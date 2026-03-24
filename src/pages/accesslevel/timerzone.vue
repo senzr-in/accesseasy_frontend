@@ -1,241 +1,244 @@
 <template>
-  <div class="timer-zone-container">
-    <!-- Timer Zones Table -->
-    <DataTableWrapper
-      subtitle="Manage your timer zones and their schedules"
-      :showSearch="true"
-      :search-query="searchQuery"
-      @update:search-query="searchQuery = $event"
-    >
-      <template #toolbar-actions>
-        <BaseButton
-          variant="primary"
-          size="md"
-          text="Add Timer Zone"
-          :leftIcon="PlusIcon"
-          @click="openAddDialog"
-        />
-      </template>
-
-      <!-- Skeleton Loading -->
-      <SkeletonLoader
-        v-if="loading"
-        variant="data-table"
-        :rows="5"
-        :columns="4"
-      />
-
-      <!-- Error State -->
-      <div v-else-if="error" class="text-center pa-8">
-        <v-icon color="error" size="48" class="mb-4">mdi-alert-circle</v-icon>
-        <p class="text-body-1 text-error mb-4">{{ error }}</p>
-        <BaseButton
-          variant="primary"
-          size="md"
-          text="Retry"
-          @click="fetchTimerZones"
+  <div class="h-full flex flex-col gap-4 overflow-hidden">
+    <!-- Toolbar -->
+    <div class="flex items-center justify-between gap-3">
+      <div class="relative flex-1 max-w-sm">
+        <Search class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+        <input
+          type="search"
+          placeholder="Search timer zones..."
+          v-model="searchQuery"
+          class="w-full pl-9 pr-4 h-10 text-sm bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm text-slate-900 dark:text-white placeholder:text-slate-400"
         />
       </div>
-
-      <!-- Table Section -->
-      <DataTable
-        v-else
-        :items="filteredTimerZones"
-        :columns="headers"
-        :showSelection="false"
-        :expandable="false"
-        show-header
-        :row-clickable="true"
-        @rowClick="handleRowClick"
+      <button
+        @click="openAddDialog"
+        class="flex items-center gap-2 h-10 px-4 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all shadow-sm shrink-0"
       >
-        <template #column-name="{ item }">
-          <span class="text-body-2">{{ item.timeZoneName }}</span>
-        </template>
+        <Plus class="w-4 h-4" /> Add Timer Zone
+      </button>
+    </div>
 
-        <template #column-startTime="{ item }">
-          <span class="text-body-2">{{ formatTime(item.entryTime) }}</span>
-        </template>
+    <!-- Table Card -->
+    <div class="rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm overflow-hidden flex flex-col flex-1 min-h-0">
+      <div class="overflow-x-auto flex-1 h-full">
+        <table class="w-full text-left border-collapse relative">
+          <thead class="bg-slate-50 dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-10">
+            <tr>
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">Name</th>
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">Start Time</th>
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">End Time</th>
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">Status</th>
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest text-right whitespace-nowrap">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 dark:divide-zinc-800 bg-white dark:bg-zinc-950">
+            <!-- Loading -->
+            <tr v-if="loading">
+              <td colspan="5" class="px-5 py-24 text-center">
+                <Loader2 class="w-8 h-8 animate-spin text-blue-500 mx-auto" />
+              </td>
+            </tr>
 
-        <template #column-endTime="{ item }">
-          <span class="text-body-2">{{ formatTime(item.exitTime) }}</span>
-        </template>
+            <!-- Error -->
+            <tr v-else-if="error">
+              <td colspan="5" class="px-5 py-24 text-center">
+                <div class="flex flex-col items-center justify-center space-y-3">
+                  <AlertCircle class="w-10 h-10 text-rose-300 dark:text-rose-700" />
+                  <p class="text-[10px] font-black uppercase tracking-widest text-rose-500">{{ error }}</p>
+                  <button @click="fetchTimerZones" class="text-xs font-bold text-blue-500 hover:underline">Try Again</button>
+                </div>
+              </td>
+            </tr>
 
-        <template #column-status="{ item }">
-          <v-chip
-            :color="getStatusColor(item.status)"
-            variant="flat"
-            size="small"
-          >
-            {{ item.status }}
-          </v-chip>
-        </template>
+            <!-- Empty -->
+            <tr v-else-if="filteredTimerZones.length === 0">
+              <td colspan="5" class="px-5 py-24 text-center">
+                <div class="flex flex-col items-center justify-center space-y-3">
+                  <Clock class="w-10 h-10 text-slate-300 dark:text-zinc-700" />
+                  <p class="text-[10px] font-black uppercase tracking-widest text-slate-500">No timer zones found.</p>
+                  <button
+                    v-if="searchQuery"
+                    @click="searchQuery = ''"
+                    class="text-xs font-bold text-blue-500 hover:underline"
+                  >Clear search</button>
+                  <button
+                    v-else
+                    @click="openAddDialog"
+                    class="h-9 px-4 rounded-lg bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-black uppercase tracking-widest hover:opacity-90 transition-opacity"
+                  >
+                    <Plus class="w-4 h-4 inline mr-1" /> Add First Timer Zone
+                  </button>
+                </div>
+              </td>
+            </tr>
 
-        <template #column-actions="{ item }">
-          <div class="d-flex align-center">
-            <!-- Edit button removed, only delete button remains -->
-            <BaseButton
-              variant="text"
-              size="sm"
-              :icon="TrashIcon"
-              color="error"
-              @click.stop="deleteZone(item)"
+            <!-- Rows -->
+            <tr
+              v-else
+              v-for="item in filteredTimerZones"
+              :key="item.id"
+              class="group/row hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors duration-200 cursor-pointer"
+              @click="editZone(item)"
+            >
+              <td class="px-5 py-3">
+                <div class="flex items-center gap-3">
+                  <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-cyan-50 dark:bg-cyan-500/10 border border-cyan-100 dark:border-cyan-500/20 text-cyan-600 dark:text-cyan-400 shrink-0">
+                    <Clock class="h-4 w-4" />
+                  </div>
+                  <span class="text-[13px] font-semibold text-slate-800 dark:text-white">{{ item.timeZoneName }}</span>
+                </div>
+              </td>
+              <td class="px-5 py-3">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 text-[11px] font-mono font-bold border border-slate-200 dark:border-zinc-700">
+                  {{ formatTime(item.entryTime) }}
+                </span>
+              </td>
+              <td class="px-5 py-3">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 text-[11px] font-mono font-bold border border-slate-200 dark:border-zinc-700">
+                  {{ formatTime(item.exitTime) }}
+                </span>
+              </td>
+              <td class="px-5 py-3">
+                <span :class="[
+                  'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold border',
+                  item.status === 'active' || item.status === 'published'
+                    ? 'bg-green-500/10 text-green-700 border-green-500/20 dark:text-green-400'
+                    : 'bg-gray-500/10 text-gray-600 border-gray-500/20'
+                ]">
+                  <span :class="['w-1.5 h-1.5 rounded-full', item.status === 'active' || item.status === 'published' ? 'bg-green-500' : 'bg-gray-400']"></span>
+                  {{ item.status || 'unknown' }}
+                </span>
+              </td>
+              <td class="px-5 py-3 text-right">
+                <div class="flex justify-end pr-2 opacity-0 group-hover/row:opacity-100 transition-opacity">
+                  <button
+                    @click.stop="deleteZone(item)"
+                    title="Delete Zone"
+                    class="h-7 w-7 p-0 flex items-center justify-center rounded-md border border-rose-200 dark:border-rose-900/50 bg-transparent text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors shadow-sm"
+                  >
+                    <Trash2 class="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="flex items-center justify-between p-4 border-t border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 shrink-0">
+        <div class="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-3">
+          <span>{{ filteredTimerZones.length }} total</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modals Overlay -->
+    <div v-if="showDialog || showDeleteDialog" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+      
+      <!-- Add/Edit Modal -->
+      <div v-if="showDialog" class="w-full max-w-md bg-white dark:bg-zinc-950 rounded-2xl shadow-xl overflow-hidden border border-slate-200 dark:border-zinc-800 flex flex-col animate-in zoom-in-95 duration-200">
+        <div class="flex items-center justify-between p-5 border-b border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900">
+          <h3 class="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white">
+            {{ isEditing ? "Edit Timer Zone" : "Add Timer Zone" }}
+          </h3>
+          <button @click="closeDialog" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+            <X class="w-4 h-4" />
+          </button>
+        </div>
+        
+        <div class="p-5 space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Time Zone Name *</label>
+            <input
+              v-model="formData.timeZoneName"
+              type="text"
+              placeholder="e.g., Work Hours"
+              class="w-full h-10 px-3 text-sm bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors shadow-sm text-slate-900 dark:text-white"
             />
           </div>
-        </template>
-
-        <!-- Add row click handler -->
-        <template #row="{ item }">
-          <tr @click="editZone(item)" class="clickable-row">
-            <td>
-              <span class="text-body-2">{{ item.timeZoneName }}</span>
-            </td>
-            <td>
-              <span class="text-body-2">{{ formatTime(item.entryTime) }}</span>
-            </td>
-            <td>
-              <span class="text-body-2">{{ formatTime(item.exitTime) }}</span>
-            </td>
-            <td>
-              <v-chip
-                :color="getStatusColor(item.status)"
-                variant="flat"
-                size="small"
-              >
-                {{ item.status }}
-              </v-chip>
-            </td>
-            <td>
-              <div class="d-flex align-center" @click.stop>
-                <BaseButton
-                  variant="text"
-                  size="sm"
-                  :icon="TrashIcon"
-                  color="error"
-                  @click="deleteZone(item)"
-                />
-              </div>
-            </td>
-          </tr>
-        </template>
-      </DataTable>
-    </DataTableWrapper>
-
-    <!-- Add/Edit Timer Zone Dialog -->
-    <v-dialog v-model="showDialog" max-width="500px">
-      <v-card>
-        <v-card-title class="d-flex justify-space-between align-center">
-          <span class="text-h6">{{
-            isEditing ? "Edit Timer Zone" : "Add Timer Zone"
-          }}</span>
-          <BaseButton
-            variant="text"
-            size="sm"
-            :icon="XMarkIcon"
-            @click="closeDialog"
-          />
-        </v-card-title>
-
-        <v-card-text class="pt-4">
-          <v-form ref="form" v-model="formValid">
-            <!-- Time Zone Name -->
-            <v-text-field
-              v-model="formData.timeZoneName"
-              label="Time Zone Name *"
-              placeholder="e.g., Work Hours, Sleep Time"
-              variant="outlined"
-              density="compact"
-              :rules="[(v) => !!v || 'Time zone name is required']"
-              class="mb-4"
-            />
-
-            <!-- Start and End Time -->
-            <div class="d-flex align-center mb-4">
-              <div class="flex-grow-1 mr-2">
-                <v-text-field
-                  v-model="formData.entryTime"
-                  label="Start Time"
-                  type="time"
-                  variant="outlined"
-                  density="compact"
-                  :rules="[(v) => !!v || 'Start time is required']"
-                />
-              </div>
-              <div class="flex-grow-1 ml-2">
-                <v-text-field
-                  v-model="formData.exitTime"
-                  label="End Time"
-                  type="time"
-                  variant="outlined"
-                  density="compact"
-                  :rules="[(v) => !!v || 'End time is required']"
-                />
-              </div>
+          <div class="flex gap-4">
+            <div class="flex-1">
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Start Time *</label>
+              <input
+                v-model="formData.entryTime"
+                type="time"
+                class="w-full h-10 px-3 text-sm bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors shadow-sm text-slate-900 dark:text-white [color-scheme:light] dark:[color-scheme:dark]"
+              />
             </div>
-          </v-form>
-        </v-card-text>
+            <div class="flex-1">
+              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">End Time *</label>
+              <input
+                v-model="formData.exitTime"
+                type="time"
+                class="w-full h-10 px-3 text-sm bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors shadow-sm text-slate-900 dark:text-white [color-scheme:light] dark:[color-scheme:dark]"
+              />
+            </div>
+          </div>
+        </div>
 
-        <v-card-actions class="pa-4">
-          <v-spacer></v-spacer>
-          <BaseButton
-            variant="text"
-            size="md"
-            text="Cancel"
+        <div class="flex items-center justify-end gap-3 p-5 border-t border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900">
+          <button
             @click="closeDialog"
-          />
-          <BaseButton
-            variant="primary"
-            size="md"
-            :text="isEditing ? 'Update Timer Zone' : 'Add Timer Zone'"
-            :disabled="!formValid || saving"
-            :loading="saving"
+            class="h-9 px-4 text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+          >
+            Cancel
+          </button>
+          <button
             @click="saveZone"
-          />
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+            :disabled="!isFormValid || saving"
+            class="flex items-center gap-2 h-9 px-4 rounded-lg bg-blue-600 text-white text-xs font-black uppercase tracking-widest hover:bg-blue-700 disabled:opacity-50 transition-all shadow-sm"
+          >
+            <Loader2 v-if="saving" class="w-3.5 h-3.5 animate-spin" />
+            {{ isEditing ? 'Update' : 'Save' }}
+          </button>
+        </div>
+      </div>
 
-    <!-- Delete Confirmation Dialog -->
-    <v-dialog v-model="showDeleteDialog" max-width="400px">
-      <v-card>
-        <v-card-title class="text-h6">Confirm Delete</v-card-title>
-        <v-card-text>
-          Are you sure you want to delete "{{ zoneToDelete?.timeZoneName }}"?
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <BaseButton
-            variant="text"
-            size="md"
-            text="Cancel"
-            :disabled="deleting"
+      <!-- Delete Model -->
+      <div v-if="showDeleteDialog" class="w-full max-w-sm bg-white dark:bg-zinc-950 rounded-2xl shadow-xl overflow-hidden border border-rose-100 dark:border-rose-900/30 flex flex-col animate-in zoom-in-95 duration-200">
+        <div class="p-6 flex flex-col items-center text-center">
+          <div class="w-12 h-12 rounded-full bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center mb-4">
+            <AlertCircle class="w-6 h-6 text-rose-500" />
+          </div>
+          <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Delete Timer Zone</h3>
+          <p class="text-sm text-slate-500 dark:text-slate-400">
+            Are you sure you want to delete <span class="font-bold text-slate-700 dark:text-slate-300">"{{ zoneToDelete?.timeZoneName }}"</span>? This action cannot be undone.
+          </p>
+        </div>
+        <div class="flex items-center gap-2 p-4 border-t border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900">
+          <button
             @click="showDeleteDialog = false"
-          />
-          <BaseButton
-            variant="primary"
-            size="md"
-            text="Delete"
-            color="error"
             :disabled="deleting"
-            :loading="deleting"
+            class="flex-1 h-10 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
             @click="confirmDelete"
-          />
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+            :disabled="deleting"
+            class="flex-1 flex items-center justify-center gap-2 h-10 rounded-xl bg-rose-500 text-white text-sm font-bold hover:bg-rose-600 transition-colors shadow-sm disabled:opacity-50 shadow-rose-500/20"
+          >
+            <Loader2 v-if="deleting" class="w-4 h-4 animate-spin" />
+            Delete
+          </button>
+        </div>
+      </div>
+
+    </div>
 
     <!-- Snackbar for notifications -->
-    <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="3000">
-      {{ snackbar.message }}
-    </v-snackbar>
+    <div v-if="snackbar.show" class="fixed bottom-4 right-4 z-50 flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg border animate-in slide-in-from-bottom-5"
+      :class="snackbar.color === 'success' ? 'bg-green-50 dark:bg-green-900 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300' : 'bg-rose-50 dark:bg-rose-900 border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300'"
+    >
+      <span class="text-sm font-semibold">{{ snackbar.message }}</span>
+      <button @click="snackbar.show = false" class="opacity-50 hover:opacity-100 transition-opacity"><X class="w-4 h-4"/></button>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted, computed, watch } from "vue";
-import BaseButton from "@/components/common/buttons/BaseButton.vue";
-import DataTable from "@/components/common/table/DataTable.vue";
-import DataTableWrapper from "@/components/common/table/DataTableWrapper.vue";
-import SkeletonLoader from "@/components/common/states/SkeletonLoading.vue";
+import { Search, Plus, Clock, AlertCircle, Loader2, Trash2, X } from "lucide-vue-next";
 import { authService } from "@/services/authService";
 import { currentUserTenant } from "@/utils/currentUserTenant";
 
@@ -309,6 +312,11 @@ const formData = reactive({
 });
 
 // Get tenant ID and token
+// Form valid calculation
+const isFormValid = computed(() => {
+  return formData.timeZoneName?.trim() && formData.entryTime && formData.exitTime;
+});
+
 const tenantId = ref(null);
 const token = ref(null);
 
@@ -584,64 +592,5 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.timer-zone-container {
-  height: 100%;
-}
-
-:deep(.v-table) {
-  border-radius: 8px;
-}
-
-:deep(.v-table thead th) {
-  background-color: #f8fafc;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-:deep(.v-table tbody tr) {
-  border-bottom: 1px solid #e2e8f0;
-}
-
-:deep(.v-table tbody tr:hover) {
-  background-color: #f8fafc;
-  cursor: pointer;
-}
-
-/* Custom column widths */
-:deep(.v-table th:nth-child(1)),
-:deep(.v-table td:nth-child(1)) {
-  width: 30%;
-}
-
-:deep(.v-table th:nth-child(2)),
-:deep(.v-table td:nth-child(2)) {
-  width: 20%;
-  text-align: center;
-}
-
-:deep(.v-table th:nth-child(3)),
-:deep(.v-table td:nth-child(3)) {
-  width: 20%;
-  text-align: center;
-}
-
-:deep(.v-table th:nth-child(4)),
-:deep(.v-table td:nth-child(4)) {
-  width: 15%;
-  text-align: center;
-}
-
-:deep(.v-table th:nth-child(5)),
-:deep(.v-table td:nth-child(5)) {
-  width: 15%;
-  text-align: center;
-}
-
-/* Add cursor pointer for clickable rows */
-.clickable-row {
-  cursor: pointer;
-}
-
-.clickable-row:hover {
-  background-color: #f5f5f5 !important;
-}
+/* Tailwind CSS used exclusively */
 </style>

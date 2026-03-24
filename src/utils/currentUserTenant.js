@@ -29,8 +29,12 @@ class CurrentUserTenant {
         await this.fetchLoginUserDetails();
         this.initialized = true;
       } catch (error) {
-        console.error("Failed to initialize user data:", error);
-        throw error;
+        // If the localStorage fallback in fetchLoginUserDetails already set initialized=true,
+        // we're fine — don't rethrow. Otherwise propagate.
+        if (!this.initialized) {
+          console.error("Failed to initialize user data:", error);
+          throw error;
+        }
       } finally {
         this.isLoading = false;
       }
@@ -62,7 +66,7 @@ class CurrentUserTenant {
 
       const params = {
         fields:
-          "id,tenant.tenantId,tenant.tenantName,role.name,phone,tenant.plan,tenant.accountSettings",
+          "id,tenant.tenantId,tenant.tenantName,role.name,phone,first_name,last_name,email,tenant.plan,tenant.accountSettings,title",
       };
 
       if (formattedPhone) {
@@ -115,11 +119,29 @@ class CurrentUserTenant {
         throw new Error("User not found");
       }
     } catch (error) {
-      console.error("Error fetching login user details:", error);
-      if (error.response?.status === 401) {
+      console.warn("currentUserTenant: API fetch failed, falling back to localStorage:", error.message);
+
+      // ── Graceful fallback: read from localStorage (covers dev bypass + token refresh edge cases)
+      const localUserData = authService.getUserData();
+      if (localUserData) {
+        this.tenantId = localUserData.tenant?.tenantId || null;
+        this.tenantName = localUserData.tenant?.tenantName || null;
+        this.role = localUserData.role?.name || null;
+        this.userId = localUserData.id || null;
+        this.tenantPlan = localUserData.tenant?.plan || null;
+        this.accountSettings = localUserData.tenant?.accountSettings || null;
+        this.initialized = true;
+        console.log("currentUserTenant: Loaded from localStorage fallback — role:", this.role);
+        return localUserData;
+      }
+
+      // Only hard-logout if we have absolutely no user data at all AND it's a 401
+      if (error.response?.status === 401 && !localUserData) {
+        console.error("currentUserTenant: 401 with no local user data — logging out.");
         this.clearUserData();
         authService.logout();
       }
+
       throw error;
     }
   }

@@ -1,927 +1,251 @@
 <template>
-  <div class="settings-container">
-    <!-- Fixed Header Section -->
-    <div class="fixed-header">
-      <div class="section-header">
-        <div class="header-with-back">
-          <template v-if="showAccessLevelConfig">
-            <v-btn
-              icon="mdi-arrow-left"
-              variant="text"
-              @click="closeAccessLevelConfig"
-              class="mr-4"
-            ></v-btn>
-          </template>
-          <h3 class="text-h6">AccessLevel</h3>
-        </div>
-        <div v-if="!showAccessLevelConfig" class="filters-container">
-          <!-- Search Input -->
-          <v-text-field
-            v-model="searchQuery"
-            placeholder="Search..."
-            variant="outlined"
-            density="compact"
-            hide-details
-            class="search-input"
-            prepend-inner-icon="mdi-magnify"
-          ></v-text-field>
+  <div class="h-full flex flex-col gap-4 overflow-hidden">
 
-          <!-- State Filter -->
-          <!-- <v-select
-            v-model="filterState"
-            :items="states"
-            label="State"
-            variant="outlined"
-            density="compact"
-            hide-details
-            class="filter-select"
-            clearable
-          ></v-select> -->
-
-          <!-- Branch Filter -->
-          <!-- <v-select
-            v-model="filterBranch"
-            :items="allBranches"
-            item-title="text"
-            item-value="value"
-            label="Branch"
-            variant="outlined"
-            density="compact"
-            hide-details
-            class="filter-select"
-            clearable
-          ></v-select> -->
-
-          <v-btn color="black" class="create-btn" @click="openCreateDialog">
-            <v-icon start>mdi-plus</v-icon>
-            CREATE CATEGORY
-          </v-btn>
-        </div>
+    <!-- Toolbar: Search + Add Group on the same line -->
+    <div class="flex items-center justify-between gap-3">
+      <div class="relative flex-1 max-w-sm">
+        <Search class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+        <input
+          type="search"
+          placeholder="Search access groups..."
+          v-model="searchQuery"
+          @input="debouncedSearch"
+          class="w-full pl-9 pr-4 h-10 text-sm bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm text-slate-900 dark:text-white placeholder:text-slate-400"
+        />
       </div>
+      <button
+        @click="openCreateDialog"
+        class="flex items-center gap-2 h-10 px-4 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all shadow-sm shrink-0"
+      >
+        <Plus class="w-4 h-4" /> Add Access Group
+      </button>
     </div>
 
-    <!-- Scrollable Content Section -->
-    <div v-if="!showAccessLevelConfig" class="scrollable">
-      <v-progress-circular
-        v-if="loading"
-        indeterminate
-        color="primary"
-        size="64"
-      ></v-progress-circular>
-      <div v-else class="templates-container">
-        <!-- Create Card -->
-        <div class="template-card create-card" @click="openCreateDialog">
-          <div class="create-card-content">
-            <v-icon size="32" color="grey-darken-1">mdi-plus</v-icon>
-            <span class="create-text">Create</span>
-          </div>
-        </div>
+    <!-- Data Table Card — fills remaining height -->
+    <div class="rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm overflow-hidden flex flex-col flex-1 min-h-0">
 
-        <!-- Category Cards -->
-        <div
-          v-for="category in filteredAccessLevelCategories"
-          :key="category.id"
-          class="template-card"
-          @click="handleCategoryClick(category)"
-        >
-          <div class="template-content">
-            <div class="category-header">
-              <span class="category-name">{{ category.name }}</span>
-            </div>
-            <div class="category-details">
-              <div v-if="!category.accessType" class="access-disabled-icon">
-                <v-icon color="error" size="48" title="Access Disabled">
-                  mdi-lock-off
-                </v-icon>
-                <div class="access-disabled-message">
-                  <span>Access Disabled</span>
+      <!-- Table -->
+      <div class="overflow-x-auto flex-1 h-full">
+        <table class="w-full text-left border-collapse relative">
+          <thead class="bg-slate-50 dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-10 w-full">
+            <tr>
+              <th scope="col" class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">Access Group Name</th>
+              <th scope="col" class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">Work Hours</th>
+              <th scope="col" class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">Valid Hours</th>
+              <th scope="col" class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">Doors</th>
+              <th scope="col" class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest text-right whitespace-nowrap">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 dark:divide-zinc-800 bg-white dark:bg-zinc-950">
+            <tr v-if="loading">
+              <td colspan="5" class="px-5 py-24 text-center text-slate-500">
+                <Loader2 class="w-8 h-8 animate-spin text-blue-500 mx-auto" />
+              </td>
+            </tr>
+            <tr v-else-if="items.length === 0">
+              <td colspan="5" class="px-5 py-24 text-center">
+                <div class="flex flex-col items-center justify-center space-y-3">
+                  <Shield class="w-10 h-10 text-slate-300 dark:text-zinc-700" />
+                  <p class="text-[10px] font-black uppercase tracking-widest text-slate-500">No access groups found.</p>
                 </div>
-              </div>
-            </div>
-            <div class="template-actions">
-              <v-btn
-                icon="mdi-pencil"
-                variant="text"
-                size="small"
-                color="primary"
-                @click.stop="editCategory(category)"
-              ></v-btn>
-              <v-btn
-                icon="mdi-delete"
-                variant="text"
-                size="small"
-                color="error"
-                @click.stop="deleteCategory(category.id)"
-              ></v-btn>
-            </div>
-          </div>
-        </div>
+              </td>
+            </tr>
+            <tr
+              v-else
+              v-for="group in items"
+              :key="group.id"
+              class="group/row hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors duration-200"
+            >
+              <td class="px-5 py-3">
+                <div class="flex items-center gap-3">
+                  <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 text-blue-600 dark:text-blue-400">
+                    <Shield class="h-4 w-4" />
+                  </div>
+                  <span class="text-[13px] font-semibold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer transition-colors" @click="editGroup(group)">
+                    {{ group.accessLevelName }}
+                  </span>
+                </div>
+              </td>
+              <td class="px-5 py-3">
+                <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-500">
+                  <Clock class="w-3.5 h-3.5 text-slate-400" />
+                  {{ group.workingHours ? group.workingHours : "Not set" }}
+                </div>
+              </td>
+              <td class="px-5 py-3">
+                <span class="inline-flex px-2 py-0.5 bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 rounded-md text-[9px] font-black uppercase tracking-widest border border-slate-200 dark:border-zinc-700">
+                  {{ group._24hrs ? "24 Hours" : (group.workingHours || "Custom") }}
+                </span>
+              </td>
+              <td class="px-5 py-3">
+                <div class="flex items-center gap-1.5 px-2.5 py-1 bg-slate-50 dark:bg-zinc-800/80 rounded-md w-fit border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-slate-400">
+                  <Key class="w-3 h-3 text-slate-400" />
+                  <span class="text-[10px] font-black uppercase tracking-widest">
+                    {{ Array.isArray(group.assignDoorsGroup) ? group.assignDoorsGroup.length : 0 }} Doors
+                  </span>
+                </div>
+              </td>
+              <td class="px-5 py-3 text-right">
+                <div class="flex justify-end gap-2 pr-2 opacity-0 group-hover/row:opacity-100 transition-opacity">
+                  <button
+                    @click="editGroup(group)"
+                    class="h-7 px-3 text-[10px] font-black uppercase tracking-widest bg-transparent border border-slate-200 dark:border-zinc-700 rounded-md hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 transition-colors shadow-sm"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    title="Delete Access Group"
+                    @click="deleteGroup(group)"
+                    class="h-7 w-7 p-0 flex items-center justify-center rounded-md border border-rose-200 dark:border-rose-900/50 bg-transparent text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors shadow-sm"
+                  >
+                    <Trash2 class="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
+
+      <!-- Pagination -->
+      <div class="flex items-center justify-between p-4 border-t border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 shrink-0">
+        <button
+          class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-950 disabled:opacity-50 transition-colors shadow-sm text-slate-700 dark:text-slate-300"
+          @click="page--"
+          :disabled="page <= 1 || loading"
+        >
+          Previous
+        </button>
+        <div class="text-[10px] font-black uppercase tracking-widest text-slate-500">
+          Page {{ page }} of {{ totalPages || 1 }} &nbsp;·&nbsp; {{ totalItems }} total
+        </div>
+        <button
+          class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-950 disabled:opacity-50 transition-colors shadow-sm text-slate-700 dark:text-slate-300"
+          @click="page++"
+          :disabled="page >= totalPages || loading"
+        >
+          Next
+        </button>
+      </div>
+
+      <!-- Dialog -->
+      <AddAccessLevelDialog v-model="showDialog" :accessLevel="selectedGroup" @success="fetchData" />
     </div>
-
-    <!-- AccessLevelConfiguration Component -->
-    <AccessLevelConfiguration
-      v-if="showAccessLevelConfig"
-      :category="selectedCategory"
-      @close="closeAccessLevelConfig"
-    />
-
-    <!-- Create/Edit Category Dialog -->
-    <v-dialog v-model="categoryDialog" max-width="500px">
-      <v-card>
-        <v-card-title class="dialog-title">
-          {{ editingCategory ? "Edit" : "Create" }} AccessLevel Category
-        </v-card-title>
-        <v-card-text class="dialog-content">
-          <v-text-field
-            v-model="categoryName"
-            label="Category Name"
-            :placeholder="defaultCategoryName"
-            variant="outlined"
-            required
-            class="category-name-input"
-            :error-messages="categoryNameError"
-          ></v-text-field>
-          <v-switch
-            v-model="accessTypeEnabled"
-            label="Access Type"
-            color="primary"
-            hide-details
-            inset
-            class="mt-4"
-          ></v-switch>
-        </v-card-text>
-        <v-card-actions class="dialog-actions">
-          <v-spacer></v-spacer>
-          <v-btn color="error" variant="text" @click="categoryDialog = false"
-            >Cancel</v-btn
-          >
-          <v-btn
-            color="black"
-            @click="saveCategory"
-            :disabled="!!categoryNameError"
-            >Save</v-btn
-          >
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <!-- Warning Message Dialog -->
-    <v-dialog v-model="showWarningDialog" max-width="400px">
-      <v-card class="warning-dialog">
-        <v-card-text class="warning-message">
-          If you want to assign this category to employees, please enable the
-          access type by editing this category.
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="white" variant="text" @click="showWarningDialog = false"
-            >Close</v-btn
-          >
-          <v-btn
-            color="white"
-            variant="text"
-            @click="handleEditFromWarning(selectedWarningCategory)"
-            >Edit Category</v-btn
-          >
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-
-    <MessageAlert
-      :message="alertMessage"
-      :type="alertType"
-      @close="clearAlert"
-    />
   </div>
 </template>
 
-<script>
-import AccessLevelConfiguration from "./accesslvelConfiguration.vue";
+
+<script setup>
+import { ref, computed, watch, onMounted } from "vue";
+import { Shield, Plus, Search, Trash2, Key, Clock, Settings, Loader2 } from "lucide-vue-next";
 import { authService } from "@/services/authService";
 import { currentUserTenant } from "@/utils/currentUserTenant";
+import AddAccessLevelDialog from "./addAccessLevelDialog.vue";
 
-export default {
-  name: "AccessLevelCategory",
-  components: {
-    AccessLevelConfiguration,
-  },
-  data() {
-    return {
-      categoryDialog: false,
-      accessLevelCategories: [],
-      accessTypeEnabled: true,
-      categoryNameError: "",
-      states: [
-        "Andhra Pradesh",
-        "Arunachal Pradesh",
-        "Assam",
-        "Bihar",
-        "Chhattisgarh",
-        "Goa",
-        "Gujarat",
-        "Haryana",
-        "Himachal Pradesh",
-        "Jharkhand",
-        "Karnataka",
-        "Kerala",
-        "Madhya Pradesh",
-        "Maharashtra",
-        "Manipur",
-        "Meghalaya",
-        "Mizoram",
-        "Nagaland",
-        "Odisha",
-        "Punjab",
-        "Rajasthan",
-        "Sikkim",
-        "Tamil Nadu",
-        "Telangana",
-        "Tripura",
-        "Uttar Pradesh",
-        "Uttarakhand",
-        "West Bengal",
-      ],
-      branches: [],
-      selectedState: null,
-      selectedBranches: [],
-      categoryName: "",
-      editingCategory: null,
-      searchQuery: "",
-      filterState: null,
-      filterBranch: null,
-      allBranches: [],
-      showAccessLevelConfig: false,
-      selectedCategory: null,
-      loading: false,
-      page: 1,
-      limit: 25,
-      areaType: "urban",
-      showWarningDialog: false,
-      selectedWarningCategory: null,
-      alertMessage: "",
-      alertType: "",
-    };
-  },
-  computed: {
-    defaultCategoryName() {
-      return `AccessLevel ${this.accessLevelCategories.length + 1}`;
-    },
-    token() {
-      return authService.getToken();
-    },
-    apiUrl() {
-      return import.meta.env.VITE_API_URL;
-    },
-    filteredAccessLevelCategories() {
-      return this.accessLevelCategories.filter((category) => {
-        const matchesSearch = this.searchQuery
-          ? category.name.toLowerCase().includes(this.searchQuery.toLowerCase())
-          : true;
-        const matchesState = this.filterState
-          ? category.state === this.filterState
-          : true;
-        const matchesBranch = this.filterBranch
-          ? category.branches.includes(this.filterBranch)
-          : true;
-        return matchesSearch && matchesState && matchesBranch;
-      });
-    },
-  },
-  created() {
-    this.initializeData();
-  },
-  methods: {
-    async initializeData() {
-      await this.fetchAccessLevels();
-      await this.fetchBranches();
-    },
-    async fetchAccessLevels() {
-      try {
-        await currentUserTenant.fetchLoginUserDetails();
-        const tenantId = currentUserTenant.getTenantId();
-        this.loading = true;
-        const fields = [
-          "accessLevelName",
-          "accessLevelNumber",
-          "tenant.tenantName",
-          "_24hrs",
-          "holidays",
-          "maxWorkHours",
-          "accessType",
-          "workingHours",
-          "configName",
-          "tenant.tenantId",
-          "assignedDoors.doors_id.doorNumber",
-          "assignedDoors.doors_id.doorName",
-          "assignedDoors.doors_id.id",
-          "assignedDoors.id",
-          "assignedBranches.branch_id.id",
-          "assignedBranches.branch_id.branchId",
-          "assignedBranches.branch_id.state",
-          "assignedBranches.branch_id.branchName",
-          "assignedBranches.id",
-          "id",
-          "state",
-          "assignDoorsGroup",
-          "assignDevicesGroup",
-          "groupType",
-        ];
+// State
+const items = ref([]);
+const loading = ref(false);
+const searchQuery = ref("");
+const page = ref(1);
+const limit = 15;
+const totalItems = ref(0);
+const showDialog = ref(false);
+const selectedGroup = ref(null);
 
-        const params = new URLSearchParams({
-          limit: this.limit.toString(),
-          page: this.page.toString(),
-          "sort[]": "sort",
-          "filter[tenant][tenantId][_eq]": tenantId,
-        });
+const token = authService.getToken();
 
-        fields.forEach((field) => {
-          params.append("fields[]", field);
-        });
+const totalPages = computed(() => Math.ceil(totalItems.value / limit));
 
-        if (this.searchQuery) {
-          params.append("filter[accessLevelName][_contains]", this.searchQuery);
-        }
-
-        if (this.filterState) {
-          params.append(
-            "filter[accessLevelName][branch_id][state][_eq]",
-            this.filterState,
-          );
-        }
-
-        if (this.filterBranch) {
-          params.append(
-            "filter[assignedBranches][branch_id][branchId][_eq]",
-            this.filterBranch,
-          );
-        }
-
-        const response = await fetch(
-          `${this.apiUrl}/items/accesslevels?${params}`,
-          {
-            headers: {
-              Authorization: `Bearer ${this.token}`,
-              "Content-Type": "application/json",
-            },
-          },
-        );
-
-        const data = await response.json();
-        this.accessLevelCategories = data.data.map((item) => ({
-          id: item.id,
-          name: item.accessLevelName,
-          state: item.state || "",
-          assignedBranches: item.assignedBranches.map((branch) => ({
-            id: branch.branch_id?.id,
-            branchId: branch.branch_id?.branchId,
-            branchName: branch.branch_id?.branchName,
-            state: branch.branch_id?.state,
-          })),
-          assignedDoors: item.assignedDoors.map((door) => ({
-            doorId: door.doors_id?.id,
-            doorName: door.doors_id?.doorName,
-            doorNumber: door.doors_id?.doorNumber,
-          })),
-          configName: item.configName,
-          accessType: item.accessType,
-          workingHours: item.workingHours,
-          maxWorkHours: item.maxWorkHours,
-          holidays: item.holidays,
-          assignDoorsGroup: item.assignDoorsGroup,
-          assignDevicesGroup: item.assignDevicesGroup,
-          groupType: item.groupType,
-          _24hrs: item._24hrs,
-        }));
-      } catch (error) {
-        console.error("Error fetching access levels:", error);
-      } finally {
-        this.loading = false;
-      }
-    },
-    async fetchBranches() {
-      try {
-        await currentUserTenant.fetchLoginUserDetails();
-        const tenantId = currentUserTenant.getTenantId();
-
-        const params = new URLSearchParams({
-          "filter[tenant][tenantId][_eq]": tenantId,
-        });
-
-        const response = await fetch(`${this.apiUrl}/items/branch?${params}`, {
-          headers: {
-            Authorization: `Bearer ${this.token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        const data = await response.json();
-        this.allBranches = data.data.map((branch) => ({
-          text: branch.branchName,
-          value: branch.branchId,
-          state: branch.state,
-        }));
-      } catch (error) {
-        console.error("Error fetching branches:", error);
-      }
-    },
-    isDuplicateCategoryName(name) {
-      return this.accessLevelCategories.some(
-        (category) =>
-          category.name.toLowerCase() === name.toLowerCase() &&
-          (!this.editingCategory || category.id !== this.editingCategory.id),
-      );
-    },
-
-    openCreateDialog() {
-      this.editingCategory = null;
-      this.selectedState = null;
-      this.selectedBranches = [];
-      this.categoryName = `AccessLevel ${this.accessLevelCategories.length + 1}`;
-      this.categoryDialog = true;
-      this.categoryNameError = "";
-      this.accessTypeEnabled = true;
-    },
-    editCategory(category) {
-      this.editingCategory = category;
-      this.selectedState = category.state;
-      this.categoryName = category.name;
-      this.selectedBranches = category.branches;
-      this.selectedDoors = category.doors;
-      this.areaType = category.areaType || "urban";
-      this.categoryNameError = "";
-      this.categoryDialog = true;
-      this.accessTypeEnabled = category.accessType !== false;
-    },
-
-    async handleAccessTypeToggle(switchValue) {
-      try {
-        // Get tenant ID
-        const tenantId = currentUserTenant.getTenantId();
-
-        // Step 1: Fetch all personal module IDs associated with this category
-        const fetchUrl = `${this.apiUrl}/items/personalModule?fields[]=id&filter[_and][0][assignedUser][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][assignedAccessLevels][accesslevels_id][accessLevelName][_contains]=${this.categoryName || this.defaultCategoryName}`;
-
-        const response = await fetch(fetchUrl, {
-          headers: {
-            Authorization: `Bearer ${this.token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        const data = await response.json();
-
-        // Step 2: Extract all IDs from the response
-        const ids = data.data.map((item) => item.id);
-
-        if (ids.length === 0) {
-          console.log("No personal modules found for this category");
-          return;
-        }
-
-        // Step 3: Make PATCH request to update access status for all IDs
-        const patchUrl = `${this.apiUrl}/items/personalModule`;
-        const patchPayload = {
-          keys: ids,
-          data: {
-            accessOn: switchValue,
-          },
-        };
-
-        const patchResponse = await fetch(patchUrl, {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${this.token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(patchPayload),
-        });
-
-        if (patchResponse.ok) {
-          // Show success message
-          this.alertMessage = `Access ${switchValue ? "enabled" : "disabled"} for ${ids.length} users`;
-          this.alertType = "success";
-        } else {
-          throw new Error("Failed to update access status");
-        }
-      } catch (error) {
-        console.error("Error updating access status:", error);
-        this.alertMessage = "Failed to update access status";
-        this.alertType = "error";
-      }
-    },
-
-    async saveCategory() {
-      if (this.isDuplicateCategoryName(this.categoryName)) {
-        this.categoryNameError =
-          "A category with this name already exists. No duplicates allowed.";
-        return;
-      }
-
-      try {
-        const payload = {
-          accessLevelName: this.categoryName || this.defaultCategoryName,
-          tenant: {
-            tenantId: currentUserTenant.getTenantId(),
-          },
-          status: "active",
-          configName: this.categoryName || this.defaultCategoryName,
-          accessType: this.accessTypeEnabled,
-        };
-
-        const accessLevelId = await this.generateSequentialAccessLevelId();
-        payload.accessLevelNumber = accessLevelId;
-
-        const url = this.editingCategory
-          ? `${this.apiUrl}/items/accesslevels/${this.editingCategory.id}`
-          : `${this.apiUrl}/items/accesslevels`;
-
-        const method = this.editingCategory ? "PATCH" : "POST";
-
-        const response = await fetch(url, {
-          method,
-          headers: {
-            Authorization: `Bearer ${this.token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        });
-
-        if (response.ok) {
-          this.categoryDialog = false;
-          await this.fetchAccessLevels();
-
-          // If editing and access type changed, update personal modules
-          if (
-            this.editingCategory &&
-            this.editingCategory.accessType !== this.accessTypeEnabled
-          ) {
-            await this.handleAccessTypeToggle(this.accessTypeEnabled);
-          }
-        }
-      } catch (error) {
-        console.error("Error saving category:", error);
-      }
-    },
-
-    async duplicateCategory(category) {
-      try {
-        const newCategory = {
-          ...category,
-          name: `${category.name} (Copy)`,
-        };
-        delete newCategory.id;
-
-        const response = await fetch(`${this.apiUrl}/items/accesslevels`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${this.token}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(newCategory),
-        });
-
-        if (response.ok) {
-          await this.fetchAccessLevels();
-        }
-      } catch (error) {
-        console.error("Error duplicating category:", error);
-      }
-    },
-    async deleteCategory(categoryId) {
-      if (confirm("Are you sure you want to delete this category?")) {
-        try {
-          const response = await fetch(
-            `${this.apiUrl}/items/accesslevels/${categoryId}`,
-            {
-              method: "DELETE",
-              headers: {
-                Authorization: `Bearer ${this.token}`,
-                "Content-Type": "application/json",
-              },
-            },
-          );
-
-          if (response.ok) {
-            await this.fetchAccessLevels();
-          }
-        } catch (error) {
-          console.error("Error deleting category:", error);
-        }
-      }
-    },
-
-    openAccessLevelConfig(category) {
-      this.selectedCategory = category;
-      this.showAccessLevelConfig = true;
-    },
-    closeAccessLevelConfig() {
-      this.showAccessLevelConfig = false;
-      this.selectedCategory = null;
-    },
-
-    async generateSequentialAccessLevelId() {
-      try {
-        const tenantId = currentUserTenant.getTenantId();
-        const response = await fetch(
-          `${this.apiUrl}/items/accesslevels?filter[tenant][tenantId][_eq]=${tenantId}&sort[]=-accessLevelNumber&limit=1`,
-          {
-            headers: {
-              Authorization: `Bearer ${this.token}`,
-            },
-          },
-        );
-        const data = await response.json();
-        if (!data.data || data.data.length === 0) {
-          return "1";
-        }
-        const lastAccessLevel = data.data[0].accessLevelNumber;
-        if (!lastAccessLevel || lastAccessLevel === "NaN") {
-          return "1";
-        }
-        const lastNumber = parseInt(lastAccessLevel, 10);
-        if (isNaN(lastNumber)) {
-          return "1";
-        }
-        return (lastNumber + 1).toString();
-      } catch (error) {
-        console.error("Error generating access level ID:", error);
-        return "1";
-      }
-    },
-    handleCategoryClick(category) {
-      if (!category.accessType) {
-        this.selectedWarningCategory = category;
-        this.showWarningDialog = true;
-      } else {
-        this.openAccessLevelConfig(category);
-      }
-    },
-    handleEditFromWarning(category) {
-      this.showWarningDialog = false;
-      this.editCategory(category);
-    },
-    clearAlert() {
-      this.alertMessage = "";
-      this.alertType = "";
-    },
-  },
-  watch: {
-    searchQuery: {
-      handler() {
-        this.fetchAccessLevels();
-      },
-      debounce: 300,
-    },
-    filterState() {
-      this.fetchAccessLevels();
-    },
-    filterBranch() {
-      this.fetchAccessLevels();
-    },
-    categoryName(newValue) {
-      if (this.isDuplicateCategoryName(newValue)) {
-        this.categoryNameError =
-          "A category with this name already exists. No duplicates allowed.";
-      } else {
-        this.categoryNameError = "";
-      }
-    },
-    accessTypeEnabled(newValue, oldValue) {
-      if (this.editingCategory && newValue !== oldValue) {
-        // Don't call API here, we'll do it after saving the category
-        console.log(`Access type changed to: ${newValue}`);
-      }
-    },
-  },
+let searchTimeout = null;
+const debouncedSearch = () => {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    page.value = 1;
+    fetchData();
+  }, 300);
 };
+
+watch(page, () => {
+  fetchData();
+});
+
+const fetchData = async () => {
+  if (!token) return;
+  // Always resolve tenantId async — sync getter returns null before initialization
+  const tenantId = await currentUserTenant.getTenantIdAsync();
+  if (!tenantId) return;
+
+  loading.value = true;
+
+  try {
+    const params = new URLSearchParams({
+      limit: limit.toString(),
+      page: page.value.toString(),
+      "sort[]": "sort",
+      "filter[tenant][tenantId][_eq]": tenantId,
+    });
+
+    const fields = [
+      "id",
+      "accessLevelName",
+      "accessLevelNumber",
+      "_24hrs",
+      "workingHours",
+      "assignDoorsGroup",
+      "groupType",
+      "accessType"
+    ];
+
+    fields.forEach(f => params.append("fields[]", f));
+
+    if (searchQuery.value) {
+      params.append("filter[accessLevelName][_contains]", searchQuery.value);
+    }
+
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/items/accesslevels?${params.toString()}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      items.value = data.data || [];
+      totalItems.value = data.data?.length ?? 0;
+    }
+  } catch (error) {
+    console.error("Fetch access levels error:", error);
+  } finally {
+    loading.value = false;
+  }
+};
+
+const openCreateDialog = () => {
+    selectedGroup.value = null;
+    showDialog.value = true;
+};
+
+const editGroup = (group) => {
+    selectedGroup.value = group;
+    showDialog.value = true;
+};
+
+const deleteGroup = async (group) => {
+    if(!confirm("Are you sure you want to delete this group?")) return;
+    try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/items/accesslevels/${group.id}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if(response.ok) {
+            fetchData();
+        } else {
+            alert("Failed to delete access level.");
+        }
+    } catch(err) {
+        console.error(err);
+    }
+};
+
+onMounted(() => {
+  fetchData();
+});
 </script>
-
-<style scoped>
-.settings-container {
-  width: 100%;
-  height: calc(100vh - 50px);
-  display: flex;
-  flex-direction: column;
-  background: white;
-}
-
-.scrollable {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 24px;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
-  margin: 0 24px 24px;
-}
-
-.templates-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
-  padding: 0;
-  margin-top: 20px;
-}
-
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-  gap: 16px;
-  background: white;
-}
-
-.create-btn {
-  text-transform: uppercase;
-  font-weight: 500;
-  letter-spacing: 0.5px;
-}
-
-.template-card {
-  background: #ffffff;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  height: 160px;
-  transition: all 0.2s ease;
-  cursor: pointer;
-  position: relative;
-  padding: 20px;
-}
-
-.template-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.create-card {
-  border: 2px dashed #e0e0e0;
-  background: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.create-card-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-.create-text {
-  color: #666;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.template-content {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.category-name {
-  font-size: 18px;
-  font-weight: 600;
-  color: #212529;
-  margin-bottom: 16px;
-}
-
-.category-details {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 16px;
-  margin-top: 12px;
-}
-
-.access-disabled-icon {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  gap: 8px;
-}
-
-.access-disabled-icon .v-icon {
-  font-size: 48px;
-  opacity: 0.8;
-}
-
-.access-disabled-message {
-  text-align: center;
-  color: #dc3545;
-  font-weight: 500;
-  font-size: 14px;
-}
-
-.detail-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.detail-label {
-  font-size: 14px;
-  color: #333;
-  font-weight: 500;
-}
-
-.detail-value {
-  font-size: 14px;
-  color: #666;
-}
-
-.template-actions {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  display: flex;
-  gap: 4px;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  background: rgba(255, 255, 255, 0.9);
-  padding: 4px;
-  border-radius: 8px;
-}
-
-.template-card:hover .template-actions {
-  opacity: 1;
-}
-
-.dialog-title {
-  font-size: 20px;
-  font-weight: 600;
-  padding: 24px 24px 0;
-}
-
-.dialog-content {
-  padding: 24px;
-}
-
-.dialog-actions {
-  padding: 16px 24px;
-}
-
-.filters-container {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.search-input {
-  width: 240px;
-  margin-bottom: 0;
-}
-
-.filter-select {
-  width: 160px;
-  margin-bottom: 0;
-}
-
-.header-with-back {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.warning-dialog {
-  background-color: #dc3545 !important;
-}
-
-.warning-message {
-  color: white !important;
-  font-size: 16px;
-  padding: 20px;
-  text-align: center;
-}
-
-/* Override Vuetify dialog card styles */
-.warning-dialog :deep(.v-card-actions) {
-  padding: 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.warning-dialog :deep(.v-btn) {
-  color: white !important;
-}
-
-@media (max-width: 768px) {
-  .templates-container {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 16px;
-  }
-
-  .template-card {
-    height: 160px;
-  }
-}
-</style>

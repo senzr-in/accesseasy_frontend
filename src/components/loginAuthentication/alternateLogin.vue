@@ -1,162 +1,203 @@
-<!-- alternativelogin.vue -->
 <template>
-  <v-container fluid class="fill-height pa-0">
-    <v-row no-gutters class="h-100">
-      <!-- Full Background Image - EXACT SAME AS LOGIN PAGE -->
-      <v-col cols="12" class="d-flex align-center justify-end pa-0">
-        <div
-          class="background-container d-flex align-center justify-end h-100"
-          :style="backgroundStyle"
-        >
-          <!-- Right Panel - EXACT SAME LOGIN DESIGN -->
-          <div class="login-container">
-            <!-- Redesigned login card with EXACT SAME layout as loginpage.vue -->
-            <v-card
-              class="login-card"
-              style="
-                border: 2px solid #059669;
-                border-radius: 16px;
-                overflow: hidden;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-              "
-            >
-              <!-- Logo and Tagline inside card header - EXACT SAME -->
-              <div class="card-header">
-                <div class="logo-section">
-                  <img
-                    src="/public/images/project.png"
-                    alt="FieldsEasy"
-                    class="logo-image"
-                  />
-                </div>
-              </div>
+  <div class="flex min-h-screen w-full bg-[#f8fafc] dark:bg-[#020617] text-slate-900 dark:text-slate-100 flex-col lg:flex-row relative overflow-hidden font-sans">
+    
+    <!-- Left Side: Marketing Content -->
+    <div class="flex-1 flex flex-col justify-center px-6 py-8 lg:px-14 lg:py-6 bg-white/10 dark:bg-black/20 backdrop-blur-md border-r border-slate-200 dark:border-white/10 relative overflow-hidden border-b lg:border-b-0">
+      <!-- Grid Background Pattern -->
+      <div 
+        class="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none"
+        style="background-image: radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0); background-size: 24px 24px;"
+      ></div>
 
-              <!-- Sub Header with light green background - EXACT SAME -->
-              <div class="card-subheader">
-                <h2 class="subheader-title">Switch Account</h2>
-              </div>
-
-              <!-- Card content with improved spacing - EXACT SAME -->
-              <div class="card-content">
-                <!-- Session Timeout Alert - ORIGINAL FUNCTIONALITY -->
-                <v-alert
-                  v-if="showTimeoutMessage"
-                  type="error"
-                  variant="tonal"
-                  class="mb-4"
-                  density="compact"
-                  closable
-                  @click:close="dismissTimeoutMessage"
-                >
-                  Session timed out
-                </v-alert>
-
-                <!-- Tab buttons with EXACT SAME styling -->
-                <div class="tab-buttons-container">
-                  <button
-                    @click="setMode('phone')"
-                    :class="['tab-btn', { active: mode === 'phone' }]"
-                  >
-                    PHONE
-                  </button>
-                  <button
-                    @click="setMode('email')"
-                    :class="['tab-btn', { active: mode === 'email' }]"
-                  >
-                    E-MAIL
-                  </button>
-                </div>
-
-                <!-- Phone Tab - EXACT SAME FORM DESIGN -->
-                <div v-if="mode === 'phone'" class="form-section">
-                  <label class="form-label">Mobile Number</label>
-
-                  <div class="phone-row">
-                    <div class="country-code-text">+91</div>
-                    <v-text-field
-                      v-model.trim="phoneRaw"
-                      placeholder="Enter your Phone Number"
-                      variant="outlined"
-                      density="comfortable"
-                      type="tel"
-                      @input="sanitizePhone"
-                      @keyup.enter="handleSubmit"
-                      :error="!!phoneError"
-                      :error-messages="phoneError ? [phoneError] : []"
-                      class="phone-input"
-                    ></v-text-field>
-                  </div>
-                  <div class="help-text">
-                    We'll initiate a secure session and take you to OTP
-                    verification.
-                  </div>
-                </div>
-
-                <!-- Email Tab - EXACT SAME FORM DESIGN -->
-                <div v-if="mode === 'email'" class="form-section">
-                  <label class="form-label">E-mail</label>
-                  <v-text-field
-                    v-model.trim="email"
-                    placeholder="your@example.com"
-                    type="email"
-                    variant="outlined"
-                    density="comfortable"
-                    @keyup.enter="handleSubmit"
-                    :error="!!emailError"
-                    :error-messages="emailError ? [emailError] : []"
-                  ></v-text-field>
-                  <div class="help-text">
-                    We'll initiate a secure session and take you to OTP
-                    verification.
-                  </div>
-                </div>
-
-                <!-- Submit button with EXACT SAME styling -->
-                <v-btn
-                  @click="handleSubmit"
-                  :disabled="loading || emailLoading"
-                  :loading="loading || emailLoading"
-                  block
-                  size="large"
-                  class="submit-btn"
-                >
-                  {{
-                    loading || emailLoading
-                      ? "Loading..."
-                      : mode === "phone"
-                        ? "Sign In"
-                        : "Sign In"
-                  }}
-                </v-btn>
-
-                <!-- Signup link with EXACT SAME styling -->
-                <p class="signup-text">
-                  Don't have an account?
-                  <router-link to="/register" class="signup-link"
-                    >Signup Now</router-link
-                  >
-                </p>
-              </div>
-            </v-card>
-
-            <!-- Footer - EXACT SAME -->
-            <p class="footer-text">© {{ year }} Fieldseasy</p>
+      <div class="max-w-xl relative z-10 animate-fade-in-left">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="h-10 w-10 rounded-xl bg-blue-600/20 flex items-center justify-center border border-blue-600/20 shadow-xl shadow-blue-600/10">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-blue-600">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-base font-black tracking-tight uppercase leading-none text-slate-900 dark:text-white">AccessEasy</span>
+            <span class="text-[9px] font-black text-blue-600 tracking-[0.4em] uppercase mt-0.5">Enterprise Hub</span>
           </div>
         </div>
-      </v-col>
-    </v-row>
-  </v-container>
+
+        <h1 class="text-3xl lg:text-4xl font-black tracking-tight leading-[1] mb-4 text-slate-900 dark:text-white">
+          Manage multiple <br />
+          <span class="text-blue-600">Security</span> Profiles.
+        </h1>
+
+        <p class="text-[12px] text-slate-500 font-bold mb-8 leading-relaxed max-w-sm uppercase tracking-wide">
+          Switch between organizations or verification methods seamlessly with our unified identity bridge.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-5 mb-8">
+          <div class="flex items-center gap-3 group" v-for="(h, i) in highlights" :key="i">
+            <div class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-md group-hover:scale-110 group-hover:border-blue-500/50 transition-all duration-300">
+              <component :is="h.icon" class="h-4 w-4 text-blue-600" />
+            </div>
+            <div>
+              <h3 class="font-black text-[10px] tracking-[0.05em] uppercase text-slate-900 dark:text-white">{{ h.text }}</h3>
+              <p class="text-[9px] font-bold text-slate-500 leading-snug mt-0.5 uppercase tracking-widest">{{ h.sub }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-6 border-t border-slate-200 dark:border-white/5">
+          <p class="text-[8px] font-black tracking-[0.3em] text-slate-400 dark:text-slate-600 mb-4 uppercase">Connected Modules</p>
+          <div class="flex flex-wrap gap-x-6 gap-y-3">
+            <div class="flex items-center gap-2 opacity-50 hover:opacity-100 transition-all duration-300 cursor-default group" v-for="(ind, i) in industries" :key="i">
+              <component :is="ind.icon" class="h-4 w-4 group-hover:text-blue-600 transition-colors" />
+              <span class="text-[9px] font-black tracking-widest uppercase">{{ ind.name }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Side: Switch Account Form -->
+    <div class="flex-1 flex items-center justify-center p-4 lg:p-10 relative overflow-hidden bg-slate-50/50 dark:bg-transparent">
+      <!-- Glow effect -->
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-emerald-600/5 rounded-full blur-[100px] pointer-events-none"></div>
+
+      <div class="w-full max-w-[420px] rounded-[2rem] bg-white/90 dark:bg-[#0a0e1a]/80 backdrop-blur-xl p-8 shadow-2xl border border-slate-200 dark:border-white/10 relative z-10 animate-fade-in-up">
+        
+        <div class="text-center mb-8">
+          <div class="mx-auto mb-4 h-12 w-12 flex items-center justify-center rounded-[1rem] bg-emerald-600 text-white shadow-lg shadow-emerald-600/30 border border-emerald-500/20">
+            <Users class="h-5 w-5" />
+          </div>
+          <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight uppercase mb-1">Switch Account</h2>
+          <p class="text-[9px] text-emerald-600 font-black tracking-[0.4em] uppercase">Connect via phone or email</p>
+        </div>
+
+        <!-- Mode Toggle Tabs -->
+        <div class="flex p-1 bg-slate-100 dark:bg-slate-900 rounded-2xl mb-8">
+          <button 
+            @click="setMode('phone')"
+            :class="[
+              'flex-1 py-2.5 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all duration-300',
+              mode === 'phone' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-md' : 'text-slate-500 hover:text-slate-700'
+            ]"
+          >
+            Phone
+          </button>
+          <button 
+            @click="setMode('email')"
+            :class="[
+              'flex-1 py-2.5 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all duration-300',
+              mode === 'email' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-md' : 'text-slate-500 hover:text-slate-700'
+            ]"
+          >
+            E-Mail
+          </button>
+        </div>
+
+        <!-- Form Elements -->
+        <div class="space-y-6">
+          
+          <div
+            v-if="showTimeoutMessage"
+            class="flex items-start gap-3 p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl animate-shake relative"
+          >
+            <AlertCircle class="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+            <div class="flex-1">
+              <p class="text-[10px] font-black uppercase tracking-widest text-rose-500">Session timed out</p>
+              <p class="text-[9px] font-bold text-rose-400 uppercase tracking-widest mt-1">Please sign in again to continue.</p>
+            </div>
+            <button @click="dismissTimeoutMessage" class="text-rose-500/50 hover:text-rose-500 transition-colors">
+              <X class="w-4 h-4" />
+            </button>
+          </div>
+
+          <div v-if="mode === 'phone'" class="space-y-4">
+            <div class="space-y-1.5">
+              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 ml-1 uppercase">Mobile Number</label>
+              <div class="flex gap-2">
+                <div class="h-12 w-16 flex items-center justify-center bg-slate-100 dark:bg-slate-900 rounded-xl border border-transparent dark:border-white/5 text-[12px] font-black text-slate-900 dark:text-white">
+                  +91
+                </div>
+                <div class="relative group flex-1">
+                  <input
+                    v-model.trim="phoneRaw"
+                    type="tel"
+                    maxlength="10"
+                    placeholder="Enter phone"
+                    @input="sanitizePhone"
+                    @keyup.enter="handleSubmit"
+                    class="w-full h-12 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-emerald-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-emerald-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
+                  />
+                  <Phone class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-emerald-600 transition-colors" />
+                </div>
+              </div>
+            </div>
+            <p v-if="phoneError" class="text-[10px] font-bold text-rose-500 uppercase tracking-wide ml-1 animate-shake">{{ phoneError }}</p>
+          </div>
+
+          <div v-if="mode === 'email'" class="space-y-4">
+            <div class="space-y-1.5">
+              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 ml-1 uppercase">Work Email</label>
+              <div class="relative group">
+                <input
+                  v-model.trim="email"
+                  type="email"
+                  placeholder="name@company.com"
+                  @keyup.enter="handleSubmit"
+                  class="w-full h-12 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-emerald-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-emerald-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
+                />
+                <Mail class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-emerald-600 transition-colors" />
+              </div>
+            </div>
+            <p v-if="emailError" class="text-[10px] font-bold text-rose-500 uppercase tracking-wide ml-1 animate-shake">{{ emailError }}</p>
+          </div>
+
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-white/5 flex gap-3">
+            <ShieldCheck class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+            <p class="text-[10px] text-slate-500 font-bold leading-relaxed uppercase tracking-wider">
+              We'll initiate a secure session and take you to OTP verification.
+            </p>
+          </div>
+
+          <button
+            @click="handleSubmit"
+            :disabled="loading || emailLoading"
+            class="w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/30 transition-all disabled:opacity-70 disabled:cursor-not-allowed group"
+          >
+            <span v-if="loading || emailLoading">Initialising...</span>
+            <template v-else>
+              Sign In to Profile
+              <ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </template>
+          </button>
+
+          <p class="text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+            Don't have an account? 
+            <router-link to="/register" class="text-emerald-600 hover:text-emerald-700 underline underline-offset-4 cursor-pointer">Signup Now</router-link>
+          </p>
+        </div>
+
+        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 text-[8px] font-black tracking-[0.4em] text-slate-400 uppercase flex items-center gap-2 text-nowrap">
+          <div class="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+          Direct Access Gateway
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { authService } from "@/services/authService";
+import { 
+  Users, Phone, Mail, ArrowRight, ShieldCheck,
+  Zap, BarChart3, Cpu, Building2, Factory,
+  Warehouse, GraduationCap, HeartPulse, Globe,
+  AlertCircle, X
+} from "lucide-vue-next";
 
 const router = useRouter();
 const route = useRoute();
 
-// ALL ORIGINAL REFS - 100% UNCHANGED
 const mode = ref("phone");
 const phoneRaw = ref("");
 const phoneError = ref("");
@@ -167,16 +208,22 @@ const emailLoading = ref(false);
 const showTimeoutMessage = ref(false);
 const year = ref(new Date().getFullYear());
 
-// Background image style - EXACT SAME AS LOGIN PAGE
-const backgroundStyle = computed(() => ({
-  backgroundImage: `url('/public/images/loginimage.png')`,
-  backgroundSize: "cover",
-  backgroundPosition: "center",
-  backgroundRepeat: "no-repeat",
-  minHeight: "100vh",
-}));
+const highlights = [
+  { icon: Zap, text: "Instant switch", sub: "Switch profiles sub-second." },
+  { icon: ShieldCheck, text: "Hardware locked", sub: "Session tied to device." },
+  { icon: BarChart3, text: "Cross-org audit", sub: "Unified security logs." },
+  { icon: Cpu, text: "JWT powered", sub: "Standardized auth tokens." },
+];
 
-// ALL ORIGINAL FUNCTIONS - 100% UNCHANGED
+const industries = [
+  { icon: Building2, name: "Corporate" },
+  { icon: Factory, name: "Industrial" },
+  { icon: Warehouse, name: "Logistics" },
+  { icon: GraduationCap, name: "Education" },
+  { icon: HeartPulse, name: "Healthcare" },
+  { icon: Globe, name: "Critical Infra" },
+];
+
 function setMode(next) {
   mode.value = next;
   phoneError.value = "";
@@ -214,7 +261,6 @@ function dismissTimeoutMessage() {
 
 async function handleSubmit() {
   if (mode.value === "phone") {
-    // ORIGINAL PHONE LOGIC - 100% UNCHANGED
     phoneError.value = "";
     const digits = (phoneRaw.value || "").replace(/\D/g, "");
     if (!validPhone(digits)) {
@@ -229,23 +275,18 @@ async function handleSubmit() {
 
       const fullPhoneNumber = "+91" + digits;
 
-      // Check if phone exists
       const phoneExists = await authService.checkPhoneExists(fullPhoneNumber);
       if (!phoneExists) {
-        phoneError.value =
-          "This phone number is not registered. Please sign up first.";
+        phoneError.value = "This phone number is not registered. Please sign up first.";
         return;
       }
 
-      // Check if user is resigned
       const isResigned = await authService.checkUserResigned(fullPhoneNumber);
       if (isResigned) {
-        phoneError.value =
-          "Resigned Employee has No access. Please contact your Company Admin.";
+        phoneError.value = "Resigned Employee has No access. Please contact your Company Admin.";
         return;
       }
 
-      // Check user PIN and token status
       const user = await authService.getUserByPhone(fullPhoneNumber);
       const hasPin = user && user.userPin;
       const token = authService.getToken();
@@ -260,26 +301,16 @@ async function handleSubmit() {
       } else if (hasPin && isTokenValid) {
         router.push({
           name: "PinVerification",
-          params: { phoneNumber: digits },
+          params: { contactType: "phone", contactValue: digits },
         });
       }
     } catch (error) {
       console.error("Error during phone login:", error);
-
-      let errorMessage =
-        "An error occurred. Please try again or check the internet connection";
-      if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-
-      phoneError.value = errorMessage;
+      phoneError.value = error.response?.data?.message || error.message || "An error occurred. Please try again.";
     } finally {
       loading.value = false;
     }
   } else {
-    // ORIGINAL EMAIL LOGIC - 100% UNCHANGED
     emailError.value = "";
     if (!validEmail(email.value)) {
       emailError.value = "Enter a valid email address.";
@@ -291,25 +322,18 @@ async function handleSubmit() {
     try {
       clearPreviousSession();
 
-      // Check if email exists
       const emailExists = await authService.checkEmailExists(email.value);
       if (!emailExists) {
-        emailError.value =
-          "This email is not registered. Please sign up first.";
+        emailError.value = "This email is not registered. Please sign up first.";
         return;
       }
 
-      // Check if user is resigned
-      const isResigned = await authService.checkUserResignedByEmail(
-        email.value,
-      );
+      const isResigned = await authService.checkUserResignedByEmail(email.value);
       if (isResigned) {
-        emailError.value =
-          "Resigned Employee has No access. Please contact your Company Admin.";
+        emailError.value = "Resigned Employee has No access. Please contact your Company Admin.";
         return;
       }
 
-      // Generate OTP session for email
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/emailLogin/generate-session`,
         {
@@ -320,9 +344,7 @@ async function handleSubmit() {
       );
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data?.otp_session_uuid) {
-        const backendMessage =
-          data?.message || "Could not start email session. Try again.";
-        throw new Error(backendMessage);
+        throw new Error(data?.message || "Could not start email session. Try again.");
       }
 
       localStorage.setItem("email", email.value);
@@ -335,20 +357,13 @@ async function handleSubmit() {
       });
     } catch (error) {
       console.error("Error during email login:", error);
-
-      let errorMessage = "Something went wrong. Please try again.";
-      if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
-      } else if (error.message) {
-        errorMessage = error.message;
-      }
-
-      emailError.value = errorMessage;
+      emailError.value = error.response?.data?.message || error.message || "Something went wrong. Please try again.";
     } finally {
       emailLoading.value = false;
     }
   }
 }
+
 async function proceedToOtpVerification(fullPhoneNumber) {
   try {
     let response = await authService.generateOtp(fullPhoneNumber);
@@ -361,54 +376,23 @@ async function proceedToOtpVerification(fullPhoneNumber) {
       }
     }
 
-    console.log("OTP Generation Response:", response);
-
     if (response && response.otp_session_uuid) {
-      console.log("✅ Valid OTP response:", response);
       localStorage.setItem("sessionUuid", response.otp_session_uuid);
       localStorage.setItem("fromOtp", "true");
 
       router.push({
         name: "Verification",
-        params: { phoneNumber: fullPhoneNumber.replace(countryCode.value, "") },
+        params: { phoneNumber: fullPhoneNumber.replace("+91", "") },
       });
     } else {
-      // 🔥 NEW: SHOW EXACT BACKEND MESSAGE
-      let backendMessage = "Failed to generate OTP. Please try again.";
-
-      if (response?.message) {
-        backendMessage = response.message; // ✅ "Failed to send OTP. Please try again."
-      } else if (response?.msg91Response?.message) {
-        backendMessage = `${response.message || "OTP Error:"} ${response.msg91Response.message}`; // ✅ "Failed to send OTP... Insufficient Balance..."
-      }
-
-      phoneError.value = backendMessage;
+      phoneError.value = response?.message || response?.msg91Response?.message || "Failed to generate OTP.";
     }
   } catch (error) {
     console.error("Error generating OTP:", error);
-
-    // 🔥 NEW: SHOW EXACT BACKEND MESSAGE FROM ERROR
-    let errorMessage = "Failed to generate OTP. Please try again.";
-
-    if (error.message === "RESIGNED_USER") {
-      errorMessage =
-        "Resigned Employee has No access. Please contact your Company Admin.";
-    } else if (error.response?.data?.message) {
-      errorMessage = error.response.data.message;
-    } else if (error.response?.data) {
-      const data = error.response.data;
-      if (data.message) {
-        errorMessage = data.message;
-      } else if (data.msg91Response?.message) {
-        errorMessage = `${data.message || "OTP Error:"} ${data.msg91Response.message}`;
-      }
-    } else if (error.message) {
-      errorMessage = error.message;
-    }
-
-    phoneError.value = errorMessage;
+    phoneError.value = error.response?.data?.message || error.message || "Failed to generate OTP.";
   }
 }
+
 onMounted(() => {
   clearPreviousSession();
   if (route.query.timeout) {
@@ -418,312 +402,46 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* EXACT SAME STYLES AS LOGIN PAGE - 100% COPIED */
-.h-100 {
-  height: 100%;
+.animate-fade-in-left {
+  animation: fadeInLeft 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.background-container {
-  position: relative;
-  width: 100%;
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* DESKTOP - Background Image */
-@media (min-width: 961px) {
-  .background-container {
-    background-image: url("/public/images/loginimage.png") !important;
-    background-size: cover !important;
-    background-position: center !important;
-    background-repeat: no-repeat !important;
-    min-height: 100vh !important;
-  }
+.animate-shake {
+  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
 }
 
-.login-container {
-  max-width: 520px;
-  width: 100%;
-  z-index: 10;
-  margin-right: 170px;
-  position: relative;
+@keyframes fadeInLeft {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
-/* Logo section styling - now inside card */
-.logo-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.logo-image {
-  height: 100px;
-  width: auto;
-  object-fit: contain;
+@keyframes shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
 }
 
-/* Card header styling - contains logo */
-.card-header {
-  text-align: center;
-  padding: 24px 0;
+:deep(.v-alert) {
+  border: none !important;
+  background: rgba(244, 63, 94, 0.1) !important;
+  color: #f43f5e !important;
 }
 
-/* Sub header styling */
-.card-subheader {
-  background: #abffb54d;
-  padding: 14px 24px;
-  text-align: center;
-  border-bottom: 1px solid #5fb96e;
-  border-top: 1px solid #5fb96e;
+:deep(.v-alert__prepend .v-icon) {
+  color: #f43f5e !important;
 }
 
-.subheader-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #333;
-  margin: 0;
-  letter-spacing: 0.3px;
-}
-
-/* Card content styling */
-.card-content {
-  padding: 20px 24px;
-  background: white;
-  margin-bottom: 250px;
-}
-
-/* Tab buttons styling */
-.tab-buttons-container {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 18px;
-}
-
-.tab-btn {
-  flex: 1;
-  padding: 10px 16px;
-  border: 2px solid #e0e0e0;
-  background: white;
-  color: #666;
-  font-size: 12px;
-  font-weight: 600;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  letter-spacing: 0.5px;
-}
-
-.tab-btn:hover {
-  border-color: #059669;
-  color: #059669;
-}
-
-.tab-btn.active {
-  background: #059669;
-  color: white;
-  border-color: #059669;
-  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
-}
-
-/* Form section styling */
-.form-section {
-  margin-bottom: 16px;
-}
-
-.form-label {
-  display: block;
-  font-size: 13px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 10px;
-}
-
-.phone-row {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-}
-
-.country-code-text {
-  flex: 0 0 auto;
-  width: 100px;
-  min-width: 100px;
-  display: flex;
-  align-items: center;
-  padding: 0 12px;
-  background: white;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-size: 16px;
-  font-weight: 500;
-  color: #374151;
-  height: 50px;
-}
-
-.phone-input {
-  flex: 1;
-  min-width: 0;
-}
-
-.help-text {
-  font-size: 12px;
-  color: #999;
-  margin-top: 8px;
-}
-
-/* Submit button styling */
-.submit-btn {
-  background: #059669 !important;
-  color: white !important;
-  font-weight: 600 !important;
-  border-radius: 8px !important;
-  padding: 12px 16px !important;
-  margin-top: 16px !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.5px !important;
-  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3) !important;
-  transition: all 0.3s ease !important;
-}
-
-.submit-btn:hover:not(:disabled) {
-  background: #0a7a73 !important;
-  box-shadow: 0 6px 16px rgba(13, 148, 136, 0.4) !important;
-}
-
-/* Signup text styling */
-.signup-text {
-  text-align: center;
-  font-size: 12px;
-  color: #666;
-  margin-top: 16px;
-  margin-bottom: 0;
-}
-
-.signup-link {
-  color: #059669;
-  text-decoration: none;
-  font-weight: 600;
-  transition: color 0.3s ease;
-}
-
-.signup-link:hover {
-  color: #0a7a73;
-  text-decoration: underline;
-}
-
-.footer-text {
-  text-align: center;
-  font-size: 11px;
-  color: #999;
-  margin-top: 12px;
-  margin-bottom: 0;
-}
-
-.login-card {
-  transition: all 0.3s ease;
-}
-
-/* ✅ MOBILE - PLAIN WHITE BACKGROUND + CENTERED LOGIN - EXACT SAME */
-@media (max-width: 960px) {
-  .background-container {
-    background: #ffffff !important; /* ✅ PLAIN WHITE */
-    background-image: none !important; /* ✅ NO IMAGE */
-  }
-
-  .login-container {
-    padding: 12px !important;
-    margin: 0 auto !important; /* ✅ CENTERED */
-    max-width: 480px;
-    width: 90% !important;
-  }
-
-  .card-content {
-    padding: 16px 20px;
-    margin-bottom: 50px;
-  }
-
-  .tab-btn {
-    font-size: 11px;
-    padding: 8px 12px;
-  }
-}
-
-@media (max-width: 768px) {
-  .background-container {
-    background: #ffffff !important; /* ✅ PLAIN WHITE */
-    background-image: none !important; /* ✅ NO IMAGE */
-  }
-
-  .login-container {
-    padding: 8px !important;
-    margin: 0 auto !important; /* ✅ CENTERED */
-    max-width: 100%;
-    width: calc(100% - 16px) !important;
-  }
-
-  .card-content {
-    padding: 16px 20px;
-    margin-bottom: 40px;
-  }
-
-  .phone-row {
-    flex-wrap: wrap;
-  }
-
-  .country-select {
-    width: 90px;
-  }
-}
-
-@media (max-width: 480px) {
-  .background-container {
-    background: #ffffff !important; /* ✅ PLAIN WHITE */
-    background-image: none !important; /* ✅ NO IMAGE */
-  }
-
-  .login-container {
-    padding: 8px !important;
-    margin: 0 auto !important; /* ✅ CENTERED */
-    max-width: 100%;
-    width: calc(100% - 16px) !important;
-  }
-
-  .card-content {
-    padding: 14px 16px;
-    margin-bottom: 30px;
-  }
-
-  .subheader-title {
-    font-size: 14px;
-  }
-
-  .form-label {
-    font-size: 12px;
-  }
-
-  .tab-btn {
-    font-size: 10px;
-    padding: 6px 10px;
-  }
-
-  .phone-row {
-    gap: 8px;
-  }
-
-  .country-select {
-    width: 80px;
-    min-width: 80px;
-  }
-
-  .help-text {
-    font-size: 11px;
-  }
-
-  .signup-text {
-    font-size: 11px;
-  }
-
-  .footer-text {
-    font-size: 10px;
-  }
+:deep(.v-alert__close .v-btn) {
+  color: #f43f5e !important;
 }
 </style>

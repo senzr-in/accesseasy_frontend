@@ -1,35 +1,31 @@
-/*src/assets/styles/typograpy.css*/
+/*src/assets/styles/typography.css*/
+/* Font-scale CSS variables — do NOT redefine Tailwind utility class names here. */
 :root {
-  /* Font family */
-  --font-family-primary: "inter", sans-serif;
+  --font-family-primary: "Inter", sans-serif;
   --font-family-secondary: "Open Sans", sans-serif;
 
-  /* Font sizes */
-  --font-size-xs: 0.75rem; /* 12px */
-  --font-size-sm: 0.875rem; /* 14px */
-  --font-size-base: 1em; /* 16px */
-  --font-size-lg: 1.125rem; /* 18px */
-  --font-size-xl: 1.25rem; /* 20px */
-  --font-size-2xl: 1.5rem; /* 24px */
-  --font-size-3xl: 1.875rem; /* 30px */
-  --font-size-4xl: 2.25rem; /* 36px */
-  --font-size-5xl: 3rem; /* 48px */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1em;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+  --font-size-5xl: 3rem;
 
-  /* Font weights */
   --font-weight-light: 300;
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
   --font-weight-bold: 700;
 
-  /* Line heights */
   --line-height-tight: 1.25;
   --line-height-snug: 1.375;
   --line-height-normal: 1.5;
   --line-height-relaxed: 1.625;
   --line-height-loose: 2;
 
-  /* Letter spacing */
   --letter-spacing-tight: -0.025em;
   --letter-spacing-normal: 0em;
   --letter-spacing-wide: 0.025em;
@@ -40,73 +36,7 @@ body,
   font-family: var(--font-family-primary);
 }
 
-/* Typography classes */
-.text-xs {
-  font-size: var(--font-size-xs);
-}
-.text-sm {
-  font-size: var(--font-size-sm);
-}
-.text-base {
-  font-size: var(--font-size-base);
-}
-.text-lg {
-  font-size: var(--font-size-lg);
-}
-.text-xl {
-  font-size: var(--font-size-xl);
-}
-.text-2xl {
-  font-size: var(--font-size-2xl);
-}
-.text-3xl {
-  font-size: var(--font-size-3xl);
-}
-.text-4xl {
-  font-size: var(--font-size-4xl);
-}
-.text-5xl {
-  font-size: var(--font-size-5xl);
-}
-
-.font-light {
-  font-weight: var(--font-weight-light);
-}
-.font-normal {
-  font-weight: var(--font-weight-normal);
-}
-.font-medium {
-  font-weight: var(--font-weight-medium);
-}
-.font-semibold {
-  font-weight: var(--font-weight-semibold);
-}
-.font-bold {
-  font-weight: var(--font-weight-bold);
-}
-
-.leading-tight {
-  line-height: var(--line-height-tight);
-}
-.leading-snug {
-  line-height: var(--line-height-snug);
-}
-.leading-normal {
-  line-height: var(--line-height-normal);
-}
-.leading-relaxed {
-  line-height: var(--line-height-relaxed);
-}
-.leading-loose {
-  line-height: var(--line-height-loose);
-}
-
-.tracking-tight {
-  letter-spacing: var(--letter-spacing-tight);
-}
-.tracking-normal {
-  letter-spacing: var(--letter-spacing-normal);
-}
-.tracking-wide {
-  letter-spacing: var(--letter-spacing-wide);
-}
+/* NOTE: Do NOT define classes named .text-xs, .text-sm, .font-bold etc. here.
+   Those are Tailwind utility class names. Redefining them in plain CSS
+   breaks dark mode because the plain CSS takes precedence over Tailwind's
+   generated dark:bg-* and dark:text-* variants. */

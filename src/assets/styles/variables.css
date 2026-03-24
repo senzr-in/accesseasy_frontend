@@ -1,60 +1,126 @@
-/* src/assets/styles/variables.css */
-:root {
-  --theme-color: #000000;
-  --theme-secondary: #333333;
-  --theme-accent: #666666;
-  --background-color: #ffffff;
-  --card-background: #ffffff;
+@import "tailwindcss";
 
-  --text-dark: #000000;
-  --text-light: #666666;
-  --text-muted: #999999;
-  --text-color: #ffffff;
-  --title: #000000;
+/* ============================================================
+   Tailwind v4 dark mode configuration
+   Using class-based dark mode: adds .dark to <html>
+   ============================================================ */
+@variant dark (&:where(.dark, .dark *));
 
-  --success: #000000;
-  --warning: #000000;
-  --error: #000000;
-  --info: #000000;
+/* ============================================================
+   Design token aliases (used by bg-background, text-foreground etc.)
+   ============================================================ */
+@theme {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
 
-  --dashboard-gradient: linear-gradient(135deg, #000000 0%, #333333 100%);
-  --hover-gradient: linear-gradient(135deg, #333333 0%, #666666 100%);
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
 }
 
-/* :root {
-  --theme-color: #1e40af;
-  --theme-secondary: #3b82f6;
-  --theme-accent: #60a5fa;
-  --background-color: #f8fafc;
-  --card-background: #ffffff;
-  --text-dark: #1e293b;
-  --text-light: #64748b;
-  --text-muted: #64748b;
-  --text-color: #1e293b;
-  --title: #1e293b;
-  --success: #1e40af;
-  --warning: #3b82f6;
-  --error: #1e40af;
-  --info: #3b82f6;
-  --dashboard-gradient: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-  --hover-gradient: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
-}
+/* ============================================================
+   Light mode CSS variable values  (:root = default = light)
+   ============================================================ */
+@layer base {
+  :root {
+    --background: 0 0% 97%;          /* near-white #f7f7f7 */
+    --foreground: 222 47% 11%;       /* deep navy text */
 
-.dark-theme {
-  --theme-color: #3b82f6;
-  --theme-secondary: #60a5fa;
-  --theme-accent: #93c5fd;
-  --background-color: #1e293b;
-  --card-background: #2d3748;
-  --text-dark: #f8fafc;
-  --text-light: #e2e8f0;
-  --text-muted: #a0aec0;
-  --text-color: #f8fafc;
-  --title: #f8fafc;
-  --success: #3b82f6;
-  --warning: #60a5fa;
-  --error: #3b82f6;
-  --info: #60a5fa;
-  --dashboard-gradient: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%);
-  --hover-gradient: linear-gradient(135deg, #60a5fa 0%, #93c5fd 100%);
-} */
+    --card: 0 0% 100%;               /* pure white cards */
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 221 83% 53%;          /* blue-600 */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 40% 94%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 40% 94%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 210 40% 94%;
+    --accent-foreground: 222 47% 11%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 32% 88%;
+    --input: 214 32% 88%;
+    --ring: 221 83% 53%;
+
+    --radius: 0.5rem;
+  }
+
+  /* ============================================================
+     Dark mode CSS variable values (.dark class on <html>)
+     ============================================================ */
+  .dark {
+    --background: 222 24% 8%;        /* very dark blue-gray */
+    --foreground: 210 40% 96%;       /* near-white text */
+
+    --card: 222 24% 11%;             /* slightly lighter than background */
+    --card-foreground: 210 40% 96%;
+
+    --popover: 222 24% 11%;
+    --popover-foreground: 210 40% 96%;
+
+    --primary: 217 91% 60%;          /* brighter blue */
+    --primary-foreground: 222 47% 11%;
+
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 96%;
+
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 217 33% 17%;
+    --accent-foreground: 210 40% 96%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 96%;
+
+    --border: 217 33% 18%;
+    --input: 217 33% 18%;
+    --ring: 224 76% 48%;
+  }
+
+  /* Apply background & text to html + body so the whole page gets the theme */
+  html,
+  body,
+  #app {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+
+  * {
+    border-color: hsl(var(--border));
+  }
+}

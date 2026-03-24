@@ -17,7 +17,7 @@
       class="text-center empty-state"
     >
       <img
-        src="../../../../../../public/images/bank.png"
+        src="/images/bank.png"
         style="width: 300px; height: 300px; margin: 0 auto"
       />
 

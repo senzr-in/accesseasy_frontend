@@ -11,7 +11,7 @@
         hide-default-footer
         :items="items"
         :items-per-page="-1"
-        class="elevation-1 device-table"
+        class="border border-slate-200 dark:border-zinc-800 rounded-xl shadow-sm bg-white dark:bg-zinc-950 overflow-hidden"
         height="calc(90vh - 190px)"
         fixed-header
         show-select
@@ -76,99 +76,73 @@
           </v-chip>
         </template>
         <template v-slot:top>
-          <div class="d-flex align-center py-2 px-4">
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border-b border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 gap-4 shrink-0">
             <!-- Left side tabs -->
-            <div class="left-tabs">
+            <div class="flex bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-1 rounded-xl shadow-sm">
               <button
                 @click="activeTab = 'all'"
-                :class="{ active: activeTab === 'all' }"
+                :class="[
+                  'px-4 h-8 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all flex items-center',
+                  activeTab === 'all'
+                    ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-sm border border-slate-200 dark:border-zinc-700'
+                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                ]"
               >
-                <v-icon
-                  small
-                  class="mr-1"
-                  :color="activeTab === 'all' ? 'white' : '#1e88e5'"
-                >
-                  mdi-format-list-bulleted
-                </v-icon>
+                <v-icon size="14" class="mr-1.5 opacity-70">mdi-format-list-bulleted</v-icon>
                 All
               </button>
               <button
                 @click="activeTab = 'unApproved'"
-                :class="{ active: activeTab === 'unApproved' }"
+                :class="[
+                  'px-4 h-8 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all flex items-center',
+                  activeTab === 'unApproved'
+                    ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-sm border border-slate-200 dark:border-zinc-700'
+                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                ]"
               >
-                <v-icon
-                  small
-                  class="mr-1"
-                  :color="activeTab === 'unApproved' ? 'white' : '#f44336'"
-                >
-                  mdi-clock-alert
-                </v-icon>
-                unApproved
+                <v-icon size="14" class="mr-1.5 opacity-70">mdi-clock-alert</v-icon>
+                Unapproved
               </button>
               <button
                 @click="activeTab = 'approved'"
-                :class="{ active: activeTab === 'approved' }"
+                :class="[
+                  'px-4 h-8 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all flex items-center',
+                  activeTab === 'approved'
+                    ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-sm border border-slate-200 dark:border-zinc-700'
+                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                ]"
               >
-                <v-icon
-                  small
-                  class="mr-1"
-                  :color="activeTab === 'approved' ? 'white' : '#4caf50'"
-                >
-                  mdi-check-circle-outline
-                </v-icon>
+                <v-icon size="14" class="mr-1.5 opacity-70">mdi-check-circle-outline</v-icon>
                 Approved
               </button>
             </div>
 
-            <v-spacer></v-spacer>
+            <!-- Search field and controls moved to right side -->
+            <div class="flex items-center gap-3 w-full sm:w-auto">
+              <div class="relative w-full sm:w-64">
+                <v-icon class="absolute left-3 top-2.5 h-4 w-4 text-slate-400 z-10" size="16">mdi-magnify</v-icon>
+                <input
+                  v-model="search"
+                  type="text"
+                  placeholder="Search Device..."
+                  class="w-full pl-9 pr-4 h-10 text-sm bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm text-slate-900 dark:text-white placeholder:text-slate-400"
+                />
+              </div>
 
-            <!-- Search field moved to right side -->
-            <v-text-field
-              v-model="search"
-              label="Search Device"
-              prepend-inner-icon="mdi-magnify"
-              density="compact"
-              variant="outlined"
-              class="search-field"
-              hide-details
-            ></v-text-field>
-
-            <div class="position-relative">
-              <v-btn color="primary" @click="toggleFilters" class="ms-2">
-                <v-icon start>mdi-filter</v-icon>
-                Filters
-              </v-btn>
-              <span v-if="hasActiveFilters" class="filter-indicator"></span>
+              <div class="relative">
+                <button 
+                  @click="toggleFilters" 
+                  class="flex items-center gap-2 h-10 px-4 text-xs font-bold uppercase tracking-widest rounded-xl border border-slate-200 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-950 transition-colors shadow-sm bg-slate-50 dark:bg-zinc-900 text-slate-700 dark:text-slate-300"
+                >
+                  <v-icon size="16">mdi-filter</v-icon>
+                  Filters
+                </button>
+                <span v-if="hasActiveFilters" class="absolute -top-1 -right-1 h-3 w-3 bg-blue-500 rounded-full border-2 border-white dark:border-zinc-900 block"></span>
+              </div>
             </div>
-
-            <v-chip-group
-              v-model="selectedStatus"
-              class="mt-2 mt-sm-0"
-              mandatory
-            >
-              <v-chip
-                v-for="status in statuses"
-                :key="status.value"
-                :value="status.value"
-                filter
-                :color="status.color"
-                label
-                class="ma-1"
-              >
-                {{ status.text }} ({{ getStatusCount(status.value) }})
-              </v-chip>
-            </v-chip-group>
-            <!-- <template v-if="selected.length > 0">
-              <v-btn color="error" @click="deleteSelected" class="ms-2">
-                <v-icon start>mdi-delete</v-icon>
-                Delete ({{ selected.length }})
-              </v-btn>
-            </template> -->
-            <v-btn color="black" class="ms-2" @click="showAddDeviceForm">
-              <v-icon start>mdi-plus</v-icon>
-              Add Device
-            </v-btn>
           </div>
+
+          <!-- Removed extra buttons for standard tabular mapping -->
         </template>
 
         <template v-slot:item.actions="{ item }">

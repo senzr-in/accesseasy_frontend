@@ -1,133 +1,166 @@
-<!-- EmailVerification.vue -->
 <template>
-  <v-container fluid class="fill-height pa-0">
-    <v-row no-gutters class="h-100">
-      <!-- Full Background Image - EXACT SAME AS verification.vue -->
-      <v-col cols="12" class="d-flex align-center justify-end pa-0">
-        <div
-          class="background-container d-flex align-center justify-end h-100"
-          :style="backgroundStyle"
-        >
-          <!-- Right Panel - EMAIL VERIFICATION FORM (EXACT SAME LAYOUT) -->
-          <div class="login-container">
-            <!-- Redesigned verification card with EXACT SAME LAYOUT -->
-            <v-card
-              class="login-card"
-              style="
-                border: 2px solid #059669;
-                border-radius: 16px;
-                overflow: hidden;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-              "
-            >
-              <!-- Logo and Tagline inside card header - SAME -->
-              <div class="card-header">
-                <div class="logo-section">
-                  <img
-                    src="/public/images/project.png"
-                    alt="FieldsEasy"
-                    class="logo-image"
-                  />
-                </div>
-              </div>
+  <div class="flex min-h-screen w-full bg-[#f8fafc] dark:bg-[#020617] text-slate-900 dark:text-slate-100 flex-col lg:flex-row relative overflow-hidden font-sans">
+    
+    <!-- Left Side: Marketing Content (Same as Login) -->
+    <div class="flex-1 flex flex-col justify-center px-6 py-8 lg:px-14 lg:py-6 bg-white/10 dark:bg-black/20 backdrop-blur-md border-r border-slate-200 dark:border-white/10 relative overflow-hidden">
+      <!-- Grid Background Pattern -->
+      <div 
+        class="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none"
+        style="background-image: radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0); background-size: 24px 24px;"
+      ></div>
 
-              <!-- Sub Header with light green background - SAME -->
-              <div class="card-subheader">
-                <h2 class="subheader-title">Verify Your Email</h2>
-              </div>
-
-              <!-- Card content with improved spacing - SAME -->
-              <div class="card-content">
-                <!-- Error Alert - SAME POSITION -->
-                <v-alert
-                  v-if="error"
-                  type="error"
-                  variant="tonal"
-                  density="compact"
-                  class="mb-4"
-                >
-                  {{ error }}
-                </v-alert>
-
-                <!-- Success Alert - SAME POSITION -->
-                <v-alert
-                  v-if="success"
-                  type="success"
-                  variant="tonal"
-                  density="compact"
-                  class="mb-4"
-                >
-                  {{ success }}
-                </v-alert>
-
-                <!-- OTP Input - SAME FORM SECTION STYLE -->
-                <div class="form-section">
-                  <label class="form-label">Verification Code</label>
-                  <div class="d-flex justify-center gap-2">
-                    <v-text-field
-                      v-for="(digit, index) in 6"
-                      :key="index"
-                      v-model="otpDigits[index]"
-                      maxlength="1"
-                      type="text"
-                      density="comfortable"
-                      variant="outlined"
-                      class="otp-input-field"
-                      :class="{ filled: otpDigits[index] }"
-                      @input="handleInput(index)"
-                      @keydown="handleKeydown($event, index)"
-                      @focus="focusedIndex = index"
-                      @blur="focusedIndex = -1"
-                      ref="otpFields"
-                    />
-                  </div>
-                  <div class="help-text">
-                    Didn't receive?
-                    <a
-                      v-if="timer <= 0"
-                      href="#"
-                      @click.prevent="resendOtp"
-                      class="signup-link"
-                    >
-                      {{ resendLoading ? "Sending..." : "Resend OTP" }}
-                    </a>
-                    <span v-else>Resend in {{ timer }}s</span>
-                  </div>
-                </div>
-
-                <!-- Submit button with new styling - SAME -->
-                <v-btn
-                  @click="verifyCode"
-                  :disabled="loading || !isValidOtp"
-                  :loading="loading"
-                  block
-                  size="large"
-                  class="submit-btn"
-                >
-                  {{ loading ? "Verifying..." : "Verify Code" }}
-                </v-btn>
-
-                <!-- Back link with improved styling - SAME -->
-                <p class="signup-text">
-                  <router-link to="/login" class="signup-link"
-                    >Back to Login</router-link
-                  >
-                </p>
-              </div>
-            </v-card>
-
-            <p class="footer-text">© 2025 Fieldseasy</p>
+      <div class="max-w-xl relative z-10 animate-fade-in-left">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="h-10 w-10 rounded-xl bg-blue-600/20 flex items-center justify-center border border-blue-600/20 shadow-xl shadow-blue-600/10">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-blue-600">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            </svg>
+          </div>
+          <div class="flex flex-col">
+            <span class="text-base font-black tracking-tight uppercase leading-none text-slate-900 dark:text-white">AccessEasy</span>
+            <span class="text-[9px] font-black text-blue-600 tracking-[0.4em] uppercase mt-0.5">Universal OS</span>
           </div>
         </div>
-      </v-col>
-    </v-row>
-  </v-container>
+
+        <h1 class="text-3xl lg:text-4xl font-black tracking-tight leading-[1] mb-4 text-slate-900 dark:text-white">
+          Secure your infrastructure. <br />
+          <span class="text-blue-600">Empower</span> your workforce.
+        </h1>
+
+        <p class="text-[12px] text-slate-500 font-bold mb-8 leading-relaxed max-w-sm uppercase tracking-wide">
+          The ultimate platform for real-time access control and workforce intelligence.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-5 mb-8">
+          <div class="flex items-center gap-3 group" v-for="(h, i) in highlights" :key="i">
+            <div class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-md group-hover:scale-110 group-hover:border-blue-500/50 transition-all duration-300">
+              <component :is="h.icon" class="h-4 w-4 text-blue-600" />
+            </div>
+            <div>
+              <h3 class="font-black text-[10px] tracking-[0.05em] uppercase text-slate-900 dark:text-white">{{ h.text }}</h3>
+              <p class="text-[9px] font-bold text-slate-500 leading-snug mt-0.5 uppercase tracking-widest">{{ h.sub }}</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-6 border-t border-slate-200 dark:border-white/5">
+          <p class="text-[8px] font-black tracking-[0.3em] text-slate-400 dark:text-slate-600 mb-4 uppercase">Trusted Enterprise Networks</p>
+          <div class="flex flex-wrap gap-x-6 gap-y-3">
+            <div class="flex items-center gap-2 opacity-50 hover:opacity-100 transition-all duration-300 cursor-default group" v-for="(ind, i) in industries" :key="i">
+              <component :is="ind.icon" class="h-4 w-4 group-hover:text-blue-600 transition-colors" />
+              <span class="text-[9px] font-black tracking-widest uppercase">{{ ind.name }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Side: Email OTP Verification Form -->
+    <div class="flex-1 flex items-center justify-center p-4 lg:p-10 relative overflow-hidden bg-slate-50/50 dark:bg-transparent">
+      <!-- Glow effect -->
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-blue-600/5 rounded-full blur-[100px] pointer-events-none"></div>
+
+      <div class="w-full max-w-[420px] rounded-[2rem] bg-white/90 dark:bg-[#0a0e1a]/80 backdrop-blur-xl p-8 shadow-2xl border border-slate-200 dark:border-white/10 relative z-10 animate-fade-in-up">
+        
+        <div class="text-center mb-6">
+          <div class="mx-auto mb-4 h-12 w-12 flex items-center justify-center rounded-[1rem] bg-blue-600 text-white shadow-lg shadow-blue-600/30 border border-blue-500/20">
+            <Mail class="h-5 w-5" />
+          </div>
+          <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight uppercase mb-1">Verify Email</h2>
+          <p class="text-[9px] text-blue-600 font-black tracking-[0.4em] uppercase">Verification code sent to {{ displayEmail }}</p>
+        </div>
+
+        <!-- Alerts -->
+        <div v-if="error" class="mb-4 p-3 rounded-xl bg-rose-50 dark:bg-rose-900/10 border border-rose-100 dark:border-rose-900/30 flex items-start gap-3 animate-shake">
+          <AlertCircle class="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+          <p class="text-[11px] text-rose-800 dark:text-rose-300 leading-relaxed font-semibold uppercase tracking-wider">
+            {{ error }}
+          </p>
+        </div>
+
+        <div v-if="success" class="mb-4 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/30 flex items-start gap-3">
+          <CheckCircle class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+          <p class="text-[11px] text-emerald-800 dark:text-emerald-300 leading-relaxed font-semibold uppercase tracking-wider">
+            {{ success }}
+          </p>
+        </div>
+
+        <div class="space-y-6">
+          <div class="space-y-2">
+            <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 ml-1 uppercase">Verification Code</label>
+            <div class="flex justify-between gap-2">
+              <input
+                v-for="(digit, index) in 6"
+                :key="index"
+                v-model="otpDigits[index]"
+                maxlength="1"
+                type="text"
+                @input="handleInput(index)"
+                @keydown="handleKeydown($event, index)"
+                ref="otpFields"
+                class="w-12 h-14 text-center rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none text-xl font-black text-slate-900 dark:text-white shadow-sm"
+              />
+            </div>
+            
+            <div class="flex items-center justify-between px-1 mt-2">
+              <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                Didn't receive code?
+              </p>
+              <button 
+                v-if="timer <= 0" 
+                @click="resendOtp" 
+                :disabled="resendLoading"
+                class="text-[10px] font-black text-blue-600 hover:text-blue-700 uppercase tracking-[0.1em] transition-colors disabled:opacity-50"
+              >
+                {{ resendLoading ? 'Sending...' : 'Resend Now' }}
+              </button>
+              <span v-else class="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em]">
+                Retry in {{ timer }}s
+              </span>
+            </div>
+          </div>
+
+          <button
+            @click="verifyCode"
+            :disabled="loading || !isValidOtp"
+            class="w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 transition-all disabled:opacity-70 disabled:cursor-not-allowed group"
+          >
+            <span v-if="loading">Verifying...</span>
+            <template v-else>
+              Verify & Continue
+              <ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            </template>
+          </button>
+
+          <div class="flex items-center justify-between gap-4 py-2 opacity-50">
+            <div class="h-[1px] flex-1 bg-slate-300 dark:bg-slate-700" />
+            <span class="text-[9px] font-black tracking-[0.3em] text-slate-500 uppercase">OR</span>
+            <div class="h-[1px] flex-1 bg-slate-300 dark:bg-slate-700" />
+          </div>
+
+          <p class="text-center text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+            <router-link to="/login" class="text-blue-600 hover:text-blue-700 underline underline-offset-4 cursor-pointer">Back to Login</router-link>
+          </p>
+        </div>
+
+        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 text-[8px] font-black tracking-[0.4em] text-slate-400 uppercase flex items-center gap-2">
+          <div class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          Secure Session Active
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, nextTick, onUnmounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { authService } from "@/services/authService";
+import { 
+  Mail, ArrowRight, ShieldCheck, AlertCircle, CheckCircle,
+  Zap, BarChart3, Cpu, Building2, Factory, Warehouse, 
+  GraduationCap, HeartPulse, Globe
+} from "lucide-vue-next";
 
 const router = useRouter();
 const route = useRoute();
@@ -144,23 +177,30 @@ const year = ref(new Date().getFullYear());
 const timer = ref(30);
 let timerInterval = null;
 
+const highlights = [
+  { icon: Zap, text: "Real-time attendance", sub: "Live presence tracking." },
+  { icon: ShieldCheck, text: "Advanced access", sub: "Secure doors & roles." },
+  { icon: BarChart3, text: "Operational insights", sub: "Instant system health." },
+  { icon: Cpu, text: "Smart integration", sub: "Hardware & networks." },
+];
+
+const industries = [
+  { icon: Building2, name: "Offices" },
+  { icon: Factory, name: "Manufacturing" },
+  { icon: Warehouse, name: "Logistics" },
+  { icon: GraduationCap, name: "Education" },
+  { icon: HeartPulse, name: "Healthcare" },
+  { icon: Globe, name: "Enterprises" },
+];
+
 const isValidOtp = computed(() =>
   otpDigits.value.every((digit) => digit !== ""),
 );
+
 const displayEmail = computed(() => {
   return userEmail.value || localStorage.getItem("email") || "your email";
 });
 
-// Background image style - EXACT SAME AS verification.vue
-const backgroundStyle = computed(() => ({
-  backgroundImage: `url('/public/images/loginimage.png')`,
-  backgroundSize: "cover",
-  backgroundPosition: "center",
-  backgroundRepeat: "no-repeat",
-  minHeight: "100vh",
-}));
-
-// ALL EXISTING FUNCTIONS - 100% UNCHANGED
 function startTimer() {
   timer.value = 30;
   clearInterval(timerInterval);
@@ -215,8 +255,7 @@ async function onEmailSubmit(email) {
 
     const isResigned = await authService.checkUserResignedByEmail(email);
     if (isResigned) {
-      error.value =
-        "Resigned Employee has No access. Please contact your Company Admin.";
+      error.value = "Resigned Employee has No access. Please contact your Company Admin.";
       return;
     }
 
@@ -230,13 +269,10 @@ async function onEmailSubmit(email) {
     );
     const data = await res.json().catch(() => ({}));
     if (!res.ok || !data?.otp_session_uuid) {
-      throw new Error(
-        data?.message || "Could not start email session. Try again.",
-      );
+      throw new Error(data?.message || "Could not start email session. Try again.");
     }
     localStorage.setItem("email", email);
     localStorage.setItem("emailSessionUuid", data.otp_session_uuid);
-    router.push({ name: "EmailVerification", params: { email: email } });
   } catch (err) {
     throw err;
   }
@@ -265,10 +301,6 @@ function handleKeydown(event, index) {
   }
 }
 
-function clearError() {
-  error.value = "";
-}
-
 async function verifyCode() {
   error.value = "";
   success.value = "";
@@ -293,19 +325,28 @@ async function verifyCode() {
 
     const response = await authService.verifyEmailOtp(otp, sessionUuid, email);
 
-    if (response && response.token) {
+    if (response && (response.token || response.success)) {
       success.value = "OTP verified successfully!";
+
+      // Check role — esslAdmin goes to their own portal, skipping PIN
+      const userData = response.userData || authService.getUserData();
+      const role = userData?.role?.name || authService.getUserRole();
+
       setTimeout(() => {
         clearSuccess();
-        localStorage.setItem("fromEmailOtp", "true");
-        router.push({
-          name: "PinVerification",
-          params: {
-            contactType: "email",
-            contactValue: email,
-          },
-          query: { fromEmail: true },
-        });
+        if (role === "esslAdmin") {
+          router.push("/dealer-dashboard");
+        } else {
+          localStorage.setItem("fromEmailOtp", "true");
+          router.push({
+            name: "PinVerification",
+            params: {
+              contactType: "email",
+              contactValue: email,
+            },
+            query: { fromEmail: true },
+          });
+        }
       }, 2000);
     } else {
       error.value = "OTP is wrong, please enter correct OTP.";
@@ -318,8 +359,7 @@ async function verifyCode() {
     }
   } catch (err) {
     console.error("Email OTP verification error:", err);
-    error.value =
-      err?.response?.data?.message || "OTP is wrong, please enter correct OTP.";
+    error.value = err?.response?.data?.message || "OTP is wrong, please enter correct OTP.";
     otpDigits.value = Array(6).fill("");
     nextTick(() => {
       if (otpFields.value[0]) {
@@ -351,278 +391,32 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* emailVerification.css */
-.h-100 {
-  height: 100%;
+.animate-fade-in-left {
+  animation: fadeInLeft 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.background-container {
-  position: relative;
-  width: 100%;
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* DESKTOP - Background Image */
-@media (min-width: 961px) {
-  .background-container {
-    background-image: url("/public/images/loginimage.png") !important;
-    background-size: cover !important;
-    background-position: center !important;
-    background-repeat: no-repeat !important;
-    min-height: 100vh !important;
-  }
+.animate-shake {
+  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
 }
 
-.login-container {
-  max-width: 520px;
-  width: 100%;
-  z-index: 10;
-  margin-right: 170px;
-  position: relative;
+@keyframes fadeInLeft {
+  from { opacity: 0; transform: translateX(-30px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
-/* Logo section styling - SAME */
-.logo-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.logo-image {
-  height: 130px;
-  width: auto;
-}
-
-/* Card header styling - SAME */
-.card-header {
-  text-align: center;
-}
-
-/* Sub header styling - SAME */
-.card-subheader {
-  background: #abffb54d;
-  padding: 14px 24px;
-  text-align: center;
-  border-bottom: 1px solid #5fb96e;
-  border-top: 1px solid #5fb96e;
-}
-
-.subheader-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #333;
-  margin: 0;
-  letter-spacing: 0.3px;
-}
-
-/* Card content styling - SAME */
-.card-content {
-  padding: 20px 24px;
-  background: white;
-  margin-bottom: 250px;
-}
-
-/* Form section styling - SAME */
-.form-section {
-  margin-bottom: 16px;
-}
-
-.form-label {
-  display: block;
-  font-size: 13px;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 10px;
-}
-
-.gap-2 {
-  gap: 8px;
-}
-
-.otp-input-field {
-  flex: 0 0 50px !important;
-  max-width: 50px !important;
-  min-width: 40px !important;
-}
-
-.otp-input-field :deep(.v-field) {
-  height: 40px !important;
-  padding: 0 !important;
-}
-
-.otp-input-field :deep(.v-field__input) {
-  text-align: center !important;
-  font-size: 16px !important;
-  padding: 0 4px !important;
-  width: 100% !important;
-  box-sizing: border-box !important;
-}
-
-.otp-input-field.filled :deep(.v-field__outline) {
-  border-color: #059669 !important;
-}
-
-.otp-input-field :deep(.v-field__outline) {
-  border-width: 1px !important;
-}
-
-.help-text {
-  font-size: 12px;
-  color: #999;
-  margin-top: 8px;
-  text-align: center;
-}
-
-/* Submit button styling - SAME */
-.submit-btn {
-  background: #059669 !important;
-  color: white !important;
-  font-weight: 600 !important;
-  border-radius: 8px !important;
-  padding: 12px 16px !important;
-  margin-top: 16px !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.5px !important;
-  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3) !important;
-  transition: all 0.3s ease !important;
-}
-
-.submit-btn:hover:not(:disabled) {
-  background: #0a7a73 !important;
-  box-shadow: 0 6px 16px rgba(13, 148, 136, 0.4) !important;
-}
-
-/* Signup text styling - SAME */
-.signup-text {
-  text-align: center;
-  font-size: 12px;
-  color: #666;
-  margin-top: 16px;
-  margin-bottom: 0;
-}
-
-.signup-link {
-  color: #059669;
-  text-decoration: none;
-  font-weight: 600;
-  transition: color 0.3s ease;
-}
-
-.signup-link:hover {
-  color: #0a7a73;
-  text-decoration: underline;
-}
-
-.footer-text {
-  text-align: center;
-  font-size: 11px;
-  color: #999;
-  margin-top: 12px;
-  margin-bottom: 0;
-}
-
-.login-card {
-  transition: all 0.3s ease;
-}
-
-/* MOBILE - PLAIN WHITE BACKGROUND + CENTERED - SAME AS verification.vue */
-@media (max-width: 960px) {
-  .background-container {
-    background: #ffffff !important;
-    background-image: none !important;
-  }
-
-  .login-container {
-    padding: 12px !important;
-    margin: 0 auto !important;
-    max-width: 480px;
-    width: 90% !important;
-  }
-
-  .card-content {
-    padding: 16px 20px;
-    margin-bottom: 60px;
-  }
-
-  .otp-input-field {
-    flex: 0 0 40px !important;
-    max-width: 40px !important;
-    min-width: 35px !important;
-  }
-}
-
-@media (max-width: 768px) {
-  .background-container {
-    background: #ffffff !important;
-    background-image: none !important;
-  }
-
-  .login-container {
-    padding: 8px !important;
-    margin: 0 auto !important;
-    max-width: 100%;
-    width: calc(100% - 16px) !important;
-  }
-
-  .card-content {
-    padding: 16px 20px;
-    margin-bottom: 40px;
-  }
-
-  .otp-input-field {
-    flex: 0 0 35px !important;
-    max-width: 35px !important;
-    min-width: 30px !important;
-  }
-}
-
-@media (max-width: 480px) {
-  .background-container {
-    background: #ffffff !important;
-    background-image: none !important;
-  }
-
-  .login-container {
-    padding: 8px !important;
-    margin: 0 auto !important;
-    max-width: 100%;
-    width: calc(100% - 16px) !important;
-  }
-
-  .card-content {
-    padding: 14px 16px;
-    margin-bottom: 30px;
-  }
-
-  .subheader-title {
-    font-size: 14px;
-  }
-
-  .form-label {
-    font-size: 12px;
-  }
-
-  .otp-input-field {
-    flex: 0 0 30px !important;
-    max-width: 30px !important;
-    min-width: 25px !important;
-  }
-
-  .otp-input-field :deep(.v-field__input) {
-    font-size: 14px !important;
-    padding: 0 2px !important;
-  }
-
-  .help-text {
-    font-size: 11px;
-  }
-
-  .signup-text {
-    font-size: 11px;
-  }
-
-  .footer-text {
-    font-size: 10px;
-  }
+@keyframes shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
 }
 </style>

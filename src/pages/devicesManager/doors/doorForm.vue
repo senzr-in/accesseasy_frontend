@@ -354,7 +354,7 @@ async function fetchDepartments() {
     const response = await fetch(
       `${
         import.meta.env.VITE_API_URL
-      }/items/department?filter[tenant][tenantId][_eq]=${resolvedTenantId}`,
+      }/items/department?filter[tenant][tenantId][_eq]=${resolvedTenantId}&fields[]=id&fields[]=departmentName`,
       {
         headers: {
           Authorization: `Bearer ${authService.getToken()}`,
