@@ -265,6 +265,7 @@ const navigationItems = computed(() => {
     { name: "Groups", href: "/dashboard/easy-access/configurators/access-levels", icon: Shield, role: "Admin" },
     { name: "Guards", href: "/dashboard/guards", icon: ShieldCheck, role: "Admin" },
     { name: "Employees", href: "/dashboard/easy-access/employees", icon: Users, role: "Admin" },
+    { name: "Visitor Portals", href: "/dashboard/visitor-portals", icon: Users, role: "Admin" },
     { 
       name: "Settings", 
       icon: Settings, 

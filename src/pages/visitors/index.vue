@@ -7,7 +7,7 @@
         <Search class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
         <input
           type="search"
-          placeholder="Search by name, company, or host..."
+          placeholder="Search by name, email, or mobile..."
           v-model="searchQuery"
           @input="debouncedSearch"
           class="w-full pl-9 pr-4 h-10 text-sm bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-sm text-slate-900 dark:text-white placeholder:text-slate-400"
@@ -19,7 +19,7 @@
         @click="showAddModal = true"
         class="flex items-center gap-2 h-10 px-4 rounded-xl bg-indigo-600 dark:bg-indigo-500 text-white text-[11px] font-black uppercase tracking-widest hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-colors shadow-sm shrink-0"
       >
-        <UserPlus class="w-4 h-4" /> Sign In Visitor
+        <UserPlus class="w-4 h-4" /> Pre-Register Visitor
       </button>
     </div>
 
@@ -30,9 +30,9 @@
           <thead class="bg-slate-50 dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-10">
             <tr>
               <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">Visitor Profile</th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">Purpose / Company</th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">Host</th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap text-right">Time In</th>
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">Validity Period</th>
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">Access</th>
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap text-right">Status</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 dark:divide-zinc-800 bg-white dark:bg-zinc-950">
@@ -68,39 +68,51 @@
                <!-- Profile -->
                <td class="px-5 py-3">
                  <div class="flex items-center gap-3">
-                   <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-zinc-800 flex items-center justify-center font-bold text-xs text-slate-600 dark:text-zinc-400">
-                     {{ visitor.name?.charAt(0).toUpperCase() }}
+                   <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-zinc-800 flex items-center justify-center font-bold text-xs text-slate-600 dark:text-zinc-400 shrink-0">
+                     {{ visitor.personName?.charAt(0).toUpperCase() || '?' }}
                    </div>
                    <div>
-                     <span class="block text-sm font-bold text-slate-900 dark:text-white">{{ visitor.name }}</span>
-                     <span class="text-[10px] font-semibold text-slate-500">{{ visitor.phone || visitor.email || 'No Contact Info' }}</span>
+                     <span class="block text-sm font-bold text-slate-900 dark:text-white">{{ visitor.personName }}</span>
+                     <span class="text-[10px] font-semibold text-slate-500">{{ visitor.mobileNumber || '' }}  {{ visitor.email ? '• ' + visitor.email : '' }}</span>
                    </div>
                  </div>
                </td>
 
-               <!-- Purpose/Company -->
+               <!-- Validity Period -->
                <td class="px-5 py-3">
-                 <div>
-                   <span class="block text-xs font-bold text-slate-700 dark:text-zinc-300">{{ visitor.purpose || 'General Visit' }}</span>
-                   <span class="text-[10px] font-semibold text-slate-400 flex items-center gap-1 mt-0.5" v-if="visitor.company">
-                    <Briefcase class="w-3 h-3" /> {{ visitor.company }}
+                 <div class="flex flex-col">
+                   <span class="block text-xs font-bold text-slate-700 dark:text-zinc-300">
+                     {{ formatDate(visitor.startDate) }} to {{ formatDate(visitor.endDate) }}
+                   </span>
+                   <span class="text-[10px] font-semibold text-slate-400 mt-0.5">
+                     {{ visitor.startTime?.slice(0, 5) || '--:--' }} - {{ visitor.endTime?.slice(0, 5) || '--:--' }}
                    </span>
                  </div>
                </td>
 
-               <!-- Host -->
+               <!-- Access Level -->
                <td class="px-5 py-3">
                  <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-zinc-400">
-                   <UserCheck class="w-3 h-3" /> {{ visitor.host || 'Unassigned' }}
+                   <Briefcase class="w-3 h-3" /> 
+                   {{ visitor.assignedAccessLevels?.accessLevelName || 'N/A' }} 
+                   <span v-if="visitor.quantity > 1" class="ml-1 text-slate-400">(x{{ visitor.quantity }})</span>
                  </span>
                </td>
 
-               <!-- Time In -->
+               <!-- Status -->
                <td class="px-5 py-3 text-right">
-                 <div class="flex flex-col items-end">
-                  <span class="text-xs font-bold text-slate-800 dark:text-zinc-200">{{ formatDate(visitor.date_created) }}</span>
-                  <span class="text-[10px] font-semibold text-slate-400">{{ formatTime(visitor.date_created) }}</span>
-                 </div>
+                  <span
+                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest"
+                    :class="{
+                      'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 shrink-0': visitor.status === 'active',
+                      'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400 shrink-0': visitor.status === 'inactive',
+                      'bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400 shrink-0': visitor.status === 'expired'
+                    }"
+                  >
+                    <div class="w-1.5 h-1.5 rounded-full" 
+                        :class="visitor.status === 'active' ? 'bg-emerald-500' : (visitor.status === 'inactive' ? 'bg-amber-500' : 'bg-rose-500')"></div>
+                    {{ visitor.status || 'inactive' }}
+                  </span>
                </td>
             </tr>
           </tbody>
@@ -133,12 +145,12 @@
     <div v-if="showAddModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" @click="showAddModal = false"></div>
       
-      <div class="relative w-full max-w-md bg-white dark:bg-zinc-950 rounded-2xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-zinc-800">
+      <div class="relative w-full max-w-md bg-white dark:bg-zinc-950 rounded-2xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-200 dark:border-zinc-800 flex flex-col max-h-[90vh]">
         <!-- Header -->
-        <div class="flex items-center justify-between p-5 border-b border-slate-100 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-900/50">
+        <div class="flex items-center justify-between p-5 border-b border-slate-100 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-900/50 shrink-0">
           <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest flex items-center">
             <UserPlus class="w-4 h-4 mr-2" />
-            Registry Intake
+            Pre-register Visitor
           </h3>
           <button @click="showAddModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors">
             <X class="w-5 h-5" />
@@ -146,47 +158,67 @@
         </div>
         
         <!-- Form -->
-        <div class="p-6 space-y-4">
+        <div class="p-6 space-y-4 overflow-y-auto">
           <div class="space-y-1.5">
-            <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Full Name *</label>
-            <input v-model="form.name" type="text" placeholder="John Doe" class="w-full h-10 px-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-slate-900 dark:text-white" required />
+            <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Full Name <span class="text-rose-500">*</span></label>
+            <input v-model="form.personName" type="text" placeholder="John Doe" class="w-full h-10 px-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-slate-900 dark:text-white" required />
           </div>
           
           <div class="grid grid-cols-2 gap-4">
             <div class="space-y-1.5">
-              <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Phone</label>
-              <input v-model="form.phone" type="tel" placeholder="+12345678" class="w-full h-10 px-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:border-indigo-500 transition-all text-slate-900 dark:text-white" />
+              <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Mobile Number <span class="text-rose-500">*</span></label>
+              <input v-model="form.mobileNumber" type="tel" placeholder="+12345678" class="w-full h-10 px-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:border-indigo-500 transition-all text-slate-900 dark:text-white" />
             </div>
             <div class="space-y-1.5">
-              <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Company</label>
-              <input v-model="form.company" type="text" placeholder="Acme Corp" class="w-full h-10 px-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:border-indigo-500 transition-all text-slate-900 dark:text-white" />
+              <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Email</label>
+              <input v-model="form.email" type="email" placeholder="john@example.com" class="w-full h-10 px-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:border-indigo-500 transition-all text-slate-900 dark:text-white" />
             </div>
           </div>
 
-          <div class="space-y-1.5">
-            <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Purpose of Visit</label>
-            <input v-model="form.purpose" type="text" placeholder="Meeting / Delivery / Maintenence" class="w-full h-10 px-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:border-indigo-500 transition-all text-slate-900 dark:text-white" />
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Start Date</label>
+              <input v-model="form.startDate" type="date" class="w-full h-10 px-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:border-indigo-500 transition-all text-slate-900 dark:text-white" />
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">End Date</label>
+              <input v-model="form.endDate" type="date" class="w-full h-10 px-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:border-indigo-500 transition-all text-slate-900 dark:text-white" />
+            </div>
           </div>
 
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Start Time</label>
+              <input v-model="form.startTime" type="time" class="w-full h-10 px-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:border-indigo-500 transition-all text-slate-900 dark:text-white" />
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">End Time</label>
+              <input v-model="form.endTime" type="time" class="w-full h-10 px-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:border-indigo-500 transition-all text-slate-900 dark:text-white" />
+            </div>
+          </div>
+          
           <div class="space-y-1.5">
-            <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Host Employee</label>
-            <input v-model="form.host" type="text" placeholder="Who are they seeing?" class="w-full h-10 px-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:border-indigo-500 transition-all text-slate-900 dark:text-white" />
+            <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Access Level (Optional)</label>
+            <select v-model="form.assignedAccessLevels" class="w-full h-10 px-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:border-indigo-500 transition-all text-slate-900 dark:text-white">
+              <option value="">None</option>
+              <option v-for="lvl in accessLevels" :key="lvl.id" :value="lvl.id">{{ lvl.accessLevelName }}</option>
+            </select>
           </div>
         </div>
         
         <!-- Footer -->
-        <div class="p-5 border-t border-slate-100 dark:border-zinc-800 flex justify-end gap-3 bg-slate-50/50 dark:bg-zinc-900/50">
+        <div class="p-5 border-t border-slate-100 dark:border-zinc-800 flex justify-end gap-3 bg-slate-50/50 dark:bg-zinc-900/50 shrink-0">
           <button @click="showAddModal = false" class="h-9 px-4 text-xs font-bold text-slate-600 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white transition-colors">
             Cancel
           </button>
           <button 
             @click="submitVisitor"
-            :disabled="!form.name || saving"
+            :disabled="!form.personName || !form.mobileNumber || saving"
             class="h-9 px-6 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-[11px] font-black uppercase tracking-widest transition-all shadow-sm disabled:opacity-50 flex items-center gap-2"
           >
             <Loader2 v-if="saving" class="w-4 h-4 animate-spin" />
             <UserPlus v-else class="w-4 h-4" />
-            Sign In
+            Register
           </button>
         </div>
       </div>
@@ -207,17 +239,23 @@ const token = authService.getToken();
 const loading = ref(true);
 const saving = ref(false);
 const items = ref([]);
+const accessLevels = ref([]);
 const searchQuery = ref('');
 const page = ref(1);
 const limit = 15;
 const showAddModal = ref(false);
 
+const today = new Date().toISOString().split('T')[0];
+
 const form = ref({
-  name: '',
-  phone: '',
-  company: '',
-  purpose: '',
-  host: ''
+  personName: '',
+  mobileNumber: '',
+  email: '',
+  startDate: today,
+  endDate: today,
+  startTime: '09:00',
+  endTime: '18:00',
+  assignedAccessLevels: ''
 });
 
 // Search
@@ -232,28 +270,47 @@ const debouncedSearch = () => {
 
 watch(page, () => loadVisitors());
 
+const loadAccessLevels = async () => {
+  const tenantId = await currentUserTenant.getTenantIdAsync();
+  if (!tenantId || !token) return;
+  try {
+    const filter = { "filter[tenant][tenantId][_eq]": tenantId };
+    const params = new URLSearchParams({ limit: 100, ...filter });
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/accesslevels?${params.toString()}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      accessLevels.value = data.data || [];
+    }
+  } catch(err) {
+    console.error('Failed to load access levels', err);
+  }
+};
+
 const loadVisitors = async () => {
   const tenantId = await currentUserTenant.getTenantIdAsync();
   if (!tenantId || !token) return;
 
   loading.value = true;
   try {
-    const filter = { "filter[tenant][_eq]": tenantId };
+    const filter = { "filter[tenant][tenantId][_eq]": tenantId };
     
     if (searchQuery.value) {
-      filter["filter[_or][0][name][_icontains]"] = searchQuery.value;
-      filter["filter[_or][1][company][_icontains]"] = searchQuery.value;
-      filter["filter[_or][2][host][_icontains]"] = searchQuery.value;
+      filter["filter[_or][0][personName][_icontains]"] = searchQuery.value;
+      filter["filter[_or][1][email][_icontains]"] = searchQuery.value;
+      filter["filter[_or][2][mobileNumber][_icontains]"] = searchQuery.value;
     }
 
     const params = new URLSearchParams({
       limit,
       page: page.value,
       sort: '-date_created',
+      fields: 'id,personName,email,mobileNumber,startDate,endDate,startTime,endTime,status,quantity,assignedAccessLevels.accessLevelName,date_created',
       ...filter
     });
 
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/visitors?${params.toString()}`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/visitor?${params.toString()}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     
@@ -269,21 +326,27 @@ const loadVisitors = async () => {
 };
 
 const submitVisitor = async () => {
-  const tenantId = await currentUserTenant.getTenantIdAsync();
-  if (!tenantId || !token || !form.value.name) return;
+  const userTenant = await currentUserTenant.fetchLoginUserDetails();
+  const tenantData = userTenant?.tenant;
+  if (!tenantData || !token || !form.value.personName) return;
 
   saving.value = true;
   try {
     const payload = {
-      name: form.value.name,
-      phone: form.value.phone,
-      company: form.value.company,
-      purpose: form.value.purpose,
-      host: form.value.host,
-      tenant: { tenantId }
+      personName: form.value.personName,
+      email: form.value.email,
+      mobileNumber: form.value.mobileNumber,
+      startDate: form.value.startDate,
+      endDate: form.value.endDate,
+      startTime: form.value.startTime,
+      endTime: form.value.endTime,
+      assignedAccessLevels: form.value.assignedAccessLevels || null,
+      status: 'inactive',
+      tenant: tenantData,
+      quantity: 1
     };
 
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/visitors`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/visitor`, {
       method: 'POST',
       headers: { 
         'Authorization': `Bearer ${token}`,
@@ -294,7 +357,7 @@ const submitVisitor = async () => {
 
     if (res.ok) {
       // Reset & Reload
-      form.value = { name: '', phone: '', company: '', purpose: '', host: '' };
+      form.value = { personName: '', mobileNumber: '', email: '', startDate: today, endDate: today, startTime: '09:00', endTime: '18:00', assignedAccessLevels: '' };
       showAddModal.value = false;
       page.value = 1;
       loadVisitors();
@@ -314,13 +377,8 @@ const formatDate = (isoString) => {
   return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 };
 
-const formatTime = (isoString) => {
-  if (!isoString) return '-';
-  const d = new Date(isoString);
-  return d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
-};
-
 onMounted(() => {
+  loadAccessLevels();
   loadVisitors();
 });
 </script>

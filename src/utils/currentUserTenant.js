@@ -71,10 +71,10 @@ class CurrentUserTenant {
 
       if (formattedPhone) {
         params["filter[_and][0][phone][_eq]"] = formattedPhone;
-        params["filter[_and][1][userApp][_eq]"] = "fieldeasy";
+        params["filter[_and][1][userApp][_eq]"] = "accesseasy";
       } else if (email) {
         params["filter[_and][0][email][_eq]"] = email;
-        params["filter[_and][1][userApp][_eq]"] = "fieldeasy";
+        params["filter[_and][1][userApp][_eq]"] = "accesseasy";
       }
 
       // Use the user's token instead of env token

@@ -208,6 +208,18 @@ const routes = [
         meta: { roles: ["Admin", "Guard"] }
       },
       {
+        path: "visitor-portals",
+        name: "VisitorPortals",
+        component: () => import("@/pages/visitorPortals/index.vue"),
+        meta: { roles: ["Admin"] }
+      },
+      {
+        path: "visitor-portals/builder/:id?",
+        name: "VisitorPortalBuilder",
+        component: () => import("@/pages/visitorPortals/builder.vue"),
+        meta: { roles: ["Admin"] }
+      },
+      {
         path: "access-control/schedules",
         name: "Schedules",
         component: () => import("@/pages/schedules/index.vue"),

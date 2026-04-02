@@ -9,13 +9,7 @@
             {{ format(currentDate, "MMMM yyyy") }}
           </span>
         </h1>
-        <p class="text-sm font-medium text-slate-500 mt-1">Review your presence and work hours.</p>
-      </div>
-      <div class="flex items-center gap-2">
-        <button class="flex items-center gap-2 h-9 px-4 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-[10px] font-black uppercase tracking-widest text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors shadow-sm">
-          <Download class="w-3.5 h-3.5" />
-          Download Report (PDF)
-        </button>
+        <p class="text-sm font-medium text-slate-500 mt-1">Your daily check-in/out summary for the month.</p>
       </div>
     </div>
 
@@ -29,75 +23,130 @@
             <button @click="nextMonth" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-600 dark:text-zinc-400 transition-colors"><ChevronRight class="w-4 h-4" /></button>
           </div>
         </div>
-        
+
         <div class="grid grid-cols-7 gap-1 text-center mb-2">
           <div v-for="day in ['S', 'M', 'T', 'W', 'T', 'F', 'S']" :key="day" class="text-[10px] font-black text-slate-400 py-1">{{ day }}</div>
         </div>
         <div class="grid grid-cols-7 gap-1">
           <!-- Empty slots -->
           <div v-for="i in startDayOffset" :key="`empty-${i}`" class="aspect-square"></div>
-          
           <!-- Calendar Days -->
-          <div 
-            v-for="day in calendarDays" 
+          <div
+            v-for="day in calendarDays"
             :key="day.date.toISOString()"
             :class="[
-              'aspect-square rounded-xl flex flex-col items-center justify-center relative transition-all group cursor-default shadow-sm border',
-              day.isToday ? 'bg-blue-600 text-white border-blue-600 font-bold' : 
-              day.isPresent ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-100 dark:border-emerald-500/20' : 
-              'bg-white dark:bg-zinc-950 text-slate-500 dark:text-zinc-500 border-slate-100 dark:border-zinc-800/50 hover:border-slate-300 dark:hover:border-zinc-700'
+              'aspect-square rounded-xl flex flex-col items-center justify-center relative transition-all shadow-sm border text-[11px] font-black',
+              day.isToday
+                ? 'bg-blue-600 text-white border-blue-600'
+                : day.attendance === 'present' || day.attendance === 'workFromHome' || day.attendance === 'onDuty'
+                ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-100 dark:border-emerald-500/20'
+                : day.attendance === 'halfDay'
+                ? 'bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-100 dark:border-amber-500/20'
+                : day.attendance === 'absent'
+                ? 'bg-rose-50 dark:bg-rose-500/10 text-rose-400 dark:text-rose-500 border-rose-100 dark:border-rose-500/10'
+                : day.attendance === 'weekOff' || day.attendance === 'holiday'
+                ? 'bg-slate-100 dark:bg-zinc-800 text-slate-400 border-slate-200 dark:border-zinc-700'
+                : 'bg-white dark:bg-zinc-950 text-slate-500 dark:text-zinc-500 border-slate-100 dark:border-zinc-800/50'
             ]"
           >
-            <span class="text-xs font-black">{{ day.dayNumber }}</span>
-            <div v-if="day.isPresent && !day.isToday" class="absolute bottom-1.5 h-1 w-1 rounded-full bg-emerald-500 shadow-[0_0_4px_rgba(16,185,129,0.8)]"></div>
+            <span>{{ day.dayNumber }}</span>
+            <div v-if="day.attendance && !day.isToday" class="absolute bottom-1 h-1 w-1 rounded-full"
+              :class="{
+                'bg-emerald-500': ['present','workFromHome','onDuty'].includes(day.attendance),
+                'bg-amber-500': day.attendance === 'halfDay',
+                'bg-rose-400': day.attendance === 'absent',
+              }"
+            ></div>
           </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="mt-4 flex flex-wrap gap-2 text-[9px] font-black uppercase tracking-widest">
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>Present</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500"></span>Half Day</span>
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-rose-400"></span>Absent</span>
         </div>
       </div>
 
-      <!-- Table View -->
+      <!-- Attendance Table -->
       <div class="lg:col-span-2">
-        <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-4 px-1">Detailed Logs</h3>
-        
+        <div class="flex items-center justify-between mb-4 px-1">
+          <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500">Detailed Logs</h3>
+          <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">{{ records.length }} Records</span>
+        </div>
+
         <div class="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden shadow-sm">
           <table class="w-full text-left border-collapse">
             <thead class="bg-slate-50/50 dark:bg-zinc-900/50 border-b border-slate-100 dark:border-zinc-800">
               <tr>
                 <th class="px-5 py-4 text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">Date</th>
-                <th class="px-5 py-4 text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">Check-in</th>
-                <th class="px-5 py-4 text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">Location</th>
-                <th class="px-5 py-4 text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">Status</th>
+                <th class="px-5 py-4 text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">First Punch</th>
+                <th class="px-5 py-4 text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">Last Punch</th>
+                <th class="px-5 py-4 text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">Work Hours</th>
+                <th class="px-5 py-4 text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">Attendance</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 dark:divide-zinc-800">
               <tr v-if="loading" class="h-40">
-                <td colspan="4" class="text-center">
+                <td colspan="5" class="text-center">
                   <div class="flex justify-center items-center gap-2 text-blue-500 text-xs font-bold uppercase tracking-widest">
                     <Loader2 class="w-4 h-4 animate-spin" /> Loading records...
                   </div>
                 </td>
               </tr>
               <tr v-else-if="records.length === 0" class="h-40">
-                <td colspan="4" class="text-center text-xs font-bold text-slate-400 uppercase tracking-widest">No records found for this period.</td>
+                <td colspan="5" class="text-center text-xs font-bold text-slate-400 uppercase tracking-widest">No records found for this period.</td>
               </tr>
-              <tr v-else v-for="record in records" :key="record.id" class="hover:bg-slate-50/50 dark:hover:bg-zinc-900/50 transition-colors group">
+              <tr
+                v-else
+                v-for="record in records"
+                :key="record.id"
+                class="hover:bg-slate-50/50 dark:hover:bg-zinc-900/50 transition-colors group"
+              >
+                <!-- Date -->
                 <td class="px-5 py-4">
-                  <span class="font-black text-[12px] text-slate-900 dark:text-white">{{ format(new Date(record.date_created), "EEE, MMM dd") }}</span>
-                </td>
-                <td class="px-5 py-4">
-                  <span class="text-[12px] font-bold text-slate-500 dark:text-zinc-400">{{ format(new Date(record.date_created), "hh:mm a") }}</span>
-                </td>
-                <td class="px-5 py-4">
-                  <div class="flex items-center gap-1.5 text-[11px] font-semibold text-slate-600 dark:text-zinc-400">
-                    <DoorOpen class="w-3 h-3 text-slate-400" />
-                    {{ record.door?.doorName || 'Main Entrance' }}
+                  <div class="flex flex-col">
+                    <span class="font-black text-[12px] text-slate-900 dark:text-white">{{ formatDisplayDate(record.date) }}</span>
+                    <span class="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">{{ formatDayName(record.date) }}</span>
                   </div>
                 </td>
+
+                <!-- First Punch (inTime) -->
                 <td class="px-5 py-4">
-                  <span v-if="record.ValidLogs === 'authorized' || record.ValidLogs === true" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-black bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 uppercase tracking-widest">
-                    Auth
-                  </span>
-                  <span v-else class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-black bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400 border border-rose-200 dark:border-rose-500/20 uppercase tracking-widest">
-                    Denied
+                  <div class="flex flex-col">
+                    <span class="font-bold text-[12px]" :class="record.lateBy && record.lateBy !== '00:00:00' ? 'text-amber-600 dark:text-amber-400' : 'text-slate-700 dark:text-zinc-300'">
+                      {{ formatTime(record.inTime) }}
+                    </span>
+                    <span v-if="record.lateBy && record.lateBy !== '00:00:00'" class="text-[9px] font-black text-amber-500 uppercase tracking-widest mt-0.5">
+                      Late {{ record.lateBy }}
+                    </span>
+                  </div>
+                </td>
+
+                <!-- Last Punch (outTime) -->
+                <td class="px-5 py-4">
+                  <div class="flex flex-col">
+                    <span class="font-bold text-[12px] text-slate-700 dark:text-zinc-300">
+                      {{ formatTime(record.outTime) }}
+                    </span>
+                    <span v-if="record.earlyDeparture && record.earlyDeparture !== '00:00:00'" class="text-[9px] font-black text-rose-400 uppercase tracking-widest mt-0.5">
+                      Early {{ record.earlyDeparture }}
+                    </span>
+                  </div>
+                </td>
+
+                <!-- Work Hours -->
+                <td class="px-5 py-4">
+                  <span class="font-bold text-[12px] text-slate-700 dark:text-zinc-300">{{ formatTime(record.workHours) }}</span>
+                </td>
+
+                <!-- Attendance Status -->
+                <td class="px-5 py-4">
+                  <span
+                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest border"
+                    :class="getAttendanceBadgeClass(record.attendance)"
+                  >
+                    {{ formatAttendanceLabel(record.attendance) }}
                   </span>
                 </td>
               </tr>
@@ -111,38 +160,33 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from "vue";
-import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, isSameDay } from "date-fns";
-import { Download, ChevronLeft, ChevronRight, DoorOpen, Loader2 } from "lucide-vue-next";
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isToday, isSameDay, parseISO } from "date-fns";
+import { ChevronLeft, ChevronRight, Loader2 } from "lucide-vue-next";
 import { authService } from "@/services/authService";
 import { currentUserTenant } from "@/utils/currentUserTenant";
 
 const currentDate = ref(new Date());
 const records = ref([]);
 const loading = ref(true);
-const employeeId = ref(null);
 
 const token = authService.getToken();
 const tenantId = currentUserTenant.getTenantId();
 const rawUser = authService.getUserData();
 
-// Calendar logic
+// ── Calendar Logic ──────────────────────────────────────────────
 const monthStart = computed(() => startOfMonth(currentDate.value));
-const monthEnd = computed(() => endOfMonth(currentDate.value));
+const monthEnd   = computed(() => endOfMonth(currentDate.value));
 const startDayOffset = computed(() => monthStart.value.getDay());
 
 const calendarDays = computed(() => {
   const days = eachDayOfInterval({ start: monthStart.value, end: monthEnd.value });
   return days.map(day => {
-    // Check if there is any authorized log for this day
-    const isPresent = records.value.some(r => 
-      isSameDay(new Date(r.date_created), day) && 
-      (r.ValidLogs === 'authorized' || r.ValidLogs === true)
-    );
+    const match = records.value.find(r => r.date && isSameDay(parseISO(r.date), day));
     return {
-      date: day,
-      dayNumber: day.getDate(),
-      isToday: isToday(day),
-      isPresent
+      date:       day,
+      dayNumber:  day.getDate(),
+      isToday:    isToday(day),
+      attendance: match?.attendance || null,
     };
   });
 });
@@ -154,59 +198,146 @@ const nextMonth = () => {
   currentDate.value = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth() + 1, 1);
 };
 
-const getEmployeeId = async () => {
+// ── API: Get personalModule ID for current user ──────────────────
+const getPersonalModuleId = async () => {
   if (!rawUser?.id) return null;
-  
   try {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/employees?filter[assignedUser][_eq]=${rawUser.id}&fields=id`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    if (!res.ok) {
-      console.warn("Could not fetch employee mapping (403 likely).");
-      return null;
-    }
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/items/personalModule?filter[assignedUser][_eq]=${rawUser.id}&fields=id`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (!res.ok) return null;
     const data = await res.json();
     return data?.data?.[0]?.id || null;
-  } catch (error) {
-    console.error("Failed to fetch employee record mapped to current user:", error);
+  } catch {
     return null;
   }
 };
 
+// ── API: Load from /items/attendance ────────────────────────────
 const loadAttendance = async () => {
   loading.value = true;
   try {
-    // If employeeId is unknown, try to query logs by assignedUser relationship if possible.
-    let url = '';
-    if (employeeId.value) {
-      url = `${import.meta.env.VITE_API_URL}/items/logs?filter[employeeId][_eq]=${employeeId.value}&fields=*,door.doorName&sort=-date_created&limit=100`;
-    } else {
-      url = `${import.meta.env.VITE_API_URL}/items/logs?filter[employeeId][assignedUser][_eq]=${rawUser.id}&fields=*,door.doorName&sort=-date_created&limit=100`;
+    const personalModuleId = await getPersonalModuleId();
+    if (!personalModuleId) {
+      console.warn("No personalModule ID found for current user");
+      records.value = [];
+      return;
     }
 
-    const res = await fetch(url, {
-      headers: { Authorization: `Bearer ${token}` }
+    const year  = currentDate.value.getFullYear();
+    const month = String(currentDate.value.getMonth() + 1).padStart(2, "0");
+    const dateFrom = `${year}-${month}-01`;
+    const dateTo   = format(endOfMonth(currentDate.value), "yyyy-MM-dd");
+
+    const params = new URLSearchParams({
+      "filter[_and][0][employeeId][id][_eq]": personalModuleId,
+      "filter[_and][1][date][_gte]":          dateFrom,
+      "filter[_and][2][date][_lte]":          dateTo,
+      "sort[]":                               "-date",
+      "limit":                                "60",
     });
-    if (!res.ok) {
-       records.value = [];
-       return;
+
+    const fields = [
+      "id", "date", "status", "attendance",
+      "inTime", "outTime", "workHours",
+      "lateBy", "earlyDeparture", "overTime", "mode"
+    ];
+    fields.forEach(f => params.append("fields[]", f));
+
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/items/attendance?${params.toString()}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    if (res.ok) {
+      const data = await res.json();
+      records.value = data?.data || [];
+    } else {
+      console.error("Attendance fetch failed:", res.status);
+      records.value = [];
     }
-    const data = await res.json();
-    records.value = data?.data || [];
-  } catch (error) {
-    console.error("Failed to load personal logs:", error);
+  } catch (err) {
+    console.error("Error loading attendance:", err);
+    records.value = [];
   } finally {
     loading.value = false;
   }
 };
 
-onMounted(async () => {
-  employeeId.value = await getEmployeeId();
-  await loadAttendance();
+// ── Re-fetch when month changes ───────────────────────────────────
+watch(currentDate, () => {
+  loadAttendance();
 });
 
-// If they change months, ideally we'd re-fetch data for that month.
-watch(currentDate, () => {
-  // If we had a month filter in the API query, we would re-fetch here.
+onMounted(() => {
+  loadAttendance();
 });
+
+// ── Formatting Helpers ────────────────────────────────────────────
+const formatDisplayDate = (dateStr) => {
+  if (!dateStr) return "—";
+  try { return format(parseISO(dateStr), "MMM dd, yyyy"); } catch { return dateStr; }
+};
+
+const formatDayName = (dateStr) => {
+  if (!dateStr) return "";
+  try { return format(parseISO(dateStr), "EEEE"); } catch { return ""; }
+};
+
+const formatTime = (time) => {
+  if (!time) return "—";
+  try {
+    // Time is stored as HH:mm:ss — display as HH:mm
+    const parts = time.split(":");
+    if (parts.length >= 2) {
+      return `${parts[0].padStart(2, "0")}:${parts[1].padStart(2, "0")}`;
+    }
+    return time;
+  } catch { return time; }
+};
+
+const formatAttendanceLabel = (val) => {
+  const map = {
+    present:       "Present",
+    absent:        "Absent",
+    weekOff:       "Week Off",
+    holiday:       "Holiday",
+    onDuty:        "On Duty",
+    workFromHome:  "Work From Home",
+    halfDay:       "Half Day",
+    paidLeave:     "Paid Leave",
+    unpaidLeave:   "Unpaid Leave",
+    lateComing:    "Late Coming",
+    earlyLeaving:  "Early Leaving",
+    holidayPresent:"Holiday Present",
+    weekoffPresent:"Weekoff Present",
+  };
+  return map[val] || val || "—";
+};
+
+const getAttendanceBadgeClass = (val) => {
+  switch (val) {
+    case "present":
+    case "workFromHome":
+    case "onDuty":
+    case "holidayPresent":
+    case "weekoffPresent":
+      return "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20";
+    case "halfDay":
+    case "lateComing":
+    case "earlyLeaving":
+      return "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20";
+    case "absent":
+    case "unpaidLeave":
+      return "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20";
+    case "weekOff":
+    case "holiday":
+      return "bg-slate-100 text-slate-600 border-slate-200 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700";
+    case "paidLeave":
+      return "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20";
+    default:
+      return "bg-slate-50 text-slate-600 border-slate-200 dark:bg-zinc-900 dark:text-zinc-400 dark:border-zinc-700";
+  }
+};
 </script>

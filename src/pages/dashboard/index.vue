@@ -310,7 +310,7 @@
                   <td class="px-5 py-3 text-[11px] font-semibold text-slate-600 dark:text-zinc-400">
                     <div class="flex items-center gap-1.5">
                       <DoorOpen class="w-3.5 h-3.5 text-slate-400" />
-                      {{ log.door?.doorName || 'Main Door' }}
+                      {{ log.door?.doorName || '—' }}
                     </div>
                   </td>
                   <td class="px-5 py-3 text-right">
@@ -345,7 +345,7 @@ import { format } from 'date-fns';
 import {
   Building, Users, ShieldCheck, Server,
   DoorOpen, UserPlus, Shield, Zap, Activity, ArrowUpRight, ArrowRight,
-  CheckCircle, XCircle, ShieldAlert, BarChart3, AlertTriangle, QrCode, Calendar
+  CheckCircle, XCircle, ShieldAlert, BarChart3, AlertTriangle, QrCode, Calendar, List
 } from 'lucide-vue-next';
 import { authService } from '@/services/authService';
 import { currentUserTenant } from '@/utils/currentUserTenant';
@@ -510,13 +510,13 @@ const quickActions = computed(() => [
     label: 'Access Groups', sub: 'Manage clearances',
     icon: Shield, iconBg: 'bg-emerald-50 dark:bg-emerald-500/10 group-hover:bg-emerald-500 group-hover:text-white', iconColor: 'text-emerald-600 dark:text-emerald-400 group-hover:text-white',
     labelColor: 'text-slate-900 dark:text-white', borderClass: 'border-slate-200 dark:border-zinc-800 hover:border-emerald-500/50',
-    onClick: () => router.push('/devices-manager?tab=2')
+    onClick: () => router.push('/dashboard/easy-access/configurators/access-levels')
   },
   {
-    label: 'Add Device', sub: 'Register controller',
-    icon: Server, iconBg: 'bg-amber-50 dark:bg-amber-500/10 group-hover:bg-amber-500 group-hover:text-white', iconColor: 'text-amber-600 dark:text-amber-400 group-hover:text-white',
+    label: 'Add Guard', sub: 'Assign security personnel',
+    icon: ShieldCheck, iconBg: 'bg-amber-50 dark:bg-amber-500/10 group-hover:bg-amber-500 group-hover:text-white', iconColor: 'text-amber-600 dark:text-amber-400 group-hover:text-white',
     labelColor: 'text-slate-900 dark:text-white', borderClass: 'border-slate-200 dark:border-zinc-800 hover:border-amber-500/50',
-    onClick: () => router.push('/dashboard/devices')
+    onClick: () => router.push('/dashboard/guards')
   }
 ]);
 </script>

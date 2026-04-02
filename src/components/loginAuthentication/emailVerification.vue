@@ -264,7 +264,7 @@ async function onEmailSubmit(email) {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email, userApp: "fieldeasy" }),
+        body: JSON.stringify({ email: email, userApp: "accesseasy" }),
       },
     );
     const data = await res.json().catch(() => ({}));

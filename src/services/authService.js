@@ -202,7 +202,7 @@ class AuthService {
       const response = await this.api.get("/users", {
         params: {
           "filter[_and][0][phone][_contains]": phone,
-          "filter[_and][1][userApp][_eq]": "fieldeasy",
+          "filter[_and][1][userApp][_eq]": "accesseasy",
         },
       });
       return response.data.data.length > 0;
@@ -234,7 +234,7 @@ class AuthService {
       const response = await this.api.get("/users", {
         params: {
           "filter[_and][0][phone][_contains]": searchPhone,
-          "filter[_and][1][userApp][_eq]": "fieldeasy",
+          "filter[_and][1][userApp][_eq]": "accesseasy",
           "fields[]": ["dateOfLeaving"],
         },
       });
@@ -307,10 +307,10 @@ class AuthService {
       const cleanPhone = phone.replace(/\s/g, "");
       console.log("  [2/4] Cleaned phone:", cleanPhone);
 
-      console.log("  [3/4] Sending OTP via Knative /send-otp-sms ...");
-      const response = await this.knApi.post("/send-otp-sms", {
+      console.log("  [3/4] Sending OTP via Knative /send-otp-accesseasy ...");
+      const response = await this.knApi.post("/send-otp-accesseasy", {
         phone: cleanPhone,
-        userApp: "fieldeasy",
+        userApp: "accesseasy",
       });
       console.log("  ✅ OTP sent. Response:", response.data);
 
@@ -353,7 +353,7 @@ class AuthService {
       const userRes = await this.api.get("/users", {
         params: {
           "filter[_and][0][phone][_contains]": searchPhone,
-          "filter[_and][1][userApp][_eq]": "fieldeasy",
+          "filter[_and][1][userApp][_eq]": "accesseasy",
           "fields[]": ["id", "token", "otp", "usertoken", "tenant.tenantId", "tenant.tenantName", "role.name", "phone", "first_name", "last_name", "email", "userPin", "dateOfLeaving", "title", "description"],
         },
       });
@@ -398,14 +398,14 @@ class AuthService {
       }
 
       // ── STEP 4: No DB token → call Knative verify-otp → flow trigger ──
-      console.log("  → ▶️  TRIGGER PATH: No token in DB — calling Knative /verify-otp ...");
+      console.log("  → ▶️  TRIGGER PATH: No token in DB — calling Knative /verify-otp-accesseasy ...");
       const cleanPhoneForVerify = phone.replace(/\s/g, "");
-      const verifyResponse = await this.knApi.post("/verify-otp", {
+      const verifyResponse = await this.knApi.post("/verify-otp-accesseasy", {
         phone: cleanPhoneForVerify,
         otp,
         otp_session_uuid: sessionUuid,
       });
-      console.log("  Knative /verify-otp response:", verifyResponse.data);
+      console.log("  Knative /verify-otp-accesseasy response:", verifyResponse.data);
 
       if (!verifyResponse.data.success) {
         console.error("  ❌ Knative OTP verification failed:", verifyResponse.data.message);
@@ -465,7 +465,7 @@ class AuthService {
       const response = await this.api.get("/users", {
         params: {
           "filter[_and][0][phone][_contains]": searchPhone,
-          "filter[_and][1][userApp][_eq]": "fieldeasy",
+          "filter[_and][1][userApp][_eq]": "accesseasy",
           "fields[]": [
             "id",
             "tenant.tenantId",
@@ -501,7 +501,7 @@ class AuthService {
       const response = await this.api.get("/users", {
         params: {
           "filter[_and][0][email][_eq]": email,
-          "filter[_and][1][userApp][_eq]": "fieldeasy",
+          "filter[_and][1][userApp][_eq]": "accesseasy",
         },
       });
       return response.data.data.length > 0;
@@ -516,7 +516,7 @@ class AuthService {
       const response = await this.api.get("/users", {
         params: {
           "filter[_and][0][email][_eq]": email,
-          "filter[_and][1][userApp][_eq]": "fieldeasy",
+          "filter[_and][1][userApp][_eq]": "accesseasy",
           "fields[]": ["dateOfLeaving"],
         },
       });
@@ -546,7 +546,7 @@ class AuthService {
       const response = await this.api.get("/users", {
         params: {
           "filter[_and][0][email][_eq]": email,
-          "filter[_and][1][userApp][_eq]": "fieldeasy",
+          "filter[_and][1][userApp][_eq]": "accesseasy",
           "fields[]": [
             "id",
             "tenant.tenantId",
@@ -586,7 +586,7 @@ class AuthService {
       }
 
       const response = await this.api.get(
-        `/flows/trigger/133d557a-42ac-480c-9fd9-49ced4bbf5e8?session_uuid=${sessionUuid}&email=${email}&user_app=fieldeasy`
+        `/flows/trigger/133d557a-42ac-480c-9fd9-49ced4bbf5e8?session_uuid=${sessionUuid}&email=${email}&user_app=accesseasy`
       );
 
       if (!response.data || !response.data.token) {
@@ -627,7 +627,7 @@ class AuthService {
       const userRes = await this.api.get("/users", {
         params: {
           "filter[_and][0][email][_eq]": email,
-          "filter[_and][1][userApp][_eq]": "fieldeasy",
+          "filter[_and][1][userApp][_eq]": "accesseasy",
           "fields[]": ["id", "token", "otp", "usertoken", "tenant.tenantId", "tenant.tenantName", "role.name", "phone", "first_name", "last_name", "email", "userPin", "dateOfLeaving", "title", "description"],
         },
       });
@@ -670,7 +670,7 @@ class AuthService {
       // ── STEP 4: No token in DB → call flow trigger ──
       console.log("  → ▶️  TRIGGER PATH: No token in DB — calling Directus flow trigger...");
       const response = await this.api.get(
-        `/flows/trigger/133d557a-42ac-480c-9fd9-49ced4bbf5e8?otp=${otp}&session_uuid=${sessionUuid}&email=${email}&user_app=fieldeasy`,
+        `/flows/trigger/133d557a-42ac-480c-9fd9-49ced4bbf5e8?otp=${otp}&session_uuid=${sessionUuid}&email=${email}&user_app=accesseasy`,
       );
       console.log("  Flow trigger response:", response.data);
 
@@ -704,7 +704,7 @@ class AuthService {
   }
 
   // 🔥 FIXED: FORGOT PIN METHODS - PRESERVE +91
-  async forgotPin({ phone, email, userApp = "fieldeasy" }) {
+  async forgotPin({ phone, email, userApp = "accesseasy" }) {
     try {
       const payload = { userApp };
 
@@ -783,73 +783,154 @@ class AuthService {
     const inactivityTimeout = 3600000; // 1 hour
 
     if (inactiveTime > inactivityTimeout) {
+      // ── Inject keyframe animation once ──────────────────────────────────
+      if (!document.getElementById("session-modal-styles")) {
+        const styleEl = document.createElement("style");
+        styleEl.id = "session-modal-styles";
+        styleEl.textContent = `
+          @keyframes session-modal-in {
+            from { opacity: 0; transform: scale(0.92) translateY(12px); }
+            to   { opacity: 1; transform: scale(1)   translateY(0); }
+          }
+          @keyframes session-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.45); }
+            50%       { box-shadow: 0 0 0 14px rgba(239,68,68,0); }
+          }
+        `;
+        document.head.appendChild(styleEl);
+      }
+
+      // ── Overlay ──────────────────────────────────────────────────────────
       const modalOverlay = document.createElement("div");
       modalOverlay.className = "session-timeout-modal-overlay";
-      modalOverlay.style.position = "fixed";
-      modalOverlay.style.top = "0";
-      modalOverlay.style.left = "0";
-      modalOverlay.style.width = "100%";
-      modalOverlay.style.height = "100%";
-      modalOverlay.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
-      modalOverlay.style.display = "flex";
-      modalOverlay.style.alignItems = "center";
-      modalOverlay.style.justifyContent = "center";
-      modalOverlay.style.zIndex = "9999";
+      Object.assign(modalOverlay.style, {
+        position:        "fixed",
+        inset:           "0",
+        width:           "100%",
+        height:          "100%",
+        backgroundColor: "rgba(0,0,0,0.65)",
+        backdropFilter:  "blur(6px)",
+        WebkitBackdropFilter: "blur(6px)",
+        display:         "flex",
+        alignItems:      "center",
+        justifyContent:  "center",
+        zIndex:          "9999",
+        padding:         "16px",
+      });
 
+      // ── Card ─────────────────────────────────────────────────────────────
       const modalContent = document.createElement("div");
-      modalContent.style.backgroundColor = "white";
-      modalContent.style.borderRadius = "8px";
-      modalContent.style.padding = "20px";
-      modalContent.style.width = "90%";
-      modalContent.style.maxWidth = "400px";
-      modalContent.style.textAlign = "center";
-      modalContent.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.15)";
+      Object.assign(modalContent.style, {
+        background:    "linear-gradient(145deg, #18181b, #09090b)",
+        border:        "1px solid rgba(63,63,70,0.8)",
+        borderRadius:  "20px",
+        padding:       "36px 32px",
+        width:         "100%",
+        maxWidth:      "400px",
+        textAlign:     "center",
+        boxShadow:     "0 25px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04) inset",
+        animation:     "session-modal-in 0.28s cubic-bezier(0.34,1.56,0.64,1) forwards",
+      });
 
-      const icon = document.createElement("div");
-      icon.style.width = "60px";
-      icon.style.height = "60px";
-      icon.style.backgroundColor = "#ff5252";
-      icon.style.borderRadius = "50%";
-      icon.style.display = "flex";
-      icon.style.alignItems = "center";
-      icon.style.justifyContent = "center";
-      icon.style.margin = "0 auto 20px";
-      icon.innerHTML =
-        "<span style='color: white; font-size: 30px; font-weight: bold;'>!</span>";
+      // ── Icon ring ────────────────────────────────────────────────────────
+      const iconRing = document.createElement("div");
+      Object.assign(iconRing.style, {
+        width:           "72px",
+        height:          "72px",
+        borderRadius:    "50%",
+        background:      "linear-gradient(135deg, #ef4444, #b91c1c)",
+        display:         "flex",
+        alignItems:      "center",
+        justifyContent:  "center",
+        margin:          "0 auto 24px",
+        animation:       "session-pulse 2s infinite",
+        flexShrink:      "0",
+      });
+      iconRing.innerHTML = `
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
+             stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+          <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+        </svg>`;
 
+      // ── Badge ────────────────────────────────────────────────────────────
+      const badge = document.createElement("span");
+      Object.assign(badge.style, {
+        display:       "inline-block",
+        padding:       "3px 10px",
+        borderRadius:  "999px",
+        fontSize:      "10px",
+        fontWeight:    "800",
+        letterSpacing: "0.1em",
+        textTransform: "uppercase",
+        background:    "rgba(239,68,68,0.12)",
+        color:         "#f87171",
+        border:        "1px solid rgba(239,68,68,0.25)",
+        marginBottom:  "12px",
+      });
+      badge.textContent = "Session Expired";
+
+      // ── Heading ──────────────────────────────────────────────────────────
       const heading = document.createElement("h3");
-      heading.style.fontSize = "22px";
-      heading.style.color = "#333";
-      heading.style.marginBottom = "10px";
-      heading.textContent = "Session Expired";
+      Object.assign(heading.style, {
+        fontSize:     "22px",
+        fontWeight:   "900",
+        color:        "#fafafa",
+        marginBottom: "8px",
+        letterSpacing: "-0.02em",
+        lineHeight:   "1.2",
+        fontFamily:   "inherit",
+      });
+      heading.textContent = "You've been signed out";
 
+      // ── Message ──────────────────────────────────────────────────────────
       const message = document.createElement("p");
-      message.style.fontSize = "16px";
-      message.style.color = "#666";
-      message.style.marginBottom = "20px";
-      message.textContent = "Your session has expired due to inactivity.";
+      Object.assign(message.style, {
+        fontSize:     "14px",
+        color:        "#a1a1aa",
+        marginBottom: "28px",
+        lineHeight:   "1.6",
+        fontFamily:   "inherit",
+      });
+      message.textContent = "Your session expired due to inactivity. Please log in again to continue.";
 
+      // ── Button ───────────────────────────────────────────────────────────
       const okButton = document.createElement("button");
-      okButton.style.backgroundColor = "#ff5252";
-      okButton.style.color = "white";
-      okButton.style.border = "none";
-      okButton.style.borderRadius = "4px";
-      okButton.style.padding = "10px 20px";
-      okButton.style.fontSize = "16px";
-      okButton.style.fontWeight = "600";
-      okButton.style.cursor = "pointer";
-      okButton.textContent = "OK";
+      Object.assign(okButton.style, {
+        display:        "flex",
+        alignItems:     "center",
+        justifyContent: "center",
+        gap:            "8px",
+        width:          "100%",
+        padding:        "12px 24px",
+        background:     "linear-gradient(135deg, #ef4444, #b91c1c)",
+        color:          "white",
+        border:         "none",
+        borderRadius:   "12px",
+        fontSize:       "13px",
+        fontWeight:     "800",
+        letterSpacing:  "0.06em",
+        textTransform:  "uppercase",
+        cursor:         "pointer",
+        transition:     "opacity 0.2s, transform 0.15s",
+        boxShadow:      "0 4px 20px rgba(239,68,68,0.35)",
+        fontFamily:     "inherit",
+      });
+      okButton.textContent = "Sign In Again";
+      okButton.onmouseenter = () => { okButton.style.opacity = "0.88"; okButton.style.transform = "scale(0.98)"; };
+      okButton.onmouseleave = () => { okButton.style.opacity = "1";    okButton.style.transform = "scale(1)"; };
       okButton.onclick = () => {
         document.body.removeChild(modalOverlay);
         this.redirectToLogin();
       };
 
-      modalContent.appendChild(icon);
+      // ── Assemble ─────────────────────────────────────────────────────────
+      modalContent.appendChild(iconRing);
+      modalContent.appendChild(badge);
       modalContent.appendChild(heading);
       modalContent.appendChild(message);
       modalContent.appendChild(okButton);
       modalOverlay.appendChild(modalContent);
-
       document.body.appendChild(modalOverlay);
     }
   }

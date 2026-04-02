@@ -281,7 +281,7 @@ const fetchGuards = async () => {
     const token = authService.getToken();
     const tenantId = await currentUserTenant.getTenantIdAsync();
     const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/users?filter[_and][0][userApp][_eq]=fieldeasy&filter[_and][1][tenant][tenantId][_eq]=${tenantId}&filter[_and][2][title][_eq]=Guard&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=email&fields[]=phone&fields[]=status`,
+      `${import.meta.env.VITE_API_URL}/users?filter[_and][0][userApp][_eq]=accesseasy&filter[_and][1][tenant][tenantId][_eq]=${tenantId}&filter[_and][2][title][_eq]=Guard&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=email&fields[]=phone&fields[]=status`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     if (res.ok) {
@@ -325,7 +325,7 @@ const handleSubmit = async () => {
       last_name: form.value.last_name,
       email: form.value.email,
       phone: form.value.phone || null,
-      userApp: 'fieldeasy',
+      userApp: 'accesseasy',
       title: 'Guard',
       tenant: tenantId,
     };

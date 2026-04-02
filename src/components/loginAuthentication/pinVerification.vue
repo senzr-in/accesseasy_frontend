@@ -454,8 +454,8 @@ function formatPhoneForDisplay(phone) {
 }
 function prepareForgotPinPayload() {
   return props.contactType === "email"
-    ? { email: userEmail.value, userApp: "fieldeasy" }
-    : { phone: formatPhoneForAPI(userPhone.value), userApp: "fieldeasy" };
+    ? { email: userEmail.value, userApp: "accesseasy" }
+    : { phone: formatPhoneForAPI(userPhone.value), userApp: "accesseasy" };
 }
 function checkIfEncrypted(text) {
   if (!text || typeof text !== "string") return false;

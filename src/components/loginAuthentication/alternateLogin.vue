@@ -339,7 +339,7 @@ async function handleSubmit() {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: email.value, userApp: "fieldeasy" }),
+          body: JSON.stringify({ email: email.value, userApp: "accesseasy" }),
         },
       );
       const data = await res.json().catch(() => ({}));

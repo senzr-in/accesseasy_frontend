@@ -1221,7 +1221,7 @@ const transformEmployeeData = async (
   ).toLowerCase();
 
   if (!email) {
-    email = `${employeeId}@fieldeasy.com`;
+    email = `${employeeId}@accesseasy.com`;
   }
 
   if (!officeEmail && phone) {
@@ -1383,7 +1383,7 @@ const transformEmployeeData = async (
       : null,
     assignedUser: {
       first_name: employee.firstName || employee["First Name"],
-      userApp: "fieldeasy",
+      userApp: "accesseasy",
       cycleType: "1",
       middleName: employee.middleName || employee["Middle Name"] || "",
       last_name: employee.lastName || employee["Last Name"],

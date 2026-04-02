@@ -163,8 +163,8 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { ref, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import { authService } from "@/services/authService";
 import { 
   Lock, Phone, Mail, ArrowRight, ShieldCheck, 
@@ -173,6 +173,7 @@ import {
 } from "lucide-vue-next";
 
 const router = useRouter();
+const route = useRoute();
 const mode = ref("phone");
 const phoneRaw = ref("");
 const phoneError = ref("");
@@ -196,6 +197,21 @@ const industries = [
   { icon: HeartPulse, name: "Healthcare" },
   { icon: Globe, name: "Enterprises" },
 ];
+
+onMounted(() => {
+  if (route.query.autoSubmit === "true" && localStorage.getItem("fromRegistration") === "true") {
+    const registeredPhone = localStorage.getItem("justRegisteredPhone");
+    if (registeredPhone) {
+      const digits = registeredPhone.replace(/\D/g, "").slice(-10);
+      phoneRaw.value = digits;
+      mode.value = "phone";
+      
+      setTimeout(() => {
+        onPhoneSubmit();
+      }, 500);
+    }
+  }
+});
 
 function setMode(next) {
   mode.value = next;
@@ -354,7 +370,7 @@ async function onEmailSubmit() {
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.value, userApp: "fieldeasy" }),
+        body: JSON.stringify({ email: email.value, userApp: "accesseasy" }),
       },
     );
 

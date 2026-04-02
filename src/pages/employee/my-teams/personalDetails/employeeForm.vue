@@ -2450,7 +2450,7 @@ async function createNewEmployee() {
       appAccess: formData.appAccess,
       password: `${formData.phone}`,
       role: selectedRole?.id,
-      userApp: "fieldeasy",
+      userApp: "accesseasy",
       tenant: resolvedTenantId,
       officeEmail: formData.officeEmail,
       designation: formData.designation,

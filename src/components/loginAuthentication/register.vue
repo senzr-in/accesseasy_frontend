@@ -80,6 +80,7 @@
                 <input
                   v-model="fullName"
                   type="text"
+                  required
                   placeholder="John Doe"
                   class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
                 />
@@ -93,6 +94,7 @@
                 <input
                   v-model="mobileNumber"
                   type="tel"
+                  required
                   placeholder="10-digit number"
                   maxlength="10"
                   class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
@@ -100,15 +102,14 @@
                 <Phone class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
               </div>
             </div>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            
             <div class="space-y-1.5">
               <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 ml-1 uppercase">Work Email</label>
               <div class="relative group">
                 <input
                   v-model="email"
                   type="email"
+                  required
                   placeholder="name@company.com"
                   @input="email = email.toLowerCase()"
                   class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
@@ -123,6 +124,7 @@
                 <input
                   v-model="employeeId"
                   type="text"
+                  required
                   placeholder="EMP-001"
                   class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
                 />
@@ -138,23 +140,11 @@
               <input
                 v-model="companyName"
                 type="text"
+                required
                 placeholder="Acme Corporation"
                 class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
               />
               <Building2 class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
-            </div>
-          </div>
-
-          <div class="space-y-1.5">
-            <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 ml-1 uppercase">Company Address</label>
-            <div class="relative group">
-              <textarea
-                v-model="companyAddress"
-                rows="2"
-                placeholder="Full office address..."
-                class="w-full px-4 py-3 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white resize-none"
-              ></textarea>
-              <MapPin class="absolute right-4 top-4 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
             </div>
           </div>
 
@@ -238,7 +228,6 @@ const api = axios.create({
 
 const isLoading = ref(false);
 const companyName = ref("");
-const companyAddress = ref("");
 const fullName = ref("");
 const email = ref("");
 const mobileNumber = ref("");
@@ -289,7 +278,6 @@ const showError = (message, duration = 5000) => addToast(message, "error", durat
 const isFormValid = computed(() => {
   return (
     companyName.value.trim() !== "" &&
-    companyAddress.value.trim() !== "" &&
     fullName.value.trim() !== "" &&
     email.value.trim() !== "" &&
     mobileNumber.value.trim() !== "" &&
@@ -334,6 +322,80 @@ async function validateRegistration() {
   }
 }
 
+function buildTrialPlan(opts = {}) {
+  const today = new Date();
+  const end = new Date(today);
+  end.setDate(today.getDate() + 14);
+
+  const toISO = (d) => d.toISOString().split("T")[0];
+
+  return {
+    users: 120,
+    features: [
+      {
+        key: "trial",
+        name: "trial",
+        features: ["all features"],
+      },
+      {
+        key: "lite",
+        name: "Lite",
+        features: [
+          "Selfie & QR check-in",
+          "Geofence check-in",
+          "Leave management",
+          "Expense management",
+          "Daily & monthly reports",
+        ],
+        value: 120,
+      },
+      {
+        key: "fieldpro",
+        name: "FieldPro",
+        features: [
+          "All Lite features",
+          "Work order management",
+          "Client management",
+          "Field job tracking",
+          "Work order scheduling",
+        ],
+        value: 120,
+      },
+      {
+        key: "pro",
+        name: "PRO",
+        features: [
+          "All Lite features",
+          "Face check-in with liveness",
+          "Regularisation",
+          "Scheduled reports",
+          "Payroll integration (API)",
+        ],
+        value: 120,
+      },
+      {
+        key: "crm",
+        name: "GrowthSuite CRMENTERPRISE",
+        features: [
+          "All Lite features",
+          "Smart Forms (custom)",
+          "CRM Dashboard",
+          "Role configurator",
+          "WhatsApp reports",
+          "Employee KPI Dashboard",
+          "CRM integrations (Zoho, ERPNext)",
+        ],
+        value: 120,
+      },
+    ],
+    billing_cycle: opts.billing_cycle || "trial",
+    start_date: toISO(today),
+    end_date: toISO(end),
+    currency: opts.currency || "INR",
+    total_value: opts.total_value ?? 0,
+  };
+}
+
 async function handleRegistration() {
   isLoading.value = true;
   
@@ -343,22 +405,31 @@ async function handleRegistration() {
   }
 
   try {
-    // Create tenant
+    const accountSettings = {
+      currency: "INR",
+      currency_name: "Indian Rupee",
+      currency_symbol: "₹",
+      country: "India",
+      country_code: "IN",
+    };
+
     const tenantPayload = {
       tenantName: companyName.value,
-      companyAddress: JSON.stringify(companyAddress.value || ""),
+      panOrGst: null,
+      companyAddress: null,
+      accountSettings: JSON.stringify(accountSettings),
+      plan: JSON.stringify(buildTrialPlan()),
     };
     const tenantResponse = await api.post("/items/tenant", tenantPayload);
     const tenantId = tenantResponse.data.data.tenantId;
 
-    // Create personal module
     const adminRoleId = "ea2303aa-1662-43ca-a7f7-ab84924a7e0a";
     const personalModulePayload = {
       status: "active",
       accessOn: true,
-      employeeId: employeeId.value,
       cycleType: 1,
       uniqueId: `${tenantId}-${employeeId.value}`,
+      employeeId: employeeId.value,
       assignedUser: {
         first_name: fullName.value,
         email: email.value.toLowerCase(),
@@ -366,13 +437,23 @@ async function handleRegistration() {
         role: adminRoleId,
         tenant: tenantId,
         appAccess: true,
-        userApp: "fieldeasy",
+        userApp: "accesseasy",
       },
     };
     await api.post("/items/personalModule", personalModulePayload);
 
-    showSuccess("Success! Redirecting to login...", 3000);
-    setTimeout(() => router.push("/login"), 2000);
+    showSuccess("Registration successful! Initiating login...", 3000);
+
+    const registeredPhoneNumber = `+91${mobileNumber.value}`;
+    localStorage.setItem("justRegisteredPhone", registeredPhoneNumber);
+    localStorage.setItem("fromRegistration", "true");
+
+    setTimeout(() => {
+      router.push({
+        path: "/login",
+        query: { autoSubmit: "true" }
+      });
+    }, 2000);
   } catch (e) {
     console.error("Registration error:", e);
     showError(e.response?.data?.message || "Registration failed. Please contact support.");

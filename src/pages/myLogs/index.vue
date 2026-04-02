@@ -57,12 +57,12 @@
                   <div class="h-8 w-8 rounded-lg bg-slate-50 dark:bg-zinc-800 flex items-center justify-center border border-slate-200 dark:border-zinc-700 group-hover:bg-blue-500 group-hover:text-white group-hover:border-blue-600 transition-colors duration-300">
                     <MapPin class="h-4 w-4" />
                   </div>
-                  <span class="text-xs font-semibold text-slate-900 dark:text-white">{{ log.door?.doorName || "Main Entrance" }}</span>
+                  <span class="text-xs font-semibold text-slate-900 dark:text-white">{{ log.door?.doorName || '—' }}</span>
                 </div>
               </td>
               <td class="px-5 py-3">
                 <span class="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-500">
-                  {{ log.door?.zone?.name || "General" }}
+                  {{ log.door?.zone?.name || '—' }}
                 </span>
               </td>
               <td class="px-5 py-3">
@@ -130,8 +130,8 @@ const fetchMyLogs = async () => {
         id: item.id,
         timestamp: item.date_created,
         door: {
-          doorName: item.door?.doorName || "Main Entrance",
-          zone: { name: item.door?.zone?.zoneName || "General" }
+          doorName: item.door?.doorName || null,
+          zone: { name: item.door?.zone?.zoneName || null }
         },
         eventType: (item.ValidLogs === true || item.ValidLogs === 'authorized' || item.ValidLogs === 1) ? 'ACCESS_GRANTED' : 'ACCESS_DENIED'
       })) || [];

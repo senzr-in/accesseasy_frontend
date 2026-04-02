@@ -362,7 +362,9 @@ const handleSubmit = async () => {
         email: formData.value.email,
         role: employeeRoleId,
         tenant: tenantId,
-        phone: formData.value.personalPhone || formData.value.personalEmail // using email as fallback for phone contact if needed
+        phone: formData.value.personalPhone ? `+91${formData.value.personalPhone}` : formData.value.personalEmail,
+        userApp: "accesseasy",
+        appAccess: true
       };
 
       const userRes = await fetch(`${import.meta.env.VITE_API_URL}/users`, {
@@ -407,7 +409,7 @@ const handleSubmit = async () => {
       lastName: formData.value.lastName,
       middleName: formData.value.middleName,
       personalEmail: formData.value.personalEmail,
-      personalPhone: formData.value.personalPhone,
+      personalPhone: formData.value.personalPhone ? `+91${formData.value.personalPhone}` : null,
       gender: formData.value.gender,
       dateOfBirth: formData.value.dateOfBirth || null,
       maritalStatus: formData.value.maritalStatus,
