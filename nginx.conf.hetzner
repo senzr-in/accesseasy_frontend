@@ -31,7 +31,7 @@ server {
     # Proxy /kn/<function> to Knative Kourier with correct Host header
     # Pattern: /kn/send-otp-sms -> Host: send-otp-sms.knative-fn.65.109.41.139.sslip.io
     location ~ ^/kn/(?<fun>[^/?]+) {
-        rewrite ^/kn/.*$ / break;
+        rewrite ^/kn/[^/?]+/?(.*)$ /$1 break;
         proxy_pass http://kourier-internal.kourier-system.svc.cluster.local;
         proxy_http_version 1.1;
         proxy_set_header Connection "";
