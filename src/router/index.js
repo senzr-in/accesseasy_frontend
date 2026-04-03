@@ -14,6 +14,9 @@ import DashboardLayout from "@/layouts/dashboardLayout.vue";
 // Superadmin (esslAdmin) Dashboard
 import EsslDashboard from "@/pages/dealers/dashboard/esslDashboard.vue";
 
+// Visitor Portal
+import VisitorPortalView from "@/pages/visitorPortals/VisitorPortalView.vue";
+
 // DEV ONLY: Dev quick login bypass
 import DevLogin from "@/components/loginAuthentication/devLogin.vue";
 
@@ -298,6 +301,12 @@ const routes = [
         meta: { roles: ["Admin", "Manager", "Employee"] }
       }
     ]
+  },
+  // Visitor Portal Route
+  {
+    path: "/visit/:id",
+    name: "VisitorPortalView",
+    component: VisitorPortalView
   },
   // Catch-all 404
   {
