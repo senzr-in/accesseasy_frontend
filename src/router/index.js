@@ -1,0 +1,345 @@
+import { createRouter, createWebHistory } from "vue-router";
+import { authService } from "@/services/authService";
+
+// Auth
+import Login from "@/components/loginAuthentication/login.vue";
+import Register from "@/components/loginAuthentication/register.vue";
+import Verification from "@/components/loginAuthentication/verification.vue";
+import PinVerification from "@/components/loginAuthentication/pinVerification.vue";
+import EmailVerification from "@/components/loginAuthentication/emailVerification.vue";
+
+// Layout
+import DashboardLayout from "@/layouts/dashboardLayout.vue";
+
+// Superadmin (esslAdmin) Dashboard
+import EsslDashboard from "@/pages/dealers/dashboard/esslDashboard.vue";
+
+// Visitor Portal
+import VisitorPortalView from "@/pages/visitorPortals/VisitorPortalView.vue";
+
+// DEV ONLY: Dev quick login bypass
+import DevLogin from "@/components/loginAuthentication/devLogin.vue";
+
+// Placeholders / Ports
+import DashboardHome from "@/pages/dashboard/index.vue";
+import Employees from "@/pages/employee/my-teams/personalDetails/employeeDetails.vue";
+import Devices from "@/pages/devicesManager/deviceManagerTabs.vue";
+import Doors from "@/pages/devicesManager/doors/doorsVue.vue";
+import Zones from "@/pages/zones/index.vue";
+import Logs from "@/pages/logs/logTab.vue";
+import OnboardingPage from "@/pages/onboarding/index.vue";
+import Timerzones from "@/pages/accesslevel/timerzone.vue";
+import BranchConfiguration from "@/pages/settings/configuration/branch/branchConfiguration.vue";
+import BranchAddForm from "@/pages/settings/configuration/branch/branchAddForm.vue";
+import BranchEditForm from "@/pages/settings/configuration/branch/branchEditForm.vue";
+import AppearanceSettings from "@/pages/settings/appearance.vue";
+
+const routes = [
+  {
+    path: "/",
+    redirect: () => {
+      if (!authService.isAuthenticated()) return "/login";
+      // Superadmin gets their own portal
+      const role = authService.getUserRole();
+      return role === "esslAdmin" ? "/dealer-dashboard" : "/dashboard";
+    },
+  },
+  {
+    path: "/dealer-dashboard",
+    name: "DealerDashboard",
+    component: EsslDashboard,
+    meta: { requiresAuth: true },
+    beforeEnter: (to, from, next) => {
+      const role = authService.getUserRole();
+      if (role === "esslAdmin") {
+        next();
+      } else {
+        // Non-superadmin trying to access this page → send to main dashboard
+        next("/dashboard");
+      }
+    },
+  },
+  {
+    path: "/login",
+    name: "Login",
+    component: Login,
+    beforeEnter: (to, from, next) => {
+      const token = authService.getToken();
+      const userData = authService.getUserData();
+      if (token && (authService.getPhone() || authService.getEmail() || userData)) {
+        const role = authService.getUserRole();
+        next(role === "esslAdmin" ? "/dealer-dashboard" : "/dashboard");
+      } else {
+        next();
+      }
+    },
+  },
+  // Onboarding welcome page (full-page, no sidebar)
+  {
+    path: "/onboarding",
+    name: "Onboarding",
+    component: OnboardingPage,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/register",
+    name: "Register",
+    component: Register,
+  },
+  // ⚠ DEV ONLY — Remove before production deployment
+  {
+    path: "/dev-login",
+    name: "DevLogin",
+    component: DevLogin,
+  },
+  {
+    path: "/verification/:phoneNumber",
+    name: "Verification",
+    component: Verification,
+    props: true,
+  },
+  {
+    path: "/pin-verification/:contactType/:contactValue",
+    name: "PinVerification",
+    component: PinVerification,
+    props: true,
+  },
+  {
+    path: "/email-verification/:email",
+    name: "EmailVerification",
+    component: EmailVerification,
+    props: true,
+  },
+  {
+    path: "/dashboard",
+    component: DashboardLayout,
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: "",
+        name: "DashboardHome",
+        component: DashboardHome,
+        meta: { roles: ["Admin", "Manager", "Employee"] }
+      },
+      {
+        path: "easy-access/employees",
+        name: "Employees",
+        component: Employees,
+        meta: { roles: ["Admin", "Manager"] }
+      },
+      {
+        path: "settings",
+        meta: { roles: ["Admin"] },
+        redirect: '/dashboard/settings/branches'
+      },
+      {
+        path: "settings/appearance",
+        name: "SettingsAppearance",
+        component: AppearanceSettings,
+        meta: { roles: ["Admin"] }
+      },
+      {
+        path: "settings/devices",
+        name: "SettingsDevices",
+        component: Devices,
+        meta: { roles: ["Admin"] }
+      },
+      {
+        path: "settings/logs",
+        name: "SettingsLogs",
+        component: Logs,
+        meta: { roles: ["Admin", "Manager"] }
+      },
+      {
+        path: "settings/zones",
+        name: "SettingsZones",
+        component: Zones,
+        meta: { roles: ["Admin"] }
+      },
+      {
+        path: "settings/timezones",
+        name: "SettingsTimezones",
+        component: Timerzones,
+        meta: { roles: ["Admin"] }
+      },
+      {
+        path: "settings/branches",
+        name: "SettingsBranches",
+        component: BranchConfiguration,
+        meta: { roles: ["Admin"] }
+      },
+      {
+        path: "settings/branches/add",
+        name: "SettingsBranchAdd",
+        component: BranchAddForm,
+        meta: { roles: ["Admin"] }
+      },
+      {
+        path: "settings/branches/:id/edit",
+        name: "SettingsBranchEdit",
+        component: BranchEditForm,
+        meta: { roles: ["Admin"] }
+      },
+      {
+        path: "access-control/doors",
+        name: "Doors",
+        component: Doors,
+        meta: { roles: ["Admin"] }
+      },
+      {
+        path: "easy-access/configurators/access-levels",
+        name: "AccessLevels",
+        component: () => import("@/pages/devicesManager/accesslevel/accesslevelCatagory.vue"), // Existing component
+        meta: { roles: ["Admin"] }
+      },
+      {
+        path: "guards",
+        name: "Guards",
+        component: () => import("@/pages/guard/index.vue"),
+        meta: { roles: ["Admin"] }
+      },
+      {
+        path: "authorize",
+        name: "Authorize",
+        component: () => import("@/pages/authorize/index.vue"),
+        meta: { roles: ["Admin", "Guard"] }
+      },
+      {
+        path: "visitors",
+        name: "Visitors",
+        component: () => import("@/pages/visitors/index.vue"),
+        meta: { roles: ["Admin", "Guard"] }
+      },
+      {
+        path: "visitor-portals",
+        name: "VisitorPortals",
+        component: () => import("@/pages/visitorPortals/index.vue"),
+        meta: { roles: ["Admin"] }
+      },
+      {
+        path: "visitor-portals/builder/:id?",
+        name: "VisitorPortalBuilder",
+        component: () => import("@/pages/visitorPortals/builder.vue"),
+        meta: { roles: ["Admin"] }
+      },
+      {
+        path: "access-control/schedules",
+        name: "Schedules",
+        component: () => import("@/pages/schedules/index.vue"),
+        meta: { roles: ["Admin"] }
+      },
+      {
+        path: "access-control/rules",
+        name: "Rules",
+        component: () => import("@/pages/rules/index.vue"),
+        meta: { roles: ["Admin"] }
+      },
+      {
+        path: "monitoring",
+        name: "Monitoring",
+        component: () => import("@/pages/monitoring/index.vue"),
+        meta: { roles: ["Admin", "Manager"] }
+      },
+      {
+        path: "firmware",
+        name: "Firmware",
+        component: () => import("@/pages/firmware/index.vue"),
+        meta: { roles: ["Admin"] }
+      },
+      {
+        path: "device-types",
+        name: "DeviceTypes",
+        component: () => import("@/pages/deviceTypes/index.vue"),
+        meta: { roles: ["Admin"] }
+      },
+      {
+        path: "mobile-pass",
+        name: "MobilePass",
+        component: () => import("@/pages/mobilePass/index.vue"),
+        meta: { roles: ["Admin", "Manager", "Employee"] }
+      },
+      {
+        path: "easy-access/biometrics/face",
+        name: "FaceEmbedding",
+        component: () => import("@/pages/faceEmbedding/index.vue"),
+        meta: { roles: ["Admin", "Manager"] }
+      },
+      {
+        path: "easy-access/biometrics/fingerprint",
+        name: "FingerprintManagement",
+        component: () => import("@/pages/fingerData/index.vue"),
+        meta: { roles: ["Admin", "Manager"] }
+      },
+      {
+        path: "easy-access/biometrics/qr",
+        name: "QRGenerate",
+        component: () => import("@/pages/qrgenerate/index.vue"),
+        meta: { roles: ["Admin", "Manager"] }
+      },
+      {
+        path: "my-access",
+        name: "MyAccess",
+        component: () => import("@/pages/myAccess/index.vue"),
+        meta: { roles: ["Admin", "Manager", "Employee"] }
+      },
+      {
+        path: "my-attendance",
+        name: "MyAttendance",
+        component: () => import("@/pages/myAttendance/index.vue"),
+        meta: { roles: ["Admin", "Manager", "Employee"] }
+      },
+      {
+        path: "my-logs",
+        name: "MyLogs",
+        component: () => import("@/pages/myLogs/index.vue"),
+        meta: { roles: ["Admin", "Manager", "Employee"] }
+      },
+      {
+        path: "profile",
+        name: "Profile",
+        component: () => import("@/pages/profile/index.vue"),
+        meta: { roles: ["Admin", "Manager", "Employee"] }
+      }
+    ]
+  },
+  // Visitor Portal Route
+  {
+    path: "/visit/:id",
+    name: "VisitorPortalView",
+    component: VisitorPortalView
+  },
+  // Catch-all 404
+  {
+    path: "/:pathMatch(.*)*",
+    redirect: "/dashboard"
+  }
+];
+
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes,
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition;
+    } else {
+      return { top: 0 };
+    }
+  },
+});
+
+router.beforeEach((to, from, next) => {
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+
+  // More robust auth check: token + userData is enough (covers dev bypass and real login)
+  const token = authService.getToken();
+  const userData = authService.getUserData();
+  const isAuthenticated = !!(token && (authService.getPhone() || authService.getEmail() || userData));
+
+  if (requiresAuth && !isAuthenticated) {
+    next("/login");
+  } else {
+    next();
+  }
+});
+
+export default router;
