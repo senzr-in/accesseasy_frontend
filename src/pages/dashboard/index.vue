@@ -427,9 +427,9 @@ const fetchStats = async () => {
     // Fetch counts using correct Directus relational filtering
     const [doorsRes, empRes, groupsRes, devicesRes, authRes, unauthRes] = await Promise.all([
       fetch(`${baseUrl}/items/doors?aggregate[count]=id&filter[tenant][_eq]=${tenantId}`, { headers }),
-      fetch(`${baseUrl}/items/employees?aggregate[count]=id&filter[tenant][_eq]=${tenantId}`, { headers }),
+      fetch(`${baseUrl}/items/personalModule?aggregate[count]=id&filter[assignedUser][tenant][tenantId][_eq]=${tenantId}`, { headers }),
       fetch(`${baseUrl}/items/accesslevels?aggregate[count]=id&filter[tenant][_eq]=${tenantId}`, { headers }),
-      fetch(`${baseUrl}/items/devices?aggregate[count]=id&filter[tenant][_eq]=${tenantId}`, { headers }),
+      fetch(`${baseUrl}/items/controllers?aggregate[count]=id&filter[tenant][_eq]=${tenantId}`, { headers }),
       fetch(`${baseUrl}/items/logs?aggregate[count]=id&filter[tenant][_eq]=${tenantId}&filter[ValidLogs][_in]=authorized,true`, { headers }),
       fetch(`${baseUrl}/items/logs?aggregate[count]=id&filter[tenant][_eq]=${tenantId}&filter[ValidLogs][_in]=unAuthorized,false`, { headers }),
     ]);

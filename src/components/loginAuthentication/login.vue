@@ -365,18 +365,21 @@ async function onEmailSubmit() {
       return;
     }
 
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/emailLogin/generate-session`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.value, userApp: "accesseasy" }),
-      },
-    );
+    const res = await authService.knApi.post("/email-login", {
+      email: email.value,
+      userApp: "accesseasy",
+    });
 
-    const data = await res.json().catch(() => ({}));
+    // Adapt to Knative function returning { status: 200, body: {...} } natively
+    const responseData = res.data;
+    if (responseData.status && responseData.status >= 400) {
+      throw new Error(responseData.body?.message || responseData.body?.error || "Could not start session.");
+    }
+    
+    // Extract nested body if it exists
+    const data = responseData.body ? responseData.body : responseData;
 
-    if (!res.ok || !data?.otp_session_uuid) {
+    if (!data?.otp_session_uuid) {
       throw new Error(data?.message || "Could not start email session. Try again.");
     }
 
@@ -384,7 +387,7 @@ async function onEmailSubmit() {
     localStorage.setItem("emailSessionUuid", data.otp_session_uuid);
     router.push({ name: "EmailVerification", params: { email: email.value } });
   } catch (err) {
-    emailError.value = err?.message || "Something went wrong. Please try again.";
+    emailError.value = err?.response?.data?.message || err?.message || "Something went wrong. Please try again.";
   } finally {
     emailLoading.value = false;
   }

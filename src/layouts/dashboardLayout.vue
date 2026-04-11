@@ -88,7 +88,7 @@ const autoGenerateEmployeeQr = async () => {
 
     // Fetch the employee record to get their id and access level
     const empRes = await fetch(
-      `${apiUrl}/items/employees?filter[assignedUser][_eq]=${_userData?.id}&filter[tenant][_eq]=${tenantId}&fields=id,accessLevelId&limit=1`,
+      `${apiUrl}/items/personalModule?filter[assignedUser][_eq]=${_userData?.id}&filter[assignedUser][tenant][tenantId][_eq]=${tenantId}&fields=id,assignedAccessLevel&limit=1`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     if (!empRes.ok) return;
@@ -97,7 +97,7 @@ const autoGenerateEmployeeQr = async () => {
     if (!emp) return;
 
     // Generate a new encrypted token
-    const rawToken = generateEncryptedQrToken(emp.id, emp.accessLevelId || 'default');
+    const rawToken = generateEncryptedQrToken(emp.id, emp.assignedAccessLevel || 'default');
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
     await fetch(`${apiUrl}/items/qrgenerate`, {
@@ -106,7 +106,7 @@ const autoGenerateEmployeeQr = async () => {
       body: JSON.stringify({
         tenant: tenantId,
         employeeId: emp.id,
-        accessLevelsId: emp.accessLevelId || null,
+        accessLevelsId: emp.assignedAccessLevel || null,
         qrcode: rawToken,
         qraccess: true,
         expires_at: expiresAt

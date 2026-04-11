@@ -259,22 +259,24 @@ async function onEmailSubmit(email) {
       return;
     }
 
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/emailLogin/generate-session`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email, userApp: "accesseasy" }),
-      },
-    );
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok || !data?.otp_session_uuid) {
+    const res = await authService.knApi.post("/email-login", {
+      email: email,
+      userApp: "accesseasy",
+    });
+    
+    const responseData = res.data;
+    if (responseData.status && responseData.status >= 400) {
+      throw new Error(responseData.body?.message || responseData.body?.error || "Could not start session.");
+    }
+    const data = responseData.body ? responseData.body : responseData;
+    
+    if (!data?.otp_session_uuid) {
       throw new Error(data?.message || "Could not start email session. Try again.");
     }
     localStorage.setItem("email", email);
     localStorage.setItem("emailSessionUuid", data.otp_session_uuid);
   } catch (err) {
-    throw err;
+    throw new Error(err?.response?.data?.message || err?.message || "Something went wrong.");
   }
 }
 
