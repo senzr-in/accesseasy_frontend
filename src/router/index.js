@@ -119,7 +119,7 @@ const routes = [
         path: "",
         name: "DashboardHome",
         component: DashboardHome,
-        meta: { roles: ["Admin", "Manager", "Employee"] }
+        meta: { roles: ["Admin", "Manager", "Employee", "Guard"] }
       },
       {
         path: "easy-access/employees",
@@ -299,6 +299,12 @@ const routes = [
         name: "Profile",
         component: () => import("@/pages/profile/index.vue"),
         meta: { roles: ["Admin", "Manager", "Employee"] }
+      },
+      {
+        path: "report-automation",
+        name: "ReportAutomation",
+        component: () => import("@/pages/reportAutomation/index.vue"),
+        meta: { roles: ["Admin"] }
       }
     ]
   },
@@ -337,9 +343,31 @@ router.beforeEach((to, from, next) => {
 
   if (requiresAuth && !isAuthenticated) {
     next("/login");
-  } else {
-    next();
+    return;
   }
+
+  // Role-based access control: enforce meta.roles if defined on the matched route
+  // Skip check when already redirecting to /dashboard to prevent infinite loops
+  const requiredRoles = to.matched
+    .slice()
+    .reverse()
+    .find(record => record.meta.roles)?.meta.roles;
+
+  if (requiredRoles && isAuthenticated) {
+    const userRole = authService.getUserRole() || userData?.role?.name || '';
+    if (!requiredRoles.includes(userRole)) {
+      // Prevent infinite loop: if we're already heading to /dashboard, just allow it
+      if (to.path === '/dashboard') {
+        next();
+        return;
+      }
+      // User's role is not permitted for this route — redirect to dashboard
+      next("/dashboard");
+      return;
+    }
+  }
+
+  next();
 });
 
 export default router;

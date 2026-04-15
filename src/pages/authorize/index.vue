@@ -256,8 +256,84 @@ const handleCodeDecoded = async (qrString) => {
            await postVerificationLog('authorized', empIdFallback);
          }
       } else {
-         authResult.value = 'failed';
-         await postVerificationLog('unAuthorized', match?.employeeId?.id || null);
+         // ── VISITOR QR FALLBACK ──
+         // The scanned QR may be a Visitor QR issued by visitor-portal-flow.
+         // Those QRs encode a JSON payload: { type: 'VISITOR', visitorId, name, expiresAt, ... }
+         // The employee qrgenerate lookup failed, so try parsing the scanned string as visitor JSON.
+         console.log('VIS-01: No employee QR match — attempting visitor QR parse...');
+         let visitorQrData = null;
+         try {
+           visitorQrData = JSON.parse(qrString);
+         } catch (_) {
+           // Not a JSON payload — definitely not a visitor QR
+         }
+
+         if (visitorQrData && visitorQrData.type === 'VISITOR' && visitorQrData.visitorId) {
+           try {
+             // Check QR expiry embedded in the token itself
+             if (visitorQrData.expiresAt && new Date(visitorQrData.expiresAt) < new Date()) {
+               console.warn('VIS-01: Visitor QR has expired.');
+               authResult.value = 'failed';
+               await postVerificationLog('unAuthorized', null);
+             } else {
+               // Fetch the visitor record from Directus
+               const visRes = await fetch(
+                 `${import.meta.env.VITE_API_URL}/items/visitor/${visitorQrData.visitorId}?fields=id,personName,status,qrUsed,startDate,endDate`,
+                 { headers: { Authorization: `Bearer ${token}` }, signal: abortController.signal }
+               );
+               if (visRes.ok) {
+                 const visData = await visRes.json();
+                 const visitor = visData?.data;
+                 if (!visitor) {
+                   console.warn('VIS-01: Visitor record not found.');
+                   authResult.value = 'failed';
+                   await postVerificationLog('unAuthorized', null);
+                 } else if (visitor.qrUsed === true) {
+                   console.warn('VIS-01: Visitor QR already used (replay prevented).');
+                   authResult.value = 'failed';
+                   await postVerificationLog('unAuthorized', null);
+                 } else if (visitor.status !== 'active') {
+                   console.warn('VIS-01: Visitor is not active, status:', visitor.status);
+                   authResult.value = 'failed';
+                   await postVerificationLog('unAuthorized', null);
+                 } else {
+                   // ✅ Visitor QR valid — grant access
+                   console.log('VIS-01: Visitor QR authorized:', visitor.personName);
+                   scannedEmployee.value = {
+                     first_name: visitor.personName || visitorQrData.name || 'Visitor',
+                     last_name: ''
+                   };
+                   accessData.value = visitor;
+                   authResult.value = 'success';
+                   // Mark QR as used to prevent replay
+                   try {
+                     await fetch(`${import.meta.env.VITE_API_URL}/items/visitor/${visitor.id}`, {
+                       method: 'PATCH',
+                       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                       body: JSON.stringify({ qrUsed: true, entryTime: new Date().toISOString() })
+                     });
+                     console.log('VIS-01: Visitor QR marked as used.');
+                   } catch(e) {
+                     console.warn('VIS-01: Could not mark visitor QR as used:', e);
+                   }
+                   await postVerificationLog('authorized', null);
+                 }
+               } else {
+                 console.warn('VIS-01: Failed to fetch visitor record.');
+                 authResult.value = 'failed';
+                 await postVerificationLog('unAuthorized', null);
+               }
+             }
+           } catch(visErr) {
+             console.warn('VIS-01: Visitor QR validation error:', visErr);
+             authResult.value = 'failed';
+             await postVerificationLog('unAuthorized', null);
+           }
+         } else {
+           // Not a visitor QR either — deny
+           authResult.value = 'failed';
+           await postVerificationLog('unAuthorized', match?.employeeId?.id || null);
+         }
       }
     } else {
       authResult.value = 'failed';

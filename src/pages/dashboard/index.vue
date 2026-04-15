@@ -276,7 +276,7 @@
                 <span class="relative flex h-1.5 w-1.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span><span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-blue-500"></span></span> LIVE
               </span>
             </h3>
-            <router-link to="/dashboard/logs" class="text-[9px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors flex items-center gap-1">
+            <router-link to="/dashboard/settings/logs" class="text-[9px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors flex items-center gap-1">
               View Database <ArrowUpRight class="w-3.5 h-3.5" />
             </router-link>
           </div>
