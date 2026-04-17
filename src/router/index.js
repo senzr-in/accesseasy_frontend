@@ -7,6 +7,7 @@ import Register from "@/components/loginAuthentication/register.vue";
 import Verification from "@/components/loginAuthentication/verification.vue";
 import PinVerification from "@/components/loginAuthentication/pinVerification.vue";
 import EmailVerification from "@/components/loginAuthentication/emailVerification.vue";
+import AuthCallback from "@/pages/authorize/AuthCallback.vue";
 
 // Layout
 import DashboardLayout from "@/layouts/dashboardLayout.vue";
@@ -97,6 +98,11 @@ const routes = [
     name: "Verification",
     component: Verification,
     props: true,
+  },
+  {
+    path: "/auth/callback",
+    name: "AuthCallback",
+    component: AuthCallback,
   },
   {
     path: "/pin-verification/:contactType/:contactValue",

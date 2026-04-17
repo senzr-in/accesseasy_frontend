@@ -176,40 +176,31 @@ const loadEmployeeData = async () => {
   
   loadingEmployee.value = true;
   try {
-    const url = `${import.meta.env.VITE_API_URL}/items/employees?filter[assignedUser][_eq]=${rawUser.id}&fields=*,access_level.*`;
+    const url = `${import.meta.env.VITE_API_URL}/items/personalModule?filter[assignedUser][_eq]=${rawUser.id}&fields=*,assignedAccessLevel.*`;
     const res = await fetch(url, {
       headers: { Authorization: `Bearer ${token}` }
     });
     
-    // If the employee role doesn't have permissions to read `employees` collection (403), handle gracefully
     if (!res.ok) {
-      console.warn("Could not fetch employee record (likely 403 permissions). Proceeding with default user context.");
-      employee.value = { id: null, card_number: null, access_level: null };
+      console.warn("Could not fetch personalModule record. Proceeding with default user context.");
+      employee.value = { id: rawUser.id, card_number: null, access_level: null };
       return;
     }
 
     const data = await res.json();
     if (data?.data?.length > 0) {
-      employee.value = data.data[0];
-      
-      // Also fetch personalModule to get the correct foreign key for QR Generate
-      try {
-        const pmRes = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule?filter[assignedUser][_eq]=${rawUser.id}&fields=id`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        const pmData = await pmRes.json();
-        if (pmData?.data?.length > 0) {
-          employee.value.personalModuleId = pmData.data[0].id;
-        }
-      } catch (e) {
-        console.warn("Could not fetch personalModule ID", e);
-      }
+      const pmData = data.data[0];
+      employee.value = {
+        ...pmData,
+        access_level: pmData.assignedAccessLevel,
+        personalModuleId: pmData.id
+      };
     } else {
-      employee.value = { id: null, card_number: null, access_level: null };
+      employee.value = { id: rawUser.id, card_number: null, access_level: null };
     }
   } catch (error) {
     console.error("Failed to load personal employee data:", error);
-    employee.value = { id: null, card_number: null, access_level: null };
+    employee.value = { id: rawUser.id, card_number: null, access_level: null };
   } finally {
     loadingEmployee.value = false;
   }
@@ -276,8 +267,15 @@ const generateNewQr = async () => {
        console.error("Failed to save QR to backend");
     }
 
-    // 3. Render Visual QR Code from the token
-    const qrDataUrl = await QRCodeLib.toDataURL(rawToken, {
+    const qrPayloadObj = JSON.stringify({
+      type: "EMPLOYEE",
+      token: rawToken,
+      name: rawUser?.first_name || "Employee",
+      empId: employee.value?.employeeId || ""
+    });
+
+    // 3. Render Visual QR Code from the payload
+    const qrDataUrl = await QRCodeLib.toDataURL(qrPayloadObj, {
       width: 400,
       margin: 1,
       color: { dark: '#000000', light: '#ffffff' }
@@ -308,7 +306,7 @@ const assignRfidCard = async () => {
   
   isAssigningCard.value = true;
   try {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/employees/${employee.value.id}`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule/${employee.value.id}`, {
       method: "PATCH",
       headers: {
         "Authorization": `Bearer ${token}`,
@@ -337,7 +335,7 @@ const removeRfidCard = async () => {
 
   isAssigningCard.value = true;
   try {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/employees/${employee.value.id}`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule/${employee.value.id}`, {
       method: "PATCH",
       headers: {
         "Authorization": `Bearer ${token}`,

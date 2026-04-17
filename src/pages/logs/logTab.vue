@@ -92,7 +92,7 @@
                     {{ log.date || '-' }}
                   </span>
                   <span class="text-[10px] font-semibold text-slate-500 mt-0.5">
-                    {{ formatTime(log.timeStamp) }}
+                    {{ formatTime(log.timeStamp, log.date_created) }}
                   </span>
                 </div>
               </td>
@@ -186,13 +186,14 @@ const aggregateCount = async () => {
   try {
     const params = new URLSearchParams({
       "aggregate[count]": "id",
-      "filter[_and][0][tenant][tenantId][_eq]": tenantId
+      "filter[_and][0][tenant][tenantId][_eq]": tenantId,
+      "filter[_and][1][mode][_neq]": "cronJob"
     });
     
     if (searchQuery.value) {
-       params.append("filter[_and][1][_or][0][employeeId][employeeId][_icontains]", searchQuery.value);
-       params.append("filter[_and][1][_or][1][employeeId][assignedUser][first_name][_icontains]", searchQuery.value);
-       params.append("filter[_and][1][_or][2][employeeId][assignedUser][last_name][_icontains]", searchQuery.value);
+       params.append("filter[_and][2][_or][0][employeeId][employeeId][_icontains]", searchQuery.value);
+       params.append("filter[_and][2][_or][1][employeeId][assignedUser][first_name][_icontains]", searchQuery.value);
+       params.append("filter[_and][2][_or][2][employeeId][assignedUser][last_name][_icontains]", searchQuery.value);
     }
 
     const res = await fetch(`${import.meta.env.VITE_API_URL}/items/logs?${params.toString()}`, {
@@ -216,6 +217,7 @@ const fetchLogs = async () => {
       page: page.value.toString(),
       "sort[]": "-date_created",
       "filter[_and][0][tenant][tenantId][_eq]": tenantId,
+      "filter[_and][1][mode][_neq]": "cronJob"
     });
 
     const fields = [
@@ -228,9 +230,9 @@ const fetchLogs = async () => {
     fields.forEach(f => params.append("fields[]", f));
 
     if (searchQuery.value) {
-       params.append("filter[_and][1][_or][0][employeeId][employeeId][_icontains]", searchQuery.value);
-       params.append("filter[_and][1][_or][1][employeeId][assignedUser][first_name][_icontains]", searchQuery.value);
-       params.append("filter[_and][1][_or][2][employeeId][assignedUser][last_name][_icontains]", searchQuery.value);
+       params.append("filter[_and][2][_or][0][employeeId][employeeId][_icontains]", searchQuery.value);
+       params.append("filter[_and][2][_or][1][employeeId][assignedUser][first_name][_icontains]", searchQuery.value);
+       params.append("filter[_and][2][_or][2][employeeId][assignedUser][last_name][_icontains]", searchQuery.value);
     }
 
     const response = await fetch(`${import.meta.env.VITE_API_URL}/items/logs?${params.toString()}`, {
@@ -262,12 +264,34 @@ const fetchLogs = async () => {
 };
 
 const getEmployeeName = (item) => {
-  if (!item?.employeeId?.assignedUser) return "Unknown";
-  const { first_name, last_name } = item.employeeId.assignedUser;
-  return `${first_name || ''} ${last_name || ''}`.trim() || 'Unknown';
+  let first_name = '';
+  let last_name = '';
+  
+  if (item?.employeeId?.assignedUser) {
+    first_name = item.employeeId.assignedUser.first_name || '';
+    last_name = item.employeeId.assignedUser.last_name || '';
+  } else if (item?.employeeId) {
+    first_name = item.employeeId.first_name || item.employeeId.firstName || '';
+    last_name = item.employeeId.last_name || item.employeeId.lastName || '';
+  }
+
+  const fullName = `${first_name} ${last_name}`.trim();
+  
+  if (fullName) return fullName;
+  if (item?.name) return item.name;
+  if (item?.employeeName) return item.employeeName;
+  
+  return "Unknown";
 };
 
-const formatTime = (timeStr) => {
+const formatTime = (timeStr, fallbackDateCreated) => {
+    if (!timeStr && fallbackDateCreated) {
+      const d = new Date(fallbackDateCreated);
+      const hours = String(d.getHours()).padStart(2, '0');
+      const minutes = String(d.getMinutes()).padStart(2, '0');
+      const seconds = String(d.getSeconds()).padStart(2, '0');
+      return `${hours}:${minutes}:${seconds}`;
+    }
     if(!timeStr) return "-";
     return timeStr.split(".")[0]; 
 }

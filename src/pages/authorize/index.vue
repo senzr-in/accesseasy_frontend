@@ -167,6 +167,19 @@ const handleCodeDecoded = async (qrString) => {
   cameraStatus.value = 'validating';
   stopCamera(); // halt the feed
 
+  let queryToken = qrString;
+  let embeddedName = '';
+  
+  try {
+    const parsedQr = JSON.parse(qrString);
+    if (parsedQr.type === 'EMPLOYEE' && parsedQr.token) {
+        queryToken = parsedQr.token;
+        embeddedName = parsedQr.name || '';
+    } else if (parsedQr.type === 'VISITOR') {
+        embeddedName = parsedQr.name || 'Visitor';
+    }
+  } catch(e) {}
+
   // IN-14: Timeout guard — auto-deny if API takes longer than 10 seconds
   const abortController = new AbortController();
   const timeoutId = setTimeout(() => abortController.abort(), 10000);
@@ -183,7 +196,9 @@ const handleCodeDecoded = async (qrString) => {
           ValidLogs: status, // "authorized" or "unAuthorized"
           action: "in",
           mode: "throughApp",
-          date: new Date().toISOString().split('T')[0]
+          name: embeddedName || undefined, // Save extracted name to log
+          date: new Date().toISOString().split('T')[0],
+          timeStamp: new Date().toTimeString().split(' ')[0]
         };
         await fetch(`${import.meta.env.VITE_API_URL}/items/logs`, {
           method: 'POST',
@@ -197,7 +212,7 @@ const handleCodeDecoded = async (qrString) => {
 
     // Explicitly request nested user structures and access level info
     const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/items/qrgenerate?filter[qrcode][_eq]=${encodeURIComponent(qrString)}&filter[tenant][_eq]=${tenantId}&fields=*,employeeId.*,employeeId.assignedUser.*,employeeId.access_level.*`,
+      `${import.meta.env.VITE_API_URL}/items/qrgenerate?filter[qrcode][_eq]=${encodeURIComponent(queryToken)}&filter[tenant][_eq]=${tenantId}&fields=*,employeeId.*,employeeId.assignedUser.*,employeeId.access_level.*`,
       {
         headers: { Authorization: `Bearer ${token}` },
         signal: abortController.signal
@@ -235,7 +250,7 @@ const handleCodeDecoded = async (qrString) => {
            // ✅ All checks passed — Grant Access
            accessData.value = match;
            scannedEmployee.value = {
-             first_name: emp?.firstName || emp?.first_name || emp?.assignedUser?.first_name || 'Personnel',
+             first_name: embeddedName || emp?.firstName || emp?.first_name || emp?.assignedUser?.first_name || 'Personnel',
              last_name: emp?.lastName || emp?.last_name || emp?.assignedUser?.last_name || ''
            };
            authResult.value = 'success';
