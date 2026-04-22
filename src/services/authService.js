@@ -193,6 +193,30 @@ class AuthService {
     window.location.href = "/login";
   }
 
+  // Clears auth state without redirecting (used by router guard before it redirects)
+  softLogout() {
+    Cookies.remove("userToken");
+    localStorage.removeItem("userToken");
+    localStorage.removeItem("pinVerifiedInSession");
+    localStorage.removeItem("userData");
+    localStorage.removeItem("tenantData");
+    delete this.protectedApi.defaults.headers.common["Authorization"];
+  }
+
+  // Validates token against the server — returns true if valid, false if expired/invalid
+  async validateToken() {
+    const token = this.getToken();
+    if (!token) return false;
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/users/me?fields=id`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  }
+
   redirectToLogin() {
     window.location.href = "/login?timeout=true";
   }
@@ -751,6 +775,16 @@ class AuthService {
 
   initInactivityTracking() {
     if (typeof window !== "undefined") {
+      const lastActivity = Number.parseInt(
+        localStorage.getItem("lastActivityTime") || "0",
+        10
+      );
+      if (lastActivity > 0) {
+        const inactiveTime = Date.now() - lastActivity;
+        if (inactiveTime > 900000 && this.isAuthenticated()) {
+          this.setPinVerified(false);
+        }
+      }
       this.updateLastActivity();
       const events = [
         "mousedown",
@@ -780,9 +814,12 @@ class AuthService {
     );
     const currentTime = Date.now();
     const inactiveTime = currentTime - lastActivity;
-    const inactivityTimeout = 3600000; // 1 hour
+    const inactivityTimeout = 900000; // 15 minutes
 
     if (inactiveTime > inactivityTimeout) {
+      if (this.isPinVerified()) {
+        this.setPinVerified(false);
+      }
       // ── Inject keyframe animation once ──────────────────────────────────
       if (!document.getElementById("session-modal-styles")) {
         const styleEl = document.createElement("style");
@@ -921,7 +958,7 @@ class AuthService {
       okButton.onmouseleave = () => { okButton.style.opacity = "1";    okButton.style.transform = "scale(1)"; };
       okButton.onclick = () => {
         document.body.removeChild(modalOverlay);
-        this.redirectToLogin();
+        window.location.reload();
       };
 
       // ── Assemble ─────────────────────────────────────────────────────────

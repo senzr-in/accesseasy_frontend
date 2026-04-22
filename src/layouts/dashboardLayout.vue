@@ -35,8 +35,8 @@
         <OnboardingBanner />
 
         <!-- Page Content Router View -->
-        <main class="flex-1 overflow-y-auto px-6 pt-4 pb-6 relative custom-scrollbar">
-          <router-view />
+        <main class="flex-1 flex flex-col overflow-hidden px-6 pt-4 pb-6 relative">
+          <router-view class="flex-1 min-h-0" />
         </main>
 
       </div>
@@ -88,7 +88,7 @@ const autoGenerateEmployeeQr = async () => {
 
     // Fetch the employee record to get their id and access level
     const empRes = await fetch(
-      `${apiUrl}/items/employees?filter[assignedUser][_eq]=${_userData?.id}&filter[tenant][_eq]=${tenantId}&fields=id,accessLevelId&limit=1`,
+      `${apiUrl}/items/personalModule?filter[assignedUser][_eq]=${_userData?.id}&filter[assignedUser][tenant][tenantId][_eq]=${tenantId}&fields=id,assignedAccessLevel&limit=1`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     if (!empRes.ok) return;
@@ -97,7 +97,7 @@ const autoGenerateEmployeeQr = async () => {
     if (!emp) return;
 
     // Generate a new encrypted token
-    const rawToken = generateEncryptedQrToken(emp.id, emp.accessLevelId || 'default');
+    const rawToken = generateEncryptedQrToken(emp.id, emp.assignedAccessLevel || 'default');
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
 
     await fetch(`${apiUrl}/items/qrgenerate`, {
@@ -106,7 +106,7 @@ const autoGenerateEmployeeQr = async () => {
       body: JSON.stringify({
         tenant: tenantId,
         employeeId: emp.id,
-        accessLevelsId: emp.accessLevelId || null,
+        accessLevelsId: emp.assignedAccessLevel || null,
         qrcode: rawToken,
         qraccess: true,
         expires_at: expiresAt
@@ -139,10 +139,12 @@ const currentPageTitle = computed(() => {
   if (path.includes('/dashboard/easy-access/employees')) return 'Employees';
   if (path.includes('/dashboard/easy-access/configurators/access-levels')) return 'Access Group';
   if (path.includes('/dashboard/devices')) return 'Devices';
+  if (path.includes('/dashboard/settings/logs')) return 'Event Logs';
   if (path.includes('/dashboard/settings')) return 'Settings';
   if (path.includes('/dashboard/logs')) return 'Event Logs';
   if (path.includes('/dashboard/guards')) return 'Guards';
   if (path.includes('/dashboard/my-access')) return 'My Access';
+  if (path.includes('/dashboard/report-automation')) return 'Scheduled Reports';
   return 'Dashboard';
 });
 </script>

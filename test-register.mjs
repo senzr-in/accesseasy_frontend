@@ -2,7 +2,7 @@ import fs from 'fs';
 
 (async () => {
   const token = "p2pJHhZAjca6jQea0RbPVwNWRyrJG29X"; // From .env VITE_API_TOKEN
-  const baseURL = "https://appv1.fieldseasy.com/directus";
+  const baseURL = "https://privateapp.senzr.in/directus";
 
   const headers = {
     "Authorization": `Bearer ${token}`,

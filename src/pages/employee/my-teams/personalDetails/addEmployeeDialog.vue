@@ -160,7 +160,7 @@
                 <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Branch</label>
                 <select v-model="formData.branchId" class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground">
                   <option value="" disabled>Select branch</option>
-                  <option v-for="branch in branches" :key="branch.id" :value="branch.id">{{ branch.name }}</option>
+                  <option v-for="branch in branches" :key="branch.id" :value="branch.id">{{ branch.locdetail?.locationName || branch.name || branch.branchName }}</option>
                 </select>
               </div>
               <div class="space-y-1.5">
@@ -168,7 +168,7 @@
                 <select v-model="formData.groupId" class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground">
                   <option value="" disabled>Select group</option>
                   <option v-for="group in groups" :key="group.id" :value="group.id">
-                    {{ group.name || group.groupName }}
+                    {{ group.accessLevelName || group.name || group.groupName }}
                   </option>
                 </select>
               </div>
@@ -268,9 +268,9 @@ watch(() => props.modelValue, (isOpen) => {
         employeeId: props.employee.employeeId || '',
         designation: props.employee.designation || '',
         dateOfJoining: props.employee.dateOfJoining ? props.employee.dateOfJoining.split('T')[0] : '',
-        departmentId: props.employee.department?.id || '',
+        departmentId: props.employee.department?.id || props.employee.department || '',
         branchId: props.employee.branch?.id || props.employee.branch || '',
-        groupId: props.employee.group?.id || props.employee.group || '',
+        groupId: props.employee.assignedAccessLevel?.id || props.employee.assignedAccessLevel || props.employee.group?.id || props.employee.group || '',
         status: props.employee.status || 'active',
       };
     } else {
@@ -310,7 +310,7 @@ const close = () => {
 
 const fetchDepartments = async () => {
   try {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/departments?filter[tenant][tenantId][_eq]=${tenantId}`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/department?filter[tenant][tenantId][_eq]=${tenantId}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     const data = await res.json();
@@ -320,7 +320,7 @@ const fetchDepartments = async () => {
 
 const fetchBranches = async () => {
   try {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/branches?filter[tenant][tenantId][_eq]=${tenantId}`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/locationManagement?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][_and][1][locType][_eq]=branch`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     const data = await res.json();
@@ -330,7 +330,7 @@ const fetchBranches = async () => {
 
 const fetchGroups = async () => {
   try {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/groups?filter[tenant][tenantId][_eq]=${tenantId}`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/accesslevels?filter[tenant][tenantId][_eq]=${tenantId}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     const data = await res.json();
@@ -430,7 +430,7 @@ const handleSubmit = async () => {
 
       tenant: tenantId,
       department: formData.value.departmentId || null,
-      group: formData.value.groupId || null,
+      assignedAccessLevel: formData.value.groupId || null,
       branch: formData.value.branchId || null
     };
 

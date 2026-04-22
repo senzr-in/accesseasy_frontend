@@ -88,7 +88,7 @@ export class Product {
       productName: json.productName || "",
       status: json.status || "draft",
       productImageId: toStringOrNull(json.product), // Read the file ID from 'product' field
-      imageUrl: json.product ? `https://access.sensenservice.com/assets/${json.product}` : null, // Derive imageUrl for display
+      imageUrl: json.product ? `${import.meta.env.VITE_API_URL}/assets/${json.product}` : null, // Derive imageUrl for display
       modelNumber: toStringOrNull(json.modelNumber),
       productId: toStringOrNull(json.productId),
       tenant: toStringOrNull(json.tenant) || "",

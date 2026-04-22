@@ -172,7 +172,7 @@
               <div class="employee-info">
                 <div class="employee-details">
                   <h3 class="employee-name">
-                    {{ item.employeeId?.assignedUser?.first_name || "Unknown" }}
+                    {{ getEmployeeName(item) }}
                   </h3>
                 </div>
               </div>
@@ -185,7 +185,7 @@
 
             <!-- Custom Cell for Time -->
             <template #cell-timeStamp="{ item }">
-              <span>{{ formatTime24Hour(item.timeStamp) }}</span>
+              <span>{{ formatTime24Hour(item.timeStamp, item.date_created) }}</span>
             </template>
 
             <!-- Custom Cell for Action -->
@@ -803,10 +803,24 @@ const getImageSrc = (base64Data) => {
 };
 
 const getEmployeeName = (item) => {
-  if (!item?.employeeId?.assignedUser) return "Unknown";
-  const firstName = item.employeeId.assignedUser.first_name || "";
-  const lastName = item.employeeId.assignedUser.last_name || "";
-  return `${firstName} ${lastName}`.trim() || "Unknown";
+  let first_name = '';
+  let last_name = '';
+  
+  if (item?.employeeId?.assignedUser) {
+    first_name = item.employeeId.assignedUser.first_name || '';
+    last_name = item.employeeId.assignedUser.last_name || '';
+  } else if (item?.employeeId) {
+    first_name = item.employeeId.first_name || item.employeeId.firstName || '';
+    last_name = item.employeeId.last_name || item.employeeId.lastName || '';
+  }
+
+  const fullName = `${first_name} ${last_name}`.trim();
+  
+  if (fullName) return fullName;
+  if (item?.name) return item.name;
+  if (item?.employeeName) return item.employeeName;
+  
+  return "Unknown";
 };
 
 const openImagePopup = (imageData, logItem, imageType = "base64") => {
@@ -878,7 +892,14 @@ const formatDate = (dateString) => {
   return `${year}/${month}/${day} ${hour}:${minute}:${second}`;
 };
 
-const formatTime24Hour = (time) => {
+const formatTime24Hour = (time, fallbackDateCreated) => {
+  if (!time && fallbackDateCreated) {
+    const d = new Date(fallbackDateCreated);
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    const seconds = String(d.getSeconds()).padStart(2, '0');
+    return `${hours}:${minutes}:${seconds}`;
+  }
   if (!time) return "-";
   try {
     if (time.includes(":") && time.split(":").length >= 2) {
@@ -1007,7 +1028,6 @@ const fetchLogs = async () => {
         "date",
         "id",
         "rfid",
-        "name",
         "sn",
         "msgType",
         "tenant",
@@ -1148,6 +1168,9 @@ const filterParams = (tabStatus = selectedStatus.value) => {
   }
   if (filters.mode) {
     params[`filter[_and][${filterCount}][mode][_in]`] = filters.mode;
+    filterCount++;
+  } else {
+    params[`filter[_and][${filterCount}][mode][_neq]`] = "cronJob";
     filterCount++;
   }
 

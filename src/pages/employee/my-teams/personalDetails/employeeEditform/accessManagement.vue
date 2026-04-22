@@ -893,8 +893,18 @@ const generateQRCodeImage = async (size = 200) => {
   if (!qrCodeData.value?.qrcode) return;
 
   try {
+    const nameStr = props.employeeData?.first_name || props.employeeData?.assignedUser?.first_name || props.employeeData?.firstName || "";
+    const empIdStr = props.employeeData?.employeeId?.employeeId || props.employeeData?.employeeId || "";
+    
+    const qrPayload = JSON.stringify({
+      type: "EMPLOYEE",
+      token: qrCodeData.value.qrcode,
+      name: nameStr,
+      empId: empIdStr
+    });
+
     const canvas = document.createElement("canvas");
-    await QRCode.toCanvas(canvas, qrCodeData.value.qrcode, {
+    await QRCode.toCanvas(canvas, qrPayload, {
       width: size,
       margin: 2,
       color: {

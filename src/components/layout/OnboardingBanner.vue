@@ -58,12 +58,16 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { ArrowRight, SkipForward, X } from 'lucide-vue-next';
 import { onboardingService } from '@/services/onboardingService';
+import { authService } from '@/services/authService';
 
 const router = useRouter();
 const stepData = ref(null);
 const isSkipping = ref(false);
 
 onMounted(() => {
+  // Only show onboarding banner for Admin users — Guards and Employees should not see it
+  const role = authService.getUserRole();
+  if (role !== 'Admin') return;
   if (!onboardingService.isCompleted()) {
     stepData.value = onboardingService.getCurrentStep();
   }

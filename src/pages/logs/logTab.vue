@@ -1,22 +1,8 @@
 <template>
-  <div class="space-y-6 p-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-      <div class="flex items-center gap-4">
-        <!-- Title moved to global App Bar -->
-      </div>
-      <div class="flex items-center gap-3">
-        <button 
-          v-if="userRole === 'Admin'"
-          class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-black uppercase tracking-widest h-10 px-5 rounded-xl transition-colors shadow-sm flex items-center"
-        >
-          <Download class="w-4 h-4 mr-2" /> EXPORT
-        </button>
-      </div>
-    </div>
+  <div class="flex flex-col h-full p-6 gap-0 animate-in fade-in slide-in-from-bottom-4 duration-700">
 
     <!-- Data Table Card -->
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-sm overflow-hidden flex flex-col min-h-[500px]">
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-sm overflow-hidden flex flex-col flex-1 min-h-0">
       <!-- Toolbar -->
       <div class="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 p-4 flex flex-col sm:flex-row gap-4 items-center justify-between">
         <div class="relative w-full sm:w-80">
@@ -29,16 +15,10 @@
             class="w-full pl-9 h-10 rounded-lg text-sm bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-900 dark:text-white shadow-sm"
           />
         </div>
-        <div class="flex items-center gap-2">
-           <button class="h-10 px-4 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 flex items-center text-xs font-black uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-             <Filter class="w-3.5 h-3.5 mr-2" />
-             Filters
-           </button>
-        </div>
       </div>
 
       <!-- Table -->
-      <div class="overflow-x-auto flex-1 h-full">
+      <div class="overflow-auto flex-1 min-h-0">
         <table class="w-full text-left border-collapse whitespace-nowrap relative">
           <thead class="bg-slate-50 dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-10 w-full">
             <tr>
@@ -92,7 +72,7 @@
                     {{ log.date || '-' }}
                   </span>
                   <span class="text-[10px] font-semibold text-slate-500 mt-0.5">
-                    {{ formatTime(log.timeStamp) }}
+                    {{ formatTime(log.timeStamp, log.date_created) }}
                   </span>
                 </div>
               </td>
@@ -148,7 +128,7 @@
 <script setup>
 import { ref, computed, watch, onMounted } from "vue";
 import { 
-  Activity, Search, Filter, Download, User, 
+  Activity, Search, User, 
   LogIn, LogOut, Loader2, Fingerprint, 
   Smartphone, MapPin, ScanFace, CheckCircle2, XCircle, HelpCircle 
 } from "lucide-vue-next";
@@ -186,13 +166,14 @@ const aggregateCount = async () => {
   try {
     const params = new URLSearchParams({
       "aggregate[count]": "id",
-      "filter[_and][0][tenant][tenantId][_eq]": tenantId
+      "filter[_and][0][tenant][tenantId][_eq]": tenantId,
+      "filter[_and][1][mode][_neq]": "cronJob"
     });
     
     if (searchQuery.value) {
-       params.append("filter[_and][1][_or][0][employeeId][employeeId][_icontains]", searchQuery.value);
-       params.append("filter[_and][1][_or][1][employeeId][assignedUser][first_name][_icontains]", searchQuery.value);
-       params.append("filter[_and][1][_or][2][employeeId][assignedUser][last_name][_icontains]", searchQuery.value);
+       params.append("filter[_and][2][_or][0][employeeId][employeeId][_icontains]", searchQuery.value);
+       params.append("filter[_and][2][_or][1][employeeId][assignedUser][first_name][_icontains]", searchQuery.value);
+       params.append("filter[_and][2][_or][2][employeeId][assignedUser][last_name][_icontains]", searchQuery.value);
     }
 
     const res = await fetch(`${import.meta.env.VITE_API_URL}/items/logs?${params.toString()}`, {
@@ -216,6 +197,7 @@ const fetchLogs = async () => {
       page: page.value.toString(),
       "sort[]": "-date_created",
       "filter[_and][0][tenant][tenantId][_eq]": tenantId,
+      "filter[_and][1][mode][_neq]": "cronJob"
     });
 
     const fields = [
@@ -228,9 +210,9 @@ const fetchLogs = async () => {
     fields.forEach(f => params.append("fields[]", f));
 
     if (searchQuery.value) {
-       params.append("filter[_and][1][_or][0][employeeId][employeeId][_icontains]", searchQuery.value);
-       params.append("filter[_and][1][_or][1][employeeId][assignedUser][first_name][_icontains]", searchQuery.value);
-       params.append("filter[_and][1][_or][2][employeeId][assignedUser][last_name][_icontains]", searchQuery.value);
+       params.append("filter[_and][2][_or][0][employeeId][employeeId][_icontains]", searchQuery.value);
+       params.append("filter[_and][2][_or][1][employeeId][assignedUser][first_name][_icontains]", searchQuery.value);
+       params.append("filter[_and][2][_or][2][employeeId][assignedUser][last_name][_icontains]", searchQuery.value);
     }
 
     const response = await fetch(`${import.meta.env.VITE_API_URL}/items/logs?${params.toString()}`, {
@@ -262,12 +244,34 @@ const fetchLogs = async () => {
 };
 
 const getEmployeeName = (item) => {
-  if (!item?.employeeId?.assignedUser) return "Unknown";
-  const { first_name, last_name } = item.employeeId.assignedUser;
-  return `${first_name || ''} ${last_name || ''}`.trim() || 'Unknown';
+  let first_name = '';
+  let last_name = '';
+  
+  if (item?.employeeId?.assignedUser) {
+    first_name = item.employeeId.assignedUser.first_name || '';
+    last_name = item.employeeId.assignedUser.last_name || '';
+  } else if (item?.employeeId) {
+    first_name = item.employeeId.first_name || item.employeeId.firstName || '';
+    last_name = item.employeeId.last_name || item.employeeId.lastName || '';
+  }
+
+  const fullName = `${first_name} ${last_name}`.trim();
+  
+  if (fullName) return fullName;
+  if (item?.name) return item.name;
+  if (item?.employeeName) return item.employeeName;
+  
+  return "Unknown";
 };
 
-const formatTime = (timeStr) => {
+const formatTime = (timeStr, fallbackDateCreated) => {
+    if (!timeStr && fallbackDateCreated) {
+      const d = new Date(fallbackDateCreated);
+      const hours = String(d.getHours()).padStart(2, '0');
+      const minutes = String(d.getMinutes()).padStart(2, '0');
+      const seconds = String(d.getSeconds()).padStart(2, '0');
+      return `${hours}:${minutes}:${seconds}`;
+    }
     if(!timeStr) return "-";
     return timeStr.split(".")[0]; 
 }

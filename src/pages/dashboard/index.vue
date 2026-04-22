@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-8 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+  <div class="space-y-8 pb-12 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-bottom-4 duration-700">
     <template v-if="userRole === 'Guard'">
       <!-- Guard Security Dashboard -->
       <div class="flex flex-col gap-6">
@@ -276,7 +276,7 @@
                 <span class="relative flex h-1.5 w-1.5"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span><span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-blue-500"></span></span> LIVE
               </span>
             </h3>
-            <router-link to="/dashboard/logs" class="text-[9px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors flex items-center gap-1">
+            <router-link to="/dashboard/settings/logs" class="text-[9px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors flex items-center gap-1">
               View Database <ArrowUpRight class="w-3.5 h-3.5" />
             </router-link>
           </div>
@@ -394,9 +394,9 @@ const fetchGuardStats = async () => {
     const today = new Date().toISOString().split('T')[0];
 
     const [authRes, unauthRes, recentRes] = await Promise.all([
-      fetch(`${base}/items/logs?aggregate[count]=id&filter[tenant][_eq]=${tenantId}&filter[ValidLogs][_eq]=authorized&filter[date][_eq]=${today}`, { headers }),
-      fetch(`${base}/items/logs?aggregate[count]=id&filter[tenant][_eq]=${tenantId}&filter[ValidLogs][_eq]=unAuthorized&filter[date][_eq]=${today}`, { headers }),
-      fetch(`${base}/items/logs?filter[tenant][_eq]=${tenantId}&sort=-date_created&limit=8&fields=id,ValidLogs,date_created,employeeId.assignedUser.first_name,employeeId.assignedUser.last_name,employeeId.firstName,employeeId.lastName`, { headers }),
+      fetch(`${base}/items/logs?aggregate[count]=id&filter[tenant][_eq]=${tenantId}&filter[ValidLogs][_eq]=authorized&filter[date][_eq]=${today}&filter[mode][_neq]=cronJob`, { headers }),
+      fetch(`${base}/items/logs?aggregate[count]=id&filter[tenant][_eq]=${tenantId}&filter[ValidLogs][_eq]=unAuthorized&filter[date][_eq]=${today}&filter[mode][_neq]=cronJob`, { headers }),
+      fetch(`${base}/items/logs?filter[tenant][_eq]=${tenantId}&filter[mode][_neq]=cronJob&sort=-date_created&limit=8&fields=id,ValidLogs,date_created,employeeId.assignedUser.first_name,employeeId.assignedUser.last_name,employeeId.firstName,employeeId.lastName`, { headers }),
     ]);
 
     if (authRes.ok)   guardStats.value.authorized   = (await authRes.json()).data?.[0]?.count?.id || 0;
@@ -424,14 +424,16 @@ const fetchStats = async () => {
     const headers = { Authorization: `Bearer ${token}` };
     const baseUrl = import.meta.env.VITE_API_URL;
     
+    const today = new Date().toISOString().split('T')[0];
+
     // Fetch counts using correct Directus relational filtering
     const [doorsRes, empRes, groupsRes, devicesRes, authRes, unauthRes] = await Promise.all([
       fetch(`${baseUrl}/items/doors?aggregate[count]=id&filter[tenant][_eq]=${tenantId}`, { headers }),
-      fetch(`${baseUrl}/items/employees?aggregate[count]=id&filter[tenant][_eq]=${tenantId}`, { headers }),
+      fetch(`${baseUrl}/items/personalModule?aggregate[count]=id&filter[assignedUser][tenant][tenantId][_eq]=${tenantId}`, { headers }),
       fetch(`${baseUrl}/items/accesslevels?aggregate[count]=id&filter[tenant][_eq]=${tenantId}`, { headers }),
-      fetch(`${baseUrl}/items/devices?aggregate[count]=id&filter[tenant][_eq]=${tenantId}`, { headers }),
-      fetch(`${baseUrl}/items/logs?aggregate[count]=id&filter[tenant][_eq]=${tenantId}&filter[ValidLogs][_in]=authorized,true`, { headers }),
-      fetch(`${baseUrl}/items/logs?aggregate[count]=id&filter[tenant][_eq]=${tenantId}&filter[ValidLogs][_in]=unAuthorized,false`, { headers }),
+      fetch(`${baseUrl}/items/controllers?aggregate[count]=id&filter[tenant][_eq]=${tenantId}`, { headers }),
+      fetch(`${baseUrl}/items/logs?aggregate[count]=id&filter[tenant][_eq]=${tenantId}&filter[ValidLogs][_in]=authorized,true&filter[date][_eq]=${today}&filter[mode][_neq]=cronJob`, { headers }),
+      fetch(`${baseUrl}/items/logs?aggregate[count]=id&filter[tenant][_eq]=${tenantId}&filter[ValidLogs][_in]=unAuthorized,false&filter[date][_eq]=${today}&filter[mode][_neq]=cronJob`, { headers }),
     ]);
     const [d, e, g, dv, auth, unauth] = await Promise.all([doorsRes.json(), empRes.json(), groupsRes.json(), devicesRes.json(), authRes.json(), unauthRes.json()]);
     
@@ -455,7 +457,7 @@ const fetchRecentLogs = async () => {
   recentLogsLoading.value = true;
   try {
     const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/items/logs?filter[tenant][_eq]=${tenantId}&sort=-date_created&limit=5&fields=*,employeeId.assignedUser.first_name,employeeId.assignedUser.last_name,door.doorName`,
+      `${import.meta.env.VITE_API_URL}/items/logs?filter[tenant][_eq]=${tenantId}&filter[mode][_neq]=cronJob&sort=-date_created&limit=5&fields=*,employeeId.assignedUser.first_name,employeeId.assignedUser.last_name,door.doorName`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     const data = await res.json();

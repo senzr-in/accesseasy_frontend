@@ -224,7 +224,8 @@ import {
   LogOut,
   ChevronDown,
   Moon,
-  Sun
+  Sun,
+  CalendarClock
 } from 'lucide-vue-next';
 import RbacGuard from './RbacGuard.vue';
 import { authService } from '@/services/authService';
@@ -266,6 +267,7 @@ const navigationItems = computed(() => {
     { name: "Guards", href: "/dashboard/guards", icon: ShieldCheck, role: "Admin" },
     { name: "Employees", href: "/dashboard/easy-access/employees", icon: Users, role: "Admin" },
     { name: "Visitor Portals", href: "/dashboard/visitor-portals", icon: Users, role: "Admin" },
+    { name: "Scheduled Reports", href: "/dashboard/report-automation", icon: CalendarClock, role: "Admin" },
     { 
       name: "Settings", 
       icon: Settings, 

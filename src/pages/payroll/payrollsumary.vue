@@ -98,7 +98,7 @@ const applyFilters = async (newFilters) => {
 const fetchPayrollData = async () => {
   loading.value = true;
   try {
-    const baseUrl = 'https://access.sensenservice.com/items/payrollVerification';
+    const baseUrl = `${import.meta.env.VITE_API_URL}/items/payrollVerification`;
     const monthYear = filters.value.monthYear || 'July 2025';
     const [monthName, year] = monthYear.split(' ');
     const monthIndex = new Date(Date.parse(`${monthName} 1, ${year}`)).getMonth() + 1;

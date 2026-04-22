@@ -305,7 +305,13 @@ const showQRPreview = async (item) => {
 
   if (qrCanvas.value && item.qrcode) {
     try {
-      QRCode.toCanvas(qrCanvas.value, item.qrcode, {
+      const qrPayload = JSON.stringify({
+        type: "EMPLOYEE",
+        token: item.qrcode,
+        name: item.employeeName || "",
+        empId: item.employeeId || ""
+      });
+      QRCode.toCanvas(qrCanvas.value, qrPayload, {
         width: 250,
         margin: 2,
         color: { dark: "#000000", light: "#FFFFFF" },
@@ -320,8 +326,14 @@ const downloadSingleQR = async (qr) => {
   if (!qr || !qr.qrcode) return;
 
   try {
+    const qrPayload = JSON.stringify({
+      type: "EMPLOYEE",
+      token: qr.qrcode,
+      name: qr.employeeName || "",
+      empId: qr.employeeId || ""
+    });
     const canvas = document.createElement("canvas");
-    await QRCode.toCanvas(canvas, qr.qrcode, {
+    await QRCode.toCanvas(canvas, qrPayload, {
       width: 500,
       margin: 4,
     });
