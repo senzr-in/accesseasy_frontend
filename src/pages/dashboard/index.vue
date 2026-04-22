@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-8 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+  <div class="space-y-8 pb-12 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-bottom-4 duration-700">
     <template v-if="userRole === 'Guard'">
       <!-- Guard Security Dashboard -->
       <div class="flex flex-col gap-6">

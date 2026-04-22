@@ -1,22 +1,8 @@
 <template>
-  <div class="space-y-6 p-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-      <div class="flex items-center gap-4">
-        <!-- Title moved to global App Bar -->
-      </div>
-      <div class="flex items-center gap-3">
-        <button 
-          v-if="userRole === 'Admin'"
-          class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-[10px] font-black uppercase tracking-widest h-10 px-5 rounded-xl transition-colors shadow-sm flex items-center"
-        >
-          <Download class="w-4 h-4 mr-2" /> EXPORT
-        </button>
-      </div>
-    </div>
+  <div class="flex flex-col h-full p-6 gap-0 animate-in fade-in slide-in-from-bottom-4 duration-700">
 
     <!-- Data Table Card -->
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-sm overflow-hidden flex flex-col min-h-[500px]">
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-sm overflow-hidden flex flex-col flex-1 min-h-0">
       <!-- Toolbar -->
       <div class="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 p-4 flex flex-col sm:flex-row gap-4 items-center justify-between">
         <div class="relative w-full sm:w-80">
@@ -29,16 +15,10 @@
             class="w-full pl-9 h-10 rounded-lg text-sm bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-900 dark:text-white shadow-sm"
           />
         </div>
-        <div class="flex items-center gap-2">
-           <button class="h-10 px-4 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-900 flex items-center text-xs font-black uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-             <Filter class="w-3.5 h-3.5 mr-2" />
-             Filters
-           </button>
-        </div>
       </div>
 
       <!-- Table -->
-      <div class="overflow-x-auto flex-1 h-full">
+      <div class="overflow-auto flex-1 min-h-0">
         <table class="w-full text-left border-collapse whitespace-nowrap relative">
           <thead class="bg-slate-50 dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-10 w-full">
             <tr>
@@ -148,7 +128,7 @@
 <script setup>
 import { ref, computed, watch, onMounted } from "vue";
 import { 
-  Activity, Search, Filter, Download, User, 
+  Activity, Search, User, 
   LogIn, LogOut, Loader2, Fingerprint, 
   Smartphone, MapPin, ScanFace, CheckCircle2, XCircle, HelpCircle 
 } from "lucide-vue-next";

@@ -35,8 +35,8 @@
         <OnboardingBanner />
 
         <!-- Page Content Router View -->
-        <main class="flex-1 overflow-y-auto px-6 pt-4 pb-6 relative custom-scrollbar">
-          <router-view />
+        <main class="flex-1 flex flex-col overflow-hidden px-6 pt-4 pb-6 relative">
+          <router-view class="flex-1 min-h-0" />
         </main>
 
       </div>
@@ -139,6 +139,7 @@ const currentPageTitle = computed(() => {
   if (path.includes('/dashboard/easy-access/employees')) return 'Employees';
   if (path.includes('/dashboard/easy-access/configurators/access-levels')) return 'Access Group';
   if (path.includes('/dashboard/devices')) return 'Devices';
+  if (path.includes('/dashboard/settings/logs')) return 'Event Logs';
   if (path.includes('/dashboard/settings')) return 'Settings';
   if (path.includes('/dashboard/logs')) return 'Event Logs';
   if (path.includes('/dashboard/guards')) return 'Guards';

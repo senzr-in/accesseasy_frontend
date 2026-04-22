@@ -68,6 +68,23 @@ const routes = [
       const token = authService.getToken();
       const userData = authService.getUserData();
       if (token && (authService.getPhone() || authService.getEmail() || userData)) {
+        if (!authService.isPinVerified()) {
+          const phone = authService.getPhone() || localStorage.getItem("userPhone");
+          const email = authService.getEmail() || localStorage.getItem("email");
+
+          if (phone) {
+            const digits = phone.replace(/\D/g, "").slice(-10);
+            next({ name: "PinVerification", params: { contactType: "phone", contactValue: digits } });
+            return;
+          } else if (email) {
+            next({ name: "PinVerification", params: { contactType: "email", contactValue: email } });
+            return;
+          } else {
+            authService.softLogout();
+            next();
+            return;
+          }
+        }
         const role = authService.getUserRole();
         next(role === "esslAdmin" ? "/dealer-dashboard" : "/dashboard");
       } else {
@@ -339,35 +356,89 @@ const router = createRouter({
   },
 });
 
-router.beforeEach((to, from, next) => {
+// Token validation is done once per browser session to avoid a network call on every navigation.
+// sessionStorage is cleared on tab close/reload, so every page reload triggers a fresh server check.
+let tokenValidatedThisSession = false;
+
+router.beforeEach(async (to, from, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
 
-  // More robust auth check: token + userData is enough (covers dev bypass and real login)
+  // Skip non-protected routes (login, register, etc.)
+  if (!requiresAuth) {
+    next();
+    return;
+  }
+
+  // Basic local auth check first
   const token = authService.getToken();
   const userData = authService.getUserData();
   const isAuthenticated = !!(token && (authService.getPhone() || authService.getEmail() || userData));
 
-  if (requiresAuth && !isAuthenticated) {
+  if (!isAuthenticated) {
     next("/login");
     return;
   }
 
-  // Role-based access control: enforce meta.roles if defined on the matched route
-  // Skip check when already redirecting to /dashboard to prevent infinite loops
+  // --- Enforce PIN verification state ---
+  if (!authService.isPinVerified()) {
+    const phone = authService.getPhone() || localStorage.getItem("userPhone");
+    const email = authService.getEmail() || localStorage.getItem("email");
+
+    if (phone) {
+      const digits = phone.replace(/\D/g, "").slice(-10);
+      next({ name: "PinVerification", params: { contactType: "phone", contactValue: digits } });
+      return;
+    } else if (email) {
+      next({ name: "PinVerification", params: { contactType: "email", contactValue: email } });
+      return;
+    } else {
+      authService.softLogout();
+      next("/login?expired=true");
+      return;
+    }
+  }
+
+  // ── Server-side token validation (once per browser session / page reload) ──
+  if (!tokenValidatedThisSession) {
+    tokenValidatedThisSession = true; // Prevent duplicate calls during the same navigation cycle
+    const isTokenValid = await authService.validateToken();
+
+    if (!isTokenValid) {
+      console.warn("[Router] Server token invalid or expired. Redirecting to re-auth.");
+      authService.softLogout();
+
+      // If the user had a PIN set, send them to PIN verification
+      const phone = authService.getPhone() || localStorage.getItem("userPhone");
+      const email = authService.getEmail() || localStorage.getItem("email");
+      const savedUserData = userData;
+      const hasPin = !!(savedUserData?.userPin);
+
+      if (hasPin && phone) {
+        const digits = phone.replace(/\D/g, "").slice(-10);
+        next({ name: "PinVerification", params: { contactType: "phone", contactValue: digits } });
+      } else if (hasPin && email) {
+        next({ name: "PinVerification", params: { contactType: "email", contactValue: email } });
+      } else {
+        // No PIN — redirect to full login
+        next("/login?expired=true");
+      }
+      return;
+    }
+  }
+
+  // Role-based access control
   const requiredRoles = to.matched
     .slice()
     .reverse()
     .find(record => record.meta.roles)?.meta.roles;
 
-  if (requiredRoles && isAuthenticated) {
+  if (requiredRoles) {
     const userRole = authService.getUserRole() || userData?.role?.name || '';
     if (!requiredRoles.includes(userRole)) {
-      // Prevent infinite loop: if we're already heading to /dashboard, just allow it
       if (to.path === '/dashboard') {
         next();
         return;
       }
-      // User's role is not permitted for this route — redirect to dashboard
       next("/dashboard");
       return;
     }
