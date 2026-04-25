@@ -75,7 +75,7 @@ jobs:
       - name: Setup Node.js 
         uses: actions/setup-node@v4
         with:
-          node-version: '18.20.8'
+          node-version: '20'
           cache: 'npm'
           cache-dependency-path: package-lock.json
 
@@ -94,6 +94,9 @@ jobs:
           VITE_DIRECTUS_URL: ${{ secrets.VITE_DIRECTUS_URL }}
           VITE_API_TOKEN: ${{ secrets.VITE_API_TOKEN }}
           VITE_FIELDSEASY_DOMAIN: ${{ secrets.VITE_FIELDSEASY_DOMAIN }}
+          VITE_KN_API_URL: ${{ secrets.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn' }}
+          VITE_UI_URL: ${{ secrets.VITE_UI_URL }}
+          VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.VITE_GOOGLE_MAPS_API_KEY }}
           # Add any additional environment variables your AccessEasy app needs
 
       - name: Verify build output
