@@ -447,4 +447,14 @@ router.beforeEach(async (to, from, next) => {
   next();
 });
 
+router.onError((error) => {
+  if (
+    error.message.includes('Failed to fetch dynamically imported module') ||
+    error.message.includes('Importing a module script failed')
+  ) {
+    console.warn('Chunk load error detected. Reloading page...');
+    window.location.reload();
+  }
+});
+
 export default router;
