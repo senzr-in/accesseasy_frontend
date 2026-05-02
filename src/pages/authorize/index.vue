@@ -188,18 +188,21 @@ const handleCodeDecoded = async (qrString) => {
     const tenantId = await currentUserTenant.getTenantIdAsync();
     
     // Helper to post audit logs natively to Directus
-    const postVerificationLog = async (status, empId = null) => {
+    const postVerificationLog = async (status, empId = null, actionType = "in", customName = null) => {
       try {
         const payload = {
           tenant: tenantId,
-          employeeId: empId,
+          employeeId: typeof empId === 'object' ? empId?.id : empId,
           ValidLogs: status, // "authorized" or "unAuthorized"
-          action: "in",
+          action: actionType,
           mode: "throughApp",
-          name: embeddedName || undefined, // Save extracted name to log
+          name: customName || embeddedName || undefined, // Save extracted name to log
           date: new Date().toISOString().split('T')[0],
           timeStamp: new Date().toTimeString().split(' ')[0]
         };
+        
+        if (!payload.employeeId) delete payload.employeeId;
+
         await fetch(`${import.meta.env.VITE_API_URL}/items/logs`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
@@ -248,27 +251,51 @@ const handleCodeDecoded = async (qrString) => {
          }
          else {
            // ✅ All checks passed — Grant Access
+           
+           // IN-09: Entry/Exit Toggle
+           let actionType = "in";
+           let isExit = false;
+           
+           try {
+             const today = new Date().toISOString().split('T')[0];
+             const logRes = await fetch(`${import.meta.env.VITE_API_URL}/items/logs?filter[employeeId][_eq]=${empIdFallback}&filter[date][_eq]=${today}&filter[ValidLogs][_eq]=authorized`, {
+               headers: { Authorization: `Bearer ${token}` }
+             });
+             if (logRes.ok) {
+               const logData = await logRes.json();
+               const logsToday = logData.data || [];
+               if (logsToday.length > 0) {
+                 actionType = "out";
+                 isExit = true;
+               }
+             }
+           } catch(e) {
+             console.warn("Could not fetch previous logs", e);
+           }
+
            accessData.value = match;
            scannedEmployee.value = {
              first_name: embeddedName || emp?.firstName || emp?.first_name || emp?.assignedUser?.first_name || 'Personnel',
-             last_name: emp?.lastName || emp?.last_name || emp?.assignedUser?.last_name || ''
+             last_name: emp?.lastName || emp?.last_name || emp?.assignedUser?.last_name || (isExit ? '(Exit)' : '(Entry)')
            };
            authResult.value = 'success';
 
-           // IN-09: Replay Prevention — mark this token as used (one-time scan)
-           try {
-             await fetch(`${import.meta.env.VITE_API_URL}/items/qrgenerate/${match.id}`, {
-               method: 'PATCH',
-               headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-               body: JSON.stringify({ qraccess: false })
-             });
-             console.log('IN-09: Token marked as used (one-time scan enforced).');
-           } catch(e) {
-             console.warn('IN-09: Failed to mark token as used:', e);
+           // If it's an Exit, disable the token to prevent a third scan
+           if (isExit) {
+             try {
+               await fetch(`${import.meta.env.VITE_API_URL}/items/qrgenerate/${match.id}`, {
+                 method: 'PATCH',
+                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                 body: JSON.stringify({ qraccess: false })
+               });
+               console.log('IN-09: Token marked as used (Exit recorded).');
+             } catch(e) {
+               console.warn('IN-09: Failed to mark token as used:', e);
+             }
            }
 
-           // Post a Live Log confirming entry
-           await postVerificationLog('authorized', empIdFallback);
+           // Post a Live Log confirming entry/exit
+           await postVerificationLog('authorized', empIdFallback, actionType);
          }
       } else {
          // ── VISITOR QR FALLBACK ──
@@ -285,56 +312,41 @@ const handleCodeDecoded = async (qrString) => {
 
          if (visitorQrData && visitorQrData.type === 'VISITOR' && visitorQrData.visitorId) {
            try {
-             // Check QR expiry embedded in the token itself
+             // Check QR expiry embedded in the token itself (fast client-side check)
              if (visitorQrData.expiresAt && new Date(visitorQrData.expiresAt) < new Date()) {
                console.warn('VIS-01: Visitor QR has expired.');
                authResult.value = 'failed';
                await postVerificationLog('unAuthorized', null);
              } else {
-               // Fetch the visitor record from Directus
-               const visRes = await fetch(
-                 `${import.meta.env.VITE_API_URL}/items/visitor/${visitorQrData.visitorId}?fields=id,personName,status,qrUsed,startDate,endDate`,
-                 { headers: { Authorization: `Bearer ${token}` }, signal: abortController.signal }
-               );
-               if (visRes.ok) {
-                 const visData = await visRes.json();
-                 const visitor = visData?.data;
-                 if (!visitor) {
-                   console.warn('VIS-01: Visitor record not found.');
-                   authResult.value = 'failed';
-                   await postVerificationLog('unAuthorized', null);
-                 } else if (visitor.qrUsed === true) {
-                   console.warn('VIS-01: Visitor QR already used (replay prevented).');
-                   authResult.value = 'failed';
-                   await postVerificationLog('unAuthorized', null);
-                 } else if (visitor.status !== 'active') {
-                   console.warn('VIS-01: Visitor is not active, status:', visitor.status);
-                   authResult.value = 'failed';
-                   await postVerificationLog('unAuthorized', null);
-                 } else {
-                   // ✅ Visitor QR valid — grant access
-                   console.log('VIS-01: Visitor QR authorized:', visitor.personName);
-                   scannedEmployee.value = {
-                     first_name: visitor.personName || visitorQrData.name || 'Visitor',
-                     last_name: ''
-                   };
-                   accessData.value = visitor;
-                   authResult.value = 'success';
-                   // Mark QR as used to prevent replay
-                   try {
-                     await fetch(`${import.meta.env.VITE_API_URL}/items/visitor/${visitor.id}`, {
-                       method: 'PATCH',
-                       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                       body: JSON.stringify({ qrUsed: true, entryTime: new Date().toISOString() })
-                     });
-                     console.log('VIS-01: Visitor QR marked as used.');
-                   } catch(e) {
-                     console.warn('VIS-01: Could not mark visitor QR as used:', e);
-                   }
-                   await postVerificationLog('authorized', null);
+               // Route through visitor-portal-flow backend (/guardians/scan)
+               // This uses the admin Directus token (avoids 403) and handles Entry/Exit toggle
+               const scanRes = await fetch(
+                 `${import.meta.env.VITE_KN_API_URL}/visitor-portal-flow/guardians/scan`,
+                 {
+                   method: 'POST',
+                   headers: { 'Content-Type': 'application/json' },
+                   body: JSON.stringify({ qrToken: qrString, tenant: tenantId }),
+                   signal: abortController.signal
                  }
+               );
+               const scanData = await scanRes.json();
+               console.log('VIS-01: Backend scan response:', scanData);
+
+               if (scanRes.ok && (scanData.status === 'ACCESS_GRANTED' || scanData.status === 'EXIT_RECORDED')) {
+                 const isEntry = scanData.status === 'ACCESS_GRANTED';
+                 const finalName = scanData.visitor?.name || visitorQrData?.name || 'Visitor';
+                 console.log(`VIS-01: Visitor ${isEntry ? 'Entry' : 'Exit'} recorded:`, finalName);
+                 scannedEmployee.value = {
+                   first_name: `${finalName} (Visitor)`,
+                   last_name: isEntry ? '(Entry)' : '(Exit)'
+                 };
+                 accessData.value = scanData;
+                 authResult.value = 'success';
+                 await postVerificationLog('authorized', null, isEntry ? 'in' : 'out', `${finalName} (Visitor)`);
                } else {
-                 console.warn('VIS-01: Failed to fetch visitor record.');
+                 // DENIED or error from backend
+                 const reason = scanData.reason || scanData.message || 'Access Denied';
+                 console.warn('VIS-01: Visitor scan denied by backend:', reason);
                  authResult.value = 'failed';
                  await postVerificationLog('unAuthorized', null);
                }

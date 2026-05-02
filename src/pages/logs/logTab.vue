@@ -204,7 +204,8 @@ const fetchLogs = async () => {
       "status", "action", "employeeId.employeeId", 
       "employeeId.assignedUser.id", "employeeId.assignedUser.first_name", 
       "employeeId.assignedUser.last_name", "employeeId.assignedUser.avatar.id",
-      "mode", "timeStamp", "date", "id", "ValidLogs", "date_created"
+      "mode", "timeStamp", "date", "id", "ValidLogs", "date_created",
+      "name"
     ];
 
     fields.forEach(f => params.append("fields[]", f));

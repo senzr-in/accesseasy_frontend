@@ -171,7 +171,7 @@ const routes = [
         path: "settings/logs",
         name: "SettingsLogs",
         component: Logs,
-        meta: { roles: ["Admin", "Manager"] }
+        meta: { roles: ["Admin", "Manager", "Guard"] }
       },
       {
         path: "settings/zones",
