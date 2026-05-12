@@ -1040,6 +1040,7 @@ const fetchLogs = async () => {
         "base64Data",
         "faceId",
         "ValidLogs",
+        "name",
       ],
       sort:
         sortBy.value.key && sortBy.value.order === "desc"

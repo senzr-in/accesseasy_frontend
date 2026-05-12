@@ -74,8 +74,7 @@
               <div :class="['w-2 h-2 rounded-full shrink-0', log.ValidLogs === 'authorized' ? 'bg-emerald-500' : 'bg-rose-500']"></div>
               <div class="flex-1 min-w-0">
                 <p class="text-sm font-bold text-slate-900 dark:text-white truncate">
-                  {{ log.employeeId?.assignedUser?.first_name || log.employeeId?.firstName || 'Unknown' }}
-                  {{ log.employeeId?.assignedUser?.last_name || log.employeeId?.lastName || '' }}
+                  {{ getEmployeeName(log) }}
                 </p>
                 <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{{ formatGuardTime(log.date_created) }}</p>
               </div>
@@ -353,9 +352,9 @@ import DoorRegistrationDialog from '@/pages/devicesManager/doors/doorRegistratio
 import AddEmployeeDialog from '@/pages/employee/my-teams/personalDetails/addEmployeeDialog.vue';
 
 const router = useRouter();
-const token = authService.getToken();
-const tenantId = currentUserTenant.getTenantId();
-const rawUser = authService.getUserData();
+let token = authService.getToken();
+let tenantId = currentUserTenant.getTenantId() || authService.getTenantId();
+let rawUser = authService.getUserData();
 
 const userName = computed(() => {
   if (!rawUser) return 'Employee';
@@ -396,7 +395,7 @@ const fetchGuardStats = async () => {
     const [authRes, unauthRes, recentRes] = await Promise.all([
       fetch(`${base}/items/logs?aggregate[count]=id&filter[tenant][_eq]=${tenantId}&filter[ValidLogs][_eq]=authorized&filter[date][_eq]=${today}&filter[mode][_neq]=cronJob`, { headers }),
       fetch(`${base}/items/logs?aggregate[count]=id&filter[tenant][_eq]=${tenantId}&filter[ValidLogs][_eq]=unAuthorized&filter[date][_eq]=${today}&filter[mode][_neq]=cronJob`, { headers }),
-      fetch(`${base}/items/logs?filter[tenant][_eq]=${tenantId}&filter[mode][_neq]=cronJob&sort=-date_created&limit=8&fields=id,ValidLogs,date_created,employeeId.assignedUser.first_name,employeeId.assignedUser.last_name,employeeId.firstName,employeeId.lastName`, { headers }),
+      fetch(`${base}/items/logs?filter[tenant][_eq]=${tenantId}&filter[mode][_neq]=cronJob&sort=-date_created&limit=8&fields=id,ValidLogs,date_created,name,employeeId.assignedUser.first_name,employeeId.assignedUser.last_name,employeeId.first_name,employeeId.last_name`, { headers }),
     ]);
 
     if (authRes.ok)   guardStats.value.authorized   = (await authRes.json()).data?.[0]?.count?.id || 0;
@@ -469,7 +468,15 @@ const fetchRecentLogs = async () => {
   }
 };
 
-onMounted(() => {
+onMounted(async () => {
+  // Wait for currentUserTenant to fully initialize (async on first login)
+  await currentUserTenant.initialize();
+
+  // Refresh variables after initialization (they may have been null at setup time)
+  token = authService.getToken();
+  tenantId = currentUserTenant.getTenantId() || authService.getTenantId();
+  rawUser = authService.getUserData();
+
   fetchStats();
   fetchRecentLogs();
   // Guard stats — only fetched when role is Guard
@@ -480,9 +487,24 @@ onMounted(() => {
 
 // Helpers
 const getEmployeeName = (log) => {
-  const user = log?.employeeId?.assignedUser;
-  if (!user) return 'Unknown Guest';
-  return `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Unknown Subject';
+  let first_name = '';
+  let last_name = '';
+  
+  if (log?.employeeId?.assignedUser) {
+    first_name = log.employeeId.assignedUser.first_name || '';
+    last_name = log.employeeId.assignedUser.last_name || '';
+  } else if (log?.employeeId) {
+    first_name = log.employeeId.first_name || log.employeeId.firstName || '';
+    last_name = log.employeeId.last_name || log.employeeId.lastName || '';
+  }
+
+  const fullName = `${first_name} ${last_name}`.trim();
+  
+  if (fullName) return fullName;
+  if (log?.name) return log.name;
+  if (log?.employeeName) return log.employeeName;
+  
+  return 'Unknown Guest';
 };
 
 const formatTime = (dateString) => {

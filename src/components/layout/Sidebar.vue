@@ -261,7 +261,6 @@ const navigationItems = computed(() => {
   
   return [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-    { name: "Authorize", href: "/dashboard/authorize", icon: Key, role: "Admin" },
     { name: "Doors", href: "/dashboard/access-control/doors", icon: Building, role: "Admin" },
     { name: "Groups", href: "/dashboard/easy-access/configurators/access-levels", icon: Shield, role: "Admin" },
     { name: "Guards", href: "/dashboard/guards", icon: ShieldCheck, role: "Admin" },

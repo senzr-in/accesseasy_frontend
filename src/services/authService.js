@@ -135,6 +135,16 @@ class AuthService {
     if (userData) {
       localStorage.setItem("userData", JSON.stringify(userData));
       
+      const tid = userData?.tenant?.tenantId || userData?.tenant?.id; 
+      const uid = userData?.id;
+      const appName = userData?.userApp || "accesseasy";
+      
+      if (tid && uid) {
+        this.ensureTenantUserApp(tid, uid, appName).catch(err => 
+          console.warn("[setUserData] Background userApp registration failed:", err.message)
+        );
+      }
+
       // Automatically sync email and phone to localStorage if present in userData
       // This ensures isAuthenticated() stays consistent
       if (userData.email) {
@@ -225,8 +235,7 @@ class AuthService {
     try {
       const response = await this.api.get("/users", {
         params: {
-          "filter[_and][0][phone][_contains]": phone,
-          "filter[_and][1][userApp][_eq]": "accesseasy",
+          "filter[phone][_contains]": phone,
         },
       });
       return response.data.data.length > 0;
@@ -257,8 +266,7 @@ class AuthService {
 
       const response = await this.api.get("/users", {
         params: {
-          "filter[_and][0][phone][_contains]": searchPhone,
-          "filter[_and][1][userApp][_eq]": "accesseasy",
+          "filter[phone][_contains]": searchPhone,
           "fields[]": ["dateOfLeaving"],
         },
       });
@@ -376,9 +384,8 @@ class AuthService {
 
       const userRes = await this.api.get("/users", {
         params: {
-          "filter[_and][0][phone][_contains]": searchPhone,
-          "filter[_and][1][userApp][_eq]": "accesseasy",
-          "fields[]": ["id", "token", "otp", "usertoken", "tenant.tenantId", "tenant.tenantName", "role.name", "phone", "first_name", "last_name", "email", "userPin", "dateOfLeaving", "title", "description"],
+          "filter[phone][_contains]": searchPhone,
+          "fields[]": ["id", "token", "otp", "usertoken", "tenant.tenantId", "tenant.tenantName", "tenant.userApp", "role.name", "phone", "first_name", "last_name", "userApp", "email", "userPin", "dateOfLeaving", "title", "description"],
         },
       });
 
@@ -488,8 +495,7 @@ class AuthService {
 
       const response = await this.api.get("/users", {
         params: {
-          "filter[_and][0][phone][_contains]": searchPhone,
-          "filter[_and][1][userApp][_eq]": "accesseasy",
+          "filter[phone][_contains]": searchPhone,
           "fields[]": [
             "id",
             "tenant.tenantId",
@@ -501,6 +507,7 @@ class AuthService {
             "email",
             "userPin",
             "dateOfLeaving",
+            "userApp",
             "title",
             "description"
           ],
@@ -509,6 +516,26 @@ class AuthService {
 
       if (response?.data?.data && response.data.data.length > 0) {
         const userData = response.data.data[0];
+        
+        // Auto-attach to accesseasy if they exist but aren't on this app yet
+        const currentAppStr = String(userData.userApp || "").toLowerCase();
+        if (!currentAppStr.includes("accesseasy")) {
+          console.log("[getUserByPhone] User found but not on accesseasy. Attaching...");
+          const newAppStr = currentAppStr ? `${currentAppStr}, accesseasy` : "accesseasy";
+          
+          this.api.patch(`/users/${userData.id}`, { userApp: newAppStr }).catch(e => 
+            console.warn("[getUserByPhone] User patch failed:", e.message)
+          );
+          userData.userApp = newAppStr;
+
+          const tId = userData.tenant?.tenantId || userData.tenant?.id;
+          if (tId) {
+            this.ensureTenantUserApp(tId, userData.id, "accesseasy").catch(e =>
+              console.warn("[getUserByPhone] Tenant patch failed:", e.message)
+            );
+          }
+        }
+
         this.setUserData(userData);
         return userData;
       }
@@ -520,12 +547,84 @@ class AuthService {
     }
   }
 
+  async ensureTenantUserApp(tenantId, userId, appName = "accesseasy") {
+    if (!tenantId || !userId) {
+      console.warn("[ensureTenantUserApp] Missing tenantId or userId — skipping.");
+      return;
+    }
+
+    try {
+      const targetApp = "accesseasy";
+      const envToken = import.meta.env.VITE_API_TOKEN;
+      const getUrl = `${import.meta.env.VITE_API_URL}/items/tenant?filter[tenantId][_eq]=${tenantId}&fields[]=tenantId&fields[]=userApp&limit=1`;
+      
+      const response = await fetch(getUrl, {
+        headers: { Authorization: `Bearer ${envToken}` }
+      });
+      const tenantJson = await response.json();
+
+      const tenantRecord = tenantJson.data?.[0];
+      if (!tenantRecord) {
+        console.warn("[ensureTenantUserApp] Tenant record not found for tenantId:", tenantId);
+        return;
+      }
+
+      let appsArray = [];
+      if (tenantRecord.userApp) {
+        try {
+          const parsed = typeof tenantRecord.userApp === "string" ? JSON.parse(tenantRecord.userApp) : tenantRecord.userApp;
+          appsArray = Array.isArray(parsed) ? parsed : [];
+        } catch (e) { appsArray = []; }
+      }
+
+      const alreadyExists = appsArray.some(entry => 
+        String(entry.userApp || "").toLowerCase() === targetApp.toLowerCase()
+      );
+
+      if (alreadyExists) {
+        return;
+      }
+
+      let empi = null;
+      try {
+        const pmRes = await this.api.get("/items/personalModule", {
+          params: { "filter[assignedUser][_eq]": userId, "fields[]": ["id"], limit: 1 },
+        });
+        empi = pmRes.data?.data?.[0]?.id || null;
+      } catch (e) { console.warn("[ensureTenantUserApp] PM lookup failed:", e.message); }
+
+      const newEntry = {
+        userApp: targetApp,
+        date: new Date().toISOString(),
+        empi: empi,
+      };
+      
+      appsArray.push(newEntry);
+
+      const patchRes = await fetch(`${import.meta.env.VITE_API_URL}/items/tenant/${tenantId}`, {
+        method: "PATCH",
+        headers: { 
+          Authorization: `Bearer ${envToken}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ 
+           userApp: JSON.stringify(appsArray) 
+        })
+      });
+
+      if (!patchRes.ok) {
+        console.error(`[ensureTenantUserApp] Patch failed`);
+      }
+    } catch (error) {
+      console.error("[ensureTenantUserApp] Failed to update tenant userApp:", error.message);
+    }
+  }
+
   async checkEmailExists(email) {
     try {
       const response = await this.api.get("/users", {
         params: {
-          "filter[_and][0][email][_eq]": email,
-          "filter[_and][1][userApp][_eq]": "accesseasy",
+          "filter[email][_eq]": email,
         },
       });
       return response.data.data.length > 0;
@@ -539,8 +638,7 @@ class AuthService {
     try {
       const response = await this.api.get("/users", {
         params: {
-          "filter[_and][0][email][_eq]": email,
-          "filter[_and][1][userApp][_eq]": "accesseasy",
+          "filter[email][_eq]": email,
           "fields[]": ["dateOfLeaving"],
         },
       });
@@ -569,8 +667,7 @@ class AuthService {
     try {
       const response = await this.api.get("/users", {
         params: {
-          "filter[_and][0][email][_eq]": email,
-          "filter[_and][1][userApp][_eq]": "accesseasy",
+          "filter[email][_eq]": email,
           "fields[]": [
             "id",
             "tenant.tenantId",
@@ -582,6 +679,7 @@ class AuthService {
             "email",
             "userPin",
             "dateOfLeaving",
+            "userApp",
             "otp",
             "usertoken",
             "title",
@@ -592,6 +690,26 @@ class AuthService {
 
       if (response?.data?.data && response.data.data.length > 0) {
         const userData = response.data.data[0];
+        
+        // Auto-attach to accesseasy if they exist but aren't on this app yet
+        const currentAppStr = String(userData.userApp || "").toLowerCase();
+        if (!currentAppStr.includes("accesseasy")) {
+          console.log("[getUserByEmail] User found but not on accesseasy. Attaching...");
+          const newAppStr = currentAppStr ? `${currentAppStr}, accesseasy` : "accesseasy";
+          
+          this.api.patch(`/users/${userData.id}`, { userApp: newAppStr }).catch(e => 
+            console.warn("[getUserByEmail] User patch failed:", e.message)
+          );
+          userData.userApp = newAppStr;
+
+          const tId = userData.tenant?.tenantId || userData.tenant?.id;
+          if (tId) {
+            this.ensureTenantUserApp(tId, userData.id, "accesseasy").catch(e =>
+              console.warn("[getUserByEmail] Tenant patch failed:", e.message)
+            );
+          }
+        }
+
         this.setUserData(userData);
         return userData;
       }
@@ -650,9 +768,8 @@ class AuthService {
       console.log("  [1] Fetching user record from DB for email:", email);
       const userRes = await this.api.get("/users", {
         params: {
-          "filter[_and][0][email][_eq]": email,
-          "filter[_and][1][userApp][_eq]": "accesseasy",
-          "fields[]": ["id", "token", "otp", "usertoken", "tenant.tenantId", "tenant.tenantName", "role.name", "phone", "first_name", "last_name", "email", "userPin", "dateOfLeaving", "title", "description"],
+          "filter[email][_eq]": email,
+          "fields[]": ["id", "token", "otp", "usertoken", "tenant.tenantId", "tenant.tenantName", "tenant.userApp", "role.name", "phone", "first_name", "last_name", "userApp", "email", "userPin", "dateOfLeaving", "title", "description"],
         },
       });
 
