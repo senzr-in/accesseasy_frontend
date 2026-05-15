@@ -7,6 +7,7 @@
         <p class="text-sm font-semibold text-slate-500">Manage and monitor all your visitor check-in portals.</p>
       </div>
       <button
+        v-if="pages.length === 0"
         @click="createNewPage"
         class="flex items-center gap-2 h-12 px-6 rounded-xl bg-blue-600 text-white text-sm font-bold shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition-all disabled:opacity-50"
         :disabled="!permissions.visitorPortals.create"
@@ -162,6 +163,10 @@ const fetchPages = async () => {
 const createNewPage = () => {
     if (!permissions.visitorPortals.create) {
         messageHandler.showError("Blocked Access: No permission to create portals.");
+        return;
+    }
+    if (pages.value && pages.value.length > 0) {
+        messageHandler.showWarning("You can only have one active visitor portal.");
         return;
     }
     router.push('/dashboard/visitor-portals/builder');

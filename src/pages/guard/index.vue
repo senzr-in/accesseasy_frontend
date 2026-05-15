@@ -195,9 +195,19 @@
               <input v-model="form.email" type="email" placeholder="guard@example.com" class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all text-foreground shadow-sm focus:border-indigo-500" />
             </div>
 
-            <div class="space-y-1.5">
-              <label class="text-[10px] font-black text-slate-500 dark:text-zinc-400 uppercase tracking-widest">Phone</label>
-              <input v-model="form.phone" type="tel" placeholder="+1 (555) 000-0000" class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all text-foreground shadow-sm focus:border-indigo-500" />
+            <div class="grid grid-cols-2 gap-4">
+              <div class="space-y-1.5">
+                <label class="text-[10px] font-black text-slate-500 dark:text-zinc-400 uppercase tracking-widest">Phone</label>
+                <input v-model="form.phone" type="tel" placeholder="+1 (555) 000-0000" class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all text-foreground shadow-sm focus:border-indigo-500" />
+              </div>
+
+              <div class="space-y-1.5">
+                <label class="text-[10px] font-black text-slate-500 dark:text-zinc-400 uppercase tracking-widest">Assigned Door <span class="text-red-500">*</span></label>
+                <select v-model="form.assigned_door" class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all text-foreground shadow-sm focus:border-indigo-500">
+                  <option :value="null" disabled>Select a Door</option>
+                  <option v-for="door in doors" :key="door.id" :value="door.id">{{ door.doorName || 'Unnamed Door' }}</option>
+                </select>
+              </div>
             </div>
 
             <div class="space-y-1.5" v-if="!editingGuard">
@@ -235,6 +245,7 @@ const showDialog = ref(false);
 const editingGuard = ref(null);
 const dialogLoading = ref(false);
 const dialogError = ref('');
+const doors = ref([]);
 
 const form = ref({
   first_name: '',
@@ -242,6 +253,7 @@ const form = ref({
   email: '',
   phone: '',
   password: '',
+  assigned_door: null,
 });
 
 const filteredItems = computed(() => {
@@ -258,11 +270,11 @@ const initials = (g) => fullName(g).charAt(0).toUpperCase();
 const openAddDialog = () => {
   editingGuard.value = null;
   dialogError.value = '';
-  form.value = { first_name: '', last_name: '', email: '', phone: '', password: '' };
+  form.value = { first_name: '', last_name: '', email: '', phone: '', password: '', assigned_door: null };
   showDialog.value = true;
 };
 
-const editGuard = (guard) => {
+const editGuard = async (guard) => {
   editingGuard.value = guard;
   dialogError.value = '';
   form.value = {
@@ -271,7 +283,29 @@ const editGuard = (guard) => {
     email: guard.email || '',
     phone: guard.phone || '',
     password: '',
+    assigned_door: null,
   };
+  
+  // Fetch personalModule to get assigned_door
+  try {
+    dialogLoading.value = true;
+    const token = authService.getToken();
+    const pmRes = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule?filter[assignedUser][_eq]=${guard.id}&fields[]=id&fields[]=assigned_door`, {
+        headers: { Authorization: `Bearer ${token}` }
+    });
+    if (pmRes.ok) {
+        const pmData = await pmRes.json();
+        if (pmData.data && pmData.data.length > 0) {
+            form.value.assigned_door = pmData.data[0].assigned_door;
+            editingGuard.value.personalModuleId = pmData.data[0].id;
+        }
+    }
+  } catch(err) {
+      console.error('Failed to fetch guard personal info:', err);
+  } finally {
+      dialogLoading.value = false;
+  }
+
   showDialog.value = true;
 };
 
@@ -295,6 +329,22 @@ const fetchGuards = async () => {
   }
 };
 
+const fetchDoors = async () => {
+  try {
+    const token = authService.getToken();
+    const tenantId = await currentUserTenant.getTenantIdAsync();
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/doors?filter[tenant][_eq]=${tenantId}&filter[status][_neq]=archived&fields[]=id&fields[]=doorName`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      doors.value = data.data || [];
+    }
+  } catch (err) {
+    console.error('Failed to fetch doors:', err);
+  }
+};
+
 const handleSubmit = async () => {
   dialogError.value = '';
   if (!form.value.first_name.trim()) {
@@ -307,6 +357,10 @@ const handleSubmit = async () => {
   }
   if (!editingGuard.value && !form.value.password.trim()) {
     dialogError.value = 'Password is required for new guards.';
+    return;
+  }
+  if (!form.value.assigned_door) {
+    dialogError.value = 'Assigned door is required.';
     return;
   }
 
@@ -375,6 +429,7 @@ const handleSubmit = async () => {
           attendancePolicyHistory: { status: "published" },
           tenant: tenantId,
           assignedUser: newUserId,
+          assigned_door: form.value.assigned_door,
         };
 
         const personalRes = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule`, {
@@ -389,6 +444,23 @@ const handleSubmit = async () => {
         if (!personalRes.ok) {
           console.warn('Backend rejected personalModule assignment for Guard.');
         }
+      } else if (isEdit && editingGuard.value.personalModuleId) {
+        // Update assigned_door
+        const personalPayload = {
+            firstName: form.value.first_name,
+            lastName: form.value.last_name || '-',
+            personalEmail: form.value.email,
+            personalPhone: form.value.phone || null,
+            assigned_door: form.value.assigned_door
+        };
+        await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule/${editingGuard.value.personalModuleId}`, {
+          method: 'PATCH',
+          headers: { 
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify(personalPayload),
+        });
       }
 
       showDialog.value = false;
@@ -424,5 +496,6 @@ const deleteGuard = async (guard) => {
 
 onMounted(() => {
   fetchGuards();
+  fetchDoors();
 });
 </script>

@@ -45,15 +45,6 @@
 
               
               <div class="space-y-1.5">
-                <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Door Type</label>
-                <select v-model="formData.doorType" class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground">
-                  <option value="entry">Entry</option>
-                  <option value="exit">Exit</option>
-                  <option value="both">Both (Entry/Exit)</option>
-                </select>
-              </div>
-
-              <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Location</label>
                 <input v-model="formData.location" type="text" placeholder="Floor 1, Building A" class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground placeholder:text-zinc-500" />
               </div>
@@ -128,7 +119,6 @@ const departments = ref([]);
 const formData = ref({
   doorNumber: 1,
   doorName: '',
-  doorType: 'entry',
   location: '',
   assignedDepts: []
 });
@@ -143,7 +133,6 @@ watch(() => props.modelValue, (isOpen) => {
       formData.value = {
         doorNumber: props.door.doorNumber || 1,
         doorName: props.door.doorName || '',
-        doorType: props.door.doorType || 'entry',
         location: props.door.location || '',
         // Directus returns assignedDepts as array of objects potentially
         assignedDepts: (props.door.assignedDepts || []).map(d => d.id || d)
@@ -153,7 +142,6 @@ watch(() => props.modelValue, (isOpen) => {
       formData.value = {
         doorNumber: 1,
         doorName: '',
-        doorType: 'entry',
         location: '',
         assignedDepts: []
       };
@@ -219,7 +207,6 @@ const handleSubmit = async () => {
     const payload = {
       doorName: formData.value.doorName,
       doorNumber,
-      doorType: formData.value.doorType || null,
       location: formData.value.location || null,
       status: 'active',
       tenant: tenantId,

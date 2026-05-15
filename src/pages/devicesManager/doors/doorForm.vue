@@ -92,17 +92,6 @@
                   @blur="markFieldAsTouched('doorName')"
                 ></v-text-field>
               </v-col>
-              <!-- Door Type -->
-              <v-col cols="12" md="6">
-                <v-select
-                  v-model="formData.doorType"
-                  :items="['Sub door', 'Main door']"
-                  label="Door Type"
-                  variant="outlined"
-                  density="comfortable"
-                ></v-select>
-              </v-col>
-
               <!-- Door Group Dropdown -->
               <v-col cols="12" md="6">
                 <div class="door-group-container">
@@ -171,18 +160,6 @@
                 ></v-select>
               </v-col>
 
-              <!-- Branch -->
-              <v-col cols="12" md="6">
-                <v-select
-                  v-model="formData.branch"
-                  :items="branchOptions"
-                  item-title="name"
-                  item-value="name"
-                  label="Branch"
-                  variant="outlined"
-                  density="comfortable"
-                ></v-select>
-              </v-col>
             </v-row>
           </div>
 
@@ -309,9 +286,7 @@ const showErrorMessage = (message) => {
 const formData = reactive({
   doorName: "",
   doorNumber: "",
-  doorType: "",
   assignedDepts: "",
-  branch: "",
   accessLevel: "",
   status: true,
   accessStartTime: "",
@@ -321,7 +296,6 @@ const formData = reactive({
 });
 
 const departmentOptions = ref([]);
-const branchOptions = ref([]);
 const accessLevelOptions = ref([]);
 
 const tabHasError = (tabId) => {
@@ -368,29 +342,6 @@ async function fetchDepartments() {
     }));
   } catch (error) {
     console.error("Error fetching departments:", error);
-  }
-}
-
-async function fetchBranches() {
-  try {
-    const resolvedTenantId = await resolveTenantId();
-    const response = await fetch(
-      `${
-        import.meta.env.VITE_API_URL
-      }/items/branch?filter[tenant][tenantId][_eq]=${resolvedTenantId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${authService.getToken()}`,
-        },
-      },
-    );
-    const data = await response.json();
-    branchOptions.value = data.data.map((branch) => ({
-      id: branch.id,
-      name: branch.branchName,
-    }));
-  } catch (error) {
-    console.error("Error fetching branches:", error);
   }
 }
 
@@ -541,9 +492,6 @@ async function createNewDoor() {
     const selectedDepartment = departmentOptions.value.find(
       (dept) => dept.name === formData.assignedDepts,
     );
-    const selectedBranch = branchOptions.value.find(
-      (branch) => branch.name === formData.branch,
-    );
     const selectedAccessLevel = accessLevelOptions.value.find(
       (level) => level.accessLevelName === formData.accessLevel,
     );
@@ -551,11 +499,9 @@ async function createNewDoor() {
     const payload = {
       doorName: formData.doorName,
       doorNumber: DoorNumber,
-      doorType: formData.doorType,
       status: formData.status ? "active" : "inactive",
       tenant: resolvedTenantId,
       assignedDepts: selectedDepartment?.id,
-      branch: selectedBranch?.id,
       accessLevel: selectedAccessLevel?.id,
       accessStartTime: formData.accessStartTime,
       accessEndTime: formData.accessEndTime,
@@ -625,9 +571,6 @@ async function editDoor() {
     const selectedDepartment = departmentOptions.value.find(
       (dept) => dept.name === formData.department,
     );
-    const selectedBranch = branchOptions.value.find(
-      (branch) => branch.name === formData.branch,
-    );
     const selectedAccessLevel = accessLevelOptions.value.find(
       (level) => level.accessLevelName === formData.accessLevel,
     );
@@ -635,11 +578,9 @@ async function editDoor() {
     const payload = {
       doorName: formData.doorName,
       doorNumber: formData.doorNumber,
-      doorType: formData.doorType,
       status: formData.status ? "active" : "inactive",
       tenant: resolvedTenantId,
       assignedDepts: selectedDepartment?.id,
-      branch: selectedBranch?.id,
       accessLevel: selectedAccessLevel?.id,
       accessStartTime: formData.accessStartTime,
       accessEndTime: formData.accessEndTime,
@@ -727,7 +668,6 @@ async function deleteDoor() {
 
 onMounted(async () => {
   await fetchDepartments();
-  await fetchBranches();
   await fetchAccessLevels();
   await fetchDoorGroups();
 
@@ -761,7 +701,6 @@ watch(
         // formData.assignedDepts = newVal.assignedDepts.departmentName || "";
         // formData.branch = newVal.branch.branchName || "";
         formData.doorNumber = newVal.doorNumber || "";
-        formData.doorType = newVal.doorType || "";
         formData.status = newVal.status === "active";
         formData.accessStartTime = newVal.accessStartTime || "";
         formData.accessEndTime = newVal.accessEndTime || "";
@@ -770,11 +709,6 @@ watch(
         // Handle department
         if (newVal.assignedDepts) {
           formData.assignedDepts = newVal.assignedDepts.departmentName || "";
-        }
-
-        // Handle branch
-        if (newVal.branch) {
-          formData.branch = newVal.branch.branchName || "";
         }
 
         // Access Level

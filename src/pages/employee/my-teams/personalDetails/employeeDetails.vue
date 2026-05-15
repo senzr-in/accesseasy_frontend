@@ -109,6 +109,7 @@
                   </button>
                   <button 
                     v-if="isAdmin"
+                    @click="confirmDelete(emp)"
                     class="h-7 w-7 p-0 flex items-center justify-center rounded-md border border-rose-200 dark:border-rose-900/50 bg-transparent text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors shadow-sm"
                   >
                     <Trash2 class="h-3.5 w-3.5" />
@@ -143,12 +144,41 @@
 
     <!-- Dialogs -->
     <AddEmployeeDialog v-model="showAddDialog" :employee="selectedEmployee" @success="fetchEmployeeData" />
+
+    <!-- Delete Confirmation Dialog -->
+    <div v-if="deleteDialog" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" @click="deleteDialog = false"></div>
+      <div class="relative bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-6 w-full max-w-sm shadow-xl">
+        <div class="flex items-center gap-4 mb-4">
+          <div class="w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-500/10 flex items-center justify-center shrink-0">
+            <Trash2 class="w-5 h-5 text-rose-500" />
+          </div>
+          <div>
+            <h3 class="text-base font-black text-slate-900 dark:text-white">Delete Employee?</h3>
+            <p class="text-xs text-slate-500 mt-0.5">This action cannot be undone.</p>
+          </div>
+        </div>
+        <p class="text-sm font-medium text-slate-600 dark:text-zinc-400 mb-6">
+          Are you sure you want to permanently remove
+          <strong class="text-slate-800 dark:text-white">{{ employeeToDelete?.assignedUser?.first_name }}</strong>
+          from the system?
+        </p>
+        <div class="flex justify-end gap-3">
+          <button @click="deleteDialog = false" class="px-4 py-2 rounded-xl text-sm font-bold text-slate-500 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors">Cancel</button>
+          <button @click="deleteEmployee" :disabled="deleting" class="px-4 py-2 rounded-xl text-sm font-bold text-white bg-rose-500 hover:bg-rose-600 disabled:opacity-50 flex items-center gap-2 transition-colors">
+            <Loader2 v-if="deleting" class="w-4 h-4 animate-spin" />
+            <Trash2 v-else class="w-4 h-4" />
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted, watch, inject } from "vue";
 import { useRouter } from "vue-router";
 import { Plus, Search, Filter, FileDown, Trash2, MessageCircle, Loader2 } from "lucide-vue-next";
 import { authService } from "@/services/authService";
@@ -170,6 +200,12 @@ const totalItems = ref(0);
 const itemsPerPage = 15;
 const showAddDialog = ref(false);
 const selectedEmployee = ref(null);
+const deleteDialog = ref(false);
+const employeeToDelete = ref(null);
+const deleting = ref(false);
+
+const defaultMessageHandler = { showSuccess: (m) => console.log(m), showError: (m) => console.error(m) };
+const messageHandler = inject('messageHandler', defaultMessageHandler);
 
 // Permissions
 const isAdmin = computed(() => userRole === "Admin" || userRole === "Dealer");
@@ -200,6 +236,43 @@ const handleCreateEmployee = () => {
 const handleEditEmployee = (employeeData) => {
   selectedEmployee.value = employeeData;
   showAddDialog.value = true;
+};
+
+const confirmDelete = (emp) => {
+  employeeToDelete.value = emp;
+  deleteDialog.value = true;
+};
+
+const deleteEmployee = async () => {
+  if (!employeeToDelete.value) return;
+  deleting.value = true;
+  try {
+    const emp = employeeToDelete.value;
+    // Step 1: Delete the personalModule record
+    const pmRes = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule/${emp.id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!pmRes.ok && pmRes.status !== 204) {
+      throw new Error('Failed to delete employee record');
+    }
+    // Step 2: Delete the Directus user account if linked
+    if (emp.assignedUser?.id) {
+      await fetch(`${import.meta.env.VITE_API_URL}/users/${emp.assignedUser.id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    }
+    messageHandler.showSuccess('Employee deleted successfully');
+    deleteDialog.value = false;
+    employeeToDelete.value = null;
+    fetchEmployeeData();
+  } catch (err) {
+    console.error('Delete error:', err);
+    messageHandler.showError(err.message || 'Failed to delete employee');
+  } finally {
+    deleting.value = false;
+  }
 };
 
 const buildFilterParams = () => {
@@ -243,10 +316,11 @@ const fetchEmployeeData = async () => {
     
     // Add fields array manually since URLSearchParams doesn't handle array brackets exactly as Directus wants
     const fields = [
-        "id", "employeeId", "status", "assignedUser.id", 
-        "assignedUser.first_name", "assignedUser.role.name", 
+        "*",
+        "assignedUser.id", "assignedUser.first_name", "assignedUser.last_name", "assignedUser.role.name", 
         "assignedUser.phone", "assignedUser.email",
-        "department.id", "department.departmentName"
+        "department.id", "department.departmentName",
+        "branch.id", "assignedAccessLevel.id"
     ].map(f => `fields[]=${f}`).join('&');
 
     const res = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule?${queryParams.toString()}&${fields}`, {

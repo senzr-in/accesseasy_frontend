@@ -116,7 +116,7 @@
             <div class="grid gap-4">
               <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Official Email <span class="text-red-500">*</span></label>
-                <input v-model="formData.email" type="email" required placeholder="john.doe@organization.com" :disabled="!!employee" class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground disabled:opacity-50 disabled:cursor-not-allowed" />
+                <input v-model="formData.email" type="email" required placeholder="john.doe@organization.com" class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground disabled:opacity-50 disabled:cursor-not-allowed" />
               </div>
             </div>
             <div class="grid grid-cols-2 gap-4">
@@ -389,9 +389,10 @@ const handleSubmit = async () => {
              const userUpdatePayload = {
                 first_name: formData.value.firstName,
                 last_name: formData.value.lastName || '-',
-                phone: formData.value.personalPhone || formData.value.personalEmail
+                phone: formData.value.personalPhone ? `+91${formData.value.personalPhone}` : null,
+                email: formData.value.email
              };
-             await fetch(`${import.meta.env.VITE_API_URL}/users/${props.employee.assignedUser.id}`, {
+             const patchRes = await fetch(`${import.meta.env.VITE_API_URL}/users/${props.employee.assignedUser.id}`, {
                 method: 'PATCH',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -399,6 +400,10 @@ const handleSubmit = async () => {
                 },
                 body: JSON.stringify(userUpdatePayload)
             });
+            if (!patchRes.ok) {
+              const errData = await patchRes.json();
+              throw new Error("Failed to update user: " + (errData.errors?.[0]?.message || 'Unknown'));
+            }
         }
     }
 

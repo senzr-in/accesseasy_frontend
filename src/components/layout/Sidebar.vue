@@ -272,9 +272,6 @@ const navigationItems = computed(() => {
       icon: Settings, 
       role: "Admin",
       children: [
-        { name: "Branches", href: "/dashboard/settings/branches" },
-        { name: "Zones", href: "/dashboard/settings/zones" },
-        { name: "Timer Zones", href: "/dashboard/settings/timezones" },
         { name: "Devices", href: "/dashboard/settings/devices" },
         { name: "Event Logs", href: "/dashboard/settings/logs" }
       ]

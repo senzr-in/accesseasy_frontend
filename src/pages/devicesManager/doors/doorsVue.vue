@@ -32,7 +32,6 @@
             <tr>
               <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">Door Name</th>
               <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">#</th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">Type</th>
               <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">Location</th>
               <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">Status</th>
               <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest text-right whitespace-nowrap">Actions</th>
@@ -41,14 +40,14 @@
           <tbody class="divide-y divide-slate-100 dark:divide-zinc-800 bg-white dark:bg-zinc-950">
             <!-- Loading -->
             <tr v-if="loading">
-              <td colspan="6" class="px-5 py-24 text-center">
+              <td colspan="5" class="px-5 py-24 text-center">
                 <Loader2 class="w-8 h-8 animate-spin text-blue-500 mx-auto" />
               </td>
             </tr>
 
             <!-- Empty -->
             <tr v-else-if="items.length === 0">
-              <td colspan="6" class="px-5 py-24 text-center">
+              <td colspan="5" class="px-5 py-24 text-center">
                 <div class="flex flex-col items-center justify-center space-y-3">
                   <DoorOpen class="w-10 h-10 text-slate-300 dark:text-zinc-700" />
                   <p class="text-[10px] font-black uppercase tracking-widest text-slate-500">No doors found.</p>
@@ -93,11 +92,6 @@
                 <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 text-[11px] font-mono font-bold border border-slate-200 dark:border-zinc-700">
                   #{{ door.doorNumber || '—' }}
                 </span>
-              </td>
-
-              <!-- Type -->
-              <td class="px-5 py-3">
-                <span class="text-[12px] font-semibold text-slate-500 capitalize">{{ door.doorType || '—' }}</span>
               </td>
 
               <!-- Location -->
@@ -230,7 +224,7 @@ const fetchDoorData = async () => {
 
     // Only request fields that exist and have read permissions (matching reference codebase)
     const fields = [
-      "id", "doorNumber", "doorName", "status", "doorType",
+      "id", "doorNumber", "doorName", "status",
       "departmentIds", "location",
     ].map(f => `fields[]=${encodeURIComponent(f)}`).join('&');
 
