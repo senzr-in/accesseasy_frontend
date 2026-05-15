@@ -140,7 +140,7 @@
 
               <div class="vp-field-row">
                 <div class="vp-field">
-                  <label class="vp-label">Govt ID Type <span class="vp-required">*</span></label>
+                  <label class="vp-label">Govt ID Type <span v-if="!content.govtIdOptional" class="vp-required">*</span></label>
                   <select v-model="visitorData.govtIdType" class="vp-input vp-select">
                     <option>Aadhar</option>
                     <option>Driving License</option>
@@ -150,7 +150,7 @@
                   </select>
                 </div>
                 <div class="vp-field">
-                  <label class="vp-label">ID Number <span class="vp-required">*</span></label>
+                  <label class="vp-label">ID Number <span v-if="!content.govtIdOptional" class="vp-required">*</span></label>
                   <input v-model="visitorData.govtIdNumber" type="text" placeholder="XXXX-XXXX-XXXX" class="vp-input" :class="{ 'vp-input-error': errors.govtIdNumber }" @blur="validateField('govtIdNumber')" />
                 </div>
               </div>
@@ -181,6 +181,37 @@
               <div class="vp-field">
                 <label class="vp-label">Company / Organisation</label>
                 <input v-model="visitorData.company" type="text" placeholder="e.g. Acme Corp" class="vp-input" />
+              </div>
+
+              <!-- ── Photo Upload (configurable) ── -->
+              <div v-if="content.enablePhotoUpload" class="vp-field">
+                <label class="vp-label">Your Photo <span class="vp-badge-opt">Optional</span></label>
+                <div class="vp-upload-box" @click="$refs.photoInput.click()">
+                  <img v-if="photoPreview" :src="photoPreview" class="vp-upload-preview" />
+                  <div v-else class="vp-upload-placeholder">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><circle cx="12" cy="13" r="3" stroke-width="2"/></svg>
+                    <span>Tap to take / upload photo</span>
+                  </div>
+                </div>
+                <input ref="photoInput" type="file" accept="image/*" capture="user" class="hidden" @change="handlePhotoChange" />
+                <button v-if="photoPreview" class="vp-upload-clear" @click.stop="clearPhoto">Remove photo</button>
+              </div>
+
+              <!-- ── Proof Document Upload (configurable) ── -->
+              <div v-if="content.enableProofUpload" class="vp-field">
+                <label class="vp-label">ID Proof Document <span class="vp-badge-opt">Optional</span></label>
+                <div class="vp-upload-box vp-upload-doc" @click="$refs.proofInput.click()">
+                  <div v-if="proofFileName" class="vp-upload-doc-selected">
+                    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    <span>{{ proofFileName }}</span>
+                  </div>
+                  <div v-else class="vp-upload-placeholder">
+                    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                    <span>Upload ID proof (image or PDF)</span>
+                  </div>
+                </div>
+                <input ref="proofInput" type="file" accept="image/*,application/pdf" class="hidden" @change="handleProofChange" />
+                <button v-if="proofFileName" class="vp-upload-clear" @click.stop="clearProof">Remove file</button>
               </div>
 
               <p v-if="submitError" class="vp-err-msg" style="text-align:center;">{{ submitError }}</p>
@@ -222,6 +253,12 @@ const submitError = ref('');
 const checkInTime = ref('');
 const qrToken     = ref('');    // QR token returned from backend
 const visitorId   = ref('');   // visitor record ID
+
+// ── File upload state ─────────────────────────────────────────────────────
+const photoFile    = ref(null);
+const photoPreview = ref(null);
+const proofFile    = ref(null);
+const proofFileName= ref(null);
 
 const DEFAULT_ASSET_ID = 'b88c5273-ba1e-45db-b874-c34ad791afeb';
 
@@ -291,6 +328,8 @@ const openModal  = () => { submitted.value = false; submitError.value = ''; moda
 const resetModal = () => {
   modalOpen.value = false; submitted.value = false;
   qrToken.value = ''; visitorId.value = '';
+  photoFile.value = null; photoPreview.value = null;
+  proofFile.value = null; proofFileName.value = null;
   visitorData.value = { name:'', mobile:'', govtIdType:'Aadhar', govtIdNumber:'', reasonForVisit:'', reasonForVisitOther:'', personToMeet:'', company:'' };
   errors.value = {};
 };
@@ -330,15 +369,46 @@ const validateField = (f) => {
   errors.value[f] = '';
   if (f === 'name'         && !visitorData.value.name.trim())         errors.value.name         = 'Full name is required';
   if (f === 'mobile'       && !visitorData.value.mobile.trim())       errors.value.mobile       = 'Mobile number is required';
-  if (f === 'govtIdNumber' && !visitorData.value.govtIdNumber.trim()) errors.value.govtIdNumber = 'ID number is required';
+  if (f === 'govtIdNumber' && !content.value.govtIdOptional && !visitorData.value.govtIdNumber.trim()) errors.value.govtIdNumber = 'ID number is required';
 };
 
 const validate = () => {
-  ['name','mobile','govtIdNumber'].forEach(validateField);
+  ['name','mobile'].forEach(validateField);
+  if (!content.value.govtIdOptional) validateField('govtIdNumber');
   if (!visitorData.value.reasonForVisit) errors.value.reasonForVisit = 'Please select a reason';
   if (visitorData.value.reasonForVisit === 'Other' && !visitorData.value.reasonForVisitOther.trim())
     errors.value.reasonForVisit = 'Please describe the reason';
   return !Object.values(errors.value).some(Boolean);
+};
+
+// ── File handlers ─────────────────────────────────────────────────────────
+const handlePhotoChange = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  photoFile.value    = file;
+  photoPreview.value = URL.createObjectURL(file);
+};
+const clearPhoto = () => { photoFile.value = null; photoPreview.value = null; };
+
+const handleProofChange = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  proofFile.value     = file;
+  proofFileName.value = file.name;
+};
+const clearProof = () => { proofFile.value = null; proofFileName.value = null; };
+
+// Upload a file to Directus and return the file ID
+const uploadToDirectus = async (file, prefix) => {
+  const formData = new FormData();
+  formData.append('file', file, `${prefix}-${Date.now()}-${file.name}`);
+  const res = await axios.post(`${import.meta.env.VITE_API_URL}/files`, formData, {
+    headers: {
+      'Authorization': `Bearer ${import.meta.env.VITE_API_TOKEN}`,
+      'Content-Type': 'multipart/form-data'
+    }
+  });
+  return res.data?.data?.id || null;
 };
 
 const submitRegistration = async () => {
@@ -352,6 +422,18 @@ const submitRegistration = async () => {
     const startDate = today.toISOString().split('T')[0];
     const timeNow = today.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }) + ':00';
 
+    // Upload files to Directus if provided
+    let photoId = null;
+    let proofDocumentId = null;
+    if (photoFile.value) {
+      try { photoId = await uploadToDirectus(photoFile.value, 'visitor-photo'); }
+      catch(e) { console.warn('Photo upload failed (non-critical):', e.message); }
+    }
+    if (proofFile.value) {
+      try { proofDocumentId = await uploadToDirectus(proofFile.value, 'visitor-proof'); }
+      catch(e) { console.warn('Proof upload failed (non-critical):', e.message); }
+    }
+
     const payload = {
       personName: visitorData.value.name, mobileNumber: visitorData.value.mobile,
       email: '', startDate, endDate: startDate, startTime: timeNow, endTime: '23:59:59',
@@ -360,6 +442,8 @@ const submitRegistration = async () => {
       personToMeet: visitorData.value.personToMeet, reasonForVisit: reason,
       govtIdType: visitorData.value.govtIdType, govtIdNumber: visitorData.value.govtIdNumber,
       portalId: portal.value.id,
+      ...(photoId        && { photo:           photoId }),
+      ...(proofDocumentId && { proofDocument:  proofDocumentId }),
     };
 
     const res = await axios.post(`${import.meta.env.VITE_KN_API_URL}/visitor-portal-flow/visitor`, payload);
@@ -705,4 +789,73 @@ onMounted(fetchPortal);
 .vp-modal-leave-active .vp-modal-panel { transition: transform 0.35s cubic-bezier(0.16,1,0.3,1); }
 .vp-modal-enter-from .vp-modal-panel { transform: translateY(100%); }
 .vp-modal-leave-to .vp-modal-panel   { transform: translateY(100%); }
+
+/* ── Optional badge ── */
+.vp-badge-opt {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.55rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border-radius: 4px;
+  background: #f1f5f9;
+  color: #94a3b8;
+  vertical-align: middle;
+}
+
+/* ── Upload box ── */
+.vp-upload-box {
+  width: 100%;
+  min-height: 90px;
+  border: 1.5px dashed #e2e8f0;
+  border-radius: 0.75rem;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.2s, background 0.2s;
+}
+.vp-upload-box:hover { border-color: var(--vp-brand); background: #fff; }
+
+.vp-upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  color: #94a3b8;
+  padding: 1rem;
+}
+.vp-upload-placeholder span { font-size: 0.7rem; font-weight: 600; text-align: center; }
+
+.vp-upload-preview {
+  width: 100%;
+  max-height: 140px;
+  object-fit: cover;
+  display: block;
+}
+
+.vp-upload-doc-selected {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  color: #475569;
+}
+.vp-upload-doc-selected span { font-size: 0.75rem; font-weight: 600; word-break: break-all; }
+
+.vp-upload-clear {
+  margin-top: 0.35rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #f43f5e;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+.vp-upload-clear:hover { text-decoration: underline; }
 </style>

@@ -106,6 +106,66 @@
                </div>
             </div>
           </div>
+
+          <!-- Section: Optional Form Fields -->
+          <div class="p-8 border-t border-slate-100 dark:border-zinc-800 space-y-5">
+            <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+              <SlidersHorizontal class="w-3.5 h-3.5 text-blue-500" /> Optional Fields
+            </h3>
+            <p class="text-[10px] font-medium text-slate-400 -mt-2">Choose which extra fields visitors will see on the check-in form.</p>
+
+            <!-- Photo Upload Toggle -->
+            <div class="flex items-center justify-between p-4 rounded-xl bg-white dark:bg-zinc-950 border border-slate-100 dark:border-zinc-800">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center">
+                  <Camera class="w-4 h-4 text-blue-500" />
+                </div>
+                <div>
+                  <p class="text-xs font-bold text-slate-700 dark:text-slate-200">Visitor Photo</p>
+                  <p class="text-[10px] font-medium text-slate-400">Capture or upload a selfie photo</p>
+                </div>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" v-model="pageConfig.enablePhotoUpload" class="sr-only peer">
+                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+
+            <!-- Proof Upload Toggle -->
+            <div class="flex items-center justify-between p-4 rounded-xl bg-white dark:bg-zinc-950 border border-slate-100 dark:border-zinc-800">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-violet-50 dark:bg-violet-500/10 flex items-center justify-center">
+                  <FileUp class="w-4 h-4 text-violet-500" />
+                </div>
+                <div>
+                  <p class="text-xs font-bold text-slate-700 dark:text-slate-200">ID Proof Document</p>
+                  <p class="text-[10px] font-medium text-slate-400">Upload photo or PDF of ID proof</p>
+                </div>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" v-model="pageConfig.enableProofUpload" class="sr-only peer">
+                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-violet-600"></div>
+              </label>
+            </div>
+
+            <!-- Govt ID Optional Toggle -->
+            <div class="flex items-center justify-between p-4 rounded-xl bg-white dark:bg-zinc-950 border border-slate-100 dark:border-zinc-800">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center">
+                  <ShieldOff class="w-4 h-4 text-amber-500" />
+                </div>
+                <div>
+                  <p class="text-xs font-bold text-slate-700 dark:text-slate-200">Govt ID — Optional</p>
+                  <p class="text-[10px] font-medium text-slate-400">When ON, visitors can skip the Govt ID fields</p>
+                </div>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" v-model="pageConfig.govtIdOptional" class="sr-only peer">
+                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-amber-500"></div>
+              </label>
+            </div>
+          </div>
+
         </div>
 
         <!-- Preview Note -->
@@ -159,7 +219,8 @@ import { useRoute, useRouter } from 'vue-router';
 import { authService } from '@/services/authService';
 import {
   Loader2, Settings, Image as ImageIcon, Plus, Layout, UploadCloud,
-  ClipboardSignature, Save, Check, Copy, MessageCircle, Mail, Phone, X
+  ClipboardSignature, Save, Check, Copy, MessageCircle, Mail, Phone, X,
+  SlidersHorizontal, Camera, FileUp, ShieldOff
 } from 'lucide-vue-next';
 
 const route  = useRoute();
@@ -202,6 +263,10 @@ const pageConfig = ref({
   contactEmail:  '',
   status: 'published',
   defaultAccessLevel: null,
+  // Optional Fields
+  enablePhotoUpload: false,
+  enableProofUpload: false,
+  govtIdOptional:    false,
 });
 
 // ── Preview URL ────────────────────────────────────────────────────────────
@@ -266,6 +331,10 @@ const savePage = async () => {
         contactPhone:                pageConfig.value.contactPhone,
         contactEmail:                pageConfig.value.contactEmail,
         defaultAccessLevel:          pageConfig.value.defaultAccessLevel,
+        // Optional Fields
+        enablePhotoUpload:           pageConfig.value.enablePhotoUpload,
+        enableProofUpload:           pageConfig.value.enableProofUpload,
+        govtIdOptional:              pageConfig.value.govtIdOptional,
       },
       Assetjson: { images: { logo: pageConfig.value.logoId, banner: pageConfig.value.bannerId } },
     };
@@ -337,6 +406,9 @@ onMounted(async () => {
       pageConfig.value.contactPhone               = d.Contentjson.contactPhone                ?? '';
       pageConfig.value.contactEmail               = d.Contentjson.contactEmail                ?? '';
       pageConfig.value.defaultAccessLevel         = d.Contentjson.defaultAccessLevel          ?? null;
+      pageConfig.value.enablePhotoUpload          = d.Contentjson.enablePhotoUpload           ?? false;
+      pageConfig.value.enableProofUpload          = d.Contentjson.enableProofUpload           ?? false;
+      pageConfig.value.govtIdOptional             = d.Contentjson.govtIdOptional              ?? false;
     }
     if (d.Assetjson?.images) {
       pageConfig.value.logoId       = d.Assetjson.images.logo   || DEFAULT_ASSET_ID;
