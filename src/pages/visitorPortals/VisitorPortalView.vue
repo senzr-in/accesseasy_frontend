@@ -266,7 +266,7 @@ const fetchPortal = async () => {
   if (!id) { error.value = 'No portal ID provided'; loading.value = false; return; }
 
   try {
-    const res = await axios.get(`${import.meta.env.VITE_KN_API_URL}/branded-page-flow/${id}`, { timeout: 15000 });
+    const res = await axios.get(`${import.meta.env.VITE_KN_API_URL}/visitor-portal-flow/${id}`, { timeout: 15000 });
     if (res.data.status === 'SUCCESS') {
       let data = res.data.data;
       if (data?.Contentjson && typeof data.Contentjson === 'string') try { data.Contentjson = JSON.parse(data.Contentjson); } catch(e) {}
