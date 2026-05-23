@@ -1,30 +1,30 @@
 <template>
-  <div class="space-y-8 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700 p-6 max-w-7xl mx-auto">
+  <div class="space-y-4 pb-4 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 max-w-7xl mx-auto">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row items-start justify-between gap-4">
+    <div class="flex flex-col sm:flex-row items-start justify-between gap-2">
       <div>
-        <h1 class="text-4xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
+        <h1 class="text-3xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
           Access Profile
           <span class="px-2.5 py-0.5 rounded-md border border-indigo-200 dark:border-indigo-500/20 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-sm font-black uppercase tracking-widest leading-tight">
             Level {{ employee?.access_level?.accessLevelName || 'Unknown' }}
           </span>
         </h1>
-        <p class="text-sm font-medium text-slate-500 mt-1">Manage your mobile keys and physical cards.</p>
+        <p class="text-xs font-medium text-slate-500 mt-0.5">Manage your mobile keys and physical cards.</p>
       </div>
     </div>
 
     <!-- Main Content -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
       
       <!-- Left Column: Digital Access / QR -->
-      <div class="space-y-6">
+      <div class="space-y-3">
         <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 px-1">Mobile Access</h3>
         
         <div class="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden shadow-sm relative group">
           <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-500"></div>
           
-          <div class="p-8 pb-6 flex flex-col items-center justify-center min-h-[300px]">
-            <div v-if="loadingEmployee" class="flex flex-col items-center gap-4 text-slate-400">
+          <div class="p-5 pb-4 flex flex-col items-center justify-center min-h-[260px]">
+            <div v-if="loadingEmployee" class="flex flex-col items-center gap-3 text-slate-400">
               <Loader2 class="w-8 h-8 animate-spin text-indigo-500" />
               <span class="text-xs font-bold uppercase tracking-widest">Loading secure identity...</span>
             </div>
@@ -36,37 +36,34 @@
             </div>
 
             <div v-else-if="activeQrUrl" class="flex flex-col items-center w-full animate-in zoom-in-95 duration-500">
-              <div class="bg-white p-4 rounded-xl shadow-inner border border-slate-100 flex items-center justify-center">
-                <img :src="activeQrUrl" alt="Access QR Code" class="w-48 h-48 block rendering-pixelated" />
+              <div class="bg-white p-3 rounded-xl shadow-inner border border-slate-100 flex items-center justify-center">
+                <img :src="activeQrUrl" alt="Access QR Code" class="w-44 h-44 block rendering-pixelated" />
               </div>
-              <p class="text-[10px] font-black uppercase tracking-widest text-indigo-500 mt-6 bg-indigo-50 dark:bg-indigo-500/10 px-3 py-1.5 rounded-full border border-indigo-100 dark:border-indigo-500/20">
-                Active Code: {{ activeQrToken }}
-              </p>
               
-              <div class="mt-8 flex flex-col sm:flex-row gap-3 w-full px-4 justify-center items-center">
-                <button @click="generateNewQr" :disabled="generatingQr" class="w-full sm:w-auto px-4 h-10 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-zinc-300 hover:bg-slate-100 transition-colors flex items-center justify-center disabled:opacity-50">
+              <div class="mt-4 flex flex-col sm:flex-row gap-3 w-full px-4 justify-center items-center">
+                <button @click="generateNewQr" :disabled="generatingQr" class="w-full sm:w-auto px-4 h-9 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-zinc-300 hover:bg-slate-100 transition-colors flex items-center justify-center disabled:opacity-50">
                   <RefreshCw class="w-3.5 h-3.5 mr-2" :class="{ 'animate-spin': generatingQr }" />
                   Regenerate
                 </button>
-                <button @click="downloadQrCode" class="w-full sm:w-auto px-4 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 text-[10px] font-black uppercase tracking-widest text-indigo-600 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors flex items-center justify-center">
+                <button @click="downloadQrCode" class="w-full sm:w-auto px-4 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 text-[10px] font-black uppercase tracking-widest text-indigo-600 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors flex items-center justify-center">
                   <Download class="w-3.5 h-3.5 mr-2" />
                   Download
                 </button>
-                <button @click="activeQrUrl = null" class="w-full sm:w-auto px-4 h-10 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-[10px] font-black uppercase tracking-widest text-rose-600 hover:bg-rose-50 transition-colors flex items-center justify-center">
+                <button @click="activeQrUrl = null" class="w-full sm:w-auto px-4 h-9 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-[10px] font-black uppercase tracking-widest text-rose-600 hover:bg-rose-50 transition-colors flex items-center justify-center">
                   <X class="w-3.5 h-3.5 mr-2" />
                   Revoke
                 </button>
               </div>
             </div>
 
-            <div v-else class="flex flex-col items-center w-full">
-              <div class="w-24 h-24 bg-indigo-50 dark:bg-indigo-500/10 rounded-full flex items-center justify-center mb-6">
-                <QrCode class="w-10 h-10 text-indigo-500" />
+            <div v-else class="flex flex-col items-center w-full py-4">
+              <div class="w-20 h-20 bg-indigo-50 dark:bg-indigo-500/10 rounded-full flex items-center justify-center mb-4">
+                <QrCode class="w-8 h-8 text-indigo-500" />
               </div>
-              <h3 class="text-lg font-black text-slate-900 dark:text-white mb-2">Request Mobile Key</h3>
-              <p class="text-sm text-slate-500 text-center max-w-xs mb-8">Generate a secure cryptographic QR token to access authorized doors using your mobile phone.</p>
+              <h3 class="text-base font-black text-slate-900 dark:text-white mb-1">Request Mobile Key</h3>
+              <p class="text-xs text-slate-500 text-center max-w-xs mb-6">Generate a secure cryptographic QR token to access authorized doors using your mobile phone.</p>
               
-              <button @click="generateNewQr" :disabled="generatingQr" class="w-full max-w-xs flex items-center justify-center h-12 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold tracking-wide shadow-lg shadow-indigo-500/25 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-75">
+              <button @click="generateNewQr" :disabled="generatingQr" class="w-full max-w-xs flex items-center justify-center h-11 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold tracking-wide shadow-lg shadow-indigo-500/25 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-75">
                 <Loader2 v-if="generatingQr" class="w-4 h-4 mr-2 animate-spin" />
                 <QrCode v-else class="w-4 h-4 mr-2" />
                 {{ generatingQr ? 'Generating...' : 'Generate New Key' }}
@@ -77,22 +74,22 @@
       </div>
 
       <!-- Right Column: Physical Access -->
-      <div class="space-y-6">
+      <div class="space-y-3">
         <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 px-1">Physical Credentials</h3>
         
         <div class="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden shadow-sm">
           
-          <div class="p-6">
+          <div class="p-4">
             <div v-if="loadingEmployee" class="animate-pulse flex flex-col gap-4">
               <div class="h-20 bg-slate-100 dark:bg-zinc-900 rounded-xl"></div>
             </div>
             
-            <div v-else class="space-y-4">
+            <div v-else class="space-y-3">
               <!-- Physical Card -->
-              <div class="p-4 rounded-xl border border-slate-200 dark:border-zinc-800 flex items-center justify-between group">
-                <div class="flex items-center gap-4">
-                  <div class="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-600 border border-emerald-100 dark:border-emerald-500/20">
-                    <CreditCard class="w-5 h-5" />
+              <div class="p-3 rounded-xl border border-slate-200 dark:border-zinc-800 flex items-center justify-between group">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center text-emerald-600 border border-emerald-100 dark:border-emerald-500/20">
+                    <CreditCard class="w-4.5 h-4.5" />
                   </div>
                   <div>
                     <h4 class="text-sm font-bold text-slate-900 dark:text-white">RFID Smart Card</h4>
@@ -111,11 +108,11 @@
               </div>
 
               <!-- Action Button / Input -->
-              <div v-if="!employee?.card_number" class="mt-4 pt-4 border-t border-slate-100 dark:border-zinc-800">
-                <p class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-2">Register Physical Card</p>
+              <div v-if="!employee?.card_number" class="mt-3 pt-3 border-t border-slate-100 dark:border-zinc-800">
+                <p class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1.5">Register Physical Card</p>
                 <div class="flex items-center gap-2">
-                  <input type="text" v-model="newRfidCard" placeholder="Enter Card ID/Number" class="flex-1 h-10 px-3 border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-900 rounded-lg text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-slate-900 dark:text-white" />
-                  <button @click="assignRfidCard" :disabled="!newRfidCard || isAssigningCard" class="h-10 px-4 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-colors shadow-sm shadow-emerald-500/20 disabled:opacity-50 flex items-center gap-2">
+                  <input type="text" v-model="newRfidCard" placeholder="Enter Card ID/Number" class="flex-1 h-9 px-3 border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-900 rounded-lg text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-slate-900 dark:text-white" />
+                  <button @click="assignRfidCard" :disabled="!newRfidCard || isAssigningCard" class="h-9 px-4 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-colors shadow-sm shadow-emerald-500/20 disabled:opacity-50 flex items-center gap-2">
                     <Loader2 v-if="isAssigningCard" class="w-3.5 h-3.5 animate-spin" />
                     <Plus v-else class="w-3.5 h-3.5" /> Activate
                   </button>
@@ -126,20 +123,20 @@
         </div>
 
         <!-- Clearance Summary Box -->
-        <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 px-1 pt-4">Assigned Clearances</h3>
-        <div class="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-6 shadow-sm">
+        <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 px-1 pt-1">Assigned Clearances</h3>
+        <div class="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-4 shadow-sm">
           <div v-if="loadingEmployee" class="animate-pulse h-10 bg-slate-100 dark:bg-zinc-900 rounded-xl"></div>
-          <div v-else-if="employee?.access_level?.id" class="flex flex-col gap-3">
-             <div class="flex items-center gap-3 pb-3 border-b border-slate-100 dark:border-zinc-800">
-               <ShieldCheck class="w-5 h-5 text-indigo-500" />
-               <div>
-                  <h4 class="text-sm font-bold text-slate-900 dark:text-white">{{ employee.access_level.accessLevelName }}</h4>
-                  <p class="text-xs text-slate-500">ID: {{ employee.access_level.id }}</p>
-               </div>
+          <div v-else-if="employee?.access_level?.id" class="flex flex-col gap-2">
+             <div class="flex items-center gap-3 pb-2.5 border-b border-slate-100 dark:border-zinc-800">
+                <ShieldCheck class="w-5 h-5 text-indigo-500" />
+                <div>
+                   <h4 class="text-sm font-bold text-slate-900 dark:text-white">{{ employee.access_level.accessLevelName }}</h4>
+                   <p class="text-xs text-slate-500">ID: {{ employee.access_level.id }}</p>
+                </div>
              </div>
-             <p class="text-[11px] font-medium text-slate-500 leading-relaxed max-w-sm mt-1">This level defines the physical zones and time windows you are authorized to enter. Contact administration for clearance changes.</p>
+             <p class="text-[11px] font-medium text-slate-500 leading-relaxed max-w-sm mt-0.5">This level defines the physical zones and time windows you are authorized to enter. Contact administration for clearance changes.</p>
           </div>
-          <div v-else class="text-sm text-slate-500 italic pb-2">
+          <div v-else class="text-sm text-slate-500 italic pb-1">
             No specific access level is currently assigned to your profile.
           </div>
         </div>
