@@ -134,6 +134,7 @@ onMounted(() => {
 const currentPageTitle = computed(() => {
   // Simple mapping, can be expanded or driven by route meta
   const path = route.path;
+  if (path.includes('/dashboard/visitors-overview')) return 'Visitor Dashboard';
   if (path.includes('/dashboard/access-control/doors')) return 'Doors';
   if (path.includes('/dashboard/access-control/zones')) return 'Access Zones';
   if (path.includes('/dashboard/easy-access/employees')) return 'Employees';

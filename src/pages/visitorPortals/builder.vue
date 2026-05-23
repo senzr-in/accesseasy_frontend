@@ -71,7 +71,7 @@
             </div>
           </div>
 
-          <!-- Section: Registration -->
+          <!-- Section: Registration & Default Group -->
           <div class="p-8 space-y-6 bg-slate-50/50 dark:bg-zinc-900/50">
             <div class="flex items-center justify-between">
               <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
@@ -85,17 +85,7 @@
             </div>
 
             <div v-if="pageConfig.enableRegistrationForm" class="space-y-4">
-               <div class="p-4 rounded-xl bg-white dark:bg-zinc-950 border border-slate-100 dark:border-zinc-800">
-                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">Fields Collected Automatically</p>
-                 <div class="grid grid-cols-2 gap-2 text-[10px] font-bold text-slate-600 dark:text-zinc-400">
-                   <div class="px-3 py-2 rounded-lg bg-slate-50 dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div> Full Name</div>
-                   <div class="px-3 py-2 rounded-lg bg-slate-50 dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div> Mobile Number</div>
-                   <div class="px-3 py-2 rounded-lg bg-slate-50 dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div> Govt ID Type</div>
-                   <div class="px-3 py-2 rounded-lg bg-slate-50 dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 flex items-center gap-2"><div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div> ID Number</div>
-                   <div class="px-3 py-2 rounded-lg bg-slate-50 dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 flex items-center gap-2 col-span-2"><div class="w-1.5 h-1.5 rounded-full bg-blue-500"></div> Reason for Visit</div>
-                 </div>
-               </div>
-               <div class="space-y-1.5 mt-6">
+               <div class="space-y-1.5">
                  <label class="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Default Visitor Access Group</label>
                  <select v-model="pageConfig.defaultAccessLevel"
                    class="w-full h-11 px-4 border border-slate-200 dark:border-zinc-700 rounded-xl bg-white dark:bg-zinc-950 text-sm font-medium text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all cursor-pointer">
@@ -107,62 +97,70 @@
             </div>
           </div>
 
-          <!-- Section: Optional Form Fields -->
-          <div class="p-8 border-t border-slate-100 dark:border-zinc-800 space-y-5">
+          <!-- Section: Form Fields Customizer -->
+          <div v-if="pageConfig.enableRegistrationForm" class="p-8 border-t border-slate-100 dark:border-zinc-800 space-y-5">
             <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-              <SlidersHorizontal class="w-3.5 h-3.5 text-blue-500" /> Optional Fields
+              <SlidersHorizontal class="w-3.5 h-3.5 text-blue-500" /> Form Fields Customizer
             </h3>
-            <p class="text-[10px] font-medium text-slate-400 -mt-2">Choose which extra fields visitors will see on the check-in form.</p>
+            <p class="text-[10px] font-medium text-slate-400 -mt-2">Choose which fields are displayed, which are required, and customize their labels and placeholders.</p>
 
-            <!-- Photo Upload Toggle -->
-            <div class="flex items-center justify-between p-4 rounded-xl bg-white dark:bg-zinc-950 border border-slate-100 dark:border-zinc-800">
-              <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center">
-                  <Camera class="w-4 h-4 text-blue-500" />
-                </div>
-                <div>
-                  <p class="text-xs font-bold text-slate-700 dark:text-slate-200">Visitor Photo</p>
-                  <p class="text-[10px] font-medium text-slate-400">Capture or upload a selfie photo</p>
-                </div>
-              </div>
-              <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" v-model="pageConfig.enablePhotoUpload" class="sr-only peer">
-                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-              </label>
-            </div>
+            <div class="space-y-4">
+              <div v-for="(field, key) in pageConfig.fieldsConfig" :key="key" 
+                class="p-4 rounded-xl bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 transition-all duration-300"
+                :class="{ 'opacity-60': !field.visible }">
+                
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <!-- Field Header & Icon -->
+                  <div class="flex items-center gap-4">
+                    <div class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center shrink-0">
+                      <Camera v-if="key === 'photo'" class="w-4 h-4 text-blue-500" />
+                      <FileUp v-else-if="key === 'proofDocument'" class="w-4 h-4 text-blue-500" />
+                      <ShieldOff v-else-if="key === 'govtId'" class="w-4 h-4 text-blue-500" />
+                      <SlidersHorizontal v-else class="w-4 h-4 text-blue-500" />
+                    </div>
+                    <div>
+                      <h4 class="text-xs font-bold text-slate-700 dark:text-slate-200 capitalize">{{ key.replace(/([A-Z])/g, ' $1') }}</h4>
+                      <p class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest">
+                        {{ key === 'name' || key === 'mobile' ? 'Core Field' : 'Optional Field' }}
+                      </p>
+                    </div>
+                  </div>
 
-            <!-- Proof Upload Toggle -->
-            <div class="flex items-center justify-between p-4 rounded-xl bg-white dark:bg-zinc-950 border border-slate-100 dark:border-zinc-800">
-              <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-violet-50 dark:bg-violet-500/10 flex items-center justify-center">
-                  <FileUp class="w-4 h-4 text-violet-500" />
+                  <!-- Action Toggles -->
+                  <div class="flex items-center gap-6 justify-between md:justify-end">
+                    <div class="flex items-center gap-2">
+                      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Visible</span>
+                      <label class="relative inline-flex items-center cursor-pointer" :class="{ 'pointer-events-none opacity-50': key === 'name' || key === 'mobile' }">
+                        <input type="checkbox" v-model="field.visible" :disabled="key === 'name' || key === 'mobile'" @change="!field.visible && (field.required = false)" class="sr-only peer">
+                        <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                      </label>
+                    </div>
+                    
+                    <div class="flex items-center gap-2">
+                      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest" :class="{ 'opacity-50': !field.visible }">Required</span>
+                      <label class="relative inline-flex items-center cursor-pointer" :class="{ 'pointer-events-none opacity-50': !field.visible || key === 'name' || key === 'mobile' }">
+                        <input type="checkbox" v-model="field.required" :disabled="!field.visible || key === 'name' || key === 'mobile'" class="sr-only peer">
+                        <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+                      </label>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <p class="text-xs font-bold text-slate-700 dark:text-slate-200">ID Proof Document</p>
-                  <p class="text-[10px] font-medium text-slate-400">Upload photo or PDF of ID proof</p>
-                </div>
-              </div>
-              <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" v-model="pageConfig.enableProofUpload" class="sr-only peer">
-                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-violet-600"></div>
-              </label>
-            </div>
 
-            <!-- Govt ID Optional Toggle -->
-            <div class="flex items-center justify-between p-4 rounded-xl bg-white dark:bg-zinc-950 border border-slate-100 dark:border-zinc-800">
-              <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center">
-                  <ShieldOff class="w-4 h-4 text-amber-500" />
+                <!-- Editable Labels & Placeholders -->
+                <div v-if="field.visible" class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4 pt-3 border-t border-slate-100 dark:border-zinc-900 animate-in fade-in duration-200">
+                  <div class="space-y-1">
+                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Custom Field Label</span>
+                    <input v-model="field.label" type="text" 
+                      class="w-full h-9 px-3 border border-slate-200 dark:border-zinc-800 rounded-xl bg-slate-50 dark:bg-zinc-900 text-xs font-semibold text-slate-700 dark:text-zinc-200 outline-none focus:border-blue-500 transition-colors" />
+                  </div>
+                  <div class="space-y-1">
+                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Custom Placeholder</span>
+                    <input v-model="field.placeholder" type="text" 
+                      class="w-full h-9 px-3 border border-slate-200 dark:border-zinc-800 rounded-xl bg-slate-50 dark:bg-zinc-900 text-xs font-semibold text-slate-700 dark:text-zinc-200 outline-none focus:border-blue-500 transition-colors" />
+                  </div>
                 </div>
-                <div>
-                  <p class="text-xs font-bold text-slate-700 dark:text-slate-200">Govt ID — Optional</p>
-                  <p class="text-[10px] font-medium text-slate-400">When ON, visitors can skip the Govt ID fields</p>
-                </div>
+
               </div>
-              <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" v-model="pageConfig.govtIdOptional" class="sr-only peer">
-                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-amber-500"></div>
-              </label>
             </div>
           </div>
 
@@ -263,10 +261,22 @@ const pageConfig = ref({
   contactEmail:  '',
   status: 'published',
   defaultAccessLevel: null,
-  // Optional Fields
+  // Optional Fields (legacy)
   enablePhotoUpload: false,
   enableProofUpload: false,
   govtIdOptional:    false,
+  // New Customizable Fields Config
+  fieldsConfig: {
+    name: { visible: true, required: true, label: 'Full Name', placeholder: 'John Doe' },
+    mobile: { visible: true, required: true, label: 'Mobile Number', placeholder: '+91 98765 43210' },
+    email: { visible: false, required: false, label: 'Email Address', placeholder: 'john@example.com' },
+    govtId: { visible: true, required: true, label: 'Government ID', placeholder: 'XXXX-XXXX-XXXX' },
+    reasonForVisit: { visible: true, required: true, label: 'Reason for Visit', placeholder: 'Select a reason...' },
+    personToMeet: { visible: true, required: false, label: 'Person to Meet', placeholder: 'e.g. Rajan Kumar' },
+    company: { visible: true, required: false, label: 'Company / Organisation', placeholder: 'e.g. Acme Corp' },
+    photo: { visible: false, required: false, label: 'Your Photo', placeholder: 'Tap to take / upload photo' },
+    proofDocument: { visible: false, required: false, label: 'ID Proof Document', placeholder: 'Upload ID proof (image or PDF)' }
+  }
 });
 
 // ── Preview URL ────────────────────────────────────────────────────────────
@@ -314,12 +324,19 @@ const savePage = async () => {
       if (id) { pageConfig.value.logoId = id; selectedLogoFile.value = null; }
     }
 
+    // Keep legacy flags in perfect sync with the new fieldsConfig before saving
+    if (pageConfig.value.fieldsConfig) {
+      pageConfig.value.enablePhotoUpload = !!pageConfig.value.fieldsConfig.photo?.visible;
+      pageConfig.value.enableProofUpload = !!pageConfig.value.fieldsConfig.proofDocument?.visible;
+      pageConfig.value.govtIdOptional = !pageConfig.value.fieldsConfig.govtId?.required;
+    }
+
     const payload = {
       Title:  pageConfig.value.title,
       status: pageConfig.value.status,
       tenant: tenantId,
       Contentjson: {
-        heading:                     pageConfig.value.bannerHeading, // Defaults maintained
+        heading:                     pageConfig.value.bannerHeading,
         subtext:                     pageConfig.value.bannerSubtext,
         theme:                       pageConfig.value.theme,
         primaryColor:                pageConfig.value.primaryColor,
@@ -331,10 +348,12 @@ const savePage = async () => {
         contactPhone:                pageConfig.value.contactPhone,
         contactEmail:                pageConfig.value.contactEmail,
         defaultAccessLevel:          pageConfig.value.defaultAccessLevel,
-        // Optional Fields
+        // Legacy Optional Fields
         enablePhotoUpload:           pageConfig.value.enablePhotoUpload,
         enableProofUpload:           pageConfig.value.enableProofUpload,
         govtIdOptional:              pageConfig.value.govtIdOptional,
+        // New customizable fields config
+        fieldsConfig:                pageConfig.value.fieldsConfig,
       },
       Assetjson: { images: { logo: pageConfig.value.logoId, banner: pageConfig.value.bannerId } },
     };
@@ -409,6 +428,16 @@ onMounted(async () => {
       pageConfig.value.enablePhotoUpload          = d.Contentjson.enablePhotoUpload           ?? false;
       pageConfig.value.enableProofUpload          = d.Contentjson.enableProofUpload           ?? false;
       pageConfig.value.govtIdOptional             = d.Contentjson.govtIdOptional              ?? false;
+
+      // Safe load & initialize with backward-compatibility logic
+      if (d.Contentjson.fieldsConfig) {
+        pageConfig.value.fieldsConfig = { ...pageConfig.value.fieldsConfig, ...d.Contentjson.fieldsConfig };
+      } else {
+        // Fallback to legacy config flags
+        pageConfig.value.fieldsConfig.photo.visible = !!pageConfig.value.enablePhotoUpload;
+        pageConfig.value.fieldsConfig.proofDocument.visible = !!pageConfig.value.enableProofUpload;
+        pageConfig.value.fieldsConfig.govtId.required = !pageConfig.value.govtIdOptional;
+      }
     }
     if (d.Assetjson?.images) {
       pageConfig.value.logoId       = d.Assetjson.images.logo   || DEFAULT_ASSET_ID;

@@ -284,22 +284,26 @@ const fetchStats = async (portalId, tenantId) => {
     const today = new Date().toISOString().split('T')[0];
 
     const [totalRes, todayRes, activeRes] = await Promise.all([
-      authService.protectedApi.get('/items/visitor', {
-        params: { 'filter[portalId][_eq]': portalId, 'aggregate[count]': 'id' }
-      }),
+      // 1. Total Visitors registered under this tenant
       authService.protectedApi.get('/items/visitor', {
         params: {
-          'filter[portalId][_eq]': portalId,
+          'filter[tenant][tenantId][_eq]': tenantId,
+          'aggregate[count]': 'id'
+        }
+      }),
+      // 2. Today's Visitors registered under this tenant
+      authService.protectedApi.get('/items/visitor', {
+        params: {
+          'filter[tenant][tenantId][_eq]': tenantId,
           'filter[startDate][_eq]': today,
           'aggregate[count]': 'id'
         }
       }),
+      // 3. Active Visitors (Inside Now) under this tenant
       authService.protectedApi.get('/items/visitor', {
         params: {
-          'filter[portalId][_eq]': portalId,
-          'filter[startDate][_eq]': today,
-          'filter[qrUsed][_eq]': true,
-          'filter[exitTime][_null]': true,
+          'filter[tenant][tenantId][_eq]': tenantId,
+          'filter[status][_eq]': 'active',
           'aggregate[count]': 'id'
         }
       }),

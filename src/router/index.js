@@ -145,6 +145,12 @@ const routes = [
         meta: { roles: ["Admin", "Manager", "Employee", "Guard"] }
       },
       {
+        path: "visitors-overview",
+        name: "VisitorDashboardHome",
+        component: () => import("@/pages/dashboard/visitors.vue"),
+        meta: { roles: ["Admin", "Guard"] }
+      },
+      {
         path: "easy-access/employees",
         name: "Employees",
         component: Employees,

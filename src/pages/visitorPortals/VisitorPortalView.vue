@@ -125,22 +125,33 @@
             </div>
 
             <!-- Form -->
+            <!-- Form -->
             <div v-else class="vp-form-body">
-              <div class="vp-field">
-                <label class="vp-label">Full Name <span class="vp-required">*</span></label>
-                <input v-model="visitorData.name" type="text" placeholder="John Doe" class="vp-input" :class="{ 'vp-input-error': errors.name }" @blur="validateField('name')" />
+              <!-- Full Name -->
+              <div v-if="resolvedFields.name.visible" class="vp-field">
+                <label class="vp-label">{{ resolvedFields.name.label }} <span v-if="resolvedFields.name.required" class="vp-required">*</span></label>
+                <input v-model="visitorData.name" type="text" :placeholder="resolvedFields.name.placeholder" class="vp-input" :class="{ 'vp-input-error': errors.name }" @blur="validateField('name')" />
                 <p v-if="errors.name" class="vp-err-msg">{{ errors.name }}</p>
               </div>
 
-              <div class="vp-field">
-                <label class="vp-label">Mobile Number <span class="vp-required">*</span></label>
-                <input v-model="visitorData.mobile" type="tel" placeholder="+91 98765 43210" class="vp-input" :class="{ 'vp-input-error': errors.mobile }" @blur="validateField('mobile')" />
+              <!-- Mobile Number -->
+              <div v-if="resolvedFields.mobile.visible" class="vp-field">
+                <label class="vp-label">{{ resolvedFields.mobile.label }} <span v-if="resolvedFields.mobile.required" class="vp-required">*</span></label>
+                <input v-model="visitorData.mobile" type="tel" :placeholder="resolvedFields.mobile.placeholder" class="vp-input" :class="{ 'vp-input-error': errors.mobile }" @blur="validateField('mobile')" />
                 <p v-if="errors.mobile" class="vp-err-msg">{{ errors.mobile }}</p>
               </div>
 
-              <div class="vp-field-row">
+              <!-- Email Address -->
+              <div v-if="resolvedFields.email.visible" class="vp-field">
+                <label class="vp-label">{{ resolvedFields.email.label }} <span v-if="resolvedFields.email.required" class="vp-required">*</span></label>
+                <input v-model="visitorData.email" type="email" :placeholder="resolvedFields.email.placeholder" class="vp-input" :class="{ 'vp-input-error': errors.email }" @blur="validateField('email')" />
+                <p v-if="errors.email" class="vp-err-msg">{{ errors.email }}</p>
+              </div>
+
+              <!-- Govt ID Type & ID Number -->
+              <div v-if="resolvedFields.govtId.visible" class="vp-field-row">
                 <div class="vp-field">
-                  <label class="vp-label">Govt ID Type <span v-if="!content.govtIdOptional" class="vp-required">*</span></label>
+                  <label class="vp-label">{{ resolvedFields.govtId.label }} Type <span v-if="resolvedFields.govtId.required" class="vp-required">*</span></label>
                   <select v-model="visitorData.govtIdType" class="vp-input vp-select">
                     <option>Aadhar</option>
                     <option>Driving License</option>
@@ -150,16 +161,17 @@
                   </select>
                 </div>
                 <div class="vp-field">
-                  <label class="vp-label">ID Number <span v-if="!content.govtIdOptional" class="vp-required">*</span></label>
-                  <input v-model="visitorData.govtIdNumber" type="text" placeholder="XXXX-XXXX-XXXX" class="vp-input" :class="{ 'vp-input-error': errors.govtIdNumber }" @blur="validateField('govtIdNumber')" />
+                  <label class="vp-label">ID Number <span v-if="resolvedFields.govtId.required" class="vp-required">*</span></label>
+                  <input v-model="visitorData.govtIdNumber" type="text" :placeholder="resolvedFields.govtId.placeholder" class="vp-input" :class="{ 'vp-input-error': errors.govtIdNumber }" @blur="validateField('govtIdNumber')" />
                 </div>
               </div>
-              <p v-if="errors.govtIdNumber" class="vp-err-msg">{{ errors.govtIdNumber }}</p>
+              <p v-if="resolvedFields.govtId.visible && errors.govtIdNumber" class="vp-err-msg">{{ errors.govtIdNumber }}</p>
 
-              <div class="vp-field">
-                <label class="vp-label">Reason for Visit <span class="vp-required">*</span></label>
+              <!-- Reason for Visit -->
+              <div v-if="resolvedFields.reasonForVisit.visible" class="vp-field">
+                <label class="vp-label">{{ resolvedFields.reasonForVisit.label }} <span v-if="resolvedFields.reasonForVisit.required" class="vp-required">*</span></label>
                 <select v-model="visitorData.reasonForVisit" class="vp-input vp-select" :class="{ 'vp-input-error': errors.reasonForVisit }" @change="errors.reasonForVisit = ''">
-                  <option value="">Select a reason...</option>
+                  <option value="">{{ resolvedFields.reasonForVisit.placeholder }}</option>
                   <option>Meeting / Appointment</option>
                   <option>Interview</option>
                   <option>Delivery / Courier</option>
@@ -173,45 +185,51 @@
                 <p v-if="errors.reasonForVisit" class="vp-err-msg">{{ errors.reasonForVisit }}</p>
               </div>
 
-              <div class="vp-field">
-                <label class="vp-label">Person to Meet</label>
-                <input v-model="visitorData.personToMeet" type="text" placeholder="e.g. Rajan Kumar" class="vp-input" />
+              <!-- Person to Meet -->
+              <div v-if="resolvedFields.personToMeet.visible" class="vp-field">
+                <label class="vp-label">{{ resolvedFields.personToMeet.label }} <span v-if="resolvedFields.personToMeet.required" class="vp-required">*</span></label>
+                <input v-model="visitorData.personToMeet" type="text" :placeholder="resolvedFields.personToMeet.placeholder" class="vp-input" :class="{ 'vp-input-error': errors.personToMeet }" @blur="validateField('personToMeet')" />
+                <p v-if="errors.personToMeet" class="vp-err-msg">{{ errors.personToMeet }}</p>
               </div>
 
-              <div class="vp-field">
-                <label class="vp-label">Company / Organisation</label>
-                <input v-model="visitorData.company" type="text" placeholder="e.g. Acme Corp" class="vp-input" />
+              <!-- Company / Organisation -->
+              <div v-if="resolvedFields.company.visible" class="vp-field">
+                <label class="vp-label">{{ resolvedFields.company.label }} <span v-if="resolvedFields.company.required" class="vp-required">*</span></label>
+                <input v-model="visitorData.company" type="text" :placeholder="resolvedFields.company.placeholder" class="vp-input" :class="{ 'vp-input-error': errors.company }" @blur="validateField('company')" />
+                <p v-if="errors.company" class="vp-err-msg">{{ errors.company }}</p>
               </div>
 
-              <!-- ── Photo Upload (configurable) ── -->
-              <div v-if="content.enablePhotoUpload" class="vp-field">
-                <label class="vp-label">Your Photo <span class="vp-badge-opt">Optional</span></label>
-                <div class="vp-upload-box" @click="$refs.photoInput.click()">
+              <!-- Photo Upload (configurable) -->
+              <div v-if="resolvedFields.photo.visible" class="vp-field">
+                <label class="vp-label">{{ resolvedFields.photo.label }} <span v-if="resolvedFields.photo.required" class="vp-required">*</span><span v-else class="vp-badge-opt">Optional</span></label>
+                <div class="vp-upload-box" :class="{ 'vp-input-error': errors.photo }" @click="$refs.photoInput.click()">
                   <img v-if="photoPreview" :src="photoPreview" class="vp-upload-preview" />
                   <div v-else class="vp-upload-placeholder">
                     <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><circle cx="12" cy="13" r="3" stroke-width="2"/></svg>
-                    <span>Tap to take / upload photo</span>
+                    <span>{{ resolvedFields.photo.placeholder }}</span>
                   </div>
                 </div>
                 <input ref="photoInput" type="file" accept="image/*" capture="user" class="hidden" @change="handlePhotoChange" />
                 <button v-if="photoPreview" class="vp-upload-clear" @click.stop="clearPhoto">Remove photo</button>
+                <p v-if="errors.photo" class="vp-err-msg">{{ errors.photo }}</p>
               </div>
 
-              <!-- ── Proof Document Upload (configurable) ── -->
-              <div v-if="content.enableProofUpload" class="vp-field">
-                <label class="vp-label">ID Proof Document <span class="vp-badge-opt">Optional</span></label>
-                <div class="vp-upload-box vp-upload-doc" @click="$refs.proofInput.click()">
+              <!-- Proof Document Upload (configurable) -->
+              <div v-if="resolvedFields.proofDocument.visible" class="vp-field">
+                <label class="vp-label">{{ resolvedFields.proofDocument.label }} <span v-if="resolvedFields.proofDocument.required" class="vp-required">*</span><span v-else class="vp-badge-opt">Optional</span></label>
+                <div class="vp-upload-box vp-upload-doc" :class="{ 'vp-input-error': errors.proofDocument }" @click="$refs.proofInput.click()">
                   <div v-if="proofFileName" class="vp-upload-doc-selected">
                     <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     <span>{{ proofFileName }}</span>
                   </div>
                   <div v-else class="vp-upload-placeholder">
                     <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                    <span>Upload ID proof (image or PDF)</span>
+                    <span>{{ resolvedFields.proofDocument.placeholder }}</span>
                   </div>
                 </div>
                 <input ref="proofInput" type="file" accept="image/*,application/pdf" class="hidden" @change="handleProofChange" />
                 <button v-if="proofFileName" class="vp-upload-clear" @click.stop="clearProof">Remove file</button>
+                <p v-if="errors.proofDocument" class="vp-err-msg">{{ errors.proofDocument }}</p>
               </div>
 
               <p v-if="submitError" class="vp-err-msg" style="text-align:center;">{{ submitError }}</p>
@@ -289,8 +307,44 @@ const cssVars = computed(() => ({
   '--vp-brand-shadow': brandColor.value + '44',
 }));
 
+const defaultFieldsConfig = {
+  name: { visible: true, required: true, label: 'Full Name', placeholder: 'John Doe' },
+  mobile: { visible: true, required: true, label: 'Mobile Number', placeholder: '+91 98765 43210' },
+  email: { visible: false, required: false, label: 'Email Address', placeholder: 'john@example.com' },
+  govtId: { visible: true, required: true, label: 'Government ID', placeholder: 'XXXX-XXXX-XXXX' },
+  reasonForVisit: { visible: true, required: true, label: 'Reason for Visit', placeholder: 'Select a reason...' },
+  personToMeet: { visible: true, required: false, label: 'Person to Meet', placeholder: 'e.g. Rajan Kumar' },
+  company: { visible: true, required: false, label: 'Company / Organisation', placeholder: 'e.g. Acme Corp' },
+  photo: { visible: false, required: false, label: 'Your Photo', placeholder: 'Tap to take / upload photo' },
+  proofDocument: { visible: false, required: false, label: 'ID Proof Document', placeholder: 'Upload ID proof (image or PDF)' }
+};
+
+const resolvedFields = computed(() => {
+  const config = JSON.parse(JSON.stringify(defaultFieldsConfig));
+
+  if (content.value && content.value.fieldsConfig) {
+    Object.keys(config).forEach(key => {
+      if (content.value.fieldsConfig[key]) {
+        config[key] = { ...config[key], ...content.value.fieldsConfig[key] };
+      }
+    });
+  } else if (content.value) {
+    config.photo.visible = !!content.value.enablePhotoUpload;
+    config.proofDocument.visible = !!content.value.enableProofUpload;
+    config.govtId.required = !content.value.govtIdOptional;
+  }
+
+  // Force core fields validation rules
+  config.name.visible = true;
+  config.name.required = true;
+  config.mobile.visible = true;
+  config.mobile.required = true;
+
+  return config;
+});
+
 const visitorData = ref({
-  name: '', mobile: '', govtIdType: 'Aadhar', govtIdNumber: '',
+  name: '', mobile: '', email: '', govtIdType: 'Aadhar', govtIdNumber: '',
   reasonForVisit: '', reasonForVisitOther: '', personToMeet: '', company: '',
 });
 const errors = ref({});
@@ -330,7 +384,7 @@ const resetModal = () => {
   qrToken.value = ''; visitorId.value = '';
   photoFile.value = null; photoPreview.value = null;
   proofFile.value = null; proofFileName.value = null;
-  visitorData.value = { name:'', mobile:'', govtIdType:'Aadhar', govtIdNumber:'', reasonForVisit:'', reasonForVisitOther:'', personToMeet:'', company:'' };
+  visitorData.value = { name:'', mobile:'', email:'', govtIdType:'Aadhar', govtIdNumber:'', reasonForVisit:'', reasonForVisitOther:'', personToMeet:'', company:'' };
   errors.value = {};
 };
 
@@ -367,17 +421,71 @@ const downloadQR = async () => {
 
 const validateField = (f) => {
   errors.value[f] = '';
-  if (f === 'name'         && !visitorData.value.name.trim())         errors.value.name         = 'Full name is required';
-  if (f === 'mobile'       && !visitorData.value.mobile.trim())       errors.value.mobile       = 'Mobile number is required';
-  if (f === 'govtIdNumber' && !content.value.govtIdOptional && !visitorData.value.govtIdNumber.trim()) errors.value.govtIdNumber = 'ID number is required';
+  const fieldSetting = resolvedFields.value[f];
+
+  // If field is not visible, don't validate it
+  if (fieldSetting && !fieldSetting.visible) return;
+
+  if (f === 'name') {
+    if (!visitorData.value.name.trim()) {
+      errors.value.name = `${resolvedFields.value.name.label} is required`;
+    }
+  } else if (f === 'mobile') {
+    if (!visitorData.value.mobile.trim()) {
+      errors.value.mobile = `${resolvedFields.value.mobile.label} is required`;
+    }
+  } else if (f === 'email') {
+    const val = visitorData.value.email.trim();
+    if (resolvedFields.value.email.required && !val) {
+      errors.value.email = `${resolvedFields.value.email.label} is required`;
+    } else if (val) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(val)) {
+        errors.value.email = 'Please enter a valid email address';
+      }
+    }
+  } else if (f === 'govtIdNumber') {
+    if (resolvedFields.value.govtId.required && !visitorData.value.govtIdNumber.trim()) {
+      errors.value.govtIdNumber = 'ID number is required';
+    }
+  } else if (f === 'personToMeet') {
+    if (resolvedFields.value.personToMeet.required && !visitorData.value.personToMeet.trim()) {
+      errors.value.personToMeet = `${resolvedFields.value.personToMeet.label} is required`;
+    }
+  } else if (f === 'company') {
+    if (resolvedFields.value.company.required && !visitorData.value.company.trim()) {
+      errors.value.company = `${resolvedFields.value.company.label} is required`;
+    }
+  } else if (f === 'photo') {
+    if (resolvedFields.value.photo.required && !photoFile.value) {
+      errors.value.photo = 'Photo upload is required';
+    }
+  } else if (f === 'proofDocument') {
+    if (resolvedFields.value.proofDocument.required && !proofFile.value) {
+      errors.value.proofDocument = 'ID Proof Document is required';
+    }
+  }
 };
 
 const validate = () => {
-  ['name','mobile'].forEach(validateField);
-  if (!content.value.govtIdOptional) validateField('govtIdNumber');
-  if (!visitorData.value.reasonForVisit) errors.value.reasonForVisit = 'Please select a reason';
-  if (visitorData.value.reasonForVisit === 'Other' && !visitorData.value.reasonForVisitOther.trim())
-    errors.value.reasonForVisit = 'Please describe the reason';
+  errors.value = {};
+
+  Object.keys(resolvedFields.value).forEach(key => {
+    if (key === 'govtId') {
+      validateField('govtIdNumber');
+    } else {
+      validateField(key);
+    }
+  });
+
+  if (resolvedFields.value.reasonForVisit.visible) {
+    if (resolvedFields.value.reasonForVisit.required && !visitorData.value.reasonForVisit) {
+      errors.value.reasonForVisit = 'Please select a reason';
+    } else if (visitorData.value.reasonForVisit === 'Other' && !visitorData.value.reasonForVisitOther.trim()) {
+      errors.value.reasonForVisit = 'Please describe the reason';
+    }
+  }
+
   return !Object.values(errors.value).some(Boolean);
 };
 
@@ -387,6 +495,7 @@ const handlePhotoChange = (e) => {
   if (!file) return;
   photoFile.value    = file;
   photoPreview.value = URL.createObjectURL(file);
+  errors.value.photo = '';
 };
 const clearPhoto = () => { photoFile.value = null; photoPreview.value = null; };
 
@@ -395,6 +504,7 @@ const handleProofChange = (e) => {
   if (!file) return;
   proofFile.value     = file;
   proofFileName.value = file.name;
+  errors.value.proofDocument = '';
 };
 const clearProof = () => { proofFile.value = null; proofFileName.value = null; };
 
@@ -435,12 +545,20 @@ const submitRegistration = async () => {
     }
 
     const payload = {
-      personName: visitorData.value.name, mobileNumber: visitorData.value.mobile,
-      email: '', startDate, endDate: startDate, startTime: timeNow, endTime: '23:59:59',
-      status: 'active', quantity: 1,
+      personName: visitorData.value.name,
+      mobileNumber: visitorData.value.mobile,
+      email: visitorData.value.email || '',
+      startDate,
+      endDate: startDate,
+      startTime: timeNow,
+      endTime: '23:59:59',
+      status: 'active',
+      quantity: 1,
       tenant: { tenantId: portal.value.tenant },
-      personToMeet: visitorData.value.personToMeet, reasonForVisit: reason,
-      govtIdType: visitorData.value.govtIdType, govtIdNumber: visitorData.value.govtIdNumber,
+      personToMeet: resolvedFields.value.personToMeet.visible ? visitorData.value.personToMeet : '',
+      reasonForVisit: resolvedFields.value.reasonForVisit.visible ? reason : '',
+      govtIdType: resolvedFields.value.govtId.visible ? visitorData.value.govtIdType : '',
+      govtIdNumber: resolvedFields.value.govtId.visible ? visitorData.value.govtIdNumber : '',
       portalId: portal.value.id,
       ...(photoId        && { photo:           photoId }),
       ...(proofDocumentId && { proofDocument:  proofDocumentId }),
