@@ -1,16 +1,11 @@
 <template>
   <div class="space-y-4 pb-4 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 max-w-7xl mx-auto">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row items-start justify-between gap-2">
-      <div>
-        <h1 class="text-3xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
-          Access Profile
-          <span class="px-2.5 py-0.5 rounded-md border border-indigo-200 dark:border-indigo-500/20 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-sm font-black uppercase tracking-widest leading-tight">
-            Level {{ employee?.access_level?.accessLevelName || 'Unknown' }}
-          </span>
-        </h1>
-        <p class="text-xs font-medium text-slate-500 mt-0.5">Manage your mobile keys and physical cards.</p>
-      </div>
+    <!-- Header (Compact metadata since page title is in top bar) -->
+    <div class="flex items-center gap-3 pb-1">
+      <span class="px-2.5 py-1 rounded-md border border-indigo-200 dark:border-indigo-500/20 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-sm font-black uppercase tracking-widest leading-tight">
+        Level {{ employee?.access_level?.accessLevelName || 'Unknown' }}
+      </span>
+      <p class="text-xs font-medium text-slate-500">Manage your mobile keys and physical cards.</p>
     </div>
 
     <!-- Main Content -->
@@ -92,11 +87,11 @@
                     <CreditCard class="w-4.5 h-4.5" />
                   </div>
                   <div>
-                    <h4 class="text-sm font-bold text-slate-900 dark:text-white">RFID Smart Card</h4>
+                    <h4 class="text-sm font-bold text-slate-900 dark:text-white">NFC Card</h4>
                     <p class="text-xs text-slate-500 font-medium mt-0.5" v-if="employee?.card_number">
-                      Card Number: <span class="font-mono text-slate-700 dark:text-zinc-300">{{ employee.card_number }}</span>
+                      NFC ID: <span class="font-mono text-slate-700 dark:text-zinc-300">{{ employee.card_number }}</span>
                     </p>
-                    <p class="text-xs text-rose-500 font-medium mt-0.5" v-else>No card assigned</p>
+                    <p class="text-xs text-rose-500 font-medium mt-0.5" v-else>No NFC assigned</p>
                   </div>
                 </div>
                 <div v-if="employee?.card_number" class="flex items-center gap-2">
@@ -109,9 +104,9 @@
 
               <!-- Action Button / Input -->
               <div v-if="!employee?.card_number" class="mt-3 pt-3 border-t border-slate-100 dark:border-zinc-800">
-                <p class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1.5">Register Physical Card</p>
+                <p class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1.5">Register NFC Card</p>
                 <div class="flex items-center gap-2">
-                  <input type="text" v-model="newRfidCard" placeholder="Enter Card ID/Number" class="flex-1 h-9 px-3 border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-900 rounded-lg text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-slate-900 dark:text-white" />
+                  <input type="text" v-model="newRfidCard" placeholder="Enter NFC ID/Number" class="flex-1 h-9 px-3 border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-900 rounded-lg text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-slate-900 dark:text-white" />
                   <button @click="assignRfidCard" :disabled="!newRfidCard || isAssigningCard" class="h-9 px-4 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-colors shadow-sm shadow-emerald-500/20 disabled:opacity-50 flex items-center gap-2">
                     <Loader2 v-if="isAssigningCard" class="w-3.5 h-3.5 animate-spin" />
                     <Plus v-else class="w-3.5 h-3.5" /> Activate

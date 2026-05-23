@@ -145,6 +145,9 @@ const currentPageTitle = computed(() => {
   if (path.includes('/dashboard/logs')) return 'Event Logs';
   if (path.includes('/dashboard/guards')) return 'Guards';
   if (path.includes('/dashboard/my-access')) return 'My Access';
+  if (path.includes('/dashboard/my-attendance')) return 'My Attendance';
+  if (path.includes('/dashboard/my-logs')) return 'My Logs';
+  if (path.includes('/dashboard/profile')) return 'Profile';
   if (path.includes('/dashboard/report-automation')) return 'Scheduled Reports';
   return 'Dashboard';
 });

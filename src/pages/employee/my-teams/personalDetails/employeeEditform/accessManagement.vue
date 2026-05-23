@@ -241,7 +241,7 @@
         <!-- Credentials & Biometrics Section -->
         <div class="credentials-biometrics-section">
           <div class="credentials-grid">
-            <!-- RFID Card Card -->
+            <!-- NFC Card -->
             <div class="credential-card">
               <div class="card-header">
                 <div class="header-left">
@@ -249,7 +249,7 @@
                     <v-icon color="#1976D2">mdi-credit-card</v-icon>
                   </div>
                   <div class="header-text">
-                    <h3>RFID Card</h3>
+                    <h3>NFC Card</h3>
                     <p>Physical access card management</p>
                   </div>
                 </div>
@@ -261,7 +261,6 @@
 
               <div class="card-content">
                 <EmptyState
-                  v-if="assignedCards.length === 0"
                   title="No active cards assigned"
                   :show-default-actions="false"
                   class="empty-state-small"

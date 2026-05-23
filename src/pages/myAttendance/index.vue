@@ -1,22 +1,17 @@
 <template>
-  <div class="space-y-8 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700 p-6 max-w-7xl mx-auto">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-      <div>
-        <h1 class="text-4xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
-          My Attendance
-          <span class="px-2.5 py-0.5 rounded-md border border-blue-200 dark:border-blue-500/20 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 text-sm font-black uppercase tracking-widest leading-tight">
-            {{ format(currentDate, "MMMM yyyy") }}
-          </span>
-        </h1>
-        <p class="text-sm font-medium text-slate-500 mt-1">Your daily check-in/out summary for the month.</p>
-      </div>
+  <div class="space-y-4 pb-4 animate-in fade-in slide-in-from-bottom-4 duration-700 p-4 max-w-7xl mx-auto">
+    <!-- Header (Compact description and month since page title is in top bar) -->
+    <div class="flex items-center gap-3 pb-1">
+      <span class="px-2.5 py-1 rounded-md border border-blue-200 dark:border-blue-500/20 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 text-sm font-black uppercase tracking-widest leading-tight">
+        {{ format(currentDate, "MMMM yyyy") }}
+      </span>
+      <p class="text-xs font-medium text-slate-500">Your daily check-in/out summary for the month.</p>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
       <!-- Calendar View -->
-      <div class="lg:col-span-1 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-2xl p-6 shadow-sm">
-        <div class="flex items-center justify-between mb-6">
+      <div class="lg:col-span-1 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-2xl p-4 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
           <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500">Monthly View</h3>
           <div class="flex items-center gap-1">
             <button @click="prevMonth" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-600 dark:text-zinc-400 transition-colors"><ChevronLeft class="w-4 h-4" /></button>
@@ -24,7 +19,7 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-7 gap-1 text-center mb-2">
+        <div class="grid grid-cols-7 gap-1 text-center mb-1">
           <div v-for="day in ['S', 'M', 'T', 'W', 'T', 'F', 'S']" :key="day" class="text-[10px] font-black text-slate-400 py-1">{{ day }}</div>
         </div>
         <div class="grid grid-cols-7 gap-1">
@@ -35,7 +30,7 @@
             v-for="day in calendarDays"
             :key="day.date.toISOString()"
             :class="[
-              'aspect-square rounded-xl flex flex-col items-center justify-center relative transition-all shadow-sm border text-[11px] font-black',
+              'aspect-square rounded-lg flex flex-col items-center justify-center relative transition-all shadow-sm border text-[11px] font-black',
               day.isToday
                 ? 'bg-blue-600 text-white border-blue-600'
                 : day.attendance === 'present' || day.attendance === 'workFromHome' || day.attendance === 'onDuty'
@@ -61,7 +56,7 @@
         </div>
 
         <!-- Legend -->
-        <div class="mt-4 flex flex-wrap gap-2 text-[9px] font-black uppercase tracking-widest">
+        <div class="mt-3 flex flex-wrap gap-2 text-[9px] font-black uppercase tracking-widest">
           <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>Present</span>
           <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500"></span>Half Day</span>
           <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-rose-400"></span>Absent</span>
@@ -70,31 +65,31 @@
 
       <!-- Attendance Table -->
       <div class="lg:col-span-2">
-        <div class="flex items-center justify-between mb-4 px-1">
+        <div class="flex items-center justify-between mb-2 px-1">
           <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500">Detailed Logs</h3>
           <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">{{ records.length }} Records</span>
         </div>
 
-        <div class="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden shadow-sm">
+        <div class="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm max-h-[420px] overflow-y-auto relative">
           <table class="w-full text-left border-collapse">
-            <thead class="bg-slate-50/50 dark:bg-zinc-900/50 border-b border-slate-100 dark:border-zinc-800">
+            <thead class="bg-slate-50 dark:bg-zinc-900 border-b border-slate-100 dark:border-zinc-800 sticky top-0 z-10">
               <tr>
-                <th class="px-5 py-4 text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">Date</th>
-                <th class="px-5 py-4 text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">First Punch</th>
-                <th class="px-5 py-4 text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">Last Punch</th>
-                <th class="px-5 py-4 text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">Work Hours</th>
-                <th class="px-5 py-4 text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">Attendance</th>
+                <th class="px-4 py-2.5 text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">Date</th>
+                <th class="px-4 py-2.5 text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">First Punch</th>
+                <th class="px-4 py-2.5 text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">Last Punch</th>
+                <th class="px-4 py-2.5 text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">Work Hours</th>
+                <th class="px-4 py-2.5 text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">Attendance</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 dark:divide-zinc-800">
-              <tr v-if="loading" class="h-40">
+              <tr v-if="loading" class="h-32">
                 <td colspan="5" class="text-center">
                   <div class="flex justify-center items-center gap-2 text-blue-500 text-xs font-bold uppercase tracking-widest">
                     <Loader2 class="w-4 h-4 animate-spin" /> Loading records...
                   </div>
                 </td>
               </tr>
-              <tr v-else-if="records.length === 0" class="h-40">
+              <tr v-else-if="records.length === 0" class="h-32">
                 <td colspan="5" class="text-center text-xs font-bold text-slate-400 uppercase tracking-widest">No records found for this period.</td>
               </tr>
               <tr
@@ -104,7 +99,7 @@
                 class="hover:bg-slate-50/50 dark:hover:bg-zinc-900/50 transition-colors group"
               >
                 <!-- Date -->
-                <td class="px-5 py-4">
+                <td class="px-4 py-2">
                   <div class="flex flex-col">
                     <span class="font-black text-[12px] text-slate-900 dark:text-white">{{ formatDisplayDate(record.date) }}</span>
                     <span class="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-widest">{{ formatDayName(record.date) }}</span>
@@ -112,7 +107,7 @@
                 </td>
 
                 <!-- First Punch (inTime) -->
-                <td class="px-5 py-4">
+                <td class="px-4 py-2">
                   <div class="flex flex-col">
                     <span class="font-bold text-[12px]" :class="record.lateBy && record.lateBy !== '00:00:00' ? 'text-amber-600 dark:text-amber-400' : 'text-slate-700 dark:text-zinc-300'">
                       {{ formatTime(record.inTime) }}
@@ -124,7 +119,7 @@
                 </td>
 
                 <!-- Last Punch (outTime) -->
-                <td class="px-5 py-4">
+                <td class="px-4 py-2">
                   <div class="flex flex-col">
                     <span class="font-bold text-[12px] text-slate-700 dark:text-zinc-300">
                       {{ formatTime(record.outTime) }}
@@ -136,12 +131,12 @@
                 </td>
 
                 <!-- Work Hours -->
-                <td class="px-5 py-4">
+                <td class="px-4 py-2">
                   <span class="font-bold text-[12px] text-slate-700 dark:text-zinc-300">{{ formatTime(record.workHours) }}</span>
                 </td>
 
                 <!-- Attendance Status -->
-                <td class="px-5 py-4">
+                <td class="px-4 py-2">
                   <span
                     class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest border"
                     :class="getAttendanceBadgeClass(record.attendance)"
