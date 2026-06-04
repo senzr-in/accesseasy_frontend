@@ -176,6 +176,60 @@
             <!-- Form End -->
           </div>
 
+          <!-- Credentials & Access -->
+          <div class="space-y-5">
+            <h4 class="text-xs font-black uppercase tracking-widest border-b border-zinc-200 dark:border-zinc-800/80 pb-3 flex items-center gap-2 text-zinc-400 dark:text-zinc-500">
+              <ShieldAlert class="w-4 h-4 text-violet-500" /> Credentials & Access
+            </h4>
+            <div class="grid grid-cols-2 gap-4">
+              <div class="space-y-1.5">
+                <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">RFID Card Number</label>
+                <input v-model="formData.rfidCard" type="text" placeholder="Enter RFID Card number..." class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground" />
+              </div>
+              <div class="space-y-1.5 flex flex-col justify-end">
+                <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2">Access Status</label>
+                <div class="flex items-center gap-2 h-9">
+                  <input v-model="formData.accessOn" type="checkbox" id="access-on-checkbox" class="w-4 h-4 rounded text-violet-600 focus:ring-violet-500 border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950" />
+                  <label for="access-on-checkbox" class="text-sm font-medium text-slate-700 dark:text-zinc-300 cursor-pointer">
+                    {{ formData.accessOn ? 'Access Enabled' : 'Access Disabled' }}
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Allowed Entrance Modes -->
+            <div class="space-y-2">
+              <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest block">Allowed Entrance Modes</label>
+              <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-1">
+                <!-- Face -->
+                <label class="flex items-center gap-2 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 cursor-pointer hover:bg-slate-50 dark:hover:bg-zinc-900 transition-all">
+                  <input v-model="formData.face" type="checkbox" class="w-4 h-4 rounded text-violet-600 focus:ring-violet-500 border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950" />
+                  <span class="text-xs font-semibold text-slate-700 dark:text-zinc-300 select-none">Face</span>
+                </label>
+                <!-- Finger -->
+                <label class="flex items-center gap-2 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 cursor-pointer hover:bg-slate-50 dark:hover:bg-zinc-900 transition-all">
+                  <input v-model="formData.finger" type="checkbox" class="w-4 h-4 rounded text-violet-600 focus:ring-violet-500 border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950" />
+                  <span class="text-xs font-semibold text-slate-700 dark:text-zinc-300 select-none">Fingerprint</span>
+                </label>
+                <!-- RFID -->
+                <label class="flex items-center gap-2 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 cursor-pointer hover:bg-slate-50 dark:hover:bg-zinc-900 transition-all">
+                  <input v-model="formData.rfid" type="checkbox" class="w-4 h-4 rounded text-violet-600 focus:ring-violet-500 border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950" />
+                  <span class="text-xs font-semibold text-slate-700 dark:text-zinc-300 select-none">RFID</span>
+                </label>
+                <!-- QR -->
+                <label class="flex items-center gap-2 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 cursor-pointer hover:bg-slate-50 dark:hover:bg-zinc-900 transition-all">
+                  <input v-model="formData.QrAttendance" type="checkbox" class="w-4 h-4 rounded text-violet-600 focus:ring-violet-500 border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950" />
+                  <span class="text-xs font-semibold text-slate-700 dark:text-zinc-300 select-none">QR Code</span>
+                </label>
+                <!-- Geo -->
+                <label class="flex items-center gap-2 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 cursor-pointer hover:bg-slate-50 dark:hover:bg-zinc-900 transition-all">
+                  <input v-model="formData.GeoAttendance" type="checkbox" class="w-4 h-4 rounded text-violet-600 focus:ring-violet-500 border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-950" />
+                  <span class="text-xs font-semibold text-slate-700 dark:text-zinc-300 select-none">Geo Fence</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
         </form>
       </div>
 
@@ -204,9 +258,10 @@
 
 <script setup>
 import { ref, watch, onMounted } from 'vue';
-import { X, Loader2, UserPlus, User, Plus, Building, AlertTriangle } from 'lucide-vue-next';
+import { X, Loader2, UserPlus, User, Plus, Building, AlertTriangle, ShieldAlert } from 'lucide-vue-next';
 import { authService } from '@/services/authService';
 import { currentUserTenant } from '@/utils/currentUserTenant';
+import { convertToCardAccessHex } from '@/utils/helpers/convertToCardAccessHex';
 
 const props = defineProps({
   modelValue: Boolean,
@@ -223,6 +278,30 @@ const tenantId = currentUserTenant.getTenantId();
 const departments = ref([]);
 const branches = ref([]);
 const groups = ref([]);
+
+const originalCardNumber = ref('');
+const originalCardId = ref(null);
+
+const fetchEmployeeCard = async () => {
+  if (!props.employee?.id) return;
+  try {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/cardManagement?filter[employeeId][_eq]=${props.employee.id}&filter[type][_eq]=rfid`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if (data.data?.length > 0) {
+      originalCardId.value = data.data[0].id;
+      originalCardNumber.value = data.data[0].rfidCard;
+      formData.value.rfidCard = data.data[0].rfidCard;
+    } else {
+      originalCardId.value = null;
+      originalCardNumber.value = '';
+      formData.value.rfidCard = '';
+    }
+  } catch (err) {
+    console.error("Error fetching employee card:", err);
+  }
+};
 
 const formData = ref({
   firstName: '',
@@ -244,6 +323,13 @@ const formData = ref({
   branchId: '',
   groupId: '',
   status: 'active',
+  rfidCard: '',
+  accessOn: true,
+  face: false,
+  finger: false,
+  rfid: false,
+  QrAttendance: false,
+  GeoAttendance: false,
 });
 
 // Load dropdowns when opened
@@ -272,7 +358,17 @@ watch(() => props.modelValue, (isOpen) => {
         branchId: props.employee.branch?.id || props.employee.branch || '',
         groupId: props.employee.assignedAccessLevel?.id || props.employee.assignedAccessLevel || props.employee.group?.id || props.employee.group || '',
         status: props.employee.status || 'active',
+        rfidCard: '',
+        accessOn: props.employee.accessOn !== false,
+        face: props.employee.face === true,
+        finger: props.employee.finger === true,
+        rfid: props.employee.rfid === true,
+        QrAttendance: props.employee.QrAttendance === true,
+        GeoAttendance: props.employee.GeoAttendance === true,
       };
+      originalCardId.value = null;
+      originalCardNumber.value = '';
+      fetchEmployeeCard();
     } else {
       // Reset Form for new employee
       formData.value = {
@@ -295,7 +391,16 @@ watch(() => props.modelValue, (isOpen) => {
         branchId: '',
         groupId: '',
         status: 'active',
+        rfidCard: '',
+        accessOn: true,
+        face: false,
+        finger: false,
+        rfid: false,
+        QrAttendance: false,
+        GeoAttendance: false,
       };
+      originalCardId.value = null;
+      originalCardNumber.value = '';
     }
     
     fetchDepartments();
@@ -344,6 +449,19 @@ const handleSubmit = async () => {
   try {
     const isEdit = !!props.employee;
     let newUserId = null;
+
+    // Validate RFID Card uniqueness if entered
+    if (formData.value.rfidCard && formData.value.rfidCard !== originalCardNumber.value) {
+      const cardCheckRes = await fetch(`${import.meta.env.VITE_API_URL}/items/cardManagement?filter[rfidCard][_eq]=${formData.value.rfidCard}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (cardCheckRes.ok) {
+        const cardCheckData = await cardCheckRes.json();
+        if (cardCheckData.data?.length > 0) {
+          throw new Error(`RFID Card Number ${formData.value.rfidCard} is already assigned to another employee.`);
+        }
+      }
+    }
 
     if (!isEdit) {
       // Step 1: Create the Directus user first (following Next.js pattern)
@@ -426,7 +544,12 @@ const handleSubmit = async () => {
       
       // Critical fields required by backend
       status: formData.value.status === 'active' ? 'true' : 'false',
-      accessOn: true,
+      accessOn: formData.value.accessOn,
+      face: formData.value.face,
+      finger: formData.value.finger,
+      rfid: formData.value.rfid,
+      QrAttendance: formData.value.QrAttendance,
+      GeoAttendance: formData.value.GeoAttendance,
       uniqueId: `${tenantId}-${formData.value.employeeId}`,
       config: [{ shiftName: 1, startTime: "09:00", endTime: "18:00" }], // basic fallback config mapping
       attendancePolicyHistory: { status: "published" },
@@ -461,6 +584,63 @@ const handleSubmit = async () => {
       console.error("Directus personalModule creation failed:", errorData);
       const detailMsg = errorData.errors?.[0]?.message || 'Unknown server error';
       throw new Error(`Failed to ${isEdit ? 'update' : 'create'} personal record: ` + detailMsg);
+    }
+
+    const personalResData = await personalRes.json();
+    const savedPersonalRecordId = isEdit ? props.employee.id : personalResData.data.id;
+    
+    // Handle RFID Card management
+    if (formData.value.rfidCard !== originalCardNumber.value) {
+      if (originalCardId.value && !formData.value.rfidCard) {
+        // Delete card
+        await fetch(`${import.meta.env.VITE_API_URL}/items/cardManagement/${originalCardId.value}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      } else if (formData.value.rfidCard) {
+        const accessLevelNum = formData.value.groupId 
+          ? groups.value.find(g => g.id === formData.value.groupId)?.accessLevelNumber || 1 
+          : 1;
+        const cardAccess = formData.value.accessOn;
+
+        const cardPayload = {
+          rfidCard: formData.value.rfidCard,
+          type: "rfid",
+          enabled: cardAccess,
+          cardAccess: cardAccess,
+          accessLevelsId: accessLevelNum,
+          cardAccessLevelArray: `${formData.value.rfidCard}:${cardAccess ? 1 : 0}:${accessLevelNum}`,
+          cardAccessLevelHex: convertToCardAccessHex(
+            formData.value.rfidCard,
+            cardAccess,
+            accessLevelNum
+          ),
+          employeeId: savedPersonalRecordId,
+          tenant: tenantId
+        };
+
+        if (originalCardId.value) {
+          // Update card
+          await fetch(`${import.meta.env.VITE_API_URL}/items/cardManagement/${originalCardId.value}`, {
+            method: 'PATCH',
+            headers: { 
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify(cardPayload)
+          });
+        } else {
+          // Create card
+          await fetch(`${import.meta.env.VITE_API_URL}/items/cardManagement`, {
+            method: 'POST',
+            headers: { 
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify(cardPayload)
+          });
+        }
+      }
     }
 
     emit('success');

@@ -177,7 +177,7 @@ const items = ref([]);
 const loading = ref(false);
 const searchQuery = ref("");
 const page = ref(1);
-const itemsPerPage = 15;
+const itemsPerPage = 10;
 const totalItems = ref(0);
 const showDialog = ref(false);
 const selectedDoor = ref(null);
@@ -216,9 +216,10 @@ const fetchDoorData = async () => {
     }
 
     const queryParams = new URLSearchParams({
-      limit: itemsPerPage,
-      page: page.value,
+      limit: itemsPerPage.toString(),
+      page: page.value.toString(),
       sort: "-date_created",
+      meta: "filter_count",
       ...filterParams
     });
 
@@ -235,7 +236,7 @@ const fetchDoorData = async () => {
     if (response.ok) {
       const data = await response.json();
       items.value = data.data || [];
-      totalItems.value = data.data?.length ?? 0;
+      totalItems.value = data.meta?.filter_count ?? 0;
     } else {
       console.error("Fetch doors failed:", response.status, response.statusText);
     }

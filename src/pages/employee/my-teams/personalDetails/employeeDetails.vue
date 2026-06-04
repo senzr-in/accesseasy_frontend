@@ -41,18 +41,19 @@
               <th scope="col" class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">Name</th>
               <th scope="col" class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">Department</th>
               <th scope="col" class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">Role</th>
+              <th scope="col" class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">Biometrics & Keys</th>
               <th scope="col" class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">Status</th>
               <th scope="col" class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap text-right">Actions</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 dark:divide-zinc-800 bg-white dark:bg-zinc-950">
             <tr v-if="loading">
-              <td colspan="6" class="h-24 text-center text-slate-500">
+              <td colspan="7" class="h-24 text-center text-slate-500">
                 <Loader2 class="w-6 h-6 animate-spin text-blue-500 mx-auto" />
               </td>
             </tr>
             <tr v-else-if="items.length === 0">
-              <td colspan="6" class="h-32 text-center text-slate-500 text-sm font-medium">
+              <td colspan="7" class="h-32 text-center text-slate-500 text-sm font-medium">
                 No employees found.
               </td>
             </tr>
@@ -81,6 +82,50 @@
                 <span class="inline-flex px-2 py-0.5 bg-slate-50 dark:bg-zinc-900 text-slate-600 dark:text-zinc-400 rounded-md text-[9px] font-black uppercase tracking-widest border border-slate-200 dark:border-zinc-800">
                   {{ emp.assignedUser?.role?.name || "Unassigned" }}
                 </span>
+              </td>
+              <td class="px-5 py-3">
+                <div class="flex items-center gap-1.5">
+                  <!-- Fingerprint -->
+                  <span :title="hasFinger(emp.id) ? 'Fingerprint Registered' : 'Fingerprint Missing'"
+                    :class="[
+                      'p-1 rounded-lg border text-xs flex items-center justify-center transition-all',
+                      hasFinger(emp.id) 
+                        ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' 
+                        : 'bg-slate-50 text-slate-400 border-slate-200 dark:bg-zinc-900 dark:text-zinc-600 dark:border-zinc-800'
+                    ]">
+                    <Fingerprint class="w-3.5 h-3.5" />
+                  </span>
+                  <!-- Face -->
+                  <span :title="hasFace(emp) ? 'Face Template Registered' : 'Face Template Missing'"
+                    :class="[
+                      'p-1 rounded-lg border text-xs flex items-center justify-center transition-all',
+                      hasFace(emp) 
+                        ? 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20' 
+                        : 'bg-slate-50 text-slate-400 border-slate-200 dark:bg-zinc-900 dark:text-zinc-600 dark:border-zinc-800'
+                    ]">
+                    <Scan class="w-3.5 h-3.5" />
+                  </span>
+                  <!-- RFID -->
+                  <span :title="hasRfid(emp.id) ? 'RFID Card Assigned' : 'RFID Card Missing'"
+                    :class="[
+                      'p-1 rounded-lg border text-xs flex items-center justify-center transition-all',
+                      hasRfid(emp.id) 
+                        ? 'bg-purple-50 text-purple-600 border-purple-200 dark:bg-purple-500/10 dark:text-purple-400 dark:border-purple-500/20' 
+                        : 'bg-slate-50 text-slate-400 border-slate-200 dark:bg-zinc-900 dark:text-zinc-600 dark:border-zinc-800'
+                    ]">
+                    <CreditCard class="w-3.5 h-3.5" />
+                  </span>
+                  <!-- NFC -->
+                  <span :title="hasNfc(emp) ? 'NFC Key Registered' : 'NFC Key Missing'"
+                    :class="[
+                      'p-1 rounded-lg border text-xs flex items-center justify-center transition-all',
+                      hasNfc(emp) 
+                        ? 'bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20' 
+                        : 'bg-slate-50 text-slate-400 border-slate-200 dark:bg-zinc-900 dark:text-zinc-600 dark:border-zinc-800'
+                    ]">
+                    <Smartphone class="w-3.5 h-3.5" />
+                  </span>
+                </div>
               </td>
               <td class="px-5 py-3">
                 <span :class="[
@@ -180,7 +225,7 @@
 <script setup>
 import { ref, computed, onMounted, watch, inject } from "vue";
 import { useRouter } from "vue-router";
-import { Plus, Search, Filter, FileDown, Trash2, MessageCircle, Loader2 } from "lucide-vue-next";
+import { Plus, Search, Filter, FileDown, Trash2, MessageCircle, Loader2, Fingerprint, Scan, CreditCard, Smartphone } from "lucide-vue-next";
 import { authService } from "@/services/authService";
 import { currentUserTenant } from "@/utils/currentUserTenant";
 import AddEmployeeDialog from "./addEmployeeDialog.vue";
@@ -197,7 +242,7 @@ const loading = ref(true);
 const search = ref("");
 const page = ref(1);
 const totalItems = ref(0);
-const itemsPerPage = 15;
+const itemsPerPage = 10;
 const showAddDialog = ref(false);
 const selectedEmployee = ref(null);
 const deleteDialog = ref(false);
@@ -316,11 +361,13 @@ const fetchEmployeeData = async () => {
     
     // Add fields array manually since URLSearchParams doesn't handle array brackets exactly as Directus wants
     const fields = [
-        "*",
+        "id", "employeeId", "status", "registeredFace",
         "assignedUser.id", "assignedUser.first_name", "assignedUser.last_name", "assignedUser.role.name", 
         "assignedUser.phone", "assignedUser.email",
         "department.id", "department.departmentName",
-        "branch.id", "assignedAccessLevel.id"
+        "branch.id", "assignedAccessLevel.id",
+        "accessOn", "face", "finger", "rfid", "QrAttendance", "GeoAttendance",
+        "assignedFaceEmbed.id"
     ].map(f => `fields[]=${f}`).join('&');
 
     const res = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule?${queryParams.toString()}&${fields}`, {
@@ -330,6 +377,9 @@ const fetchEmployeeData = async () => {
     if (res.ok) {
       const data = await res.json();
       items.value = data.data || [];
+      if (items.value.length > 0) {
+        await fetchBiometricAndCredentialStatus(items.value.map(item => item.id));
+      }
     } else {
       items.value = [];
     }
@@ -340,6 +390,58 @@ const fetchEmployeeData = async () => {
     loading.value = false;
   }
 };
+
+// Biometrics and credentials status maps
+const userFingersMap = ref({});
+const rfidCardsMap = ref({});
+
+const fetchBiometricAndCredentialStatus = async (employeeIds) => {
+  if (!employeeIds || employeeIds.length === 0) return;
+  const idString = employeeIds.join(",");
+  
+  // Fetch fingerprints from userFingers
+  try {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/userFingers?filter[assignedTo][id][_in]=${idString}&fields=id,assignedTo.id`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const map = {};
+      (data.data || []).forEach(f => {
+        const empId = f.assignedTo?.id;
+        if (empId) map[empId] = true;
+      });
+      userFingersMap.value = { ...userFingersMap.value, ...map };
+    }
+  } catch (err) {
+    console.error("Error fetching userFingers status:", err);
+  }
+
+  // Fetch RFID cards from cardManagement
+  try {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/cardManagement?filter[employeeId][id][_in]=${idString}&fields=id,rfidCard,type,employeeId.id`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const map = {};
+      (data.data || []).forEach(c => {
+        const empId = c.employeeId?.id;
+        if (empId && c.rfidCard) {
+          map[empId] = true;
+        }
+      });
+      rfidCardsMap.value = { ...rfidCardsMap.value, ...map };
+    }
+  } catch (err) {
+    console.error("Error fetching cardManagement status:", err);
+  }
+};
+
+const hasFinger = (id) => !!userFingersMap.value[id];
+const hasFace = (emp) => !!emp.assignedFaceEmbed?.id || (emp.registeredFace && emp.registeredFace.trim() !== "");
+const hasRfid = (id) => !!rfidCardsMap.value[id];
+const hasNfc = (emp) => !!emp.card_number;
 
 onMounted(() => {
   fetchEmployeeData();

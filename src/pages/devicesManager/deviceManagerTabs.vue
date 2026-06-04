@@ -224,7 +224,7 @@ const items = ref([]);
 const loading = ref(false);
 const search = ref("");
 const page = ref(1);
-const itemsPerPage = 15;
+const itemsPerPage = 10;
 const totalItems = ref(0);
 const activeStatusTab = ref("all");
 const showDialog = ref(false);
@@ -288,9 +288,10 @@ const fetchDeviceData = async () => {
     }
 
     const queryParams = new URLSearchParams({
-      limit: itemsPerPage,
-      page: page.value,
+      limit: itemsPerPage.toString(),
+      page: page.value.toString(),
       sort: "-date_created",
+      meta: "filter_count",
       ...filterObj
     });
 
@@ -315,7 +316,7 @@ const fetchDeviceData = async () => {
           return item;
         })
       );
-      totalItems.value = items.value.length;
+      totalItems.value = data.meta?.filter_count ?? 0;
     } else {
       console.error("Fetch devices failed:", response.status, response.statusText);
     }

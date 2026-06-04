@@ -147,7 +147,7 @@ const items = ref([]);
 const loading = ref(false);
 const searchQuery = ref("");
 const page = ref(1);
-const limit = 15;
+const limit = 10;
 const totalItems = ref(0);
 const showDialog = ref(false);
 const selectedGroup = ref(null);
@@ -183,6 +183,7 @@ const fetchData = async () => {
       page: page.value.toString(),
       "sort[]": "sort",
       "filter[tenant][tenantId][_eq]": tenantId,
+      meta: "filter_count",
     });
 
     const fields = [
@@ -209,7 +210,7 @@ const fetchData = async () => {
     if (response.ok) {
       const data = await response.json();
       items.value = data.data || [];
-      totalItems.value = data.data?.length ?? 0;
+      totalItems.value = data.meta?.filter_count ?? 0;
     }
   } catch (error) {
     console.error("Fetch access levels error:", error);

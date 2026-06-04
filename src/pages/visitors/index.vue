@@ -131,12 +131,12 @@
           Previous
         </button>
         <div class="text-[10px] font-black uppercase tracking-widest text-slate-500">
-          Page {{ page }}
+          Page {{ page }} of {{ totalPages || 1 }} &nbsp;·&nbsp; {{ totalItems }} total
         </div>
         <button
           class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-950 disabled:opacity-50 transition-colors shadow-sm text-slate-700 dark:text-slate-300"
           @click="page++"
-          :disabled="items.length < limit || loading"
+          :disabled="page >= totalPages || loading"
         >
           Next
         </button>
@@ -229,7 +229,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { 
   Users, Search, UserPlus, Loader2, Briefcase, UserCheck, X 
 } from 'lucide-vue-next';
@@ -244,7 +244,9 @@ const items = ref([]);
 const accessLevels = ref([]);
 const searchQuery = ref('');
 const page = ref(1);
-const limit = 15;
+const limit = 10;
+const totalItems = ref(0);
+const totalPages = computed(() => Math.ceil(totalItems.value / limit));
 const showAddModal = ref(false);
 
 const today = new Date().toISOString().split('T')[0];
@@ -305,10 +307,11 @@ const loadVisitors = async () => {
     }
 
     const params = new URLSearchParams({
-      limit,
-      page: page.value,
+      limit: limit.toString(),
+      page: page.value.toString(),
       sort: '-date_created',
       fields: 'id,personName,email,mobileNumber,startDate,endDate,startTime,endTime,status,quantity,assignedAccessLevels.accessLevelName,date_created',
+      meta: 'filter_count',
       ...filter
     });
 
@@ -319,6 +322,7 @@ const loadVisitors = async () => {
     if (res.ok) {
       const data = await res.json();
       items.value = data.data || [];
+      totalItems.value = data.meta?.filter_count ?? 0;
     }
   } catch (err) {
     console.error('Failed to load visitors', err);

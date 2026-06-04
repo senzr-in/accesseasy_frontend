@@ -19,7 +19,7 @@ class AuthService {
         Authorization: `Bearer ${import.meta.env.VITE_API_TOKEN}`,
         "Content-Type": "application/json",
       },
-      timeout: 30000,
+      timeout: 45000,
     });
 
     this.protectedApi = axios.create({

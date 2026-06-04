@@ -93,21 +93,34 @@
             <thead class="text-[9px] font-black uppercase tracking-widest text-slate-500 bg-slate-50 dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 sticky top-0">
               <tr>
                 <th class="px-5 py-3">Visitor</th>
+                <th class="px-5 py-3">Door</th>
+                <th class="px-5 py-3">Authorized By</th>
                 <th class="px-5 py-3">Time</th>
                 <th class="px-5 py-3 text-right">Status</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 dark:divide-zinc-800">
               <tr v-if="loading" class="h-32">
-                <td colspan="3" class="text-center text-[10px] font-black uppercase tracking-widest text-slate-400">Loading feed...</td>
+                <td colspan="5" class="text-center text-[10px] font-black uppercase tracking-widest text-slate-400">Loading feed...</td>
               </tr>
               <tr v-else-if="recentLogs.length === 0" class="h-32">
-                <td colspan="3" class="text-center text-[10px] font-black uppercase tracking-widest text-slate-400">No visitors today</td>
+                <td colspan="5" class="text-center text-[10px] font-black uppercase tracking-widest text-slate-400">No visitors today</td>
               </tr>
               <tr v-else v-for="log in recentLogs" :key="log.id" class="hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors">
                 <td class="px-5 py-3">
                   <div class="text-[12px] font-semibold text-slate-900 dark:text-white">{{ log.name || 'Unknown Visitor' }}</div>
-                  <div class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">{{ log.mode || 'Portal Scan' }}</div>
+                  <div class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">{{ log.mode === 'throughApp' ? 'App Scan' : (log.mode || 'Portal Scan') }}</div>
+                </td>
+                <td class="px-5 py-3 text-[11px] text-slate-600 dark:text-zinc-400">
+                  {{ log.door?.doorName || log.door?.doorNumber || '-' }}
+                </td>
+                <td class="px-5 py-3 text-[11px] text-slate-600 dark:text-zinc-400">
+                  <span class="font-medium" v-if="log.user_created">
+                    {{ log.user_created.first_name }} {{ log.user_created.last_name || '' }}
+                  </span>
+                  <span class="text-slate-400 italic text-[10px]" v-else>
+                    System / Auto
+                  </span>
                 </td>
                 <td class="px-5 py-3 text-[11px] text-slate-600 dark:text-zinc-400">{{ formatTime(log.date_created) }}</td>
                 <td class="px-5 py-3 text-right">
@@ -157,7 +170,7 @@ const fetchData = async () => {
       fetch(`${base}/items/logs?aggregate[count]=id&filter[tenant][_eq]=${tenantId}&filter[ValidLogs][_in]=unAuthorized,false&filter[date][_eq]=${today}&filter[employeeId][_null]=true`, { headers }),
       fetch(`${base}/items/visitor?aggregate[count]=id&filter[tenant][tenantId][_eq]=${tenantId}&filter[status][_eq]=active`, { headers }),
       fetch(`${base}/items/BrandedPages?aggregate[count]=id&filter[tenant][_eq]=${tenantId}&filter[status][_eq]=published`, { headers }),
-      fetch(`${base}/items/logs?filter[tenant][_eq]=${tenantId}&filter[employeeId][_null]=true&sort=-date_created&limit=8&fields=id,name,date_created,ValidLogs,mode`, { headers })
+      fetch(`${base}/items/logs?filter[tenant][_eq]=${tenantId}&filter[employeeId][_null]=true&sort=-date_created&limit=8&fields=id,name,date_created,ValidLogs,mode,user_created.first_name,user_created.last_name,door.doorName,door.doorNumber`, { headers })
     ]);
 
     const [auth, unauth, active, portal, recent] = await Promise.all([

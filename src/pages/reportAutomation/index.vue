@@ -431,12 +431,8 @@ function mkReport(internalId, name, description, icon, color) {
 }
 
 const reports = ref([
-  mkReport('daily-attendance',  'Daily Attendance',      'Present / Absent / On-Leave headcount.',          ClipboardList,  '#4f46e5'),
-  mkReport('access-log-report', 'Access Log Report',     'Total entries, granted vs denied, busiest doors.', DoorOpen,       '#0891b2'),
-  mkReport('visitor-activity',  'Visitor Activity',      'Daily visitors, approvals, check-ins & outs.',    UserCheck,      '#10b981'),
-  mkReport('employee-roster',   'Employee Roster',       'Workforce headcount & department breakdown.',      Users,          '#f59e0b'),
-  mkReport('device-health',     'Device Health',         'Online vs offline reader & controller status.',   Cpu,            '#8b5cf6'),
-  mkReport('weekly-summary',    'Weekly Security Summary','Combined weekly snapshot of all key metrics.',   ShieldCheck,    '#ec4899'),
+  mkReport('access-log-report', 'Employee Entry Logs', 'Summarizes total entries, granted vs denied events, and doors accessed by employees.', DoorOpen, '#0891b2'),
+  mkReport('visitor-activity', 'Visitor Entry Logs', 'Summarizes daily visitor registrations, guard approvals, and check-in/out activities.', UserCheck, '#10b981'),
 ]);
 
 // ── HELPERS ────────────────────────────────────────────────────────────────────
