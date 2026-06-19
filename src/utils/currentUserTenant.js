@@ -66,7 +66,7 @@ class CurrentUserTenant {
 
       const params = {
         fields:
-          "id,tenant.tenantId,tenant.tenantName,role.name,phone,first_name,last_name,email,tenant.plan,tenant.accountSettings,title",
+          "id,tenant.tenantId,tenant.tenantName,role.name,phone,first_name,last_name,email,tenant.plan,tenant.accountSettings,title,roleConfig.roleName",
       };
 
       if (formattedPhone) {

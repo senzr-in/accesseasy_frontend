@@ -169,9 +169,13 @@ class AuthService {
   getUserRole() {
     const userData = this.getUserData();
     let role = userData?.role?.name || "";
-    // Dynamically identify Guard sub-role via title designation if they are standard employees
-    if (role === 'Employee' && (userData?.title?.toLowerCase() === 'guard' || userData?.title?.toLowerCase() === 'security')) {
+    // Dynamically identify Guard sub-role via roleConfig roleName (or title for backwards compatibility)
+    if (role === 'Employee') {
+      const isGuardRoleConfig = userData?.roleConfig?.roleName?.toLowerCase().includes('guard');
+      const isGuardTitle = userData?.title?.toLowerCase() === 'guard' || userData?.title?.toLowerCase() === 'security';
+      if (isGuardRoleConfig || isGuardTitle) {
         role = 'Guard';
+      }
     }
     return role;
   }

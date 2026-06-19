@@ -246,6 +246,26 @@ const editingGuard = ref(null);
 const dialogLoading = ref(false);
 const dialogError = ref('');
 const doors = ref([]);
+const guardRoleId = ref(null);
+
+const fetchGuardRoleId = async () => {
+  try {
+    const token = authService.getToken();
+    const tenantId = await currentUserTenant.getTenantIdAsync();
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/items/roleConfigurator?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][_and][1][accessType][_eq]=accessEasy&filter[_and][0][_and][2][roleName][_contains]=guard&fields[]=id`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (res.ok) {
+      const data = await res.json();
+      if (data.data && data.data.length > 0) {
+        guardRoleId.value = data.data[0].id;
+      }
+    }
+  } catch (err) {
+    console.error('Failed to fetch guard role config:', err);
+  }
+};
 
 const form = ref({
   first_name: '',
@@ -314,8 +334,20 @@ const fetchGuards = async () => {
   try {
     const token = authService.getToken();
     const tenantId = await currentUserTenant.getTenantIdAsync();
+
+    if (!guardRoleId.value) {
+      await fetchGuardRoleId();
+    }
+
+    let filterString = `filter[_and][0][userApp][_eq]=accesseasy&filter[_and][1][tenant][tenantId][_eq]=${tenantId}`;
+    if (guardRoleId.value) {
+      filterString += `&filter[_and][2][roleConfig][_eq]=${guardRoleId.value}`;
+    } else {
+      filterString += `&filter[_and][2][roleConfig][roleName][_contains]=guard`;
+    }
+
     const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/users?filter[_and][0][userApp][_eq]=accesseasy&filter[_and][1][tenant][tenantId][_eq]=${tenantId}&filter[_and][2][title][_eq]=Guard&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=email&fields[]=phone&fields[]=status`,
+      `${import.meta.env.VITE_API_URL}/users?${filterString}&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=email&fields[]=phone&fields[]=status&fields[]=title&fields[]=roleConfig.*`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     if (res.ok) {
@@ -380,7 +412,7 @@ const handleSubmit = async () => {
       email: form.value.email,
       phone: form.value.phone || null,
       userApp: 'accesseasy',
-      title: 'Guard',
+      roleConfig: guardRoleId.value || null,
       tenant: tenantId,
     };
 
