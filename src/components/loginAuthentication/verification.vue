@@ -97,6 +97,7 @@
                 type="text"
                 @input="handleInput(index)"
                 @keydown="handleKeydown($event, index)"
+                @paste="handlePaste($event, index)"
                 ref="otpFields"
                 class="w-12 h-14 text-center rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none text-xl font-black text-slate-900 dark:text-white shadow-sm"
               />
@@ -260,6 +261,27 @@ function handleInput(index) {
       otpFields.value[index + 1]?.focus();
     });
   }
+}
+
+function handlePaste(event, index) {
+  event.preventDefault();
+  const pastedData = event.clipboardData.getData("text").replace(/[^0-9]/g, "");
+  if (!pastedData) return;
+
+  let pasteIndex = index;
+  if (pastedData.length === 6) {
+    pasteIndex = 0;
+  }
+
+  for (let i = 0; i < pastedData.length && pasteIndex < 6; i++) {
+    otpDigits.value[pasteIndex] = pastedData[i];
+    pasteIndex++;
+  }
+
+  const focusTarget = Math.min(pasteIndex, 5);
+  nextTick(() => {
+    otpFields.value[focusTarget]?.focus();
+  });
 }
 
 function handleKeydown(event, index) {

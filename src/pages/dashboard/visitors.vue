@@ -160,30 +160,23 @@ const fetchData = async () => {
   try {
     const token = authService.getToken();
     const tenantId = currentUserTenant.getTenantId();
-    const base = import.meta.env.VITE_API_URL;
     const today = new Date().toISOString().split('T')[0];
-
     const headers = { Authorization: `Bearer ${token}` };
 
-    const [authRes, unauthRes, activeRes, portalRes, recentRes] = await Promise.all([
-      fetch(`${base}/items/logs?aggregate[count]=id&filter[tenant][_eq]=${tenantId}&filter[ValidLogs][_in]=authorized,true&filter[date][_eq]=${today}&filter[employeeId][_null]=true`, { headers }),
-      fetch(`${base}/items/logs?aggregate[count]=id&filter[tenant][_eq]=${tenantId}&filter[ValidLogs][_in]=unAuthorized,false&filter[date][_eq]=${today}&filter[employeeId][_null]=true`, { headers }),
-      fetch(`${base}/items/visitor?aggregate[count]=id&filter[tenant][tenantId][_eq]=${tenantId}&filter[status][_eq]=active`, { headers }),
-      fetch(`${base}/items/BrandedPages?aggregate[count]=id&filter[tenant][_eq]=${tenantId}&filter[status][_eq]=published`, { headers }),
-      fetch(`${base}/items/logs?filter[tenant][_eq]=${tenantId}&filter[employeeId][_null]=true&sort=-date_created&limit=8&fields=id,name,date_created,ValidLogs,mode,user_created.first_name,user_created.last_name,door.doorName,door.doorNumber`, { headers })
-    ]);
+    const response = await authService.knApi.post('/accesseasy-dashboard-api/metrics', {
+      action: 'visitor-dashboard',
+      tenantId,
+      today
+    }, { headers });
 
-    const [auth, unauth, active, portal, recent] = await Promise.all([
-      authRes.json(), unauthRes.json(), activeRes.json(), portalRes.json(), recentRes.json()
-    ]);
-
+    const data = response.data;
     stats.value = {
-      totalToday: Number(auth?.data?.[0]?.count?.id) || 0,
-      deniedToday: Number(unauth?.data?.[0]?.count?.id) || 0,
-      activeNow: Number(active?.data?.[0]?.count?.id) || 0,
-      portals: Number(portal?.data?.[0]?.count?.id) || 0
+      totalToday: data.totalToday || 0,
+      deniedToday: data.deniedToday || 0,
+      activeNow: data.activeNow || 0,
+      portals: data.portals || 0
     };
-    recentLogs.value = recent?.data || [];
+    recentLogs.value = data.recentLogs || [];
   } catch (e) {
     console.error('Visitor dashboard fetch failed:', e);
   } finally {

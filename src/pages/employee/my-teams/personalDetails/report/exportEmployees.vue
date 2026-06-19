@@ -485,6 +485,24 @@ watch(
   { deep: true }
 );
 
+watch(
+  () => props.filters,
+  (newFilters) => {
+    if (newFilters) {
+      if (newFilters.department) {
+        selectedDepartment.value = newFilters.department;
+      }
+      if (newFilters.role) {
+        selectedRole.value = newFilters.role;
+      }
+      if (newFilters.gender) {
+        selectedGender.value = newFilters.gender;
+      }
+    }
+  },
+  { immediate: true, deep: true }
+);
+
 const getNestedValue = (obj, path) => {
   return path.split(".").reduce((acc, part) => acc && acc[part], obj);
 };

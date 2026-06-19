@@ -280,7 +280,7 @@ const pageConfig = ref({
 });
 
 // ── Preview URL ────────────────────────────────────────────────────────────
-const BASE_URL = import.meta.env.VITE_UI_URL || 'http://localhost:3000';
+const BASE_URL = import.meta.env.VITE_UI_URL || 'https://view.fieldseasy.com';
 const previewUrl = computed(() =>
   pageConfig.value.id
     ? `${BASE_URL}/visit/${pageConfig.value.id}`

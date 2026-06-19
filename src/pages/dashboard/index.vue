@@ -384,29 +384,61 @@ const formatGuardTime = (dateString) => {
   } catch { return dateString; }
 };
 
-const fetchGuardStats = async () => {
+const loadDashboardData = async () => {
   if (!token || !tenantId) return;
-  guardStatsLoading.value = true;
-  try {
-    const headers = { Authorization: `Bearer ${token}` };
-    const base = import.meta.env.VITE_API_URL;
-    const today = new Date().toISOString().split('T')[0];
+  const today = new Date().toISOString().split('T')[0];
+  const headers = { Authorization: `Bearer ${token}` };
 
-    const [authRes, unauthRes, recentRes] = await Promise.all([
-      fetch(`${base}/items/logs?aggregate[count]=id&filter[tenant][_eq]=${tenantId}&filter[ValidLogs][_eq]=authorized&filter[date][_eq]=${today}&filter[mode][_neq]=cronJob&filter[employeeId][_nnull]=true`, { headers }),
-      fetch(`${base}/items/logs?aggregate[count]=id&filter[tenant][_eq]=${tenantId}&filter[ValidLogs][_eq]=unAuthorized&filter[date][_eq]=${today}&filter[mode][_neq]=cronJob&filter[employeeId][_nnull]=true`, { headers }),
-      fetch(`${base}/items/logs?filter[tenant][_eq]=${tenantId}&filter[mode][_neq]=cronJob&filter[employeeId][_nnull]=true&sort=-date_created&limit=8&fields=id,ValidLogs,date_created,name,employeeId.assignedUser.first_name,employeeId.assignedUser.last_name,employeeId.first_name,employeeId.last_name`, { headers }),
-    ]);
+  if (userRole.value === 'Guard') {
+    guardStatsLoading.value = true;
+    try {
+      const response = await authService.knApi.post('/accesseasy-dashboard-api/metrics', {
+        action: 'main-dashboard',
+        tenantId,
+        today,
+        role: 'Guard'
+      }, { headers });
+      
+      const data = response.data;
+      guardStats.value.authorized = data.authorized || 0;
+      guardStats.value.unauthorized = data.unauthorized || 0;
+      guardRecentLogs.value = data.recentLogs || [];
+    } catch (e) {
+      console.error('Guard stats fetch failed:', e);
+    } finally {
+      guardStatsLoading.value = false;
+    }
+  } else {
+    statsLoading.value = true;
+    recentLogsLoading.value = true;
+    try {
+      const response = await authService.knApi.post('/accesseasy-dashboard-api/metrics', {
+        action: 'main-dashboard',
+        tenantId,
+        today,
+        role: userRole.value
+      }, { headers });
 
-    if (authRes.ok)   guardStats.value.authorized   = (await authRes.json()).data?.[0]?.count?.id || 0;
-    if (unauthRes.ok) guardStats.value.unauthorized = (await unauthRes.json()).data?.[0]?.count?.id || 0;
-    if (recentRes.ok) guardRecentLogs.value         = (await recentRes.json()).data || [];
-  } catch(e) {
-    console.error('Guard stats fetch failed:', e);
-  } finally {
-    guardStatsLoading.value = false;
+      const data = response.data;
+      counts.value = {
+        doors: data.doors || 0,
+        employees: data.employees || 0,
+        groups: data.groups || 0,
+        devices: data.devices || 0,
+        authorized: data.authorized || 0,
+        unauthorized: data.unauthorized || 0
+      };
+      recentLogs.value = data.recentLogs || [];
+    } catch (err) {
+      console.error('Failed to load stats:', err);
+    } finally {
+      statsLoading.value = false;
+      recentLogsLoading.value = false;
+    }
   }
 };
+
+const fetchStats = loadDashboardData;
 
 // Computed Metrics
 const totalLogs = computed(() => counts.value.authorized + counts.value.unauthorized);
@@ -414,59 +446,6 @@ const authPercentage = computed(() => {
   if (totalLogs.value === 0) return 100;
   return Math.round((counts.value.authorized / totalLogs.value) * 100);
 });
-
-// Fetch Data
-const fetchStats = async () => {
-  if (!token || !tenantId) return;
-  statsLoading.value = true;
-  try {
-    const headers = { Authorization: `Bearer ${token}` };
-    const baseUrl = import.meta.env.VITE_API_URL;
-    
-    const today = new Date().toISOString().split('T')[0];
-
-    // Fetch counts using correct Directus relational filtering
-    const [doorsRes, empRes, groupsRes, devicesRes, authRes, unauthRes] = await Promise.all([
-      fetch(`${baseUrl}/items/doors?aggregate[count]=id&filter[tenant][_eq]=${tenantId}`, { headers }),
-      fetch(`${baseUrl}/items/personalModule?aggregate[count]=id&filter[assignedUser][tenant][tenantId][_eq]=${tenantId}`, { headers }),
-      fetch(`${baseUrl}/items/accesslevels?aggregate[count]=id&filter[tenant][_eq]=${tenantId}`, { headers }),
-      fetch(`${baseUrl}/items/controllers?aggregate[count]=id&filter[tenant][_eq]=${tenantId}`, { headers }),
-      fetch(`${baseUrl}/items/logs?aggregate[count]=id&filter[tenant][_eq]=${tenantId}&filter[ValidLogs][_in]=authorized,true&filter[date][_eq]=${today}&filter[mode][_neq]=cronJob&filter[employeeId][_nnull]=true`, { headers }),
-      fetch(`${baseUrl}/items/logs?aggregate[count]=id&filter[tenant][_eq]=${tenantId}&filter[ValidLogs][_in]=unAuthorized,false&filter[date][_eq]=${today}&filter[mode][_neq]=cronJob&filter[employeeId][_nnull]=true`, { headers }),
-    ]);
-    const [d, e, g, dv, auth, unauth] = await Promise.all([doorsRes.json(), empRes.json(), groupsRes.json(), devicesRes.json(), authRes.json(), unauthRes.json()]);
-    
-    counts.value = {
-      doors: Number(d?.data?.[0]?.count?.id) || 0,
-      employees: Number(e?.data?.[0]?.count?.id) || 0,
-      groups: Number(g?.data?.[0]?.count?.id) || 0,
-      devices: Number(dv?.data?.[0]?.count?.id) || 0,
-      authorized: Number(auth?.data?.[0]?.count?.id) || 0,
-      unauthorized: Number(unauth?.data?.[0]?.count?.id) || 0,
-    };
-  } catch (err) {
-    console.error('Failed to load stats:', err);
-  } finally {
-    statsLoading.value = false;
-  }
-};
-
-const fetchRecentLogs = async () => {
-  if (!token || !tenantId) return;
-  recentLogsLoading.value = true;
-  try {
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/items/logs?filter[tenant][_eq]=${tenantId}&filter[mode][_neq]=cronJob&filter[employeeId][_nnull]=true&sort=-date_created&limit=5&fields=*,employeeId.assignedUser.first_name,employeeId.assignedUser.last_name,door.doorName`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    const data = await res.json();
-    recentLogs.value = data?.data || [];
-  } catch (error) {
-    console.error('Failed to load recent logs', error);
-  } finally {
-    recentLogsLoading.value = false;
-  }
-};
 
 onMounted(async () => {
   // Wait for currentUserTenant to fully initialize (async on first login)
@@ -477,12 +456,7 @@ onMounted(async () => {
   tenantId = currentUserTenant.getTenantId() || authService.getTenantId();
   rawUser = authService.getUserData();
 
-  fetchStats();
-  fetchRecentLogs();
-  // Guard stats — only fetched when role is Guard
-  if (userRole.value === 'Guard') {
-    fetchGuardStats();
-  }
+  loadDashboardData();
 });
 
 // Helpers

@@ -259,18 +259,9 @@ async function onEmailSubmit(email) {
       return;
     }
 
-    const res = await authService.knApi.post("/email-login", {
-      email: email,
-      userApp: "accesseasy",
-    });
+    const data = await authService.generateEmailOtp(email);
     
-    const responseData = res.data;
-    if (responseData.status && responseData.status >= 400) {
-      throw new Error(responseData.body?.message || responseData.body?.error || "Could not start session.");
-    }
-    const data = responseData.body ? responseData.body : responseData;
-    
-    if (!data?.otp_session_uuid) {
+    if (!data?.success || !data?.otp_session_uuid) {
       throw new Error(data?.message || "Could not start email session. Try again.");
     }
     localStorage.setItem("email", email);

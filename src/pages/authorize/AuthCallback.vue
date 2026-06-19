@@ -124,51 +124,28 @@ onMounted(async () => {
         authService.setEmail(userEmail);
 
         try {
-          const genRes = await fetch(`${import.meta.env.VITE_API_URL}/emailLogin/generate-session`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email: userEmail, userApp: "accesseasy" }),
-          });
+          const loginResult = await authService.googleLogin(userEmail);
 
-          const genData = await genRes.json();
-          if (genRes.ok && genData.otp_session_uuid) {
-            // Check if user has a usertoken in DB for shortcut
-            const userData = await authService.getUserByEmail(userEmail);
-            const dbToken = userData?.usertoken;
-
-            if (dbToken) {
-              console.log("[AuthCallback] usertoken found in DB — using shortcut for Google login.");
-              authService.setToken(dbToken);
-              authService.setUserData(userData);
-              if (tenantId) authService.setTenantData({ tenantId, tenantName });
-              
-              localStorage.setItem("fromEmailOtp", "true");
-              authService.setPinVerified(true);
-              
-              statusMessage.value = "Login successful! Redirecting...";
-              clearSessionAndRedirect();
-              return;
+          if (loginResult && loginResult.success && loginResult.token) {
+            authService.setToken(loginResult.token);
+            if (loginResult.userData) {
+              authService.setUserData(loginResult.userData);
+            }
+            if (tenantId) {
+              authService.setTenantData({ tenantId: tenantId, tenantName: tenantName });
             }
 
-            // Normal flow if no usertoken shortcut
-            const loginResult = await authService.loginWithSessionUuid(userEmail, genData.otp_session_uuid);
+            localStorage.setItem("fromEmailOtp", "true");
+            authService.setPinVerified(true);
 
-            if (loginResult && loginResult.token) {
-              if (tenantId) {
-                authService.setTenantData({ tenantId: tenantId, tenantName: tenantName });
-              }
-
-              // Set authentication flags to bypass router guards
-              localStorage.setItem("fromEmailOtp", "true");
-              authService.setPinVerified(true);
-
-              statusMessage.value = "Login successful! Redirecting...";
-              clearSessionAndRedirect();
-              return;
-            }
+            statusMessage.value = "Login successful! Redirecting...";
+            clearSessionAndRedirect();
+            return;
+          } else {
+            throw new Error(loginResult.message || "Google login failed");
           }
         } catch (genError) {
-          console.warn("Session generation failed, trying fallback...", genError);
+          console.warn("Knative google-login failed, trying fallback...", genError);
         }
       }
 

@@ -221,9 +221,13 @@ class AuthService {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/users/me?fields=id`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      return res.ok;
-    } catch {
-      return false;
+      if (res.status === 401 || res.status === 403) {
+        return false;
+      }
+      return true;
+    } catch (err) {
+      console.warn("[AuthService] Token validation failed due to network/offline state:", err);
+      return true;
     }
   }
 
@@ -233,12 +237,11 @@ class AuthService {
 
   async checkPhoneExists(phone) {
     try {
-      const response = await this.api.get("/users", {
-        params: {
-          "filter[phone][_contains]": phone,
-        },
+      const response = await this.knApi.post("/auth-service", {
+        action: "check-user",
+        phone,
       });
-      return response.data.data.length > 0;
+      return response.data.success === true;
     } catch (error) {
       console.error("Error checking phone:", error);
       return false;
@@ -260,21 +263,11 @@ class AuthService {
 
   async checkUserResigned(phone) {
     try {
-      // Robust search: Use last 10 digits
-      const digits = phone.replace(/\D/g, "");
-      const searchPhone = digits.length >= 10 ? digits.slice(-10) : digits;
-
-      const response = await this.api.get("/users", {
-        params: {
-          "filter[phone][_contains]": searchPhone,
-          "fields[]": ["dateOfLeaving"],
-        },
+      const response = await this.knApi.post("/auth-service", {
+        action: "check-user",
+        phone,
       });
-
-      if (response.data.data && response.data.data.length > 0) {
-        return this.isResigned(response.data.data[0]);
-      }
-      return false;
+      return response.data.success === false && response.data.message === "RESIGNED_USER";
     } catch (error) {
       console.error("Error checking resignation status:", error);
       return false;
@@ -323,40 +316,28 @@ class AuthService {
   // ─── Phone OTP ─────────────────────────────────────────────────────────────
 
   async generateOtp(phone) {
-    console.log("\n📱 [OTP PHONE] ── generateOtp() called");
+    console.log("\n📱 [OTP PHONE] ── generateOtp() called via Knative auth-service");
     console.log("  → Input phone:", phone);
 
     try {
-      console.log("  [1/4] Checking if user is resigned...");
-      const isResigned = await this.checkUserResigned(phone);
-      if (isResigned) {
-        console.warn("  ❌ User is resigned. Blocking OTP.");
-        throw new Error("RESIGNED_USER");
-      }
-      console.log("  ✅ User is active (not resigned).");
-
-      // Sanitize phone for API (remove spaces, keep +)
       const cleanPhone = phone.replace(/\s/g, "");
-      console.log("  [2/4] Cleaned phone:", cleanPhone);
+      console.log("  [1/2] Cleaned phone:", cleanPhone);
 
-      console.log("  [3/4] Sending OTP via Knative /send-otp-accesseasy ...");
-      const response = await this.knApi.post("/send-otp-accesseasy", {
+      console.log("  [2/2] Sending OTP via Knative auth-service generate-otp ...");
+      const response = await this.knApi.post("/auth-service", {
+        action: "generate-otp",
         phone: cleanPhone,
         userApp: "accesseasy",
       });
-      console.log("  ✅ OTP sent. Response:", response.data);
+      console.log("  ✅ OTP sent response:", response.data);
 
       if (response.data.otp_session_uuid) {
         localStorage.setItem("sessionUuid", response.data.otp_session_uuid);
         this.setPhone(phone);
-        console.log("  [4/4] Session UUID stored:", response.data.otp_session_uuid);
-      } else {
-        console.warn("  ⚠️ No otp_session_uuid returned from server.");
+        console.log("  Session UUID stored:", response.data.otp_session_uuid);
       }
 
       this.storeOtpMeta("phone", cleanPhone);
-      console.log("  → OTP meta stored for local verification shortcut.");
-
       return response.data;
     } catch (error) {
       console.error("  ❌ generateOtp() FAILED:", error.message);
@@ -365,107 +346,39 @@ class AuthService {
   }
 
   async verifyOtp(otp, sessionUuid, phone) {
-    console.log("\n🔐 [OTP PHONE] ── verifyOtp() called");
+    console.log("\n🔐 [OTP PHONE] ── verifyOtp() called via Knative auth-service");
     console.log("  → Phone:", phone);
     console.log("  → Session UUID:", sessionUuid);
     console.log("  → OTP entered:", otp);
 
     try {
       if (!otp || !sessionUuid || !phone) {
-        console.error("  ❌ Missing required fields:", { otp: !!otp, sessionUuid: !!sessionUuid, phone: !!phone });
         throw new Error("Missing required verification data");
       }
 
-      // ── STEP 1: Always fetch user from DB first ──
-      console.log("  [1] Fetching user record from DB...");
-      const digits = phone.replace(/\D/g, "");
-      const searchPhone = digits.length >= 10 ? digits.slice(-10) : digits;
-      console.log("  → Search phone (last 10 digits):", searchPhone);
-
-      const userRes = await this.api.get("/users", {
-        params: {
-          "filter[phone][_contains]": searchPhone,
-          "fields[]": ["id", "token", "otp", "usertoken", "tenant.tenantId", "tenant.tenantName", "tenant.userApp", "role.name", "phone", "first_name", "last_name", "userApp", "email", "userPin", "dateOfLeaving", "title", "description"],
-        },
-      });
-
-      const userData = userRes?.data?.data?.[0];
-      if (!userData) {
-        console.error("  ❌ No user record found in DB for phone:", searchPhone);
-        throw new Error("User not found");
-      }
-      console.log("  ✅ User found:", userData.first_name, userData.last_name, "| User ID:", userData.id);
-
-      // ── STEP 2: Verify OTP locally against DB stored OTP ──
-      console.log("  [2] OTP Comparison:");
-      const storedOtp = String(userData.otp ?? "").trim();
-      const enteredOtp = String(otp).trim();
-      console.log("       → Stored OTP (from DB):", storedOtp || "(empty)");
-      console.log("       → Entered OTP (by user):", enteredOtp);
-
-      if (!storedOtp) {
-        console.error("  ❌ DB has no OTP for this user. Ask user to re-send OTP.");
-        throw new Error("No OTP stored for this user. Please re-send OTP.");
-      }
-      if (storedOtp !== enteredOtp) {
-        console.warn("  ❌ OTP mismatch! Entered:", enteredOtp, "| Stored:", storedOtp);
-        throw new Error("OTP is wrong, please enter correct OTP");
-      }
-      console.log("  ✅ OTP MATCHED!");
-
-      // ── STEP 3: Check if user already has a usertoken in DB ──
-      const dbToken = userData.usertoken;
-      console.log("  [3] User's usertoken in DB:", dbToken ? `✅ FOUND (${String(dbToken).slice(0, 12)}...)` : "❌ NOT FOUND");
-
-      if (dbToken) {
-        console.log("  → 🔄 DB TOKEN PATH: usertoken found — using it directly (trigger SKIPPED).");
-        this.setToken(dbToken);
-        this.setPhone(phone);
-        this.setUserData(userData);
-        localStorage.removeItem("sessionUuid");
-        this.clearOtpMeta();
-        console.log("  🎉 PHONE OTP COMPLETE — token set from DB usertoken.");
-        return { success: true, token: dbToken, fromDb: true };
-      }
-
-      // ── STEP 4: No DB token → call Knative verify-otp → flow trigger ──
-      console.log("  → ▶️  TRIGGER PATH: No token in DB — calling Knative /verify-otp-accesseasy ...");
-      const cleanPhoneForVerify = phone.replace(/\s/g, "");
-      const verifyResponse = await this.knApi.post("/verify-otp-accesseasy", {
-        phone: cleanPhoneForVerify,
+      const cleanPhone = phone.replace(/\s/g, "");
+      const response = await this.knApi.post("/auth-service", {
+        action: "verify-otp",
+        phone: cleanPhone,
         otp,
-        otp_session_uuid: sessionUuid,
+        sessionUuid,
       });
-      console.log("  Knative /verify-otp-accesseasy response:", verifyResponse.data);
 
-      if (!verifyResponse.data.success) {
-        console.error("  ❌ Knative OTP verification failed:", verifyResponse.data.message);
-        throw new Error(verifyResponse.data.message || "OTP verification failed");
+      if (!response.data.success) {
+        throw new Error(response.data.message || "OTP verification failed");
       }
-      console.log("  ✅ Knative OTP verified successfully.");
 
-      const cleanPhone = phone.replace(/\D/g, "").replace(/^91/, "");
-      const formattedPhone = "0" + cleanPhone;
-      console.log("  [4] Calling flow trigger. Formatted phone:", formattedPhone);
-
-      const tokenResponse = await this.api.get(
-        `/flows/trigger/542de075-7445-49a5-bd18-c8d8b92b3440?otp=${otp}&session_uuid=${sessionUuid}&phone_number=${formattedPhone}`,
-      );
-      console.log("  Flow trigger response:", tokenResponse.data);
-
-      if (tokenResponse.data.token) {
-        console.log("  ✅ New token received from trigger. Storing.");
-        this.setToken(tokenResponse.data.token);
+      const { token, userData } = response.data;
+      if (token) {
+        this.setToken(token);
         this.setPhone(phone);
         localStorage.removeItem("sessionUuid");
         this.clearOtpMeta();
-        this.setUserData(userData);
-      } else {
-        console.warn("  ⚠️ No token in flow trigger response.");
+        if (userData) {
+          this.setUserData(userData);
+        }
       }
-
-      console.log("  🎉 PHONE OTP COMPLETE (via Knative + trigger).");
-      return tokenResponse.data;
+      return response.data;
     } catch (error) {
       console.error("  ❌ verifyOtp() FAILED:", error.message);
       throw error;
@@ -489,33 +402,13 @@ class AuthService {
 
   async getUserByPhone(phone) {
     try {
-      // Robust search: Use last 10 digits to match database records
-      const digits = phone.replace(/\D/g, "");
-      const searchPhone = digits.length >= 10 ? digits.slice(-10) : digits;
-
-      const response = await this.api.get("/users", {
-        params: {
-          "filter[phone][_contains]": searchPhone,
-          "fields[]": [
-            "id",
-            "tenant.tenantId",
-            "tenant.tenantName",
-            "role.name",
-            "phone",
-            "first_name",
-            "last_name",
-            "email",
-            "userPin",
-            "dateOfLeaving",
-            "userApp",
-            "title",
-            "description"
-          ],
-        },
+      const response = await this.knApi.post("/auth-service", {
+        action: "get-user-profile",
+        phone,
       });
 
-      if (response?.data?.data && response.data.data.length > 0) {
-        const userData = response.data.data[0];
+      if (response?.data?.success && response.data.userData) {
+        const userData = response.data.userData;
         
         // Auto-attach to accesseasy if they exist but aren't on this app yet
         const currentAppStr = String(userData.userApp || "").toLowerCase();
@@ -622,12 +515,11 @@ class AuthService {
 
   async checkEmailExists(email) {
     try {
-      const response = await this.api.get("/users", {
-        params: {
-          "filter[email][_eq]": email,
-        },
+      const response = await this.knApi.post("/auth-service", {
+        action: "check-user",
+        email,
       });
-      return response.data.data.length > 0;
+      return response.data.success === true;
     } catch (error) {
       console.error("Error checking email:", error);
       return false;
@@ -636,27 +528,11 @@ class AuthService {
 
   async checkUserResignedByEmail(email) {
     try {
-      const response = await this.api.get("/users", {
-        params: {
-          "filter[email][_eq]": email,
-          "fields[]": ["dateOfLeaving"],
-        },
+      const response = await this.knApi.post("/auth-service", {
+        action: "check-user",
+        email,
       });
-
-      if (response.data.data && response.data.data.length > 0) {
-        const user = response.data.data[0];
-        if (user.dateOfLeaving) {
-          const parsedDate = this.parseDateString(user.dateOfLeaving);
-          if (!parsedDate) return false;
-
-          const today = new Date();
-          parsedDate.setHours(0, 0, 0, 0);
-          today.setHours(0, 0, 0, 0);
-
-          return parsedDate <= today;
-        }
-      }
-      return false;
+      return response.data.success === false && response.data.message === "RESIGNED_USER";
     } catch (error) {
       console.error("Error checking resignation status by email:", error);
       return false;
@@ -665,31 +541,13 @@ class AuthService {
 
   async getUserByEmail(email) {
     try {
-      const response = await this.api.get("/users", {
-        params: {
-          "filter[email][_eq]": email,
-          "fields[]": [
-            "id",
-            "tenant.tenantId",
-            "tenant.tenantName",
-            "role.name",
-            "phone",
-            "first_name",
-            "last_name",
-            "email",
-            "userPin",
-            "dateOfLeaving",
-            "userApp",
-            "otp",
-            "usertoken",
-            "title",
-            "description"
-          ],
-        },
+      const response = await this.knApi.post("/auth-service", {
+        action: "get-user-profile",
+        email,
       });
 
-      if (response?.data?.data && response.data.data.length > 0) {
-        const userData = response.data.data[0];
+      if (response?.data?.success && response.data.userData) {
+        const userData = response.data.userData;
         
         // Auto-attach to accesseasy if they exist but aren't on this app yet
         const currentAppStr = String(userData.userApp || "").toLowerCase();
@@ -727,9 +585,12 @@ class AuthService {
         throw new Error("Missing email or session UUID");
       }
 
-      const response = await this.api.get(
-        `/flows/trigger/133d557a-42ac-480c-9fd9-49ced4bbf5e8?session_uuid=${sessionUuid}&email=${email}&user_app=accesseasy`
-      );
+      const response = await this.knApi.post("/auth-service", {
+        action: "login-with-session",
+        email,
+        sessionUuid,
+        userApp: "accesseasy",
+      });
 
       if (!response.data || !response.data.token) {
         throw new Error("Authentication failed: No token returned from flow");
@@ -738,11 +599,15 @@ class AuthService {
       this.setToken(response.data.token);
       this.setEmail(email);
 
-      try {
-        const userData = await this.getUserByEmail(email);
-        this.setUserData(userData);
-      } catch (e) {
-        console.warn("Could not fetch full user data after session login:", e);
+      if (response.data.userData) {
+        this.setUserData(response.data.userData);
+      } else {
+        try {
+          const userData = await this.getUserByEmail(email);
+          this.setUserData(userData);
+        } catch (e) {
+          console.warn("Could not fetch full user data after session login:", e);
+        }
       }
 
       return response.data;
@@ -753,101 +618,50 @@ class AuthService {
   }
 
   async verifyEmailOtp(otp, sessionUuid, email) {
-    console.log("\n📧 [OTP EMAIL] ── verifyEmailOtp() called");
+    console.log("\n📧 [OTP EMAIL] ── verifyEmailOtp() called via Knative auth-service");
     console.log("  → Email:", email);
     console.log("  → Session UUID:", sessionUuid);
     console.log("  → OTP entered:", otp);
 
     try {
       if (!otp || !sessionUuid || !email) {
-        console.error("  ❌ Missing required fields:", { otp: !!otp, sessionUuid: !!sessionUuid, email: !!email });
         throw new Error("Missing required verification data");
       }
 
-      // ── STEP 1: Fetch user from DB ──
-      console.log("  [1] Fetching user record from DB for email:", email);
-      const userRes = await this.api.get("/users", {
-        params: {
-          "filter[email][_eq]": email,
-          "fields[]": ["id", "token", "otp", "usertoken", "tenant.tenantId", "tenant.tenantName", "tenant.userApp", "role.name", "phone", "first_name", "last_name", "userApp", "email", "userPin", "dateOfLeaving", "title", "description"],
-        },
+      const response = await this.knApi.post("/auth-service", {
+        action: "verify-email-otp",
+        email,
+        otp,
+        sessionUuid,
       });
 
-      const userData = userRes?.data?.data?.[0];
-      if (!userData || userData.otp === null || userData.otp === undefined) {
-        console.error("  ❌ User not found or OTP not set in DB.");
-        throw new Error("OTP not found for this user");
+      if (!response.data.success) {
+        throw new Error(response.data.message || "OTP verification failed");
       }
-      console.log("  ✅ User found:", userData?.first_name, userData?.last_name, "| Role:", userData?.role?.name);
 
-      // ── STEP 2: Verify OTP locally ──
-      const storedOtp = String(userData.otp).trim();
-      const enteredOtp = String(otp).trim();
-      console.log("  [2] OTP Comparison:");
-      console.log("       → Stored OTP (from DB):", storedOtp);
-      console.log("       → Entered OTP (by user):", enteredOtp);
-
-      if (storedOtp !== enteredOtp) {
-        console.warn("  ❌ OTP mismatch! Entered:", enteredOtp, "| Stored:", storedOtp);
-        throw new Error("OTP is wrong, please enter correct OTP");
-      }
-      console.log("  ✅ OTP MATCHED!");
-
-      // ── STEP 3: Check if user already has a usertoken in DB ──
-      const dbToken = userData.usertoken;
-      console.log("  [3] User's usertoken in DB:", dbToken ? `✅ FOUND (${String(dbToken).slice(0, 12)}...)` : "❌ NOT FOUND");
-
-      if (dbToken) {
-        console.log("  → 🔄 DB TOKEN PATH: usertoken found — using it directly (trigger SKIPPED).");
-        this.setToken(dbToken);
+      const { token, userData } = response.data;
+      if (token) {
+        this.setToken(token);
         this.setEmail(email);
-        this.setUserData(userData);
         localStorage.removeItem("emailSessionUuid");
         this.clearOtpMeta();
-        console.log("  🎉 EMAIL OTP COMPLETE — token set from DB usertoken.");
-        return { success: true, token: dbToken, fromDb: true, userData };
+        if (userData) {
+          this.setUserData(userData);
+        }
       }
-
-      // ── STEP 4: No token in DB → call flow trigger ──
-      console.log("  → ▶️  TRIGGER PATH: No token in DB — calling Directus flow trigger...");
-      const response = await this.api.get(
-        `/flows/trigger/133d557a-42ac-480c-9fd9-49ced4bbf5e8?otp=${otp}&session_uuid=${sessionUuid}&email=${email}&user_app=accesseasy`,
-      );
-      console.log("  Flow trigger response:", response.data);
-
-      if (!response.data || !response.data.token) {
-        console.error("  ❌ No token in trigger response. Auth failed.");
-        throw new Error("Authentication failed");
-      }
-
-      console.log("  ✅ New token received from trigger. Storing.");
-      this.setToken(response.data.token);
-      this.setEmail(email);
-      localStorage.removeItem("emailSessionUuid");
-      this.clearOtpMeta();
-      this.setUserData(userData);
-
-      console.log("  🎉 EMAIL OTP COMPLETE (via Directus trigger).");
-      return { ...response.data, userData };
+      return response.data;
     } catch (error) {
       console.error("  ❌ verifyEmailOtp() FAILED:", error.message);
-
-      if (error.message.includes("OTP is wrong")) {
-        throw new Error("OTP is wrong, please enter correct OTP");
-      }
-
-      if (error.response?.data?.message) {
-        throw new Error(error.response.data.message);
-      }
-
       throw error;
     }
   }
 
-  // 🔥 FIXED: FORGOT PIN METHODS - PRESERVE +91
   async forgotPin({ phone, email, userApp = "accesseasy" }) {
     try {
-      const payload = { userApp };
+      const payload = { 
+        action: "update-pin",
+        userApp 
+      };
 
       if (phone) {
         payload.phone = phone.replace(/\s/g, "");
@@ -855,7 +669,7 @@ class AuthService {
       if (email) {
         payload.email = email;
       }
-      const response = await this.knApi.post("/pin", payload);
+      const response = await this.knApi.post("/auth-service", payload);
       return response.data;
     } catch (error) {
       console.error("Error forgot PIN:", error);
@@ -865,7 +679,10 @@ class AuthService {
 
   async verifyForgotPinOtp({ phone, email, otp }) {
     try {
-      const payload = { otp };
+      const payload = { 
+        action: "verify-forgotpin-otp",
+        otp 
+      };
 
       if (phone) {
         payload.phone = phone.replace(/\s/g, "");
@@ -874,7 +691,83 @@ class AuthService {
         payload.email = email;
       }
 
-      const response = await this.knApi.post("/verify-forgotpin-otp", payload);
+      const response = await this.knApi.post("/auth-service", payload);
+      return response.data;
+    } catch (error) {
+      console.error("Error verifying forgot PIN OTP:", error);
+      throw error;
+    }
+  }
+
+  async setPin(userId, pin) {
+    try {
+      const response = await this.knApi.post("/auth-service", {
+        action: "set-pin",
+        userId,
+        pin,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error in setPin:", error);
+      throw error;
+    }
+  }
+
+  async register(params) {
+    try {
+      const response = await this.knApi.post("/auth-service", {
+        action: "register",
+        ...params,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error in register:", error);
+      throw error;
+    }
+  }
+
+  async googleLogin(email) {
+    try {
+      const response = await this.knApi.post("/auth-service", {
+        action: "google-login",
+        email,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error in googleLogin:", error);
+      throw error;
+    }
+  }
+
+  async generateEmailOtp(email) {
+    try {
+      const response = await this.knApi.post("/auth-service", {
+        action: "generate-email-otp",
+        email,
+        userApp: "accesseasy",
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error generating email OTP:", error);
+      throw error;
+    }
+  }
+
+  async verifyForgotPinOtp({ phone, email, otp }) {
+    try {
+      const payload = { 
+        action: "verify-forgotpin-otp",
+        otp 
+      };
+
+      if (phone) {
+        payload.phone = phone.replace(/\s/g, "");
+      }
+      if (email) {
+        payload.email = email;
+      }
+
+      const response = await this.knApi.post("/auth-service", payload);
       return response.data;
     } catch (error) {
       console.error("Error verifying forgot PIN OTP:", error);

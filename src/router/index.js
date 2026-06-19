@@ -7,6 +7,7 @@ import Register from "@/components/loginAuthentication/register.vue";
 import Verification from "@/components/loginAuthentication/verification.vue";
 import PinVerification from "@/components/loginAuthentication/pinVerification.vue";
 import EmailVerification from "@/components/loginAuthentication/emailVerification.vue";
+import AlternateLogin from "@/components/loginAuthentication/alternateLogin.vue";
 import AuthCallback from "@/pages/authorize/AuthCallback.vue";
 
 // Layout
@@ -132,6 +133,11 @@ const routes = [
     name: "EmailVerification",
     component: EmailVerification,
     props: true,
+  },
+  {
+    path: "/alternate-login",
+    name: "AlternateLogin",
+    component: AlternateLogin,
   },
   {
     path: "/dashboard",
@@ -412,22 +418,7 @@ router.beforeEach(async (to, from, next) => {
     if (!isTokenValid) {
       console.warn("[Router] Server token invalid or expired. Redirecting to re-auth.");
       authService.softLogout();
-
-      // If the user had a PIN set, send them to PIN verification
-      const phone = authService.getPhone() || localStorage.getItem("userPhone");
-      const email = authService.getEmail() || localStorage.getItem("email");
-      const savedUserData = userData;
-      const hasPin = !!(savedUserData?.userPin);
-
-      if (hasPin && phone) {
-        const digits = phone.replace(/\D/g, "").slice(-10);
-        next({ name: "PinVerification", params: { contactType: "phone", contactValue: digits } });
-      } else if (hasPin && email) {
-        next({ name: "PinVerification", params: { contactType: "email", contactValue: email } });
-      } else {
-        // No PIN — redirect to full login
-        next("/login?expired=true");
-      }
+      next("/login?expired=true");
       return;
     }
   }

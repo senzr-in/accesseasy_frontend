@@ -42,7 +42,7 @@
       <div
         v-for="report in reports"
         :key="report.internalId"
-        class="rounded-2xl border bg-white dark:bg-slate-900 transition-all duration-300 overflow-hidden"
+        class="rounded-2xl border bg-white dark:bg-slate-900 transition-all duration-300"
         :class="report.enabled
           ? 'border-blue-300 dark:border-blue-700 shadow-md shadow-blue-500/10'
           : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-md'"
@@ -73,7 +73,7 @@
         </div>
 
         <!-- Config Panel -->
-        <div v-if="report.enabled" class="border-t border-slate-100 dark:border-slate-800 p-5 space-y-4 bg-slate-50/50 dark:bg-slate-950/20">
+        <div v-if="report.enabled" class="border-t border-slate-100 dark:border-slate-800 p-5 space-y-4 bg-slate-50/50 dark:bg-slate-950/20 rounded-b-2xl">
 
           <!-- Frequency -->
           <div>
@@ -485,8 +485,7 @@ const fetchTeamMembers = async () => {
       `&fields[]=id&fields[]=assignedUser.id&fields[]=assignedUser.first_name` +
       `&fields[]=assignedUser.last_name&fields[]=assignedUser.email` +
       `&sort[]=-date_created` +
-      `&filter[_and][0][assignedUser][tenant][tenantId][_eq]=${tenantId.value}` +
-      `&filter[_and][1][assignedUser][userApp][_contains]=accesseasy`;
+      `&filter[assignedUser][tenant][tenantId][_eq]=${tenantId.value}`;
     const res  = await fetch(url, { headers: hdrs() });
     const data = await res.json();
     teamMembers.value = (data.data || []).map(m => {

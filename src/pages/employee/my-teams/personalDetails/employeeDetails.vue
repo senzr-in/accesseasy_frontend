@@ -1,27 +1,53 @@
 <template>
-  <div class="h-full flex flex-col gap-4 overflow-hidden">
+  <div class="flex h-full w-full overflow-hidden">
+    <!-- Filter Panel -->
+    <div v-if="showFilters" class="w-80 border-r border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 flex flex-col shrink-0">
+      <FilterComponent
+        :tenantId="tenantId"
+        :initialFilters="initialFilters"
+        :initiallyVisible="true"
+        :filter-schema="pageFilters"
+        @apply-filters="handleApplyFilters"
+        @filter-visibility-changed="onFilterVisibilityChanged"
+      />
+    </div>
 
-    <!-- Toolbar: Search + Filter + Export + Add Employee on one line -->
-    <div class="flex items-center justify-between gap-3">
-      <!-- Search -->
-      <div class="relative flex-1 max-w-sm">
-        <Search class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-        <input
-          type="search"
-          placeholder="Search employees..."
-          v-model="search"
-          @input="debouncedSearch"
-          class="w-full pl-9 pr-4 h-10 text-sm bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm text-slate-900 dark:text-white placeholder:text-slate-400"
-        />
-      </div>
-      <!-- Right-side actions -->
-      <div class="flex items-center gap-2 shrink-0">
-        <button class="flex items-center gap-1.5 h-10 px-4 text-[10px] font-black uppercase tracking-widest rounded-xl border border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors shadow-sm text-slate-700 dark:text-slate-300">
-          <Filter class="w-3.5 h-3.5" /> Filter
-        </button>
-        <button class="flex items-center gap-1.5 h-10 px-4 text-[10px] font-black uppercase tracking-widest rounded-xl border border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors shadow-sm text-slate-700 dark:text-slate-300">
-          <FileDown class="w-3.5 h-3.5" /> Export
-        </button>
+    <!-- Main Content -->
+    <div class="flex-grow flex flex-col gap-4 p-4 overflow-hidden min-w-0">
+
+      <!-- Toolbar: Search + Filter + Export + Add Employee on one line -->
+      <div class="flex items-center justify-between gap-3">
+        <!-- Search -->
+        <div class="relative flex-1 max-w-sm">
+          <Search class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+          <input
+            type="search"
+            placeholder="Search employees..."
+            v-model="search"
+            @input="debouncedSearch"
+            class="w-full pl-9 pr-4 h-10 text-sm bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm text-slate-900 dark:text-white placeholder:text-slate-400"
+          />
+        </div>
+        <!-- Right-side actions -->
+        <div class="flex items-center gap-2 shrink-0">
+          <button
+            @click="toggleFilters"
+            :class="[
+              'flex items-center gap-1.5 h-10 px-4 text-[10px] font-black uppercase tracking-widest rounded-xl border transition-colors shadow-sm',
+              showFilters
+                ? 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-zinc-900 dark:text-blue-400 dark:border-zinc-800'
+                : 'border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-900 text-slate-700 dark:text-slate-300'
+            ]"
+          >
+            <Filter class="w-3.5 h-3.5" /> Filter
+            <span v-if="hasActiveFilters" class="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-500"></span>
+          </button>
+          <button
+            @click="showExportDialog = true"
+            class="flex items-center gap-1.5 h-10 px-4 text-[10px] font-black uppercase tracking-widest rounded-xl border border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors shadow-sm text-slate-700 dark:text-slate-300"
+          >
+            <FileDown class="w-3.5 h-3.5" /> Export
+          </button>
         <button v-if="isAdmin" @click="handleCreateEmployee"
           class="flex items-center gap-1.5 h-10 px-4 text-[10px] font-black uppercase tracking-widest rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:opacity-90 transition-all shadow-sm">
           <Plus class="w-4 h-4" /> Add Employee
@@ -218,17 +244,29 @@
         </div>
       </div>
     </div>
+
+    <!-- Export Dialog -->
+    <ExportEmployees
+      v-if="showExportDialog"
+      :filters="filters"
+      :search="search"
+      @close="showExportDialog = false"
+    />
+
+    </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch, inject } from "vue";
+import { ref, reactive, computed, onMounted, watch, inject } from "vue";
 import { useRouter } from "vue-router";
 import { Plus, Search, Filter, FileDown, Trash2, MessageCircle, Loader2, Fingerprint, Scan, CreditCard, Smartphone } from "lucide-vue-next";
 import { authService } from "@/services/authService";
 import { currentUserTenant } from "@/utils/currentUserTenant";
 import AddEmployeeDialog from "./addEmployeeDialog.vue";
+import FilterComponent from "@/components/common/filters/payrollfilter.vue";
+import ExportEmployees from "./report/exportEmployees.vue";
 
 // Dependencies
 const router = useRouter();
@@ -248,6 +286,41 @@ const selectedEmployee = ref(null);
 const deleteDialog = ref(false);
 const employeeToDelete = ref(null);
 const deleting = ref(false);
+
+const showExportDialog = ref(false);
+const showFilters = ref(true);
+const filters = reactive({
+  branch: "",
+  department: "",
+});
+
+const pageFilters = [
+  { key: "branch", label: "Branch", type: "select", show: true },
+  { key: "department", label: "Department", type: "select", show: true },
+];
+
+const initialFilters = computed(() => ({
+  branch: filters.branch,
+  department: filters.department,
+}));
+
+const hasActiveFilters = computed(() => {
+  return !!(filters.branch || filters.department);
+});
+
+const handleApplyFilters = (newFilters) => {
+  Object.assign(filters, newFilters);
+  page.value = 1;
+  fetchEmployeeData();
+};
+
+const onFilterVisibilityChanged = (isVisible) => {
+  showFilters.value = isVisible;
+};
+
+const toggleFilters = () => {
+  showFilters.value = !showFilters.value;
+};
 
 const defaultMessageHandler = { showSuccess: (m) => console.log(m), showError: (m) => console.error(m) };
 const messageHandler = inject('messageHandler', defaultMessageHandler);
@@ -330,6 +403,12 @@ const buildFilterParams = () => {
     params["filter[_or][0][employeeId][_eq]"] = search.value;
     params["filter[_or][1][assignedUser][first_name][_icontains]"] = search.value;
     params["filter[_or][2][assignedUser][email][_icontains]"] = search.value;
+  }
+  if (filters.branch) {
+    params["filter[branch][id][_eq]"] = filters.branch;
+  }
+  if (filters.department) {
+    params["filter[department][id][_eq]"] = filters.department;
   }
   return params;
 };

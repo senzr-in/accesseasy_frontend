@@ -379,21 +379,9 @@ async function onEmailSubmit() {
       return;
     }
 
-    const res = await authService.knApi.post("/email-login", {
-      email: email.value,
-      userApp: "accesseasy",
-    });
+    const data = await authService.generateEmailOtp(email.value);
 
-    // Adapt to Knative function returning { status: 200, body: {...} } natively
-    const responseData = res.data;
-    if (responseData.status && responseData.status >= 400) {
-      throw new Error(responseData.body?.message || responseData.body?.error || "Could not start session.");
-    }
-    
-    // Extract nested body if it exists
-    const data = responseData.body ? responseData.body : responseData;
-
-    if (!data?.otp_session_uuid) {
+    if (!data?.success || !data?.otp_session_uuid) {
       throw new Error(data?.message || "Could not start email session. Try again.");
     }
 
