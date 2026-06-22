@@ -237,7 +237,7 @@ const logoUrl     = ref(null);
 const stats = reactive({ total: 0, today: 0, active: 0 });
 
 // ── URL helpers ────────────────────────────────────────────────────────────
-const BASE_URL  = import.meta.env.VITE_UI_URL || 'https://view.fieldseasy.com';
+const BASE_URL  = import.meta.env.VITE_UI_URL || window.location.origin;
 const portalUrl = computed(() => portal.value ? `${BASE_URL}/visit/${portal.value.id}` : '');
 
 const getAssetUrl = (id) => {

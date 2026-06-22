@@ -1,5 +1,5 @@
 <template>
-  <div class="vp-root" :style="cssVars">
+  <div class="vp-root" :class="themeClass" :style="cssVars">
 
     <!-- ── Loading ── -->
     <div v-if="loading" class="vp-center-screen">
@@ -253,7 +253,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watchEffect } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watchEffect } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
 import QrcodeVue from 'qrcode.vue';
@@ -292,20 +292,63 @@ const bannerUrl = ref(null);
 
 const brandColor = computed(() => content.value.primaryColor || '#2563eb');
 
-// Set CSS vars on :root so Teleport content can access them too
+const themeClass = computed(() => {
+  const t = content.value?.theme || 'Modern Blue';
+  return 'theme-' + t.toLowerCase().replace(/\s+/g, '-');
+});
+
+// Dynamic Font Loading
+const loadedFonts = new Set();
+const loadGoogleFont = (fontFamily) => {
+  if (!fontFamily || fontFamily === 'Inter' || loadedFonts.has(fontFamily)) return;
+  
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = `https://fonts.googleapis.com/css2?family=${fontFamily.replace(/\s+/g, '+')}:wght@300;400;500;600;700;800;900&display=swap`;
+  document.head.appendChild(link);
+  loadedFonts.add(fontFamily);
+};
+
+// Set CSS vars and theme class on documentElement so Teleport content can access them too
 watchEffect(() => {
   const color = brandColor.value;
   document.documentElement.style.setProperty('--vp-brand', color);
   document.documentElement.style.setProperty('--vp-brand-light', color + '20');
   document.documentElement.style.setProperty('--vp-brand-shadow', color + '44');
+
+  const t = content.value?.theme || 'Modern Blue';
+  const newClass = 'theme-' + t.toLowerCase().replace(/\s+/g, '-');
+  
+  document.documentElement.classList.forEach(className => {
+    if (className.startsWith('theme-')) {
+      document.documentElement.classList.remove(className);
+    }
+  });
+  document.documentElement.classList.add(newClass);
+
+  const newFont = content.value?.fontFamily;
+  if (newFont) loadGoogleFont(newFont);
+});
+
+onUnmounted(() => {
+  document.documentElement.classList.forEach(className => {
+    if (className.startsWith('theme-')) {
+      document.documentElement.classList.remove(className);
+    }
+  });
 });
 
 // Keep cssVars for vp-root as well (belt-and-suspenders)
-const cssVars = computed(() => ({
-  '--vp-brand': brandColor.value,
-  '--vp-brand-light': brandColor.value + '20',
-  '--vp-brand-shadow': brandColor.value + '44',
-}));
+const cssVars = computed(() => {
+  const color = brandColor.value;
+  const fontFamily = content.value?.fontFamily || 'Inter';
+  return {
+    '--vp-brand': color,
+    '--vp-brand-light': color + '20',
+    '--vp-brand-shadow': color + '44',
+    '--vp-font': `'${fontFamily}', sans-serif`,
+  };
+});
 
 const defaultFieldsConfig = {
   name: { visible: true, required: true, label: 'Full Name', placeholder: 'John Doe' },
@@ -339,6 +382,7 @@ const resolvedFields = computed(() => {
   config.name.required = true;
   config.mobile.visible = true;
   config.mobile.required = true;
+  config.photo.visible = true; // Ensure photo upload field is always displayed in the form
 
   return config;
 });
@@ -537,11 +581,17 @@ const submitRegistration = async () => {
     let proofDocumentId = null;
     if (photoFile.value) {
       try { photoId = await uploadToDirectus(photoFile.value, 'visitor-photo'); }
-      catch(e) { console.warn('Photo upload failed (non-critical):', e.message); }
+      catch(e) {
+        console.error('Photo upload failed:', e.message);
+        throw new Error('Failed to upload photo. Please try again.');
+      }
     }
     if (proofFile.value) {
       try { proofDocumentId = await uploadToDirectus(proofFile.value, 'visitor-proof'); }
-      catch(e) { console.warn('Proof upload failed (non-critical):', e.message); }
+      catch(e) {
+        console.error('Proof upload failed:', e.message);
+        throw new Error('Failed to upload proof document. Please try again.');
+      }
     }
 
     const payload = {
@@ -560,8 +610,8 @@ const submitRegistration = async () => {
       govtIdType: resolvedFields.value.govtId.visible ? visitorData.value.govtIdType : '',
       govtIdNumber: resolvedFields.value.govtId.visible ? visitorData.value.govtIdNumber : '',
       portalId: portal.value.id,
-      ...(photoId        && { photo:           photoId }),
-      ...(proofDocumentId && { proofDocument:  proofDocumentId }),
+      photo: photoId || null,
+      proofDocument: proofDocumentId || null,
     };
 
     const res = await axios.post(`${import.meta.env.VITE_KN_API_URL}/visitor-portal-flow/visitor`, payload);
@@ -585,15 +635,80 @@ onMounted(fetchPortal);
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+/* Global Theme variables applied to documentElement */
+:root, .theme-modern-blue {
+  --vp-bg: #f8fafc;
+  --vp-text: #0f172a;
+  --vp-text-muted: #64748b;
+  --vp-text-light: #94a3b8;
+  --vp-nav-bg: rgba(255, 255, 255, 0.8);
+  --vp-nav-border: rgba(226, 232, 240, 0.8);
+  --vp-card-bg: #ffffff;
+  --vp-card-border: #f1f5f9;
+  --vp-input-bg: #f8fafc;
+  --vp-input-border: #e2e8f0;
+  --vp-input-text: #0f172a;
+  --vp-success-bg: #f8fafc;
+  --vp-success-border: #e2e8f0;
+}
+
+.theme-classic-dark {
+  --vp-bg: #0f172a;
+  --vp-text: #f8fafc;
+  --vp-text-muted: #cbd5e1;
+  --vp-text-light: #94a3b8;
+  --vp-nav-bg: rgba(15, 23, 42, 0.8);
+  --vp-nav-border: rgba(51, 65, 85, 0.8);
+  --vp-card-bg: #1e293b;
+  --vp-card-border: #334155;
+  --vp-input-bg: #0f172a;
+  --vp-input-border: #334155;
+  --vp-input-text: #ffffff;
+  --vp-success-bg: #0f172a;
+  --vp-success-border: #334155;
+}
+
+.theme-nature-green {
+  --vp-bg: #f0fdf4;
+  --vp-text: #064e3b;
+  --vp-text-muted: #047857;
+  --vp-text-light: #34d399;
+  --vp-nav-bg: rgba(240, 253, 244, 0.8);
+  --vp-nav-border: rgba(209, 250, 229, 0.8);
+  --vp-card-bg: #ffffff;
+  --vp-card-border: #d1fae5;
+  --vp-input-bg: #f0fdf4;
+  --vp-input-border: #a7f3d0;
+  --vp-input-text: #064e3b;
+  --vp-success-bg: #f0fdf4;
+  --vp-success-border: #a7f3d0;
+}
+
+.theme-sunset-orange {
+  --vp-bg: #fffaf5;
+  --vp-text: #431407;
+  --vp-text-muted: #c2410c;
+  --vp-text-light: #fb923c;
+  --vp-nav-bg: rgba(255, 250, 245, 0.8);
+  --vp-nav-border: rgba(255, 237, 213, 0.8);
+  --vp-card-bg: #ffffff;
+  --vp-card-border: #ffedd5;
+  --vp-input-bg: #fffaf5;
+  --vp-input-border: #fed7aa;
+  --vp-input-text: #431407;
+  --vp-success-bg: #fffaf5;
+  --vp-success-border: #fed7aa;
+}
 </style>
 
 <style scoped>
 /* ── Root ── */
 .vp-root {
-  font-family: 'Inter', sans-serif;
+  font-family: var(--vp-font, 'Inter', sans-serif);
   min-height: 100vh;
-  background: #f8fafc;
-  color: #0f172a;
+  background: var(--vp-bg);
+  color: var(--vp-text);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -618,25 +733,25 @@ onMounted(fetchPortal);
 }
 @keyframes vp-spin { to { transform: rotate(360deg); } }
 
-.vp-loading-text { font-size: 0.75rem; font-weight: 700; color: #94a3b8; letter-spacing: 0.1em; text-transform: uppercase; }
+.vp-loading-text { font-size: 0.75rem; font-weight: 700; color: var(--vp-text-light); letter-spacing: 0.1em; text-transform: uppercase; }
 
 .vp-error-icon {
   width: 72px; height: 72px; border-radius: 50%;
   background: #fff1f2; color: #f43f5e;
   display: flex; align-items: center; justify-content: center;
 }
-.vp-error-title { font-size: 1.5rem; font-weight: 900; color: #0f172a; }
-.vp-error-msg   { font-size: 0.875rem; color: #64748b; max-width: 280px; }
+.vp-error-title { font-size: 1.5rem; font-weight: 900; color: var(--vp-text); }
+.vp-error-msg   { font-size: 0.875rem; color: var(--vp-text-muted); max-width: 280px; }
 
 /* ── Navbar ── */
 .vp-nav {
   position: sticky; top: 0; z-index: 50;
   display: flex; align-items: center; justify-content: space-between;
   padding: 1rem 1.5rem;
-  background: rgba(255,255,255,0.8);
+  background: var(--vp-nav-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(226,232,240,0.8);
+  border-bottom: 1px solid var(--vp-nav-border);
   box-shadow: 0 1px 20px rgba(0,0,0,0.04);
 }
 .vp-nav-brand { display: flex; align-items: center; gap: 0.625rem; }
@@ -647,7 +762,7 @@ onMounted(fetchPortal);
   color: var(--vp-brand);
   display: flex; align-items: center; justify-content: center;
 }
-.vp-nav-title { font-size: 1rem; font-weight: 800; color: #0f172a; letter-spacing: -0.02em; }
+.vp-nav-title { font-size: 1rem; font-weight: 800; color: var(--vp-text); letter-spacing: -0.02em; }
 
 /* ── Buttons ── */
 .vp-btn-primary {
@@ -656,7 +771,7 @@ onMounted(fetchPortal);
   background-color: var(--vp-brand) !important;
   background-image: none !important;
   color: #fff !important;
-  font-family: 'Inter', sans-serif !important;
+  font-family: var(--vp-font, 'Inter', sans-serif) !important;
   font-weight: 700 !important;
   font-size: 0.875rem !important;
   padding: 0.75rem 1.5rem !important;
@@ -695,7 +810,7 @@ onMounted(fetchPortal);
 .vp-hero-heading {
   font-size: clamp(2rem, 5vw, 3rem);
   font-weight: 900;
-  color: #0f172a;
+  color: var(--vp-text);
   line-height: 1.15;
   letter-spacing: -0.02em;
   margin-bottom: 1rem;
@@ -703,7 +818,7 @@ onMounted(fetchPortal);
 
 .vp-hero-subtext {
   font-size: 1.1rem;
-  color: #64748b;
+  color: var(--vp-text-muted);
   font-weight: 500;
   line-height: 1.7;
   margin-bottom: 2rem;
@@ -716,7 +831,7 @@ onMounted(fetchPortal);
   border-radius: 1.25rem;
   overflow: hidden;
   box-shadow: 0 20px 60px rgba(0,0,0,0.1);
-  border: 1px solid rgba(226,232,240,0.6);
+  border: 1px solid var(--vp-card-border);
 }
 .vp-banner-img { width: 100%; display: block; max-height: 380px; object-fit: cover; }
 
@@ -740,13 +855,13 @@ onMounted(fetchPortal);
 
 /* ── Footer ── */
 .vp-footer {
-  border-top: 1px solid #e2e8f0;
-  background: #f8fafc;
+  border-top: 1px solid var(--vp-nav-border);
+  background: var(--vp-bg);
   padding: 2rem 1.5rem;
   text-align: center;
 }
-.vp-footer p      { font-size: 0.75rem; font-weight: 600; color: #94a3b8; }
-.vp-footer-sub    { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: #cbd5e1; margin-top: 0.25rem; }
+.vp-footer p      { font-size: 0.75rem; font-weight: 600; color: var(--vp-text-light); }
+.vp-footer-sub    { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.15em; color: var(--vp-text-light); opacity: 0.5; margin-top: 0.25rem; }
 
 /* ── Modal Overlay ── */
 .vp-modal-overlay {
@@ -770,7 +885,7 @@ onMounted(fetchPortal);
 .vp-modal-panel {
   position: relative;
   width: 100%; max-width: 520px;
-  background: #fff;
+  background: var(--vp-card-bg);
   border-radius: 1.5rem 1.5rem 0 0;
   box-shadow: 0 -8px 40px rgba(0,0,0,0.15);
   height: 92dvh;
@@ -783,17 +898,17 @@ onMounted(fetchPortal);
 .vp-modal-header {
   display: flex; align-items: flex-start; justify-content: space-between;
   padding: 1.5rem 1.5rem 1rem;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 1px solid var(--vp-card-border);
   flex-shrink: 0;
 }
-.vp-modal-title { font-size: 1.125rem; font-weight: 800; color: #0f172a; }
-.vp-modal-desc  { font-size: 0.75rem; color: #94a3b8; font-weight: 500; margin-top: 0.25rem; }
+.vp-modal-title { font-size: 1.125rem; font-weight: 800; color: var(--vp-text); }
+.vp-modal-desc  { font-size: 0.75rem; color: var(--vp-text-light); font-weight: 500; margin-top: 0.25rem; }
 .vp-modal-close {
   padding: 0.375rem; border-radius: 0.5rem; border: none; cursor: pointer;
-  background: transparent; color: #94a3b8; display: flex; align-items: center;
+  background: transparent; color: var(--vp-text-light); display: flex; align-items: center;
   transition: background 0.2s, color 0.2s;
 }
-.vp-modal-close:hover { background: #f1f5f9; color: #475569; }
+.vp-modal-close:hover { background: var(--vp-input-bg); color: var(--vp-text); }
 
 /* ── Form Body ── */
 .vp-form-body {
@@ -802,19 +917,19 @@ onMounted(fetchPortal);
 }
 .vp-field { display: flex; flex-direction: column; gap: 0.375rem; }
 .vp-field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-.vp-label { font-size: 0.7rem; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.08em; }
+.vp-label { font-size: 0.7rem; font-weight: 800; color: var(--vp-text-muted); text-transform: uppercase; letter-spacing: 0.08em; }
 .vp-required { color: #f43f5e; }
 
 .vp-input {
   width: 100%; height: 3rem; padding: 0 1rem;
-  border: 1.5px solid #e2e8f0; border-radius: 0.75rem;
-  background: #f8fafc; font-family: 'Inter', sans-serif;
-  font-size: 0.875rem; font-weight: 500; color: #0f172a;
+  border: 1.5px solid var(--vp-input-border); border-radius: 0.75rem;
+  background: var(--vp-input-bg); font-family: var(--vp-font, 'Inter', sans-serif);
+  font-size: 0.875rem; font-weight: 500; color: var(--vp-input-text);
   outline: none; transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
   box-sizing: border-box;
 }
 .vp-input:focus {
-  border-color: var(--vp-brand); background: #fff;
+  border-color: var(--vp-brand); background: var(--vp-card-bg);
   box-shadow: 0 0 0 3px var(--vp-brand-light);
 }
 .vp-input-error { border-color: #f43f5e !important; }
@@ -828,10 +943,9 @@ onMounted(fetchPortal);
 /* ── Modal Footer ── */
 .vp-modal-footer {
   padding: 1rem 1.5rem 1.25rem;
-  border-top: 1px solid #f1f5f9;
+  border-top: 1px solid var(--vp-card-border);
   flex-shrink: 0;
-  background: #fff;
-  /* ensure it is always anchored at bottom even if form is short */
+  background: var(--vp-card-bg);
   margin-top: auto;
 }
 
@@ -845,15 +959,15 @@ onMounted(fetchPortal);
   background: var(--vp-brand-light); color: var(--vp-brand);
   display: flex; align-items: center; justify-content: center;
 }
-.vp-success-title { font-size: 1.25rem; font-weight: 900; color: #0f172a; margin-top: -0.25rem; }
-.vp-success-msg   { font-size: 0.8rem; color: #64748b; margin-top: -0.5rem; }
+.vp-success-title { font-size: 1.25rem; font-weight: 900; color: var(--vp-text); margin-top: -0.25rem; }
+.vp-success-msg   { font-size: 0.8rem; color: var(--vp-text-muted); margin-top: -0.5rem; }
 
 /* ── QR Code Block ── */
 .vp-qr-block {
   width: 100%;
   display: flex; flex-direction: column; align-items: center; gap: 0.5rem;
-  background: #f8fafc;
-  border: 2px solid #e2e8f0;
+  background: var(--vp-success-bg);
+  border: 2px solid var(--vp-success-border);
   border-radius: 1rem;
   padding: 1rem;
 }
@@ -864,21 +978,21 @@ onMounted(fetchPortal);
 }
 .vp-qr-label {
   font-size: 0.65rem; font-weight: 700;
-  color: #64748b; text-align: center;
+  color: var(--vp-text-muted); text-align: center;
   text-transform: uppercase; letter-spacing: 0.05em;
   margin-top: 0.25rem;
 }
 .vp-qr-pending {
   display: flex; flex-direction: column; align-items: center;
-  gap: 0.5rem; color: #94a3b8; padding: 0.75rem;
+  gap: 0.5rem; color: var(--vp-text-light); padding: 0.75rem;
 }
-.vp-qr-pending p { font-size: 0.75rem; text-align: center; color: #94a3b8; font-weight: 500; max-width: 200px; }
+.vp-qr-pending p { font-size: 0.75rem; text-align: center; color: var(--vp-text-light); font-weight: 500; max-width: 200px; }
 .vp-qr-download-btn {
   display: inline-flex !important; align-items: center !important; gap: 0.4rem !important;
   padding: 0.5rem 1.25rem !important;
   background: #0f172a !important;
   color: #fff !important;
-  font-family: 'Inter', sans-serif !important;
+  font-family: var(--vp-font, 'Inter', sans-serif) !important;
   font-size: 0.75rem !important; font-weight: 700 !important;
   border: none !important; border-radius: 9999px !important;
   cursor: pointer !important;
@@ -886,15 +1000,15 @@ onMounted(fetchPortal);
 }
 .vp-qr-download-btn:hover { background: #1e293b !important; transform: translateY(-1px) !important; }
 .vp-success-summary {
-  width: 100%; background: #f8fafc; border-radius: 0.75rem;
+  width: 100%; background: var(--vp-success-bg); border-radius: 0.75rem;
   padding: 0.75rem 1rem; text-align: left; display: flex; flex-direction: column; gap: 0.35rem;
 }
 .vp-summary-row {
   display: flex; justify-content: space-between; align-items: center;
   font-size: 0.75rem;
 }
-.vp-summary-row span   { color: #64748b; font-weight: 500; }
-.vp-summary-row strong { color: #0f172a; font-weight: 700; }
+.vp-summary-row span   { color: var(--vp-text-muted); font-weight: 500; }
+.vp-summary-row strong { color: var(--vp-text); font-weight: 700; }
 
 /* ── Spin ── */
 .vp-spin { animation: vp-spin 0.8s linear infinite; }
@@ -918,8 +1032,8 @@ onMounted(fetchPortal);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   border-radius: 4px;
-  background: #f1f5f9;
-  color: #94a3b8;
+  background: var(--vp-input-bg);
+  color: var(--vp-text-light);
   vertical-align: middle;
 }
 
@@ -927,9 +1041,9 @@ onMounted(fetchPortal);
 .vp-upload-box {
   width: 100%;
   min-height: 90px;
-  border: 1.5px dashed #e2e8f0;
+  border: 1.5px dashed var(--vp-input-border);
   border-radius: 0.75rem;
-  background: #f8fafc;
+  background: var(--vp-input-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -937,14 +1051,14 @@ onMounted(fetchPortal);
   overflow: hidden;
   transition: border-color 0.2s, background 0.2s;
 }
-.vp-upload-box:hover { border-color: var(--vp-brand); background: #fff; }
+.vp-upload-box:hover { border-color: var(--vp-brand); background: var(--vp-card-bg); }
 
 .vp-upload-placeholder {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.4rem;
-  color: #94a3b8;
+  color: var(--vp-text-light);
   padding: 1rem;
 }
 .vp-upload-placeholder span { font-size: 0.7rem; font-weight: 600; text-align: center; }
@@ -961,7 +1075,7 @@ onMounted(fetchPortal);
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1rem;
-  color: #475569;
+  color: var(--vp-text-muted);
 }
 .vp-upload-doc-selected span { font-size: 0.75rem; font-weight: 600; word-break: break-all; }
 
