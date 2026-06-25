@@ -4,45 +4,58 @@
       <div class="calendar-section">
         <div class="header-actions">
           <div class="title-section">
-            <h2 class="text-h5">{{ monthName }} {{ year }} Attendance</h2>
+            <h2 class="text-h5">
+              {{ monthName }} {{ year }} Attendance
+            </h2>
           </div>
           <div class="action-section">
             <div class="cycle-info mr-4">
               <!-- <span class="cycle-type">{{ cycleType }}</span> -->
-              <span class="cycle-dates ml-2"
-                >{{ formattedCycleStartDate }} -
-                {{ formattedCycleEndDate }}</span
-              >
+              <span class="cycle-dates ml-2">{{ formattedCycleStartDate }} -
+                {{ formattedCycleEndDate }}</span>
             </div>
             <v-btn
               color="primary"
-              @click="confirmMarkAllPresent"
               :disabled="loading || isAttendanceLocked"
+              @click="confirmMarkAllPresent"
             >
               Mark All Present
             </v-btn>
           </div>
         </div>
 
-        <div v-if="isAttendanceLocked" class="locked-notification">
-          <v-icon color="warning" class="mr-2">mdi-lock</v-icon>
-          <span
-            >This attendance can't be edited because it's already verified. No
-            mode add or edit the attendance, only can view the data.</span
+        <div
+          v-if="isAttendanceLocked"
+          class="locked-notification"
+        >
+          <v-icon
+            color="warning"
+            class="mr-2"
           >
+            mdi-lock
+          </v-icon>
+          <span>This attendance can't be edited because it's already verified. No
+            mode add or edit the attendance, only can view the data.</span>
         </div>
 
-        <div v-if="loading" class="loading-indicator">
+        <div
+          v-if="loading"
+          class="loading-indicator"
+        >
           <v-progress-circular
             indeterminate
             color="primary"
-          ></v-progress-circular>
+          />
           <span class="ml-2">Loading attendance data...</span>
         </div>
 
         <div v-else>
           <div class="calendar-weekdays">
-            <div v-for="day in weekDays" :key="day" class="weekday">
+            <div
+              v-for="day in weekDays"
+              :key="day"
+              class="weekday"
+            >
               {{ day }}
             </div>
           </div>
@@ -59,15 +72,23 @@
               }"
               @click="isDateInCycle(date) ? openPopup(date) : null"
             >
-              <div class="day-number">{{ date.getDate() }}</div>
-              <div class="attendance-status" :class="getAttendanceClass(date)">
+              <div class="day-number">
+                {{ date.getDate() }}
+              </div>
+              <div
+                class="attendance-status"
+                :class="getAttendanceClass(date)"
+              >
                 {{ getAttendanceStatus(date).status }}
               </div>
             </div>
           </div>
         </div>
 
-        <div v-if="calendarAttendanceData.length > 0" class="debug-info mt-4">
+        <div
+          v-if="calendarAttendanceData.length > 0"
+          class="debug-info mt-4"
+        >
           <!-- <p>API data loaded: {{ calendarAttendanceData.length }} records</p> -->
         </div>
 
@@ -77,18 +98,23 @@
           :day="selectedDay"
           :month="selectedMonth"
           :year="selectedYear"
-          :selectedDate="selectedDate"
+          :selected-date="selectedDate"
           :AttendanceId="selectedAttendanceId"
-          :attendanceStatuses="attendanceStatuses"
-          :currentStatus="currentAttendanceStatus"
-          :isLocked="isAttendanceLocked"
+          :attendance-statuses="attendanceStatuses"
+          :current-status="currentAttendanceStatus"
+          :is-locked="isAttendanceLocked"
           @close="closePopup"
           @update="updateAttendance"
         />
 
-        <v-dialog v-model="showConfirmationDialog" max-width="500">
+        <v-dialog
+          v-model="showConfirmationDialog"
+          max-width="500"
+        >
           <v-card>
-            <v-card-title class="text-h5">Confirm Action</v-card-title>
+            <v-card-title class="text-h5">
+              Confirm Action
+            </v-card-title>
             <v-card-text>
               <p v-if="hasExistingData">
                 This month already has attendance data. Do you want to overwrite
@@ -100,27 +126,43 @@
               </p>
             </v-card-text>
             <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="error" @click="showConfirmationDialog = false"
-                >Cancel</v-btn
+              <v-spacer />
+              <v-btn
+                color="error"
+                @click="showConfirmationDialog = false"
               >
-              <v-btn color="primary" @click="markAllPresent">Confirm</v-btn>
+                Cancel
+              </v-btn>
+              <v-btn
+                color="primary"
+                @click="markAllPresent"
+              >
+                Confirm
+              </v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>
       </div>
 
       <div class="summary-section">
-        <h3 class="summary-title">Attendance Summary</h3>
+        <h3 class="summary-title">
+          Attendance Summary
+        </h3>
         <div class="summary-content">
-          <div v-if="loading" class="loading-indicator">
+          <div
+            v-if="loading"
+            class="loading-indicator"
+          >
             <v-progress-circular
               indeterminate
               color="primary"
-            ></v-progress-circular>
+            />
             <span class="ml-2">Loading summary...</span>
           </div>
-          <div v-else-if="summaryData" class="summary-items">
+          <div
+            v-else-if="summaryData"
+            class="summary-items"
+          >
             <div class="summary-item">
               <span class="summary-label">Total PayableDays:</span>
               <span class="summary-value">{{
@@ -194,7 +236,12 @@
               }}</span>
             </div>
           </div>
-          <div v-else class="no-data">No summary data available</div>
+          <div
+            v-else
+            class="no-data"
+          >
+            No summary data available
+          </div>
         </div>
       </div>
     </div>

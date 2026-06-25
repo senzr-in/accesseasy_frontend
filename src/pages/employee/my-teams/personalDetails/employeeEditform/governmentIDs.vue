@@ -2,11 +2,14 @@
   <div class="government-id">
     <v-container v-if="loading">
       <v-row>
-        <v-col cols="12" class="text-center">
+        <v-col
+          cols="12"
+          class="text-center"
+        >
           <v-progress-circular
             indeterminate
             color="black"
-          ></v-progress-circular>
+          />
         </v-col>
       </v-row>
     </v-container>
@@ -16,7 +19,10 @@
       style="height: calc(90vh - 170px); overflow: auto"
     >
       <v-card class="fill-height">
-        <v-dialog v-model="kycAgreementDialog" max-width="500">
+        <v-dialog
+          v-model="kycAgreementDialog"
+          max-width="500"
+        >
           <v-card>
             <v-card-title class="bg-primary">
               <span class="text-h5">KYC Verification Agreement</span>
@@ -30,8 +36,12 @@
               />
             </v-card-text>
             <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="red" variant="text" @click="cancelVerification">
+              <v-spacer />
+              <v-btn
+                color="red"
+                variant="text"
+                @click="cancelVerification"
+              >
                 Cancel
               </v-btn>
               <v-btn
@@ -81,7 +91,9 @@
                     <div class="icon-wrapper bg-blue-lighten-4">
                       <span class="icon-text">10</span>
                     </div>
-                    <h4 class="section-title">Aadhaar</h4>
+                    <h4 class="section-title">
+                      Aadhaar
+                    </h4>
                   </div>
                   <div class="input-controls aadhaar-controls">
                     <v-text-field
@@ -89,14 +101,14 @@
                       label="Aadhar"
                       type="text"
                       :rules="[rules.aadharFormat]"
-                      @update:model-value="
-                        (val) => handleInputChange('aadhar', val)
-                      "
-                      @blur="checkAadharExists"
                       variant="outlined"
                       density="comfortable"
                       placeholder="Enter Aadhar number"
                       class="flex-grow-1"
+                      @update:model-value="
+                        (val) => handleInputChange('aadhar', val)
+                      "
+                      @blur="checkAadharExists"
                     />
                     <v-btn
                       :color="
@@ -108,8 +120,8 @@
                       :disabled="
                         ['verified'].includes(verificationStatuses?.aadhaar)
                       "
-                      @click="handleAadhaarVerification"
                       class="verify-btn"
+                      @click="handleAadhaarVerification"
                     >
                       {{
                         ["verified"].includes(verificationStatuses?.aadhaar)
@@ -124,14 +136,19 @@
                   <div class="details-container">
                     <div class="details-header">
                       <div class="d-flex align-center">
-                        <v-icon color="green" size="small" class="mr-2">
+                        <v-icon
+                          color="green"
+                          size="small"
+                          class="mr-2"
+                        >
                           mdi-check-circle
                         </v-icon>
-                        <span class="verification-status"
-                          >Verification Details</span
-                        >
+                        <span class="verification-status">Verification Details</span>
                       </div>
-                      <div class="d-flex ga-2" v-if="userRole === 'Admin'">
+                      <div
+                        v-if="userRole === 'Admin'"
+                        class="d-flex ga-2"
+                      >
                         <v-btn
                           color="black"
                           size="small"
@@ -151,7 +168,9 @@
                       </div>
                     </div>
                     <div class="aadhaar-details-grid">
-                      <div class="detail-section-title">Personal Details</div>
+                      <div class="detail-section-title">
+                        Personal Details
+                      </div>
 
                       <div class="personal-details-row">
                         <div class="photo-section">
@@ -161,7 +180,7 @@
                             :src="`data:image/jpeg;base64,${aadhaarDetails.profile_image}`"
                             alt="Aadhaar Photo"
                             class="aadhaar-photo"
-                          />
+                          >
                         </div>
 
                         <div class="personal-info-grid">
@@ -184,14 +203,12 @@
                             </p>
                           </div>
                           <div class="detail-item">
-                            <label class="detail-label"
-                              >Care Of / Father's Name:</label
-                            >
+                            <label class="detail-label">Care Of / Father's Name:</label>
                             <p class="detail-value">
                               {{
                                 aadhaarDetails?.father_name ||
-                                aadhaarDetails?.care_of ||
-                                "—"
+                                  aadhaarDetails?.care_of ||
+                                  "—"
                               }}
                             </p>
                           </div>
@@ -230,11 +247,16 @@
                   >
                     <div class="d-flex align-center">
                       <div class="icon-wrapper bg-orange-lighten-4">
-                        <v-icon color="orange-darken-2" size="small"
-                          >mdi-credit-card</v-icon
+                        <v-icon
+                          color="orange-darken-2"
+                          size="small"
                         >
+                          mdi-credit-card
+                        </v-icon>
                       </div>
-                      <h4 class="section-title mb-0">UAN</h4>
+                      <h4 class="section-title mb-0">
+                        UAN
+                      </h4>
                     </div>
                     <v-chip
                       class="px-4"
@@ -244,15 +266,15 @@
                     >
                       {{
                         employeeData.assignedUser.PFAccountNumber ||
-                        "NotVerified"
+                          "NotVerified"
                       }}
                     </v-chip>
                   </div>
 
                   <div class="input-controls">
                     <v-text-field
-                      label="Aadhaar Number"
                       v-model="employeeData.assignedUser.aadhar"
+                      label="Aadhaar Number"
                       variant="outlined"
                       density="comfortable"
                       color="black"
@@ -269,10 +291,10 @@
                       :disabled="
                         ['verified'].includes(verificationStatuses?.uan)
                       "
+                      class="verify-btn"
                       @click="
                         verifyDocument('uan', employeeData.assignedUser?.aadhar)
                       "
-                      class="verify-btn"
                     >
                       {{
                         ["verified"].includes(verificationStatuses?.uan)
@@ -287,14 +309,19 @@
                   <div class="details-container">
                     <div class="details-header">
                       <div class="d-flex align-center">
-                        <v-icon color="green" size="small" class="mr-2"
-                          >mdi-check-circle</v-icon
+                        <v-icon
+                          color="green"
+                          size="small"
+                          class="mr-2"
                         >
-                        <span class="verification-status"
-                          >Verification Details</span
-                        >
+                          mdi-check-circle
+                        </v-icon>
+                        <span class="verification-status">Verification Details</span>
                       </div>
-                      <div class="d-flex ga-2" v-if="userRole === 'Admin'">
+                      <div
+                        v-if="userRole === 'Admin'"
+                        class="d-flex ga-2"
+                      >
                         <v-btn
                           color="black"
                           size="small"
@@ -336,9 +363,13 @@
               :class="{ 'bg-grey-lighten-5': true }"
             >
               <div class="row-content d-flex align-center justify-center pa-6">
-                <v-icon color="red" size="40" class="mr-3"
-                  >mdi-alert-circle</v-icon
+                <v-icon
+                  color="red"
+                  size="40"
+                  class="mr-3"
                 >
+                  mdi-alert-circle
+                </v-icon>
                 <div>
                   <h4 class="text-lg font-semibold mb-1">
                     UAN Verification Locked
@@ -359,25 +390,30 @@
                 <div class="input-section">
                   <div class="section-header">
                     <div class="icon-wrapper bg-purple-lighten-4">
-                      <v-icon color="purple-darken-2" size="small"
-                        >mdi-file-document</v-icon
+                      <v-icon
+                        color="purple-darken-2"
+                        size="small"
                       >
+                        mdi-file-document
+                      </v-icon>
                     </div>
-                    <h4 class="section-title">PAN</h4>
+                    <h4 class="section-title">
+                      PAN
+                    </h4>
                   </div>
                   <div class="input-controls">
                     <v-text-field
                       v-model="employeeData.assignedUser.pan"
                       label="PAN"
                       :rules="[rules.panFormat]"
-                      @update:model-value="
-                        (val) => handleInputChange('pan', val)
-                      "
-                      @blur="checkPanExists"
                       variant="outlined"
                       density="comfortable"
                       placeholder="Enter PAN details"
                       class="flex-grow-1"
+                      @update:model-value="
+                        (val) => handleInputChange('pan', val)
+                      "
+                      @blur="checkPanExists"
                     />
                     <v-btn
                       :color="
@@ -389,10 +425,10 @@
                         ['verified'].includes(verificationStatuses?.pan)
                       "
                       size="large"
+                      class="verify-btn"
                       @click="
                         verifyDocument('pan', employeeData.assignedUser?.pan)
                       "
-                      class="verify-btn"
                     >
                       {{
                         ["verified"].includes(verificationStatuses?.pan)
@@ -407,14 +443,19 @@
                   <div class="details-container">
                     <div class="details-header">
                       <div class="d-flex align-center">
-                        <v-icon color="green" size="small" class="mr-2"
-                          >mdi-check-circle</v-icon
+                        <v-icon
+                          color="green"
+                          size="small"
+                          class="mr-2"
                         >
-                        <span class="verification-status"
-                          >Verification Details</span
-                        >
+                          mdi-check-circle
+                        </v-icon>
+                        <span class="verification-status">Verification Details</span>
                       </div>
-                      <div class="d-flex ga-2" v-if="userRole === 'Admin'">
+                      <div
+                        v-if="userRole === 'Admin'"
+                        class="d-flex ga-2"
+                      >
                         <v-btn
                           color="black"
                           size="small"
@@ -465,34 +506,39 @@
                   <div class="section-header">
                     <div class="d-flex align-center">
                       <div class="icon-wrapper bg-blue-lighten-4">
-                        <v-icon color="blue-darken-2" size="small"
-                          >mdi-bank</v-icon
+                        <v-icon
+                          color="blue-darken-2"
+                          size="small"
                         >
+                          mdi-bank
+                        </v-icon>
                       </div>
-                      <h4 class="section-title mb-0">Bank Account</h4>
+                      <h4 class="section-title mb-0">
+                        Bank Account
+                      </h4>
                     </div>
                   </div>
                   <v-text-field
                     v-model="employeeData.assignedUser.accountNumber"
                     label="Bank Account Number"
-                    @update:model-value="
-                      (val) => handleInputChange('accountNumber', val)
-                    "
                     variant="outlined"
                     density="comfortable"
                     placeholder="Enter bank account number"
                     class="flex-grow-1 mr-2"
+                    @update:model-value="
+                      (val) => handleInputChange('accountNumber', val)
+                    "
                   />
                   <v-text-field
                     v-model="employeeData.assignedUser.IFSC"
                     label="IFSC Code"
-                    @update:model-value="
-                      (val) => handleInputChange('IFSC', val)
-                    "
                     variant="outlined"
                     density="comfortable"
                     placeholder="Enter IFSC code"
                     class="flex-grow-1 mr-2"
+                    @update:model-value="
+                      (val) => handleInputChange('IFSC', val)
+                    "
                   />
                   <v-btn
                     :color="
@@ -504,13 +550,13 @@
                     :disabled="
                       ['verified'].includes(verificationStatuses?.bank_account)
                     "
+                    class="verify-btn"
                     @click="
                       verifyDocument(
                         'bank_account',
                         `${employeeData.assignedUser.accountNumber}-${employeeData.assignedUser.IFSC}`,
                       )
                     "
-                    class="verify-btn"
                   >
                     {{
                       ["verified"].includes(verificationStatuses?.bank_account)
@@ -524,14 +570,19 @@
                   <div class="details-container">
                     <div class="details-header">
                       <div class="d-flex align-center">
-                        <v-icon color="green" size="small" class="mr-2"
-                          >mdi-check-circle</v-icon
+                        <v-icon
+                          color="green"
+                          size="small"
+                          class="mr-2"
                         >
-                        <span class="verification-status"
-                          >Verification Details</span
-                        >
+                          mdi-check-circle
+                        </v-icon>
+                        <span class="verification-status">Verification Details</span>
                       </div>
-                      <div class="d-flex ga-2" v-if="userRole === 'Admin'">
+                      <div
+                        v-if="userRole === 'Admin'"
+                        class="d-flex ga-2"
+                      >
                         <v-btn
                           color="black"
                           size="small"
@@ -598,7 +649,9 @@
                     <div class="icon-wrapper bg-blue-lighten-4">
                       <span class="icon-text">11</span>
                     </div>
-                    <h4 class="section-title">ESIC</h4>
+                    <h4 class="section-title">
+                      ESIC
+                    </h4>
                   </div>
                   <div class="input-controls aadhaar-controls">
                     <v-text-field
@@ -606,13 +659,13 @@
                       label="ESIC Number"
                       type="text"
                       :rules="[rules.esicFormat]"
-                      @update:model-value="
-                        (val) => handleInputChange('ESIAccountNumber', val)
-                      "
                       variant="outlined"
                       density="comfortable"
                       placeholder="Enter ESIC number"
                       class="flex-grow-1"
+                      @update:model-value="
+                        (val) => handleInputChange('ESIAccountNumber', val)
+                      "
                     />
                     <v-btn
                       :color="
@@ -624,13 +677,13 @@
                         ['verified'].includes(verificationStatuses?.esic)
                       "
                       size="large"
+                      class="verify-btn"
                       @click="
                         verifyDocument(
                           'esic',
                           employeeData.assignedUser?.ESIAccountNumber,
                         )
                       "
-                      class="verify-btn"
                     >
                       {{
                         ["verified"].includes(
@@ -647,14 +700,19 @@
                   <div class="details-container">
                     <div class="details-header">
                       <div class="d-flex align-center">
-                        <v-icon color="green" size="small" class="mr-2"
-                          >mdi-check-circle</v-icon
+                        <v-icon
+                          color="green"
+                          size="small"
+                          class="mr-2"
                         >
-                        <span class="verification-status"
-                          >Verification Details</span
-                        >
+                          mdi-check-circle
+                        </v-icon>
+                        <span class="verification-status">Verification Details</span>
                       </div>
-                      <div class="d-flex ga-2" v-if="userRole === 'Admin'">
+                      <div
+                        v-if="userRole === 'Admin'"
+                        class="d-flex ga-2"
+                      >
                         <v-btn
                           color="black"
                           size="small"
@@ -679,7 +737,9 @@
                       </div>
                     </div>
                     <div class="details-grid esic-details">
-                      <div class="detail-section-title">ESIC Details</div>
+                      <div class="detail-section-title">
+                        ESIC Details
+                      </div>
                       <div class="detail-item">
                         <label class="detail-label">ESIC Name:</label>
                         <p class="detail-value">
@@ -752,7 +812,10 @@
 
     <v-container v-else>
       <v-row>
-        <v-col cols="12" class="text-center">
+        <v-col
+          cols="12"
+          class="text-center"
+        >
           <p>No employee data found.</p>
         </v-col>
       </v-row>
@@ -765,20 +828,24 @@
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-check-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-check-circle
+        </v-icon>
         {{ successMessage }}
       </div>
     </v-snackbar>
 
     <v-snackbar
-      class="errormessge"
       v-model="showErrorSnackbar"
+      class="errormessge"
       color="error"
       timeout="2000"
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-alert-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-alert-circle
+        </v-icon>
         {{ errorMessage }}
       </div>
     </v-snackbar>
@@ -1418,7 +1485,7 @@ const toggleVerification = async () => {
   showVerification.value = !showVerification.value;
 
   if (showVerification.value) {
-    const { aadhar, pan, UAN } = employeeData.assignedUser;
+    const { aadhar, pan, UAN } = employeeData.value.assignedUser;
     const employeeId = props.id;
 
     const documents = [];
@@ -1693,7 +1760,7 @@ const fetchEmployeeData = async () => {
         employee.assignedUser.UAN = employee.assignedUser.uan;
         delete employee.assignedUser.uan;
       }
-      console.log("PAN before check:", employeeData.assignedUser?.pan);
+      console.log("PAN before check:", employeeData.value.assignedUser?.pan);
 
       if (
         employee.assignedUser?.drivingLicense &&

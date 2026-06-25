@@ -1,29 +1,38 @@
 <template>
   <div class="employee-container">
-    <div class="main-content" :class="{ 'with-filter': showFilters }">
+    <div
+      class="main-content"
+      :class="{ 'with-filter': showFilters }"
+    >
       <!-- Tab Navigation -->
       <div class="d-flex align-center py-2 px-4">
         <div class="left-tabs">
           <button
-            @click="switchTab('activity')"
             :class="{ active: activeLeftTab === 'activity' }"
+            @click="switchTab('activity')"
           >
-            <i class="fas fa-clock"></i>
+            <i class="fas fa-clock" />
             Recent Activity
           </button>
           <button
-            @click="switchTab('history')"
             :class="{ active: activeLeftTab === 'history' }"
+            @click="switchTab('history')"
           >
-            <i class="fas fa-history"></i>
+            <i class="fas fa-history" />
             History
           </button>
         </div>
-        <v-spacer></v-spacer>
+        <v-spacer />
       </div>
 
-      <div v-if="tabLoading" class="d-flex justify-center align-center py-2">
-        <v-progress-linear indeterminate color="#059367"></v-progress-linear>
+      <div
+        v-if="tabLoading"
+        class="d-flex justify-center align-center py-2"
+      >
+        <v-progress-linear
+          indeterminate
+          color="#059367"
+        />
       </div>
 
       <!-- Main Content Area with proper spacing -->
@@ -37,40 +46,48 @@
           :sort-direction="sortDirection"
           :item-key="'id'"
           :row-clickable="true"
+          class="data-table"
           @update:selected-items="selected = $event"
           @update:sort-by="sortBy = $event"
           @update:sort-direction="sortDirection = $event"
           @row-click="handleRowClick"
           @sort="handleSort"
-          class="data-table"
         >
           <!-- Custom Cell Content Slots -->
 
-          <template v-slot:[`cell-date`]="{ item }">
+          <template #[`cell-date`]="{ item }">
             {{ formatDateOnly(item.date) }}
           </template>
-          <template v-slot:[`cell-date_created`]="{ item }">
+          <template #[`cell-date_created`]="{ item }">
             {{ formatDateOnly(item.date_created) }}
           </template>
-          <template v-slot:[`cell-totalReimbursement`]="{ item }">
+          <template #[`cell-totalReimbursement`]="{ item }">
             ${{ item.totalReimbursement?.toFixed(2) || "0.00" }}
           </template>
-          <template v-slot:[`cell-subTotal`]="{ item }">
+          <template #[`cell-subTotal`]="{ item }">
             ${{ item.subTotal?.toFixed(2) || "0.00" }}
           </template>
-          <template v-slot:[`cell-ModeOfTransport.transportName`]="{ item }">
+          <template #[`cell-ModeOfTransport.transportName`]="{ item }">
             <v-chip
               v-if="item.ModeOfTransport?.transportName"
               size="small"
               color="primary"
               variant="outlined"
             >
-              <v-icon start size="small">mdi-car</v-icon>
+              <v-icon
+                start
+                size="small"
+              >
+                mdi-car
+              </v-icon>
               {{ item.ModeOfTransport.transportName }}
             </v-chip>
-            <span v-else class="text-muted">Not specified</span>
+            <span
+              v-else
+              class="text-muted"
+            >Not specified</span>
           </template>
-          <template v-slot:[`cell-itemizedExpenses`]="{ item }">
+          <template #[`cell-itemizedExpenses`]="{ item }">
             <div
               v-if="item.itemizedExpenses && item.itemizedExpenses.length > 0"
             >
@@ -81,28 +98,43 @@
               >
                 <small>{{ expense.description }} - ${{ expense.cost }}</small>
               </div>
-              <small v-if="item.itemizedExpenses.length > 2" class="text-muted">
+              <small
+                v-if="item.itemizedExpenses.length > 2"
+                class="text-muted"
+              >
                 +{{ item.itemizedExpenses.length - 2 }} more items
               </small>
             </div>
-            <span v-else class="text-muted">No expenses</span>
+            <span
+              v-else
+              class="text-muted"
+            >No expenses</span>
           </template>
-          <template v-slot:[`cell-status`]="{ item }">
+          <template #[`cell-status`]="{ item }">
             <div class="status-cell">
               <!-- Status pill -->
               <span
                 v-if="item.status !== 'submitted'"
                 :class="['status-chip', `status-${item.status}`]"
               >
-                <v-icon size="14" class="me-1">{{
+                <v-icon
+                  size="14"
+                  class="me-1"
+                >{{
                   getStatusIcon(item.status)
                 }}</v-icon>
                 {{ formatStatus(item.status) }}
               </span>
 
               <!-- "Requested" pill -->
-              <span v-else class="status-chip status-requested">
-                <v-icon size="14" class="me-1">mdi-clock-outline</v-icon>
+              <span
+                v-else
+                class="status-chip status-requested"
+              >
+                <v-icon
+                  size="14"
+                  class="me-1"
+                >mdi-clock-outline</v-icon>
                 Requested
               </span>
 
@@ -116,10 +148,12 @@
                   color="success"
                   size="x-small"
                   :loading="item.updating"
-                  @click.stop="handleStatusUpdate(item.id, 'approved')"
                   title="Approve"
+                  @click.stop="handleStatusUpdate(item.id, 'approved')"
                 >
-                  <v-icon size="16">mdi-check</v-icon>
+                  <v-icon size="16">
+                    mdi-check
+                  </v-icon>
                 </v-btn>
 
                 <v-btn
@@ -127,10 +161,12 @@
                   color="error"
                   size="x-small"
                   :loading="item.updating"
-                  @click.stop="handleStatusUpdate(item.id, 'rejected')"
                   title="Reject"
+                  @click.stop="handleStatusUpdate(item.id, 'rejected')"
                 >
-                  <v-icon size="16">mdi-close</v-icon>
+                  <v-icon size="16">
+                    mdi-close
+                  </v-icon>
                 </v-btn>
               </div>
             </div>
@@ -139,12 +175,12 @@
 
         <CustomPagination
           v-model:page="page"
-          v-model:itemsPerPage="itemsPerPage"
+          v-model:items-per-page="itemsPerPage"
           :total-items="totalItems"
           :is-searching="!!search"
-          @update:page="handlePageChange"
-          @update:itemsPerPage="handleItemsPerPageChange"
           class="pagination"
+          @update:page="handlePageChange"
+          @update:items-per-page="handleItemsPerPageChange"
         />
       </div>
     </div>
@@ -157,8 +193,12 @@
       top
     >
       {{ snackbar.message }}
-      <template v-slot:actions>
-        <v-btn color="white" variant="text" @click="snackbar.show = false">
+      <template #actions>
+        <v-btn
+          color="white"
+          variant="text"
+          @click="snackbar.show = false"
+        >
           Close
         </v-btn>
       </template>

@@ -1,6 +1,12 @@
 <template>
-  <div v-if="!showReport" class="employee-container">
-    <div class="main-content" :class="{ 'with-filter': showFilters }">
+  <div
+    v-if="!showReport"
+    class="employee-container"
+  >
+    <div
+      class="main-content"
+      :class="{ 'with-filter': showFilters }"
+    >
       <v-data-table
         :headers="headers"
         :items="filteredItems"
@@ -11,7 +17,7 @@
         fixed-header
         @click:row="(event, { item }) => editItem(item)"
       >
-        <template v-slot:top>
+        <template #top>
           <div class="d-flex align-center py-2 px-4">
             <v-text-field
               v-model="search"
@@ -21,14 +27,20 @@
               variant="outlined"
               class="search-field"
               hide-details
-            ></v-text-field>
-            <v-spacer></v-spacer>
+            />
+            <v-spacer />
             <!-- <v-btn color="primary" @click="toggleFilters" class="ms-2">
                 <v-icon start>mdi-filter</v-icon>
                 Filters
               </v-btn> -->
-            <v-btn color="black" class="ms-2" @click="showReport = true">
-              <v-icon start>mdi-plus</v-icon>
+            <v-btn
+              color="black"
+              class="ms-2"
+              @click="showReport = true"
+            >
+              <v-icon start>
+                mdi-plus
+              </v-icon>
               GenrateReport
             </v-btn>
           </div>
@@ -38,11 +50,19 @@
 
     <!-- Right Filter Panel -->
     <transition name="slide">
-      <div v-if="showFilters" class="filter-panel">
+      <div
+        v-if="showFilters"
+        class="filter-panel"
+      >
         <div class="filter-header">
           <div class="d-flex align-center justify-space-between px-4">
-            <h3 class="text-h6 font-weight-medium">Advanced Filters</h3>
-            <v-btn icon @click="toggleFilters">
+            <h3 class="text-h6 font-weight-medium">
+              Advanced Filters
+            </h3>
+            <v-btn
+              icon
+              @click="toggleFilters"
+            >
               <v-icon>mdi-close</v-icon>
             </v-btn>
           </div>
@@ -58,7 +78,7 @@
             closable-chips
             variant="outlined"
             class="mb-4"
-          ></v-select>
+          />
 
           <v-select
             v-model="filters.tenant"
@@ -69,7 +89,7 @@
             closable-chips
             variant="outlined"
             class="mb-4"
-          ></v-select>
+          />
 
           <v-select
             v-model="filters.branch"
@@ -80,9 +100,11 @@
             closable-chips
             variant="outlined"
             class="mb-4"
-          ></v-select>
+          />
 
-          <p class="text-subtitle-2 mb-2">Date Range</p>
+          <p class="text-subtitle-2 mb-2">
+            Date Range
+          </p>
           <v-text-field
             v-model="filters.dateFrom"
             label="From"
@@ -90,7 +112,7 @@
             variant="outlined"
             density="compact"
             class="mb-2"
-          ></v-text-field>
+          />
           <v-text-field
             v-model="filters.dateTo"
             label="To"
@@ -98,13 +120,21 @@
             variant="outlined"
             density="compact"
             class="mb-4"
-          ></v-text-field>
+          />
 
           <div class="filter-actions">
-            <v-btn color="error" variant="text" @click="clearFilters">
+            <v-btn
+              color="error"
+              variant="text"
+              @click="clearFilters"
+            >
               Clear
             </v-btn>
-            <v-btn color="primary" @click="applyFilters" class="ms-2">
+            <v-btn
+              color="primary"
+              class="ms-2"
+              @click="applyFilters"
+            >
               Apply
             </v-btn>
           </div>
@@ -112,7 +142,10 @@
       </div>
     </transition>
   </div>
-  <generate-report v-else @closeAddPage="showReport = false" />
+  <generate-report
+    v-else
+    @close-add-page="showReport = false"
+  />
 </template>
 <script setup>
 import { ref, onMounted, computed } from "vue";

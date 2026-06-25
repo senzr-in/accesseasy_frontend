@@ -1,10 +1,15 @@
 <template>
-  <div class="wo-single-page-root" :class="`status-${statusClass}`">
+  <div
+    class="wo-single-page-root"
+    :class="`status-${statusClass}`"
+  >
     <!-- Header with Status Badge and Download Button -->
     <div class="page-header">
       <div class="header-content">
         <div class="title-section">
-          <h1 class="page-title">{{ taskDetails?.title || "Work Order" }}</h1>
+          <h1 class="page-title">
+            {{ taskDetails?.title || "Work Order" }}
+          </h1>
           <v-chip
             v-if="taskDetails?.status"
             :color="statusColor(taskDetails.status)"
@@ -12,21 +17,28 @@
             size="large"
             label
           >
-            <v-icon size="18" class="mr-1">{{
-              statusIcon(taskDetails.status)
-            }}</v-icon>
+            <v-icon
+              size="18"
+              class="mr-1"
+            >
+              {{
+                statusIcon(taskDetails.status)
+              }}
+            </v-icon>
             {{ statusLabel(taskDetails.status) }}
           </v-chip>
         </div>
         <v-btn
           class="pdf-btn"
-          @click="downloadPDF"
           :loading="pdfLoading"
           :disabled="!taskDetails"
           variant="flat"
           icon
+          @click="downloadPDF"
         >
-          <v-icon size="20">mdi-download</v-icon>
+          <v-icon size="20">
+            mdi-download
+          </v-icon>
         </v-btn>
       </div>
       <v-divider class="mt-3" />
@@ -57,41 +69,61 @@
 
     <!-- Main Content - All Sections on One Page -->
     <div class="page-content">
-      <v-skeleton-loader v-if="loading" type="list-item-three-line" />
-      <div v-else class="content-sections">
+      <v-skeleton-loader
+        v-if="loading"
+        type="list-item-three-line"
+      />
+      <div
+        v-else
+        class="content-sections"
+      >
         <!-- Work Order Details Section -->
-        <v-div class="section-card" elevation="2" rounded="lg">
+        <v-div
+          class="section-card"
+          elevation="2"
+          rounded="lg"
+        >
           <v-card-title class="section-title">
             Work Order Details
           </v-card-title>
           <v-card-text>
             <div class="details-grid">
               <div class="detail-item">
-                <div class="detail-label">Job Type</div>
+                <div class="detail-label">
+                  Job Type
+                </div>
                 <div class="detail-value">
                   {{ taskDetails?.taskType || "No Data" }}
                 </div>
               </div>
               <div class="detail-item">
-                <div class="detail-label">Job Title</div>
+                <div class="detail-label">
+                  Job Title
+                </div>
                 <div class="detail-value">
                   {{ taskDetails?.title || "No Data" }}
                 </div>
               </div>
               <div class="detail-item">
-                <div class="detail-label">Start Date</div>
+                <div class="detail-label">
+                  Start Date
+                </div>
                 <div class="detail-value">
                   {{ fmtDateTime(taskDetails?.from) }}
                 </div>
               </div>
               <div class="detail-item">
-                <div class="detail-label">Due Date</div>
+                <div class="detail-label">
+                  Due Date
+                </div>
                 <div class="detail-value">
                   {{ fmtDateTime(taskDetails?.dueTime) }}
                 </div>
               </div>
               <div class="detail-item">
-                <div class="detail-label">Priority</div>
+                <div class="detail-label">
+                  Priority
+                </div>
                 <v-chip
                   v-if="taskDetails?.task_priority"
                   :color="priorityColor(taskDetails.task_priority)"
@@ -100,10 +132,17 @@
                 >
                   {{ cap(taskDetails?.task_priority) || "No Data" }}
                 </v-chip>
-                <div v-else class="detail-value">—</div>
+                <div
+                  v-else
+                  class="detail-value"
+                >
+                  —
+                </div>
               </div>
               <div class="detail-item">
-                <div class="detail-label">Location</div>
+                <div class="detail-label">
+                  Location
+                </div>
                 <div class="detail-value">
                   {{ taskDetails?.locationName || "No Data" }}
                   <span
@@ -117,8 +156,13 @@
             </div>
 
             <!-- Task Image -->
-            <div v-if="taskImageUrl" class="mt-4">
-              <div class="detail-label mb-2">Task Image</div>
+            <div
+              v-if="taskImageUrl"
+              class="mt-4"
+            >
+              <div class="detail-label mb-2">
+                Task Image
+              </div>
               <v-img
                 :src="taskImageUrl"
                 alt="Task image"
@@ -129,13 +173,18 @@
             </div>
 
             <!-- Organization Location Map -->
-            <div v-if="location" class="mt-4">
-              <div class="detail-label mb-2">Organization Location</div>
+            <div
+              v-if="location"
+              class="mt-4"
+            >
+              <div class="detail-label mb-2">
+                Organization Location
+              </div>
               <div
                 ref="mapContainer"
                 class="gps-map-container"
                 style="height: 250px"
-              ></div>
+              />
               <div class="text-xs text-gray-600 mt-2">
                 Lat: {{ location.lat }}, Lng: {{ location.lng }} | Radius:
                 {{ radius }} meters
@@ -145,42 +194,58 @@
         </v-div>
 
         <!-- Client Details Section -->
-        <v-div class="section-card" elevation="2" rounded="lg">
-          <v-card-title class="section-title"> Client Details </v-card-title>
+        <v-div
+          class="section-card"
+          elevation="2"
+          rounded="lg"
+        >
+          <v-card-title class="section-title">
+            Client Details
+          </v-card-title>
           <v-card-text>
             <div class="details-grid">
               <div class="detail-item">
-                <div class="detail-label">Client Name</div>
+                <div class="detail-label">
+                  Client Name
+                </div>
                 <div class="detail-value">
                   {{ taskDetails?.orgName || "No Data" }}
                 </div>
               </div>
               <div class="detail-item">
-                <div class="detail-label">Work Location</div>
+                <div class="detail-label">
+                  Work Location
+                </div>
                 <div class="detail-value">
                   {{ taskDetails?.locationName || "No Data" }}
                 </div>
               </div>
               <div class="detail-item">
-                <div class="detail-label">Supervisor</div>
+                <div class="detail-label">
+                  Supervisor
+                </div>
                 <div class="detail-value">
                   {{
                     taskDetails?.orgLocation?.contactDetails?.contactPerson ||
-                    "No Data"
+                      "No Data"
                   }}
                 </div>
               </div>
               <div class="detail-item">
-                <div class="detail-label">Contact Number</div>
+                <div class="detail-label">
+                  Contact Number
+                </div>
                 <div class="detail-value">
                   {{
                     taskDetails?.orgLocation?.contactDetails?.contactNumber ||
-                    "No Data"
+                      "No Data"
                   }}
                 </div>
               </div>
               <div class="detail-item">
-                <div class="detail-label">Email</div>
+                <div class="detail-label">
+                  Email
+                </div>
                 <div class="detail-value">
                   {{
                     taskDetails?.orgLocation?.contactDetails?.Email || "No Data"
@@ -188,7 +253,9 @@
                 </div>
               </div>
               <div class="detail-item">
-                <div class="detail-label">Service Range</div>
+                <div class="detail-label">
+                  Service Range
+                </div>
                 <div class="detail-value">
                   {{
                     taskDetails?.locSize ? `${taskDetails.locSize}` : "No Data"
@@ -200,23 +267,33 @@
         </v-div>
 
         <!-- Assigned Employee Section -->
-        <v-div class="section-card" elevation="2" rounded="lg">
-          <v-card-title class="section-title"> Assigned Employee </v-card-title>
+        <v-div
+          class="section-card"
+          elevation="2"
+          rounded="lg"
+        >
+          <v-card-title class="section-title">
+            Assigned Employee
+          </v-card-title>
           <v-card-text>
             <div class="details-grid">
               <div class="detail-item">
-                <div class="detail-label">Employee Name</div>
+                <div class="detail-label">
+                  Employee Name
+                </div>
                 <div class="detail-value">
                   {{
                     taskDetails?.employeeId?.assignedUser?.first_name &&
-                    taskDetails?.employeeId?.employeeId
+                      taskDetails?.employeeId?.employeeId
                       ? `${taskDetails.employeeId.assignedUser.first_name} - ${taskDetails.employeeId.employeeId}`
                       : taskDetails?.employeeId?.employeeId || "Not assigned"
                   }}
                 </div>
               </div>
               <div class="detail-item">
-                <div class="detail-label">Employee ID</div>
+                <div class="detail-label">
+                  Employee ID
+                </div>
                 <div class="detail-value">
                   {{ taskDetails?.employeeId?.employeeId || "No Data" }}
                 </div>
@@ -226,7 +303,11 @@
         </v-div>
 
         <!-- Jobsheets Section -->
-        <v-div class="section-card" elevation="2" rounded="lg">
+        <v-div
+          class="section-card"
+          elevation="2"
+          rounded="lg"
+        >
           <v-card-title class="section-title">
             Assigned Jobsheets
             <v-btn
@@ -236,7 +317,7 @@
               variant="flat"
               :color="statusColor(taskDetails?.status)"
               @click="toggleAllJobs"
-            ></v-btn>
+            />
           </v-card-title>
           <v-card-text>
             <v-alert
@@ -248,7 +329,10 @@
               No jobsheet data available.
             </v-alert>
 
-            <div v-else class="jobsheets-container">
+            <div
+              v-else
+              class="jobsheets-container"
+            >
               <v-div
                 v-for="job in jobsWithData"
                 :key="job.job_id"
@@ -269,7 +353,7 @@
                     "
                     size="small"
                     variant="text"
-                  ></v-btn>
+                  />
                   {{ job.job_name }}
                   <v-chip
                     class="ml-auto"
@@ -299,7 +383,12 @@
                         color="grey-lighten-3"
                         variant="flat"
                       >
-                        <v-icon size="16" class="mr-1">mdi-play-circle</v-icon>
+                        <v-icon
+                          size="16"
+                          class="mr-1"
+                        >
+                          mdi-play-circle
+                        </v-icon>
                         {{ fmtDateTime(job.taskRef.workHours.start_time) }}
                       </v-chip>
                       <v-chip
@@ -308,7 +397,12 @@
                         color="grey-lighten-3"
                         variant="flat"
                       >
-                        <v-icon size="16" class="mr-1">mdi-stop-circle</v-icon>
+                        <v-icon
+                          size="16"
+                          class="mr-1"
+                        >
+                          mdi-stop-circle
+                        </v-icon>
                         {{ fmtDateTime(job.taskRef.workHours.end_time) }}
                       </v-chip>
                       <v-chip
@@ -317,9 +411,12 @@
                         color="grey-lighten-3"
                         variant="flat"
                       >
-                        <v-icon size="16" class="mr-1"
-                          >mdi-timer-outline</v-icon
+                        <v-icon
+                          size="16"
+                          class="mr-1"
                         >
+                          mdi-timer-outline
+                        </v-icon>
                         {{ job.taskRef.workHours.total_hours }} hrs
                       </v-chip>
                     </div>
@@ -334,7 +431,10 @@
                             {{ field.label }}
                           </div>
 
-                          <div v-if="isImage(field)" class="mt-2">
+                          <div
+                            v-if="isImage(field)"
+                            class="mt-2"
+                          >
                             <div class="d-flex gap-2 flex-wrap">
                               <template
                                 v-for="img in imagesFor(job, field)"
@@ -359,12 +459,14 @@
                               <span
                                 v-if="!imagesFor(job, field).length"
                                 class="text-medium-emphasis"
-                                >—</span
-                              >
+                              >—</span>
                             </div>
                           </div>
 
-                          <div v-else-if="isGPS(field)" class="mt-2">
+                          <div
+                            v-else-if="isGPS(field)"
+                            class="mt-2"
+                          >
                             <div
                               v-if="valueFor(job, field)"
                               :ref="
@@ -373,11 +475,17 @@
                               "
                               class="gps-map-container"
                               style="height: 150px"
-                            ></div>
-                            <span v-else class="text-medium-emphasis">—</span>
+                            />
+                            <span
+                              v-else
+                              class="text-medium-emphasis"
+                            >—</span>
                           </div>
 
-                          <div v-else-if="isBoolean(field)" class="mt-2">
+                          <div
+                            v-else-if="isBoolean(field)"
+                            class="mt-2"
+                          >
                             <v-chip
                               size="small"
                               :color="valueFor(job, field) ? 'green' : 'grey'"
@@ -388,7 +496,10 @@
                             </v-chip>
                           </div>
 
-                          <div v-else class="mt-2 text-medium-emphasis">
+                          <div
+                            v-else
+                            class="mt-2 text-medium-emphasis"
+                          >
                             {{ displayValue(valueFor(job, field)) }}
                           </div>
                         </div>
@@ -402,7 +513,11 @@
         </v-div>
 
         <!-- Notes Section -->
-        <v-div class="section-card" elevation="2" rounded="lg">
+        <v-div
+          class="section-card"
+          elevation="2"
+          rounded="lg"
+        >
           <v-card-title class="section-title">
             Notes & Additional Information
           </v-card-title>
@@ -410,10 +525,10 @@
             <v-alert
               v-if="
                 !taskDetails?.complete_Task_Note &&
-                !sharedBooleans.rating &&
-                !sharedBooleans.signature &&
-                !clientImageUrl &&
-                !taskDetails?.assignedTo
+                  !sharedBooleans.rating &&
+                  !sharedBooleans.signature &&
+                  !clientImageUrl &&
+                  !taskDetails?.assignedTo
               "
               type="info"
               variant="tonal"
@@ -449,10 +564,15 @@
                 rounded="lg"
                 elevation="1"
               >
-                <v-card-title class="note-title"> Rating </v-card-title>
+                <v-card-title class="note-title">
+                  Rating
+                </v-card-title>
                 <v-card-text class="pt-0">
                   <div class="d-flex align-center">
-                    <template v-for="n in 5" :key="n">
+                    <template
+                      v-for="n in 5"
+                      :key="n"
+                    >
                       <v-icon
                         :color="
                           n <= (ratingsValue || 0) ? 'yellow' : 'grey-lighten-1'
@@ -482,7 +602,9 @@
                 rounded="lg"
                 elevation="1"
               >
-                <v-card-title class="note-title"> Signature </v-card-title>
+                <v-card-title class="note-title">
+                  Signature
+                </v-card-title>
                 <v-card-text class="pt-0">
                   <div v-if="signatureUrl">
                     <v-img
@@ -493,7 +615,12 @@
                       contain
                     />
                   </div>
-                  <div v-else class="text-black">No signature available.</div>
+                  <div
+                    v-else
+                    class="text-black"
+                  >
+                    No signature available.
+                  </div>
                 </v-card-text>
               </v-card>
 
@@ -504,7 +631,9 @@
                 rounded="lg"
                 elevation="1"
               >
-                <v-card-title class="note-title"> Client Photo </v-card-title>
+                <v-card-title class="note-title">
+                  Client Photo
+                </v-card-title>
                 <v-card-text class="pt-0">
                   <div v-if="clientImageUrl">
                     <v-img
@@ -515,7 +644,10 @@
                       contain
                     />
                   </div>
-                  <div v-else class="text-black">
+                  <div
+                    v-else
+                    class="text-black"
+                  >
                     No client image available.
                   </div>
                 </v-card-text>

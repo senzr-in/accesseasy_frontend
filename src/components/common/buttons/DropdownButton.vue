@@ -1,11 +1,14 @@
 <template>
-  <div class="dropdown-container" ref="dropdownRef">
+  <div
+    ref="dropdownRef"
+    class="dropdown-container"
+  >
     <BaseButton
       :variant="variant"
       :size="size"
       :disabled="disabled"
-      :leftIcon="leftIcon"
-      :rightIcon="ChevronDown"
+      :left-icon="leftIcon"
+      :right-icon="ChevronDown"
       @click="toggleDropdown"
     >
       {{ text }}
@@ -24,13 +27,16 @@
         @click="handleItemClick(item)"
       >
         <component
-          v-if="item.icon"
           :is="item.icon"
+          v-if="item.icon"
           :size="16"
           class="dropdown-item-icon"
         />
         <span class="dropdown-item-text">{{ item.label }}</span>
-        <span v-if="item.badge" class="dropdown-item-badge">{{
+        <span
+          v-if="item.badge"
+          class="dropdown-item-badge"
+        >{{
           item.badge
         }}</span>
       </div>

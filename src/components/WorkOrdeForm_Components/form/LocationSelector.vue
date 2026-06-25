@@ -1,8 +1,20 @@
 <template>
-  <v-dialog :model-value="show" max-width="900px" persistent>
-    <v-card class="location-selector-card" elevation="12">
+  <v-dialog
+    :model-value="show"
+    max-width="900px"
+    persistent
+  >
+    <v-card
+      class="location-selector-card"
+      elevation="12"
+    >
       <v-card-title class="location-selector-header">
-        <v-icon class="header-icon mr-3" size="28">mdi-map-marker</v-icon>
+        <v-icon
+          class="header-icon mr-3"
+          size="28"
+        >
+          mdi-map-marker
+        </v-icon>
         <span class="header-title">Select Location</span>
       </v-card-title>
 
@@ -19,18 +31,23 @@
 
         <v-row>
           <!-- Location Selection Panel -->
-          <v-col cols="12" md="5">
+          <v-col
+            cols="12"
+            md="5"
+          >
             <div class="selection-panel">
               <h3 class="panel-title">
-                <v-icon class="mr-2" color="primary"
-                  >mdi-format-list-bulleted</v-icon
+                <v-icon
+                  class="mr-2"
+                  color="primary"
                 >
+                  mdi-format-list-bulleted
+                </v-icon>
                 Location Types
               </h3>
 
               <v-select
                 :model-value="selectedLocType"
-                @update:model-value="$emit('update:selected-loc-type', $event)"
                 label="Select Location Type"
                 :items="locationTypes"
                 item-title="title"
@@ -40,7 +57,8 @@
                 clearable
                 class="location-select"
                 prepend-inner-icon="mdi-map-marker-outline"
-              ></v-select>
+                @update:model-value="$emit('update:selected-loc-type', $event)"
+              />
 
               <!-- Location Details Card -->
               <v-card
@@ -50,12 +68,16 @@
                 color="primary"
               >
                 <v-card-title class="details-title">
-                  <v-icon class="mr-2">mdi-information</v-icon>
+                  <v-icon class="mr-2">
+                    mdi-information
+                  </v-icon>
                   Location Details
                 </v-card-title>
                 <v-card-text class="details-content">
                   <div class="detail-item">
-                    <v-icon class="detail-icon">mdi-home</v-icon>
+                    <v-icon class="detail-icon">
+                      mdi-home
+                    </v-icon>
                     <span class="detail-label">Name:</span>
                     <span class="detail-value">
                       {{
@@ -65,7 +87,9 @@
                   </div>
 
                   <div class="detail-item">
-                    <v-icon class="detail-icon">mdi-map-marker</v-icon>
+                    <v-icon class="detail-icon">
+                      mdi-map-marker
+                    </v-icon>
                     <span class="detail-label">Address:</span>
                     <span class="detail-value">
                       {{ displayLocationDetails.locdetail?.address || "N/A" }}
@@ -73,7 +97,9 @@
                   </div>
 
                   <div class="detail-item">
-                    <v-icon class="detail-icon">mdi-mailbox</v-icon>
+                    <v-icon class="detail-icon">
+                      mdi-mailbox
+                    </v-icon>
                     <span class="detail-label">Pincode:</span>
                     <span class="detail-value">
                       {{
@@ -83,7 +109,9 @@
                   </div>
 
                   <div class="detail-item">
-                    <v-icon class="detail-icon">mdi-resize</v-icon>
+                    <v-icon class="detail-icon">
+                      mdi-resize
+                    </v-icon>
                     <span class="detail-label">Size:</span>
                     <span class="detail-value">
                       {{ displayLocationDetails.locSize || "N/A" }}
@@ -91,12 +119,14 @@
                   </div>
 
                   <div class="detail-item">
-                    <v-icon class="detail-icon">mdi-crosshairs-gps</v-icon>
+                    <v-icon class="detail-icon">
+                      mdi-crosshairs-gps
+                    </v-icon>
                     <span class="detail-label">Coordinates:</span>
                     <span class="detail-value">
                       {{
                         displayLocationDetails.locmark?.lat?.toFixed(4) ||
-                        "N/A"
+                          "N/A"
                       }},
                       {{
                         displayLocationDetails.locmark?.lng?.toFixed(4) || "N/A"
@@ -104,8 +134,13 @@
                     </span>
                   </div>
 
-                  <div v-if="reverseGeocodedAddress" class="detail-item">
-                    <v-icon class="detail-icon">mdi-map-search</v-icon>
+                  <div
+                    v-if="reverseGeocodedAddress"
+                    class="detail-item"
+                  >
+                    <v-icon class="detail-icon">
+                      mdi-map-search
+                    </v-icon>
                     <span class="detail-label">Geocoded Address:</span>
                     <span class="detail-value">{{
                       reverseGeocodedAddress
@@ -117,21 +152,35 @@
           </v-col>
 
           <!-- Map Panel -->
-          <v-col cols="12" md="7">
+          <v-col
+            cols="12"
+            md="7"
+          >
             <div class="map-panel">
               <h3 class="panel-title">
-                <v-icon class="mr-2" color="primary">mdi-map</v-icon>
+                <v-icon
+                  class="mr-2"
+                  color="primary"
+                >
+                  mdi-map
+                </v-icon>
                 Map View
               </h3>
 
-              <v-card class="map-card" elevation="4">
+              <v-card
+                class="map-card"
+                elevation="4"
+              >
                 <div class="map-wrapper">
-                  <div ref="mapContainer" class="map-container"></div>
+                  <div
+                    ref="mapContainer"
+                    class="map-container"
+                  />
                   <div class="coordinates-overlay">
                     <v-chip
                       v-if="
                         displayLocationDetails?.locmark?.lat &&
-                        displayLocationDetails?.locmark?.lng
+                          displayLocationDetails?.locmark?.lng
                       "
                       color="primary"
                       variant="elevated"
@@ -152,12 +201,14 @@
                   </div>
                 </div>
                 <v-card-text class="map-info">
-                  <v-icon size="16" class="mr-1" color="grey-darken-1"
-                    >mdi-information</v-icon
+                  <v-icon
+                    size="16"
+                    class="mr-1"
+                    color="grey-darken-1"
                   >
-                  <span class="info-text"
-                    >Location displayed based on selected type.</span
-                  >
+                    mdi-information
+                  </v-icon>
+                  <span class="info-text">Location displayed based on selected type.</span>
                 </v-card-text>
               </v-card>
             </div>
@@ -169,21 +220,21 @@
         <v-btn
           color="grey-darken-1"
           variant="outlined"
-          @click="$emit('close')"
           size="large"
           class="action-btn"
+          @click="$emit('close')"
         >
           Cancel
         </v-btn>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-btn
           color="primary"
           variant="flat"
-          @click="$emit('apply')"
           :disabled="!displayLocationDetails"
           size="large"
           class="action-btn apply-btn"
           append-icon="mdi-check"
+          @click="$emit('apply')"
         >
           Apply
         </v-btn>

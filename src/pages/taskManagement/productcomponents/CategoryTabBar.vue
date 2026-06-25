@@ -1,6 +1,9 @@
 <template>
   <div class="category-tab-bar">
-    <div class="tabs-container" ref="tabsContainer">
+    <div
+      ref="tabsContainer"
+      class="tabs-container"
+    >
       <div 
         v-for="(category, index) in categories" 
         :key="category.id"
@@ -9,17 +12,32 @@
         @click="onTabSelected(index)"
         @contextmenu.prevent="showDeleteDialog(category)"
       >
-        <i v-if="category.icon" class="tab-icon" :class="getIconClass(category.icon)"></i>
+        <i
+          v-if="category.icon"
+          class="tab-icon"
+          :class="getIconClass(category.icon)"
+        />
         <span class="tab-text">{{ category.categoryName }}</span>
-        <span v-if="category.productCount" class="tab-count">{{ category.productCount }}</span>
+        <span
+          v-if="category.productCount"
+          class="tab-count"
+        >{{ category.productCount }}</span>
       </div>
-      <div v-if="showAddTab" class="tab add-tab" @click="onAddCategory">
-        <i class="tab-icon fas fa-plus"></i>
+      <div
+        v-if="showAddTab"
+        class="tab add-tab"
+        @click="onAddCategory"
+      >
+        <i class="tab-icon fas fa-plus" />
         <span class="tab-text">Add Category</span>
       </div>
     </div>
-    <button v-if="showOverflowButton" class="overflow-button" @click="showCategoryDropdown">
-      <i class="fas fa-chevron-down"></i>
+    <button
+      v-if="showOverflowButton"
+      class="overflow-button"
+      @click="showCategoryDropdown"
+    >
+      <i class="fas fa-chevron-down" />
     </button>
   </div>
 </template>

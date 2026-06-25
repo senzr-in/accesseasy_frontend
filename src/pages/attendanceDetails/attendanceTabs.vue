@@ -1,7 +1,10 @@
 <template>
   <div class="attendance-details">
-    <v-card flat class="content-area">
-      <router-view></router-view>
+    <v-card
+      flat
+      class="content-area"
+    >
+      <router-view />
     </v-card>
   </div>
 </template>

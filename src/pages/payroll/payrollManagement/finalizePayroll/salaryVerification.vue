@@ -3,12 +3,20 @@
     <!-- Modern Gradient Header -->
     <div class="header-banner">
       <div class="header-content">
-        <button class="back-button" @click="goBack">
+        <button
+          class="back-button"
+          @click="goBack"
+        >
           <v-icon>mdi-arrow-left</v-icon>
         </button>
         <div class="title-section">
           <h1 class="main-title">
-            <v-icon size="32" class="title-icon">mdi-account-cash</v-icon>
+            <v-icon
+              size="32"
+              class="title-icon"
+            >
+              mdi-account-cash
+            </v-icon>
             Multi-Employee Salary Verification
           </h1>
           <div class="subtitle-wrapper">
@@ -33,30 +41,41 @@
           <div class="step-icon">
             <v-icon>mdi-check-circle</v-icon>
           </div>
-          <div class="step-label">Attendance Verification</div>
+          <div class="step-label">
+            Attendance Verification
+          </div>
         </div>
 
-        <div class="step-connector completed"></div>
+        <div class="step-connector completed" />
 
         <div class="step active">
           <div class="step-icon">
             <span>2</span>
           </div>
-          <div class="step-label">Salary Calculation</div>
+          <div class="step-label">
+            Salary Calculation
+          </div>
         </div>
-        <div class="step-connector"></div>
+        <div class="step-connector" />
 
         <div class="step disabled">
           <div class="step-icon">
             <span>3</span>
           </div>
-          <div class="step-label">Review</div>
+          <div class="step-label">
+            Review
+          </div>
         </div>
       </div>
     </div>
     <div class="content-section">
       <div class="section-header">
-        <v-icon color="primary" class="mr-2">mdi-currency-inr</v-icon>
+        <v-icon
+          color="primary"
+          class="mr-2"
+        >
+          mdi-currency-inr
+        </v-icon>
         <h2>Salary Overview</h2>
       </div>
       <!-- Main Content Area -->
@@ -71,8 +90,8 @@
       <!-- Table Wrapper -->
       <template v-else>
         <data-table-wrapper
+          v-model:search-query="searchEmployee"
           :show-search="true"
-          v-model:searchQuery="searchEmployee"
           :search-placeholder="'Search employee salary...'"
           :is-empty="employeeSalaryData.length === 0"
         >
@@ -87,14 +106,22 @@
               <!-- Expanded Section (optional detailed view) -->
               <template #expanded-content="{ item }">
                 <tr>
-                  <td colspan="8" style="color: yellow; background: #222">
+                  <td
+                    colspan="8"
+                    style="color: yellow; background: #222"
+                  >
                     Expanded row active — {{ item?.employee?.employeeId }}
                     {{ console.log("Expanded item triggered:", item) }}
                   </td>
-                  <td class="expanded-content-wrapper" colspan="8">
+                  <td
+                    class="expanded-content-wrapper"
+                    colspan="8"
+                  >
                     <div class="expanded-details">
-                      <h3 class="section-title">Detailed Salary Breakdown</h3>
-                      <div v-if="logExpanded(item)"></div>
+                      <h3 class="section-title">
+                        Detailed Salary Breakdown
+                      </h3>
+                      <div v-if="logExpanded(item)" />
                       <div class="details-grid">
                         <div class="detail-row">
                           <span class="detail-label">Payable Amount</span>
@@ -180,7 +207,12 @@
                     }
                   "
                 >
-                  <v-icon left size="16">mdi-eye</v-icon>
+                  <v-icon
+                    left
+                    size="16"
+                  >
+                    mdi-eye
+                  </v-icon>
                   View
                 </v-btn>
               </template>
@@ -193,16 +225,16 @@
               title="No salary data found"
               message="Try refreshing or check your filters"
               :primary-action="{ text: 'Reload', icon: 'mdi-reload' }"
-              @primaryAction="fetchEmployeeSalaryData"
+              @primary-action="fetchEmployeeSalaryData"
             />
           </template>
         </data-table-wrapper>
         <CustomPagination
           v-model:page="currentPage"
-          v-model:itemsPerPage="itemsPerPage"
+          v-model:items-per-page="itemsPerPage"
           :total-items="totalEmployees"
           @update:page="handlePageChange"
-          @update:itemsPerPage="handleItemsPerPageChange"
+          @update:items-per-page="handleItemsPerPageChange"
         />
       </template>
     </div>
@@ -212,8 +244,8 @@
         variant="primary"
         size="md"
         :left-icon="SidebarClose"
-        @click="goBack"
         class="ms-2"
+        @click="goBack"
       >
         Back
       </BaseButton>
@@ -222,8 +254,8 @@
         variant="primary"
         size="md"
         :left-icon="CheckCircle"
-        @click="SalariesVerification"
         class="ms-2"
+        @click="SalariesVerification"
       >
         Finalize Salaries
       </BaseButton>
@@ -237,13 +269,19 @@
     >
       <v-card>
         <v-card-title class="dialog-header">
-          <v-icon size="24" color="primary" class="mr-2">mdi-account</v-icon>
+          <v-icon
+            size="24"
+            color="primary"
+            class="mr-2"
+          >
+            mdi-account
+          </v-icon>
           {{
             selectedEmployeeDetail?.employee?.assignedUser?.first_name ||
-            "Employee"
+              "Employee"
           }}
           Details
-          <v-spacer></v-spacer>
+          <v-spacer />
         </v-card-title>
 
         <v-card-text class="dialog-content">
@@ -254,25 +292,48 @@
               color="primary"
               grow
             >
-              <v-tab value="earnings" class="tab-item">
-                <v-icon left>mdi-cash-plus</v-icon>
+              <v-tab
+                value="earnings"
+                class="tab-item"
+              >
+                <v-icon left>
+                  mdi-cash-plus
+                </v-icon>
                 Earnings
               </v-tab>
-              <v-tab value="deductions" class="tab-item">
-                <v-icon left>mdi-cash-minus</v-icon>
+              <v-tab
+                value="deductions"
+                class="tab-item"
+              >
+                <v-icon left>
+                  mdi-cash-minus
+                </v-icon>
                 Deductions
               </v-tab>
-              <v-tab value="benefits" class="tab-item">
-                <v-icon left>mdi-cash-check</v-icon>
+              <v-tab
+                value="benefits"
+                class="tab-item"
+              >
+                <v-icon left>
+                  mdi-cash-check
+                </v-icon>
                 Penalties & Benefits
               </v-tab>
-              <v-tab value="attendance" class="tab-item">
-                <v-icon left>mdi-calendar-check</v-icon>
+              <v-tab
+                value="attendance"
+                class="tab-item"
+              >
+                <v-icon left>
+                  mdi-calendar-check
+                </v-icon>
                 Attendance
               </v-tab>
             </v-tabs>
 
-            <v-window v-model="activeTab" class="mt-4">
+            <v-window
+              v-model="activeTab"
+              class="mt-4"
+            >
               <v-window-item value="earnings">
                 <div class="detail-list">
                   <div
@@ -280,7 +341,9 @@
                     :key="key"
                     class="detail-item"
                   >
-                    <div class="detail-item-label">{{ key }}</div>
+                    <div class="detail-item-label">
+                      {{ key }}
+                    </div>
                     <div class="detail-item-value">
                       ₹{{ formatAmount(value) }}
                     </div>
@@ -297,7 +360,9 @@
                       :key="'pending-' + key"
                       class="detail-item"
                     >
-                      <div class="detail-item-label">{{ key }}</div>
+                      <div class="detail-item-label">
+                        {{ key }}
+                      </div>
                       <div class="detail-item-value">
                         ₹{{ formatAmount(value) }}
                       </div>
@@ -305,7 +370,9 @@
                   </div>
 
                   <div class="detail-item total">
-                    <div class="detail-item-label">Total Earnings</div>
+                    <div class="detail-item-label">
+                      Total Earnings
+                    </div>
                     <div class="detail-item-value earnings">
                       ₹{{ formatAmount(selectedEmployeeDetail.totalEarnings) }}
                     </div>
@@ -320,7 +387,9 @@
                     :key="key"
                     class="detail-item"
                   >
-                    <div class="detail-item-label">{{ key }}</div>
+                    <div class="detail-item-label">
+                      {{ key }}
+                    </div>
                     <div class="detail-item-value">
                       ₹{{ formatAmount(value) }}
                     </div>
@@ -333,14 +402,18 @@
                     :key="key"
                     class="detail-item"
                   >
-                    <div class="detail-item-label">{{ key }}</div>
+                    <div class="detail-item-label">
+                      {{ key }}
+                    </div>
                     <div class="detail-item-value">
                       ₹{{ formatAmount(value) }}
                     </div>
                   </div>
 
                   <div class="detail-item total">
-                    <div class="detail-item-label">Total Deductions</div>
+                    <div class="detail-item-label">
+                      Total Deductions
+                    </div>
                     <div class="detail-item-value deductions">
                       ₹{{
                         formatAmount(selectedEmployeeDetail.totalDeductions)
@@ -355,19 +428,25 @@
               <v-window-item value="benefits">
                 <div class="detail-list">
                   <!-- Penalties -->
-                  <div class="sub-section-title">Penalties</div>
+                  <div class="sub-section-title">
+                    Penalties
+                  </div>
                   <div
                     v-for="(value, key) in selectedEmployeeDetail.penalties"
                     :key="key"
                     class="detail-item"
                   >
-                    <div class="detail-item-label">{{ key }}</div>
+                    <div class="detail-item-label">
+                      {{ key }}
+                    </div>
                     <div class="detail-item-value">
                       ₹{{ formatAmount(value) }}
                     </div>
                   </div>
                   <div class="detail-item total">
-                    <div class="detail-item-label">Total Penalities</div>
+                    <div class="detail-item-label">
+                      Total Penalities
+                    </div>
                     <div class="detail-item-value benefits">
                       ₹{{
                         formatAmount(selectedEmployeeDetail.totalPenalities)
@@ -375,12 +454,16 @@
                     </div>
                   </div>
                   <!-- Benefits -->
-                  <div class="sub-section-title">Benefits</div>
+                  <div class="sub-section-title">
+                    Benefits
+                  </div>
                   <div
-                    class="detail-item"
                     v-if="selectedEmployeeDetail.benefitsDetails.overtime"
+                    class="detail-item"
                   >
-                    <div class="detail-item-label">Overtime</div>
+                    <div class="detail-item-label">
+                      Overtime
+                    </div>
                     <div class="detail-item-value">
                       ₹{{
                         formatAmount(
@@ -391,10 +474,12 @@
                   </div>
 
                   <div
-                    class="detail-item"
                     v-if="selectedEmployeeDetail.benefitsDetails.bonus?.amount"
+                    class="detail-item"
                   >
-                    <div class="detail-item-label">Bonus</div>
+                    <div class="detail-item-label">
+                      Bonus
+                    </div>
                     <div class="detail-item-value">
                       ₹{{
                         formatAmount(
@@ -405,12 +490,14 @@
                   </div>
 
                   <div
-                    class="detail-item"
                     v-if="
                       selectedEmployeeDetail.benefitsDetails.incentive?.amount
                     "
+                    class="detail-item"
                   >
-                    <div class="detail-item-label">Incentive</div>
+                    <div class="detail-item-label">
+                      Incentive
+                    </div>
                     <div class="detail-item-value">
                       ₹{{
                         formatAmount(
@@ -422,13 +509,15 @@
                   </div>
 
                   <div
-                    class="detail-item"
                     v-if="
                       selectedEmployeeDetail.benefitsDetails.retentionPay
                         ?.amount
                     "
+                    class="detail-item"
                   >
-                    <div class="detail-item-label">Retention Pay</div>
+                    <div class="detail-item-label">
+                      Retention Pay
+                    </div>
                     <div class="detail-item-value">
                       ₹{{
                         formatAmount(
@@ -442,13 +531,15 @@
                   <!-- Manual Benefits -->
                   <!-- Bonus (Manual) -->
                   <div
-                    class="detail-item"
                     v-if="
                       (selectedEmployeeDetail.benefitsDetails.bonusManual || [])
                         .length
                     "
+                    class="detail-item"
                   >
-                    <div class="detail-item-label">Bonus (Manual)</div>
+                    <div class="detail-item-label">
+                      Bonus (Manual)
+                    </div>
                     <div class="detail-item-value">
                       <div
                         v-for="(b, index) in selectedEmployeeDetail
@@ -462,15 +553,17 @@
 
                   <!-- Incentive (Manual) -->
                   <div
-                    class="detail-item"
                     v-if="
                       (
                         selectedEmployeeDetail.benefitsDetails
                           .incentiveManual || []
                       ).length
                     "
+                    class="detail-item"
                   >
-                    <div class="detail-item-label">Incentive (Manual)</div>
+                    <div class="detail-item-label">
+                      Incentive (Manual)
+                    </div>
                     <div class="detail-item-value">
                       <div
                         v-for="(i, index) in selectedEmployeeDetail
@@ -484,15 +577,17 @@
 
                   <!-- Retention Pay (Manual) -->
                   <div
-                    class="detail-item"
                     v-if="
                       (
                         selectedEmployeeDetail.benefitsDetails
                           .retentionPayManual || []
                       ).length
                     "
+                    class="detail-item"
                   >
-                    <div class="detail-item-label">Retention Pay (Manual)</div>
+                    <div class="detail-item-label">
+                      Retention Pay (Manual)
+                    </div>
                     <div class="detail-item-value">
                       <div
                         v-for="(r, index) in selectedEmployeeDetail
@@ -505,7 +600,9 @@
                   </div>
 
                   <div class="detail-item total">
-                    <div class="detail-item-label">Total Benefits</div>
+                    <div class="detail-item-label">
+                      Total Benefits
+                    </div>
                     <div class="detail-item-value benefits">
                       ₹{{ formatAmount(selectedEmployeeDetail.totalBenefits) }}
                     </div>
@@ -516,7 +613,9 @@
               <v-window-item value="attendance">
                 <div class="attendance-summary">
                   <div class="attendance-item total">
-                    <div class="attendance-label">Total Payable Days</div>
+                    <div class="attendance-label">
+                      Total Payable Days
+                    </div>
                     <div class="attendance-value">
                       {{ selectedEmployeeDetail.attendance?.totalPayable || 0 }}
                     </div>
@@ -527,28 +626,36 @@
 
             <div class="salary-summary">
               <div class="summary-item">
-                <div class="summary-label">Total Earnings</div>
+                <div class="summary-label">
+                  Total Earnings
+                </div>
                 <div class="summary-value earnings">
                   ₹{{ formatAmount(selectedEmployeeDetail.totalEarnings) }}
                 </div>
               </div>
 
               <div class="summary-item">
-                <div class="summary-label">Total Deductions</div>
+                <div class="summary-label">
+                  Total Deductions
+                </div>
                 <div class="summary-value deductions">
                   ₹{{ formatAmount(selectedEmployeeDetail.totalDeductions) }}
                 </div>
               </div>
 
               <div class="summary-item">
-                <div class="summary-label">Total Benefits</div>
+                <div class="summary-label">
+                  Total Benefits
+                </div>
                 <div class="summary-value benefits">
                   ₹{{ formatAmount(selectedEmployeeDetail.totalBenefits) }}
                 </div>
               </div>
 
               <div class="summary-item net">
-                <div class="summary-label">Net Salary</div>
+                <div class="summary-label">
+                  Net Salary
+                </div>
                 <div class="summary-value">
                   ₹{{ formatAmount(selectedEmployeeDetail.netSalary) }}
                 </div>
@@ -558,19 +665,32 @@
         </v-card-text>
 
         <v-card-actions class="dialog-actions">
-          <v-spacer></v-spacer>
-          <v-btn color="primary" @click="showEmployeeDetails = false"
-            >Close</v-btn
+          <v-spacer />
+          <v-btn
+            color="primary"
+            @click="showEmployeeDetails = false"
           >
+            Close
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
     <!-- Success Snackbar -->
-    <v-snackbar v-model="showSnackbar" :color="snackbarColor" :timeout="3000">
+    <v-snackbar
+      v-model="showSnackbar"
+      :color="snackbarColor"
+      :timeout="3000"
+    >
       {{ snackbarMessage }}
-      <template v-slot:action="{ attrs }">
-        <v-btn text v-bind="attrs" @click="showSnackbar = false">Close</v-btn>
+      <template #action="{ attrs }">
+        <v-btn
+          text
+          v-bind="attrs"
+          @click="showSnackbar = false"
+        >
+          Close
+        </v-btn>
       </template>
     </v-snackbar>
 

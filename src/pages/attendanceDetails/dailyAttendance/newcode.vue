@@ -1,6 +1,9 @@
 <template>
   <div class="employee-container">
-    <div class="main-content" :class="{ 'with-filter': showFilters }">
+    <div
+      class="main-content"
+      :class="{ 'with-filter': showFilters }"
+    >
       <v-data-table
         :headers="headers"
         hide-default-footer
@@ -12,7 +15,7 @@
         fixed-header
         @click:row="handleRowClick"
       >
-        <template v-slot:top>
+        <template #top>
           <div class="d-flex align-center py-2 px-4">
             <v-text-field
               v-model="search"
@@ -22,63 +25,90 @@
               variant="outlined"
               class="search-field"
               hide-details
-            ></v-text-field>
-            <v-spacer></v-spacer>
+            />
+            <v-spacer />
 
             <div class="position-relative">
-              <v-btn color="primary" @click="toggleFilters">
-                <v-icon start>mdi-filter</v-icon>
+              <v-btn
+                color="primary"
+                @click="toggleFilters"
+              >
+                <v-icon start>
+                  mdi-filter
+                </v-icon>
                 Filters
               </v-btn>
-              <span v-if="hasActiveFilters" class="filter-indicator"></span>
+              <span
+                v-if="hasActiveFilters"
+                class="filter-indicator"
+              />
             </div>
-            <v-btn color="black" @click="handleDownload" class="ms-2">
-              <v-icon start>mdi-download</v-icon>
+            <v-btn
+              color="black"
+              class="ms-2"
+              @click="handleDownload"
+            >
+              <v-icon start>
+                mdi-download
+              </v-icon>
               Download
             </v-btn>
           </div>
         </template>
 
-        <template v-slot:[`item.inTime`]="{ item }">
+        <template #[`item.inTime`]="{ item }">
           {{ formatTime(item.inTime) }}
         </template>
-        <template v-slot:[`item.outTime`]="{ item }">
+        <template #[`item.outTime`]="{ item }">
           {{ formatTime(item.outTime) }}
         </template>
-        <template v-slot:[`item.workHours`]="{ item }">
+        <template #[`item.workHours`]="{ item }">
           {{ formatDuration(item.workHours) }}
         </template>
-        <template v-slot:[`item.breakTime`]="{ item }">
+        <template #[`item.breakTime`]="{ item }">
           {{ formatDuration(item.breakTime) }}
         </template>
       </v-data-table>
 
       <CustomPagination
         :page="page"
-        :itemsPerPage="itemsPerPage"
+        :items-per-page="itemsPerPage"
         :total-items="totalItems"
         :is-searching="!!search"
         @update:page="handlePageChange"
-        @update:itemsPerPage="handleItemsPerPageChange"
+        @update:items-per-page="handleItemsPerPageChange"
       />
     </div>
 
     <!-- Right Filter/Edit Panel -->
     <transition name="slide">
-      <div v-if="showFilters" class="filter-panel">
+      <div
+        v-if="showFilters"
+        class="filter-panel"
+      >
         <div class="filter-header">
           <div class="d-flex align-center justify-space-between px-4">
             <h3 class="text-h6 font-weight-medium">
               {{ editMode ? "Edit Attendance" : "Advanced Filters" }}
             </h3>
-            <v-btn icon @click="closePanel">
+            <v-btn
+              icon
+              @click="closePanel"
+            >
               <v-icon>mdi-close</v-icon>
             </v-btn>
           </div>
         </div>
 
-        <div v-if="showSuccessMessage" class="success-message">
-          <v-alert type="success" variant="tonal" class="ma-4">
+        <div
+          v-if="showSuccessMessage"
+          class="success-message"
+        >
+          <v-alert
+            type="success"
+            variant="tonal"
+            class="ma-4"
+          >
             {{ successMessage }}
           </v-alert>
         </div>
@@ -92,7 +122,7 @@
               variant="outlined"
               readonly
               class="mb-4"
-            ></v-text-field>
+            />
 
             <v-select
               v-model="editForm.attendance"
@@ -100,7 +130,7 @@
               label="Attendance"
               variant="outlined"
               class="mb-4"
-            ></v-select>
+            />
 
             <v-text-field
               v-model="editForm.date"
@@ -108,7 +138,7 @@
               variant="outlined"
               readonly
               class="mb-4"
-            ></v-text-field>
+            />
 
             <v-text-field
               v-model="editForm.inTime"
@@ -116,7 +146,7 @@
               type="time"
               variant="outlined"
               class="mb-4"
-            ></v-text-field>
+            />
 
             <v-text-field
               v-model="editForm.outTime"
@@ -124,7 +154,7 @@
               type="time"
               variant="outlined"
               class="mb-4"
-            ></v-text-field>
+            />
 
             <v-text-field
               v-model="editForm.mode"
@@ -133,13 +163,21 @@
               readonly
               value="manual"
               class="mb-4"
-            ></v-text-field>
+            />
 
             <div class="edit-actions">
-              <v-btn color="error" variant="text" @click="cancelEdit">
+              <v-btn
+                color="error"
+                variant="text"
+                @click="cancelEdit"
+              >
                 Cancel
               </v-btn>
-              <v-btn color="primary" @click="saveEdit" class="ms-2">
+              <v-btn
+                color="primary"
+                class="ms-2"
+                @click="saveEdit"
+              >
                 Save
               </v-btn>
             </div>
@@ -150,15 +188,21 @@
             v-else-if="editMode && selectedRecord && !isAdmin"
             class="text-center pa-4"
           >
-            <v-icon size="48" color="warning" class="mb-2">mdi-lock</v-icon>
+            <v-icon
+              size="48"
+              color="warning"
+              class="mb-2"
+            >
+              mdi-lock
+            </v-icon>
             <p class="text-body-1 text-medium-emphasis">
               Only administrators can edit attendance records.
             </p>
             <v-btn
               color="primary"
               variant="text"
-              @click="cancelEdit"
               class="mt-2"
+              @click="cancelEdit"
             >
               Close
             </v-btn>
@@ -174,7 +218,7 @@
               variant="outlined"
               class="mb-4"
               @update:model-value="onMonthChange"
-            ></v-select>
+            />
 
             <v-select
               v-model="filters.branch"
@@ -187,8 +231,10 @@
               closable-chips
               variant="outlined"
               class="mb-4"
-            ></v-select>
-            <h4 class="text-subtitle-1 font-weight-bold mb-2">Department</h4>
+            />
+            <h4 class="text-subtitle-1 font-weight-bold mb-2">
+              Department
+            </h4>
             <v-select
               v-model="filters.department"
               :items="departmentOptions"
@@ -200,8 +246,10 @@
               closable-chips
               variant="outlined"
               class="mb-4"
-            ></v-select>
-            <h4 class="text-subtitle-1 font-weight-bold mb-2">Status</h4>
+            />
+            <h4 class="text-subtitle-1 font-weight-bold mb-2">
+              Status
+            </h4>
             <v-select
               v-model="filters.status"
               :items="statusOptions"
@@ -211,8 +259,10 @@
               closable-chips
               variant="outlined"
               class="mb-4"
-            ></v-select>
-            <h4 class="text-subtitle-1 font-weight-bold mb-2">Attendance</h4>
+            />
+            <h4 class="text-subtitle-1 font-weight-bold mb-2">
+              Attendance
+            </h4>
             <v-select
               v-model="filters.attendance"
               :items="attendanceOptions"
@@ -222,8 +272,10 @@
               closable-chips
               variant="outlined"
               class="mb-4"
-            ></v-select>
-            <h4 class="text-subtitle-1 font-weight-bold mb-2">Mode</h4>
+            />
+            <h4 class="text-subtitle-1 font-weight-bold mb-2">
+              Mode
+            </h4>
             <v-select
               v-model="filters.mode"
               :items="modeOptions"
@@ -233,13 +285,21 @@
               closable-chips
               variant="outlined"
               class="mb-4"
-            ></v-select>
+            />
 
             <div class="filter-actions">
-              <v-btn color="error" variant="text" @click="clearFilters">
+              <v-btn
+                color="error"
+                variant="text"
+                @click="clearFilters"
+              >
                 Clear
               </v-btn>
-              <v-btn color="primary" @click="applyFilters" class="ms-2">
+              <v-btn
+                color="primary"
+                class="ms-2"
+                @click="applyFilters"
+              >
                 Apply
               </v-btn>
             </div>

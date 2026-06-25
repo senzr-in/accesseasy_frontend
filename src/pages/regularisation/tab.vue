@@ -6,7 +6,7 @@
       show-arrows
       background-color="transparent"
       class="custom-tabs"
-      @update:modelValue="handleTabChange"
+      @update:model-value="handleTabChange"
     >
       <v-tab
         v-for="tab in visibleTabs"
@@ -15,15 +15,18 @@
         :to="tab.route"
         class="custom-tab"
       >
-        <v-icon :icon="tab.icon" class="mr-2"></v-icon>
+        <v-icon
+          :icon="tab.icon"
+          class="mr-2"
+        />
         {{ tab.title }}
       </v-tab>
     </v-tabs>
 
     <!-- Render Child Routes -->
     <router-view
-      @showAddPage="() => navigateToAdd(activeTab.value)"
-      @showEditPage="(item) => handleShowEdit(activeTab.value, item)"
+      @show-add-page="() => navigateToAdd(activeTab.value)"
+      @show-edit-page="(item) => handleShowEdit(activeTab.value, item)"
     />
   </v-container>
 </template>

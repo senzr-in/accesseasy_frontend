@@ -15,15 +15,19 @@
                 stroke="currentColor"
                 stroke-width="2"
               >
-                <circle cx="11" cy="11" r="8" />
+                <circle
+                  cx="11"
+                  cy="11"
+                  r="8"
+                />
                 <path d="m21 21-4.35-4.35" />
               </svg>
               <input
-                type="text"
                 v-model="searchQuery"
+                type="text"
                 placeholder="Search Assets..."
                 @input="debouncedSearch"
-              />
+              >
               <button
                 v-if="searchQuery"
                 class="clear-button"
@@ -37,8 +41,18 @@
                   stroke="currentColor"
                   stroke-width="2"
                 >
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
+                  <line
+                    x1="18"
+                    y1="6"
+                    x2="6"
+                    y2="18"
+                  />
+                  <line
+                    x1="6"
+                    y1="6"
+                    x2="18"
+                    y2="18"
+                  />
                 </svg>
               </button>
             </div>
@@ -62,7 +76,10 @@
             </div>
             <!-- Add Asset Type Button -->
             <div class="add-product-container">
-              <button class="btn-primary" @click="toggleAddProductMenu">
+              <button
+                class="btn-primary"
+                @click="toggleAddProductMenu"
+              >
                 <svg
                   width="16"
                   height="16"
@@ -71,12 +88,25 @@
                   stroke="currentColor"
                   stroke-width="2"
                 >
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <line x1="5" y1="12" x2="19" y2="12" />
+                  <line
+                    x1="12"
+                    y1="5"
+                    x2="12"
+                    y2="19"
+                  />
+                  <line
+                    x1="5"
+                    y1="12"
+                    x2="19"
+                    y2="12"
+                  />
                 </svg>
                 Add Asset Type
               </button>
-              <div v-if="showAddProductMenu" class="dropdown-menu">
+              <div
+                v-if="showAddProductMenu"
+                class="dropdown-menu"
+              >
                 <button
                   class="dropdown-item"
                   @click="navigateToAddProduct('manual')"
@@ -93,7 +123,10 @@
             </div>
             <!-- Add Asset Button -->
             <div class="add-product-container">
-              <button class="btn-primary" @click="toggleAddAssetMenu">
+              <button
+                class="btn-primary"
+                @click="toggleAddAssetMenu"
+              >
                 <svg
                   width="16"
                   height="16"
@@ -102,13 +135,29 @@
                   stroke="currentColor"
                   stroke-width="2"
                 >
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <line x1="5" y1="12" x2="19" y2="12" />
+                  <line
+                    x1="12"
+                    y1="5"
+                    x2="12"
+                    y2="19"
+                  />
+                  <line
+                    x1="5"
+                    y1="12"
+                    x2="19"
+                    y2="12"
+                  />
                 </svg>
                 Add Asset
               </button>
-              <div v-if="showAddAssetMenu" class="dropdown-menu">
-                <button class="dropdown-item" @click="showProductSidebar">
+              <div
+                v-if="showAddAssetMenu"
+                class="dropdown-menu"
+              >
+                <button
+                  class="dropdown-item"
+                  @click="showProductSidebar"
+                >
                   Manual Entry
                 </button>
                 <button
@@ -126,13 +175,19 @@
       <!-- Main Content -->
       <main class="main-content-area">
         <!-- Loading State -->
-        <div v-if="isLoading" class="loading-container">
-          <div class="loading-spinner"></div>
+        <div
+          v-if="isLoading"
+          class="loading-container"
+        >
+          <div class="loading-spinner" />
           <p>Loading Assets...</p>
         </div>
 
         <!-- Empty State -->
-        <div v-else-if="allDevices.length === 0" class="empty-state">
+        <div
+          v-else-if="allDevices.length === 0"
+          class="empty-state"
+        >
           <div class="empty-icon">
             <svg
               width="48"
@@ -147,7 +202,10 @@
           </div>
           <h3>No devices found</h3>
           <p>Please add an asset type first to create assets.</p>
-          <button class="btn-primary" @click="toggleAddProductMenu">
+          <button
+            class="btn-primary"
+            @click="toggleAddProductMenu"
+          >
             <svg
               width="16"
               height="16"
@@ -156,15 +214,28 @@
               stroke="currentColor"
               stroke-width="2"
             >
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
+              <line
+                x1="12"
+                y1="5"
+                x2="12"
+                y2="19"
+              />
+              <line
+                x1="5"
+                y1="12"
+                x2="19"
+                y2="12"
+              />
             </svg>
             Add Asset Type
           </button>
         </div>
 
         <!-- Assets List -->
-        <div v-else class="tasks-list">
+        <div
+          v-else
+          class="tasks-list"
+        >
           <!-- List Header -->
           <div class="list-header">
             <div class="header-cell checkbox-col">
@@ -178,14 +249,17 @@
                   selected.length > 0 && selected.length < allDevices.length
                 "
                 @change="toggleAll"
-              />
+              >
             </div>
             <div
               class="header-cell asset-col"
               @click="requestSort('serialNumber')"
             >
               Asset
-              <span class="sort-icon" v-if="sortBy === 'serialNumber'">
+              <span
+                v-if="sortBy === 'serialNumber'"
+                class="sort-icon"
+              >
                 <svg
                   width="12"
                   height="12"
@@ -204,7 +278,10 @@
               @click="requestSort('productName')"
             >
               Type
-              <span class="sort-icon" v-if="sortBy === 'productName'">
+              <span
+                v-if="sortBy === 'productName'"
+                class="sort-icon"
+              >
                 <svg
                   width="12"
                   height="12"
@@ -218,9 +295,15 @@
                 </svg>
               </span>
             </div>
-            <div class="header-cell status-col" @click="requestSort('status')">
+            <div
+              class="header-cell status-col"
+              @click="requestSort('status')"
+            >
               Status
-              <span class="sort-icon" v-if="sortBy === 'status'">
+              <span
+                v-if="sortBy === 'status'"
+                class="sort-icon"
+              >
                 <svg
                   width="12"
                   height="12"
@@ -234,9 +317,15 @@
                 </svg>
               </span>
             </div>
-            <div class="header-cell date-col" @click="requestSort('createdAt')">
+            <div
+              class="header-cell date-col"
+              @click="requestSort('createdAt')"
+            >
               Added
-              <span class="sort-icon" v-if="sortBy === 'createdAt'">
+              <span
+                v-if="sortBy === 'createdAt'"
+                class="sort-icon"
+              >
                 <svg
                   width="12"
                   height="12"
@@ -250,7 +339,9 @@
                 </svg>
               </span>
             </div>
-            <div class="header-cell actions-col">Actions</div>
+            <div class="header-cell actions-col">
+              Actions
+            </div>
           </div>
 
           <!-- List Items -->
@@ -263,13 +354,16 @@
           >
             <div class="item-row">
               <!-- Checkbox Column -->
-              <div class="list-cell checkbox-col" @click.stop>
+              <div
+                class="list-cell checkbox-col"
+                @click.stop
+              >
                 <input
                   type="checkbox"
                   class="custom-checkbox"
                   :checked="selected.includes(device.serialNumber)"
                   @change="toggleSelection(device.serialNumber)"
-                />
+                >
               </div>
               <!-- Asset Column -->
               <div class="list-cell asset-col">
@@ -283,7 +377,14 @@
                       stroke="currentColor"
                       stroke-width="2"
                     >
-                      <rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
+                      <rect
+                        width="14"
+                        height="20"
+                        x="5"
+                        y="2"
+                        rx="2"
+                        ry="2"
+                      />
                       <path d="M12 18h.01" />
                     </svg>
                   </div>
@@ -329,7 +430,11 @@
                       stroke="currentColor"
                       stroke-width="2"
                     >
-                      <circle cx="12" cy="12" r="10" />
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="10"
+                      />
                       <polyline points="12 6 12 12 16 14" />
                     </svg>
                   </template>
@@ -342,9 +447,23 @@
                       stroke="currentColor"
                       stroke-width="2"
                     >
-                      <circle cx="12" cy="12" r="10" />
-                      <line x1="15" y1="9" x2="9" y2="15" />
-                      <line x1="9" y1="9" x2="15" y2="15" />
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="10"
+                      />
+                      <line
+                        x1="15"
+                        y1="9"
+                        x2="9"
+                        y2="15"
+                      />
+                      <line
+                        x1="9"
+                        y1="9"
+                        x2="15"
+                        y2="15"
+                      />
                     </svg>
                   </template>
                   {{ getDeviceStatusLabel(device.status) }}
@@ -361,8 +480,8 @@
                 <div class="action-buttons">
                   <button
                     class="action-btn"
-                    @click.stop="showDeviceQR(device)"
                     title="QR Code"
+                    @click.stop="showDeviceQR(device)"
                   >
                     <svg
                       width="14"
@@ -372,9 +491,27 @@
                       stroke="currentColor"
                       stroke-width="2"
                     >
-                      <rect width="5" height="5" x="3" y="3" rx="1" />
-                      <rect width="5" height="5" x="16" y="3" rx="1" />
-                      <rect width="5" height="5" x="3" y="16" rx="1" />
+                      <rect
+                        width="5"
+                        height="5"
+                        x="3"
+                        y="3"
+                        rx="1"
+                      />
+                      <rect
+                        width="5"
+                        height="5"
+                        x="16"
+                        y="3"
+                        rx="1"
+                      />
+                      <rect
+                        width="5"
+                        height="5"
+                        x="3"
+                        y="16"
+                        rx="1"
+                      />
                       <path d="m21 16-3.5-3.5-1 1" />
                       <path d="m21 21-3.5-3.5-1 1" />
                       <path d="m21 11-3.5-3.5-1 1" />
@@ -382,8 +519,8 @@
                   </button>
                   <button
                     class="action-btn"
-                    @click.stop="editDevice(device)"
                     title="Edit"
+                    @click.stop="editDevice(device)"
                   >
                     <svg
                       width="14"
@@ -410,21 +547,31 @@
         <!-- Custom Pagination -->
         <CustomPagination
           v-model:page="currentPage"
-          v-model:itemsPerPage="itemsPerPage"
+          v-model:items-per-page="itemsPerPage"
           :total-items="totalItems"
           :is-searching="!!searchQuery"
           @update:page="handlePageChange"
-          @update:itemsPerPage="handleItemsPerPageChange"
+          @update:items-per-page="handleItemsPerPageChange"
         />
       </main>
     </div>
 
     <!-- Sidebar for Product Selection -->
-    <div v-if="showSidebar" class="sidebar-overlay" @click="closeSidebar">
-      <div class="sidebar" @click.stop>
+    <div
+      v-if="showSidebar"
+      class="sidebar-overlay"
+      @click="closeSidebar"
+    >
+      <div
+        class="sidebar"
+        @click.stop
+      >
         <div class="sidebar-header">
           <h2>Select Product</h2>
-          <button class="close-btn" @click="closeSidebar">
+          <button
+            class="close-btn"
+            @click="closeSidebar"
+          >
             <svg
               width="20"
               height="20"
@@ -433,17 +580,33 @@
               stroke="currentColor"
               stroke-width="2"
             >
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
+              <line
+                x1="18"
+                y1="6"
+                x2="6"
+                y2="18"
+              />
+              <line
+                x1="6"
+                y1="6"
+                x2="18"
+                y2="18"
+              />
             </svg>
           </button>
         </div>
         <div class="sidebar-body">
-          <div v-if="isLoadingProducts" class="loading-container">
-            <div class="loading-spinner"></div>
+          <div
+            v-if="isLoadingProducts"
+            class="loading-container"
+          >
+            <div class="loading-spinner" />
             <p>Loading Products...</p>
           </div>
-          <div v-else-if="products.length === 0" class="empty-state">
+          <div
+            v-else-if="products.length === 0"
+            class="empty-state"
+          >
             <div class="empty-icon">
               <svg
                 width="48"
@@ -461,7 +624,10 @@
             <h3>No products found</h3>
             <p>No products available to add assets.</p>
           </div>
-          <div v-else class="product-list">
+          <div
+            v-else
+            class="product-list"
+          >
             <div
               v-for="product in products"
               :key="product.productId"
@@ -493,11 +659,21 @@
     </div>
 
     <!-- Edit Device Modal -->
-    <div v-if="showEditModal" class="modal-overlay" @click="closeEditModal">
-      <div class="modal-content" @click.stop>
+    <div
+      v-if="showEditModal"
+      class="modal-overlay"
+      @click="closeEditModal"
+    >
+      <div
+        class="modal-content"
+        @click.stop
+      >
         <div class="modal-header">
           <h2>Edit Device</h2>
-          <button class="close-btn" @click="closeEditModal">
+          <button
+            class="close-btn"
+            @click="closeEditModal"
+          >
             <svg
               width="20"
               height="20"
@@ -506,8 +682,18 @@
               stroke="currentColor"
               stroke-width="2"
             >
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
+              <line
+                x1="18"
+                y1="6"
+                x2="6"
+                y2="18"
+              />
+              <line
+                x1="6"
+                y1="6"
+                x2="18"
+                y2="18"
+              />
             </svg>
           </button>
         </div>
@@ -529,22 +715,30 @@
           <div class="form-group">
             <label for="deviceName">Asset Name</label>
             <input
-              type="text"
               id="deviceName"
               v-model="deviceNameInput"
+              type="text"
               class="form-input"
               placeholder="Enter Asset name"
-            />
+            >
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn-secondary" @click="closeEditModal">Cancel</button>
+          <button
+            class="btn-secondary"
+            @click="closeEditModal"
+          >
+            Cancel
+          </button>
           <button
             class="btn-primary"
             :disabled="isUpdating"
             @click="updateDeviceName"
           >
-            <div v-if="isUpdating" class="loading-spinner small"></div>
+            <div
+              v-if="isUpdating"
+              class="loading-spinner small"
+            />
             Save Changes
           </button>
         </div>
@@ -552,11 +746,21 @@
     </div>
 
     <!-- QR Code Modal -->
-    <div v-if="showQRModal" class="modal-overlay" @click="closeQRModal">
-      <div class="modal-content qr-modal" @click.stop>
+    <div
+      v-if="showQRModal"
+      class="modal-overlay"
+      @click="closeQRModal"
+    >
+      <div
+        class="modal-content qr-modal"
+        @click.stop
+      >
         <div class="modal-header">
           <h2>Asset QR Code</h2>
-          <button class="close-btn" @click="closeQRModal">
+          <button
+            class="close-btn"
+            @click="closeQRModal"
+          >
             <svg
               width="20"
               height="20"
@@ -565,14 +769,27 @@
               stroke="currentColor"
               stroke-width="2"
             >
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
+              <line
+                x1="18"
+                y1="6"
+                x2="6"
+                y2="18"
+              />
+              <line
+                x1="6"
+                y1="6"
+                x2="18"
+                y2="18"
+              />
             </svg>
           </button>
         </div>
         <div class="modal-body qr-body">
           <div class="qr-display">
-            <div class="qr-code-container" ref="qrContainer">
+            <div
+              ref="qrContainer"
+              class="qr-code-container"
+            >
               <qrcode-vue
                 :value="qrCodeData"
                 :size="200"
@@ -590,7 +807,10 @@
             </div>
           </div>
           <div class="qr-actions">
-            <button class="qr-action-btn" @click="downloadQRCode">
+            <button
+              class="qr-action-btn"
+              @click="downloadQRCode"
+            >
               <svg
                 width="16"
                 height="16"
@@ -601,11 +821,19 @@
               >
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                 <polyline points="7 10 12 15 17 10" />
-                <line x1="12" y1="15" x2="12" y2="3" />
+                <line
+                  x1="12"
+                  y1="15"
+                  x2="12"
+                  y2="3"
+                />
               </svg>
               Download
             </button>
-            <button class="qr-action-btn" @click="printQRCode">
+            <button
+              class="qr-action-btn"
+              @click="printQRCode"
+            >
               <svg
                 width="16"
                 height="16"
@@ -618,11 +846,19 @@
                 <path
                   d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"
                 />
-                <rect width="12" height="8" x="6" y="14" />
+                <rect
+                  width="12"
+                  height="8"
+                  x="6"
+                  y="14"
+                />
               </svg>
               Print
             </button>
-            <button class="qr-action-btn" @click="shareQRCode">
+            <button
+              class="qr-action-btn"
+              @click="shareQRCode"
+            >
               <svg
                 width="16"
                 height="16"
@@ -633,7 +869,12 @@
               >
                 <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
                 <polyline points="16 6 12 2 8 6" />
-                <line x1="12" y1="2" x2="12" y2="15" />
+                <line
+                  x1="12"
+                  y1="2"
+                  x2="12"
+                  y2="15"
+                />
               </svg>
               Share
             </button>
@@ -647,10 +888,16 @@
       class="modal-overlay"
       @click="closeUnderDevModal"
     >
-      <div class="modal-content" @click.stop>
+      <div
+        class="modal-content"
+        @click.stop
+      >
         <div class="modal-header">
           <h2>Feature Coming Soon</h2>
-          <button class="close-btn" @click="closeUnderDevModal">
+          <button
+            class="close-btn"
+            @click="closeUnderDevModal"
+          >
             <svg
               width="20"
               height="20"
@@ -659,8 +906,18 @@
               stroke="currentColor"
               stroke-width="2"
             >
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
+              <line
+                x1="18"
+                y1="6"
+                x2="6"
+                y2="18"
+              />
+              <line
+                x1="6"
+                y1="6"
+                x2="18"
+                y2="18"
+              />
             </svg>
           </button>
         </div>
@@ -693,7 +950,10 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn-primary" @click="closeUnderDevModal">
+          <button
+            class="btn-primary"
+            @click="closeUnderDevModal"
+          >
             Got It
           </button>
         </div>

@@ -3,12 +3,15 @@
     <!-- Filter Toggle Button -->
 
     <!-- Filter Panel -->
-    <div class="filter-pane" v-if="showFilters && tenantId && !tenantLoading">
+    <div
+      v-if="showFilters && tenantId && !tenantLoading"
+      class="filter-pane"
+    >
       <div class="filter-content">
         <FilterComponent
-          :tenantId="tenantId"
-          :initialFilters="initialFilters"
-          :initiallyVisible="true"
+          :tenant-id="tenantId"
+          :initial-filters="initialFilters"
+          :initially-visible="true"
           :filter-schema="pageFilters"
           @apply-filters="handleApplyFilters"
           @filter-visibility-changed="onFilterVisibilityChanged"
@@ -23,7 +26,7 @@
       :class="{ 'full-width': !showFilters }"
     >
       <data-table-wrapper
-        v-model:searchQuery="search"
+        v-model:search-query="search"
         :search-placeholder="'Search employees...'"
         :show-search="true"
         :has-error="showError"
@@ -33,10 +36,10 @@
           <button
             v-if="tenantId && !tenantLoading"
             class="filter-toggle-static"
-            @click="toggleFilters"
             :class="{ active: hasActiveFilters }"
             :title="showFilters ? 'Hide filters' : 'Show filters'"
             aria-label="Toggle filters"
+            @click="toggleFilters"
           >
             <svg
               width="20"
@@ -48,14 +51,23 @@
             >
               <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46" />
             </svg>
-            <div v-if="hasActiveFilters" class="filter-indicator"></div>
+            <div
+              v-if="hasActiveFilters"
+              class="filter-indicator"
+            />
           </button>
         </template>
         <!-- Toolbar Actions Slot -->
         <template #toolbar-actions>
-          <div class="d-flex align-center" style="gap: 8px">
+          <div
+            class="d-flex align-center"
+            style="gap: 8px"
+          >
             <!-- Cycle Info Display -->
-            <div v-if="selectedMonthIndex !== -1" class="cycle-info">
+            <div
+              v-if="selectedMonthIndex !== -1"
+              class="cycle-info"
+            >
               <v-chip
                 size="small"
                 :color="cycleConfig?.fixedCycle ? 'primary' : 'secondary'"
@@ -72,10 +84,10 @@
               v-if="!['Manager', 'Employee'].includes(role?.trim())"
               text="Export"
               variant="primary"
-              :leftIcon="Download"
+              :left-icon="Download"
               :items="exportOptions"
               placement="bottom-right"
-              @itemClick="handleExportOption"
+              @item-click="handleExportOption"
             />
             <!-- Import Button -->
             <!-- <v-btn
@@ -108,7 +120,7 @@
             :sort-direction="sortDirection"
             :row-clickable="true"
             item-key="id"
-            @rowClick="handleRowClick"
+            @row-click="handleRowClick"
             @sort="handleSort"
           >
             <!-- Error State Slot -->
@@ -128,7 +140,7 @@
                 title="No attendance data found"
                 message="Try adjusting your filters or check back later"
                 :primary-action="{ text: 'Clear Filters', icon: 'X' }"
-                @primaryAction="clearFilters"
+                @primary-action="clearFilters"
               />
             </template>
             <template #cell-profile="{ item }">
@@ -138,8 +150,11 @@
                   :src="item.avatarImage"
                   :alt="formatEmployeeName(item)"
                   class="avatar-image"
-                />
-                <div v-else class="avatar-placeholder">
+                >
+                <div
+                  v-else
+                  class="avatar-placeholder"
+                >
                   <svg
                     width="20"
                     height="20"
@@ -149,7 +164,11 @@
                     stroke-width="2"
                   >
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
+                    <circle
+                      cx="12"
+                      cy="7"
+                      r="4"
+                    />
                   </svg>
                 </div>
               </div>
@@ -194,7 +213,10 @@
 
             <!-- Custom Cell for Mode -->
             <template #cell-mode="{ item }">
-              <span class="attendance-count" :class="getModeClass(item.mode)">
+              <span
+                class="attendance-count"
+                :class="getModeClass(item.mode)"
+              >
                 {{ getModeDisplayName(item.mode) || "-" }}
               </span>
             </template>
@@ -265,43 +287,69 @@
         </template>
 
         <!-- Pagination Slot -->
-        <template v-slot:pagination>
+        <template #pagination>
           <CustomPagination
             v-model:page="page"
-            v-model:itemsPerPage="itemsPerPage"
+            v-model:items-per-page="itemsPerPage"
             :total-items="totalItems"
             @update:page="handlePageChange"
-            @update:itemsPerPage="handleItemsPerPageChange"
+            @update:items-per-page="handleItemsPerPageChange"
           />
         </template>
       </data-table-wrapper>
     </div>
 
     <!-- Tenant Loading State -->
-    <div v-if="tenantLoading" class="loading-container">
-      <div class="loading-spinner"></div>
+    <div
+      v-if="tenantLoading"
+      class="loading-container"
+    >
+      <div class="loading-spinner" />
       <p>Loading tenant information...</p>
     </div>
 
     <!-- Right Filter/Edit Panel -->
     <transition name="slide">
-      <div v-if="showFilters && editMode" class="filter-panel">
+      <div
+        v-if="showFilters && editMode"
+        class="filter-panel"
+      >
         <div class="filter-header">
           <div class="d-flex align-center justify-space-between px-4">
-            <h3 class="text-h6 font-weight-medium">Edit Attendance</h3>
-            <v-btn icon @click="closePanel" variant="text">
+            <h3 class="text-h6 font-weight-medium">
+              Edit Attendance
+            </h3>
+            <v-btn
+              icon
+              variant="text"
+              @click="closePanel"
+            >
               <v-icon>mdi-close</v-icon>
             </v-btn>
           </div>
         </div>
 
-        <div v-if="showSuccessMessage" class="success-message">
-          <v-alert type="success" variant="tonal" class="ma-4">
+        <div
+          v-if="showSuccessMessage"
+          class="success-message"
+        >
+          <v-alert
+            type="success"
+            variant="tonal"
+            class="ma-4"
+          >
             {{ successMessage }}
           </v-alert>
         </div>
-        <div v-if="showError" class="error-message">
-          <v-alert type="error" variant="tonal" class="ma-4">
+        <div
+          v-if="showError"
+          class="error-message"
+        >
+          <v-alert
+            type="error"
+            variant="tonal"
+            class="ma-4"
+          >
             {{ errorMessage }}
           </v-alert>
         </div>
@@ -314,7 +362,7 @@
             class="mb-4"
             disabled
             prepend-inner-icon="mdi-account"
-          ></v-text-field>
+          />
 
           <v-select
             v-model="editForm.attendance"
@@ -323,7 +371,7 @@
             variant="outlined"
             class="mb-4"
             prepend-inner-icon="mdi-calendar-check"
-          ></v-select>
+          />
 
           <v-text-field
             v-model="editForm.inTime"
@@ -332,7 +380,7 @@
             variant="outlined"
             class="mb-4"
             prepend-inner-icon="mdi-clock-in"
-          ></v-text-field>
+          />
 
           <v-text-field
             v-model="editForm.outTime"
@@ -341,7 +389,7 @@
             variant="outlined"
             class="mb-4"
             prepend-inner-icon="mdi-clock-out"
-          ></v-text-field>
+          />
 
           <v-text-field
             v-model="editForm.lateByMinutes"
@@ -380,7 +428,11 @@
           />
 
           <div class="edit-actions">
-            <v-btn color="primary" @click="saveEdit" class="ms-2 text-none">
+            <v-btn
+              color="primary"
+              class="ms-2 text-none"
+              @click="saveEdit"
+            >
               Save
             </v-btn>
           </div>

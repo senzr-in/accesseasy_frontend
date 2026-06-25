@@ -9,46 +9,76 @@
             icon="mdi-arrow-left"
             variant="text"
             size="small"
-            @click="goBackToTemplates"
             class="back-btn"
-          ></v-btn>
+            @click="goBackToTemplates"
+          />
           <h3 class="text-h6">
             {{ showTabs ? selectedTemplate.name : "Attendance Policy" }}
           </h3>
         </div>
         <!-- Modified Category Overview in Header -->
-        <div v-if="!showTabs" class="header-overview">
+        <div
+          v-if="!showTabs"
+          class="header-overview"
+        >
           <div class="stat-item">
-            <v-icon size="16" color="#3b82f6">mdi-folder-multiple</v-icon>
+            <v-icon
+              size="16"
+              color="#3b82f6"
+            >
+              mdi-folder-multiple
+            </v-icon>
             <span class="stat-count">{{ customTemplates.length }}</span>
             <span class="stat-label">Categories</span>
           </div>
           <div class="stat-item">
-            <v-icon size="16" color="#10b981">mdi-account-group</v-icon>
+            <v-icon
+              size="16"
+              color="#10b981"
+            >
+              mdi-account-group
+            </v-icon>
             <span class="stat-count">{{ totalEmployees }}</span>
             <span class="stat-label">Employees</span>
           </div>
           <div class="stat-item">
-            <v-icon size="16" color="#8b5cf6">mdi-cog</v-icon>
+            <v-icon
+              size="16"
+              color="#8b5cf6"
+            >
+              mdi-cog
+            </v-icon>
             <span class="stat-count">{{ customCategoriesCount }}</span>
             <span class="stat-label">Custom</span>
           </div>
         </div>
       </div>
 
-      <div v-if="!showTabs" class="scrollable">
-        <div v-if="isLoading" class="loading-state">
+      <div
+        v-if="!showTabs"
+        class="scrollable"
+      >
+        <div
+          v-if="isLoading"
+          class="loading-state"
+        >
           <v-progress-circular
             indeterminate
             color="primary"
-          ></v-progress-circular>
+          />
           <span class="ml-2 text-grey-darken-1">Loading categories...</span>
         </div>
 
-        <div v-else-if="customTemplates.length === 0" class="no-data-found">
-          <v-icon size="48" color="grey-lighten-1"
-            >mdi-folder-open-outline</v-icon
+        <div
+          v-else-if="customTemplates.length === 0"
+          class="no-data-found"
+        >
+          <v-icon
+            size="48"
+            color="grey-lighten-1"
           >
+            mdi-folder-open-outline
+          </v-icon>
           <p class="text-h6 text-muted-foreground mt-4">
             No attendance policies found.
           </p>
@@ -61,13 +91,25 @@
           <!-- Category Cards Grid -->
           <div class="category-grid">
             <!-- Create New Card -->
-            <div class="category-card create-card" @click="openCreateDialog">
+            <div
+              class="category-card create-card"
+              @click="openCreateDialog"
+            >
               <div class="create-content">
                 <div class="create-icon">
-                  <v-icon size="24" color="#6366f1">mdi-plus</v-icon>
+                  <v-icon
+                    size="24"
+                    color="#6366f1"
+                  >
+                    mdi-plus
+                  </v-icon>
                 </div>
-                <h4 class="create-title">Create New</h4>
-                <p class="create-subtitle">Add a new attendance category</p>
+                <h4 class="create-title">
+                  Create New
+                </h4>
+                <p class="create-subtitle">
+                  Add a new attendance category
+                </p>
               </div>
             </div>
 
@@ -85,17 +127,30 @@
                 >
                   {{ getCategoryType(template.name) }}
                 </div>
-                <div class="card-icon" :class="getIconClass(template.name)">
-                  <v-icon size="20" :color="getIconColor(template.name)">
+                <div
+                  class="card-icon"
+                  :class="getIconClass(template.name)"
+                >
+                  <v-icon
+                    size="20"
+                    :color="getIconColor(template.name)"
+                  >
                     {{ getTemplateIcon(template.name) }}
                   </v-icon>
                 </div>
               </div>
 
               <div class="card-content">
-                <h4 class="category-title">{{ template.name }}</h4>
+                <h4 class="category-title">
+                  {{ template.name }}
+                </h4>
                 <div class="employee-count">
-                  <v-icon size="16" color="#6b7280">mdi-account</v-icon>
+                  <v-icon
+                    size="16"
+                    color="#6b7280"
+                  >
+                    mdi-account
+                  </v-icon>
                   <span class="count-number">{{
                     template.assignedUserCount
                   }}</span>
@@ -113,14 +168,14 @@
                   size="small"
                   color="primary"
                   @click.stop="editTemplateName(template)"
-                ></v-btn>
+                />
                 <v-btn
                   icon="mdi-content-copy"
                   variant="text"
                   size="small"
                   color="primary"
                   @click.stop="duplicateTemplate(template)"
-                ></v-btn>
+                />
               </div>
             </div>
           </div>
@@ -157,28 +212,34 @@
         </div>
       </div>
 
-      <div v-else class="template-config">
-        <div class="custom-tabs"></div>
+      <div
+        v-else
+        class="template-config"
+      >
+        <div class="custom-tabs" />
         <AttendancePolicyTabs
           v-if="selectedTemplate"
-          :selectedConfig="selectedTemplate"
-          :policyPatchId="selectedTemplate.attendancePolicies"
-          @save-changes="handleSaveChanges"
-          :showSnackbar="showSnackbar"
           ref="policyTabs"
+          :selected-config="selectedTemplate"
+          :policy-patch-id="selectedTemplate.attendancePolicies"
+          :show-snackbar="showSnackbar"
+          @save-changes="handleSaveChanges"
         />
         <v-card-text v-else>
           <v-progress-circular
             indeterminate
             color="primary"
-          ></v-progress-circular>
+          />
           Loading attendance settings...
         </v-card-text>
       </div>
     </div>
 
     <!-- Dialogs remain the same -->
-    <v-dialog v-model="createDialog" max-width="500px">
+    <v-dialog
+      v-model="createDialog"
+      max-width="500px"
+    >
       <v-card>
         <v-card-title>Create New Category</v-card-title>
         <v-card-text>
@@ -188,28 +249,38 @@
             variant="outlined"
             required
             :rules="[(v) => !!v || 'Category name is required']"
-          ></v-text-field>
-          <v-alert v-if="customTemplates.length >= 10" type="warning" dense>
+          />
+          <v-alert
+            v-if="customTemplates.length >= 10"
+            type="warning"
+            dense
+          >
             Maximum number of categories (10) reached. You cannot create more
             categories.
           </v-alert>
         </v-card-text>
         <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="error" text @click="createDialog = false">Cancel</v-btn>
+          <v-spacer />
           <v-btn
-            @click="saveTemplate"
+            color="error"
+            text
+            @click="createDialog = false"
+          >
+            Cancel
+          </v-btn>
+          <v-btn
             :loading="isSaving"
             :disabled="isSaving"
             color="primary"
             class="save-button"
+            @click="saveTemplate"
           >
-            <template v-slot:loader>
+            <template #loader>
               <v-progress-circular
                 indeterminate
                 size="20"
                 width="2"
-              ></v-progress-circular>
+              />
             </template>
             {{ isSaving ? "Saving..." : "Save Changes" }}
           </v-btn>
@@ -217,7 +288,10 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="editNameDialog" max-width="500px">
+    <v-dialog
+      v-model="editNameDialog"
+      max-width="500px"
+    >
       <v-card>
         <v-card-title>Edit Template Name</v-card-title>
         <v-card-text>
@@ -228,21 +302,25 @@
             required
             :rules="[(v) => !!v || 'Category name is required']"
             :disabled="editingTemplate && editingTemplate.isDefault"
-          ></v-text-field>
+          />
         </v-card-text>
         <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="error" text @click="editNameDialog = false"
-            >Cancel</v-btn
+          <v-spacer />
+          <v-btn
+            color="error"
+            text
+            @click="editNameDialog = false"
           >
+            Cancel
+          </v-btn>
           <v-btn
             color="black"
-            @click="saveTemplateName"
             :disabled="
               !editingTemplate ||
-              !editingTemplate.name.trim() ||
-              (editingTemplate && editingTemplate.isDefault)
+                !editingTemplate.name.trim() ||
+                (editingTemplate && editingTemplate.isDefault)
             "
+            @click="saveTemplateName"
           >
             Save
           </v-btn>
@@ -250,20 +328,35 @@
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="deleteConfirmDialog" max-width="500px">
+    <v-dialog
+      v-model="deleteConfirmDialog"
+      max-width="500px"
+    >
       <v-card>
-        <v-card-title class="text-h5">Confirm Deletion</v-card-title>
+        <v-card-title class="text-h5">
+          Confirm Deletion
+        </v-card-title>
         <v-card-text class="text-center">
           Are you sure you want to delete the category "{{
             templateToDeleteName
           }}"? This action cannot be undone.
         </v-card-text>
         <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="grey" text @click="deleteConfirmDialog = false"
-            >Cancel</v-btn
+          <v-spacer />
+          <v-btn
+            color="grey"
+            text
+            @click="deleteConfirmDialog = false"
           >
-          <v-btn color="error" text @click="confirmDelete">Delete</v-btn>
+            Cancel
+          </v-btn>
+          <v-btn
+            color="error"
+            text
+            @click="confirmDelete"
+          >
+            Delete
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -275,8 +368,12 @@
       location="top center"
     >
       {{ snackbar.message }}
-      <template v-slot:actions>
-        <v-btn color="white" variant="text" @click="snackbar.show = false">
+      <template #actions>
+        <v-btn
+          color="white"
+          variant="text"
+          @click="snackbar.show = false"
+        >
           Close
         </v-btn>
       </template>

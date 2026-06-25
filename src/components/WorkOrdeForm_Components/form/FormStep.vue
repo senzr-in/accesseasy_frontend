@@ -1,17 +1,31 @@
 <!-- /senzrGo/senzrfieldopsfrontend/src/components/WorkOrdeForm_Components/form/FormStep.vue -->
 <template>
-  <v-div class="form-step-card" elevation="8">
+  <v-div
+    class="form-step-card"
+    elevation="8"
+  >
     <v-div class="form-step-content">
       <!-- Added debug info to help troubleshoot -->
-      <div v-if="currentStepFields.length === 0" class="empty-state">
-        <v-alert type="info" variant="tonal">
-          <v-icon class="mr-2">mdi-information</v-icon>
+      <div
+        v-if="currentStepFields.length === 0"
+        class="empty-state"
+      >
+        <v-alert
+          type="info"
+          variant="tonal"
+        >
+          <v-icon class="mr-2">
+            mdi-information
+          </v-icon>
           No fields available for this step. Please check the form
           configuration.
         </v-alert>
       </div>
 
-      <v-form ref="formRef" @submit.prevent="handleFormSubmit">
+      <v-form
+        ref="formRef"
+        @submit.prevent="handleFormSubmit"
+      >
         <v-row class="field-grid">
           <v-col
             v-for="field in currentStepFields"
@@ -36,14 +50,23 @@
             />
           </v-col>
           <!-- Priority -->
-          <v-col cols="12" class="field-column" v-if="showPriorityReschedule">
+          <v-col
+            v-if="showPriorityReschedule"
+            cols="12"
+            class="field-column"
+          >
             <v-label class="field-label">
-              <v-icon size="18" color="primary" class="mr-2">mdi-flag</v-icon>
+              <v-icon
+                size="18"
+                color="primary"
+                class="mr-2"
+              >
+                mdi-flag
+              </v-icon>
               Task priority
             </v-label>
             <v-select
               :model-value="priority"
-              @update:model-value="$emit('update-priority', $event)"
               :items="priorityItems"
               item-title="label"
               item-value="value"
@@ -51,11 +74,15 @@
               density="comfortable"
               hide-details="auto"
               clearable
+              @update:model-value="$emit('update-priority', $event)"
             >
               <template #item="{ props: itemProps, item }">
                 <v-list-item v-bind="itemProps">
                   <template #prepend>
-                    <v-icon :color="item.raw.color" class="mr-2">
+                    <v-icon
+                      :color="item.raw.color"
+                      class="mr-2"
+                    >
                       {{ item.raw.icon }}
                     </v-icon>
                   </template>
@@ -68,7 +95,10 @@
                   size="small"
                   class="ma-1"
                 >
-                  <v-icon :color="item.raw.color" class="mr-1">
+                  <v-icon
+                    :color="item.raw.color"
+                    class="mr-1"
+                  >
                     {{ item.raw.icon }}
                   </v-icon>
                   {{ item.raw.label }}
@@ -78,30 +108,47 @@
           </v-col>
 
           <!-- Reschedule toggle -->
-          <v-col cols="12" class="field-column" v-if="showPriorityReschedule">
+          <v-col
+            v-if="showPriorityReschedule"
+            cols="12"
+            class="field-column"
+          >
             <v-switch
               :model-value="rescheduleEnabled"
-              @update:model-value="$emit('update-reschedule-enabled', $event)"
               :disabled="!canEnableReschedule"
               color="primary"
               :label="`Reschedule across multiple days`"
               hide-details="auto"
+              @update:model-value="$emit('update-reschedule-enabled', $event)"
             />
-            <small v-if="!canEnableReschedule" class="text-muted">
+            <small
+              v-if="!canEnableReschedule"
+              class="text-muted"
+            >
               Enable only when From and Due date are on the same day.
             </small>
-            <small v-else class="text-success">
+            <small
+              v-else
+              class="text-success"
+            >
               From: {{ normalizedFromDate }} | Due: {{ normalizedDueDate }}
             </small>
           </v-col>
 
           <!-- Reschedule controls -->
           <template v-if="rescheduleEnabled && showPriorityReschedule">
-            <v-col cols="12" class="field-column">
+            <v-col
+              cols="12"
+              class="field-column"
+            >
               <v-label class="field-label">
-                <v-icon size="18" color="primary" class="mr-2"
-                  >mdi-calendar</v-icon
+                <v-icon
+                  size="18"
+                  color="primary"
+                  class="mr-2"
                 >
+                  mdi-calendar
+                </v-icon>
                 Start date (fixed)
               </v-label>
               <v-text-field
@@ -114,29 +161,43 @@
               />
             </v-col>
 
-            <v-col cols="12" class="field-column">
+            <v-col
+              cols="12"
+              class="field-column"
+            >
               <v-label class="field-label">
-                <v-icon size="18" color="primary" class="mr-2"
-                  >mdi-calendar-range</v-icon
+                <v-icon
+                  size="18"
+                  color="primary"
+                  class="mr-2"
                 >
+                  mdi-calendar-range
+                </v-icon>
                 End date
               </v-label>
               <v-text-field
                 :model-value="scheduleEndDate"
-                @update:model-value="$emit('update-schedule-end-date', $event)"
                 type="date"
                 variant="outlined"
                 density="comfortable"
                 hide-details="auto"
                 :min="normalizedFromDate || undefined"
+                @update:model-value="$emit('update-schedule-end-date', $event)"
               />
             </v-col>
 
-            <v-col cols="12" class="field-column">
+            <v-col
+              cols="12"
+              class="field-column"
+            >
               <v-label class="field-label">
-                <v-icon size="18" color="primary" class="mr-2"
-                  >mdi-calendar-week</v-icon
+                <v-icon
+                  size="18"
+                  color="primary"
+                  class="mr-2"
                 >
+                  mdi-calendar-week
+                </v-icon>
                 Repeat on days
               </v-label>
               <div class="weekday-grid">
@@ -144,12 +205,12 @@
                   v-for="d in weekdays"
                   :key="d.value"
                   :model-value="selectedDays"
-                  @update:model-value="$emit('update-selected-days', $event)"
                   :label="d.label"
                   :value="d.value"
                   hide-details="auto"
                   density="compact"
                   color="primary"
+                  @update:model-value="$emit('update-selected-days', $event)"
                 />
               </div>
               <small class="text-muted">

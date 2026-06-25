@@ -4,7 +4,10 @@
     <div class="flex-1 bg-slate-50 dark:bg-slate-950 overflow-y-auto p-4 md:p-8">
       <div class="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full h-full">
         <router-view v-slot="{ Component }">
-          <transition name="fade-slide" mode="out-in">
+          <transition
+            name="fade-slide"
+            mode="out-in"
+          >
             <component :is="Component" />
           </transition>
         </router-view>

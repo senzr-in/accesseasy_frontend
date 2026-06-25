@@ -9,7 +9,9 @@
             {{ logs.length }} Total
           </span>
         </h1>
-        <p class="text-slate-500 font-medium mt-1">Real-time history of your access attempts.</p>
+        <p class="text-slate-500 font-medium mt-1">
+          Real-time history of your access attempts.
+        </p>
       </div>
       <div class="relative w-full max-w-[300px]">
         <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
@@ -18,7 +20,7 @@
           type="text"
           placeholder="Search by door or status..."
           class="w-full h-10 pl-10 pr-4 rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm font-medium focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-slate-900 dark:text-white placeholder:text-slate-400 shadow-sm"
-        />
+        >
       </div>
     </div>
 
@@ -28,24 +30,42 @@
         <table class="w-full text-left border-collapse relative">
           <thead class="bg-slate-50 dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-10 w-full">
             <tr>
-              <th class="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">Time</th>
-              <th class="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">Location / Door</th>
-              <th class="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">Security Zone</th>
-              <th class="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">Status</th>
+              <th class="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">
+                Time
+              </th>
+              <th class="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">
+                Location / Door
+              </th>
+              <th class="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">
+                Security Zone
+              </th>
+              <th class="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">
+                Status
+              </th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 dark:divide-zinc-800">
             <tr v-if="loading">
-              <td colspan="4" class="text-center py-20 text-xs font-bold text-slate-400 italic bg-white dark:bg-zinc-950">
+              <td
+                colspan="4"
+                class="text-center py-20 text-xs font-bold text-slate-400 italic bg-white dark:bg-zinc-950"
+              >
                 Loading history...
               </td>
             </tr>
             <tr v-else-if="filteredLogs.length === 0">
-              <td colspan="4" class="text-center py-20 text-xs font-bold text-slate-400 italic bg-white dark:bg-zinc-950">
+              <td
+                colspan="4"
+                class="text-center py-20 text-xs font-bold text-slate-400 italic bg-white dark:bg-zinc-950"
+              >
                 No activity logs found.
               </td>
             </tr>
-            <tr v-for="log in filteredLogs" :key="log.id" class="hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors group">
+            <tr
+              v-for="log in filteredLogs"
+              :key="log.id"
+              class="hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors group"
+            >
               <td class="px-5 py-3">
                 <div class="flex flex-col justify-center">
                   <span class="font-bold text-xs text-slate-900 dark:text-white">{{ formatDate(log.timestamp) }}</span>
@@ -67,11 +87,17 @@
               </td>
               <td class="px-5 py-3">
                 <div class="flex items-center gap-2">
-                  <span v-if="log.eventType === 'ACCESS_GRANTED'" class="inline-flex items-center gap-1.5 text-emerald-700 bg-emerald-50 border border-emerald-200 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400 px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest">
+                  <span
+                    v-if="log.eventType === 'ACCESS_GRANTED'"
+                    class="inline-flex items-center gap-1.5 text-emerald-700 bg-emerald-50 border border-emerald-200 dark:bg-emerald-500/10 dark:border-emerald-500/20 dark:text-emerald-400 px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest"
+                  >
                     <ShieldCheck class="h-3 w-3" />
                     Granted
                   </span>
-                  <span v-else class="inline-flex items-center gap-1.5 text-rose-700 bg-rose-50 border border-rose-200 dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-400 px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest">
+                  <span
+                    v-else
+                    class="inline-flex items-center gap-1.5 text-rose-700 bg-rose-50 border border-rose-200 dark:bg-rose-500/10 dark:border-rose-500/20 dark:text-rose-400 px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest"
+                  >
                     <ShieldAlert class="h-3 w-3" />
                     Denied
                   </span>

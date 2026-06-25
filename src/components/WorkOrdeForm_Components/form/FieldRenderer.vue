@@ -1,12 +1,16 @@
 <!-- /senzrGo/senzrfieldopsfrontend/src/components/WorkOrdeForm_Components/form/FieldRenderer.vue -->
 <template>
   <!-- Wrap the entire field wrapper with v-if to control visibility -->
-  <div v-if="isFieldVisible" class="field-wrapper">
+  <div
+    v-if="isFieldVisible"
+    class="field-wrapper"
+  >
     <v-label class="field-label">
       {{ field.label }}
-      <span v-if="isFieldMandatory(field, userRole)" class="required-indicator"
-        >*</span
-      >
+      <span
+        v-if="isFieldMandatory(field, userRole)"
+        class="required-indicator"
+      >*</span>
     </v-label>
 
     <!-- Special handling for orgId field type -->
@@ -42,9 +46,8 @@
             class="ma-2"
             @click.stop
             @keydown.stop
-          >
-          </v-text-field>
-          <v-divider class="mb-2"></v-divider>
+          />
+          <v-divider class="mb-2" />
         </template>
 
         <template #item="{ props: itemProps, item }">
@@ -66,11 +69,11 @@
     <!-- UsersId special select -->
     <v-autocomplete
       v-else-if="isUsersField"
+      v-model="formData.UsersId"
       :items="searchedUsers"
       :loading="loadingUsers"
       item-title="label"
       item-value="id"
-      v-model="formData.UsersId"
       :hint="formData?.UsersId ? 'Personal ID selected' : 'Select employee'"
       persistent-hint
       clearable
@@ -94,9 +97,8 @@
           class="ma-2"
           @click.stop
           @keydown.stop
-        >
-        </v-text-field>
-        <v-divider class="mb-2"></v-divider>
+        />
+        <v-divider class="mb-2" />
       </template>
 
       <template #item="{ props: itemProps, item }">
@@ -118,11 +120,11 @@
     <!-- Team/Department field -->
     <v-autocomplete
       v-else-if="isTeamField && teamEnabled"
+      v-model="formData.team"
       :items="searchedDepartments"
       :loading="loadingDepartments"
       item-title="departmentName"
       item-value="id"
-      v-model="formData.team"
       hint="Select department"
       persistent-hint
       clearable
@@ -148,10 +150,12 @@
           @keydown.stop
         >
           <template #prepend-inner>
-            <v-icon size="20">mdi-magnify</v-icon>
+            <v-icon size="20">
+              mdi-magnify
+            </v-icon>
           </template>
         </v-text-field>
-        <v-divider class="mb-2"></v-divider>
+        <v-divider class="mb-2" />
       </template>
     </v-autocomplete>
 
@@ -182,8 +186,8 @@
     <!-- Client Location (using gps type/key as dropdown) -->
     <div v-else-if="isClientLocationField">
       <v-select
-        :disabled="disableClientLocation"
         v-model="formData[field.key]"
+        :disabled="disableClientLocation"
         :items="clientLocations"
         item-title="name"
         item-value="id"
@@ -227,13 +231,20 @@
         @update:model-value="handleMultipleImageSelect"
         @blur="markFieldTouched(field.key)"
       />
-      <div v-if="imagePreviews.length > 0" class="preview-container mt-4">
+      <div
+        v-if="imagePreviews.length > 0"
+        class="preview-container mt-4"
+      >
         <div
           v-for="(preview, index) in imagePreviews"
           :key="index"
           class="preview-item"
         >
-          <img :src="preview.url" alt="Preview" class="preview-image" />
+          <img
+            :src="preview.url"
+            alt="Preview"
+            class="preview-image"
+          >
           <v-btn
             icon
             size="small"
@@ -243,25 +254,35 @@
           >
             <v-icon>mdi-delete</v-icon>
           </v-btn>
-          <span v-if="preview.id" class="file-id">ID: {{ preview.id }}</span>
+          <span
+            v-if="preview.id"
+            class="file-id"
+          >ID: {{ preview.id }}</span>
         </div>
       </div>
-      <v-alert v-if="uploadError" type="error" variant="tonal" class="mt-2">{{
-        uploadError
-      }}</v-alert>
+      <v-alert
+        v-if="uploadError"
+        type="error"
+        variant="tonal"
+        class="mt-2"
+      >
+        {{
+          uploadError
+        }}
+      </v-alert>
     </div>
 
     <!-- Generic dynamic field (exclude gps/clientLocation from fallback) -->
     <component
-      v-else
       :is="getFieldComponent(field)"
+      v-else
       v-bind="resolvedProps"
       v-model="formData[field.key]"
       :error-messages="touchedFields[field.key] ? fieldErrors : []"
+      class="field-input"
       @click:append-inner="handleFieldAction"
       @update:model-value="markFieldTouched(field.key)"
       @blur="markFieldTouched(field.key)"
-      class="field-input"
     />
 
     <!-- Field-specific additional content -->
@@ -273,9 +294,9 @@
         color="orange-darken-1"
         variant="tonal"
         block
-        @click="$emit('generate-code', field)"
         prepend-icon="mdi-key-variant"
         class="generate-code-btn"
+        @click="$emit('generate-code', field)"
       >
         Generate/Resend Code
       </v-btn>

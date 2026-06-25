@@ -1,25 +1,37 @@
 <template>
   <v-container style="max-width: 100%;">
     <div class="mt-6 mb-6">
-      <h2 >
+      <h2>
         Certificate Management
       </h2>
     </div>
 
-    <v-tabs v-model="activeTab" class="mb-6">
-      <v-tab value="upload">UPLOAD NEW CERTIFICATE</v-tab>
-      <v-tab value="current">CURRENT CERTIFICATES</v-tab>
+    <v-tabs
+      v-model="activeTab"
+      class="mb-6"
+    >
+      <v-tab value="upload">
+        UPLOAD NEW CERTIFICATE
+      </v-tab>
+      <v-tab value="current">
+        CURRENT CERTIFICATES
+      </v-tab>
     </v-tabs>
 
     <v-tabs-window v-model="activeTab">
       <v-tabs-window-item value="upload">
         <div class="d-flex align-center mb-8">
-          <v-icon class="mr-3">mdi-cloud-upload</v-icon>
+          <v-icon class="mr-3">
+            mdi-cloud-upload
+          </v-icon>
           <span class="text-h6 font-weight-bold">Upload New Certificate</span>
         </div>
 
         <v-row>
-          <v-col cols="12" md="4">
+          <v-col
+            cols="12"
+            md="4"
+          >
             <v-select
               v-model="documentType"
               :items="documentTypes"
@@ -31,29 +43,32 @@
               density="comfortable"
               @update:model-value="resetSelections"
             >
-              <template v-slot:item="{ props, item }">
+              <template #item="{ props, item }">
                 <v-list-item v-bind="props">
-                  <template v-slot:prepend>
+                  <template #prepend>
                     <div
                       :class="`${item.raw.color} rounded-circle mr-2`"
                       style="width: 12px; height: 12px"
-                    ></div>
+                    />
                   </template>
                 </v-list-item>
               </template>
-              <template v-slot:selection="{ item }">
+              <template #selection="{ item }">
                 <div class="d-flex align-center">
                   <div
                     :class="`${item.raw.color} rounded-circle mr-2`"
                     style="width: 12px; height: 12px"
-                  ></div>
+                  />
                   {{ item.raw.name }}
                 </div>
               </template>
             </v-select>
           </v-col>
 
-          <v-col cols="12" md="4">
+          <v-col
+            cols="12"
+            md="4"
+          >
             <v-file-input
               v-model="selectedFile"
               label="Upload Certificate"
@@ -64,13 +79,15 @@
               variant="outlined"
               density="comfortable"
               class="mb-4"
-            ></v-file-input>
-           
+            />
           </v-col>
         </v-row>
 
         <v-row>
-          <v-col cols="12" md="4">
+          <v-col
+            cols="12"
+            md="4"
+          >
             <v-select
               v-model="selectedState"
               :items="states"
@@ -81,48 +98,63 @@
               variant="outlined"
               density="comfortable"
             >
-              <template v-slot:prepend-inner>
-                <v-icon size="small" color="grey-darken-1"
-                  >mdi-map-marker</v-icon
+              <template #prepend-inner>
+                <v-icon
+                  size="small"
+                  color="grey-darken-1"
                 >
+                  mdi-map-marker
+                </v-icon>
               </template>
             </v-select>
           </v-col>
-          <v-col cols="12" md="4">
-            
-          </v-col>
+          <v-col
+            cols="12"
+            md="4"
+          />
         </v-row>
 
-        <div class="mb-4" v-if="selectedFile">
+        <div
+          v-if="selectedFile"
+          class="mb-4"
+        >
           <v-chip
             color="primary"
             variant="flat"
             closable
             @click:close="selectedFile = null"
           >
-            <v-icon start>mdi-file</v-icon>
+            <v-icon start>
+              mdi-file
+            </v-icon>
             {{ selectedFile.name }}
           </v-chip>
         </div>
 
         <v-row class="mb-4">
-          <v-col cols="12" md="4">
+          <v-col
+            cols="12"
+            md="4"
+          >
             <v-text-field
               v-model="issueDate"
               type="date"
               label="Issue Date *"
               variant="outlined"
               density="comfortable"
-            ></v-text-field>
+            />
           </v-col>
-          <v-col cols="12" md="4">
+          <v-col
+            cols="12"
+            md="4"
+          >
             <v-text-field
               v-model="expiryDate"
               type="date"
               label="Expiry Date *"
               variant="outlined"
               density="comfortable"
-            ></v-text-field>
+            />
           </v-col>
         </v-row>
 
@@ -131,10 +163,12 @@
             color="primary"
             size="large"
             :disabled="!isFormValid"
-            @click="uploadCertificate"
             class="px-6"
+            @click="uploadCertificate"
           >
-            <v-icon start>mdi-upload</v-icon>
+            <v-icon start>
+              mdi-upload
+            </v-icon>
             Upload Certificate
           </v-btn>
         </div>
@@ -143,9 +177,13 @@
       <v-tabs-window-item value="current">
         <v-card elevation="2">
           <v-card-text class="text-center py-12">
-            <v-icon size="48" color="grey-lighten-1" class="mb-4"
-              >mdi-file-document</v-icon
+            <v-icon
+              size="48"
+              color="grey-lighten-1"
+              class="mb-4"
             >
+              mdi-file-document
+            </v-icon>
             <h3 class="text-h6 font-weight-medium text-grey-darken-2 mb-2">
               No certificates uploaded yet
             </h3>

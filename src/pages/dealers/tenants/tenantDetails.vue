@@ -1,5 +1,8 @@
 <template>
-  <v-container fluid class="pa-6">
+  <v-container
+    fluid
+    class="pa-6"
+  >
     <v-row class="mb-6">
       <v-col cols="12">
         <h2 class="text-h5 font-weight-bold text-grey-darken-3">
@@ -13,7 +16,10 @@
 
     <!-- Action Bar -->
     <v-row class="mb-4">
-      <v-col cols="12" md="4">
+      <v-col
+        cols="12"
+        md="4"
+      >
         <v-text-field
           v-model="searchQuery"
           prepend-inner-icon="mdi-magnify"
@@ -21,9 +27,12 @@
           variant="outlined"
           density="compact"
           clearable
-        ></v-text-field>
+        />
       </v-col>
-      <v-col cols="12" md="3">
+      <v-col
+        cols="12"
+        md="3"
+      >
         <v-select
           v-model="statusFilter"
           :items="statusOptions"
@@ -31,23 +40,29 @@
           variant="outlined"
           density="compact"
           clearable
-        ></v-select>
+        />
       </v-col>
-      <v-col cols="12" md="3">
+      <v-col
+        cols="12"
+        md="3"
+      >
         <v-select
           v-model="sortBy"
           :items="sortOptions"
           label="Sort by"
           variant="outlined"
           density="compact"
-        ></v-select>
+        />
       </v-col>
-      <v-col cols="12" md="2">
+      <v-col
+        cols="12"
+        md="2"
+      >
         <v-btn
           color="primary"
           prepend-icon="mdi-plus"
-          @click="openAddDialog"
           block
+          @click="openAddDialog"
         >
           Add Tenant
         </v-btn>
@@ -56,14 +71,30 @@
 
     <!-- Summary Cards -->
     <v-row class="mb-6">
-      <v-col cols="12" md="3">
-        <v-card class="pa-4" elevation="2">
+      <v-col
+        cols="12"
+        md="3"
+      >
+        <v-card
+          class="pa-4"
+          elevation="2"
+        >
           <div class="d-flex align-center">
-            <v-avatar size="48" class="bg-blue-lighten-4 mr-4">
-              <v-icon color="blue-darken-2" size="24">mdi-domain</v-icon>
+            <v-avatar
+              size="48"
+              class="bg-blue-lighten-4 mr-4"
+            >
+              <v-icon
+                color="blue-darken-2"
+                size="24"
+              >
+                mdi-domain
+              </v-icon>
             </v-avatar>
             <div>
-              <p class="text-body-2 text-grey-600 mb-1">Total Tenants</p>
+              <p class="text-body-2 text-grey-600 mb-1">
+                Total Tenants
+              </p>
               <p class="text-h4 font-weight-bold text-grey-darken-3">
                 {{ totalTenants }}
               </p>
@@ -72,14 +103,30 @@
         </v-card>
       </v-col>
 
-      <v-col cols="12" md="3">
-        <v-card class="pa-4" elevation="2">
+      <v-col
+        cols="12"
+        md="3"
+      >
+        <v-card
+          class="pa-4"
+          elevation="2"
+        >
           <div class="d-flex align-center">
-            <v-avatar size="48" class="bg-green-lighten-4 mr-4">
-              <v-icon color="green-darken-2" size="24">mdi-check-circle</v-icon>
+            <v-avatar
+              size="48"
+              class="bg-green-lighten-4 mr-4"
+            >
+              <v-icon
+                color="green-darken-2"
+                size="24"
+              >
+                mdi-check-circle
+              </v-icon>
             </v-avatar>
             <div>
-              <p class="text-body-2 text-grey-600 mb-1">Active Tenants</p>
+              <p class="text-body-2 text-grey-600 mb-1">
+                Active Tenants
+              </p>
               <p class="text-h4 font-weight-bold text-green-darken-2">
                 {{ activeTenants }}
               </p>
@@ -88,16 +135,30 @@
         </v-card>
       </v-col>
 
-      <v-col cols="12" md="3">
-        <v-card class="pa-4" elevation="2">
+      <v-col
+        cols="12"
+        md="3"
+      >
+        <v-card
+          class="pa-4"
+          elevation="2"
+        >
           <div class="d-flex align-center">
-            <v-avatar size="48" class="bg-orange-lighten-4 mr-4">
-              <v-icon color="orange-darken-2" size="24"
-                >mdi-account-group</v-icon
+            <v-avatar
+              size="48"
+              class="bg-orange-lighten-4 mr-4"
+            >
+              <v-icon
+                color="orange-darken-2"
+                size="24"
               >
+                mdi-account-group
+              </v-icon>
             </v-avatar>
             <div>
-              <p class="text-body-2 text-grey-600 mb-1">Total Employees</p>
+              <p class="text-body-2 text-grey-600 mb-1">
+                Total Employees
+              </p>
               <p class="text-h4 font-weight-bold text-orange-darken-2">
                 {{ totalEmployees }}
               </p>
@@ -106,14 +167,30 @@
         </v-card>
       </v-col>
 
-      <v-col cols="12" md="3">
-        <v-card class="pa-4" elevation="2">
+      <v-col
+        cols="12"
+        md="3"
+      >
+        <v-card
+          class="pa-4"
+          elevation="2"
+        >
           <div class="d-flex align-center">
-            <v-avatar size="48" class="bg-purple-lighten-4 mr-4">
-              <v-icon color="purple-darken-2" size="24">mdi-devices</v-icon>
+            <v-avatar
+              size="48"
+              class="bg-purple-lighten-4 mr-4"
+            >
+              <v-icon
+                color="purple-darken-2"
+                size="24"
+              >
+                mdi-devices
+              </v-icon>
             </v-avatar>
             <div>
-              <p class="text-body-2 text-grey-600 mb-1">Active Devices</p>
+              <p class="text-body-2 text-grey-600 mb-1">
+                Active Devices
+              </p>
               <p class="text-h4 font-weight-bold text-purple-darken-2">
                 {{ totalDevices }}
               </p>
@@ -158,13 +235,20 @@
           :loading="loading"
           :items-per-page="10"
         >
-          <template v-slot:item.tenantInfo="{ item }">
+          <template #item.tenantInfo="{ item }">
             <div class="d-flex align-center">
-              <v-avatar size="40" class="mr-3 bg-primary-lighten-4">
-                <v-icon color="primary">mdi-domain</v-icon>
+              <v-avatar
+                size="40"
+                class="mr-3 bg-primary-lighten-4"
+              >
+                <v-icon color="primary">
+                  mdi-domain
+                </v-icon>
               </v-avatar>
               <div>
-                <div class="font-weight-medium">{{ item.tenantName }}</div>
+                <div class="font-weight-medium">
+                  {{ item.tenantName }}
+                </div>
                 <div class="text-caption text-grey-600">
                   {{ item.tenantId }}
                 </div>
@@ -172,38 +256,49 @@
             </div>
           </template>
 
-          <template v-slot:item.status="{ item }">
+          <template #item.status="{ item }">
             <v-chip
               :color="getStatusColor(item.status)"
               size="small"
               variant="flat"
             >
-              <v-icon start size="small">{{
-                getStatusIcon(item.status)
-              }}</v-icon>
+              <v-icon
+                start
+                size="small"
+              >
+                {{
+                  getStatusIcon(item.status)
+                }}
+              </v-icon>
               {{ item.status }}
             </v-chip>
           </template>
 
-          <template v-slot:item.employeeCount="{ item }">
+          <template #item.employeeCount="{ item }">
             <div class="text-center">
-              <div class="font-weight-medium">{{ item.employeeCount }}</div>
+              <div class="font-weight-medium">
+                {{ item.employeeCount }}
+              </div>
               <v-progress-linear
                 :model-value="(item.employeeCount / 200) * 100"
                 color="primary"
                 height="4"
                 class="mt-1"
-              ></v-progress-linear>
+              />
             </div>
           </template>
 
-          <template v-slot:item.devices="{ item }">
-            <v-chip color="primary" size="small" variant="outlined">
+          <template #item.devices="{ item }">
+            <v-chip
+              color="primary"
+              size="small"
+              variant="outlined"
+            >
               {{ item.devices }} Active
             </v-chip>
           </template>
 
-          <template v-slot:item.subscription="{ item }">
+          <template #item.subscription="{ item }">
             <v-chip
               :color="getSubscriptionColor(item.subscription.plan)"
               size="small"
@@ -216,7 +311,7 @@
             </div>
           </template>
 
-          <template v-slot:item.actions="{ item }">
+          <template #item.actions="{ item }">
             <div class="d-flex ga-1">
               <v-btn
                 size="small"
@@ -224,30 +319,30 @@
                 variant="text"
                 icon="mdi-eye"
                 @click="viewTenant(item)"
-              ></v-btn>
+              />
               <v-btn
                 size="small"
                 color="warning"
                 variant="text"
                 icon="mdi-pencil"
                 @click="editTenant(item)"
-              ></v-btn>
+              />
               <v-btn
                 size="small"
                 color="success"
                 variant="text"
                 icon="mdi-cog"
                 @click="configureTenant(item)"
-              ></v-btn>
+              />
               <v-menu>
-                <template v-slot:activator="{ props }">
+                <template #activator="{ props }">
                   <v-btn
                     size="small"
                     color="grey"
                     variant="text"
                     icon="mdi-dots-vertical"
                     v-bind="props"
-                  ></v-btn>
+                  />
                 </template>
                 <v-list>
                   <v-list-item @click="toggleStatus(item)">
@@ -255,7 +350,10 @@
                       {{ item.status === "active" ? "Deactivate" : "Activate" }}
                     </v-list-item-title>
                   </v-list-item>
-                  <v-list-item @click="deleteTenant(item)" class="text-error">
+                  <v-list-item
+                    class="text-error"
+                    @click="deleteTenant(item)"
+                  >
                     <v-list-item-title>Delete</v-list-item-title>
                   </v-list-item>
                 </v-list>
@@ -267,24 +365,36 @@
     </v-card>
 
     <!-- Add/Edit Tenant Dialog -->
-    <v-dialog v-model="tenantDialog" max-width="800">
+    <v-dialog
+      v-model="tenantDialog"
+      max-width="800"
+    >
       <v-card>
         <v-card-title class="text-h6 font-weight-bold">
           {{ editingTenant ? "Edit Tenant" : "Add New Tenant" }}
         </v-card-title>
         <v-card-text>
-          <v-form ref="tenantForm" v-model="formValid">
+          <v-form
+            ref="tenantForm"
+            v-model="formValid"
+          >
             <v-row>
-              <v-col cols="12" md="6">
+              <v-col
+                cols="12"
+                md="6"
+              >
                 <v-text-field
                   v-model="tenantForm.tenantName"
                   label="Tenant Name"
                   variant="outlined"
                   :rules="[(v) => !!v || 'Tenant name is required']"
                   required
-                ></v-text-field>
+                />
               </v-col>
-              <v-col cols="12" md="6">
+              <v-col
+                cols="12"
+                md="6"
+              >
                 <v-text-field
                   v-model="tenantForm.tenantId"
                   label="Tenant ID"
@@ -292,18 +402,24 @@
                   :rules="[(v) => !!v || 'Tenant ID is required']"
                   :disabled="editingTenant"
                   required
-                ></v-text-field>
+                />
               </v-col>
-              <v-col cols="12" md="6">
+              <v-col
+                cols="12"
+                md="6"
+              >
                 <v-text-field
                   v-model="tenantForm.contactPerson"
                   label="Contact Person"
                   variant="outlined"
                   :rules="[(v) => !!v || 'Contact person is required']"
                   required
-                ></v-text-field>
+                />
               </v-col>
-              <v-col cols="12" md="6">
+              <v-col
+                cols="12"
+                md="6"
+              >
                 <v-text-field
                   v-model="tenantForm.email"
                   label="Email"
@@ -314,18 +430,24 @@
                     (v) => /.+@.+\..+/.test(v) || 'Email must be valid',
                   ]"
                   required
-                ></v-text-field>
+                />
               </v-col>
-              <v-col cols="12" md="6">
+              <v-col
+                cols="12"
+                md="6"
+              >
                 <v-text-field
                   v-model="tenantForm.phone"
                   label="Phone Number"
                   variant="outlined"
                   :rules="[(v) => !!v || 'Phone number is required']"
                   required
-                ></v-text-field>
+                />
               </v-col>
-              <v-col cols="12" md="6">
+              <v-col
+                cols="12"
+                md="6"
+              >
                 <v-select
                   v-model="tenantForm.subscriptionPlan"
                   :items="subscriptionPlans"
@@ -333,9 +455,12 @@
                   variant="outlined"
                   :rules="[(v) => !!v || 'Subscription plan is required']"
                   required
-                ></v-select>
+                />
               </v-col>
-              <v-col cols="12" md="6">
+              <v-col
+                cols="12"
+                md="6"
+              >
                 <v-text-field
                   v-model="tenantForm.employeeLimit"
                   label="Employee Limit"
@@ -343,9 +468,12 @@
                   variant="outlined"
                   :rules="[(v) => !!v || 'Employee limit is required']"
                   required
-                ></v-text-field>
+                />
               </v-col>
-              <v-col cols="12" md="6">
+              <v-col
+                cols="12"
+                md="6"
+              >
                 <v-text-field
                   v-model="tenantForm.deviceLimit"
                   label="Device Limit"
@@ -353,7 +481,7 @@
                   variant="outlined"
                   :rules="[(v) => !!v || 'Device limit is required']"
                   required
-                ></v-text-field>
+                />
               </v-col>
               <v-col cols="12">
                 <v-textarea
@@ -363,7 +491,7 @@
                   rows="3"
                   :rules="[(v) => !!v || 'Address is required']"
                   required
-                ></v-textarea>
+                />
               </v-col>
               <v-col cols="12">
                 <v-textarea
@@ -372,22 +500,26 @@
                   variant="outlined"
                   rows="2"
                   placeholder="Any additional information..."
-                ></v-textarea>
+                />
               </v-col>
             </v-row>
           </v-form>
         </v-card-text>
         <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="grey" variant="text" @click="closeTenantDialog">
+          <v-spacer />
+          <v-btn
+            color="grey"
+            variant="text"
+            @click="closeTenantDialog"
+          >
             Cancel
           </v-btn>
           <v-btn
             color="primary"
             variant="flat"
-            @click="submitTenant"
             :loading="submitting"
             :disabled="!formValid"
+            @click="submitTenant"
           >
             {{ editingTenant ? "Update" : "Create" }} Tenant
           </v-btn>
@@ -396,24 +528,37 @@
     </v-dialog>
 
     <!-- View Tenant Dialog -->
-    <v-dialog v-model="viewDialog" max-width="700">
+    <v-dialog
+      v-model="viewDialog"
+      max-width="700"
+    >
       <v-card v-if="selectedTenant">
         <v-card-title class="text-h6 font-weight-bold">
           Tenant Details - {{ selectedTenant.tenantName }}
         </v-card-title>
         <v-card-text>
           <v-row>
-            <v-col cols="12" md="6">
+            <v-col
+              cols="12"
+              md="6"
+            >
               <div class="mb-4">
-                <div class="text-caption text-grey-600">Tenant ID</div>
+                <div class="text-caption text-grey-600">
+                  Tenant ID
+                </div>
                 <div class="font-weight-medium">
                   {{ selectedTenant.tenantId }}
                 </div>
               </div>
             </v-col>
-            <v-col cols="12" md="6">
+            <v-col
+              cols="12"
+              md="6"
+            >
               <div class="mb-4">
-                <div class="text-caption text-grey-600">Status</div>
+                <div class="text-caption text-grey-600">
+                  Status
+                </div>
                 <v-chip
                   :color="getStatusColor(selectedTenant.status)"
                   size="small"
@@ -423,29 +568,53 @@
                 </v-chip>
               </div>
             </v-col>
-            <v-col cols="12" md="6">
+            <v-col
+              cols="12"
+              md="6"
+            >
               <div class="mb-4">
-                <div class="text-caption text-grey-600">Contact Person</div>
+                <div class="text-caption text-grey-600">
+                  Contact Person
+                </div>
                 <div class="font-weight-medium">
                   {{ selectedTenant.contactPerson }}
                 </div>
               </div>
             </v-col>
-            <v-col cols="12" md="6">
+            <v-col
+              cols="12"
+              md="6"
+            >
               <div class="mb-4">
-                <div class="text-caption text-grey-600">Email</div>
-                <div class="font-weight-medium">{{ selectedTenant.email }}</div>
+                <div class="text-caption text-grey-600">
+                  Email
+                </div>
+                <div class="font-weight-medium">
+                  {{ selectedTenant.email }}
+                </div>
               </div>
             </v-col>
-            <v-col cols="12" md="6">
+            <v-col
+              cols="12"
+              md="6"
+            >
               <div class="mb-4">
-                <div class="text-caption text-grey-600">Phone</div>
-                <div class="font-weight-medium">{{ selectedTenant.phone }}</div>
+                <div class="text-caption text-grey-600">
+                  Phone
+                </div>
+                <div class="font-weight-medium">
+                  {{ selectedTenant.phone }}
+                </div>
               </div>
             </v-col>
-            <v-col cols="12" md="6">
+            <v-col
+              cols="12"
+              md="6"
+            >
               <div class="mb-4">
-                <div class="text-caption text-grey-600">Subscription Plan</div>
+                <div class="text-caption text-grey-600">
+                  Subscription Plan
+                </div>
                 <v-chip
                   :color="
                     getSubscriptionColor(selectedTenant.subscription.plan)
@@ -457,9 +626,14 @@
                 </v-chip>
               </div>
             </v-col>
-            <v-col cols="12" md="6">
+            <v-col
+              cols="12"
+              md="6"
+            >
               <div class="mb-4">
-                <div class="text-caption text-grey-600">Employee Count</div>
+                <div class="text-caption text-grey-600">
+                  Employee Count
+                </div>
                 <div class="font-weight-medium">
                   {{ selectedTenant.employeeCount }} /
                   {{ selectedTenant.employeeLimit }}
@@ -468,17 +642,22 @@
                   :model-value="
                     (selectedTenant.employeeCount /
                       selectedTenant.employeeLimit) *
-                    100
+                      100
                   "
                   color="primary"
                   height="4"
                   class="mt-1"
-                ></v-progress-linear>
+                />
               </div>
             </v-col>
-            <v-col cols="12" md="6">
+            <v-col
+              cols="12"
+              md="6"
+            >
               <div class="mb-4">
-                <div class="text-caption text-grey-600">Active Devices</div>
+                <div class="text-caption text-grey-600">
+                  Active Devices
+                </div>
                 <div class="font-weight-medium">
                   {{ selectedTenant.devices }} /
                   {{ selectedTenant.deviceLimit }}
@@ -490,12 +669,14 @@
                   color="success"
                   height="4"
                   class="mt-1"
-                ></v-progress-linear>
+                />
               </div>
             </v-col>
             <v-col cols="12">
               <div class="mb-4">
-                <div class="text-caption text-grey-600">Address</div>
+                <div class="text-caption text-grey-600">
+                  Address
+                </div>
                 <div class="font-weight-medium">
                   {{ selectedTenant.address }}
                 </div>
@@ -503,23 +684,36 @@
             </v-col>
             <v-col cols="12">
               <div class="mb-4">
-                <div class="text-caption text-grey-600">Created Date</div>
+                <div class="text-caption text-grey-600">
+                  Created Date
+                </div>
                 <div class="font-weight-medium">
                   {{ formatDate(selectedTenant.dateCreated) }}
                 </div>
               </div>
             </v-col>
-            <v-col cols="12" v-if="selectedTenant.notes">
+            <v-col
+              v-if="selectedTenant.notes"
+              cols="12"
+            >
               <div class="mb-4">
-                <div class="text-caption text-grey-600">Notes</div>
-                <div class="font-weight-medium">{{ selectedTenant.notes }}</div>
+                <div class="text-caption text-grey-600">
+                  Notes
+                </div>
+                <div class="font-weight-medium">
+                  {{ selectedTenant.notes }}
+                </div>
               </div>
             </v-col>
           </v-row>
         </v-card-text>
         <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="grey" variant="text" @click="viewDialog = false">
+          <v-spacer />
+          <v-btn
+            color="grey"
+            variant="text"
+            @click="viewDialog = false"
+          >
             Close
           </v-btn>
           <v-btn
@@ -534,10 +728,18 @@
     </v-dialog>
 
     <!-- Success Snackbar -->
-    <v-snackbar v-model="snackbar.show" :color="snackbar.color" :timeout="3000">
+    <v-snackbar
+      v-model="snackbar.show"
+      :color="snackbar.color"
+      :timeout="3000"
+    >
       {{ snackbar.message }}
-      <template v-slot:actions>
-        <v-btn color="white" variant="text" @click="snackbar.show = false">
+      <template #actions>
+        <v-btn
+          color="white"
+          variant="text"
+          @click="snackbar.show = false"
+        >
           Close
         </v-btn>
       </template>

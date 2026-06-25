@@ -6,7 +6,9 @@
           <EyeIcon class="w-8 h-8" />
         </div>
         <div class="guide-text">
-          <h3 class="guide-title">Form Configuration Preview</h3>
+          <h3 class="guide-title">
+            Form Configuration Preview
+          </h3>
           <p class="guide-description">
             This is how your form configuration looks in JSON format. You can
             copy this for backup or debugging purposes.
@@ -16,8 +18,13 @@
     </div>
     <div class="json-preview-container">
       <div class="json-preview-header">
-        <h3 class="json-title">JSON Configuration</h3>
-        <button @click="$emit('copyToClipboard')" class="btn btn-secondary">
+        <h3 class="json-title">
+          JSON Configuration
+        </h3>
+        <button
+          class="btn btn-secondary"
+          @click="$emit('copyToClipboard')"
+        >
           <CopyIcon class="btn-icon" />
           Copy JSON
         </button>

@@ -6,16 +6,18 @@
         <div class="header-left">
           <div class="title-row">
             <h2 class="dashboard-title">
-              <i class="fas fa-chart-line"></i> Dashboard Overview
+              <i class="fas fa-chart-line" /> Dashboard Overview
             </h2>
             <div class="branch-filter">
               <select
                 id="branch-select"
                 v-model="selectedBranch"
-                @change="onBranchChange"
                 class="branch-select"
+                @change="onBranchChange"
               >
-                <option value="all">All Branches</option>
+                <option value="all">
+                  All Branches
+                </option>
                 <option
                   v-for="branch in branches"
                   :key="branch.id"
@@ -30,14 +32,14 @@
             Monitor your access control system in real-time
           </p>
         </div>
-        <div class="header-right"></div>
+        <div class="header-right" />
       </div>
 
       <!-- Top Statistics Bar -->
       <div class="stats-bar">
         <div class="stat-card employee-card">
           <div class="stat-icon blue-bg">
-            <i class="fas fa-users"></i>
+            <i class="fas fa-users" />
           </div>
           <div class="stat-info-detailed">
             <div class="stat-main">
@@ -46,14 +48,14 @@
             </div>
             <div class="stat-breakdown">
               <div class="breakdown-item present">
-                <i class="fas fa-user-check"></i>
+                <i class="fas fa-user-check" />
                 <span class="breakdown-label">Present:</span>
                 <span class="breakdown-value">{{
                   attendanceCounts.present
                 }}</span>
               </div>
               <div class="breakdown-item absent">
-                <i class="fas fa-user-times"></i>
+                <i class="fas fa-user-times" />
                 <span class="breakdown-label">Absent:</span>
                 <span class="breakdown-value">{{
                   attendanceCounts.absent
@@ -62,31 +64,30 @@
             </div>
           </div>
         </div>
-        <div class="stat-card" v-if="cameraCounts.total > 0">
+        <div
+          v-if="cameraCounts.total > 0"
+          class="stat-card"
+        >
           <div class="stat-icon purple-bg">
-            <i class="fas fa-video"></i>
+            <i class="fas fa-video" />
           </div>
           <div class="stat-info">
-            <span class="stat-value"
-              >{{ cameraCounts.online }} / {{ cameraCounts.total }}</span
-            >
+            <span class="stat-value">{{ cameraCounts.online }} / {{ cameraCounts.total }}</span>
             <span class="stat-label">Cameras Online</span>
           </div>
         </div>
         <div class="stat-card">
           <div class="stat-icon teal-bg">
-            <i class="fas fa-door-open"></i>
+            <i class="fas fa-door-open" />
           </div>
           <div class="stat-info">
-            <span class="stat-value"
-              >{{ doorCounts.assigned }} / {{ doorCounts.total }}</span
-            >
+            <span class="stat-value">{{ doorCounts.assigned }} / {{ doorCounts.total }}</span>
             <span class="stat-label">Active Doors</span>
           </div>
         </div>
         <div class="stat-card">
           <div class="stat-icon red-bg">
-            <i class="fas fa-exclamation-triangle"></i>
+            <i class="fas fa-exclamation-triangle" />
           </div>
           <div class="stat-info">
             <span class="stat-value">{{ criticalAlerts }}</span>
@@ -102,11 +103,14 @@
           <!-- Security Health Section -->
           <div class="section-card health-section">
             <div class="section-header">
-              <h3><i class="fas fa-shield-alt"></i> System Health</h3>
+              <h3><i class="fas fa-shield-alt" /> System Health</h3>
             </div>
             <div class="health-grid">
               <!-- Camera Health -->
-              <div class="health-item" v-if="cameraCounts.total > 0">
+              <div
+                v-if="cameraCounts.total > 0"
+                class="health-item"
+              >
                 <div class="health-chart">
                   <v-progress-circular
                     :model-value="cameraHealthPercentage"
@@ -120,11 +124,11 @@
                 <div class="health-details">
                   <h4>Cameras</h4>
                   <p class="online">
-                    <span class="dot green"></span>
+                    <span class="dot green" />
                     {{ cameraCounts.online }} Online
                   </p>
                   <p class="offline">
-                    <span class="dot red"></span>
+                    <span class="dot red" />
                     {{ cameraCounts.offline }} Offline
                   </p>
                 </div>
@@ -144,11 +148,11 @@
                 <div class="health-details">
                   <h4>Controllers</h4>
                   <p class="online">
-                    <span class="dot green"></span>
+                    <span class="dot green" />
                     {{ controllerCounts.connected }} Connected
                   </p>
                   <p class="offline">
-                    <span class="dot red"></span>
+                    <span class="dot red" />
                     {{ controllerCounts.waiting }} Waiting
                   </p>
                 </div>
@@ -168,11 +172,11 @@
                 <div class="health-details">
                   <h4>Doors</h4>
                   <p class="online">
-                    <span class="dot green"></span>
+                    <span class="dot green" />
                     {{ doorCounts.assigned }} Assigned
                   </p>
                   <p class="offline">
-                    <span class="dot grey"></span>
+                    <span class="dot grey" />
                     {{ doorCounts.unassigned }} Unassigned
                   </p>
                 </div>
@@ -185,7 +189,7 @@
             <!-- Recent Access Activity -->
             <div class="section-card activity-section">
               <div class="section-header">
-                <h3><i class="fas fa-history"></i> Recent Access Activity</h3>
+                <h3><i class="fas fa-history" /> Recent Access Activity</h3>
                 <button
                   class="view-all-btn"
                   @click="navigateTo('/monitoring/access-logs')"
@@ -209,14 +213,15 @@
                           ? 'fas fa-check'
                           : 'fas fa-times'
                       "
-                    ></i>
+                    />
                   </div>
                   <div class="activity-info">
                     <span class="user-name">{{ log.user }}</span>
                     <span class="access-point">{{ log.door }}</span>
-                    <span class="access-branch" v-if="log.branch"
-                      ><i class="fas fa-building"></i> {{ log.branch }}</span
-                    >
+                    <span
+                      v-if="log.branch"
+                      class="access-branch"
+                    ><i class="fas fa-building" /> {{ log.branch }}</span>
                   </div>
                   <div class="activity-meta">
                     <span class="time">{{ log.time }}</span>
@@ -224,8 +229,7 @@
                     <span
                       class="status-badge"
                       :class="log.status.toLowerCase()"
-                      >{{ log.status }}</span
-                    >
+                    >{{ log.status }}</span>
                   </div>
                 </div>
               </div>
@@ -234,7 +238,7 @@
             <!-- Camera Overview -->
             <div class="section-card camera-section">
               <div class="section-header">
-                <h3><i class="fas fa-video"></i> Camera Overview</h3>
+                <h3><i class="fas fa-video" /> Camera Overview</h3>
                 <button
                   class="view-all-btn"
                   @click="navigateTo('/monitoring/live')"
@@ -256,21 +260,30 @@
                       muted
                       loop
                       class="camera-video"
-                    ></video>
-                    <div v-else class="camera-placeholder">
-                      <i class="fas fa-video-slash"></i>
+                    />
+                    <div
+                      v-else
+                      class="camera-placeholder"
+                    >
+                      <i class="fas fa-video-slash" />
                       <span>No Feed</span>
                     </div>
-                    <div class="camera-status" :class="camera.status">
-                      <span class="status-dot"></span> {{ camera.status }}
+                    <div
+                      class="camera-status"
+                      :class="camera.status"
+                    >
+                      <span class="status-dot" /> {{ camera.status }}
                     </div>
                   </div>
                   <div class="camera-info">
                     <span class="camera-name">{{ camera.name }}</span>
                   </div>
                 </div>
-                <div v-if="filteredCameras.length === 0" class="no-cameras">
-                  <i class="fas fa-video-slash"></i>
+                <div
+                  v-if="filteredCameras.length === 0"
+                  class="no-cameras"
+                >
+                  <i class="fas fa-video-slash" />
                   <p>No cameras available for this selection.</p>
                 </div>
               </div>
@@ -283,10 +296,8 @@
           <!-- AI Insights Widget -->
           <div class="section-card ai-insights">
             <div class="section-header">
-              <h3><i class="fas fa-robot"></i> AI Insights (Live)</h3>
-              <span class="live-indicator"
-                ><span class="pulse"></span> Live</span
-              >
+              <h3><i class="fas fa-robot" /> AI Insights (Live)</h3>
+              <span class="live-indicator"><span class="pulse" /> Live</span>
             </div>
             <div class="insights-feed">
               <div
@@ -295,29 +306,42 @@
                 class="insight-card"
               >
                 <div class="insight-image">
-                  <img :src="event.snapshot" alt="Event Snapshot" />
+                  <img
+                    :src="event.snapshot"
+                    alt="Event Snapshot"
+                  >
                 </div>
                 <div class="insight-content">
                   <div class="insight-header-row">
-                    <span class="insight-type" :class="event.severity">{{
+                    <span
+                      class="insight-type"
+                      :class="event.severity"
+                    >{{
                       event.type
                     }}</span>
-                    <span class="insight-camera" v-if="event.camera"
-                      ><i class="fas fa-video"></i> {{ event.camera }}</span
-                    >
+                    <span
+                      v-if="event.camera"
+                      class="insight-camera"
+                    ><i class="fas fa-video" /> {{ event.camera }}</span>
                   </div>
-                  <div class="insight-location-row" v-if="event.location">
-                    <span class="insight-location"
-                      ><i class="fas fa-map-marker-alt"></i>
-                      {{ event.location }}</span
-                    >
+                  <div
+                    v-if="event.location"
+                    class="insight-location-row"
+                  >
+                    <span class="insight-location"><i class="fas fa-map-marker-alt" />
+                      {{ event.location }}</span>
                   </div>
-                  <p class="insight-desc">{{ event.description }}</p>
+                  <p class="insight-desc">
+                    {{ event.description }}
+                  </p>
                   <span class="insight-time">{{ event.time }}</span>
                 </div>
               </div>
-              <div v-if="filteredAiEvents.length === 0" class="no-events">
-                <i class="fas fa-check-circle"></i>
+              <div
+                v-if="filteredAiEvents.length === 0"
+                class="no-events"
+              >
+                <i class="fas fa-check-circle" />
                 <p>No anomalies detected.</p>
               </div>
             </div>
@@ -326,7 +350,7 @@
           <!-- Quick Actions -->
           <div class="section-card quick-actions">
             <div class="section-header">
-              <h3><i class="fas fa-bolt"></i> Quick Actions</h3>
+              <h3><i class="fas fa-bolt" /> Quick Actions</h3>
               <button
                 class="toggle-btn"
                 @click="isQuickActionsExpanded = !isQuickActionsExpanded"
@@ -337,22 +361,25 @@
                       ? 'fas fa-chevron-up'
                       : 'fas fa-chevron-down'
                   "
-                ></i>
+                />
               </button>
             </div>
             <transition name="collapse">
-              <div v-show="isQuickActionsExpanded" class="actions-grid">
+              <div
+                v-show="isQuickActionsExpanded"
+                class="actions-grid"
+              >
                 <button
                   class="action-btn"
                   @click="navigateTo('/employee-details/employee/add/personal')"
                 >
-                  <i class="fas fa-user-plus"></i> Create Employee
+                  <i class="fas fa-user-plus" /> Create Employee
                 </button>
                 <button
                   class="action-btn"
                   @click="navigateTo('/configuration/configuration')"
                 >
-                  <i class="fas fa-cogs"></i> Organization Configurator
+                  <i class="fas fa-cogs" /> Organization Configurator
                 </button>
               </div>
             </transition>

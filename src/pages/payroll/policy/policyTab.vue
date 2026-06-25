@@ -5,8 +5,8 @@
       v-model="activeTab"
       show-arrows
       background-color="transparent"
-      @update:modelValue="handleTabChange"
       class="custom-tabs"
+      @update:model-value="handleTabChange"
     >
       <v-tab
         v-for="tab in filteredTabs"
@@ -14,13 +14,19 @@
         :value="tab.value"
         class="custom-tab"
       >
-        <v-icon :icon="tab.icon" class="mr-2"></v-icon>
+        <v-icon
+          :icon="tab.icon"
+          class="mr-2"
+        />
         {{ tab.title }}
       </v-tab>
     </v-tabs>
 
     <!-- Tab Content -->
-    <v-card class="tab-content-wrapper" elevation="0">
+    <v-card
+      class="tab-content-wrapper"
+      elevation="0"
+    >
       <router-view />
     </v-card>
   </v-container>

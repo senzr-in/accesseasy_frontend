@@ -19,17 +19,22 @@
       <div class="modal-content">
         <div class="modal-header">
           <h4>Download Employee Template</h4>
-          <button class="close-btn" @click="closeModal">&times;</button>
+          <button
+            class="close-btn"
+            @click="closeModal"
+          >
+            &times;
+          </button>
         </div>
 
         <div class="modal-body">
           <div class="select-all">
             <label>
               <input
-                type="checkbox"
                 v-model="selectAll"
+                type="checkbox"
                 @change="toggleSelectAll"
-              />
+              >
               Select All
             </label>
           </div>
@@ -42,10 +47,10 @@
             >
               <label>
                 <input
-                  type="checkbox"
                   v-model="field.selected"
+                  type="checkbox"
                   :disabled="field.required"
-                />
+                >
                 {{ field.label }}
               </label>
             </div>
@@ -53,11 +58,16 @@
         </div>
 
         <div class="modal-footer">
-          <button class="cancel-btn" @click="closeModal">Cancel</button>
+          <button
+            class="cancel-btn"
+            @click="closeModal"
+          >
+            Cancel
+          </button>
           <button
             class="download-btn"
-            @click="downloadTemplate"
             :disabled="!hasSelectedFields"
+            @click="downloadTemplate"
           >
             Download Template
           </button>

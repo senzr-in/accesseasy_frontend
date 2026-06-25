@@ -6,31 +6,40 @@
     @click="handleClick"
   >
     <!-- Loading Spinner -->
-    <div v-if="isLoading" class="button-spinner"></div>
+    <div
+      v-if="isLoading"
+      class="button-spinner"
+    />
 
     <!-- Left Icon -->
     <component
-      v-if="leftIcon && !isLoading"
       :is="resolveIcon(leftIcon)"
+      v-if="leftIcon && !isLoading"
       :size="iconSize"
       class="button-icon-left"
     />
 
     <!-- Button Text -->
-    <span v-if="$slots.default || text" class="button-text">
+    <span
+      v-if="$slots.default || text"
+      class="button-text"
+    >
       <slot>{{ text }}</slot>
     </span>
 
     <!-- Right Icon -->
     <component
-      v-if="rightIcon && !isLoading"
       :is="resolveIcon(rightIcon)"
+      v-if="rightIcon && !isLoading"
       :size="iconSize"
       class="button-icon-right"
     />
 
     <!-- Badge/Indicator -->
-    <span v-if="badge" class="button-badge">{{ badge }}</span>
+    <span
+      v-if="badge"
+      class="button-badge"
+    >{{ badge }}</span>
   </button>
 </template>
 

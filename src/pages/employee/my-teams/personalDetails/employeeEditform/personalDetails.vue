@@ -17,11 +17,14 @@
   <div class="personal-details">
     <v-container v-if="loading">
       <v-row>
-        <v-col cols="12" class="text-center">
+        <v-col
+          cols="12"
+          class="text-center"
+        >
           <v-progress-circular
             indeterminate
             color="#059367"
-          ></v-progress-circular>
+          />
           <p>Loading personal details...</p>
         </v-col>
       </v-row>
@@ -31,7 +34,10 @@
       class="pa-4"
     >
       <!-- Employee Details Card -->
-      <v-card class="mb-6" flat>
+      <v-card
+        class="mb-6"
+        flat
+      >
         <v-card-title class="text-h6 d-flex justify-space-between align-center">
           <span>Employee Details</span>
           <BaseButton
@@ -45,15 +51,22 @@
         </v-card-title>
         <v-card-text>
           <v-row class="mb-6">
-            <v-col cols="12" sm="3" class="d-flex justify-center">
+            <v-col
+              cols="12"
+              sm="3"
+              class="d-flex justify-center"
+            >
               <div class="avatar-section">
                 <div class="avatar-container">
-                  <v-avatar size="160" class="avatar-image">
+                  <v-avatar
+                    size="160"
+                    class="avatar-image"
+                  >
                     <v-img
                       v-if="avatarImage"
                       :src="avatarImage"
                       alt="Avatar"
-                    ></v-img>
+                    />
                     <v-icon
                       v-else
                       size="150"
@@ -66,26 +79,32 @@
                   <v-btn
                     icon
                     class="edit-avatar-btn"
-                    @click="triggerFileInput"
                     color="white"
+                    @click="triggerFileInput"
                   >
                     <v-icon>mdi-camera</v-icon>
                   </v-btn>
                 </div>
                 <input
-                  type="file"
                   ref="fileInput"
+                  type="file"
                   style="display: none"
                   accept="image/*"
                   @change="handleAvatarChange"
-                />
+                >
               </div>
             </v-col>
-            <v-col cols="12" sm="9">
+            <v-col
+              cols="12"
+              sm="9"
+            >
               <div class="profile-info">
                 <!-- Editable Name Fields -->
                 <v-row>
-                  <v-col cols="12" md="4">
+                  <v-col
+                    cols="12"
+                    md="4"
+                  >
                     <v-text-field
                       v-model="employeeData.assignedUser.first_name"
                       :label="'First Name *'"
@@ -95,9 +114,12 @@
                       density="comfortable"
                       @blur="markFieldAsTouched('first_name')"
                       @input="capitalizeFirstLetterEachWord('first_name')"
-                    ></v-text-field>
+                    />
                   </v-col>
-                  <v-col cols="12" md="4">
+                  <v-col
+                    cols="12"
+                    md="4"
+                  >
                     <v-text-field
                       v-model="employeeData.assignedUser.middleName"
                       :label="'Middle Name'"
@@ -106,7 +128,10 @@
                       @input="capitalizeFirstLetterEachWord('middleName')"
                     />
                   </v-col>
-                  <v-col cols="12" md="4">
+                  <v-col
+                    cols="12"
+                    md="4"
+                  >
                     <v-text-field
                       v-model="employeeData.assignedUser.last_name"
                       :label="'Last Name'"
@@ -120,7 +145,10 @@
                 </v-row>
                 <!-- Editable Employee ID, Designation, Role -->
                 <v-row class="mt-4">
-                  <v-col cols="12" md="4">
+                  <v-col
+                    cols="12"
+                    md="4"
+                  >
                     <v-text-field
                       v-model="employeeData.employeeId"
                       label="Employee ID *"
@@ -131,9 +159,12 @@
                       :disabled="isRoleDisabled"
                       @blur="markFieldAsTouched('employeeId')"
                       @input="handleInputChange('employeeId')"
-                    ></v-text-field>
+                    />
                   </v-col>
-                  <v-col cols="12" md="4">
+                  <v-col
+                    cols="12"
+                    md="4"
+                  >
                     <v-text-field
                       v-model="employeeData.assignedUser.designation"
                       label="Designation"
@@ -142,7 +173,10 @@
                       @input="capitalizeFirstLetterEachWord('designation')"
                     />
                   </v-col>
-                  <v-col cols="12" md="4">
+                  <v-col
+                    cols="12"
+                    md="4"
+                  >
                     <v-select
                       v-model="selectedRole"
                       :items="roleOptions"
@@ -158,7 +192,10 @@
                 </v-row>
                 <!-- Editable Phone and Email -->
                 <v-row class="mt-4">
-                  <v-col cols="12" md="6">
+                  <v-col
+                    cols="12"
+                    md="6"
+                  >
                     <v-text-field
                       v-model="displayPhone"
                       :label="'Phone'"
@@ -166,12 +203,15 @@
                       :error-messages="phoneErrorMessage"
                       variant="outlined"
                       density="comfortable"
+                      maxlength="10"
                       @blur="validatePhone"
                       @input="clearPhoneError"
-                      maxlength="10"
-                    ></v-text-field>
+                    />
                   </v-col>
-                  <v-col cols="12" md="6">
+                  <v-col
+                    cols="12"
+                    md="6"
+                  >
                     <v-text-field
                       v-model="employeeData.assignedUser.email"
                       :label="'Email'"
@@ -183,12 +223,15 @@
                         clearEmailError();
                         toLowerCase('email');
                       "
-                    ></v-text-field>
+                    />
                   </v-col>
                 </v-row>
                 <v-row class="mt-4">
                   <v-col cols="12">
-                    <v-card variant="outlined" class="pa-4">
+                    <v-card
+                      variant="outlined"
+                      class="pa-4"
+                    >
                       <v-card-title
                         class="text-subtitle-1 font-weight-medium pa-0 mb-4"
                       >
@@ -196,7 +239,10 @@
                       </v-card-title>
                       <v-card-text class="pa-0">
                         <v-row align="center">
-                          <v-col cols="12" md="6">
+                          <v-col
+                            cols="12"
+                            md="6"
+                          >
                             <v-file-input
                               v-model="faceImageFile"
                               :label="'Upload Face Image'"
@@ -206,11 +252,15 @@
                               density="comfortable"
                               :show-size="true"
                               :clearable="true"
-                              @update:model-value="handleFaceImageUpload"
                               :error-messages="faceImageError"
-                            ></v-file-input>
+                              @update:model-value="handleFaceImageUpload"
+                            />
                           </v-col>
-                          <v-col cols="12" md="6" class="text-center">
+                          <v-col
+                            cols="12"
+                            md="6"
+                            class="text-center"
+                          >
                             <div
                               v-if="faceImagePreview"
                               class="face-image-preview"
@@ -220,18 +270,21 @@
                                 max-width="150"
                                 max-height="150"
                                 class="mx-auto rounded"
-                              ></v-img>
+                              />
                               <v-btn
                                 small
                                 color="error"
                                 variant="text"
-                                @click="removeFaceImage"
                                 class="mt-2"
+                                @click="removeFaceImage"
                               >
                                 Remove
                               </v-btn>
                             </div>
-                            <div v-else class="text-caption text-grey">
+                            <div
+                              v-else
+                              class="text-caption text-grey"
+                            >
                               No image selected
                             </div>
                           </v-col>
@@ -247,11 +300,19 @@
       </v-card>
 
       <!-- Personal Details Card -->
-      <v-card class="mb-6" flat>
-        <v-card-title class="text-h6">Personal Details</v-card-title>
+      <v-card
+        class="mb-6"
+        flat
+      >
+        <v-card-title class="text-h6">
+          Personal Details
+        </v-card-title>
         <v-card-text>
           <v-row>
-            <v-col cols="12" md="3">
+            <v-col
+              cols="12"
+              md="3"
+            >
               <v-select
                 v-model="employeeData.assignedUser.bloodGroup"
                 :items="['O+', 'O-', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-']"
@@ -259,9 +320,12 @@
                 variant="outlined"
                 density="comfortable"
                 hide-details
-              ></v-select>
+              />
             </v-col>
-            <v-col cols="12" md="3">
+            <v-col
+              cols="12"
+              md="3"
+            >
               <v-select
                 v-model="employeeData.assignedUser.gender"
                 :items="['Female', 'Male', 'Other']"
@@ -269,13 +333,16 @@
                 variant="outlined"
                 density="comfortable"
                 :error-messages="getFieldErrorMessage('gender')"
-                @blur="markFieldAsTouched('gender')"
-                @update:model-value="validateField('gender')"
                 required
                 hide-details
-              ></v-select>
+                @blur="markFieldAsTouched('gender')"
+                @update:model-value="validateField('gender')"
+              />
             </v-col>
-            <v-col cols="12" md="3">
+            <v-col
+              cols="12"
+              md="3"
+            >
               <v-select
                 v-model="employeeData.assignedUser.maritalStatus"
                 :items="['Single', 'Unmarried', 'Married']"
@@ -283,9 +350,12 @@
                 variant="outlined"
                 density="comfortable"
                 hide-details
-              ></v-select>
+              />
             </v-col>
-            <v-col cols="12" md="3">
+            <v-col
+              cols="12"
+              md="3"
+            >
               <v-text-field
                 v-model="employeeData.assignedUser.DOB"
                 label="Date of Birth"
@@ -295,12 +365,15 @@
                 :error-messages="getFieldErrorMessage('DOB')"
                 :max="maxDate"
                 :min="minDate"
+                hide-details
                 @input="handleInputChange('assignedUser.DOB')"
                 @blur="markFieldAsTouched('DOB')"
-                hide-details
-              ></v-text-field>
+              />
             </v-col>
-            <v-col cols="12" md="6">
+            <v-col
+              cols="12"
+              md="6"
+            >
               <v-textarea
                 v-model="employeeData.assignedUser.permanent_Address"
                 label="Permanent Address"
@@ -308,9 +381,12 @@
                 variant="outlined"
                 density="comfortable"
                 hide-details
-              ></v-textarea>
+              />
             </v-col>
-            <v-col cols="12" md="6">
+            <v-col
+              cols="12"
+              md="6"
+            >
               <v-textarea
                 v-model="employeeData.assignedUser.current_Address"
                 label="Communications Address"
@@ -318,7 +394,7 @@
                 variant="outlined"
                 density="comfortable"
                 hide-details
-              ></v-textarea>
+              />
             </v-col>
           </v-row>
         </v-card-text>
@@ -326,21 +402,29 @@
 
       <!-- Company Details Card -->
       <v-card flat>
-        <v-card-title class="text-h6">Company Details</v-card-title>
+        <v-card-title class="text-h6">
+          Company Details
+        </v-card-title>
         <v-card-text>
           <v-row>
-            <v-col cols="12" md="4">
+            <v-col
+              cols="12"
+              md="4"
+            >
               <v-text-field
                 v-model="employeeData.assignedUser.dateOfJoining"
                 label="Date of Joining"
                 type="date"
                 variant="outlined"
                 density="comfortable"
-                @input="handleDateOfJoiningChange"
                 hide-details
-              ></v-text-field>
+                @input="handleDateOfJoiningChange"
+              />
             </v-col>
-            <v-col cols="12" md="4">
+            <v-col
+              cols="12"
+              md="4"
+            >
               <v-select
                 v-model="selectedBranchLocation"
                 :items="branchLocationOptions"
@@ -349,11 +433,14 @@
                 label="Branch"
                 variant="outlined"
                 density="comfortable"
-                @update:model-value="handleBranchLocationChange"
                 hide-details
-              ></v-select>
+                @update:model-value="handleBranchLocationChange"
+              />
             </v-col>
-            <v-col cols="12" md="4">
+            <v-col
+              cols="12"
+              md="4"
+            >
               <v-select
                 v-model="selectedDepartment"
                 :items="departmentOptions"
@@ -362,11 +449,14 @@
                 label="Department"
                 variant="outlined"
                 density="comfortable"
-                @update:model-value="handleDepartmentChange"
                 hide-details
-              ></v-select>
+                @update:model-value="handleDepartmentChange"
+              />
             </v-col>
-            <v-col cols="12" md="4">
+            <v-col
+              cols="12"
+              md="4"
+            >
               <v-select
                 v-model="selectedCycleType"
                 :items="cycleTypeOptions"
@@ -375,11 +465,14 @@
                 label="Attendance Cycle"
                 variant="outlined"
                 density="comfortable"
-                @update:model-value="handleCycleTypeChange"
                 hide-details
-              ></v-select>
+                @update:model-value="handleCycleTypeChange"
+              />
             </v-col>
-            <v-col cols="12" md="4">
+            <v-col
+              cols="12"
+              md="4"
+            >
               <v-select
                 v-model="selectedReportingTo"
                 :items="reportingToOptions"
@@ -388,9 +481,9 @@
                 label="Approver"
                 variant="outlined"
                 density="comfortable"
-                @update:model-value="handleReportingToChange"
                 hide-details
-              ></v-select>
+                @update:model-value="handleReportingToChange"
+              />
             </v-col>
           </v-row>
         </v-card-text>

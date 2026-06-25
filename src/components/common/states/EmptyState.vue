@@ -1,27 +1,49 @@
 <template>
-  <div class="empty-state" :class="stateClass">
+  <div
+    class="empty-state"
+    :class="stateClass"
+  >
     <div class="empty-content">
       <!-- Icon -->
       <div class="empty-icon">
         <slot name="icon">
-          <component v-if="customIcon" :is="customIcon" :size="iconSize" />
-          <div v-else class="default-icon">{{ defaultIcon }}</div>
+          <component
+            :is="customIcon"
+            v-if="customIcon"
+            :size="iconSize"
+          />
+          <div
+            v-else
+            class="default-icon"
+          >
+            {{ defaultIcon }}
+          </div>
         </slot>
       </div>
 
       <!-- Text Content -->
       <div class="empty-text">
-        <h3 class="empty-title">{{ title }}</h3>
-        <p v-if="message" class="empty-message">{{ message }}</p>
+        <h3 class="empty-title">
+          {{ title }}
+        </h3>
+        <p
+          v-if="message"
+          class="empty-message"
+        >
+          {{ message }}
+        </p>
       </div>
 
       <!-- Actions -->
-      <div v-if="$slots.actions || showDefaultActions" class="empty-actions">
+      <div
+        v-if="$slots.actions || showDefaultActions"
+        class="empty-actions"
+      >
         <slot name="actions">
           <BaseButton
             v-if="primaryAction"
             variant="primary"
-            :leftIcon="primaryAction.icon"
+            :left-icon="primaryAction.icon"
             @click="$emit('primaryAction')"
           >
             {{ primaryAction.text }}
@@ -30,7 +52,7 @@
           <BaseButton
             v-if="secondaryAction"
             variant="secondary"
-            :leftIcon="secondaryAction.icon"
+            :left-icon="secondaryAction.icon"
             @click="$emit('secondaryAction')"
           >
             {{ secondaryAction.text }}

@@ -1,27 +1,45 @@
 <template>
-  <div v-if="open" class="sidebar-overlay">
+  <div
+    v-if="open"
+    class="sidebar-overlay"
+  >
     <div class="complete-task-sidebar">
       <header class="sidebar-header">
         <div class="sidebar-title-with-icon">
-          <v-icon color="primary" class="mr-2">mdi-clipboard-check</v-icon>
-          <h3 class="sidebar-title">Complete Internal Task</h3>
+          <v-icon
+            color="primary"
+            class="mr-2"
+          >
+            mdi-clipboard-check
+          </v-icon>
+          <h3 class="sidebar-title">
+            Complete Internal Task
+          </h3>
         </div>
-        <button class="close-btn" @click="closeSidebar">
+        <button
+          class="close-btn"
+          @click="closeSidebar"
+        >
           <X class="icon" />
         </button>
       </header>
 
       <div class="sidebar-content">
         <div class="task-details-box">
-          <h4 class="section-title">Job Details</h4>
+          <h4 class="section-title">
+            Job Details
+          </h4>
 
           <!-- Loading state for task details -->
-          <div v-if="loadingTaskDetails" class="loading-state">
+          <div
+            v-if="loadingTaskDetails"
+            class="loading-state"
+          >
             <v-progress-circular
               indeterminate
               color="primary"
               size="24"
-            ></v-progress-circular>
+            />
             <span>Loading JOb details...</span>
           </div>
 

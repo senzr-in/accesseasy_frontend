@@ -1,12 +1,15 @@
 <template>
   <div class="attendance-dashboard-container">
     <!-- Filter Panel -->
-    <div class="filter-panel" v-if="showFilters && tenantId">
+    <div
+      v-if="showFilters && tenantId"
+      class="filter-panel"
+    >
       <div class="filter-content">
         <FilterComponent
-          :tenantId="tenantId"
-          :initialFilters="initialFilters"
-          :initiallyVisible="true"
+          :tenant-id="tenantId"
+          :initial-filters="initialFilters"
+          :initially-visible="true"
           :filter-schema="pageFilters"
           @apply-filters="handleApplyFilters"
           @filter-visibility-changed="onFilterVisibilityChanged"
@@ -18,26 +21,26 @@
 
     <!-- Main Content -->
     <div
+      v-if="tenantId"
       class="main-content"
       :class="{ 'full-width': !showFilters }"
-      v-if="tenantId"
     >
       <DataTableWrapper
-        v-model:searchQuery="searchQuery"
-        :showSearch="true"
-        :searchPlaceholder="'Search employees...'"
-        :isEmpty="filteredAttendance.length === 0 && !searchQuery"
-        :hasError="error"
-        @update:searchQuery="debouncedSearch"
+        v-model:search-query="searchQuery"
+        :show-search="true"
+        :search-placeholder="'Search employees...'"
+        :is-empty="filteredAttendance.length === 0 && !searchQuery"
+        :has-error="error"
+        @update:search-query="debouncedSearch"
       >
         <template #before-search>
           <button
             v-if="tenantId"
             class="filter-toggle-static"
-            @click="toggleFilters"
             :class="{ active: hasActiveFilters }"
             :title="showFilters ? 'Hide filters' : 'Show filters'"
             aria-label="Toggle filters"
+            @click="toggleFilters"
           >
             <svg
               width="20"
@@ -49,11 +52,14 @@
             >
               <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46" />
             </svg>
-            <div v-if="hasActiveFilters" class="filter-indicator"></div>
+            <div
+              v-if="hasActiveFilters"
+              class="filter-indicator"
+            />
           </button>
         </template>
         <!-- Header Slot for Stats -->
-        <template v-slot:toolbar-actions>
+        <template #toolbar-actions>
           <div class="stats-container">
             <div
               v-for="stat in stats"
@@ -90,8 +96,8 @@
           <EmptyState
             title="No attendance data found"
             message="Try adjusting your filters or search criteria"
-            :primaryAction="{ text: 'Clear Filters', icon: 'X' }"
-            @primaryAction="clearFilters"
+            :primary-action="{ text: 'Clear Filters', icon: 'X' }"
+            @primary-action="clearFilters"
           />
         </div>
 
@@ -100,13 +106,13 @@
           <DataTable
             :items="paginatedAttendance"
             :columns="columns"
-            :sortBy="sortBy"
-            :sortDirection="sortDirection"
-            :showSelection="false"
+            :sort-by="sortBy"
+            :sort-direction="sortDirection"
+            :show-selection="false"
             :expandable="false"
-            :rowClickable="true"
+            :row-clickable="true"
             @sort="handleSort"
-            @rowClick="handleRowClick"
+            @row-click="handleRowClick"
           >
             <!-- Employee Column -->
             <!-- Avatar column only -->
@@ -117,8 +123,11 @@
                   :src="item.avatarImage"
                   :alt="formatEmployeeName(item)"
                   class="avatar-image"
-                />
-                <div v-else class="avatar-placeholder">
+                >
+                <div
+                  v-else
+                  class="avatar-placeholder"
+                >
                   <svg
                     width="20"
                     height="20"
@@ -128,14 +137,20 @@
                     stroke-width="2"
                   >
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
+                    <circle
+                      cx="12"
+                      cy="7"
+                      r="4"
+                    />
                   </svg>
                 </div>
               </div>
             </template>
             <template #cell-employee="{ item }">
               <div class="employee-details">
-                <h3 class="employee-name">{{ formatEmployeeName(item) }}</h3>
+                <h3 class="employee-name">
+                  {{ formatEmployeeName(item) }}
+                </h3>
               </div>
             </template>
             <!-- Employee ID Column -->
@@ -220,11 +235,17 @@
                       : 'text-success'
                   "
                 >
-                  <circle cx="12" cy="12" r="10" />
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
                   <polyline points="12 6 12 12 16 14" />
                 </svg>
                 <div>
-                  <div class="time-value">{{ formatTime(item.inTime) }}</div>
+                  <div class="time-value">
+                    {{ formatTime(item.inTime) }}
+                  </div>
                   <div
                     v-if="item.lateBy && item.lateBy !== '00:00:00'"
                     class="time-late"
@@ -251,11 +272,17 @@
                       : 'text-success'
                   "
                 >
-                  <circle cx="12" cy="12" r="10" />
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
                   <polyline points="12 6 12 12 16 14" />
                 </svg>
                 <div>
-                  <div class="time-value">{{ formatTime(item.outTime) }}</div>
+                  <div class="time-value">
+                    {{ formatTime(item.outTime) }}
+                  </div>
                   <div
                     v-if="
                       item.earlyDeparture && item.earlyDeparture !== '00:00:00'
@@ -271,14 +298,14 @@
         </div>
 
         <!-- Pagination Slot -->
-        <template v-slot:pagination>
+        <template #pagination>
           <CustomPagination
             v-model:page="currentPage"
-            v-model:itemsPerPage="itemsPerPage"
+            v-model:items-per-page="itemsPerPage"
             :total-items="totalFilteredItems"
             :is-searching="!!searchQuery"
             @update:page="handlePageChange"
-            @update:itemsPerPage="handleItemsPerPageChange"
+            @update:items-per-page="handleItemsPerPageChange"
           />
         </template>
       </DataTableWrapper>

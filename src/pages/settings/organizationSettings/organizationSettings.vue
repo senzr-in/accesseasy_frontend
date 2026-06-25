@@ -6,24 +6,36 @@
   >
     <!-- Main Container with Blue Border -->
     <div class="main-container">
-      <div v-if="isLoading" class="loading-container">
+      <div
+        v-if="isLoading"
+        class="loading-container"
+      >
         <v-progress-circular
           indeterminate
           color="primary"
           size="64"
-        ></v-progress-circular>
-        <div class="loading-text">Loading Organization details...</div>
+        />
+        <div class="loading-text">
+          Loading Organization details...
+        </div>
       </div>
 
-      <div v-else class="content-wrapper">
+      <div
+        v-else
+        class="content-wrapper"
+      >
         <!-- Company Details Section -->
         <v-card class="section-card company-section">
           <div class="section-header">
             <div class="section-title-wrapper">
               <div class="company-icon-wrapper">
-                <v-icon class="company-icon">mdi-domain</v-icon>
+                <v-icon class="company-icon">
+                  mdi-domain
+                </v-icon>
               </div>
-              <h2 class="section-title">Company Details</h2>
+              <h2 class="section-title">
+                Company Details
+              </h2>
             </div>
 
             <div class="action-buttons">
@@ -79,7 +91,13 @@
                   alt="Company Logo"
                   cover
                 />
-                <v-icon v-else size="32" color="grey">mdi-plus</v-icon>
+                <v-icon
+                  v-else
+                  size="32"
+                  color="grey"
+                >
+                  mdi-plus
+                </v-icon>
 
                 <!-- Remove button (neutral color, small) -->
                 <v-btn
@@ -90,7 +108,12 @@
                   style="top: 4px; right: 4px"
                   @click.stop="tenantData.logo = null"
                 >
-                  <v-icon size="20" color="red-darken-1">mdi-close</v-icon>
+                  <v-icon
+                    size="20"
+                    color="red-darken-1"
+                  >
+                    mdi-close
+                  </v-icon>
                 </v-btn>
               </div>
 
@@ -100,49 +123,53 @@
                 accept="image/*"
                 style="display: none"
                 @change="handleLogoChange"
-              />
+              >
             </div>
 
             <div class="company-info">
               <div class="company-name-section">
-    <div class="field-label">Company Name</div>
-    <div class="field-value d-flex align-center flex-wrap gap-3">
-      <div style="min-width: 300px;">
-        <v-text-field
-          v-if="editModes.address"
-          v-model="tenantData.tenantName"
-          label="Company Name"
-          variant="outlined"
-          density="compact"
-          hide-details
-        />
-        <v-text-field
-          v-else
-          :model-value="tenantData?.tenantName || '-'"
-          label="Company Name"
-          variant="outlined"
-          density="compact"
-          hide-details
-          readonly
-          bg-color="grey-lighten-4"
-          :disabled="!editModes.address"
-        />
-      </div>
-      <v-select
-        v-model="tenantData.accountSettings.currency"
-        :items="currencyOptions"
-        label="Currency"
-        variant="outlined"
-        density="compact"
-        hide-details
-        style="width: 140px;"
-        :disabled="!editModes.address"
-      />
-    </div>
-  </div>
+                <div class="field-label">
+                  Company Name
+                </div>
+                <div class="field-value d-flex align-center flex-wrap gap-3">
+                  <div style="min-width: 300px;">
+                    <v-text-field
+                      v-if="editModes.address"
+                      v-model="tenantData.tenantName"
+                      label="Company Name"
+                      variant="outlined"
+                      density="compact"
+                      hide-details
+                    />
+                    <v-text-field
+                      v-else
+                      :model-value="tenantData?.tenantName || '-'"
+                      label="Company Name"
+                      variant="outlined"
+                      density="compact"
+                      hide-details
+                      readonly
+                      bg-color="grey-lighten-4"
+                      :disabled="!editModes.address"
+                    />
+                  </div>
+                  <v-select
+                    v-model="tenantData.accountSettings.currency"
+                    :items="currencyOptions"
+                    label="Currency"
+                    variant="outlined"
+                    density="compact"
+                    hide-details
+                    style="width: 140px;"
+                    :disabled="!editModes.address"
+                  />
+                </div>
+              </div>
 
               <div class="address-section">
-                <div class="field-label">Company Address</div>
+                <div class="field-label">
+                  Company Address
+                </div>
                 <template v-if="!editModes.address">
                   <div class="field-value">
                     {{ tenantData?.companyAddress || "" }}
@@ -594,13 +621,13 @@
       v-if="showDeleteModal"
       :show="showDeleteModal"
       title="Confirm Deletion"
-      confirmMessage="Are you sure you want to delete"
-      :itemLabel="'ESI Account'"
-      :itemName="`${tenantData.esiAccountNumber[selectedIndex].state} - ${tenantData.esiAccountNumber[selectedIndex].esiAccount}`"
-      cancelText="Cancel"
-      confirmText="Delete"
+      confirm-message="Are you sure you want to delete"
+      :item-label="'ESI Account'"
+      :item-name="`${tenantData.esiAccountNumber[selectedIndex].state} - ${tenantData.esiAccountNumber[selectedIndex].esiAccount}`"
+      cancel-text="Cancel"
+      confirm-text="Delete"
       :deleting="deleting"
-      :deletingText="'Deleting...'"
+      :deleting-text="'Deleting...'"
       @close="showDeleteModal = false"
       @confirm="
         () => {

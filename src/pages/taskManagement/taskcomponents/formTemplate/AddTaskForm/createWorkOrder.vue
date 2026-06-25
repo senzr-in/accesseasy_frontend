@@ -17,8 +17,8 @@
           hide-details
           clearable
           placeholder="Select work order template"
-          @update:model-value="onSelectTemplate"
           class="template-selector"
+          @update:model-value="onSelectTemplate"
         />
         <v-btn
           class="createtask"
@@ -33,7 +33,10 @@
     </div>
 
     <!-- Main content area -->
-    <section class="form-body" ref="bodyEl">
+    <section
+      ref="bodyEl"
+      class="form-body"
+    >
       <!-- Global toast -->
       <ToastNotification
         :show="showToast"
@@ -48,10 +51,16 @@
         message="Please wait while we fetch the form details."
         :full-height="false"
       />
-      <ErrorState v-else-if="selectedTemplateId && error" :error="error" />
+      <ErrorState
+        v-else-if="selectedTemplateId && error"
+        :error="error"
+      />
 
       <!-- Form Content -->
-      <div v-else-if="formDetails" class="form-content">
+      <div
+        v-else-if="formDetails"
+        class="form-content"
+      >
         <v-row class="sections-grid">
           <!-- Client Details Box -->
           <div
@@ -159,7 +168,10 @@
             </div>
             <div class="section-content">
               <div class="jobsheets-list">
-                <v-expansion-panels v-model="expandedJobSheets" multiple>
+                <v-expansion-panels
+                  v-model="expandedJobSheets"
+                  multiple
+                >
                   <v-expansion-panel
                     v-for="jobSheet in visibleJobSheets"
                     :key="jobSheet.job_id"
@@ -236,7 +248,11 @@
       </div>
 
       <!-- Empty hint -->
-      <v-alert v-else type="info" variant="tonal">
+      <v-alert
+        v-else
+        type="info"
+        variant="tonal"
+      >
         Select a form to start creating a work order.
       </v-alert>
     </section>

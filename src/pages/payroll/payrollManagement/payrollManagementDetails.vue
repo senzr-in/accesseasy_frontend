@@ -1,11 +1,17 @@
 <template>
-  <div class="employee-container" :class="{ 'filter-open': showFilters }">
-    <div class="filter-pane" v-if="showFilters && tenantId">
+  <div
+    class="employee-container"
+    :class="{ 'filter-open': showFilters }"
+  >
+    <div
+      v-if="showFilters && tenantId"
+      class="filter-pane"
+    >
       <div class="filter-content">
         <PayrollFilters
-          :tenantId="tenantId"
-          :initialFilters="initialFilters"
-          :initiallyVisible="true"
+          :tenant-id="tenantId"
+          :initial-filters="initialFilters"
+          :initially-visible="true"
           :filter-schema="pageFilters"
           @apply-filters="handleApplyFilters"
           @filter-visibility-changed="onFilterVisibilityChanged"
@@ -16,21 +22,21 @@
     <div class="main-content">
       <!-- Integrate DataTable wrapper -->
       <data-table-wrapper
-        v-model:searchQuery="search"
+        v-model:search-query="search"
         search-placeholder="Search Employee "
         :show-search="true"
         :is-empty="items.length === 0 && !search"
         :has-error="false"
-        @update:searchQuery="debouncedSearch"
+        @update:search-query="debouncedSearch"
       >
         <template #before-search>
           <button
             v-if="tenantId"
             class="filter-toggle-static"
-            @click="toggleFilters"
             :class="{ active: hasActiveFilters }"
             :title="showFilters ? 'Hide filters' : 'Show filters'"
             aria-label="Toggle filters"
+            @click="toggleFilters"
           >
             <svg
               width="20"
@@ -42,7 +48,10 @@
             >
               <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46" />
             </svg>
-            <div v-if="hasActiveFilters" class="filter-indicator"></div>
+            <div
+              v-if="hasActiveFilters"
+              class="filter-indicator"
+            />
           </button>
         </template>
         <template #below-search>
@@ -51,8 +60,8 @@
               variant="primary"
               size="md"
               :left-icon="RefreshCw"
-              @click="recalculateAttendance"
               class="ms-2"
+              @click="recalculateAttendance"
             >
               Recalc Attendance
             </BaseButton>
@@ -61,9 +70,9 @@
               variant="success"
               size="md"
               :left-icon="BadgeCheck"
-              @click="markAsPaid"
               :disabled="!hasFinalizedUnpaidUsers"
               class="ms-2"
+              @click="markAsPaid"
             >
               Mark as Paid
             </BaseButton>
@@ -72,9 +81,9 @@
               variant="primary"
               size="md"
               :left-icon="CheckCheck"
-              @click="finalizeMultiplePayroll()"
               :disabled="selected.length === 0"
               class="ms-2"
+              @click="finalizeMultiplePayroll()"
             >
               Finalize Payroll ({{ selected.length }})
             </BaseButton>
@@ -83,19 +92,22 @@
               variant="primary"
               size="md"
               :left-icon="FileSpreadsheet"
-              @click="downloadSalarySheet()"
               class="ms-2"
+              @click="downloadSalarySheet()"
             >
               Salary Sheet
-              <span v-if="selected.length > 0" class="ml-1">
+              <span
+                v-if="selected.length > 0"
+                class="ml-1"
+              >
                 ({{ selected.length }})
               </span>
             </BaseButton>
-          </div></template
-        >
+          </div>
+        </template>
         <!-- Toolbar Actions Slot -->
 
-        <template v-slot:toolbar-actions>
+        <template #toolbar-actions>
           <div class="stats-container">
             <div class="stat-item">
               <span class="stat-value">{{ payrollCounts.paid }}</span>
@@ -116,7 +128,7 @@
           </div>
         </template>
         <!-- Table Content -->
-        <template v-slot:default>
+        <template #default>
           <SkeletonLoading
             v-if="loading"
             variant="data-table"
@@ -142,9 +154,9 @@
               :sort-direction="sortDirection"
               :row-clickable="true"
               @update:selected-items="selected = $event"
-              @rowClick="handleRowClick"
+              @row-click="handleRowClick"
             >
-              <template v-slot:top>
+              <template #top>
                 <div class="d-flex align-center py-2 px-4">
                   <v-chip
                     v-if="dateRange.start && dateRange.end"
@@ -208,19 +220,19 @@
                   </v-chip>
                 </div>
               </template>
-              <template v-slot:cell-employee.employeeId="{ item }">
+              <template #cell-employee.employeeId="{ item }">
                 <strong>{{ item.employee.employeeId || "-" }}</strong>
               </template>
-              <template v-slot:cell-employee.assignedUser.first_name="{ item }">
+              <template #cell-employee.assignedUser.first_name="{ item }">
                 <span class="text-primary">{{
                   item.employee.assignedUser.first_name || "-"
                 }}</span>
               </template>
-              <template v-slot:cell-employee.assignedUser.role.name="{ item }">
+              <template #cell-employee.assignedUser.role.name="{ item }">
                 {{ item.employee.assignedUser.role?.name || "-" }}
               </template>
               <template
-                v-slot:cell-employee.assignedUser.designation="{ item }"
+                #cell-employee.assignedUser.designation="{ item }"
               >
                 {{ item.employee.assignedUser.designation || "-" }}
               </template>
@@ -230,7 +242,7 @@
               <!-- <template v-slot:cell-employee.cycleType="{ item }">
               {{ getCycleNameById(item.employee.cycleType) }}
             </template> -->
-              <template v-slot:cell-attendanceVerification="{ item }">
+              <template #cell-attendanceVerification="{ item }">
                 <v-icon
                   :color="item.attendanceVerified ? 'success' : 'error'"
                   small
@@ -244,7 +256,7 @@
                 </v-icon>
                 {{ item.attendanceVerified ? "Verified" : "Unverified" }}
               </template>
-              <template v-slot:cell-salaryVerification="{ item }">
+              <template #cell-salaryVerification="{ item }">
                 <v-icon
                   :color="item.salaryVerified ? 'success' : 'error'"
                   small
@@ -258,12 +270,15 @@
                 </v-icon>
                 {{ item.salaryVerified ? "Finalized" : "Unfinalized" }}
               </template>
-              <template v-slot:cell-pending="{ item }">
-                <v-chip :color="item.isPending ? 'orange' : 'green'" small>
+              <template #cell-pending="{ item }">
+                <v-chip
+                  :color="item.isPending ? 'orange' : 'green'"
+                  small
+                >
                   {{ item.isPending ? "Pending" : "Approved" }}
                 </v-chip>
               </template>
-              <template v-slot:cell-salaryPaid="{ item }">
+              <template #cell-salaryPaid="{ item }">
                 <span
                   class="salary-paid-status"
                   :class="item.salaryPaid === 'paid' ? 'paid' : 'unpaid'"
@@ -272,7 +287,7 @@
                 </span>
               </template>
 
-              <template v-slot:cell-activity="{ item }">
+              <template #cell-activity="{ item }">
                 <v-chip
                   :color="getActivityColor(item.activity)"
                   small
@@ -281,46 +296,46 @@
                   {{ item.activity }}
                 </v-chip>
               </template>
-              <template v-slot:cell-joiningDate="{ item }">
+              <template #cell-joiningDate="{ item }">
                 {{
                   item.joiningDate
                     ? formatDateForDisplay(item.joiningDate)
                     : "-"
                 }}
               </template>
-              <template v-slot:cell-leavingDate="{ item }">
+              <template #cell-leavingDate="{ item }">
                 {{
                   item.leavingDate
                     ? formatDateForDisplay(item.leavingDate)
                     : "-"
                 }}
               </template>
-              <template v-slot:cell-startDate="{ item }">
+              <template #cell-startDate="{ item }">
                 {{
                   item.startDate ? formatDateForDisplay(item.startDate) : "-"
                 }}
               </template>
-              <template v-slot:cell-endDate="{ item }">
+              <template #cell-endDate="{ item }">
                 {{ item.endDate ? formatDateForDisplay(item.endDate) : "-" }}
               </template>
-              <template v-slot:cell-ctc="{ item }">
+              <template #cell-ctc="{ item }">
                 {{ formatAmount(item.ctc) }}
               </template>
-              <template v-slot:cell-payableDays="{ item }">
+              <template #cell-payableDays="{ item }">
                 {{ item.payableDays || "-" }}
               </template>
-              <template v-slot:cell-payableCTC="{ item }">
+              <template #cell-payableCTC="{ item }">
                 {{ formatAmount(item.payableCTC) }}
               </template>
-              <template v-slot:cell-data-table-select="{ item }">
+              <template #cell-data-table-select="{ item }">
                 <v-checkbox
                   :model-value="isItemSelected(item)"
-                  @update:model-value="
-                    (value) => handleCheckboxChange(item, value)
-                  "
                   :disabled="!isItemSelectable(item)"
                   color="black"
                   density="compact"
+                  @update:model-value="
+                    (value) => handleCheckboxChange(item, value)
+                  "
                   @click.stop
                 />
               </template>
@@ -345,14 +360,14 @@
         </template>
 
         <!-- Pagination Slot -->
-        <template v-slot:pagination>
+        <template #pagination>
           <CustomPagination
             v-if="!showForm"
             v-model:page="page"
-            v-model:itemsPerPage="itemsPerPage"
+            v-model:items-per-page="itemsPerPage"
             :total-items="totalItems"
             @update:page="handlePageChange"
-            @update:itemsPerPage="handleItemsPerPageChange"
+            @update:items-per-page="handleItemsPerPageChange"
           />
         </template>
       </data-table-wrapper>
@@ -525,20 +540,38 @@
         :show-cancel="downloadProgress < 100"
         @cancel="cancelDownload"
       />
-      <v-dialog v-model="showPayslipPreview" max-width="800px">
+      <v-dialog
+        v-model="showPayslipPreview"
+        max-width="800px"
+      >
         <v-card>
           <v-card-title class="text-h5 bg-primary text-white">
             Payslip Preview
-            <v-spacer></v-spacer>
+            <v-spacer />
           </v-card-title>
           <v-card-text class="pa-0">
-            <div ref="payslipPreviewContent" class="payslip-preview-content">
-              <div v-if="currentPayslipData" class="payslip-container-new">
-                <div class="payslip-loading" v-if="generatingPdf">
-                  <v-progress-circular indeterminate color="primary" />
+            <div
+              ref="payslipPreviewContent"
+              class="payslip-preview-content"
+            >
+              <div
+                v-if="currentPayslipData"
+                class="payslip-container-new"
+              >
+                <div
+                  v-if="generatingPdf"
+                  class="payslip-loading"
+                >
+                  <v-progress-circular
+                    indeterminate
+                    color="primary"
+                  />
                   <span class="ml-2">Generating PDF...</span>
                 </div>
-                <div v-else class="payslip-content">
+                <div
+                  v-else
+                  class="payslip-content"
+                >
                   <!-- Header Section -->
                   <div class="payslip-header-new">
                     <div>
@@ -569,43 +602,65 @@
 
                   <!-- Employee Details Section -->
                   <div class="section-container">
-                    <div class="section-header">Employee Details</div>
+                    <div class="section-header">
+                      Employee Details
+                    </div>
                     <table class="details-table">
                       <tbody>
                         <tr>
-                          <td class="label-cell">Employee Name:</td>
+                          <td class="label-cell">
+                            Employee Name:
+                          </td>
                           <td class="value-cell">
                             {{ currentPayslipData.employeeName }}
                           </td>
-                          <td class="label-cell">Employee ID:</td>
+                          <td class="label-cell">
+                            Employee ID:
+                          </td>
                           <td class="value-cell">
                             {{ currentPayslipData.employeeId }}
                           </td>
                         </tr>
                         <tr>
-                          <td class="label-cell">Role:</td>
+                          <td class="label-cell">
+                            Role:
+                          </td>
                           <td class="value-cell">
                             {{ currentPayslipData.Role }}
                           </td>
-                          <td class="label-cell">Designation:</td>
+                          <td class="label-cell">
+                            Designation:
+                          </td>
                           <td class="value-cell">
                             {{ currentPayslipData.designation }}
                           </td>
                         </tr>
                         <tr>
-                          <td class="label-cell">PF(UAN) Number:</td>
-                          <td colspan="3" class="value-cell">
+                          <td class="label-cell">
+                            PF(UAN) Number:
+                          </td>
+                          <td
+                            colspan="3"
+                            class="value-cell"
+                          >
                             {{ currentPayslipData.PFNumber }}
                           </td>
                         </tr>
                         <tr>
-                          <td class="label-cell">ESI Number:</td>
-                          <td colspan="3" class="value-cell">
+                          <td class="label-cell">
+                            ESI Number:
+                          </td>
+                          <td
+                            colspan="3"
+                            class="value-cell"
+                          >
                             {{ currentPayslipData.ESINumber }}
                           </td>
                         </tr>
                         <tr>
-                          <td class="label-cell">Pay Period:</td>
+                          <td class="label-cell">
+                            Pay Period:
+                          </td>
                           <td class="value-cell">
                             {{
                               formatPayrollMonth(
@@ -614,7 +669,9 @@
                               )
                             }}
                           </td>
-                          <td class="label-cell">Payable Days:</td>
+                          <td class="label-cell">
+                            Payable Days:
+                          </td>
                           <td class="value-cell">
                             {{ currentPayslipData.payableDays }}
                           </td>
@@ -627,14 +684,18 @@
                   <div class="salary-grid">
                     <!-- Earnings Column -->
                     <div class="salary-column">
-                      <div class="section-header">Earnings</div>
+                      <div class="section-header">
+                        Earnings
+                      </div>
                       <table class="salary-table">
                         <tbody>
                           <tr
                             v-for="(value, key) in currentPayslipData.earnings"
                             :key="`earning-${key}`"
                           >
-                            <td class="item-cell">{{ key }}</td>
+                            <td class="item-cell">
+                              {{ key }}
+                            </td>
                             <td class="amount-cell">
                               {{
                                 value === null
@@ -648,12 +709,15 @@
                           <template
                             v-if="
                               currentPayslipData.salaryArrears &&
-                              Object.keys(currentPayslipData.salaryArrears)
-                                .length > 0
+                                Object.keys(currentPayslipData.salaryArrears)
+                                  .length > 0
                             "
                           >
                             <tr>
-                              <td colspan="2" class="subsection-header">
+                              <td
+                                colspan="2"
+                                class="subsection-header"
+                              >
                                 Salary Arrears
                               </td>
                             </tr>
@@ -663,7 +727,9 @@
                               ) in currentPayslipData.salaryArrears"
                               :key="`arrear-${key}`"
                             >
-                              <td class="item-cell">{{ key }}</td>
+                              <td class="item-cell">
+                                {{ key }}
+                              </td>
                               <td class="amount-cell">
                                 {{ formatAmount(value || 0) }}
                               </td>
@@ -674,12 +740,15 @@
                           <template
                             v-if="
                               currentPayslipData.benefits &&
-                              Object.keys(currentPayslipData.benefits).length >
+                                Object.keys(currentPayslipData.benefits).length >
                                 0
                             "
                           >
                             <tr>
-                              <td colspan="2" class="subsection-header">
+                              <td
+                                colspan="2"
+                                class="subsection-header"
+                              >
                                 Benefits
                               </td>
                             </tr>
@@ -689,7 +758,9 @@
                               ) in currentPayslipData.benefits"
                               :key="`benefit-${key}`"
                             >
-                              <td class="item-cell">{{ key }}</td>
+                              <td class="item-cell">
+                                {{ key }}
+                              </td>
                               <td class="amount-cell">
                                 {{ formatAmount(value || 0) }}
                               </td>
@@ -698,14 +769,16 @@
 
                           <!-- Total Earnings -->
                           <tr class="total-row">
-                            <td class="item-cell">Total Earnings</td>
+                            <td class="item-cell">
+                              Total Earnings
+                            </td>
                             <td class="amount-cell">
                               {{
                                 currentPayslipData.totalEarnings === null
                                   ? "NaN"
                                   : formatAmount(
-                                      currentPayslipData.totalEarnings || 0,
-                                    )
+                                    currentPayslipData.totalEarnings || 0,
+                                  )
                               }}
                             </td>
                           </tr>
@@ -715,7 +788,9 @@
 
                     <!-- Deductions Column -->
                     <div class="salary-column">
-                      <div class="section-header">Deductions</div>
+                      <div class="section-header">
+                        Deductions
+                      </div>
                       <table class="salary-table">
                         <tbody>
                           <tr
@@ -724,7 +799,9 @@
                             ) in currentPayslipData.deductions"
                             :key="`deduction-${key}`"
                           >
-                            <td class="item-cell">{{ key }}</td>
+                            <td class="item-cell">
+                              {{ key }}
+                            </td>
                             <td class="amount-cell">
                               {{ formatAmount(value || 0) }}
                             </td>
@@ -734,12 +811,15 @@
                           <template
                             v-if="
                               currentPayslipData.penalties &&
-                              Object.keys(currentPayslipData.penalties).length >
+                                Object.keys(currentPayslipData.penalties).length >
                                 0
                             "
                           >
                             <tr>
-                              <td colspan="2" class="subsection-header">
+                              <td
+                                colspan="2"
+                                class="subsection-header"
+                              >
                                 Penalties
                               </td>
                             </tr>
@@ -749,7 +829,9 @@
                               ) in currentPayslipData.penalties"
                               :key="`penalty-${key}`"
                             >
-                              <td class="item-cell">{{ key }}</td>
+                              <td class="item-cell">
+                                {{ key }}
+                              </td>
                               <td class="amount-cell">
                                 {{ formatAmount(value || 0) }}
                               </td>
@@ -760,12 +842,15 @@
                           <template
                             v-if="
                               currentPayslipData.otherDeduction &&
-                              Object.keys(currentPayslipData.otherDeduction)
-                                .length > 0
+                                Object.keys(currentPayslipData.otherDeduction)
+                                  .length > 0
                             "
                           >
                             <tr>
-                              <td colspan="2" class="subsection-header">
+                              <td
+                                colspan="2"
+                                class="subsection-header"
+                              >
                                 Other Deductions
                               </td>
                             </tr>
@@ -775,7 +860,9 @@
                               ) in currentPayslipData.otherDeduction"
                               :key="`other-deduction-${key}`"
                             >
-                              <td class="item-cell">{{ key }}</td>
+                              <td class="item-cell">
+                                {{ key }}
+                              </td>
                               <td class="amount-cell">
                                 {{ formatAmount(value || 0) }}
                               </td>
@@ -786,13 +873,16 @@
                           <template
                             v-if="
                               currentPayslipData.individualDeduction &&
-                              Object.keys(
-                                currentPayslipData.individualDeduction,
-                              ).length > 0
+                                Object.keys(
+                                  currentPayslipData.individualDeduction,
+                                ).length > 0
                             "
                           >
                             <tr>
-                              <td colspan="2" class="subsection-header">
+                              <td
+                                colspan="2"
+                                class="subsection-header"
+                              >
                                 Individual Deductions
                               </td>
                             </tr>
@@ -806,7 +896,9 @@
                                 v-for="(value, key) in group"
                                 :key="`individual-deduction-${groupKey}-${key}`"
                               >
-                                <td class="item-cell">{{ key }}</td>
+                                <td class="item-cell">
+                                  {{ key }}
+                                </td>
                                 <td class="amount-cell">
                                   {{ formatAmount(value || 0) }}
                                 </td>
@@ -816,7 +908,9 @@
 
                           <!-- Total Deductions -->
                           <tr class="total-row">
-                            <td class="item-cell">Total Deductions</td>
+                            <td class="item-cell">
+                              Total Deductions
+                            </td>
                             <td class="amount-cell">
                               {{
                                 formatAmount(
@@ -868,24 +962,32 @@
             </div>
           </v-card-text>
           <v-card-actions class="pa-4">
-            <v-spacer></v-spacer>
-            <v-btn color="error" @click="showPayslipPreview = false"
-              >Close</v-btn
+            <v-spacer />
+            <v-btn
+              color="error"
+              @click="showPayslipPreview = false"
             >
+              Close
+            </v-btn>
             <v-btn
               color="primary"
-              @click="downloadCurrentPayslip"
               :loading="generatingPdf"
               :disabled="generatingPdf"
+              @click="downloadCurrentPayslip"
             >
-              <v-icon left>mdi-download</v-icon>
+              <v-icon left>
+                mdi-download
+              </v-icon>
               Download PDF
             </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
 
-      <v-dialog v-model="showPaidConfirmation" max-width="500px">
+      <v-dialog
+        v-model="showPaidConfirmation"
+        max-width="500px"
+      >
         <v-card>
           <v-card-title class="text-h5 bg-success text-white">
             Mark Users as Paid
@@ -897,17 +999,22 @@
             </p>
           </v-card-text>
           <v-card-actions class="pa-4">
-            <v-spacer></v-spacer>
-            <v-btn color="grey" @click="showPaidConfirmation = false"
-              >Cancel</v-btn
+            <v-spacer />
+            <v-btn
+              color="grey"
+              @click="showPaidConfirmation = false"
             >
+              Cancel
+            </v-btn>
             <v-btn
               color="success"
-              @click="confirmMarkAsPaid"
               :loading="markingAsPaidInProgress"
               :disabled="markingAsPaidInProgress"
+              @click="confirmMarkAsPaid"
             >
-              <v-icon left>mdi-cash</v-icon>
+              <v-icon left>
+                mdi-cash
+              </v-icon>
               Mark as Paid
             </v-btn>
           </v-card-actions>
@@ -915,7 +1022,10 @@
       </v-dialog>
 
       <!-- No users to mark as paid dialog -->
-      <v-dialog v-model="showNoUsersToMarkPaid" max-width="500px">
+      <v-dialog
+        v-model="showNoUsersToMarkPaid"
+        max-width="500px"
+      >
         <v-card>
           <v-card-title class="text-h5 bg-warning text-white">
             No Users to Mark as Paid
@@ -927,16 +1037,22 @@
             </p>
           </v-card-text>
           <v-card-actions class="pa-4">
-            <v-spacer></v-spacer>
-            <v-btn color="primary" @click="showNoUsersToMarkPaid = false"
-              >OK</v-btn
+            <v-spacer />
+            <v-btn
+              color="primary"
+              @click="showNoUsersToMarkPaid = false"
             >
+              OK
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
 
       <!-- Paid users selected warning dialog -->
-      <v-dialog v-model="showPaidUsersWarning" max-width="500px">
+      <v-dialog
+        v-model="showPaidUsersWarning"
+        max-width="500px"
+      >
         <v-card>
           <v-card-title class="text-h5 bg-warning text-white">
             Paid Users Selected
@@ -952,16 +1068,22 @@
             </p>
           </v-card-text>
           <v-card-actions class="pa-4">
-            <v-spacer></v-spacer>
-            <v-btn color="primary" @click="showPaidUsersWarning = false"
-              >OK</v-btn
+            <v-spacer />
+            <v-btn
+              color="primary"
+              @click="showPaidUsersWarning = false"
             >
+              OK
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
 
       <!-- Unfinalized users batch processing dialog -->
-      <v-dialog v-model="showUnfinalizedDialog" max-width="500px">
+      <v-dialog
+        v-model="showUnfinalizedDialog"
+        max-width="500px"
+      >
         <v-card>
           <v-card-title class="text-h5 bg-warning text-white">
             Process Unfinalized Users
@@ -979,27 +1101,29 @@
               color="warning"
               class="mt-4"
             >
-              <template v-slot:default="{ value }">
+              <template #default="{ value }">
                 <strong>{{ Math.ceil(value) }}% Complete</strong>
               </template>
             </v-progress-linear>
           </v-card-text>
           <v-card-actions class="pa-4">
-            <v-spacer></v-spacer>
+            <v-spacer />
             <v-btn
               color="grey"
-              @click="cancelUnfinalizedProcess"
               :disabled="processingBatch"
+              @click="cancelUnfinalizedProcess"
             >
               Cancel
             </v-btn>
             <v-btn
               color="warning"
-              @click="processUnfinalizedBatch"
               :loading="processingBatch"
               :disabled="processingBatch"
+              @click="processUnfinalizedBatch"
             >
-              <v-icon left>mdi-account-check</v-icon>
+              <v-icon left>
+                mdi-account-check
+              </v-icon>
               UnFinalized
             </v-btn>
           </v-card-actions>
@@ -1007,7 +1131,10 @@
       </v-dialog>
 
       <!-- Paid user selected dialog -->
-      <v-dialog v-model="showPaidUserSelectedDialog" max-width="500px">
+      <v-dialog
+        v-model="showPaidUserSelectedDialog"
+        max-width="500px"
+      >
         <v-card>
           <v-card-title class="text-h5 bg-warning text-white">
             Paid User Selected
@@ -1019,12 +1146,20 @@
             </p>
           </v-card-text>
           <v-card-actions class="pa-4">
-            <v-spacer></v-spacer>
-            <v-btn color="grey" @click="showPaidUserSelectedDialog = false"
-              >Cancel</v-btn
+            <v-spacer />
+            <v-btn
+              color="grey"
+              @click="showPaidUserSelectedDialog = false"
             >
-            <v-btn color="warning" @click="skipPaidUsers">
-              <v-icon left>mdi-skip-next</v-icon>
+              Cancel
+            </v-btn>
+            <v-btn
+              color="warning"
+              @click="skipPaidUsers"
+            >
+              <v-icon left>
+                mdi-skip-next
+              </v-icon>
               Skip Paid Users
             </v-btn>
           </v-card-actions>
@@ -1032,7 +1167,10 @@
       </v-dialog>
 
       <!-- Mixed paid users dialog -->
-      <v-dialog v-model="showMixedPaidUsersDialog" max-width="500px">
+      <v-dialog
+        v-model="showMixedPaidUsersDialog"
+        max-width="500px"
+      >
         <v-card>
           <v-card-title class="text-h5 bg-warning text-white">
             Some Selected Users Are Paid
@@ -1048,26 +1186,44 @@
             </p>
           </v-card-text>
           <v-card-actions class="pa-4">
-            <v-spacer></v-spacer>
-            <v-btn color="grey" @click="showMixedPaidUsersDialog = false"
-              >Cancel</v-btn
+            <v-spacer />
+            <v-btn
+              color="grey"
+              @click="showMixedPaidUsersDialog = false"
             >
-            <v-btn color="warning" @click="skipPaidUsers">
-              <v-icon left>mdi-skip-next</v-icon>
+              Cancel
+            </v-btn>
+            <v-btn
+              color="warning"
+              @click="skipPaidUsers"
+            >
+              <v-icon left>
+                mdi-skip-next
+              </v-icon>
               Skip Paid & Continue with Unpaid
             </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
       <!-- Modify the attendance popup -->
-      <v-dialog v-model="showAttendancePopup" max-width="500">
-        <v-card rounded="xl" class="pa-4" elevation="8">
+      <v-dialog
+        v-model="showAttendancePopup"
+        max-width="500"
+      >
+        <v-card
+          rounded="xl"
+          class="pa-4"
+          elevation="8"
+        >
           <v-card-title class="d-flex justify-space-between align-center">
             <span class="text-h6 font-weight-bold">Processing Attendance</span>
           </v-card-title>
 
           <v-card-text>
-            <div class="d-flex flex-column align-center" v-if="isProcessing">
+            <div
+              v-if="isProcessing"
+              class="d-flex flex-column align-center"
+            >
               <v-progress-circular
                 indeterminate
                 color="indigo"
@@ -1081,10 +1237,17 @@
                 Finished: {{ processedCount }} / {{ totalCount }}
               </p>
             </div>
-            <div v-else class="d-flex flex-column align-center">
-              <v-icon size="64" color="green" class="mb-4"
-                >mdi-check-circle</v-icon
+            <div
+              v-else
+              class="d-flex flex-column align-center"
+            >
+              <v-icon
+                size="64"
+                color="green"
+                class="mb-4"
               >
+                mdi-check-circle
+              </v-icon>
               <p class="text-body-1">
                 Successfully processed attendance for
                 {{ successCount }} employee(s). Failed: {{ failedCount }}
@@ -1094,16 +1257,24 @@
 
           <v-card-actions class="justify-end">
             <v-btn
+              v-if="isProcessing"
               color="grey darken-1"
               dark
               rounded
               @click="cancel"
-              v-if="isProcessing"
             >
-              <v-icon left>mdi-close</v-icon>
+              <v-icon left>
+                mdi-close
+              </v-icon>
               Cancel
             </v-btn>
-            <v-btn color="primary" dark rounded @click="close" v-else>
+            <v-btn
+              v-else
+              color="primary"
+              dark
+              rounded
+              @click="close"
+            >
               OK
             </v-btn>
           </v-card-actions>
@@ -1144,6 +1315,8 @@ import {
 } from "lucide-vue-next";
 
 export default {
+
+  name: "PayrollManagement",
   components: {
     SkeletonLoading,
     CustomPagination,
@@ -1154,8 +1327,6 @@ export default {
     PayrollFilters,
     ErrorState,
   },
-
-  name: "PayrollManagement",
   // props: {
   //   tenantId: {
   //     type: String,
@@ -1433,6 +1604,22 @@ export default {
     selectedYear() {
       this.handleMonthChange();
     },
+  },
+  watch: {
+    dateRange: {
+      handler(newVal, oldVal) {
+        console.log("dateRange changed:", {
+          newVal,
+          oldVal,
+        });
+      },
+      deep: true,
+    },
+  },
+  async mounted() {
+    await this.user();
+    await this.aggregateCount();
+    await this.fetchItems();
   },
 
   methods: {
@@ -3711,22 +3898,6 @@ export default {
       };
       return statusColors[status] || "grey";
     },
-  },
-  watch: {
-    dateRange: {
-      handler(newVal, oldVal) {
-        console.log("dateRange changed:", {
-          newVal,
-          oldVal,
-        });
-      },
-      deep: true,
-    },
-  },
-  async mounted() {
-    await this.user();
-    await this.aggregateCount();
-    await this.fetchItems();
   },
 };
 </script>

@@ -1,7 +1,13 @@
 <template>
-  <v-container fluid class="pa-0">
+  <v-container
+    fluid
+    class="pa-0"
+  >
     <v-row no-gutters>
-      <v-col cols="3" class="sidebar">
+      <v-col
+        cols="3"
+        class="sidebar"
+      >
         <v-list>
           <v-list-item
             v-for="(item, i) in sidebarItems"
@@ -16,16 +22,22 @@
             color="black"
             @click="switchSection(item.value)"
           >
-            <template v-slot:prepend>
-              <v-icon :icon="item.icon"></v-icon>
+            <template #prepend>
+              <v-icon :icon="item.icon" />
             </template>
-            <v-list-item-title v-text="item.title"></v-list-item-title>
+            <v-list-item-title v-text="item.title" />
           </v-list-item>
         </v-list>
       </v-col>
 
-      <v-col cols="9" class="content">
-        <v-card flat class="pa-4">
+      <v-col
+        cols="9"
+        class="content"
+      >
+        <v-card
+          flat
+          class="pa-4"
+        >
           <v-tabs
             :key="currentSection"
             v-model="activeTab"
@@ -43,7 +55,10 @@
             </v-tab>
           </v-tabs>
 
-          <v-window v-model="activeTab" class="mt-4">
+          <v-window
+            v-model="activeTab"
+            class="mt-4"
+          >
             <v-window-item value="salary-structure">
               <SalaryStructure
                 :key="`${currentSection}-${activeTab}`"
@@ -123,12 +138,6 @@ import bonusBenefits from "./salaryPolicy/bonusBenefits.vue";
 
 export default {
   name: "SalaryConfiguration",
-  props: {
-    category: {
-      type: Object,
-      required: true,
-    },
-  },
   components: {
     SalaryStructure,
     Contribution,
@@ -140,6 +149,12 @@ export default {
     incentive,
     retentionPay,
     bonusBenefits,
+  },
+  props: {
+    category: {
+      type: Object,
+      required: true,
+    },
   },
   data() {
     return {
@@ -207,6 +222,22 @@ export default {
         : this.policiesTabs;
     },
   },
+  watch: {
+    $route: {
+      immediate: true,
+      handler(to) {
+        const section = to.params.section;
+        const tab = to.params.tab;
+
+        if (section && section !== this.currentSection) {
+          this.currentSection = section;
+        }
+        if (tab && tab !== this.activeTab) {
+          this.activeTab = tab;
+        }
+      },
+    },
+  },
   methods: {
     switchSection(section) {
       this.lastActiveTab[this.currentSection] = this.activeTab;
@@ -237,22 +268,6 @@ export default {
           path: `/settings/payroll${this.currentSection}/${tab}`,
         });
       }
-    },
-  },
-  watch: {
-    $route: {
-      immediate: true,
-      handler(to) {
-        const section = to.params.section;
-        const tab = to.params.tab;
-
-        if (section && section !== this.currentSection) {
-          this.currentSection = section;
-        }
-        if (tab && tab !== this.activeTab) {
-          this.activeTab = tab;
-        }
-      },
     },
   },
 };

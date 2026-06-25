@@ -1,19 +1,42 @@
 <template>
-  <v-container fluid class="pa-6 bg-grey-lighten-4 min-h-screen">
+  <v-container
+    fluid
+    class="pa-6 bg-grey-lighten-4 min-h-screen"
+  >
     <!-- Toast Notification -->
-    <div v-if="showToast" :class="['toast-notification', toastType]">
-      <v-icon v-if="toastType === 'success'" class="toast-icon" color="success"
-        >mdi-check-circle</v-icon
+    <div
+      v-if="showToast"
+      :class="['toast-notification', toastType]"
+    >
+      <v-icon
+        v-if="toastType === 'success'"
+        class="toast-icon"
+        color="success"
       >
-      <v-icon v-if="toastType === 'error'" class="toast-icon" color="error"
-        >mdi-alert-circle</v-icon
+        mdi-check-circle
+      </v-icon>
+      <v-icon
+        v-if="toastType === 'error'"
+        class="toast-icon"
+        color="error"
       >
+        mdi-alert-circle
+      </v-icon>
       <span class="toast-message">{{ toastMessage }}</span>
     </div>
 
     <v-row class="align-center">
-      <v-col cols="" class="d-flex align-center">
-        <v-btn icon variant="flat" color="primary" @click="goBack" class="mr-4">
+      <v-col
+        cols=""
+        class="d-flex align-center"
+      >
+        <v-btn
+          icon
+          variant="flat"
+          color="primary"
+          class="mr-4"
+          @click="goBack"
+        >
           <v-icon>mdi-arrow-left</v-icon>
         </v-btn>
         <h1 class="text-h4 font-weight-bold text-grey-darken-4">
@@ -23,19 +46,27 @@
     </v-row>
 
     <v-row v-if="loading">
-      <v-col cols="12" class="text-center py-12">
+      <v-col
+        cols="12"
+        class="text-center py-12"
+      >
         <v-progress-circular
           indeterminate
           color="primary"
           size="64"
           width="6"
-        ></v-progress-circular>
-        <p class="mt-4 text-h6 text-grey-darken-2">Loading task details...</p>
+        />
+        <p class="mt-4 text-h6 text-grey-darken-2">
+          Loading task details...
+        </p>
       </v-col>
     </v-row>
 
     <v-row v-else-if="error">
-      <v-col cols="12" class="text-center py-12">
+      <v-col
+        cols="12"
+        class="text-center py-12"
+      >
         <v-alert
           type="error"
           prominent
@@ -43,9 +74,9 @@
           variant="tonal"
           class="rounded-lg"
         >
-          <v-alert-title class="font-weight-bold"
-            >Error Loading Task</v-alert-title
-          >
+          <v-alert-title class="font-weight-bold">
+            Error Loading Task
+          </v-alert-title>
           {{ error }}
         </v-alert>
       </v-col>
@@ -57,9 +88,12 @@
           <v-card-title
             class="text-h5 font-weight-bold text-grey-darken-3 mb-2"
           >
-            <v-icon left color="teal-darken-1"
-              >mdi-file-document-edit-outline</v-icon
+            <v-icon
+              left
+              color="teal-darken-1"
             >
+              mdi-file-document-edit-outline
+            </v-icon>
             Task Information - Step {{ currentFormStep }} of
             {{ totalFormSteps }}
           </v-card-title>
@@ -72,18 +106,25 @@
               size="small"
               class="ml-2"
             >
-              <v-icon start size="small">mdi-clock-alert</v-icon>
+              <v-icon
+                start
+                size="small"
+              >
+                mdi-clock-alert
+              </v-icon>
               OVERDUE
             </v-chip>
           </v-card-subtitle>
           <v-card-text class="form-scroll-area">
             <!-- Display "creation" fields as details -->
             <v-card
-              class="mb-6 rounded-lg elevation-1"
               v-if="creationFields.length > 0"
+              class="mb-6 rounded-lg elevation-1"
             >
               <v-card-title class="text-h6 font-weight-bold text-grey-darken-3">
-                <v-icon left>mdi-information-outline</v-icon>
+                <v-icon left>
+                  mdi-information-outline
+                </v-icon>
                 Task Creation Details
               </v-card-title>
               <v-card-text>
@@ -95,9 +136,7 @@
                     md="6"
                   >
                     <p class="text-subtitle-1 text-grey-darken-3">
-                      <strong class="text-grey-darken-2 mr-2"
-                        >{{ field.label }}:</strong
-                      >
+                      <strong class="text-grey-darken-2 mr-2">{{ field.label }}:</strong>
                       <span class="font-weight-medium">{{
                         getCreationFieldValue(field)
                       }}</span>
@@ -123,9 +162,10 @@
                     class="mb-2 d-block text-body-1 font-weight-medium text-grey-darken-2"
                   >
                     {{ field.label }}
-                    <span v-if="isFieldMandatory(field)" class="text-error ml-1"
-                      >*</span
-                    >
+                    <span
+                      v-if="isFieldMandatory(field)"
+                      class="text-error ml-1"
+                    >*</span>
                   </v-label>
 
                   <!-- Dynamic Field Rendering -->
@@ -133,13 +173,13 @@
                     :is="getFieldComponent(field)"
                     v-bind="getFieldProps(field)"
                     :model-value="formData[field.key]"
+                    :rules="getValidationRules(field)"
+                    :error-messages="getFieldErrorMessages(field)"
                     @update:model-value="
                       (value) => updateFieldValue(field.key, value)
                     "
-                    :rules="getValidationRules(field)"
                     @click:append-inner="handleFieldAction(field, $event)"
                     @change="handleFieldChange(field, $event)"
-                    :error-messages="getFieldErrorMessages(field)"
                   />
 
                   <!-- Field-specific additional content -->
@@ -153,7 +193,9 @@
                       variant="tonal"
                       @click="generateCode(field)"
                     >
-                      <v-icon start>mdi-key-variant</v-icon>
+                      <v-icon start>
+                        mdi-key-variant
+                      </v-icon>
                       Generate/Resend Code
                     </v-btn>
                   </template>
@@ -166,9 +208,12 @@
                       size="small"
                       class="mt-2"
                     >
-                      <v-icon start size="small"
-                        >mdi-alert-circle-outline</v-icon
+                      <v-icon
+                        start
+                        size="small"
                       >
+                        mdi-alert-circle-outline
+                      </v-icon>
                       Unsupported field type:
                       {{ getFieldTypeDisplay(field.type) }}
                     </v-chip>
@@ -184,7 +229,7 @@
                       indeterminate
                       color="primary"
                       class="mt-2"
-                    ></v-progress-linear>
+                    />
                     <v-alert
                       v-else-if="currentLocation.error"
                       type="error"
@@ -200,7 +245,9 @@
                       variant="tonal"
                       class="mt-2"
                     >
-                      <v-icon start>mdi-crosshairs-gps</v-icon>
+                      <v-icon start>
+                        mdi-crosshairs-gps
+                      </v-icon>
                       Location Captured
                     </v-chip>
                   </template>
@@ -212,20 +259,24 @@
                   v-if="currentFormStep > 1"
                   color="grey-darken-1"
                   variant="outlined"
-                  @click="prevFormStep"
                   class="mr-4"
                   size="large"
+                  @click="prevFormStep"
                 >
-                  <v-icon left>mdi-arrow-left</v-icon> Back
+                  <v-icon left>
+                    mdi-arrow-left
+                  </v-icon> Back
                 </v-btn>
                 <v-btn
                   color="grey-darken-1"
                   variant="outlined"
-                  @click="handleSaveDraft"
                   class="mr-4"
                   size="large"
+                  @click="handleSaveDraft"
                 >
-                  <v-icon left>mdi-content-save</v-icon> Save Draft
+                  <v-icon left>
+                    mdi-content-save
+                  </v-icon> Save Draft
                 </v-btn>
                 <v-btn
                   color="primary"
@@ -238,10 +289,18 @@
                       ? "Submit Task"
                       : "Next Step"
                   }}
-                  <v-icon right v-if="currentFormStep !== totalFormSteps"
-                    >mdi-arrow-right</v-icon
+                  <v-icon
+                    v-if="currentFormStep !== totalFormSteps"
+                    right
                   >
-                  <v-icon right v-else>mdi-check-circle</v-icon>
+                    mdi-arrow-right
+                  </v-icon>
+                  <v-icon
+                    v-else
+                    right
+                  >
+                    mdi-check-circle
+                  </v-icon>
                 </v-btn>
               </v-card-actions>
             </v-form>
@@ -251,57 +310,75 @@
     </v-row>
 
     <!-- QR Scanner Dialog -->
-    <v-dialog v-model="showQrScannerDialog" max-width="500px" persistent>
+    <v-dialog
+      v-model="showQrScannerDialog"
+      max-width="500px"
+      persistent
+    >
       <v-card class="rounded-lg elevation-8">
         <v-card-title
           class="text-h5 font-weight-bold text-primary d-flex align-center"
         >
-          <v-icon left>mdi-qrcode-scan</v-icon>
+          <v-icon left>
+            mdi-qrcode-scan
+          </v-icon>
           QR Code Scanner
-          <v-spacer></v-spacer>
-          <v-btn icon variant="text" @click="closeQrScanner">
+          <v-spacer />
+          <v-btn
+            icon
+            variant="text"
+            @click="closeQrScanner"
+          >
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-card-title>
         <v-card-text class="py-4">
-          <v-alert v-if="qrScanError" type="error" class="mb-4" closable>
+          <v-alert
+            v-if="qrScanError"
+            type="error"
+            class="mb-4"
+            closable
+          >
             {{ qrScanError }}
           </v-alert>
           <v-file-input
-            label="Upload QR Code Image"
             v-model="qrImageFile"
+            label="Upload QR Code Image"
             accept="image/*"
             prepend-icon="mdi-camera"
             variant="outlined"
             density="comfortable"
             show-size-counter
-          ></v-file-input>
+          />
           <v-text-field
             v-if="decodedQrContent"
-            label="Decoded QR Content"
             v-model="decodedQrContent"
+            label="Decoded QR Content"
             variant="outlined"
             density="comfortable"
             readonly
             class="mt-4"
-          ></v-text-field>
-          <canvas ref="qrCanvas" style="display: none"></canvas>
+          />
+          <canvas
+            ref="qrCanvas"
+            style="display: none"
+          />
         </v-card-text>
         <v-card-actions class="justify-end px-6 pb-4">
           <v-btn
             color="grey-darken-1"
             variant="outlined"
-            @click="closeQrScanner"
             size="large"
+            @click="closeQrScanner"
           >
             Cancel
           </v-btn>
           <v-btn
             color="primary"
             variant="flat"
-            @click="applyQrContent"
             :disabled="!decodedQrContent"
             size="large"
+            @click="applyQrContent"
           >
             Apply
           </v-btn>
@@ -310,26 +387,44 @@
     </v-dialog>
 
     <!-- Location Selector Dialog -->
-    <v-dialog v-model="showLocationSelectorDialog" max-width="800px" persistent>
+    <v-dialog
+      v-model="showLocationSelectorDialog"
+      max-width="800px"
+      persistent
+    >
       <v-card class="rounded-lg elevation-8">
         <v-card-title
           class="text-h5 font-weight-bold text-primary d-flex align-center"
         >
-          <v-icon left>mdi-map-marker</v-icon> Select Location
-          <v-spacer></v-spacer>
-          <v-btn icon variant="text" @click="closeLocationSelector">
+          <v-icon left>
+            mdi-map-marker
+          </v-icon> Select Location
+          <v-spacer />
+          <v-btn
+            icon
+            variant="text"
+            @click="closeLocationSelector"
+          >
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-card-title>
         <v-card-text class="py-4">
-          <v-alert v-if="locationError" type="error" class="mb-4" closable>
+          <v-alert
+            v-if="locationError"
+            type="error"
+            class="mb-4"
+            closable
+          >
             {{ locationError }}
           </v-alert>
           <v-row>
-            <v-col cols="12" md="6">
+            <v-col
+              cols="12"
+              md="6"
+            >
               <v-select
-                label="Select Location Type"
                 v-model="selectedLocType"
+                label="Select Location Type"
                 :items="locationTypes"
                 item-title="title"
                 item-value="value"
@@ -337,7 +432,7 @@
                 density="comfortable"
                 clearable
                 class="mb-4"
-              ></v-select>
+              />
               <v-card
                 v-if="displayLocationDetails"
                 class="pa-4 rounded-lg elevation-2"
@@ -387,25 +482,36 @@
                 </v-card-text>
               </v-card>
             </v-col>
-            <v-col cols="12" md="6">
-              <v-card class="map-card" elevation="2">
+            <v-col
+              cols="12"
+              md="6"
+            >
+              <v-card
+                class="map-card"
+                elevation="2"
+              >
                 <v-card-title class="pa-3 pb-2">
                   <span class="text-h6">Map View</span>
                 </v-card-title>
                 <v-card-text class="pa-3">
                   <div class="map-wrapper">
-                    <div ref="mapContainer" class="map-container"></div>
+                    <div
+                      ref="mapContainer"
+                      class="map-container"
+                    />
                     <div class="coordinates-display">
                       <v-chip
                         v-if="
                           displayLocationDetails?.locmark?.lat &&
-                          displayLocationDetails?.locmark?.lng
+                            displayLocationDetails?.locmark?.lng
                         "
                         color="primary"
                         variant="elevated"
                         size="small"
                       >
-                        <v-icon start>mdi-crosshairs-gps</v-icon>
+                        <v-icon start>
+                          mdi-crosshairs-gps
+                        </v-icon>
                         {{
                           parseFloat(
                             displayLocationDetails.locmark.lat,
@@ -420,7 +526,12 @@
                     </div>
                   </div>
                   <div class="text-caption mt-2 text-grey-darken-1">
-                    <v-icon size="small" class="mr-1">mdi-information</v-icon>
+                    <v-icon
+                      size="small"
+                      class="mr-1"
+                    >
+                      mdi-information
+                    </v-icon>
                     Location displayed based on selected type.
                   </div>
                 </v-card-text>
@@ -432,17 +543,17 @@
           <v-btn
             color="grey-darken-1"
             variant="outlined"
-            @click="closeLocationSelector"
             size="large"
+            @click="closeLocationSelector"
           >
             Cancel
           </v-btn>
           <v-btn
             color="primary"
             variant="flat"
-            @click="applyLocation"
             :disabled="!displayLocationDetails"
             size="large"
+            @click="applyLocation"
           >
             Apply
           </v-btn>

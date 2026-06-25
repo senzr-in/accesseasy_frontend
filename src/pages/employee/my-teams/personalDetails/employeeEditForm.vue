@@ -4,10 +4,13 @@
     <div class="form-heade">
       <div class="header-left">
         <div class="breadcrumb">
-          <span class="crumb" @click="$router.push('/employee-details')"
-            >All Employees</span
-          >
-          <v-icon size="small">mdi-chevron-right</v-icon>
+          <span
+            class="crumb"
+            @click="$router.push('/employee-details')"
+          >All Employees</span>
+          <v-icon size="small">
+            mdi-chevron-right
+          </v-icon>
           <span class="crumb active">{{
             employeeData.assignedUser?.first_name || "New Employee"
           }}</span>
@@ -20,13 +23,13 @@
       <!-- Top Tabs Section with v-tabs -->
       <div class="tab-section">
         <v-tabs
+          v-if="isTabReady"
           v-model="currentTabIndex"
           bg-color="transparent"
           color="#059367"
           class="custom-tab"
           align-tabs="center"
           @update:model-value="handleTabChange"
-          v-if="isTabReady"
         >
           <v-tab
             v-for="(tab, index) in filteredTabs"
@@ -39,7 +42,10 @@
             }"
           >
             <div class="tab-contet">
-              <v-icon class="tab-icon" size="20">
+              <v-icon
+                class="tab-icon"
+                size="20"
+              >
                 {{ tab.icon }}
               </v-icon>
               <span class="tab-text">{{ tab.title }}</span>
@@ -58,16 +64,22 @@
 
       <!-- Content Area -->
       <div class="form-content">
-        <transition name="fade" mode="out-in">
-          <div :key="currentModule" class="content-wrapper">
+        <transition
+          name="fade"
+          mode="out-in"
+        >
+          <div
+            :key="currentModule"
+            class="content-wrapper"
+          >
             <component
               :is="currentTabComponent"
-              :employee-data="currentTabData"
               :id="id"
-              @update:employee-data="updateTempData"
-              :tenant-id="tenantId"
               ref="currentTabRef"
-            ></component>
+              :employee-data="currentTabData"
+              :tenant-id="tenantId"
+              @update:employee-data="updateTempData"
+            />
           </div>
         </transition>
       </div>

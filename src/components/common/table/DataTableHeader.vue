@@ -1,14 +1,17 @@
 <template>
   <div class="table-header">
     <!-- Selection Column -->
-    <div v-if="showSelection" class="header-cell selection-col">
+    <div
+      v-if="showSelection"
+      class="header-cell selection-col"
+    >
       <input
         type="checkbox"
         class="table-checkbox"
         :checked="allSelected"
         :indeterminate="someSelected"
         @change="handleSelectAllChange"
-      />
+      >
     </div>
 
     <!-- Dynamic Columns -->
@@ -16,8 +19,8 @@
       v-for="column in columns"
       :key="column.key"
       :column="column"
-      :sortBy="sortBy"
-      :sortDirection="sortDirection"
+      :sort-by="sortBy"
+      :sort-direction="sortDirection"
       @sort="$emit('requestSort', $event)"
     />
   </div>

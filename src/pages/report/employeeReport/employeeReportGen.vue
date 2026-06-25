@@ -2,37 +2,55 @@
 <template>
   <div>
     <v-form ref="form">
-      <v-toolbar density="compact" color="grey-lighten-4">
-        <v-btn icon color="black" @click="$emit('closeAddPage')">
+      <v-toolbar
+        density="compact"
+        color="grey-lighten-4"
+      >
+        <v-btn
+          icon
+          color="black"
+          @click="$emit('closeAddPage')"
+        >
           <v-icon>mdi-arrow-left</v-icon>
         </v-btn>
-        <v-toolbar-title class="ml-4">Generate Report</v-toolbar-title>
-        <v-spacer></v-spacer>
+        <v-toolbar-title class="ml-4">
+          Generate Report
+        </v-toolbar-title>
+        <v-spacer />
         <v-btn
           color="error"
           variant="text"
           class="mr-2"
           @click="$emit('closeAddPage')"
-          >CANCEL</v-btn
         >
-        <v-btn color="black" @click="handleSave">SAVE</v-btn>
+          CANCEL
+        </v-btn>
+        <v-btn
+          color="black"
+          @click="handleSave"
+        >
+          SAVE
+        </v-btn>
       </v-toolbar>
 
       <div class="d-flex content-wrapper">
         <!-- Side Navigation -->
         <div class="side-nav pa-4">
-          <v-list density="compact" nav>
+          <v-list
+            density="compact"
+            nav
+          >
             <v-list-item
               v-for="(item, i) in menuItems"
               :key="i"
               :value="item"
               :active="selectedTab === item.value"
-              @click="selectedTab = item.value"
               color="black"
               rounded
+              @click="selectedTab = item.value"
             >
-              <template v-slot:prepend>
-                <v-icon :icon="item.icon"></v-icon>
+              <template #prepend>
+                <v-icon :icon="item.icon" />
               </template>
               <v-list-item-title>{{ item.title }}</v-list-item-title>
             </v-list-item>
@@ -42,13 +60,18 @@
         <!-- Content Area -->
         <div class="content-area pa-4">
           <v-card flat>
-            <h2 class="text-h6 mb-4">Basic Details</h2>
+            <h2 class="text-h6 mb-4">
+              Basic Details
+            </h2>
 
             <v-window v-model="selectedTab">
               <!-- Basic Details -->
               <v-window-item value="basic">
                 <v-row>
-                  <v-col cols="12" sm="6">
+                  <v-col
+                    cols="12"
+                    sm="6"
+                  >
                     <v-select
                       v-model="formData.collectionName"
                       label="Collection Name *"
@@ -56,9 +79,12 @@
                       variant="outlined"
                       :rules="[(v) => !!v || 'Collection Name is required']"
                       required
-                    ></v-select>
+                    />
                   </v-col>
-                  <v-col cols="12" sm="6">
+                  <v-col
+                    cols="12"
+                    sm="6"
+                  >
                     <v-autocomplete
                       v-model="formData.branch"
                       label="Branch *"
@@ -69,9 +95,12 @@
                       :loading="loadingBranches"
                       :rules="[(v) => !!v || 'Branch is required']"
                       required
-                    ></v-autocomplete>
+                    />
                   </v-col>
-                  <v-col cols="12" sm="6">
+                  <v-col
+                    cols="12"
+                    sm="6"
+                  >
                     <v-text-field
                       v-model="formData.startDate"
                       label="Start Date *"
@@ -79,10 +108,13 @@
                       variant="outlined"
                       :rules="[(v) => !!v || 'Start Date is required']"
                       required
-                    ></v-text-field>
+                    />
                   </v-col>
 
-                  <v-col cols="12" sm="6">
+                  <v-col
+                    cols="12"
+                    sm="6"
+                  >
                     <v-text-field
                       v-model="formData.endDate"
                       label="End Date *"
@@ -90,7 +122,7 @@
                       variant="outlined"
                       :rules="[(v) => !!v || 'End Date is required']"
                       required
-                    ></v-text-field>
+                    />
                   </v-col>
                 </v-row>
               </v-window-item>

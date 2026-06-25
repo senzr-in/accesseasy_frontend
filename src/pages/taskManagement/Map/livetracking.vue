@@ -2,32 +2,53 @@
   <div class="map-wrapper">
     <!-- Main Map Container -->
     <div class="map-container">
-      <div id="map" ref="mapContainer"></div>
+      <div
+        id="map"
+        ref="mapContainer"
+      />
       
       <!-- Top Statistics Bar -->
       <div class="top-stats-bar">
         <div class="stats-container">
           <div class="stat-card total-locations">
-            <div class="stat-icon">📍</div>
+            <div class="stat-icon">
+              📍
+            </div>
             <div class="stat-content">
-              <div class="stat-number">{{ totalCount }}</div>
-              <div class="stat-label">Total Locations</div>
+              <div class="stat-number">
+                {{ totalCount }}
+              </div>
+              <div class="stat-label">
+                Total Locations
+              </div>
             </div>
           </div>
           
           <div class="stat-card serviceable-areas">
-            <div class="stat-icon">🎯</div>
+            <div class="stat-icon">
+              🎯
+            </div>
             <div class="stat-content">
-              <div class="stat-number">{{ serviceableAreasCount }}</div>
-              <div class="stat-label">Serviceable Areas</div>
+              <div class="stat-number">
+                {{ serviceableAreasCount }}
+              </div>
+              <div class="stat-label">
+                Serviceable Areas
+              </div>
             </div>
           </div>
           
           <div class="stat-card branches">
-            <div class="stat-icon">🏢</div>
+            <div class="stat-icon">
+              🏢
+            </div>
             <div class="stat-content">
-              <div class="stat-number">{{ branchesCount }}</div>
-              <div class="stat-label">Branches</div>
+              <div class="stat-number">
+                {{ branchesCount }}
+              </div>
+              <div class="stat-label">
+                Branches
+              </div>
             </div>
           </div>
         </div>
@@ -38,16 +59,22 @@
         <!-- Search Input -->
         <div class="search-container">
           <input 
-            type="text" 
             v-model="searchQuery" 
+            type="text" 
             placeholder="Search by name, address, or pincode..." 
             class="search-input"
           >
         </div>
 
         <!-- Map Layers Dropdown -->
-        <div class="control-dropdown" :class="{ 'dropdown-active': showLayersPanel }">
-          <div class="dropdown-trigger" @click="toggleLayersPanel">
+        <div
+          class="control-dropdown"
+          :class="{ 'dropdown-active': showLayersPanel }"
+        >
+          <div
+            class="dropdown-trigger"
+            @click="toggleLayersPanel"
+          >
             <div class="trigger-content">
               <span class="trigger-icon">🗂️</span>
               <span class="trigger-text">Map Layers</span>
@@ -56,20 +83,41 @@
                 <span class="count-item branches">{{ branchesCount }}</span>
               </div>
             </div>
-            <div class="dropdown-arrow" :class="{ 'arrow-up': showLayersPanel }">
-              <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
-                <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <div
+              class="dropdown-arrow"
+              :class="{ 'arrow-up': showLayersPanel }"
+            >
+              <svg
+                width="12"
+                height="8"
+                viewBox="0 0 12 8"
+                fill="none"
+              >
+                <path
+                  d="M1 1.5L6 6.5L11 1.5"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
               </svg>
             </div>
           </div>
           
-          <div class="dropdown-content" v-show="showLayersPanel">
+          <div
+            v-show="showLayersPanel"
+            class="dropdown-content"
+          >
             <div class="dropdown-section">
-              <div class="section-title">Layer Visibility</div>
+              <div class="section-title">
+                Layer Visibility
+              </div>
               
               <div class="control-row">
                 <div class="control-info">
-                  <div class="control-icon serviceable-area">🎯</div>
+                  <div class="control-icon serviceable-area">
+                    🎯
+                  </div>
                   <div class="control-details">
                     <span class="control-name">Serviceable Areas</span>
                     <span class="control-description">Coverage zones with radius</span>
@@ -79,18 +127,20 @@
                   <span class="item-count">{{ serviceableAreasCount }}</span>
                   <label class="modern-switch">
                     <input 
-                      type="checkbox"
                       v-model="layers.serviceableAreas"
+                      type="checkbox"
                       @change="toggleLayer('serviceableAreas')"
                     >
-                    <span class="switch-slider"></span>
+                    <span class="switch-slider" />
                   </label>
                 </div>
               </div>
               
               <div class="control-row">
                 <div class="control-info">
-                  <div class="control-icon branch">🏢</div>
+                  <div class="control-icon branch">
+                    🏢
+                  </div>
                   <div class="control-details">
                     <span class="control-name">Branches</span>
                     <span class="control-description">Physical branch locations</span>
@@ -100,18 +150,20 @@
                   <span class="item-count">{{ branchesCount }}</span>
                   <label class="modern-switch">
                     <input 
-                      type="checkbox"
                       v-model="layers.branches"
+                      type="checkbox"
                       @change="toggleLayer('branches')"
                     >
-                    <span class="switch-slider"></span>
+                    <span class="switch-slider" />
                   </label>
                 </div>
               </div>
 
               <div class="control-row">
                 <div class="control-info">
-                  <div class="control-icon camera">📷</div>
+                  <div class="control-icon camera">
+                    📷
+                  </div>
                   <div class="control-details">
                     <span class="control-name">Cameras</span>
                     <span class="control-description">Surveillance cameras</span>
@@ -121,18 +173,20 @@
                   <span class="item-count">{{ camerasCount }}</span>
                   <label class="modern-switch">
                     <input 
-                      type="checkbox"
                       v-model="layers.cameras"
+                      type="checkbox"
                       @change="toggleLayer('cameras')"
                     >
-                    <span class="switch-slider"></span>
+                    <span class="switch-slider" />
                   </label>
                 </div>
               </div>
               
               <div class="control-row">
                 <div class="control-info">
-                  <div class="control-icon radius">📐</div>
+                  <div class="control-icon radius">
+                    📐
+                  </div>
                   <div class="control-details">
                     <span class="control-name">Coverage Radius</span>
                     <span class="control-description">Show service area circles</span>
@@ -142,18 +196,20 @@
                   <span class="item-count">{{ locationsWithRadius }}</span>
                   <label class="modern-switch">
                     <input 
-                      type="checkbox"
                       v-model="layers.showRadius"
+                      type="checkbox"
                       @change="toggleLayer('showRadius')"
                     >
-                    <span class="switch-slider"></span>
+                    <span class="switch-slider" />
                   </label>
                 </div>
               </div>
               
               <div class="control-row">
                 <div class="control-info">
-                  <div class="control-icon label">📝</div> <!-- Changed icon to indicate text labels -->
+                  <div class="control-icon label">
+                    📝
+                  </div> <!-- Changed icon to indicate text labels -->
                   <div class="control-details">
                     <span class="control-name">Location Names</span>
                     <span class="control-description">Show location names with coverage</span>
@@ -163,11 +219,11 @@
                   <span class="item-count">{{ totalCount }}</span>
                   <label class="modern-switch">
                     <input 
-                      type="checkbox"
                       v-model="layers.showLocationNames"
+                      type="checkbox"
                       @change="toggleLayer('showLocationNames')"
                     >
-                    <span class="switch-slider"></span>
+                    <span class="switch-slider" />
                   </label>
                 </div>
               </div>
@@ -176,8 +232,14 @@
         </div>
 
         <!-- Organization Filter Dropdown -->
-        <div class="control-dropdown" :class="{ 'dropdown-active': showOrgPanel }">
-          <div class="dropdown-trigger" @click="toggleOrgPanel">
+        <div
+          class="control-dropdown"
+          :class="{ 'dropdown-active': showOrgPanel }"
+        >
+          <div
+            class="dropdown-trigger"
+            @click="toggleOrgPanel"
+          >
             <div class="trigger-content">
               <span class="trigger-icon">🏢</span>
               <span class="trigger-text">Organizations</span>
@@ -185,23 +247,45 @@
                 <span class="count-item total">{{ totalCount }}</span>
               </div>
             </div>
-            <div class="dropdown-arrow" :class="{ 'arrow-up': showOrgPanel }">
-              <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
-                <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <div
+              class="dropdown-arrow"
+              :class="{ 'arrow-up': showOrgPanel }"
+            >
+              <svg
+                width="12"
+                height="8"
+                viewBox="0 0 12 8"
+                fill="none"
+              >
+                <path
+                  d="M1 1.5L6 6.5L11 1.5"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
               </svg>
             </div>
           </div>
           
-          <div class="dropdown-content" v-show="showOrgPanel">
+          <div
+            v-show="showOrgPanel"
+            class="dropdown-content"
+          >
             <div class="dropdown-section">
-              <div class="section-title">Filter by Organization</div>
+              <div class="section-title">
+                Filter by Organization
+              </div>
               
-              <label class="org-option" :class="{ 'option-active': selectedOrganization === 'all' }">
+              <label
+                class="org-option"
+                :class="{ 'option-active': selectedOrganization === 'all' }"
+              >
                 <input 
+                  v-model="selectedOrganization"
                   type="radio"
                   name="organization"
                   value="all"
-                  v-model="selectedOrganization"
                 >
                 <div class="org-card">
                   <div class="org-icon all">🌐</div>
@@ -213,12 +297,15 @@
                 </div>
               </label>
               
-              <label class="org-option" :class="{ 'option-active': selectedOrganization === 'main-tenant' }">
+              <label
+                class="org-option"
+                :class="{ 'option-active': selectedOrganization === 'main-tenant' }"
+              >
                 <input 
+                  v-model="selectedOrganization"
                   type="radio"
                   name="organization"
                   value="main-tenant"
-                  v-model="selectedOrganization"
                 >
                 <div class="org-card">
                   <div class="org-icon main-tenant">🏛️</div>
@@ -230,28 +317,34 @@
                 </div>
               </label>
               <!-- Add this after the Contact Org option -->
-<label class="org-option" :class="{ 'option-active': selectedOrganization === 'tenant-org' }">
-  <input 
-    type="radio"
-    name="organization"
-    value="tenant-org"
-    v-model="selectedOrganization"
-  >
-  <div class="org-card">
-    <div class="org-icon tenant-org">🏢</div>
-    <div class="org-details">
-      <div class="org-name">Tenant Org</div>
-      <div class="org-description">Tenant organizations</div>
-    </div>
-    <div class="org-count">{{ organizationCounts.tenantOrg }}</div>
-  </div>
-</label>
-              <label class="org-option" :class="{ 'option-active': selectedOrganization === 'client-org' }">
+              <label
+                class="org-option"
+                :class="{ 'option-active': selectedOrganization === 'tenant-org' }"
+              >
                 <input 
+                  v-model="selectedOrganization"
+                  type="radio"
+                  name="organization"
+                  value="tenant-org"
+                >
+                <div class="org-card">
+                  <div class="org-icon tenant-org">🏢</div>
+                  <div class="org-details">
+                    <div class="org-name">Tenant Org</div>
+                    <div class="org-description">Tenant organizations</div>
+                  </div>
+                  <div class="org-count">{{ organizationCounts.tenantOrg }}</div>
+                </div>
+              </label>
+              <label
+                class="org-option"
+                :class="{ 'option-active': selectedOrganization === 'client-org' }"
+              >
+                <input 
+                  v-model="selectedOrganization"
                   type="radio"
                   name="organization"
                   value="client-org"
-                  v-model="selectedOrganization"
                 >
                 <div class="org-card">
                   <div class="org-icon client-org">🏪</div>
@@ -263,12 +356,15 @@
                 </div>
               </label>
               
-              <label class="org-option" :class="{ 'option-active': selectedOrganization === 'distributor-org' }">
+              <label
+                class="org-option"
+                :class="{ 'option-active': selectedOrganization === 'distributor-org' }"
+              >
                 <input 
+                  v-model="selectedOrganization"
                   type="radio"
                   name="organization"
                   value="distributor-org"
-                  v-model="selectedOrganization"
                 >
                 <div class="org-card">
                   <div class="org-icon distributor-org">🚚</div>
@@ -280,12 +376,15 @@
                 </div>
               </label>
               
-              <label class="org-option" :class="{ 'option-active': selectedOrganization === 'contact-org' }">
+              <label
+                class="org-option"
+                :class="{ 'option-active': selectedOrganization === 'contact-org' }"
+              >
                 <input 
+                  v-model="selectedOrganization"
                   type="radio"
                   name="organization"
                   value="contact-org"
-                  v-model="selectedOrganization"
                 >
                 <div class="org-card">
                   <div class="org-icon contact-org">📞</div>
@@ -302,14 +401,44 @@
 
         <!-- Map Action Buttons -->
         <div class="action-buttons">
-          <button class="action-btn" @click="fitAllMarkers" title="Fit All Locations">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path d="M8 3H5C3.89543 3 3 3.89543 3 5V8M21 8V5C21 3.89543 20.1046 3 19 3H16M16 21H19C20.1046 21 21 20.1046 21 19V16M8 21H5C3.89543 21 3 20.1046 3 19V16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <button
+            class="action-btn"
+            title="Fit All Locations"
+            @click="fitAllMarkers"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <path
+                d="M8 3H5C3.89543 3 3 3.89543 3 5V8M21 8V5C21 3.89543 20.1046 3 19 3H16M16 21H19C20.1046 21 21 20.1046 21 19V16M8 21H5C3.89543 21 3 20.1046 3 19V16"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </button>
-          <button class="action-btn" @click="toggleFullscreen" title="Toggle Fullscreen">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path d="M15 3H21V9M9 21H3V15M3 9V3H9M21 15V21H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <button
+            class="action-btn"
+            title="Toggle Fullscreen"
+            @click="toggleFullscreen"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+            >
+              <path
+                d="M15 3H21V9M9 21H3V15M3 9V3H9M21 15V21H15"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
             </svg>
           </button>
         </div>
@@ -317,10 +446,15 @@
       
 
       <!-- Loading Overlay -->
-      <div v-if="loading" class="loading-overlay">
+      <div
+        v-if="loading"
+        class="loading-overlay"
+      >
         <div class="loading-spinner">
-          <div class="spinner"></div>
-          <div class="loading-text">Loading locations...</div>
+          <div class="spinner" />
+          <div class="loading-text">
+            Loading locations...
+          </div>
         </div>
       </div>
     </div>

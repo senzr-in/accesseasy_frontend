@@ -40,8 +40,10 @@
               <div 
                 class="w-2.5 h-2.5 rounded-full"
                 :class="cam.status === 'Online' ? 'bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]' : 'bg-slate-300 dark:bg-zinc-700'"
-              ></div>
-              <h3 class="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white">{{ cam.name }}</h3>
+              />
+              <h3 class="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white">
+                {{ cam.name }}
+              </h3>
             </div>
             <span class="text-[10px] font-black uppercase tracking-widest border border-slate-200 dark:border-zinc-800 text-slate-500 dark:text-white/50 px-2 py-0.5 rounded">
               {{ cam.group }}
@@ -53,27 +55,27 @@
         <div class="flex-1 flex flex-col">
           <div class="aspect-video bg-slate-100 dark:bg-zinc-900 relative flex items-center justify-center overflow-hidden border-y border-slate-100 dark:border-zinc-800/50">
             <template v-if="cam.status === 'Online'">
-               <!-- Mock video static/feed UI -->
-               <div class="absolute inset-0 opacity-10 dark:opacity-20 pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]"></div>
-               <Video class="w-12 h-12 text-slate-300 dark:text-zinc-800" />
-               <div class="absolute bottom-4 left-4 flex items-center gap-2 bg-white/80 dark:bg-black/40 backdrop-blur-md px-2 py-1 rounded-md border border-slate-200 dark:border-white/10 shadow-sm">
-                   <div class="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
-                   <span class="text-[10px] font-black uppercase tracking-widest text-slate-700 dark:text-white">LIVE</span>
-               </div>
+              <!-- Mock video static/feed UI -->
+              <div class="absolute inset-0 opacity-10 dark:opacity-20 pointer-events-none bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+              <Video class="w-12 h-12 text-slate-300 dark:text-zinc-800" />
+              <div class="absolute bottom-4 left-4 flex items-center gap-2 bg-white/80 dark:bg-black/40 backdrop-blur-md px-2 py-1 rounded-md border border-slate-200 dark:border-white/10 shadow-sm">
+                <div class="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+                <span class="text-[10px] font-black uppercase tracking-widest text-slate-700 dark:text-white">LIVE</span>
+              </div>
             </template>
             <template v-else>
-               <div class="flex flex-col items-center gap-2 opacity-50 dark:opacity-40">
-                   <Camera class="w-10 h-10 text-slate-400 dark:text-zinc-500" />
-                   <span class="text-[10px] font-black uppercase tracking-widest text-slate-500">Signal Lost</span>
-               </div>
+              <div class="flex flex-col items-center gap-2 opacity-50 dark:opacity-40">
+                <Camera class="w-10 h-10 text-slate-400 dark:text-zinc-500" />
+                <span class="text-[10px] font-black uppercase tracking-widest text-slate-500">Signal Lost</span>
+              </div>
             </template>
 
             <!-- Hover Overlay -->
             <div class="absolute inset-0 bg-white/80 dark:bg-black/60 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-               <button class="bg-slate-900 dark:bg-white text-white dark:text-zinc-900 rounded-2xl font-black text-[10px] h-10 px-6 uppercase tracking-widest flex items-center gap-2 shadow-lg hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors">
-                   <Maximize2 class="w-4 h-4" />
-                   EXPAND FEED
-               </button>
+              <button class="bg-slate-900 dark:bg-white text-white dark:text-zinc-900 rounded-2xl font-black text-[10px] h-10 px-6 uppercase tracking-widest flex items-center gap-2 shadow-lg hover:bg-slate-800 dark:hover:bg-slate-200 transition-colors">
+                <Maximize2 class="w-4 h-4" />
+                EXPAND FEED
+              </button>
             </div>
           </div>
 
@@ -84,7 +86,7 @@
               {{ cam.location }}
             </span>
             <button class="h-8 w-8 inline-flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-white/10 transition-colors">
-               <RefreshCw class="w-3.5 h-3.5" />
+              <RefreshCw class="w-3.5 h-3.5" />
             </button>
           </div>
         </div>

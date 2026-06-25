@@ -1,36 +1,57 @@
 <template>
   <div class="access-management">
     <!-- Loading State -->
-    <div v-if="loading" class="loading-container">
-      <v-progress-circular indeterminate color="primary"></v-progress-circular>
+    <div
+      v-if="loading"
+      class="loading-container"
+    >
+      <v-progress-circular
+        indeterminate
+        color="primary"
+      />
     </div>
 
     <!-- Main Content -->
-    <div v-else-if="employeeData" class="content-container">
+    <div
+      v-else-if="employeeData"
+      class="content-container"
+    >
       <!-- Header -->
       <div class="header">
         <div class="title">
-          <v-icon size="24" color="primary" class="mr-2">mdi-shield-key</v-icon>
+          <v-icon
+            size="24"
+            color="primary"
+            class="mr-2"
+          >
+            mdi-shield-key
+          </v-icon>
           <h1>Access Management</h1>
         </div>
         <v-btn
           color="black"
           variant="elevated"
-          @click="updateAccessCatagory"
           :disabled="!hasChanges"
           class="save-btn"
+          @click="updateAccessCatagory"
         >
           SAVE CHANGES
         </v-btn>
       </div>
 
       <!-- Warning Message -->
-      <div v-if="!accessOn" class="warning-message">
-        <v-icon color="warning" class="mr-2">mdi-alert-circle</v-icon>
-        <span
-          >To assign cards, please enable access or check the Access Level's
-          access type.</span
+      <div
+        v-if="!accessOn"
+        class="warning-message"
+      >
+        <v-icon
+          color="warning"
+          class="mr-2"
         >
+          mdi-alert-circle
+        </v-icon>
+        <span>To assign cards, please enable access or check the Access Level's
+          access type.</span>
       </div>
 
       <!-- Main Content Columns -->
@@ -41,24 +62,26 @@
             <!-- Access Level Selection - Moved here -->
             <div class="access-controls">
               <div class="access-level-container">
-                <div class="access-level-label">Access Level Category</div>
+                <div class="access-level-label">
+                  Access Level Category
+                </div>
                 <v-select
                   v-model="selectedAccessLevel"
                   :items="accessLevelOptions"
                   item-title="accessLevelName"
                   item-value="id"
                   return-object
-                  @update:model-value="handleAccessLevelChange"
                   variant="outlined"
                   hide-details
                   class="access-level-select"
+                  @update:model-value="handleAccessLevelChange"
                 >
-                  <template v-slot:item="{ item, props }">
+                  <template #item="{ item, props }">
                     <v-list-item
                       v-bind="props"
                       :disabled="!item.raw.accessType"
                     >
-                      <template v-slot:prepend>
+                      <template #prepend>
                         <v-icon
                           :color="item.raw.accessType ? 'success' : 'error'"
                         >
@@ -69,7 +92,7 @@
                           }}
                         </v-icon>
                       </template>
-                      <template v-slot:append>
+                      <template #append>
                         <span
                           :class="
                             item.raw.accessType ? 'text-success' : 'text-error'
@@ -90,23 +113,29 @@
                   hide-details
                   @change="handleAccessToggle"
                 >
-                  <template v-slot:label>
-                    <span class="access-label"
-                      >Access: {{ accessOn ? "Enabled" : "Disabled" }}</span
-                    >
+                  <template #label>
+                    <span class="access-label">Access: {{ accessOn ? "Enabled" : "Disabled" }}</span>
                   </template>
                 </v-switch>
               </div>
             </div>
 
-            <div v-if="accessLevelDetails" class="details-content">
+            <div
+              v-if="accessLevelDetails"
+              class="details-content"
+            >
               <div class="tabs">
                 <div
                   class="tab"
                   :class="{ active: activeTab === 'general' }"
                   @click="activeTab = 'general'"
                 >
-                  <v-icon size="18" class="mr-1">mdi-information</v-icon>
+                  <v-icon
+                    size="18"
+                    class="mr-1"
+                  >
+                    mdi-information
+                  </v-icon>
                   GENERAL
                 </div>
                 <div
@@ -114,12 +143,20 @@
                   :class="{ active: activeTab === 'doors' }"
                   @click="activeTab = 'doors'"
                 >
-                  <v-icon size="18" class="mr-1">mdi-door</v-icon>
+                  <v-icon
+                    size="18"
+                    class="mr-1"
+                  >
+                    mdi-door
+                  </v-icon>
                   ASSIGNED DOORS
                 </div>
               </div>
 
-              <div v-if="activeTab === 'general'" class="general-info">
+              <div
+                v-if="activeTab === 'general'"
+                class="general-info"
+              >
                 <div
                   class="info-card"
                   :class="{ 'disabled-card': !accessLevelDetails._24hrs }"
@@ -141,9 +178,13 @@
 
                 <div class="info-card">
                   <div class="info-header">
-                    <v-icon color="primary" size="24" class="mr-2"
-                      >mdi-timer-outline</v-icon
+                    <v-icon
+                      color="primary"
+                      size="24"
+                      class="mr-2"
                     >
+                      mdi-timer-outline
+                    </v-icon>
                     <span class="info-title">Max Hours</span>
                   </div>
                   <div class="info-value">
@@ -153,9 +194,13 @@
 
                 <div class="info-card">
                   <div class="info-header">
-                    <v-icon color="primary" size="24" class="mr-2"
-                      >mdi-calendar-clock</v-icon
+                    <v-icon
+                      color="primary"
+                      size="24"
+                      class="mr-2"
                     >
+                      mdi-calendar-clock
+                    </v-icon>
                     <span class="info-title">Working Hours</span>
                   </div>
                   <div class="info-value">
@@ -165,9 +210,13 @@
 
                 <div class="info-card">
                   <div class="info-header">
-                    <v-icon color="primary" size="24" class="mr-2"
-                      >mdi-calendar-star</v-icon
+                    <v-icon
+                      color="primary"
+                      size="24"
+                      class="mr-2"
                     >
+                      mdi-calendar-star
+                    </v-icon>
                     <span class="info-title">Holidays</span>
                   </div>
                   <div class="info-value">
@@ -179,11 +228,14 @@
               </div>
 
               <!-- In the doors-info section -->
-              <div v-if="activeTab === 'doors'" class="doors-info">
+              <div
+                v-if="activeTab === 'doors'"
+                class="doors-info"
+              >
                 <EmptyState
                   v-if="
                     !accessLevelDetails.assignedDoors ||
-                    accessLevelDetails.assignedDoors.length === 0
+                      accessLevelDetails.assignedDoors.length === 0
                   "
                   title="No doors assigned"
                   message="No doors assigned to this access level"
@@ -191,25 +243,42 @@
                   :icon-size="40"
                 >
                   <template #icon>
-                    <v-icon size="40" color="grey" class="mb-2">mdi-door</v-icon>
+                    <v-icon
+                      size="40"
+                      color="grey"
+                      class="mb-2"
+                    >
+                      mdi-door
+                    </v-icon>
                   </template>
                 </EmptyState>
 
-                <div v-else class="doors-grid">
+                <div
+                  v-else
+                  class="doors-grid"
+                >
                   <div
                     v-for="door in accessLevelDetails.assignedDoors"
                     :key="door.doors_id.id"
                     class="door-item"
                   >
-                    <v-icon color="primary" size="20" class="mr-2"
-                      >mdi-door</v-icon
+                    <v-icon
+                      color="primary"
+                      size="20"
+                      class="mr-2"
                     >
+                      mdi-door
+                    </v-icon>
                     <div>
                       <div class="door-number">
                         {{ door.doors_id.doorNumber }}
                       </div>
-                      <div class="door-name">{{ door.doors_id.doorName }}</div>
-                      <div class="door-type">{{ door.doors_id.doorType }}</div>
+                      <div class="door-name">
+                        {{ door.doors_id.doorName }}
+                      </div>
+                      <div class="door-type">
+                        {{ door.doors_id.doorType }}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -223,7 +292,13 @@
               class="no-access-level"
             >
               <template #icon>
-                <v-icon size="40" color="grey" class="mb-2">mdi-shield-off</v-icon>
+                <v-icon
+                  size="40"
+                  color="grey"
+                  class="mb-2"
+                >
+                  mdi-shield-off
+                </v-icon>
               </template>
             </EmptyState>
           </div>
@@ -234,7 +309,9 @@
             @click="redirectToAccessLevelCategory"
           >
             <span class="configure-text">Configure Access Levels</span>
-            <v-icon color="#D32F2F">mdi-arrow-right</v-icon>
+            <v-icon color="#D32F2F">
+              mdi-arrow-right
+            </v-icon>
           </div>
         </div>
 
@@ -246,7 +323,9 @@
               <div class="card-header">
                 <div class="header-left">
                   <div class="icon-box blue-bg">
-                    <v-icon color="#1976D2">mdi-credit-card</v-icon>
+                    <v-icon color="#1976D2">
+                      mdi-credit-card
+                    </v-icon>
                   </div>
                   <div class="header-text">
                     <h3>NFC Card</h3>
@@ -256,7 +335,7 @@
                 <div
                   class="status-dot"
                   :class="{ active: assignedCards.length > 0 }"
-                ></div>
+                />
               </div>
 
               <div class="card-content">
@@ -265,7 +344,10 @@
                   :show-default-actions="false"
                   class="empty-state-small"
                 />
-                <div v-else class="assigned-list">
+                <div
+                  v-else
+                  class="assigned-list"
+                >
                   <div
                     v-for="card in assignedCards"
                     :key="card.id"
@@ -277,9 +359,9 @@
                       variant="text"
                       size="x-small"
                       color="grey"
-                      @click="removeCard(card.id)"
                       :disabled="!accessOn"
-                    ></v-btn>
+                      @click="removeCard(card.id)"
+                    />
                   </div>
                 </div>
 
@@ -292,14 +374,14 @@
                     hide-details
                     class="card-input"
                     append-inner-icon="mdi-credit-card-scan"
-                    @focus="handleCardFocus"
                     :disabled="!accessOn"
-                  ></v-text-field>
+                    @focus="handleCardFocus"
+                  />
                   <v-btn
                     color="#2563EB"
                     class="add-btn"
-                    @click="addNewCard"
                     :disabled="!cardInput || !accessOn"
+                    @click="addNewCard"
                   >
                     + Add
                   </v-btn>
@@ -312,7 +394,9 @@
               <div class="card-header">
                 <div class="header-left">
                   <div class="icon-box purple-bg">
-                    <v-icon color="#9333EA">mdi-fingerprint</v-icon>
+                    <v-icon color="#9333EA">
+                      mdi-fingerprint
+                    </v-icon>
                   </div>
                   <div class="header-text">
                     <h3>Fingerprint</h3>
@@ -322,7 +406,7 @@
                 <div
                   class="status-dot"
                   :class="{ active: hasFingerData }"
-                ></div>
+                />
               </div>
 
               <div class="card-content centered">
@@ -357,14 +441,19 @@
               <div class="card-header">
                 <div class="header-left">
                   <div class="icon-box orange-bg">
-                    <v-icon color="#F59E0B">mdi-face-recognition</v-icon>
+                    <v-icon color="#F59E0B">
+                      mdi-face-recognition
+                    </v-icon>
                   </div>
                   <div class="header-text">
                     <h3>Face ID</h3>
                     <p>Facial recognition profile</p>
                   </div>
                 </div>
-                <div class="status-dot" :class="{ active: hasFaceData }"></div>
+                <div
+                  class="status-dot"
+                  :class="{ active: hasFaceData }"
+                />
               </div>
 
               <div class="card-content centered">
@@ -397,7 +486,9 @@
               <div class="card-header">
                 <div class="header-left">
                   <div class="icon-box green-bg">
-                    <v-icon color="#10B981">mdi-qrcode</v-icon>
+                    <v-icon color="#10B981">
+                      mdi-qrcode
+                    </v-icon>
                   </div>
                   <div class="header-text">
                     <h3>Mobile QR</h3>
@@ -412,12 +503,15 @@
                   inset
                   :disabled="!accessOn || !hasQRCode"
                   @change="handleQRAccessToggle"
-                ></v-switch>
+                />
               </div>
 
               <div class="card-content centered">
                 <div class="status-display">
-                  <v-icon size="48" :color="hasQRCode ? '#10B981' : '#E5E7EB'">
+                  <v-icon
+                    size="48"
+                    :color="hasQRCode ? '#10B981' : '#E5E7EB'"
+                  >
                     {{ hasQRCode ? "mdi-qrcode" : "mdi-qrcode-scan" }}
                   </v-icon>
                   <span class="status-text">{{
@@ -431,9 +525,9 @@
                   block
                   class="action-btn green-text"
                   prepend-icon="mdi-refresh"
-                  @click="generateQRCode"
                   :loading="generatingQR"
                   :disabled="!accessOn"
+                  @click="generateQRCode"
                 >
                   {{ hasQRCode ? "Regenerate QR" : "Generate New QR" }}
                 </v-btn>
@@ -453,7 +547,13 @@
       class="no-data"
     >
       <template #icon>
-        <v-icon size="64" color="grey" class="mb-4">mdi-account-question</v-icon>
+        <v-icon
+          size="64"
+          color="grey"
+          class="mb-4"
+        >
+          mdi-account-question
+        </v-icon>
       </template>
     </EmptyState>
 
@@ -465,7 +565,9 @@
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-check-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-check-circle
+        </v-icon>
         {{ successMessage }}
       </div>
     </v-snackbar>
@@ -477,7 +579,9 @@
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-alert-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-alert-circle
+        </v-icon>
         {{ errorMessage }}
       </div>
     </v-snackbar>
@@ -801,6 +905,17 @@ const generateQRCode = async () => {
         ? "QR code updated successfully!"
         : "QR code generated successfully!"
     );
+
+    // Sync QR to device via Knative
+    const userName = props.employeeData?.first_name || String(props.id);
+    const uuids = new Set(
+      (accessLevelDetails.value?.assignedDoors || [])
+        .map(d => d.doors_id?.deviceUuid)
+        .filter(Boolean)
+    );
+    for (const uuid of uuids) {
+      await syncCredentialToDevice(uuid, qrCodeValue, 101, userName);
+    }
 
     // Fetch the updated QR code data
     await fetchQRCodeData();
@@ -1153,7 +1268,7 @@ const handleAccessLevelChange = async (value) => {
     if (data.data.assignDoorsGroup && data.data.assignDoorsGroup.length > 0) {
       const doorIds = data.data.assignDoorsGroup.join(",");
       const doorsResponse = await fetch(
-        `${import.meta.env.VITE_API_URL}/items/doors?filter[id][_in]=${doorIds}&fields=id,doorNumber,doorName,doorType,doorsConfigure,tenant.tenantName`,
+        `${import.meta.env.VITE_API_URL}/items/doors?filter[id][_in]=${doorIds}&fields=id,doorNumber,doorName,doorType,deviceUuid,doorsConfigure,tenant.tenantName`,
         {
           headers: {
             Authorization: `Bearer ${authService.getToken()}`,
@@ -1181,6 +1296,7 @@ const handleAccessLevelChange = async (value) => {
           doorName: door.doorName,
           doorType: door.doorType,
           doorsConfigure: door.doorsConfigure,
+          deviceUuid: door.deviceUuid,
           tenant: door.tenant,
         },
       })),
@@ -1189,6 +1305,52 @@ const handleAccessLevelChange = async (value) => {
   } catch (error) {
     console.error("Error fetching access level details:", error);
     showErrorMessage("Failed to load access level details");
+  }
+};
+
+const syncCredentialToDevice = async (deviceUuid, credentialCode, credentialType, credentialId) => {
+  try {
+    const payload = {
+      action: "insertPermission",
+      uuid: deviceUuid,
+      data: [
+        {
+          id: String(credentialId || "UnknownUser"),
+          type: credentialType,
+          code: String(credentialCode),
+          index: "01",       // Target sub-device
+          time: { type: 0 }  // 0 = Permanent access
+        }
+      ]
+    };
+
+    await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-router`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    console.log(`Synced credential (type ${credentialType}) to device ${deviceUuid}`);
+  } catch (err) {
+    console.error("Failed to sync credential to Knative:", err);
+  }
+};
+
+const deleteCredentialFromDevice = async (deviceUuid, credentialId) => {
+  try {
+    const payload = {
+      action: "delPermission",
+      uuid: deviceUuid,
+      data: [String(credentialId)]
+    };
+
+    await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-router`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    console.log(`Deleted credentials for ${credentialId} from device ${deviceUuid}`);
+  } catch (err) {
+    console.error("Failed to delete credential from Knative:", err);
   }
 };
 
@@ -1206,6 +1368,82 @@ const updateAccessCatagory = async () => {
     if (selectedAccessLevel.value) {
       payload.assignedAccessLevel = selectedAccessLevel.value.id;
     }
+
+    const userName = props.employeeData?.first_name || String(props.id);
+    
+    // 1. Get the current/new devices set
+    const uuids = new Set(
+      (accessLevelDetails.value?.assignedDoors || [])
+        .map(d => d.doors_id?.deviceUuid)
+        .filter(Boolean)
+    );
+
+    // 2. Fetch and identify old devices set to check for cleanup
+    const oldUuids = new Set();
+    if (originalAccessOn.value && originalAccessLevel.value) {
+      try {
+        const oldLevelResponse = await fetch(
+          `${import.meta.env.VITE_API_URL}/items/accesslevels/${originalAccessLevel.value.id}?fields=assignDoorsGroup`,
+          {
+            headers: {
+              Authorization: `Bearer ${authService.getToken()}`,
+            },
+          }
+        );
+        if (oldLevelResponse.ok) {
+          const oldLevelData = await oldLevelResponse.json();
+          if (oldLevelData.data?.assignDoorsGroup && oldLevelData.data.assignDoorsGroup.length > 0) {
+            const oldDoorIds = oldLevelData.data.assignDoorsGroup.join(",");
+            const oldDoorsResponse = await fetch(
+              `${import.meta.env.VITE_API_URL}/items/doors?filter[id][_in]=${oldDoorIds}&fields=deviceUuid`,
+              {
+                headers: {
+                  Authorization: `Bearer ${authService.getToken()}`,
+                },
+              }
+            );
+            if (oldDoorsResponse.ok) {
+              const oldDoorsData = await oldDoorsResponse.json();
+              (oldDoorsData.data || []).forEach(d => {
+                if (d.deviceUuid) {
+                  oldUuids.add(d.deviceUuid);
+                }
+              });
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching old access level doors:", err);
+      }
+    }
+
+    // 3. Delete credentials from devices that are no longer assigned
+    for (const oldUuid of oldUuids) {
+      if (!uuids.has(oldUuid)) {
+        await deleteCredentialFromDevice(oldUuid, userName);
+      }
+    }
+
+    // 4. If access is completely disabled, wipe from all new/remaining devices as well
+    if (!accessOn.value) {
+      for (const oldUuid of oldUuids) {
+        await deleteCredentialFromDevice(oldUuid, userName);
+      }
+      for (const uuid of uuids) {
+        await deleteCredentialFromDevice(uuid, userName);
+      }
+    }
+
+    // 5. If access is enabled, wipe-and-rebuild on any devices if cards were deleted,
+    // or if the access level actually changed (ensuring clean state on new devices).
+    const isAccessLevelChanged = selectedAccessLevel.value?.id !== originalAccessLevel.value?.id;
+    const shouldWipeNewDevices = accessOn.value && (removedCardIds.value.length > 0 || isAccessLevelChanged);
+    if (shouldWipeNewDevices) {
+      for (const uuid of uuids) {
+        await deleteCredentialFromDevice(uuid, userName);
+      }
+    }
+
     for (const card of assignedCards.value) {
       const cardAccess = accessOn.value ? card.enabled : false;
 
@@ -1235,6 +1473,13 @@ const updateAccessCatagory = async () => {
           },
           body: JSON.stringify(cardPayload),
         });
+
+        // Sync card to device via Knative if access is active
+        if (accessOn.value && cardAccess) {
+          for (const uuid of uuids) {
+            await syncCredentialToDevice(uuid, card.rfidCard, 200, userName);
+          }
+        }
       } else {
         await fetch(
           `${import.meta.env.VITE_API_URL}/items/cardManagement/${card.originalId}`,
@@ -1247,10 +1492,18 @@ const updateAccessCatagory = async () => {
             body: JSON.stringify(cardPayload),
           }
         );
+
+        // If card was not new, but we wiped and rebuilt the devices (or access level changed),
+        // we must re-sync this remaining active card to the devices
+        if (shouldWipeNewDevices && cardAccess) {
+          for (const uuid of uuids) {
+            await syncCredentialToDevice(uuid, card.rfidCard, 200, userName);
+          }
+        }
       }
     }
 
-    // Delete removed cards
+    // Delete removed cards from DB
     for (const removedCardId of removedCardIds.value) {
       await fetch(
         `${import.meta.env.VITE_API_URL}/items/cardManagement/${removedCardId}`,
@@ -1261,6 +1514,20 @@ const updateAccessCatagory = async () => {
           },
         }
       );
+    }
+
+    // Sync Face Data if access is active (either new or re-synced after delete-wipe / access level change)
+    if (faceEmbedData.value?.base64Data && accessOn.value) {
+      for (const uuid of uuids) {
+        await syncCredentialToDevice(uuid, faceEmbedData.value.base64Data, 300, userName);
+      }
+    }
+
+    // Sync Fingerprint Data if access is active (either new or re-synced after delete-wipe / access level change)
+    if (fingerData.value?.base64_UserFingers && accessOn.value) {
+      for (const uuid of uuids) {
+        await syncCredentialToDevice(uuid, fingerData.value.base64_UserFingers, 500, userName);
+      }
     }
 
     const response = await fetch(

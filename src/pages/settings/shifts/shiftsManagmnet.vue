@@ -1,5 +1,8 @@
 <template>
-  <v-container fluid class="shifts-container">
+  <v-container
+    fluid
+    class="shifts-container"
+  >
     <!-- ToastContainer Component -->
     <ToastContainer ref="toastContainer" />
 
@@ -16,8 +19,8 @@
           :left-icon="plusIcon"
           variant="primary"
           size="md"
-          @click="openAddDialog"
           class="add-shift-btn"
+          @click="openAddDialog"
         />
       </template>
 
@@ -28,8 +31,8 @@
           :columns="columns"
           :sort-by="sortBy"
           :sort-direction="sortDirection"
-          @update:sortBy="sortBy = $event"
-          @update:sortDirection="sortDirection = $event"
+          @update:sort-by="sortBy = $event"
+          @update:sort-direction="sortDirection = $event"
           @sort="handleSort"
         >
           <!-- Shift Name Cell -->
@@ -86,7 +89,12 @@
               color="primary"
               variant="outlined"
             >
-              <v-icon start size="14">mdi-timer-outline</v-icon>
+              <v-icon
+                start
+                size="14"
+              >
+                mdi-timer-outline
+              </v-icon>
               {{ getDuration(item.startTime, item.endTime) }}h
             </v-chip>
           </template>
@@ -152,21 +160,26 @@
         <div class="dialog-header">
           <div class="dialog-header-content">
             <div class="dialog-title-section">
-              <h2 class="dialog-title">Create New Shift</h2>
+              <h2 class="dialog-title">
+                Create New Shift
+              </h2>
             </div>
           </div>
           <v-btn
             icon="mdi-close"
             variant="text"
             size="small"
-            @click="closeAddDialog"
             class="dialog-close-btn"
+            @click="closeAddDialog"
           />
         </div>
 
         <!-- Dialog Content -->
         <div class="dialog-content">
-          <v-form ref="addForm" v-model="validAdd">
+          <v-form
+            ref="addForm"
+            v-model="validAdd"
+          >
             <!-- Shift Name Section -->
             <div class="form-section">
               <v-text-field
@@ -189,8 +202,12 @@
             <!-- Time Section -->
             <div class="form-section">
               <div class="section-header">
-                <v-icon class="section-icon">mdi-clock-outline</v-icon>
-                <h3 class="section-title">Working Hours</h3>
+                <v-icon class="section-icon">
+                  mdi-clock-outline
+                </v-icon>
+                <h3 class="section-title">
+                  Working Hours
+                </h3>
               </div>
 
               <div class="time-inputs-grid">
@@ -235,8 +252,8 @@
             variant="danger"
             color="grey-darken-1"
             size="md"
-            @click="closeAddDialog"
             class="footer-btn"
+            @click="closeAddDialog"
           />
           <BaseButton
             text="Create Shift"
@@ -245,9 +262,9 @@
             }"
             variant="primary"
             size="md"
-            @click="addShift"
             :disabled="!validAdd"
             class="footer-btn primary-btn"
+            @click="addShift"
           />
         </div>
       </v-card>
@@ -265,21 +282,26 @@
         <div class="dialog-header">
           <div class="dialog-header-content">
             <div class="dialog-title-section">
-              <h2 class="dialog-title">Edit Shift</h2>
+              <h2 class="dialog-title">
+                Edit Shift
+              </h2>
             </div>
           </div>
           <v-btn
             icon="mdi-close"
             variant="text"
             size="small"
-            @click="closeEditDialog"
             class="dialog-close-btn"
+            @click="closeEditDialog"
           />
         </div>
 
         <!-- Dialog Content -->
         <div class="dialog-content">
-          <v-form ref="editForm" v-model="validEdit">
+          <v-form
+            ref="editForm"
+            v-model="validEdit"
+          >
             <!-- Shift Name Section -->
             <div class="form-section">
               <v-text-field
@@ -302,8 +324,12 @@
             <!-- Time Section -->
             <div class="form-section">
               <div class="section-header">
-                <v-icon class="section-icon">mdi-clock-outline</v-icon>
-                <h3 class="section-title">Working Hours</h3>
+                <v-icon class="section-icon">
+                  mdi-clock-outline
+                </v-icon>
+                <h3 class="section-title">
+                  Working Hours
+                </h3>
               </div>
 
               <div class="time-inputs-grid">
@@ -348,8 +374,8 @@
             variant="danger"
             color="grey-darken-1"
             size="md"
-            @click="closeEditDialog"
             class="footer-btn"
+            @click="closeEditDialog"
           />
           <BaseButton
             text="Save Changes"
@@ -358,9 +384,9 @@
             }"
             variant="primary"
             size="md"
-            @click="saveChanges"
             :disabled="!validEdit"
             class="footer-btn primary-btn"
+            @click="saveChanges"
           />
         </div>
       </v-card>

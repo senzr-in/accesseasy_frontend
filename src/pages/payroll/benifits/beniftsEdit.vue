@@ -25,9 +25,9 @@
             variant="primary"
             size="md"
             :left-icon="Check"
-            @click="saveAdhocPayments"
             :loading="isLoading"
             class="ms-2"
+            @click="saveAdhocPayments"
           >
             Save Bonus
           </BaseButton>
@@ -97,7 +97,10 @@
             background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
           "
         >
-          <h3 class="text-h6 font-weight-bold" style="color: #374151">
+          <h3
+            class="text-h6 font-weight-bold"
+            style="color: #374151"
+          >
             Existing Bonus Records
           </h3>
         </v-card-title>
@@ -107,22 +110,38 @@
             class="text-center py-8"
             style="color: #6b7280"
           >
-            <v-icon size="48" style="color: #d1d5db" class="mb-3"
-              >mdi-inbox</v-icon
+            <v-icon
+              size="48"
+              style="color: #d1d5db"
+              class="mb-3"
             >
-            <p class="text-body-1">No bonus records found</p>
+              mdi-inbox
+            </v-icon>
+            <p class="text-body-1">
+              No bonus records found
+            </p>
           </div>
-          <div v-else class="bonus-list">
+          <div
+            v-else
+            class="bonus-list"
+          >
             <div
               v-for="(bonus, index) in bonuses"
               :key="index"
               class="bonus-item d-flex align-center justify-space-between py-3 px-4 mb-3"
               style="width: 40%"
             >
-              <v-chip color="#3b82f6" size="default" class="font-weight-medium">
+              <v-chip
+                color="#3b82f6"
+                size="default"
+                class="font-weight-medium"
+              >
                 {{ bonus.reason }}
               </v-chip>
-              <div class="d-flex align-center" style="gap: 12px">
+              <div
+                class="d-flex align-center"
+                style="gap: 12px"
+              >
                 <v-chip
                   color="#10b981"
                   size="default"
@@ -152,7 +171,11 @@
               style="width: 40%; border-top: 1px solid #e5e7eb"
             >
               <strong>Total</strong>
-              <v-chip color="#f59e0b" size="default" class="font-weight-bold">
+              <v-chip
+                color="#f59e0b"
+                size="default"
+                class="font-weight-bold"
+              >
                 ₹{{ totalBonus }}
               </v-chip>
             </div>
@@ -186,9 +209,9 @@
             variant="primary"
             size="md"
             :left-icon="Check"
-            @click="saveAdhocPayments"
             :loading="isLoading"
             class="ms-2"
+            @click="saveAdhocPayments"
           >
             Save Incentive
           </BaseButton>
@@ -258,7 +281,10 @@
             background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
           "
         >
-          <h3 class="text-h6 font-weight-bold" style="color: #374151">
+          <h3
+            class="text-h6 font-weight-bold"
+            style="color: #374151"
+          >
             Existing Incentive Records
           </h3>
         </v-card-title>
@@ -268,22 +294,38 @@
             class="text-center py-8"
             style="color: #6b7280"
           >
-            <v-icon size="48" style="color: #d1d5db" class="mb-3"
-              >mdi-inbox</v-icon
+            <v-icon
+              size="48"
+              style="color: #d1d5db"
+              class="mb-3"
             >
-            <p class="text-body-1">No incentive records found</p>
+              mdi-inbox
+            </v-icon>
+            <p class="text-body-1">
+              No incentive records found
+            </p>
           </div>
-          <div v-else class="bonus-list">
+          <div
+            v-else
+            class="bonus-list"
+          >
             <div
               v-for="(incentive, index) in incentives"
               :key="index"
               class="bonus-item d-flex align-center justify-space-between py-3 px-4 mb-3"
               style="width: 40%"
             >
-              <v-chip color="#3b82f6" size="default" class="font-weight-medium">
+              <v-chip
+                color="#3b82f6"
+                size="default"
+                class="font-weight-medium"
+              >
                 {{ incentive.reason }}
               </v-chip>
-              <div class="d-flex align-center" style="gap: 12px">
+              <div
+                class="d-flex align-center"
+                style="gap: 12px"
+              >
                 <v-chip
                   color="#10b981"
                   size="default"
@@ -313,7 +355,11 @@
               style="width: 40%; border-top: 1px solid #e5e7eb"
             >
               <strong>Total</strong>
-              <v-chip color="#f59e0b" size="default" class="font-weight-bold">
+              <v-chip
+                color="#f59e0b"
+                size="default"
+                class="font-weight-bold"
+              >
                 ₹{{ totalIncentive }}
               </v-chip>
             </div>
@@ -347,9 +393,9 @@
             variant="primary"
             size="md"
             :left-icon="Check"
-            @click="saveAdhocPayments"
             :loading="isLoading"
             class="ms-2"
+            @click="saveAdhocPayments"
           >
             Save Retention
           </BaseButton>
@@ -419,7 +465,10 @@
             background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
           "
         >
-          <h3 class="text-h6 font-weight-bold" style="color: #374151">
+          <h3
+            class="text-h6 font-weight-bold"
+            style="color: #374151"
+          >
             Existing Retention Pay Records
           </h3>
         </v-card-title>
@@ -429,22 +478,38 @@
             class="text-center py-8"
             style="color: #6b7280"
           >
-            <v-icon size="48" style="color: #d1d5db" class="mb-3"
-              >mdi-inbox</v-icon
+            <v-icon
+              size="48"
+              style="color: #d1d5db"
+              class="mb-3"
             >
-            <p class="text-body-1">No retention pay records found</p>
+              mdi-inbox
+            </v-icon>
+            <p class="text-body-1">
+              No retention pay records found
+            </p>
           </div>
-          <div v-else class="bonus-list">
+          <div
+            v-else
+            class="bonus-list"
+          >
             <div
               v-for="(item, index) in retentionPays"
               :key="index"
               class="bonus-item d-flex align-center justify-space-between py-3 px-4 mb-3"
               style="width: 40%"
             >
-              <v-chip color="#3b82f6" size="default" class="font-weight-medium">
+              <v-chip
+                color="#3b82f6"
+                size="default"
+                class="font-weight-medium"
+              >
                 {{ item.reason }}
               </v-chip>
-              <div class="d-flex align-center" style="gap: 12px">
+              <div
+                class="d-flex align-center"
+                style="gap: 12px"
+              >
                 <v-chip
                   color="#10b981"
                   size="default"
@@ -474,7 +539,11 @@
               style="width: 40%; border-top: 1px solid #e5e7eb"
             >
               <strong>Total</strong>
-              <v-chip color="#f59e0b" size="default" class="font-weight-bold">
+              <v-chip
+                color="#f59e0b"
+                size="default"
+                class="font-weight-bold"
+              >
                 ₹{{ totalRetentionPay }}
               </v-chip>
             </div>
@@ -508,9 +577,9 @@
             variant="primary"
             size="md"
             :left-icon="Check"
-            @click="saveAdhocPayments"
             :loading="isLoading"
             class="ms-2"
+            @click="saveAdhocPayments"
           >
             Save Arrears
           </BaseButton>
@@ -580,7 +649,10 @@
             background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
           "
         >
-          <h3 class="text-h6 font-weight-bold" style="color: #374151">
+          <h3
+            class="text-h6 font-weight-bold"
+            style="color: #374151"
+          >
             Existing Salary Arrears Records
           </h3>
         </v-card-title>
@@ -590,22 +662,38 @@
             class="text-center py-8"
             style="color: #6b7280"
           >
-            <v-icon size="48" style="color: #d1d5db" class="mb-3"
-              >mdi-inbox</v-icon
+            <v-icon
+              size="48"
+              style="color: #d1d5db"
+              class="mb-3"
             >
-            <p class="text-body-1">No salary arrears records found</p>
+              mdi-inbox
+            </v-icon>
+            <p class="text-body-1">
+              No salary arrears records found
+            </p>
           </div>
-          <div v-else class="bonus-list">
+          <div
+            v-else
+            class="bonus-list"
+          >
             <div
               v-for="(item, index) in salaryArrears"
               :key="index"
               class="bonus-item d-flex align-center justify-space-between py-3 px-4 mb-3"
               style="width: 40%"
             >
-              <v-chip color="#3b82f6" size="default" class="font-weight-medium">
+              <v-chip
+                color="#3b82f6"
+                size="default"
+                class="font-weight-medium"
+              >
                 {{ item.name }}
               </v-chip>
-              <div class="d-flex align-center" style="gap: 12px">
+              <div
+                class="d-flex align-center"
+                style="gap: 12px"
+              >
                 <v-chip
                   color="#10b981"
                   size="default"
@@ -635,7 +723,11 @@
               style="width: 40%; border-top: 1px solid #e5e7eb"
             >
               <strong>Total</strong>
-              <v-chip color="#f59e0b" size="default" class="font-weight-bold">
+              <v-chip
+                color="#f59e0b"
+                size="default"
+                class="font-weight-bold"
+              >
                 ₹{{ totalArrears }}
               </v-chip>
             </div>
@@ -669,9 +761,9 @@
             variant="primary"
             size="md"
             :left-icon="Check"
-            @click="saveAdhocPayments"
             :loading="isLoading"
             class="ms-2"
+            @click="saveAdhocPayments"
           >
             Save Deduction
           </BaseButton>
@@ -741,7 +833,10 @@
             background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
           "
         >
-          <h3 class="text-h6 font-weight-bold" style="color: #374151">
+          <h3
+            class="text-h6 font-weight-bold"
+            style="color: #374151"
+          >
             Existing Deduction Records
           </h3>
         </v-card-title>
@@ -751,22 +846,38 @@
             class="text-center py-8"
             style="color: #6b7280"
           >
-            <v-icon size="48" style="color: #d1d5db" class="mb-3"
-              >mdi-inbox</v-icon
+            <v-icon
+              size="48"
+              style="color: #d1d5db"
+              class="mb-3"
             >
-            <p class="text-body-1">No deduction records found</p>
+              mdi-inbox
+            </v-icon>
+            <p class="text-body-1">
+              No deduction records found
+            </p>
           </div>
-          <div v-else class="bonus-list">
+          <div
+            v-else
+            class="bonus-list"
+          >
             <div
               v-for="(item, index) in deductions"
               :key="index"
               class="bonus-item d-flex align-center justify-space-between py-3 px-4 mb-3"
               style="width: 40%"
             >
-              <v-chip color="#3b82f6" size="default" class="font-weight-medium">
+              <v-chip
+                color="#3b82f6"
+                size="default"
+                class="font-weight-medium"
+              >
                 {{ item.name }}
               </v-chip>
-              <div class="d-flex align-center" style="gap: 12px">
+              <div
+                class="d-flex align-center"
+                style="gap: 12px"
+              >
                 <v-chip
                   color="#10b981"
                   size="default"
@@ -796,7 +907,11 @@
               style="width: 40%; border-top: 1px solid #e5e7eb"
             >
               <strong>Total</strong>
-              <v-chip color="#f59e0b" size="default" class="font-weight-bold">
+              <v-chip
+                color="#f59e0b"
+                size="default"
+                class="font-weight-bold"
+              >
                 ₹{{ totalDeduction }}
               </v-chip>
             </div>
@@ -809,13 +924,13 @@
       v-if="showDeleteModal"
       :show="showDeleteModal"
       title="Confirm Deletion"
-      confirmMessage="Are you sure you want to delete?"
-      :itemLabel="deleteType"
-      :itemName="''"
-      cancelText="Cancel"
-      confirmText="Delete"
+      confirm-message="Are you sure you want to delete?"
+      :item-label="deleteType"
+      :item-name="''"
+      cancel-text="Cancel"
+      confirm-text="Delete"
       :deleting="deleting"
-      :deletingText="'Deleting...'"
+      :deleting-text="'Deleting...'"
       @close="showDeleteModal = false"
       @confirm="
         () => {

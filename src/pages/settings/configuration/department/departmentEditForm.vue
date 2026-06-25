@@ -1,35 +1,56 @@
 <template>
   <div>
     <v-form ref="form">
-      <v-toolbar density="compact" color="grey-lighten-4">
-        <v-btn icon color="black" @click="handleClose">
+      <v-toolbar
+        density="compact"
+        color="grey-lighten-4"
+      >
+        <v-btn
+          icon
+          color="black"
+          @click="handleClose"
+        >
           <v-icon>mdi-arrow-left</v-icon>
         </v-btn>
-        <v-toolbar-title class="ml-4">Edit Department</v-toolbar-title>
-        <v-spacer></v-spacer>
-        <v-btn color="error" variant="text" class="mr-2" @click="handleClose"
-          >CANCEL</v-btn
+        <v-toolbar-title class="ml-4">
+          Edit Department
+        </v-toolbar-title>
+        <v-spacer />
+        <v-btn
+          color="error"
+          variant="text"
+          class="mr-2"
+          @click="handleClose"
         >
-        <v-btn style="background-color:  #68ade1" color="white" @click="handleSave"
-          >SAVE</v-btn
+          CANCEL
+        </v-btn>
+        <v-btn
+          style="background-color:  #68ade1"
+          color="white"
+          @click="handleSave"
         >
+          SAVE
+        </v-btn>
       </v-toolbar>
 
       <div class="d-flex content-wrapper">
         <!-- Side Navigation -->
         <div class="side-nav pa-4">
-          <v-list density="compact" nav>
+          <v-list
+            density="compact"
+            nav
+          >
             <v-list-item
               v-for="(item, i) in menuItems"
               :key="i"
               :value="item"
               :active="selectedTab === item.value"
-              @click="selectedTab = item.value"
               color="black"
               rounded
+              @click="selectedTab = item.value"
             >
-              <template v-slot:prepend>
-                <v-icon :icon="item.icon"></v-icon>
+              <template #prepend>
+                <v-icon :icon="item.icon" />
               </template>
               <v-list-item-title>{{ item.title }}</v-list-item-title>
             </v-list-item>
@@ -39,13 +60,18 @@
         <!-- Content Area -->
         <div class="content-area pa-4">
           <v-card flat>
-            <h2 class="text-h6 mb-4">Department Details</h2>
+            <h2 class="text-h6 mb-4">
+              Department Details
+            </h2>
 
             <v-window v-model="selectedTab">
               <!-- Basic Details -->
               <v-window-item value="basic">
                 <v-row>
-                  <v-col cols="12" sm="6">
+                  <v-col
+                    cols="12"
+                    sm="6"
+                  >
                     <v-text-field
                       v-model="formData.departmentName"
                       label="Department Name *"
@@ -55,9 +81,12 @@
                       required
                       @input="capitalizeFirstLetterEachWord('departmentName')"
                       @blur="checkDepartmentExists"
-                    ></v-text-field>
+                    />
                   </v-col>
-                  <v-col cols="12" sm="6">
+                  <v-col
+                    cols="12"
+                    sm="6"
+                  >
                     <v-autocomplete
                       v-model="formData.branch"
                       label="Branch"
@@ -66,7 +95,7 @@
                       item-value="id"
                       variant="outlined"
                       :loading="loadingBranches"
-                    ></v-autocomplete>
+                    />
                   </v-col>
                 </v-row>
               </v-window-item>
@@ -81,7 +110,12 @@
         timeout="2000"
         location="top"
       >
-        <v-icon class="me-2" color="white">mdi-check-circle</v-icon>
+        <v-icon
+          class="me-2"
+          color="white"
+        >
+          mdi-check-circle
+        </v-icon>
         Department updated successfully!
       </v-snackbar>
 
@@ -91,10 +125,19 @@
         timeout="2000"
         location="top"
       >
-        <v-icon class="me-2" color="white">mdi-alert-circle</v-icon>
+        <v-icon
+          class="me-2"
+          color="white"
+        >
+          mdi-alert-circle
+        </v-icon>
         {{ errorMessage }}
-        <template v-slot:actions>
-          <v-btn color="red" variant="text" @click="showErrorAlert = false">
+        <template #actions>
+          <v-btn
+            color="red"
+            variant="text"
+            @click="showErrorAlert = false"
+          >
             Close
           </v-btn>
         </template>

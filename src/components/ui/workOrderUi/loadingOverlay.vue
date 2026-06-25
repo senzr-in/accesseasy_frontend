@@ -1,7 +1,10 @@
 <template>
-  <div v-if="loading" class="loading-overlay">
+  <div
+    v-if="loading"
+    class="loading-overlay"
+  >
     <div class="loading-content">
-      <div class="loading-spinner"></div>
+      <div class="loading-spinner" />
       <span class="loading-text">Loading...</span>
     </div>
   </div>

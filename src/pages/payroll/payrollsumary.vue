@@ -1,11 +1,20 @@
 <template>
   <div class="payroll-summary-container">
     <!-- Toggleable Left Filter Sidebar -->
-    <div class="filter-sidebar" :class="{ 'collapsed': isCollapsed }">
-      <button class="toggle-btn" @click="toggleSidebar">
+    <div
+      class="filter-sidebar"
+      :class="{ 'collapsed': isCollapsed }"
+    >
+      <button
+        class="toggle-btn"
+        @click="toggleSidebar"
+      >
         {{ isCollapsed ? '▶' : '◀' }}
       </button>
-      <payrollfilter v-if="!isCollapsed" @apply-filters="applyFilters"></payrollfilter>
+      <payrollfilter
+        v-if="!isCollapsed"
+        @apply-filters="applyFilters"
+      />
     </div>
 
     <!-- Main Content -->
@@ -18,9 +27,13 @@
       <!-- Right Side Card with Actions -->
       <div class="action-card">
         <h3>Actions</h3>
-        <button @click="addSalary">Add Salary</button>
+        <button @click="addSalary">
+          Add Salary
+        </button>
 
-        <button @click="finalizePayroll">Finalize Payroll</button>
+        <button @click="finalizePayroll">
+          Finalize Payroll
+        </button>
       </div>
 
       <!-- Payroll Summary Sections -->

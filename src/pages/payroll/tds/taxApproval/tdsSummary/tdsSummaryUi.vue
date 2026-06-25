@@ -1,16 +1,30 @@
 <template>
-  <v-container fluid class="pa-6">
+  <v-container
+    fluid
+    class="pa-6"
+  >
     <v-row class="mb-4">
-      <v-col cols="12" md="8">
+      <v-col
+        cols="12"
+        md="8"
+      >
         <div class="d-flex align-center mb-2">
-          <v-icon class="mr-2">mdi-file-document-outline</v-icon>
-          <h2 class="text-h5 font-weight-bold">TDS Calculations Summary</h2>
+          <v-icon class="mr-2">
+            mdi-file-document-outline
+          </v-icon>
+          <h2 class="text-h5 font-weight-bold">
+            TDS Calculations Summary
+          </h2>
         </div>
         <p class="text-subtitle-1 text-grey-darken-1 mb-0">
           Annual Salary: {{ formatCurrency(totalYearlyEarnings) }}
         </p>
       </v-col>
-      <v-col cols="12" md="4" class="d-flex justify-end align-center">
+      <v-col
+        cols="12"
+        md="4"
+        class="d-flex justify-end align-center"
+      >
         <div class="d-flex align-center">
           <span class="mr-3 text-body-1">Select Tax Regime:</span>
           <v-select
@@ -21,16 +35,22 @@
             hide-details
             class="regime-select"
             style="min-width: 150px"
-          ></v-select>
+          />
         </div>
       </v-col>
     </v-row>
 
-    <v-card elevation="2" class="overflow-hidden">
+    <v-card
+      elevation="2"
+      class="overflow-hidden"
+    >
       <v-table class="comparison-table">
         <thead>
           <tr>
-            <th class="text-left font-weight-bold pa-4" style="width: 40%">
+            <th
+              class="text-left font-weight-bold pa-4"
+              style="width: 40%"
+            >
               Description
             </th>
             <th
@@ -45,8 +65,9 @@
                 v-if="selectedRegime === 'New Regime'"
                 color="success"
                 class="ml-2"
-                >mdi-check-circle</v-icon
               >
+                mdi-check-circle
+              </v-icon>
             </th>
             <th
               class="text-center font-weight-bold pa-4"
@@ -60,8 +81,9 @@
                 v-if="selectedRegime === 'Old Regime'"
                 color="primary"
                 class="ml-2"
-                >mdi-check-circle</v-icon
               >
+                mdi-check-circle
+              </v-icon>
             </th>
           </tr>
         </thead>
@@ -71,67 +93,82 @@
             :key="index"
             :class="getRowClass(row.type)"
           >
-            <td class="pa-4 font-weight-medium">{{ row.description }}</td>
+            <td class="pa-4 font-weight-medium">
+              {{ row.description }}
+            </td>
            
             <td
-  class="pa-4 text-center font-weight-medium cursor-pointer"
-  :class="[
-    getValueClass(row.type, 'new'),
-    { 'disabled-cell': selectedRegime !== 'New Regime' },
-  ]"
-  @click="row.type === 'tax-liability' ? openBreakdown('New Regime') : null"
->
-  {{ row.newRegime }}
-</td>
-<td
-  class="pa-4 text-center font-weight-medium cursor-pointer"
-  :class="[
-    getValueClass(row.type, 'old'),
-    { 'disabled-cell': selectedRegime !== 'Old Regime' },
-  ]"
-  @click="row.type === 'tax-liability' ? openBreakdown('Old Regime') : null"
->
-  {{ row.oldRegime }}
-</td>
+              class="pa-4 text-center font-weight-medium cursor-pointer"
+              :class="[
+                getValueClass(row.type, 'new'),
+                { 'disabled-cell': selectedRegime !== 'New Regime' },
+              ]"
+              @click="row.type === 'tax-liability' ? openBreakdown('New Regime') : null"
+            >
+              {{ row.newRegime }}
+            </td>
+            <td
+              class="pa-4 text-center font-weight-medium cursor-pointer"
+              :class="[
+                getValueClass(row.type, 'old'),
+                { 'disabled-cell': selectedRegime !== 'Old Regime' },
+              ]"
+              @click="row.type === 'tax-liability' ? openBreakdown('Old Regime') : null"
+            >
+              {{ row.oldRegime }}
+            </td>
           </tr>
         </tbody>
       </v-table>
     </v-card>
 
     
-<v-dialog v-model="breakdownDialog" max-width="400" persistent>
-  <v-card class="pa-4">
-    <v-card-title class="text-center pb-4">
-      <span class="text-h6 font-weight-semibold">{{ selectedBreakdownRegime }} Breakdown</span>
-    </v-card-title>
+    <v-dialog
+      v-model="breakdownDialog"
+      max-width="400"
+      persistent
+    >
+      <v-card class="pa-4">
+        <v-card-title class="text-center pb-4">
+          <span class="text-h6 font-weight-semibold">{{ selectedBreakdownRegime }} Breakdown</span>
+        </v-card-title>
     
-    <v-card-text class="py-2">
-      <div class="breakdown-content">
-        <div 
-          v-for="(slab, index) in breakdownSlabs" 
-          :key="index"
-          class="text-center py-3"
-          :class="{ 'border-bottom': index < breakdownSlabs.length - 1 }"
-        >
-          <div class="text-body-2 font-weight-medium text-grey-darken-2 mb-1">
-            {{ slab.range }}—{{ slab.amount }}{{ slab.percentage }}
-          </div>
-          <div class="text-body-2 text-grey-darken-1">→ Tax: {{ slab.tax }}</div>
-        </div>
+        <v-card-text class="py-2">
+          <div class="breakdown-content">
+            <div 
+              v-for="(slab, index) in breakdownSlabs" 
+              :key="index"
+              class="text-center py-3"
+              :class="{ 'border-bottom': index < breakdownSlabs.length - 1 }"
+            >
+              <div class="text-body-2 font-weight-medium text-grey-darken-2 mb-1">
+                {{ slab.range }}—{{ slab.amount }}{{ slab.percentage }}
+              </div>
+              <div class="text-body-2 text-grey-darken-1">
+                → Tax: {{ slab.tax }}
+              </div>
+            </div>
         
-        <div class="pt-4 mt-4 border-top">
-          <div class="text-center">
-            <div class="text-body-1 font-weight-semibold">Total Tax: {{ breakdownTotalTax }}</div>
+            <div class="pt-4 mt-4 border-top">
+              <div class="text-center">
+                <div class="text-body-1 font-weight-semibold">
+                  Total Tax: {{ breakdownTotalTax }}
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-    </v-card-text>
+        </v-card-text>
     
-    <v-card-actions class="justify-center pt-0">
-      <v-btn text @click="breakdownDialog = false">Close</v-btn>
-    </v-card-actions>
-  </v-card>
-</v-dialog>
+        <v-card-actions class="justify-center pt-0">
+          <v-btn
+            text
+            @click="breakdownDialog = false"
+          >
+            Close
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 

@@ -1,52 +1,62 @@
 <template>
   <div class="employee-container">
-    <div class="main-content" :class="{ 'with-filter': showFilters }">
+    <div
+      class="main-content"
+      :class="{ 'with-filter': showFilters }"
+    >
       <!-- Delete Confirmation Dialog -->
       <ConfirmDeleteModal
         :show="deleteDialog"
         title="Delete Confirmation"
-        :confirmMessage="`Are you sure you want to delete ${selected.length} ${selected.length === 1 ? 'designation' : 'designations'}?`"
-        itemLabel="Designation(s)"
-        :itemName="
+        :confirm-message="`Are you sure you want to delete ${selected.length} ${selected.length === 1 ? 'designation' : 'designations'}?`"
+        item-label="Designation(s)"
+        :item-name="
           selected.length === 1
             ? selected[0]?.designations_name
             : `${selected.length} designations`
         "
         description="This action cannot be undone."
-        cancelText="Cancel"
-        confirmText="Delete"
-        deletingText="Deleting..."
+        cancel-text="Cancel"
+        confirm-text="Delete"
+        deleting-text="Deleting..."
         :deleting="deleting"
         @close="closeDelete"
         @confirm="confirmDelete"
       />
 
       <!-- Add/Edit Designation Dialog -->
-      <v-dialog v-model="designationDialog" max-width="400px" persistent>
+      <v-dialog
+        v-model="designationDialog"
+        max-width="400px"
+        persistent
+      >
         <v-card>
           <v-card-title class="text-h6 d-flex justify-center py-4">
             {{ isEditing ? "Edit Designation" : "Add Designation" }}
           </v-card-title>
           <v-card-text>
-            <v-form ref="designationForm" v-model="formValid">
+            <v-form
+              ref="designationForm"
+              v-model="formValid"
+            >
               <v-text-field
                 v-model="designationFormData.designations_name"
                 label="Designation Name"
                 :rules="[rules.required]"
                 variant="outlined"
                 density="compact"
-              ></v-text-field>
+              />
 
               <v-text-field
                 v-model="designationFormData.description"
                 label="Description"
                 variant="outlined"
                 density="compact"
-              ></v-text-field>
+              />
             </v-form>
           </v-card-text>
           <v-card-actions>
-            <v-spacer></v-spacer>
+            <v-spacer />
             <v-btn
               color="grey-darken-1"
               variant="text"
@@ -57,9 +67,9 @@
             <v-btn
               color="primary"
               variant="text"
-              @click="saveDesignation"
               :loading="saving"
               :disabled="!formValid"
+              @click="saveDesignation"
             >
               {{ isEditing ? "Update" : "Save" }}
             </v-btn>
@@ -72,7 +82,7 @@
         :search-query="search"
         :has-error="false"
         search-placeholder="Search designations..."
-        @update:searchQuery="updateSearchQuery"
+        @update:search-query="updateSearchQuery"
       >
         <!-- Toolbar actions -->
         <template #toolbar-actions>
@@ -80,7 +90,7 @@
             <BaseButton
               variant="primary"
               text="Add Designation"
-              :leftIcon="Plus"
+              :left-icon="Plus"
               width="100px"
               @click="openAddDialog"
             />
@@ -109,11 +119,11 @@
             :selected-items="selected"
             :sort-by="currentSortBy"
             :sort-direction="currentSortDirection"
-            @update:selectedItems="updateSelectedItems"
-            @update:sortBy="updateSortBy"
-            @update:sortDirection="updateSortDirection"
+            @update:selected-items="updateSelectedItems"
+            @update:sort-by="updateSortBy"
+            @update:sort-direction="updateSortDirection"
             @sort="handleSort"
-            @rowClick="handleRowClick"
+            @row-click="handleRowClick"
           >
             <!-- Actions -->
             <template #cell-actions="{ item }">

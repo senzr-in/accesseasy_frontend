@@ -17,14 +17,20 @@
             class="custom-tab"
             @click="handleTabClick(tab.value)"
           >
-            <v-icon :icon="tab.icon" class="mr-2"></v-icon>
+            <v-icon
+              :icon="tab.icon"
+              class="mr-2"
+            />
             {{ tab.title }}
           </v-tab>
         </v-tabs>
 
         <!-- Routed View -->
-        <v-card class="tab-content-wrapper" elevation="0">
-          <router-view></router-view>
+        <v-card
+          class="tab-content-wrapper"
+          elevation="0"
+        >
+          <router-view />
         </v-card>
       </v-container>
     </v-main>

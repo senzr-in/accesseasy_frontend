@@ -18,33 +18,39 @@
         item-value="id"
         @click:row="(event, { item }) => handleRowClick(item)"
       >
-        <template v-slot:item.attendanceVerification="{ item }">
-          <v-icon :color="item.attendanceVerified ? 'success' : 'error'" small>
+        <template #item.attendanceVerification="{ item }">
+          <v-icon
+            :color="item.attendanceVerified ? 'success' : 'error'"
+            small
+          >
             {{
               item.attendanceVerified ? "mdi-check-circle" : "mdi-alert-circle"
             }}
           </v-icon>
           {{ item.attendanceVerified ? "Verified" : "Unverified" }}
         </template>
-        <template v-slot:item.salaryVerification="{ item }">
-          <v-icon :color="item.salaryVerified ? 'success' : 'error'" small>
+        <template #item.salaryVerification="{ item }">
+          <v-icon
+            :color="item.salaryVerified ? 'success' : 'error'"
+            small
+          >
             {{ item.salaryVerified ? "mdi-check-circle" : "mdi-alert-circle" }}
           </v-icon>
           {{ item.salaryVerified ? "Verified" : "Unverified" }}
         </template>
 
-        <template v-slot:item.ctc="{ item }">
+        <template #item.ctc="{ item }">
           {{ item.ctc || "-" }}
         </template>
-        <template v-slot:item.payableDays="{ item }">
+        <template #item.payableDays="{ item }">
           {{ item.payableDays || "-" }}
         </template>
-        <template v-slot:item.payableCTC="{ item }">
+        <template #item.payableCTC="{ item }">
           {{ item.payableCTC || "-" }}
         </template>
 
         <!-- search and filter -->
-        <template v-slot:top>
+        <template #top>
           <div class="d-flex align-center py-2 px-4">
             <v-text-field
               v-model="search"
@@ -55,23 +61,31 @@
               class="search-field"
               hide-details
               @input="debouncedSearch"
-            ></v-text-field>
-            <v-spacer></v-spacer>
+            />
+            <v-spacer />
             <div class="position-relative">
               <v-chip
-  class="me-4 mb-2"
-  color="primary"
-  variant="outlined"
-  prepend-icon="mdi-calendar-range"
->
-  FY: {{ startDate }} to {{ endDate }}
-</v-chip>
-              <v-btn color="primary" @click="toggleFilters">
-                <v-icon start>mdi-filter</v-icon>
+                class="me-4 mb-2"
+                color="primary"
+                variant="outlined"
+                prepend-icon="mdi-calendar-range"
+              >
+                FY: {{ startDate }} to {{ endDate }}
+              </v-chip>
+              <v-btn
+                color="primary"
+                @click="toggleFilters"
+              >
+                <v-icon start>
+                  mdi-filter
+                </v-icon>
                 Filters
               </v-btn>
 
-              <span v-if="hasActiveFilters" class="filter-indicator"></span>
+              <span
+                v-if="hasActiveFilters"
+                class="filter-indicator"
+              />
             </div>
           </div>
         </template>
@@ -80,11 +94,11 @@
       <!-- pagination -->
       <CustomPagination
         v-model:page="page"
-        v-model:itemsPerPage="itemsPerPage"
+        v-model:items-per-page="itemsPerPage"
         :total-items="totalItems"
         :is-searching="!!search"
         @update:page="handlePageChange"
-        @update:itemsPerPage="handleItemsPerPageChange"
+        @update:items-per-page="handleItemsPerPageChange"
       />
     </div>
     <!-- <v-dialog 
@@ -155,11 +169,19 @@
   </v-dialog> -->
 
     <transition name="slide">
-      <div v-if="showFilters" class="filter-panel">
+      <div
+        v-if="showFilters"
+        class="filter-panel"
+      >
         <div class="filter-header">
           <div class="d-flex align-center justify-space-between px-4">
-            <h3 class="text-h6 font-weight-medium">Advanced Filters</h3>
-            <v-btn icon @click="toggleFilters">
+            <h3 class="text-h6 font-weight-medium">
+              Advanced Filters
+            </h3>
+            <v-btn
+              icon
+              @click="toggleFilters"
+            >
               <v-icon>mdi-close</v-icon>
             </v-btn>
           </div>
@@ -183,10 +205,10 @@
             closable-chips
             variant="outlined"
             class="mb-4"
-            @update:model-value="handleFilterChange"
             persistent-placeholder
+            @update:model-value="handleFilterChange"
           >
-            <template v-slot:selection="{ item }">
+            <template #selection="{ item }">
               {{ item.title }}
             </template>
           </v-select>
@@ -200,19 +222,27 @@
             closable-chips
             variant="outlined"
             class="mb-4"
-            @update:model-value="handleFilterChange"
             persistent-placeholder
+            @update:model-value="handleFilterChange"
           >
-            <template v-slot:selection="{ item }">
+            <template #selection="{ item }">
               {{ item.title }}
             </template>
           </v-select>
 
           <div class="filter-actions">
-            <v-btn color="error" variant="text" @click="clearFilters">
+            <v-btn
+              color="error"
+              variant="text"
+              @click="clearFilters"
+            >
               Clear
             </v-btn>
-            <v-btn color="primary" @click="applyFilters" class="ms-2">
+            <v-btn
+              color="primary"
+              class="ms-2"
+              @click="applyFilters"
+            >
               Apply
             </v-btn>
           </div>

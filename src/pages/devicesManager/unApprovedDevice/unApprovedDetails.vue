@@ -24,26 +24,36 @@
           }
         "
       >
-        <template v-slot:item.controllerImage="{ item }">
-          <v-avatar size="40" v-if="item.controllerImage?.id">
+        <template #item.controllerImage="{ item }">
+          <v-avatar
+            v-if="item.controllerImage?.id"
+            size="40"
+          >
             <v-img
               v-if="item.controllerImage?.id && item.controllerImage.url"
               :src="item.controllerImage.url"
               :alt="item.controllerName"
-            ></v-img>
+            />
           </v-avatar>
-          <v-avatar size="40" v-else>
+          <v-avatar
+            v-else
+            size="40"
+          >
             <v-img
               v-if="item.controllerName"
               :src="getDefaultImageForController(item.controllerName)"
               :alt="item.controllerName"
-            ></v-img>
-            <v-avatar v-else color="grey" class="text-uppercase">
+            />
+            <v-avatar
+              v-else
+              color="grey"
+              class="text-uppercase"
+            >
               {{ item.controllerName?.charAt(0) }}
             </v-avatar>
           </v-avatar>
         </template>
-        <template v-slot:item.status="{ item }">
+        <template #item.status="{ item }">
           <v-chip
             :color="item.status === 'approved' ? 'success' : 'error'"
             :text-color="item.status === 'approved' ? 'white' : 'white'"
@@ -57,11 +67,11 @@
                   ? 'mdi-check-circle'
                   : 'mdi-clock-alert'
               "
-            ></v-icon>
+            />
             {{ item.status }}
           </v-chip>
         </template>
-        <template v-slot:item.controllerStatus="{ item }">
+        <template #item.controllerStatus="{ item }">
           <v-chip
             :color="getControllerStatusColor(item.controllerStatus)"
             :text-color="'white'"
@@ -71,48 +81,63 @@
               start
               small
               :icon="getControllerStatusIcon(item.controllerStatus)"
-            ></v-icon>
+            />
             {{ item.controllerStatus }}
           </v-chip>
         </template>
-        <template v-slot:top>
+        <template #top>
           <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border-b border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 gap-4 shrink-0">
             <!-- Left side tabs -->
             <div class="flex bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-1 rounded-xl shadow-sm">
               <button
-                @click="activeTab = 'all'"
                 :class="[
                   'px-4 h-8 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all flex items-center',
                   activeTab === 'all'
                     ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-sm border border-slate-200 dark:border-zinc-700'
                     : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
                 ]"
+                @click="activeTab = 'all'"
               >
-                <v-icon size="14" class="mr-1.5 opacity-70">mdi-format-list-bulleted</v-icon>
+                <v-icon
+                  size="14"
+                  class="mr-1.5 opacity-70"
+                >
+                  mdi-format-list-bulleted
+                </v-icon>
                 All
               </button>
               <button
-                @click="activeTab = 'unApproved'"
                 :class="[
                   'px-4 h-8 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all flex items-center',
                   activeTab === 'unApproved'
                     ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-sm border border-slate-200 dark:border-zinc-700'
                     : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
                 ]"
+                @click="activeTab = 'unApproved'"
               >
-                <v-icon size="14" class="mr-1.5 opacity-70">mdi-clock-alert</v-icon>
+                <v-icon
+                  size="14"
+                  class="mr-1.5 opacity-70"
+                >
+                  mdi-clock-alert
+                </v-icon>
                 Unapproved
               </button>
               <button
-                @click="activeTab = 'approved'"
                 :class="[
                   'px-4 h-8 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all flex items-center',
                   activeTab === 'approved'
                     ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-sm border border-slate-200 dark:border-zinc-700'
                     : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
                 ]"
+                @click="activeTab = 'approved'"
               >
-                <v-icon size="14" class="mr-1.5 opacity-70">mdi-check-circle-outline</v-icon>
+                <v-icon
+                  size="14"
+                  class="mr-1.5 opacity-70"
+                >
+                  mdi-check-circle-outline
+                </v-icon>
                 Approved
               </button>
             </div>
@@ -120,24 +145,34 @@
             <!-- Search field and controls moved to right side -->
             <div class="flex items-center gap-3 w-full sm:w-auto">
               <div class="relative w-full sm:w-64">
-                <v-icon class="absolute left-3 top-2.5 h-4 w-4 text-slate-400 z-10" size="16">mdi-magnify</v-icon>
+                <v-icon
+                  class="absolute left-3 top-2.5 h-4 w-4 text-slate-400 z-10"
+                  size="16"
+                >
+                  mdi-magnify
+                </v-icon>
                 <input
                   v-model="search"
                   type="text"
                   placeholder="Search Device..."
                   class="w-full pl-9 pr-4 h-10 text-sm bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm text-slate-900 dark:text-white placeholder:text-slate-400"
-                />
+                >
               </div>
 
               <div class="relative">
                 <button 
-                  @click="toggleFilters" 
-                  class="flex items-center gap-2 h-10 px-4 text-xs font-bold uppercase tracking-widest rounded-xl border border-slate-200 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-950 transition-colors shadow-sm bg-slate-50 dark:bg-zinc-900 text-slate-700 dark:text-slate-300"
+                  class="flex items-center gap-2 h-10 px-4 text-xs font-bold uppercase tracking-widest rounded-xl border border-slate-200 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-950 transition-colors shadow-sm bg-slate-50 dark:bg-zinc-900 text-slate-700 dark:text-slate-300" 
+                  @click="toggleFilters"
                 >
-                  <v-icon size="16">mdi-filter</v-icon>
+                  <v-icon size="16">
+                    mdi-filter
+                  </v-icon>
                   Filters
                 </button>
-                <span v-if="hasActiveFilters" class="absolute -top-1 -right-1 h-3 w-3 bg-blue-500 rounded-full border-2 border-white dark:border-zinc-900 block"></span>
+                <span
+                  v-if="hasActiveFilters"
+                  class="absolute -top-1 -right-1 h-3 w-3 bg-blue-500 rounded-full border-2 border-white dark:border-zinc-900 block"
+                />
               </div>
             </div>
           </div>
@@ -145,13 +180,13 @@
           <!-- Removed extra buttons for standard tabular mapping -->
         </template>
 
-        <template v-slot:item.actions="{ item }">
+        <template #item.actions="{ item }">
           <div class="d-flex justify-center">
             <v-icon
               size="small"
               class="me-2"
-              @click.stop="editItem(item)"
               title="Edit"
+              @click.stop="editItem(item)"
             >
               mdi-pencil
             </v-icon>
@@ -160,21 +195,29 @@
       </v-data-table>
       <CustomPagination
         v-model:page="page"
-        v-model:itemsPerPage="itemsPerPage"
+        v-model:items-per-page="itemsPerPage"
         :total-items="totalItems"
         :is-searching="!!search"
         @update:page="handlePageChange"
-        @update:itemsPerPage="handleItemsPerPageChange"
+        @update:items-per-page="handleItemsPerPageChange"
       />
     </div>
 
     <!-- Right Filter Panel -->
     <transition name="slide">
-      <div v-if="showFilters" class="filter-panel">
+      <div
+        v-if="showFilters"
+        class="filter-panel"
+      >
         <div class="filter-header">
           <div class="d-flex align-center justify-space-between px-4">
-            <h3 class="text-h6 font-weight-medium">Advanced Filters</h3>
-            <v-btn icon @click="toggleFilters">
+            <h3 class="text-h6 font-weight-medium">
+              Advanced Filters
+            </h3>
+            <v-btn
+              icon
+              @click="toggleFilters"
+            >
               <v-icon>mdi-close</v-icon>
             </v-btn>
           </div>
@@ -190,10 +233,10 @@
             closable-chips
             variant="outlined"
             class="mb-4"
-            @update:model-value="handleFilterChange"
             persistent-placeholder
+            @update:model-value="handleFilterChange"
           >
-            <template v-slot:selection="{ item }">
+            <template #selection="{ item }">
               {{ item.title }}
             </template>
           </v-select>
@@ -207,12 +250,20 @@
             closable-chips
             variant="outlined"
             class="mb-4"
-          ></v-select>
+          />
           <div class="filter-actions">
-            <v-btn color="error" variant="text" @click="clearFilters">
+            <v-btn
+              color="error"
+              variant="text"
+              @click="clearFilters"
+            >
               Clear
             </v-btn>
-            <v-btn color="primary" @click="applyFilters" class="ms-2">
+            <v-btn
+              color="primary"
+              class="ms-2"
+              @click="applyFilters"
+            >
               Apply
             </v-btn>
           </div>

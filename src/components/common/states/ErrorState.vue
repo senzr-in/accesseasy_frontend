@@ -1,39 +1,71 @@
 <template>
-  <div class="error-state" :class="stateClass">
+  <div
+    class="error-state"
+    :class="stateClass"
+  >
     <div class="error-content">
       <!-- Icon -->
       <div class="error-icon">
-        <component v-if="customIcon" :is="customIcon" :size="iconSize" />
-        <AlertCircle v-else :size="iconSize" />
+        <component
+          :is="customIcon"
+          v-if="customIcon"
+          :size="iconSize"
+        />
+        <AlertCircle
+          v-else
+          :size="iconSize"
+        />
       </div>
 
       <!-- Text Content -->
       <div class="error-text">
-        <h3 class="error-title">{{ title }}</h3>
-        <p v-if="message" class="error-message">{{ message }}</p>
+        <h3 class="error-title">
+          {{ title }}
+        </h3>
+        <p
+          v-if="message"
+          class="error-message"
+        >
+          {{ message }}
+        </p>
 
         <!-- Error Details (Collapsible) -->
-        <div v-if="errorDetails && showDetails" class="error-details">
-          <button class="details-toggle" @click="detailsOpen = !detailsOpen">
-            <ChevronDown :size="16" :class="{ 'rotate-180': detailsOpen }" />
+        <div
+          v-if="errorDetails && showDetails"
+          class="error-details"
+        >
+          <button
+            class="details-toggle"
+            @click="detailsOpen = !detailsOpen"
+          >
+            <ChevronDown
+              :size="16"
+              :class="{ 'rotate-180': detailsOpen }"
+            />
             {{ detailsOpen ? "Hide" : "Show" }} Details
           </button>
 
-          <div v-if="detailsOpen" class="details-content">
+          <div
+            v-if="detailsOpen"
+            class="details-content"
+          >
             <pre>{{ errorDetails }}</pre>
           </div>
         </div>
       </div>
 
       <!-- Actions -->
-      <div v-if="$slots.actions || showDefaultActions" class="error-actions">
+      <div
+        v-if="$slots.actions || showDefaultActions"
+        class="error-actions"
+      >
         <slot name="actions">
           <BaseButton
             v-if="retryAction"
             variant="primary"
-            :leftIcon="retryAction.icon || RefreshCw"
-            @click="$emit('retry')"
+            :left-icon="retryAction.icon || RefreshCw"
             :loading="retrying"
+            @click="$emit('retry')"
           >
             {{ retryAction.text || "Try Again" }}
           </BaseButton>
@@ -41,7 +73,7 @@
           <BaseButton
             v-if="secondaryAction"
             variant="secondary"
-            :leftIcon="secondaryAction.icon"
+            :left-icon="secondaryAction.icon"
             @click="$emit('secondaryAction')"
           >
             {{ secondaryAction.text }}

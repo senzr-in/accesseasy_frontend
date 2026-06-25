@@ -1,12 +1,18 @@
 <template>
-  <div class="employee-container" :class="{ 'drawer-open': viewDrawer }">
+  <div
+    class="employee-container"
+    :class="{ 'drawer-open': viewDrawer }"
+  >
     <!-- Filter Panel -->
-    <div class="filter-panel" v-if="showFilters">
+    <div
+      v-if="showFilters"
+      class="filter-panel"
+    >
       <div class="filter-content">
         <FilterComponent
-          :tenantId="tenantId"
-          :initialFilters="initialFilters"
-          :initiallyVisible="true"
+          :tenant-id="tenantId"
+          :initial-filters="initialFilters"
+          :initially-visible="true"
           :filter-schema="pageFilters"
           @apply-filters="handleApplyFilters"
           @filter-visibility-changed="onFilterVisibilityChanged"
@@ -14,23 +20,26 @@
       </div>
     </div>
 
-    <div class="main-content" :class="{ 'full-width': !showFilters }">
+    <div
+      class="main-content"
+      :class="{ 'full-width': !showFilters }"
+    >
       <DataTableWrapper
-        v-model:searchQuery="search"
-        :showSearch="true"
-        :searchPlaceholder="'Search Employee'"
-        :isEmpty="items.length === 0 && !search"
-        :hasError="error"
-        @update:searchQuery="debouncedSearch"
+        v-model:search-query="search"
+        :show-search="true"
+        :search-placeholder="'Search Employee'"
+        :is-empty="items.length === 0 && !search"
+        :has-error="error"
+        @update:search-query="debouncedSearch"
       >
         <!-- Filter Toggle Button -->
         <template #before-search>
           <button
             class="filter-toggle-static"
-            @click="toggleFilters"
             :class="{ active: hasActiveFilters }"
             :title="showFilters ? 'Hide filters' : 'Show filters'"
             aria-label="Toggle filters"
+            @click="toggleFilters"
           >
             <svg
               width="20"
@@ -42,8 +51,12 @@
             >
               <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46" />
             </svg>
-            <div v-if="hasActiveFilters" class="filter-indicator"></div></button
-        ></template>
+            <div
+              v-if="hasActiveFilters"
+              class="filter-indicator"
+            />
+          </button>
+        </template>
         <div v-if="loading">
           <SkeletonLoader
             variant="table-body-only"
@@ -64,8 +77,8 @@
           <EmptyState
             title="No Employees found"
             message="Try adjusting your filters or search term"
-            :primaryAction="{ text: 'Clear Filters', icon: 'X' }"
-            @primaryAction="clearFilters"
+            :primary-action="{ text: 'Clear Filters', icon: 'X' }"
+            @primary-action="clearFilters"
           />
         </div>
 
@@ -73,17 +86,17 @@
           <DataTable
             :items="items"
             :columns="columns"
-            :selectedItems="selected"
-            :sortBy="sortBy[0]?.key || ''"
-            :sortDirection="sortBy[0]?.order || 'asc'"
-            :itemKey="'id'"
-            :rowClickable="true"
-            @update:selectedItems="selected = $event"
-            @update:sortBy="updateSortBy"
-            @update:sortDirection="updateSortDirection"
-            @rowClick="handleAdhocEdit"
-            @sort="handleSort"
+            :selected-items="selected"
+            :sort-by="sortBy[0]?.key || ''"
+            :sort-direction="sortBy[0]?.order || 'asc'"
+            :item-key="'id'"
+            :row-clickable="true"
             :show-selection="false"
+            @update:selected-items="selected = $event"
+            @update:sort-by="updateSortBy"
+            @update:sort-direction="updateSortDirection"
+            @row-click="handleAdhocEdit"
+            @sort="handleSort"
           >
             <!-- Employee Name Column -->
             <template #cell-employee.assignedUser.first_name="{ item }">
@@ -113,12 +126,12 @@
                   color="primary"
                   variant="text"
                   size="small"
+                  class="mr-2"
+                  clickable
                   @click="
                     openViewDrawer(item, 'add');
                     resetBenefitsForm(viewActiveTab);
                   "
-                  class="mr-2"
-                  clickable
                 >
                   Add Adhoc Payments
                 </v-btn>
@@ -127,9 +140,9 @@
                     color="info"
                     variant="outlined"
                     size="small"
-                    @click="openViewDrawer(item)"
                     class="view-chip"
                     clickable
+                    @click="openViewDrawer(item)"
                   >
                     View Details
                   </v-chip>
@@ -140,13 +153,13 @@
         </div>
 
         <!-- Pagination Slot -->
-        <template v-slot:pagination>
+        <template #pagination>
           <CustomPagination
             v-model:page="page"
-            v-model:itemsPerPage="itemsPerPage"
+            v-model:items-per-page="itemsPerPage"
             :total-items="totalItems"
             @update:page="handlePageChange"
-            @update:itemsPerPage="handleItemsPerPageChange"
+            @update:items-per-page="handleItemsPerPageChange"
           />
         </template>
       </DataTableWrapper>

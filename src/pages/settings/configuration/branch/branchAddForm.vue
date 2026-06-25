@@ -15,14 +15,17 @@
       @close="showErrorAlert = false"
     />
     <v-form ref="form">
-      <v-toolbar density="compact" color="grey-lighten-4">
-        <v-spacer></v-spacer>
+      <v-toolbar
+        density="compact"
+        color="grey-lighten-4"
+      >
+        <v-spacer />
         <BaseButton
           color="primary"
-          @click="handleSave"
           :loading="isSaving"
           :text="`save`"
-        ></BaseButton>
+          @click="handleSave"
+        />
       </v-toolbar>
 
       <div class="content-wrapper">
@@ -31,7 +34,10 @@
           <v-card flat>
             <v-row>
               <!-- Location Name -->
-              <v-col cols="12" sm="6">
+              <v-col
+                cols="12"
+                sm="6"
+              >
                 <v-text-field
                   v-model="formData.locationName"
                   label="Branch Name *"
@@ -39,18 +45,26 @@
                   density="comfortable"
                   :rules="locationNameRules"
                   required
-                ></v-text-field>
+                />
               </v-col>
 
               <!-- Multiple Pincodes with Index Display -->
-              <v-col cols="12" sm="6">
+              <v-col
+                cols="12"
+                sm="6"
+              >
                 <v-card
+                  v-if="formData.pincodes.length > 0"
                   class="pa-3 mb-3"
                   elevation="1"
-                  v-if="formData.pincodes.length > 0"
                 >
                   <v-card-title class="text-subtitle-1 pa-0 mb-2">
-                    <v-icon class="mr-2" color="primary">mdi-map-marker</v-icon>
+                    <v-icon
+                      class="mr-2"
+                      color="primary"
+                    >
+                      mdi-map-marker
+                    </v-icon>
                     Added Pincodes ({{ formData.pincodes.length }})
                   </v-card-title>
                   <div class="d-flex flex-wrap gap-2">
@@ -63,9 +77,12 @@
                       closable
                       @click:close="removePincode(index)"
                     >
-                      <v-icon start size="small"
-                        >mdi-numeric-{{ index }}-circle</v-icon
+                      <v-icon
+                        start
+                        size="small"
                       >
+                        mdi-numeric-{{ index }}-circle
+                      </v-icon>
                       {{ pincode }}
                     </v-chip>
                   </div>
@@ -79,9 +96,7 @@
                   density="comfortable"
                   type="number"
                   maxlength="6"
-                  @keyup.enter="addPincode"
                   append-inner-icon="mdi-plus"
-                  @click:append-inner="addPincode"
                   :rules="[
                     (v) =>
                       !v ||
@@ -92,7 +107,9 @@
                   ]"
                   :hint="`Enter 6-digit pincode (${formData.pincodes.length} added)`"
                   persistent-hint
-                ></v-text-field>
+                  @keyup.enter="addPincode"
+                  @click:append-inner="addPincode"
+                />
 
                 <v-alert
                   v-if="pincodeValidationMessage"
@@ -105,7 +122,10 @@
                 </v-alert>
               </v-col>
 
-              <v-col cols="12" sm="6">
+              <v-col
+                cols="12"
+                sm="6"
+              >
                 <v-select
                   v-model="formData.state"
                   :items="stateOptions"
@@ -114,13 +134,21 @@
                   density="comfortable"
                   :rules="[(v) => !!v || 'State is required']"
                   @change="updateState"
-                ></v-select>
+                />
               </v-col>
 
               <v-col cols="12">
-                <v-card class="map-card" elevation="2">
+                <v-card
+                  class="map-card"
+                  elevation="2"
+                >
                   <v-card-title class="pa-3 pb-2">
-                    <v-icon class="mr-2" color="primary">mdi-map-marker</v-icon>
+                    <v-icon
+                      class="mr-2"
+                      color="primary"
+                    >
+                      mdi-map-marker
+                    </v-icon>
                     <span class="text-h6">Location Selection</span>
                   </v-card-title>
                   <v-card-text class="pa-3">
@@ -133,9 +161,9 @@
                         density="compact"
                         prepend-inner-icon="mdi-magnify"
                         clearable
-                        @click:clear="clearSearch"
                         :loading="searchLoading"
-                      ></v-text-field>
+                        @click:clear="clearSearch"
+                      />
                       <!-- Search Results -->
                       <v-list
                         v-if="searchResults.length > 0"
@@ -145,18 +173,23 @@
                         <v-list-item
                           v-for="(result, index) in searchResults"
                           :key="index"
-                          @click="selectSearchResult(result)"
                           class="search-result-item"
+                          @click="selectSearchResult(result)"
                         >
-                          <v-list-item-title>{{
-                            result.description
-                          }}</v-list-item-title>
+                          <v-list-item-title>
+                            {{
+                              result.description
+                            }}
+                          </v-list-item-title>
                         </v-list-item>
                       </v-list>
                     </div>
                     <!-- Map Container -->
                     <div class="map-wrapper">
-                      <div id="map" class="map-container"></div>
+                      <div
+                        id="map"
+                        class="map-container"
+                      />
                       <!-- Coordinates Display -->
                       <div class="coordinates-display">
                         <v-chip
@@ -165,14 +198,21 @@
                           variant="elevated"
                           size="small"
                         >
-                          <v-icon start>mdi-crosshairs-gps</v-icon>
+                          <v-icon start>
+                            mdi-crosshairs-gps
+                          </v-icon>
                           {{ parseFloat(formData.lat).toFixed(6) }},
                           {{ parseFloat(formData.lng).toFixed(6) }}
                         </v-chip>
                       </div>
                     </div>
                     <div class="text-caption mt-2 text-grey-darken-1">
-                      <v-icon size="small" class="mr-1">mdi-information</v-icon>
+                      <v-icon
+                        size="small"
+                        class="mr-1"
+                      >
+                        mdi-information
+                      </v-icon>
                       Click on the map to select location or use the search
                       above
                     </div>
@@ -189,7 +229,7 @@
                   rows="3"
                   readonly
                   auto-grow
-                ></v-textarea>
+                />
               </v-col>
             </v-row>
           </v-card>

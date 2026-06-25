@@ -2,28 +2,40 @@
   <div class="payroll-category">
     <v-container v-if="loading">
       <v-row>
-        <v-col cols="12" class="text-center">
+        <v-col
+          cols="12"
+          class="text-center"
+        >
           <v-progress-circular
             indeterminate
             color="primary"
-          ></v-progress-circular>
+          />
         </v-col>
       </v-row>
     </v-container>
-    <v-container v-else-if="employeeData" class="pa-0">
+    <v-container
+      v-else-if="employeeData"
+      class="pa-0"
+    >
       <h3>Payroll Category</h3>
-      <br />
+      <br>
       <!-- Employee Profile Card -->
       <v-card class="profile-card mb-6">
         <div class="salary-config pa-4">
           <v-row>
             <!-- Payroll Category -->
-            <v-col cols="12" md="4">
+            <v-col
+              cols="12"
+              md="4"
+            >
               <label class="config-label">Payroll Category</label>
               <div class="input-wrapper">
-                <v-icon color="primary" class="field-icon"
-                  >mdi-cash-multiple</v-icon
+                <v-icon
+                  color="primary"
+                  class="field-icon"
                 >
+                  mdi-cash-multiple
+                </v-icon>
                 <v-select
                   v-model="selectedCategory"
                   :items="salarySettingsArray"
@@ -32,38 +44,52 @@
                   variant="outlined"
                   density="comfortable"
                   class="salary-select"
-                  @update:model-value="onSalarySettingChange"
                   return-object
+                  @update:model-value="onSalarySettingChange"
                 />
               </div>
             </v-col>
 
             <!-- Annual CTC -->
-            <v-col cols="12" md="4">
+            <v-col
+              cols="12"
+              md="4"
+            >
               <label class="config-label">Annual CTC</label>
               <div class="input-wrapper">
-                <v-icon color="success" class="field-icon"
-                  >mdi-currency-inr</v-icon
+                <v-icon
+                  color="success"
+                  class="field-icon"
                 >
+                  mdi-currency-inr
+                </v-icon>
                 <v-text-field
                   v-model="annualCTC"
                   :disabled="!selectedCategory"
-                  @input="calculateMonthlyCTC"
                   variant="outlined"
                   density="comfortable"
                   hide-details
                   type="number"
                   class="ctc-input"
                   prefix="₹"
+                  @input="calculateMonthlyCTC"
                 />
               </div>
             </v-col>
 
             <!-- Net Salary -->
-            <v-col cols="12" md="4">
+            <v-col
+              cols="12"
+              md="4"
+            >
               <label class="config-label">Net Salary</label>
               <div class="input-wrapper">
-                <v-icon color="success" class="field-icon">mdi-wallet</v-icon>
+                <v-icon
+                  color="success"
+                  class="field-icon"
+                >
+                  mdi-wallet
+                </v-icon>
                 <v-text-field
                   :value="netSalary"
                   readonly
@@ -80,14 +106,25 @@
       </v-card>
 
       <!-- Salary Breakdown Section -->
-      <div v-if="selectedCategory" class="salary-breakdown">
+      <div
+        v-if="selectedCategory"
+        class="salary-breakdown"
+      >
         <v-row>
-          <v-col cols="12" lg="6">
+          <v-col
+            cols="12"
+            lg="6"
+          >
             <!-- Earnings Card -->
             <v-card class="mb-4 earnings-card">
               <div class="card-header earnings">
                 <div class="header-content">
-                  <v-icon size="28" color="white">mdi-cash-plus</v-icon>
+                  <v-icon
+                    size="28"
+                    color="white"
+                  >
+                    mdi-cash-plus
+                  </v-icon>
                   <div class="header-text">
                     <h3>Earnings</h3>
                     <span class="amount">₹ {{ totalEarnings }}</span>
@@ -98,11 +135,13 @@
                 <v-list>
                   <!-- Basic Pay -->
                   <v-list-item>
-                    <template v-slot:prepend>
-                      <v-icon color="primary">mdi-cash</v-icon>
+                    <template #prepend>
+                      <v-icon color="primary">
+                        mdi-cash
+                      </v-icon>
                     </template>
                     <v-list-item-title>Basic Pay</v-list-item-title>
-                    <template v-slot:append>
+                    <template #append>
                       <div class="d-flex align-center">
                         <span class="percentage mr-2">{{ basicPay }}%</span>
                         <span class="amount">₹ {{ basicPayValue }}</span>
@@ -111,16 +150,19 @@
                   </v-list-item>
 
                   <!-- Other Earnings -->
-                  <v-list-item v-for="(item, index) in earnings" :key="index">
-                    <template v-slot:prepend>
-                      <v-icon color="success">mdi-plus-circle</v-icon>
+                  <v-list-item
+                    v-for="(item, index) in earnings"
+                    :key="index"
+                  >
+                    <template #prepend>
+                      <v-icon color="success">
+                        mdi-plus-circle
+                      </v-icon>
                     </template>
                     <v-list-item-title>{{ item.name }}</v-list-item-title>
-                    <template v-slot:append>
+                    <template #append>
                       <div class="d-flex align-center">
-                        <span class="percentage mr-2"
-                          >{{ item.percentage }}%</span
-                        >
+                        <span class="percentage mr-2">{{ item.percentage }}%</span>
                         <span class="amount">₹ {{ item.amount }}</span>
                       </div>
                     </template>
@@ -130,13 +172,21 @@
             </v-card>
           </v-col>
 
-          <v-col cols="12" lg="6">
+          <v-col
+            cols="12"
+            lg="6"
+          >
             <div class="right-cards">
               <!-- Employer Contributions Card -->
               <v-card class="mb-4 employer-card">
                 <div class="card-header employer">
                   <div class="header-content">
-                    <v-icon size="28" color="white">mdi-office-building</v-icon>
+                    <v-icon
+                      size="28"
+                      color="white"
+                    >
+                      mdi-office-building
+                    </v-icon>
                     <div class="header-text">
                       <h3>Employer Contributions</h3>
                       <span class="amount">₹ {{ totalEmployer }}</span>
@@ -149,18 +199,20 @@
                       v-for="(item, index) in employerContributions"
                       :key="index"
                     >
-                      <template v-slot:prepend>
-                        <v-icon color="info">mdi-bank</v-icon>
+                      <template #prepend>
+                        <v-icon color="info">
+                          mdi-bank
+                        </v-icon>
                       </template>
                       <v-list-item-title>{{ item.name }}</v-list-item-title>
-                      <template v-slot:append>
+                      <template #append>
                         <div class="d-flex align-center">
                           <v-chip
+                            v-if="item.includedInCTC"
                             size="small"
                             color="success"
                             variant="flat"
                             class="mr-2"
-                            v-if="item.includedInCTC"
                           >
                             In CTC
                           </v-chip>
@@ -176,7 +228,12 @@
               <v-card class="mb-4 employee-card">
                 <div class="card-header employee">
                   <div class="header-content">
-                    <v-icon size="28" color="white">mdi-account-cash</v-icon>
+                    <v-icon
+                      size="28"
+                      color="white"
+                    >
+                      mdi-account-cash
+                    </v-icon>
                     <div class="header-text">
                       <h3>Employee Contributions</h3>
                       <span class="amount">₹ {{ totalEmployee }}</span>
@@ -189,11 +246,13 @@
                       v-for="(item, index) in employeeContributions"
                       :key="index"
                     >
-                      <template v-slot:prepend>
-                        <v-icon color="warning">mdi-account-arrow-left</v-icon>
+                      <template #prepend>
+                        <v-icon color="warning">
+                          mdi-account-arrow-left
+                        </v-icon>
                       </template>
                       <v-list-item-title>{{ item.name }}</v-list-item-title>
-                      <template v-slot:append>
+                      <template #append>
                         <span class="amount">₹ {{ item.rupee }}</span>
                       </template>
                     </v-list-item>
@@ -205,7 +264,12 @@
               <v-card class="mb-4 deductions-card">
                 <div class="card-header deductions">
                   <div class="header-content">
-                    <v-icon size="28" color="white">mdi-cash-minus</v-icon>
+                    <v-icon
+                      size="28"
+                      color="white"
+                    >
+                      mdi-cash-minus
+                    </v-icon>
                     <div class="header-text">
                       <h3>Deductions</h3>
                       <span class="amount">₹ {{ totalDeductions }}</span>
@@ -218,13 +282,18 @@
                       v-for="(item, index) in deductions"
                       :key="index"
                     >
-                      <template v-slot:prepend>
-                        <v-icon color="error">mdi-minus-circle</v-icon>
+                      <template #prepend>
+                        <v-icon color="error">
+                          mdi-minus-circle
+                        </v-icon>
                       </template>
                       <v-list-item-title>{{ item.name }}</v-list-item-title>
-                      <template v-slot:append>
+                      <template #append>
                         <div class="d-flex align-center">
-                          <span class="percentage mr-2" v-if="item.percentage">
+                          <span
+                            v-if="item.percentage"
+                            class="percentage mr-2"
+                          >
                             {{ item.percentage }}%
                           </span>
                           <span class="amount">₹ {{ item.amount }}</span>
@@ -240,20 +309,26 @@
       </div>
 
       <!-- Action Footer -->
-      <v-card class="mt-4 action-footer" flat>
+      <v-card
+        class="mt-4 action-footer"
+        flat
+      >
         <v-card-text>
           <div class="d-flex align-center justify-space-between">
             <div class="d-flex align-center">
-              <v-icon color="info" class="mr-2">mdi-information</v-icon>
-              <span class="text-info"
-                >Want to modify the payroll configuration?</span
+              <v-icon
+                color="info"
+                class="mr-2"
               >
+                mdi-information
+              </v-icon>
+              <span class="text-info">Want to modify the payroll configuration?</span>
             </div>
             <v-btn
               color="primary"
               variant="elevated"
-              @click="redirectToPayrollConfig"
               prepend-icon="mdi-cog"
+              @click="redirectToPayrollConfig"
             >
               Payroll Category Settings
             </v-btn>
@@ -263,7 +338,10 @@
     </v-container>
     <v-container v-else>
       <v-row>
-        <v-col cols="12" class="text-center">
+        <v-col
+          cols="12"
+          class="text-center"
+        >
           <p>No employee data found.</p>
         </v-col>
       </v-row>

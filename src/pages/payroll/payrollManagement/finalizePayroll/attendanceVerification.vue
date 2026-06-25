@@ -2,12 +2,20 @@
   <div class="payroll-dashboard">
     <div class="header-banner">
       <div class="header-content">
-        <button class="back-button" @click="goBack">
+        <button
+          class="back-button"
+          @click="goBack"
+        >
           <v-icon>mdi-arrow-left</v-icon>
         </button>
         <div class="title-section">
           <h1 class="main-title">
-            <v-icon size="32" class="title-icon">mdi-account-cash</v-icon>
+            <v-icon
+              size="32"
+              class="title-icon"
+            >
+              mdi-account-cash
+            </v-icon>
             Multi-Employee Attendance Verification
           </h1>
           <div class="subtitle-wrapper">
@@ -29,7 +37,7 @@
             </span>
           </div>
         </div>
-        <div class="header-actions"></div>
+        <div class="header-actions" />
       </div>
     </div>
 
@@ -39,30 +47,41 @@
           <div class="step-icon">
             <span>1</span>
           </div>
-          <div class="step-label">Attendance Verification</div>
+          <div class="step-label">
+            Attendance Verification
+          </div>
         </div>
 
-        <div class="step-connector"></div>
+        <div class="step-connector" />
 
         <div class="step disabled">
           <div class="step-icon">
             <span>2</span>
           </div>
-          <div class="step-label">Salary Calculation</div>
+          <div class="step-label">
+            Salary Calculation
+          </div>
         </div>
-        <div class="step-connector"></div>
+        <div class="step-connector" />
         <div class="step disabled">
           <div class="step-icon">
             <span>3</span>
           </div>
-          <div class="step-label">Review</div>
+          <div class="step-label">
+            Review
+          </div>
         </div>
       </div>
     </div>
 
     <div class="content-section">
       <div class="section-header">
-        <v-icon color="primary" class="mr-2">mdi-account-group</v-icon>
+        <v-icon
+          color="primary"
+          class="mr-2"
+        >
+          mdi-account-group
+        </v-icon>
         <h2>Employee Status</h2>
       </div>
 
@@ -78,8 +97,8 @@
       <!-- Table Wrapper -->
       <template v-else>
         <data-table-wrapper
+          v-model:search-query="searchEmployee"
           :show-search="true"
-          v-model:searchQuery="searchEmployee"
           :search-placeholder="'Search employees...'"
           :is-empty="attendanceSummaryData.length === 0"
         >
@@ -98,7 +117,9 @@
                     <div class="expanded-details">
                       <!-- Attendance Details Section -->
                       <div class="details-section">
-                        <h3 class="section-title">Attendance Details</h3>
+                        <h3 class="section-title">
+                          Attendance Details
+                        </h3>
                         <div class="details-grid">
                           <div class="detail-row">
                             <span class="detail-label">Full Present</span>
@@ -121,7 +142,9 @@
 
                       <!-- Leave Details Section -->
                       <div class="details-section">
-                        <h3 class="section-title">Leave Details</h3>
+                        <h3 class="section-title">
+                          Leave Details
+                        </h3>
                         <div class="details-grid">
                           <div class="detail-row">
                             <span class="detail-label">Privileged Leave</span>
@@ -144,7 +167,9 @@
 
                       <!-- Work Metrics Section -->
                       <div class="details-section">
-                        <h3 class="section-title">Work Metrics</h3>
+                        <h3 class="section-title">
+                          Work Metrics
+                        </h3>
                         <div class="details-grid">
                           <div class="detail-row">
                             <span class="detail-label">Late By</span>
@@ -163,7 +188,9 @@
 
                       <!-- Days Off Section -->
                       <div class="details-section">
-                        <h3 class="section-title">Days Off</h3>
+                        <h3 class="section-title">
+                          Days Off
+                        </h3>
                         <div class="details-grid">
                           <div class="detail-row">
                             <span class="detail-label">Week Off</span>
@@ -261,7 +288,10 @@
                   size="small"
                   class="text-none"
                 >
-                  <v-icon start size="16">
+                  <v-icon
+                    start
+                    size="16"
+                  >
                     {{
                       item?.attendanceVerified
                         ? "mdi-check-circle"
@@ -280,7 +310,7 @@
               title="No employee data found"
               message="Try refreshing or check your filters"
               :primary-action="{ text: 'Reload', icon: 'mdi-reload' }"
-              @primaryAction="fetchEmployees"
+              @primary-action="fetchEmployees"
             />
           </template>
 
@@ -289,10 +319,10 @@
 
         <CustomPagination
           v-model:page="currentPage"
-          v-model:itemsPerPage="itemsPerPage"
+          v-model:items-per-page="itemsPerPage"
           :total-items="totalEmployees"
           @update:page="handlePageChange"
-          @update:itemsPerPage="handleItemsPerPageChange"
+          @update:items-per-page="handleItemsPerPageChange"
         />
       </template>
     </div>
@@ -302,8 +332,8 @@
         variant="danger"
         size="md"
         :left-icon="X"
-        @click="goBack"
         class="ms-2"
+        @click="goBack"
       >
         Cancel
       </BaseButton>
@@ -313,8 +343,8 @@
         variant="primary"
         size="md"
         :left-icon="CheckCircle"
-        @click="showVerifyAllDialog = true"
         class="ms-2"
+        @click="showVerifyAllDialog = true"
       >
         Verify Attendance
       </BaseButton>
@@ -324,9 +354,9 @@
         variant="primary"
         size="md"
         :left-icon="ArrowRight"
-        @click="handleNext"
         class="ms-2"
         style="min-width: 80px"
+        @click="handleNext"
       >
         Next
       </BaseButton>
@@ -338,24 +368,35 @@
     >
       <v-card>
         <v-card-title class="dialog-header">
-          <v-icon size="24" color="primary" class="mr-2">mdi-account</v-icon>
+          <v-icon
+            size="24"
+            color="primary"
+            class="mr-2"
+          >
+            mdi-account
+          </v-icon>
           {{
             selectedEmployeeDetail?.employee?.assignedUser?.first_name ||
-            "Employee"
+              "Employee"
           }}
           Details
-          <v-spacer></v-spacer>
+          <v-spacer />
         </v-card-title>
 
         <v-card-text class="dialog-content">
           <div v-if="selectedEmployeeDetail">
-            <div v-if="isLoading" class="loading-container">
+            <div
+              v-if="isLoading"
+              class="loading-container"
+            >
               <v-progress-circular
                 indeterminate
                 color="primary"
                 size="64"
-              ></v-progress-circular>
-              <div class="loading-text">Loading attendance data...</div>
+              />
+              <div class="loading-text">
+                Loading attendance data...
+              </div>
             </div>
 
             <div v-else>
@@ -365,81 +406,117 @@
                 color="primary"
                 grow
               >
-                <v-tab value="attendance" class="tab-item">
-                  <v-icon left>mdi-calendar-check</v-icon>
+                <v-tab
+                  value="attendance"
+                  class="tab-item"
+                >
+                  <v-icon left>
+                    mdi-calendar-check
+                  </v-icon>
                   Attendance
                 </v-tab>
-                <v-tab value="leaves" class="tab-item">
-                  <v-icon left>mdi-calendar-remove</v-icon>
+                <v-tab
+                  value="leaves"
+                  class="tab-item"
+                >
+                  <v-icon left>
+                    mdi-calendar-remove
+                  </v-icon>
                   Leaves
                 </v-tab>
-                <v-tab value="penalties" class="tab-item">
-                  <v-icon left>mdi-alert-circle</v-icon>
+                <v-tab
+                  value="penalties"
+                  class="tab-item"
+                >
+                  <v-icon left>
+                    mdi-alert-circle
+                  </v-icon>
                   Penalties
                 </v-tab>
               </v-tabs>
 
-              <v-window v-model="activeTab" class="mt-4">
+              <v-window
+                v-model="activeTab"
+                class="mt-4"
+              >
                 <v-window-item value="attendance">
                   <div class="attendance-summary">
                     <div class="attendance-item">
-                      <div class="attendance-label">Present Days</div>
+                      <div class="attendance-label">
+                        Present Days
+                      </div>
                       <div class="attendance-value">
                         {{ employeeAttendanceData.present || 0 }}
                       </div>
                     </div>
 
                     <div class="attendance-item">
-                      <div class="attendance-label">Half Days</div>
+                      <div class="attendance-label">
+                        Half Days
+                      </div>
                       <div class="attendance-value">
                         {{ employeeAttendanceData.halfDay || 0 }}
                       </div>
                     </div>
 
                     <div class="attendance-item">
-                      <div class="attendance-label">Weekoffs</div>
+                      <div class="attendance-label">
+                        Weekoffs
+                      </div>
                       <div class="attendance-value">
                         {{ employeeAttendanceData.weekOff || 0 }}
                       </div>
                     </div>
 
                     <div class="attendance-item">
-                      <div class="attendance-label">Holidays</div>
+                      <div class="attendance-label">
+                        Holidays
+                      </div>
                       <div class="attendance-value">
                         {{ employeeAttendanceData.holiday || 0 }}
                       </div>
                     </div>
 
                     <div class="attendance-item">
-                      <div class="attendance-label">Work from Home</div>
+                      <div class="attendance-label">
+                        Work from Home
+                      </div>
                       <div class="attendance-value">
                         {{ employeeAttendanceData.workFromHome || 0 }}
                       </div>
                     </div>
 
                     <div class="attendance-item">
-                      <div class="attendance-label">OnDuty</div>
+                      <div class="attendance-label">
+                        OnDuty
+                      </div>
                       <div class="attendance-value">
                         {{ employeeAttendanceData.onDuty || 0 }}
                       </div>
                     </div>
 
                     <div class="attendance-item">
-                      <div class="attendance-label">WeekOff Present</div>
+                      <div class="attendance-label">
+                        WeekOff Present
+                      </div>
                       <div class="attendance-value">
                         {{ employeeAttendanceData.weekoffPresent || 0 }}
                       </div>
                     </div>
 
                     <div class="attendance-item">
-                      <div class="attendance-label">Holiday Present</div>
+                      <div class="attendance-label">
+                        Holiday Present
+                      </div>
                       <div class="attendance-value">
                         {{ employeeAttendanceData.holidayPresent || 0 }}
                       </div>
                     </div>
 
                     <div class="attendance-item total">
-                      <div class="attendance-label">Total Payable</div>
+                      <div class="attendance-label">
+                        Total Payable
+                      </div>
                       <div class="attendance-value">
                         {{ employeeAttendanceData.totalPayableDays || 0 }}
                       </div>
@@ -450,25 +527,31 @@
                 <v-window-item value="leaves">
                   <div class="detail-list">
                     <div class="detail-item">
-                      <div class="detail-item-label">Paid Leave</div>
+                      <div class="detail-item-label">
+                        Paid Leave
+                      </div>
                       <div class="detail-item-value">
                         {{ employeeAttendanceData.paidLeave || 0 }}
                       </div>
                     </div>
 
                     <div class="detail-item">
-                      <div class="detail-item-label">Unpaid Leave</div>
+                      <div class="detail-item-label">
+                        Unpaid Leave
+                      </div>
                       <div class="detail-item-value">
                         {{ employeeAttendanceData.unpaidLeave || 0 }}
                       </div>
                     </div>
 
                     <div class="detail-item total">
-                      <div class="detail-item-label">Total Leaves</div>
+                      <div class="detail-item-label">
+                        Total Leaves
+                      </div>
                       <div class="detail-item-value">
                         {{
                           (employeeAttendanceData.paidLeave || 0) +
-                          (employeeAttendanceData.unpaidLeave || 0)
+                            (employeeAttendanceData.unpaidLeave || 0)
                         }}
                       </div>
                     </div>
@@ -483,13 +566,17 @@
 
                     <!-- Penalty: Late Coming -->
                     <div class="penalty-row">
-                      <div class="penalty-label">Late Coming</div>
+                      <div class="penalty-label">
+                        Late Coming
+                      </div>
                       <div class="penalty-stats d-flex align-center">
                         <div class="stat-item">
                           <div class="stat-number text-red-500">
                             {{ employeeAttendanceData?.lateEntryCount || 0 }}
                           </div>
-                          <div class="stat-label">Total Days</div>
+                          <div class="stat-label">
+                            Total Days
+                          </div>
                           <v-chip
                             color="red lighten-4"
                             text-color="red darken-2"
@@ -497,7 +584,7 @@
                           >
                             {{
                               employeeAttendanceData?.totalLateDuration ||
-                              "00:00:00"
+                                "00:00:00"
                             }}
                           </v-chip>
                         </div>
@@ -505,13 +592,17 @@
                           <div class="stat-number text-green-500">
                             {{ employeeAttendanceData?.lateComingAllowed || 0 }}
                           </div>
-                          <div class="stat-label">Allowed</div>
+                          <div class="stat-label">
+                            Allowed
+                          </div>
                         </div>
                         <div class="stat-item">
                           <div class="stat-number text-orange-500">
                             {{ employeeAttendanceData?.lateComing || 0 }}
                           </div>
-                          <div class="stat-label">Deductions</div>
+                          <div class="stat-label">
+                            Deductions
+                          </div>
                           <v-chip
                             color="red lighten-4"
                             text-color="red darken-2"
@@ -519,13 +610,13 @@
                           >
                             {{
                               employeeAttendanceData?.deductedLateDuration ||
-                              "00:00:00"
+                                "00:00:00"
                             }}
                           </v-chip>
                         </div>
                         <div
-                          class="stat-item"
                           v-if="employeeAttendanceData?.lateData?.leave"
+                          class="stat-item"
                         >
                           <div class="badge-container mb-1">
                             <span class="badge badge-leave">{{
@@ -545,7 +636,9 @@
                                 )
                               }} -->
                             </div>
-                            <div class="applied-subtitle">Applied As</div>
+                            <div class="applied-subtitle">
+                              Applied As
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -553,13 +646,17 @@
 
                     <!-- Penalty: Early Leaving -->
                     <div class="penalty-row">
-                      <div class="penalty-label">Early Leaving</div>
+                      <div class="penalty-label">
+                        Early Leaving
+                      </div>
                       <div class="penalty-stats d-flex align-center">
                         <div class="stat-item">
                           <div class="stat-number text-red-500">
                             {{ employeeAttendanceData?.earlyLeavingCount || 0 }}
                           </div>
-                          <div class="stat-label">Total Days</div>
+                          <div class="stat-label">
+                            Total Days
+                          </div>
                           <v-chip
                             color="red lighten-4"
                             text-color="red darken-2"
@@ -567,7 +664,7 @@
                           >
                             {{
                               employeeAttendanceData?.totalEarlyDuration ||
-                              "00:00:00"
+                                "00:00:00"
                             }}
                           </v-chip>
                         </div>
@@ -577,13 +674,17 @@
                               employeeAttendanceData?.earlyLeavingAllowed || 0
                             }}
                           </div>
-                          <div class="stat-label">Allowed</div>
+                          <div class="stat-label">
+                            Allowed
+                          </div>
                         </div>
                         <div class="stat-item">
                           <div class="stat-number text-orange-500">
                             {{ employeeAttendanceData?.earlyLeaving || 0 }}
                           </div>
-                          <div class="stat-label">Deductions</div>
+                          <div class="stat-label">
+                            Deductions
+                          </div>
                           <v-chip
                             color="red lighten-4"
                             text-color="red darken-2"
@@ -591,13 +692,13 @@
                           >
                             {{
                               employeeAttendanceData?.deductedEarlyDuration ||
-                              "00:00:00"
+                                "00:00:00"
                             }}
                           </v-chip>
                         </div>
                         <div
-                          class="stat-item"
                           v-if="employeeAttendanceData?.earlyLeavingData?.leave"
+                          class="stat-item"
                         >
                           <div class="badge-container mb-1">
                             <span class="badge badge-lop">{{
@@ -617,7 +718,9 @@
                                 )
                               }} -->
                             </div>
-                            <div class="applied-subtitle">Applied As</div>
+                            <div class="applied-subtitle">
+                              Applied As
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -625,13 +728,17 @@
 
                     <!-- Penalty: Working Hours Shortage -->
                     <div class="penalty-row">
-                      <div class="penalty-label">Working Hours Shortage</div>
+                      <div class="penalty-label">
+                        Working Hours Shortage
+                      </div>
                       <div class="penalty-stats d-flex align-center">
                         <div class="stat-item">
                           <div class="stat-number text-red-500">
                             {{ employeeAttendanceData?.workingHoursCount || 0 }}
                           </div>
-                          <div class="stat-label">Total Days</div>
+                          <div class="stat-label">
+                            Total Days
+                          </div>
                         </div>
                         <div class="stat-item">
                           <div class="stat-number text-green-500">
@@ -639,17 +746,21 @@
                               employeeAttendanceData?.workingHoursAllowed || 0
                             }}
                           </div>
-                          <div class="stat-label">Allowed</div>
+                          <div class="stat-label">
+                            Allowed
+                          </div>
                         </div>
                         <div class="stat-item">
                           <div class="stat-number text-orange-500">
                             {{ employeeAttendanceData?.workingHours || 0 }}
                           </div>
-                          <div class="stat-label">Deductions</div>
+                          <div class="stat-label">
+                            Deductions
+                          </div>
                         </div>
                         <div
-                          class="stat-item"
                           v-if="employeeAttendanceData?.workingHoursData?.leave"
+                          class="stat-item"
                         >
                           <div class="badge-container mb-1">
                             <span class="badge badge-leave">{{
@@ -672,7 +783,9 @@
                                 )
                               }} -->
                             </div>
-                            <div class="applied-subtitle">Applied As</div>
+                            <div class="applied-subtitle">
+                              Applied As
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -680,65 +793,89 @@
 
                     <!-- Simple OT Rows -->
                     <div class="simple-row">
-                      <div class="simple-label">WeekOff OT</div>
+                      <div class="simple-label">
+                        WeekOff OT
+                      </div>
                       <div class="stat-item">
                         <div class="stat-number text-red-500">
                           {{ employeeAttendanceData?.weekOffOTHours || 0 }}
                         </div>
-                        <div class="stat-label">Total OTHours</div>
+                        <div class="stat-label">
+                          Total OTHours
+                        </div>
                       </div>
                       <div class="stat-item">
                         <div class="stat-number text-red-500">
                           {{ employeeAttendanceData?.weekOffOT || 0 }}
                         </div>
-                        <div class="stat-label">Total OTCount</div>
+                        <div class="stat-label">
+                          Total OTCount
+                        </div>
                       </div>
                     </div>
 
                     <div class="simple-row">
-                      <div class="simple-label">Holiday OT</div>
+                      <div class="simple-label">
+                        Holiday OT
+                      </div>
                       <div class="stat-item">
                         <div class="stat-number text-red-500">
                           {{ employeeAttendanceData?.holidayOTHours || 0 }}
                         </div>
-                        <div class="stat-label">Total OTHours</div>
+                        <div class="stat-label">
+                          Total OTHours
+                        </div>
                       </div>
                       <div class="stat-item">
                         <div class="stat-number text-red-500">
                           {{ employeeAttendanceData?.holidayOT || 0 }}
                         </div>
-                        <div class="stat-label">Total OTCount</div>
+                        <div class="stat-label">
+                          Total OTCount
+                        </div>
                       </div>
                     </div>
 
                     <div class="simple-row">
-                      <div class="simple-label">Work From Home OT</div>
+                      <div class="simple-label">
+                        Work From Home OT
+                      </div>
                       <div class="stat-item">
                         <div class="stat-number text-red-500">
                           {{ employeeAttendanceData?.workFromHomeOTHours || 0 }}
                         </div>
-                        <div class="stat-label">Total OTHours</div>
+                        <div class="stat-label">
+                          Total OTHours
+                        </div>
                       </div>
                       <div class="stat-item">
                         <div class="stat-number text-red-500">
                           {{ employeeAttendanceData?.workFromHomeOT || 0 }}
                         </div>
-                        <div class="stat-label">Total OTCount</div>
+                        <div class="stat-label">
+                          Total OTCount
+                        </div>
                       </div>
                     </div>
                     <div class="simple-row">
-                      <div class="simple-label">WorkingDay OT</div>
+                      <div class="simple-label">
+                        WorkingDay OT
+                      </div>
                       <div class="stat-item">
                         <div class="stat-number text-red-500">
                           {{ employeeAttendanceData?.workingDayOTHours || 0 }}
                         </div>
-                        <div class="stat-label">Total OTHours</div>
+                        <div class="stat-label">
+                          Total OTHours
+                        </div>
                       </div>
                       <div class="stat-item">
                         <div class="stat-number text-red-500">
                           {{ employeeAttendanceData?.workingDayOT || 0 }}
                         </div>
-                        <div class="stat-label">Total OTCount</div>
+                        <div class="stat-label">
+                          Total OTCount
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -747,7 +884,9 @@
 
               <div class="attendance-summary-footer">
                 <div class="summary-item">
-                  <div class="summary-label">Payable Days</div>
+                  <div class="summary-label">
+                    Payable Days
+                  </div>
                   <div class="summary-value">
                     {{ employeeAttendanceData.totalPayableDays || 0 }}
                   </div>
@@ -758,10 +897,13 @@
         </v-card-text>
 
         <v-card-actions class="dialog-actions">
-          <v-spacer></v-spacer>
-          <v-btn color="primary" @click="showEmployeeDetails = false"
-            >Close</v-btn
+          <v-spacer />
+          <v-btn
+            color="primary"
+            @click="showEmployeeDetails = false"
           >
+            Close
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -774,51 +916,73 @@
     >
       <v-card>
         <v-card-title class="verify-dialog-title">
-          <v-icon left color="primary" size="24">mdi-check-circle</v-icon>
+          <v-icon
+            left
+            color="primary"
+            size="24"
+          >
+            mdi-check-circle
+          </v-icon>
           Verifying Attendance
         </v-card-title>
 
         <v-card-text class="verify-dialog-content">
-          <div v-if="processing" class="verify-loading-container">
+          <div
+            v-if="processing"
+            class="verify-loading-container"
+          >
             <v-progress-circular
               indeterminate
               color="primary"
               size="64"
-            ></v-progress-circular>
+            />
             <div class="verify-loading-text">
               Processing attendance verification for all employees...
             </div>
           </div>
 
-          <div v-else class="verify-confirm-text">
+          <div
+            v-else
+            class="verify-confirm-text"
+          >
             Are you sure you want to verify attendance for all employees?
           </div>
         </v-card-text>
 
         <v-card-actions class="verify-dialog-actions">
-          <v-spacer></v-spacer>
+          <v-spacer />
           <v-btn
             text
             color="grey-darken-1"
-            @click="showVerifyAllDialog = false"
             :disabled="processing"
+            @click="showVerifyAllDialog = false"
           >
             Cancel
           </v-btn>
           <v-btn
             color="primary"
-            @click="verifyAllAttendance"
             :disabled="processing"
+            @click="verifyAllAttendance"
           >
             Verify All
           </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
-    <v-snackbar v-model="showSnackbar" :color="snackbarColor" :timeout="3000">
+    <v-snackbar
+      v-model="showSnackbar"
+      :color="snackbarColor"
+      :timeout="3000"
+    >
       {{ snackbarMessage }}
-      <template v-slot:action="{ attrs }">
-        <v-btn text v-bind="attrs" @click="showSnackbar = false">Close</v-btn>
+      <template #action="{ attrs }">
+        <v-btn
+          text
+          v-bind="attrs"
+          @click="showSnackbar = false"
+        >
+          Close
+        </v-btn>
       </template>
     </v-snackbar>
   </div>

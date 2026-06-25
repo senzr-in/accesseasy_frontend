@@ -7,27 +7,36 @@
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-check-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-check-circle
+        </v-icon>
         {{ successMessage }}
       </div>
     </v-snackbar>
 
     <v-snackbar
-      class="errormessge"
       v-model="showErrorSnackbar"
+      class="errormessge"
       color="error"
       timeout="2000"
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-alert-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-alert-circle
+        </v-icon>
         {{ errorMessage }}
       </div>
     </v-snackbar>
 
     <div class="form-header">
       <div class="header-content">
-        <v-btn icon variant="text" @click="$emit('cancel')" class="back-button">
+        <v-btn
+          icon
+          variant="text"
+          class="back-button"
+          @click="$emit('cancel')"
+        >
           <v-icon>mdi-arrow-left</v-icon>
         </v-btn>
         <h2 class="text-h6">
@@ -35,27 +44,46 @@
         </h2>
       </div>
       <div class="action-buttons">
-        <v-btn color="error" variant="text" @click="$emit('cancel')"
-          >CANCEL</v-btn
+        <v-btn
+          color="error"
+          variant="text"
+          @click="$emit('cancel')"
         >
-        <v-btn color="primary" @click="saveController">SAVE</v-btn>
+          CANCEL
+        </v-btn>
+        <v-btn
+          color="primary"
+          @click="saveController"
+        >
+          SAVE
+        </v-btn>
       </div>
     </div>
 
-    <div v-if="!isEditing" class="main-content">
-      <div v-if="showDoorWarning" class="info-banner">
+    <div
+      v-if="!isEditing"
+      class="main-content"
+    >
+      <div
+        v-if="showDoorWarning"
+        class="info-banner"
+      >
         <v-icon
           icon="mdi-information-outline"
           color="info"
           class="me-2"
-        ></v-icon>
+        />
         <span>
           Controller type {{ formData.controllerType }} can only have
           {{ formData.controllerType }} door(s). Please remove extra selections.
         </span>
       </div>
 
-      <v-form ref="form" v-model="valid" @submit.prevent="saveController">
+      <v-form
+        ref="form"
+        v-model="valid"
+        @submit.prevent="saveController"
+      >
         <div class="form-fields">
           <!-- First row -->
           <div class="form-row">
@@ -68,7 +96,7 @@
               density="comfortable"
               :error-messages="getFieldErrorMessage('controllerName')"
               @blur="markFieldAsTouched('controllerName')"
-            ></v-select>
+            />
 
             <v-text-field
               v-model="formData.controllerId"
@@ -78,7 +106,7 @@
               density="comfortable"
               :error-messages="getFieldErrorMessage('controllerId')"
               @blur="markFieldAsTouched('controllerId')"
-            ></v-text-field>
+            />
 
             <!-- Device Group Dropdown with Search and Add Option -->
             <div class="device-group-container">
@@ -86,29 +114,37 @@
                 <div
                   label="deviceGroup"
                   class="dropdown-trigger"
-                  @click="toggleDeviceGroupDropdown"
                   :class="{ 'dropdown-active': showDeviceGroupDropdown }"
+                  @click="toggleDeviceGroupDropdown"
                 >
                   <span v-if="formData.deviceGroup">{{
                     formData.deviceGroup
                   }}</span>
-                  <span v-else class="placeholder">Select device group</span>
-                  <v-icon>{{
-                    showDeviceGroupDropdown
-                      ? "mdi-chevron-up"
-                      : "mdi-chevron-down"
-                  }}</v-icon>
+                  <span
+                    v-else
+                    class="placeholder"
+                  >Select device group</span>
+                  <v-icon>
+                    {{
+                      showDeviceGroupDropdown
+                        ? "mdi-chevron-up"
+                        : "mdi-chevron-down"
+                    }}
+                  </v-icon>
                 </div>
 
-                <div v-if="showDeviceGroupDropdown" class="dropdown-content">
+                <div
+                  v-if="showDeviceGroupDropdown"
+                  class="dropdown-content"
+                >
                   <div class="search-container">
                     <input
-                      type="text"
                       v-model="deviceGroupSearch"
+                      type="text"
                       placeholder="Search groups..."
-                      @input="filterDeviceGroups"
                       class="search-input"
-                    />
+                      @input="filterDeviceGroups"
+                    >
                   </div>
 
                   <div class="dropdown-items">
@@ -116,8 +152,8 @@
                       v-for="group in filteredDeviceGroups"
                       :key="group"
                       class="dropdown-item"
-                      @click="selectDeviceGroup(group)"
                       :class="{ selected: formData.deviceGroup === group }"
+                      @click="selectDeviceGroup(group)"
                     >
                       {{ group }}
                     </div>
@@ -126,7 +162,12 @@
                       class="dropdown-item add-new"
                       @click="showAddGroupPopup = true"
                     >
-                      <v-icon size="small" class="me-2">mdi-plus</v-icon> Add
+                      <v-icon
+                        size="small"
+                        class="me-2"
+                      >
+                        mdi-plus
+                      </v-icon> Add
                     </div>
                   </div>
                 </div>
@@ -146,7 +187,7 @@
               chips
               closable-chips
               @update:model-value="handleAssignedDoorUpdate"
-            ></v-select>
+            />
 
             <v-select
               v-if="isAdminRole"
@@ -157,7 +198,7 @@
               item-title="name"
               item-value="id"
               label="Tenant"
-            ></v-select>
+            />
           </div>
 
           <!-- Second row -->
@@ -172,7 +213,7 @@
               density="comfortable"
               :error-messages="getFieldErrorMessage('controllerType')"
               @blur="markFieldAsTouched('controllerType')"
-            ></v-select>
+            />
 
             <v-select
               v-model="formData.attendanceMode"
@@ -182,7 +223,7 @@
               density="comfortable"
               :error-messages="getFieldErrorMessage('attendanceMode')"
               @blur="markFieldAsTouched('attendanceMode')"
-            ></v-select>
+            />
 
             <v-select
               v-model="formData.branch"
@@ -192,43 +233,70 @@
               item-title="name"
               item-value="id"
               label="Branch"
-            ></v-select>
+            />
           </div>
         </div>
 
-        <div v-if="formData.controllerName" class="split-section">
+        <div
+          v-if="formData.controllerName"
+          class="split-section"
+        >
           <div class="image-section">
-            <div v-if="formData.controllerName" class="device-image">
-              <img :src="getImageUrl()" alt="Device Image" />
+            <div
+              v-if="formData.controllerName"
+              class="device-image"
+            >
+              <img
+                :src="getImageUrl()"
+                alt="Device Image"
+              >
             </div>
-            <div v-else class="device-image-placeholder">
-              <v-icon size="48" color="grey-lighten-1">mdi-camera</v-icon>
-              <div class="placeholder-text">Select a device to view image</div>
+            <div
+              v-else
+              class="device-image-placeholder"
+            >
+              <v-icon
+                size="48"
+                color="grey-lighten-1"
+              >
+                mdi-camera
+              </v-icon>
+              <div class="placeholder-text">
+                Select a device to view image
+              </div>
             </div>
           </div>
 
           <div class="device-details-section">
-            <h3 class="details-title">Device Details</h3>
+            <h3 class="details-title">
+              Device Details
+            </h3>
             <div class="details-grid">
               <div class="detail-item">
                 <div class="detail-icon sn-icon">
                   <v-icon>mdi-barcode</v-icon>
                 </div>
                 <div class="detail-content">
-                  <div class="detail-label">SN Number</div>
-                  <div class="detail-value">{{ formData.sn }}</div>
+                  <div class="detail-label">
+                    SN Number
+                  </div>
+                  <div class="detail-value">
+                    {{ formData.sn }}
+                  </div>
                 </div>
               </div>
 
               <div
-                class="detail-item"
                 v-if="formData.controllerName !== 'AI face'"
+                class="detail-item"
               >
                 <div class="detail-icon device-type-icon">
                   <v-icon>mdi-devices</v-icon>
                 </div>
                 <div class="detail-content">
-                  <div class="detail-label">Device Type</div>
+                  <div class="detail-label">
+                    Device Type
+                  </div>
                   <div class="detail-value">
                     {{ formData.controllerType }}
                   </div>
@@ -240,7 +308,9 @@
                   <v-icon>mdi-clock-check-outline</v-icon>
                 </div>
                 <div class="detail-content">
-                  <div class="detail-label">Attendance mode</div>
+                  <div class="detail-label">
+                    Attendance mode
+                  </div>
                   <div class="detail-value">
                     {{ formData.attendanceMode }}
                   </div>
@@ -248,54 +318,68 @@
               </div>
 
               <div
-                class="detail-item"
                 v-if="formData.controllerName !== 'AI face'"
+                class="detail-item"
               >
                 <div class="detail-icon passback-icon">
                   <v-icon>mdi-shield-outline</v-icon>
                 </div>
                 <div class="detail-content">
-                  <div class="detail-label">Anti Pass-back Mode</div>
+                  <div class="detail-label">
+                    Anti Pass-back Mode
+                  </div>
                   <div class="detail-value">
                     {{ formData.antiPassbackMode }}
                   </div>
                 </div>
               </div>
               <div
-                class="detail-item"
                 v-if="formData.controllerName !== 'AI face'"
+                class="detail-item"
               >
                 <div class="detail-icon timer-icon">
                   <v-icon>mdi-timer-outline</v-icon>
                 </div>
                 <div class="detail-content">
-                  <div class="detail-label">Timer Mode</div>
-                  <div class="detail-value">{{ formData.timerMode }}</div>
+                  <div class="detail-label">
+                    Timer Mode
+                  </div>
+                  <div class="detail-value">
+                    {{ formData.timerMode }}
+                  </div>
                 </div>
               </div>
 
               <div
-                class="detail-item"
                 v-if="formData.controllerName !== 'AI face'"
+                class="detail-item"
               >
                 <div class="detail-icon door-icon">
                   <v-icon>mdi-door</v-icon>
                 </div>
                 <div class="detail-content">
-                  <div class="detail-label">Door Mode</div>
-                  <div class="detail-value">{{ formData.doorMode }}</div>
+                  <div class="detail-label">
+                    Door Mode
+                  </div>
+                  <div class="detail-value">
+                    {{ formData.doorMode }}
+                  </div>
                 </div>
               </div>
               <div
-                class="detail-item"
                 v-if="formData.controllerName !== 'AI face'"
+                class="detail-item"
               >
                 <div class="detail-icon interlock-icon">
                   <v-icon>mdi-lock</v-icon>
                 </div>
                 <div class="detail-content">
-                  <div class="detail-label">Interlock mode</div>
-                  <div class="detail-value">{{ formData.interlockMode }}</div>
+                  <div class="detail-label">
+                    Interlock mode
+                  </div>
+                  <div class="detail-value">
+                    {{ formData.interlockMode }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -308,26 +392,29 @@
             v-model="formData.controllerImageFile"
             accept="image/*"
             @update:model-value="handleImageChange"
-          ></v-file-input>
-          <v-text-field v-model="formData.sn"></v-text-field>
+          />
+          <v-text-field v-model="formData.sn" />
           <v-text-field
             v-model="formData.interval"
             type="number"
-          ></v-text-field>
+          />
           <v-select
             v-model="formData.timerMode"
             :items="timerModeOptions"
-          ></v-select>
+          />
           <v-select
             v-model="formData.interlockMode"
             :items="interlockModeOptions"
-          ></v-select>
+          />
         </div>
       </v-form>
     </div>
 
     <!-- ORIGINAL UI DESIGN FOR EDIT DEVICE -->
-    <div v-else class="form-content-wrapper">
+    <div
+      v-else
+      class="form-content-wrapper"
+    >
       <div class="sidebar">
         <v-list>
           <v-list-item
@@ -335,10 +422,10 @@
             :key="index"
             :value="tab"
             :active="currentTab === tab.id"
-            @click="currentTab = tab.id"
             :class="{ 'has-error': tabHasError(tab.id) }"
+            @click="currentTab = tab.id"
           >
-            <template v-slot:prepend>
+            <template #prepend>
               <v-icon :color="tabHasError(tab.id) ? 'error' : 'default'">
                 {{ tab.icon }}
               </v-icon>
@@ -360,20 +447,30 @@
 
       <!-- Main Form Content -->
       <div class="form-content">
-        <div v-if="showDoorWarning" class="info-banner">
+        <div
+          v-if="showDoorWarning"
+          class="info-banner"
+        >
           <v-icon
             icon="mdi-information-outline"
             color="info"
             class="me-2"
-          ></v-icon>
+          />
           <span>
             Controller type {{ formData.controllerType }} can only have
             {{ formData.controllerType }} door(s). Please remove extra
             selections.
           </span>
         </div>
-        <v-form ref="form" v-model="valid" @submit.prevent="saveController">
-          <div v-show="currentTab === 'basic'" class="form-section">
+        <v-form
+          ref="form"
+          v-model="valid"
+          @submit.prevent="saveController"
+        >
+          <div
+            v-show="currentTab === 'basic'"
+            class="form-section"
+          >
             <v-row>
               <!-- <v-col cols="12" md="6">
                 <v-file-input
@@ -389,7 +486,10 @@
                 ></v-file-input>
               </v-col> -->
 
-              <v-col cols="12" md="6">
+              <v-col
+                cols="12"
+                md="6"
+              >
                 <v-text-field
                   v-model="formData.controllerId"
                   label="Device ID *"
@@ -398,10 +498,13 @@
                   variant="outlined"
                   density="comfortable"
                   @blur="markFieldAsTouched('controllerId')"
-                ></v-text-field>
+                />
               </v-col>
 
-              <v-col cols="12" md="6">
+              <v-col
+                cols="12"
+                md="6"
+              >
                 <v-select
                   v-model="formData.controllerName"
                   :items="['AI face', 'finger print', '4 door device']"
@@ -411,10 +514,13 @@
                   variant="outlined"
                   density="comfortable"
                   @blur="markFieldAsTouched('controllerName')"
-                ></v-select>
+                />
               </v-col>
 
-              <v-col cols="12" md="6">
+              <v-col
+                cols="12"
+                md="6"
+              >
                 <v-text-field
                   v-model="formData.sn"
                   label="Serial Number"
@@ -422,29 +528,35 @@
                   variant="outlined"
                   density="comfortable"
                   @blur="markFieldAsTouched('sn')"
-                ></v-text-field>
+                />
               </v-col>
 
               <!-- Device Group Dropdown in Edit Mode -->
-              <v-col cols="12" md="6">
+              <v-col
+                cols="12"
+                md="6"
+              >
                 <div class="device-group-container">
                   <div class="custom-dropdown">
                     <div
                       class="dropdown-trigger"
-                      @click="toggleDeviceGroupDropdown"
                       :class="{ 'dropdown-active': showDeviceGroupDropdown }"
+                      @click="toggleDeviceGroupDropdown"
                     >
                       <span v-if="formData.deviceGroup">{{
                         formData.deviceGroup
                       }}</span>
-                      <span v-else class="placeholder"
-                        >Select device group</span
-                      >
-                      <v-icon>{{
-                        showDeviceGroupDropdown
-                          ? "mdi-chevron-up"
-                          : "mdi-chevron-down"
-                      }}</v-icon>
+                      <span
+                        v-else
+                        class="placeholder"
+                      >Select device group</span>
+                      <v-icon>
+                        {{
+                          showDeviceGroupDropdown
+                            ? "mdi-chevron-up"
+                            : "mdi-chevron-down"
+                        }}
+                      </v-icon>
                     </div>
 
                     <div
@@ -453,12 +565,12 @@
                     >
                       <div class="search-container">
                         <input
-                          type="text"
                           v-model="deviceGroupSearch"
+                          type="text"
                           placeholder="Search groups..."
-                          @input="filterDeviceGroups"
                           class="search-input"
-                        />
+                          @input="filterDeviceGroups"
+                        >
                       </div>
 
                       <div class="dropdown-items">
@@ -466,8 +578,8 @@
                           v-for="group in filteredDeviceGroups"
                           :key="group"
                           class="dropdown-item"
-                          @click="selectDeviceGroup(group)"
                           :class="{ selected: formData.deviceGroup === group }"
+                          @click="selectDeviceGroup(group)"
                         >
                           {{ group }}
                         </div>
@@ -476,7 +588,12 @@
                           class="dropdown-item add-new"
                           @click="showAddGroupPopup = true"
                         >
-                          <v-icon size="small" class="me-2">mdi-plus</v-icon>
+                          <v-icon
+                            size="small"
+                            class="me-2"
+                          >
+                            mdi-plus
+                          </v-icon>
                           Add
                         </div>
                       </div>
@@ -486,9 +603,9 @@
               </v-col>
 
               <v-col
+                v-if="formData.controllerName !== 'AI face'"
                 cols="12"
                 md="6"
-                v-if="formData.controllerName !== 'AI face'"
               >
                 <v-select
                   v-model="formData.controllerType"
@@ -499,10 +616,13 @@
                   variant="outlined"
                   density="comfortable"
                   @blur="markFieldAsTouched('controllerType')"
-                ></v-select>
+                />
               </v-col>
 
-              <v-col cols="12" md="6">
+              <v-col
+                cols="12"
+                md="6"
+              >
                 <v-select
                   v-model="formData.branch"
                   :items="branchOptions"
@@ -511,10 +631,14 @@
                   label="Branch"
                   variant="outlined"
                   density="comfortable"
-                ></v-select>
+                />
               </v-col>
 
-              <v-col cols="12" md="6" v-if="isAdminRole">
+              <v-col
+                v-if="isAdminRole"
+                cols="12"
+                md="6"
+              >
                 <v-select
                   v-model="formData.tenant"
                   :items="tenantOptions"
@@ -523,17 +647,20 @@
                   label="Tenant"
                   variant="outlined"
                   density="comfortable"
-                ></v-select>
+                />
               </v-col>
             </v-row>
           </div>
 
-          <div v-show="currentTab === 'modes'" class="form-section">
+          <div
+            v-show="currentTab === 'modes'"
+            class="form-section"
+          >
             <v-row>
               <v-col
+                v-if="formData.controllerName !== 'AI face'"
                 cols="12"
                 md="6"
-                v-if="formData.controllerName !== 'AI face'"
               >
                 <v-select
                   v-model="formData.assignedDoor"
@@ -558,13 +685,13 @@
                       }
                     }
                   "
-                ></v-select>
+                />
               </v-col>
 
               <v-col
+                v-if="formData.controllerName !== 'AI face'"
                 cols="12"
                 md="6"
-                v-if="formData.controllerName !== 'AI face'"
               >
                 <v-select
                   v-model="formData.doorMode"
@@ -572,13 +699,13 @@
                   label="Door Mode"
                   variant="outlined"
                   density="comfortable"
-                ></v-select>
+                />
               </v-col>
 
               <v-col
+                v-if="formData.controllerName !== 'AI face'"
                 cols="12"
                 md="6"
-                v-if="formData.controllerName !== 'AI face'"
               >
                 <v-select
                   v-model="formData.timerMode"
@@ -586,13 +713,13 @@
                   label="Timer Mode"
                   variant="outlined"
                   density="comfortable"
-                ></v-select>
+                />
               </v-col>
 
               <v-col
+                v-if="formData.controllerName !== 'AI face'"
                 cols="12"
                 md="6"
-                v-if="formData.controllerName !== 'AI face'"
               >
                 <v-text-field
                   v-model="formData.interval"
@@ -600,13 +727,13 @@
                   type="number"
                   variant="outlined"
                   density="comfortable"
-                ></v-text-field>
+                />
               </v-col>
 
               <v-col
+                v-if="formData.controllerName !== 'AI face'"
                 cols="12"
                 md="6"
-                v-if="formData.controllerName !== 'AI face'"
               >
                 <v-select
                   v-model="formData.interlockMode"
@@ -614,13 +741,13 @@
                   label="Interlock Mode"
                   variant="outlined"
                   density="comfortable"
-                ></v-select>
+                />
               </v-col>
 
               <v-col
+                v-if="formData.controllerName !== 'AI face'"
                 cols="12"
                 md="6"
-                v-if="formData.controllerName !== 'AI face'"
               >
                 <v-select
                   v-model="formData.parkingMode"
@@ -628,9 +755,12 @@
                   label="Parking Mode"
                   variant="outlined"
                   density="comfortable"
-                ></v-select>
+                />
               </v-col>
-              <v-col cols="12" md="6">
+              <v-col
+                cols="12"
+                md="6"
+              >
                 <v-select
                   v-model="formData.attendanceMode"
                   :items="['in', 'out', 'InOut']"
@@ -639,13 +769,13 @@
                   variant="outlined"
                   density="comfortable"
                   @blur="markFieldAsTouched('attendanceMode')"
-                ></v-select>
+                />
               </v-col>
 
               <v-col
+                v-if="formData.controllerName !== 'AI face'"
                 cols="12"
                 md="6"
-                v-if="formData.controllerName !== 'AI face'"
               >
                 <v-select
                   v-model="formData.antiPassbackMode"
@@ -653,7 +783,7 @@
                   label="Anti-Passback Mode"
                   variant="outlined"
                   density="comfortable"
-                ></v-select>
+                />
               </v-col>
             </v-row>
           </div>
@@ -670,30 +800,36 @@
       <div class="popup-container">
         <div class="popup-header">
           <h3>Add New Device Group</h3>
-          <v-icon @click="showAddGroupPopup = false" class="close-icon"
-            >mdi-close</v-icon
+          <v-icon
+            class="close-icon"
+            @click="showAddGroupPopup = false"
           >
+            mdi-close
+          </v-icon>
         </div>
         <div class="popup-content">
           <div class="input-group">
             <label for="newGroupName">Group Name</label>
             <input
-              type="text"
               id="newGroupName"
-              v-model="newDeviceGroup"
-              placeholder="Enter group name"
               ref="newGroupInput"
+              v-model="newDeviceGroup"
+              type="text"
+              placeholder="Enter group name"
               @keyup.enter="addNewDeviceGroup"
-            />
+            >
           </div>
           <div class="popup-actions">
-            <button class="cancel-btn" @click="showAddGroupPopup = false">
+            <button
+              class="cancel-btn"
+              @click="showAddGroupPopup = false"
+            >
               Cancel
             </button>
             <button
               class="add-btn"
-              @click="addNewDeviceGroup"
               :disabled="!newDeviceGroup.trim()"
+              @click="addNewDeviceGroup"
             >
               Add
             </button>

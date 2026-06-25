@@ -2,34 +2,43 @@
 <template>
   <div class="date-range-filter">
     <div class="date-input-group">
-      <label v-if="fromLabel" class="date-label">{{ fromLabel }}</label>
+      <label
+        v-if="fromLabel"
+        class="date-label"
+      >{{ fromLabel }}</label>
       <input
         type="date"
         :value="fromDate"
-        @input="$emit('update:fromDate', $event.target.value)"
-        @change="$emit('change')"
         class="date-input"
         :disabled="disabled"
-      />
+        @input="$emit('update:fromDate', $event.target.value)"
+        @change="$emit('change')"
+      >
     </div>
 
     <div class="date-input-group">
-      <label v-if="toLabel" class="date-label">{{ toLabel }}</label>
+      <label
+        v-if="toLabel"
+        class="date-label"
+      >{{ toLabel }}</label>
       <input
         type="date"
         :value="toDate"
-        @input="$emit('update:toDate', $event.target.value)"
-        @change="$emit('change')"
         class="date-input"
         :disabled="disabled"
-      />
+        @input="$emit('update:toDate', $event.target.value)"
+        @change="$emit('change')"
+      >
     </div>
 
-    <div v-if="showClearButton && (fromDate || toDate)" class="date-actions">
+    <div
+      v-if="showClearButton && (fromDate || toDate)"
+      class="date-actions"
+    >
       <BaseButton
         variant="ghost"
         size="sm"
-        :leftIcon="X"
+        :left-icon="X"
         @click="$emit('clear')"
       >
         {{ clearText }}

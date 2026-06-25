@@ -1,13 +1,30 @@
 <template>
-  <v-dialog :model-value="show" max-width="500px" persistent>
-    <v-card class="email-dialog-card" elevation="12">
+  <v-dialog
+    :model-value="show"
+    max-width="500px"
+    persistent
+  >
+    <v-card
+      class="email-dialog-card"
+      elevation="12"
+    >
       <v-card-title class="email-dialog-header">
-        <v-icon class="header-icon mr-3" size="28">mdi-email-outline</v-icon>
+        <v-icon
+          class="header-icon mr-3"
+          size="28"
+        >
+          mdi-email-outline
+        </v-icon>
         <span class="header-title">Client Email Required</span>
       </v-card-title>
 
       <v-card-text class="email-dialog-content">
-        <v-alert type="info" variant="tonal" class="mb-4" prominent>
+        <v-alert
+          type="info"
+          variant="tonal"
+          class="mb-4"
+          prominent
+        >
           <v-alert-title>Email Required</v-alert-title>
           Client has no email address. Please provide an email to send OTP/Happy
           Code.
@@ -15,7 +32,6 @@
 
         <v-text-field
           :model-value="clientEmail"
-          @update:model-value="$emit('update:client-email', $event)"
           label="Client Email Address"
           type="email"
           :rules="emailRules"
@@ -24,27 +40,28 @@
           prepend-inner-icon="mdi-email"
           class="email-input"
           required
-        ></v-text-field>
+          @update:model-value="$emit('update:client-email', $event)"
+        />
       </v-card-text>
 
       <v-card-actions class="email-dialog-actions">
         <v-btn
           color="grey-darken-1"
           variant="outlined"
-          @click="$emit('skip')"
           size="large"
           class="action-btn"
+          @click="$emit('skip')"
         >
           Do it Later
         </v-btn>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-btn
           color="primary"
           variant="flat"
-          @click="$emit('update-and-submit')"
           size="large"
           class="action-btn update-btn"
           append-icon="mdi-check"
+          @click="$emit('update-and-submit')"
         >
           Update & Submit
         </v-btn>

@@ -1,25 +1,51 @@
 <template>
-  <v-dialog v-model="isOpen" max-width="600px">
+  <v-dialog
+    v-model="isOpen"
+    max-width="600px"
+  >
     <v-card class="rounded-lg">
       <v-card-title
         class="d-flex justify-space-between align-center gradient-header text-white pa-4"
       >
         <div class="d-flex align-center">
-          <v-icon color="white" class="mr-2">mdi-credit-card-multiple</v-icon>
+          <v-icon
+            color="white"
+            class="mr-2"
+          >
+            mdi-credit-card-multiple
+          </v-icon>
           <span class="text-h5 font-weight-bold">RFID Cards</span>
         </div>
-        <v-btn icon variant="text" color="white" @click="isOpen = false">
+        <v-btn
+          icon
+          variant="text"
+          color="white"
+          @click="isOpen = false"
+        >
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </v-card-title>
 
       <v-card-text class="pa-4">
-        <div v-if="rfidCards.length === 0" class="text-center pa-6">
-          <v-icon size="64" color="grey-lighten-1">mdi-credit-card-off</v-icon>
-          <div class="text-h6 mt-2 text-grey">No RFID cards found</div>
+        <div
+          v-if="rfidCards.length === 0"
+          class="text-center pa-6"
+        >
+          <v-icon
+            size="64"
+            color="grey-lighten-1"
+          >
+            mdi-credit-card-off
+          </v-icon>
+          <div class="text-h6 mt-2 text-grey">
+            No RFID cards found
+          </div>
         </div>
 
-        <div v-else class="card-grid">
+        <div
+          v-else
+          class="card-grid"
+        >
           <v-card
             v-for="(card, index) in rfidCards"
             :key="index"
@@ -38,9 +64,11 @@
                 size="42"
                 class="mr-3"
               >
-                <v-icon color="white">{{
-                  getCardIcon(card.cardManagement_id.type)
-                }}</v-icon>
+                <v-icon color="white">
+                  {{
+                    getCardIcon(card.cardManagement_id.type)
+                  }}
+                </v-icon>
               </v-avatar>
 
               <div class="flex-grow-1">
@@ -63,7 +91,12 @@
                 </div>
 
                 <div class="text-caption text-grey mt-1">
-                  <v-icon size="small" class="mr-1">mdi-tag</v-icon>
+                  <v-icon
+                    size="small"
+                    class="mr-1"
+                  >
+                    mdi-tag
+                  </v-icon>
                   {{ card.cardManagement_id.type || "Standard" }}
                 </div>
               </div>
@@ -72,10 +105,14 @@
         </div>
       </v-card-text>
 
-      <v-divider></v-divider>
+      <v-divider />
 
       <v-card-actions class="pa-4 d-flex justify-end">
-        <v-btn color="primary" variant="text" @click="isOpen = false">
+        <v-btn
+          color="primary"
+          variant="text"
+          @click="isOpen = false"
+        >
           Close
         </v-btn>
       </v-card-actions>

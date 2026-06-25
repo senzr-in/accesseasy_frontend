@@ -5,7 +5,11 @@
     size="x-small"
     class="font-weight-medium"
   >
-    <v-icon :icon="config.icon" size="x-small" class="mr-1"></v-icon>
+    <v-icon
+      :icon="config.icon"
+      size="x-small"
+      class="mr-1"
+    />
     {{ config.label }}
   </v-chip>
 </template>

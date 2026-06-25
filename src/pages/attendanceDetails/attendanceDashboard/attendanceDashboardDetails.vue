@@ -8,9 +8,9 @@
       >
         <div class="filter-content">
           <FilterComponent
-            :tenantId="tenantId"
-            :initialFilters="initialFilters"
-            :initiallyVisible="true"
+            :tenant-id="tenantId"
+            :initial-filters="initialFilters"
+            :initially-visible="true"
             :filter-schema="pageFilters"
             @apply-filters="handleApplyFilters"
             @filter-visibility-changed="onFilterVisibilityChanged"
@@ -25,7 +25,7 @@
         :class="{ 'full-width': !showFilters }"
       >
         <data-table-wrapper
-          v-model:searchQuery="search"
+          v-model:search-query="search"
           :search-placeholder="'Search employees...'"
           :show-search="isAdmin"
           :has-error="error"
@@ -34,10 +34,10 @@
           <template #before-search>
             <button
               class="filter-toggle-static"
-              @click="toggleFilters"
               :class="{ active: hasActiveFilters }"
               :title="showFilters ? 'Hide filters' : 'Show filters'"
               aria-label="Toggle filters"
+              @click="toggleFilters"
             >
               <svg
                 width="20"
@@ -49,20 +49,26 @@
               >
                 <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46" />
               </svg>
-              <div v-if="hasActiveFilters" class="filter-indicator"></div>
+              <div
+                v-if="hasActiveFilters"
+                class="filter-indicator"
+              />
             </button>
           </template>
           <!-- Toolbar Actions Slot -->
-          <template #toolbar-actions v-if="isAdmin">
+          <template
+            v-if="isAdmin"
+            #toolbar-actions
+          >
             <!-- Filter Toggle Button - MOVED HERE, BEFORE EXPORT BUTTON -->
 
             <Dropdown
               text="Export"
               variant="primary"
-              :leftIcon="Download"
+              :left-icon="Download"
               :items="exportOptions"
               placement="bottom-right"
-              @itemClick="handleExportOption"
+              @item-click="handleExportOption"
             />
           </template>
 
@@ -84,7 +90,7 @@
               :sort-direction="sortDirection"
               :row-clickable="true"
               item-key="employeeId"
-              @rowClick="handleRowClick"
+              @row-click="handleRowClick"
               @sort="handleSort"
             >
               <!-- Error State -->
@@ -112,7 +118,7 @@
                       : 'Try adjusting your filters or check back later'
                   "
                   :primary-action="{ text: 'Clear Filters', icon: 'X' }"
-                  @primaryAction="clearFilters"
+                  @primary-action="clearFilters"
                 />
               </template>
 
@@ -124,8 +130,11 @@
                     :src="item.avatarImage"
                     :alt="formatEmployeeName(item)"
                     class="avatar-image"
-                  />
-                  <div v-else class="avatar-placeholder">
+                  >
+                  <div
+                    v-else
+                    class="avatar-placeholder"
+                  >
                     <svg
                       width="20"
                       height="20"
@@ -135,7 +144,11 @@
                       stroke-width="2"
                     >
                       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                      <circle cx="12" cy="7" r="4" />
+                      <circle
+                        cx="12"
+                        cy="7"
+                        r="4"
+                      />
                     </svg>
                   </div>
                 </div>
@@ -219,22 +232,28 @@
           </template>
 
           <!-- Pagination Slot -->
-          <template #pagination v-if="isAdmin">
+          <template
+            v-if="isAdmin"
+            #pagination
+          >
             <PaginationComponent
               v-model:page="currentPage"
-              v-model:itemsPerPage="itemsPerPage"
+              v-model:items-per-page="itemsPerPage"
               :total-items="totalItems"
               :is-searching="!!search"
               @update:page="handlePageChange"
-              @update:itemsPerPage="handleItemsPerPageChange"
+              @update:items-per-page="handleItemsPerPageChange"
             />
           </template>
         </data-table-wrapper>
       </div>
 
       <!-- Tenant Loading State -->
-      <div v-if="tenantLoading" class="loading-container">
-        <div class="loading-spinner"></div>
+      <div
+        v-if="tenantLoading"
+        class="loading-container"
+      >
+        <div class="loading-spinner" />
         <p>Loading tenant information...</p>
       </div>
     </template>
@@ -260,20 +279,23 @@
 
     <!-- Calendar View -->
     <template v-if="showCalendarView">
-      <v-container fluid class="pa-6">
+      <v-container
+        fluid
+        class="pa-6"
+      >
         <div class="d-flex justify-space-between align-center">
           <BaseButton
             size="md"
             variant="primary"
-            :leftIcon="ArrowLeft"
-            @click="backToMainView"
+            :left-icon="ArrowLeft"
             :text="'Back to Dashboard'"
+            @click="backToMainView"
           />
         </div>
         <CalendarView
           :month="selectedCalendarMonth"
           :year="selectedCalendarYear"
-          :attendanceData="selectedMonthAttendanceData"
+          :attendance-data="selectedMonthAttendanceData"
           :employee="userData"
         />
       </v-container>

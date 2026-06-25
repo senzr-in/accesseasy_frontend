@@ -1,10 +1,19 @@
 <template>
   <v-card class="incentive-configuration">
     <!-- Snackbar for notifications -->
-    <v-snackbar v-model="snackbar" :color="snackbarColor" :timeout="2000" location="top">
+    <v-snackbar
+      v-model="snackbar"
+      :color="snackbarColor"
+      :timeout="2000"
+      location="top"
+    >
       {{ snackbarText }}
-      <template v-slot:actions>
-        <v-btn color="white" variant="text" @click="snackbar = false">
+      <template #actions>
+        <v-btn
+          color="white"
+          variant="text"
+          @click="snackbar = false"
+        >
           Close
         </v-btn>
       </template>
@@ -13,14 +22,31 @@
     <div class="sticky-header">
       <v-card-text>
         <div class="d-flex justify-space-between align-center mb-4">
-          <h3 class="text-h6">Incentive Configuration</h3>
+          <h3 class="text-h6">
+            Incentive Configuration
+          </h3>
           <div class="d-flex">
-            <v-btn v-if="!isEditing" color="black" @click="startEditing">
+            <v-btn
+              v-if="!isEditing"
+              color="black"
+              @click="startEditing"
+            >
               Edit
             </v-btn>
             <template v-else>
-              <v-btn color="black" class="mr-2" @click="saveConfiguration"> Save </v-btn>
-              <v-btn color="black" @click="cancelEdit"> Cancel </v-btn>
+              <v-btn
+                color="black"
+                class="mr-2"
+                @click="saveConfiguration"
+              >
+                Save
+              </v-btn>
+              <v-btn
+                color="black"
+                @click="cancelEdit"
+              >
+                Cancel
+              </v-btn>
             </template>
           </div>
         </div>
@@ -35,14 +61,42 @@
             <div class="form-group">
               <label>Incentive Type</label>
               <div class="select-container">
-                <select v-model="incentiveConfig.reason" class="form-control" :disabled="!isEditing">
-                  <option value="" disabled selected>Select incentive type</option>
-                  <option v-for="type in incentiveTypes" :key="type" :value="type">{{ type }}</option>
-                  <option value="add_new">+ Add New Incentive Type</option>
+                <select
+                  v-model="incentiveConfig.reason"
+                  class="form-control"
+                  :disabled="!isEditing"
+                >
+                  <option
+                    value=""
+                    disabled
+                    selected
+                  >
+                    Select incentive type
+                  </option>
+                  <option
+                    v-for="type in incentiveTypes"
+                    :key="type"
+                    :value="type"
+                  >
+                    {{ type }}
+                  </option>
+                  <option value="add_new">
+                    + Add New Incentive Type
+                  </option>
                 </select>
                 <span class="select-arrow">
-                  <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
-                    <path d="M1 1.5L6 6.5L11 1.5" stroke="#555" stroke-width="2" stroke-linecap="round"/>
+                  <svg
+                    width="12"
+                    height="8"
+                    viewBox="0 0 12 8"
+                    fill="none"
+                  >
+                    <path
+                      d="M1 1.5L6 6.5L11 1.5"
+                      stroke="#555"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                    />
                   </svg>
                 </span>
               </div>
@@ -52,13 +106,31 @@
             <div class="form-group">
               <label>Amount Type</label>
               <div class="select-container">
-                <select v-model="incentiveConfig.type" class="form-control" :disabled="!isEditing">
-                  <option value="fixed">Fixed Amount</option>
-                  <option value="percentage">Percentage</option>
+                <select
+                  v-model="incentiveConfig.type"
+                  class="form-control"
+                  :disabled="!isEditing"
+                >
+                  <option value="fixed">
+                    Fixed Amount
+                  </option>
+                  <option value="percentage">
+                    Percentage
+                  </option>
                 </select>
                 <span class="select-arrow">
-                  <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
-                    <path d="M1 1.5L6 6.5L11 1.5" stroke="#555" stroke-width="2" stroke-linecap="round"/>
+                  <svg
+                    width="12"
+                    height="8"
+                    viewBox="0 0 12 8"
+                    fill="none"
+                  >
+                    <path
+                      d="M1 1.5L6 6.5L11 1.5"
+                      stroke="#555"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                    />
                   </svg>
                 </span>
               </div>
@@ -69,8 +141,12 @@
               <label>Within CTC</label>
               <div class="toggle-switch-container">
                 <label class="toggle-switch">
-                  <input type="checkbox" v-model="incentiveConfig.withinCTC" :disabled="!isEditing">
-                  <span class="toggle-slider"></span>
+                  <input
+                    v-model="incentiveConfig.withinCTC"
+                    type="checkbox"
+                    :disabled="!isEditing"
+                  >
+                  <span class="toggle-slider" />
                   <span class="toggle-text">{{ incentiveConfig.withinCTC ? 'Yes' : 'No' }}</span>
                 </label>
               </div>
@@ -82,9 +158,9 @@
               <div class="input-with-icon">
                 <span class="prefix-icon">{{ incentiveConfig.type === 'fixed' ? '₹' : '%' }}</span>
                 <input
+                  v-model="incentiveConfig.value"
                   type="text"
                   :placeholder="incentiveConfig.type === 'fixed' ? 'Enter amount' : 'Enter percentage'"
-                  v-model="incentiveConfig.value"
                   class="form-control with-prefix"
                   :disabled="!isEditing"
                 >
@@ -95,16 +171,44 @@
             <div class="form-group">
               <label>Frequency</label>
               <div class="select-container">
-                <select v-model="incentiveConfig.frequency" class="form-control" :disabled="!isEditing">
-                  <option value="" disabled selected>Select frequency</option>
-                  <option value="monthly">Monthly</option>
-                  <option value="quarterly">Quarterly</option>
-                  <option value="half-yearly">Half Yearly</option>
-                  <option value="yearly">Yearly</option>
+                <select
+                  v-model="incentiveConfig.frequency"
+                  class="form-control"
+                  :disabled="!isEditing"
+                >
+                  <option
+                    value=""
+                    disabled
+                    selected
+                  >
+                    Select frequency
+                  </option>
+                  <option value="monthly">
+                    Monthly
+                  </option>
+                  <option value="quarterly">
+                    Quarterly
+                  </option>
+                  <option value="half-yearly">
+                    Half Yearly
+                  </option>
+                  <option value="yearly">
+                    Yearly
+                  </option>
                 </select>
                 <span class="select-arrow">
-                  <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
-                    <path d="M1 1.5L6 6.5L11 1.5" stroke="#555" stroke-width="2" stroke-linecap="round"/>
+                  <svg
+                    width="12"
+                    height="8"
+                    viewBox="0 0 12 8"
+                    fill="none"
+                  >
+                    <path
+                      d="M1 1.5L6 6.5L11 1.5"
+                      stroke="#555"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                    />
                   </svg>
                 </span>
               </div>
@@ -114,21 +218,39 @@
             <div class="form-group payment-date">
               <label>Payment Date</label>
               <div class="select-container">
-                <select v-model="incentiveConfig.paymentDateType" class="form-control" :disabled="!isEditing">
-                  <option value="specific">Specific Date</option>
-                  <option value="salary">Salary Date</option>
+                <select
+                  v-model="incentiveConfig.paymentDateType"
+                  class="form-control"
+                  :disabled="!isEditing"
+                >
+                  <option value="specific">
+                    Specific Date
+                  </option>
+                  <option value="salary">
+                    Salary Date
+                  </option>
                 </select>
                 <span class="select-arrow">
-                  <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
-                    <path d="M1 1.5L6 6.5L11 1.5" stroke="#555" stroke-width="2" stroke-linecap="round"/>
+                  <svg
+                    width="12"
+                    height="8"
+                    viewBox="0 0 12 8"
+                    fill="none"
+                  >
+                    <path
+                      d="M1 1.5L6 6.5L11 1.5"
+                      stroke="#555"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                    />
                   </svg>
                 </span>
               </div>
 
               <input
-                type="date"
-                v-model="incentiveConfig.specificDate"
                 v-if="incentiveConfig.paymentDateType === 'specific'"
+                v-model="incentiveConfig.specificDate"
+                type="date"
                 class="form-control date-input"
                 :disabled="!isEditing"
               >
@@ -139,7 +261,10 @@
     </div>
 
     <!-- Add Incentive Type Dialog -->
-    <v-dialog v-model="showDialog" max-width="500px">
+    <v-dialog
+      v-model="showDialog"
+      max-width="500px"
+    >
       <v-card>
         <v-card-title>Add New Incentive Type</v-card-title>
         <v-card-text>
@@ -148,14 +273,23 @@
             label="Incentive Type Name"
             variant="outlined"
             density="comfortable"
-          ></v-text-field>
+          />
         </v-card-text>
         <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="black" variant="contained" @click="addIncentiveType" class="white--text">
+          <v-spacer />
+          <v-btn
+            color="black"
+            variant="contained"
+            class="white--text"
+            @click="addIncentiveType"
+          >
             Add
           </v-btn>
-          <v-btn color="black" variant="outlined" @click="closeDialog">
+          <v-btn
+            color="black"
+            variant="outlined"
+            @click="closeDialog"
+          >
             Cancel
           </v-btn>
         </v-card-actions>
@@ -208,9 +342,6 @@ export default {
       return !!this.category?.id; 
     }
   },
-  created() {
-    this.fetchIncentiveConfiguration();
-  },
   watch: {
     'incentiveConfig.reason'(newVal) {
       if (newVal === "add_new") {
@@ -218,6 +349,9 @@ export default {
         this.incentiveConfig.reason = "";
       }
     }
+  },
+  created() {
+    this.fetchIncentiveConfiguration();
   },
   methods: {
     async fetchIncentiveConfiguration() {

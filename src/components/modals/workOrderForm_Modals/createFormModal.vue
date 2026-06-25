@@ -1,7 +1,14 @@
 <!-- /senzrGo/senzrfieldopsfrontend/src/components/modals/workOrderForm_Modals/createFormModal.vue -->
 <template>
-  <div v-if="show" class="modal-overlay" @click="$emit('close')">
-    <div class="modal-content enhanced-modal" @click.stop>
+  <div
+    v-if="show"
+    class="modal-overlay"
+    @click="$emit('close')"
+  >
+    <div
+      class="modal-content enhanced-modal"
+      @click.stop
+    >
       <div class="modal-header">
         <div class="modal-title-section">
           <h3 class="modal-title">
@@ -13,7 +20,10 @@
             purpose
           </p>
         </div>
-        <button @click="$emit('close')" class="modal-close">
+        <button
+          class="modal-close"
+          @click="$emit('close')"
+        >
           <XIcon class="w-6 h-6" />
         </button>
       </div>
@@ -28,15 +38,23 @@
             type="text"
             class="form-input"
             placeholder="e.g., Equipment Maintenance Request"
-          />
+          >
         </div>
         <div class="form-group">
           <label class="form-label">
             <Building class="label-icon" />
             Organization
           </label>
-          <select v-model="formData.orgId" class="form-select">
-            <option :value="null" disabled>Select an organization</option>
+          <select
+            v-model="formData.orgId"
+            class="form-select"
+          >
+            <option
+              :value="null"
+              disabled
+            >
+              Select an organization
+            </option>
             <option
               v-for="org in organizationsOptions"
               :key="org.id"
@@ -53,13 +71,15 @@
           </label>
           <label class="toggle-switch">
             <input
-              type="checkbox"
               v-model="formData.requires_location"
+              type="checkbox"
               class="toggle-input"
-            />
-            <span class="toggle-slider"></span>
+            >
+            <span class="toggle-slider" />
           </label>
-          <div class="field-help">Enable if this form requires a location</div>
+          <div class="field-help">
+            Enable if this form requires a location
+          </div>
         </div>
         <!-- Template Selection -->
         <div class="form-group">
@@ -95,7 +115,10 @@
             This will copy all fields and configurations from the selected
             template.
           </div>
-          <div v-else class="template-info">
+          <div
+            v-else
+            class="template-info"
+          >
             <CheckCircleIcon class="inline-icon" />
             Will create form with default configuration.
           </div>
@@ -109,10 +132,8 @@
           <div class="tips-list">
             <div class="tip-item">
               <CheckCircleIcon class="tip-icon" />
-              <span
-                >Use clear, descriptive names like "Equipment Maintenance" or
-                "Facility Repair Request"</span
-              >
+              <span>Use clear, descriptive names like "Equipment Maintenance" or
+                "Facility Repair Request"</span>
             </div>
             <div class="tip-item">
               <CheckCircleIcon class="tip-icon" />
@@ -120,36 +141,43 @@
             </div>
             <div class="tip-item">
               <CheckCircleIcon class="tip-icon" />
-              <span
-                >Templates help you get started faster with pre-configured
-                fields</span
-              >
+              <span>Templates help you get started faster with pre-configured
+                fields</span>
             </div>
           </div>
         </div>
         <div class="toggle-item mt-4">
           <label class="toggle-switch">
             <input
-              type="checkbox"
               v-model="formData.enabled"
+              type="checkbox"
               class="toggle-input"
-            />
-            <span class="toggle-slider"></span>
+            >
+            <span class="toggle-slider" />
           </label>
           <span class="toggle-label">Enable Form</span>
         </div>
       </div>
       <div class="modal-footer">
-        <button @click="$emit('close')" class="btn btn-secondary">
+        <button
+          class="btn btn-secondary"
+          @click="$emit('close')"
+        >
           Cancel
         </button>
         <button
-          @click="handleCreateForm"
           class="btn btn-primary"
           :disabled="!formData.form_name.trim() || creating || loadingTemplates"
+          @click="handleCreateForm"
         >
-          <div v-if="creating" class="loading-spinner-small"></div>
-          <PlusIcon v-else class="btn-icon" />
+          <div
+            v-if="creating"
+            class="loading-spinner-small"
+          />
+          <PlusIcon
+            v-else
+            class="btn-icon"
+          />
           {{ creating ? "Creating..." : "Create Form" }}
         </button>
       </div>

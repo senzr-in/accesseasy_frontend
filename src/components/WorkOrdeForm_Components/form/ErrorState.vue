@@ -1,6 +1,9 @@
 <template>
   <v-row class="error-container">
-    <v-col cols="12" class="text-center">
+    <v-col
+      cols="12"
+      class="text-center"
+    >
       <v-alert
         type="error"
         prominent
@@ -8,10 +11,16 @@
         class="error-alert"
       >
         <template #prepend>
-          <v-icon size="32">mdi-alert-circle</v-icon>
+          <v-icon size="32">
+            mdi-alert-circle
+          </v-icon>
         </template>
-        <v-alert-title class="error-title">Error Loading Form</v-alert-title>
-        <div class="error-message">{{ error }}</div>
+        <v-alert-title class="error-title">
+          Error Loading Form
+        </v-alert-title>
+        <div class="error-message">
+          {{ error }}
+        </div>
       </v-alert>
     </v-col>
   </v-row>

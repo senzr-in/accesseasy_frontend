@@ -1,30 +1,41 @@
 <template>
-  <div class="modal-overlay" @click.self="$emit('close')">
+  <div
+    class="modal-overlay"
+    @click.self="$emit('close')"
+  >
     <div class="modal-content">
       <div class="modal-header">
         <h2>Import Employee Data</h2>
-        <button class="close-btn" @click="$emit('close')">&times;</button>
+        <button
+          class="close-btn"
+          @click="$emit('close')"
+        >
+          &times;
+        </button>
       </div>
 
       <div class="modal-body">
         <!-- Error display section with download button -->
-        <div v-if="errors.length > 0" class="error-container">
+        <div
+          v-if="errors.length > 0"
+          class="error-container"
+        >
           <div class="error-header">
             <AlertCircle class="error-icon" />
             <h3>Errors Found</h3>
             <div class="error-header-buttons">
               <button
                 class="download-error-btn"
-                @click="downloadErrorCSV"
                 title="Download Errors as CSV"
+                @click="downloadErrorCSV"
               >
                 <DownloadIcon class="download-icon" />
                 Download Errors
               </button>
               <button
                 class="close-error-btn"
-                @click="clearErrors"
                 title="Close"
+                @click="clearErrors"
               >
                 &times;
               </button>
@@ -46,38 +57,49 @@
           <h3>Upload File</h3>
           <div
             class="file-upload-container"
+            :class="{ 'file-upload-error': fileError }"
             @click="triggerFileInput"
             @drop.prevent="handleFileDrop"
             @dragover.prevent
-            :class="{ 'file-upload-error': fileError }"
           >
             <input
-              type="file"
               ref="fileInput"
-              @change="handleFileChange"
+              type="file"
               accept=".csv, .xlsx"
               class="file-input"
-            />
+              @change="handleFileChange"
+            >
             <div class="file-upload-content">
               <UploadCloud class="upload-icon" />
               <div v-if="!uploadedFile">
                 <p>Drag and drop your file here or click to browse</p>
               </div>
-              <div v-else class="uploaded-file-info">
+              <div
+                v-else
+                class="uploaded-file-info"
+              >
                 <p>{{ uploadedFile.filename_download }}</p>
                 <button
                   class="cancel-upload-btn"
-                  @click.stop="cancelUpload"
                   title="Remove file"
+                  @click.stop="cancelUpload"
                 >
                   &times;
                 </button>
               </div>
             </div>
           </div>
-          <p v-if="fileError" class="field-error">{{ fileError }}</p>
+          <p
+            v-if="fileError"
+            class="field-error"
+          >
+            {{ fileError }}
+          </p>
 
-          <div v-if="uploadedFile" class="file-details">
+          <div
+            v-if="uploadedFile"
+            class="file-details"
+          >
             <p>
               <strong>File Name:</strong> {{ uploadedFile.filename_download }}
             </p>
@@ -95,7 +117,10 @@
         <div class="format-section">
           <p>Please ensure your file follows this format:</p>
           <div>
-            <button class="download-btn" @click="showModal = true">
+            <button
+              class="download-btn"
+              @click="showModal = true"
+            >
               Download Template
             </button>
             <EmployeeTemplateDownload
@@ -106,24 +131,39 @@
         </div>
       </div>
 
-      <div v-if="successMessage" class="success-message">
+      <div
+        v-if="successMessage"
+        class="success-message"
+      >
         <CheckCircle class="success-icon" />
         {{ successMessage }}
       </div>
 
       <!-- Snackbar for user feedback -->
-      <div v-if="snackbar.show" class="snackbar" :class="snackbar.type">
+      <div
+        v-if="snackbar.show"
+        class="snackbar"
+        :class="snackbar.type"
+      >
         {{ snackbar.message }}
       </div>
 
       <div class="modal-footer">
-        <button class="cancel-btn" @click="$emit('close')">Cancel</button>
+        <button
+          class="cancel-btn"
+          @click="$emit('close')"
+        >
+          Cancel
+        </button>
         <button
           class="import-btn"
-          @click="importData"
           :disabled="!uploadedFile || isImporting || errors.length > 0"
+          @click="importData"
         >
-          <span v-if="isImporting" class="loading-spinner"></span>
+          <span
+            v-if="isImporting"
+            class="loading-spinner"
+          />
           {{ isImporting ? "Importing..." : "Import" }}
         </button>
       </div>

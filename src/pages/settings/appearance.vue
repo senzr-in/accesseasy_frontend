@@ -1,8 +1,12 @@
 <template>
   <div class="space-y-6">
     <div>
-      <h2 class="text-2xl font-black text-slate-900 dark:text-white">Appearance</h2>
-      <p class="text-sm font-medium text-slate-500 mt-1">Customize how the application looks to you.</p>
+      <h2 class="text-2xl font-black text-slate-900 dark:text-white">
+        Appearance
+      </h2>
+      <p class="text-sm font-medium text-slate-500 mt-1">
+        Customize how the application looks to you.
+      </p>
     </div>
 
     <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm p-6">
@@ -16,20 +20,20 @@
           </p>
         </div>
         <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg border border-slate-200 dark:border-slate-700">
-           <button 
-             @click="toggleTheme('light')" 
-             class="p-3 rounded-md transition-colors flex items-center gap-2 font-bold text-sm"
-             :class="!isDark ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-700'"
-            >
-             <Sun class="w-4 h-4" /> Light
-           </button>
-           <button 
-             @click="toggleTheme('dark')" 
-             class="p-3 rounded-md transition-colors flex items-center gap-2 font-bold text-sm"
-             :class="isDark ? 'bg-slate-900 shadow-sm text-white' : 'text-slate-500 hover:text-slate-700'"
-            >
-             <Moon class="w-4 h-4" /> Dark
-           </button>
+          <button 
+            class="p-3 rounded-md transition-colors flex items-center gap-2 font-bold text-sm" 
+            :class="!isDark ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-700'"
+            @click="toggleTheme('light')"
+          >
+            <Sun class="w-4 h-4" /> Light
+          </button>
+          <button 
+            class="p-3 rounded-md transition-colors flex items-center gap-2 font-bold text-sm" 
+            :class="isDark ? 'bg-slate-900 shadow-sm text-white' : 'text-slate-500 hover:text-slate-700'"
+            @click="toggleTheme('dark')"
+          >
+            <Moon class="w-4 h-4" /> Dark
+          </button>
         </div>
       </div>
     </div>

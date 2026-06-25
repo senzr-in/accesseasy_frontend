@@ -1,9 +1,20 @@
 <template>
   <v-app>
-    <v-container fluid class="pa-0">
-      <v-row no-gutters class="full-height">
+    <v-container
+      fluid
+      class="pa-0"
+    >
+      <v-row
+        no-gutters
+        class="full-height"
+      >
         <!-- Task List Panel -->
-        <v-col cols="12" lg="4" xl="3" class="task-panel">
+        <v-col
+          cols="12"
+          lg="4"
+          xl="3"
+          class="task-panel"
+        >
           <v-card 
             flat 
             class="task-card h-100 d-flex flex-column"
@@ -14,16 +25,24 @@
               <div class="d-flex align-center justify-space-between w-100">
                 <div class="d-flex align-center">
                   <v-btn
-                    @click="goBack"
                     icon
                     variant="text"
                     size="small"
                     class="mr-2"
+                    @click="goBack"
                   >
                     <v-icon>mdi-arrow-left</v-icon>
-                    <v-tooltip activator="parent">Back to Reimbursement</v-tooltip>
+                    <v-tooltip activator="parent">
+                      Back to Reimbursement
+                    </v-tooltip>
                   </v-btn>
-                  <v-icon class="mr-3" color="primary" size="24">mdi-clipboard-list</v-icon>
+                  <v-icon
+                    class="mr-3"
+                    color="primary"
+                    size="24"
+                  >
+                    mdi-clipboard-list
+                  </v-icon>
                   <span class="text-h6 font-weight-bold">WORK ORDER LOCATION VIEW</span>
                 </div>
               </div>
@@ -45,10 +64,12 @@
                       hide-details
                       item-title="text"
                       item-value="value"
-                      @update:modelValue="handleDateFilterChange"
+                      @update:model-value="handleDateFilterChange"
                     >
                       <template #prepend-inner>
-                        <v-icon size="20">mdi-calendar-month</v-icon>
+                        <v-icon size="20">
+                          mdi-calendar-month
+                        </v-icon>
                       </template>
                     </v-select>
                   </v-col>
@@ -60,10 +81,12 @@
                       variant="outlined"
                       density="compact"
                       hide-details
-                      @update:modelValue="handleDateFilterChange"
+                      @update:model-value="handleDateFilterChange"
                     >
                       <template #prepend-inner>
-                        <v-icon size="20">mdi-calendar</v-icon>
+                        <v-icon size="20">
+                          mdi-calendar
+                        </v-icon>
                       </template>
                     </v-select>
                   </v-col>
@@ -80,7 +103,9 @@
                   class="mt-3"
                 >
                   <template #prepend-inner>
-                    <v-icon size="20">mdi-magnify</v-icon>
+                    <v-icon size="20">
+                      mdi-magnify
+                    </v-icon>
                   </template>
                 </v-text-field>
 
@@ -88,18 +113,34 @@
                 <div class="stats-section mt-4">
                   <v-row dense>
                     <v-col cols="6">
-                      <v-card variant="tonal" color="primary" class="pa-2">
+                      <v-card
+                        variant="tonal"
+                        color="primary"
+                        class="pa-2"
+                      >
                         <div class="text-center">
-                          <div class="text-h6 font-weight-bold">{{ totalItems }}</div>
-                          <div class="text-caption">Total Tasks</div>
+                          <div class="text-h6 font-weight-bold">
+                            {{ totalItems }}
+                          </div>
+                          <div class="text-caption">
+                            Total Tasks
+                          </div>
                         </div>
                       </v-card>
                     </v-col>
                     <v-col cols="6">
-                      <v-card variant="tonal" color="success" class="pa-2">
+                      <v-card
+                        variant="tonal"
+                        color="success"
+                        class="pa-2"
+                      >
                         <div class="text-center">
-                          <div class="text-h6 font-weight-bold">{{ completedTasks }}</div>
-                          <div class="text-caption">Completed</div>
+                          <div class="text-h6 font-weight-bold">
+                            {{ completedTasks }}
+                          </div>
+                          <div class="text-caption">
+                            Completed
+                          </div>
                         </div>
                       </v-card>
                     </v-col>
@@ -111,9 +152,16 @@
 
               <!-- Task List -->
               <div class="task-list flex-grow-1">
-                <v-progress-linear v-if="loading" indeterminate color="primary" />
+                <v-progress-linear
+                  v-if="loading"
+                  indeterminate
+                  color="primary"
+                />
                 
-                <div v-if="!loading && filteredTasks.length > 0" class="pa-2">
+                <div
+                  v-if="!loading && filteredTasks.length > 0"
+                  class="pa-2"
+                >
                   <v-virtual-scroll
                     :items="filteredTasks"
                     height="400"
@@ -123,9 +171,9 @@
                       <v-card
                         class="task-item ma-2"
                         :class="{ 'selected-task': selectedTask?.id === item.id }"
-                        @click="selectTask(item)"
                         hover
                         :elevation="selectedTask?.id === item.id ? 4 : 1"
+                        @click="selectTask(item)"
                       >
                         <v-card-text class="pa-3">
                           <div class="d-flex justify-space-between align-start">
@@ -152,7 +200,12 @@
                                 </v-chip>
                               </div>
                               <div class="task-distance mt-2">
-                                <v-icon size="16" class="mr-1">mdi-map-marker-distance</v-icon>
+                                <v-icon
+                                  size="16"
+                                  class="mr-1"
+                                >
+                                  mdi-map-marker-distance
+                                </v-icon>
                                 <span class="text-caption">{{ formatDistance(item.distanceKm) }}</span>
                               </div>
                               <!-- Location Status Indicator -->
@@ -162,7 +215,10 @@
                                   size="x-small"
                                   variant="tonal"
                                 >
-                                  <v-icon size="12" class="mr-1">
+                                  <v-icon
+                                    size="12"
+                                    class="mr-1"
+                                  >
                                     {{ hasCurrentLocation(item) ? 'mdi-map-marker-check' : 'mdi-map-marker-off' }}
                                   </v-icon>
                                   {{ hasCurrentLocation(item) ? 'Located' : 'No Location' }}
@@ -184,14 +240,28 @@
                   </v-virtual-scroll>
                 </div>
 
-                <div v-else-if="!loading" class="pa-4 text-center">
-                  <v-icon size="64" color="grey" class="mb-2">mdi-clipboard-off</v-icon>
-                  <p class="text-body-2 text-grey">No tasks found for the selected period.</p>
+                <div
+                  v-else-if="!loading"
+                  class="pa-4 text-center"
+                >
+                  <v-icon
+                    size="64"
+                    color="grey"
+                    class="mb-2"
+                  >
+                    mdi-clipboard-off
+                  </v-icon>
+                  <p class="text-body-2 text-grey">
+                    No tasks found for the selected period.
+                  </p>
                 </div>
               </div>
 
               <!-- Pagination -->
-              <div v-if="totalPages > 1" class="pa-3">
+              <div
+                v-if="totalPages > 1"
+                class="pa-3"
+              >
                 <v-pagination
                   v-model="currentPage"
                   :length="totalPages"
@@ -205,8 +275,16 @@
         </v-col>
 
         <!-- Map Panel -->
-       <v-col cols="12" lg="8" xl="9" class="map-panel">
-          <v-card flat class="map-card h-100">
+        <v-col
+          cols="12"
+          lg="8"
+          xl="9"
+          class="map-panel"
+        >
+          <v-card
+            flat
+            class="map-card h-100"
+          >
             <!-- Google Map Container -->
             <div class="map-container">
               <GoogleMap
@@ -240,20 +318,46 @@
               </GoogleMap>
 
               <!-- Map Overlay for No Selection -->
-              <div v-if="!selectedTask" class="map-overlay">
+              <div
+                v-if="!selectedTask"
+                class="map-overlay"
+              >
                 <div class="text-center">
-                  <v-icon size="64" color="grey-lighten-2" class="mb-4">mdi-map-marker-outline</v-icon>
-                  <h3 class="text-h6 text-grey-lighten-1 mb-2">Select a Task</h3>
-                  <p class="text-body-2 text-grey">Choose a task from the list to view its location on the map</p>
+                  <v-icon
+                    size="64"
+                    color="grey-lighten-2"
+                    class="mb-4"
+                  >
+                    mdi-map-marker-outline
+                  </v-icon>
+                  <h3 class="text-h6 text-grey-lighten-1 mb-2">
+                    Select a Task
+                  </h3>
+                  <p class="text-body-2 text-grey">
+                    Choose a task from the list to view its location on the map
+                  </p>
                 </div>
               </div>
 
               <!-- Map Overlay for No Location Data -->
-              <div v-else-if="selectedTask && !hasCurrentLocation(selectedTask)" class="map-overlay">
+              <div
+                v-else-if="selectedTask && !hasCurrentLocation(selectedTask)"
+                class="map-overlay"
+              >
                 <div class="text-center">
-                  <v-icon size="64" color="warning" class="mb-4">mdi-map-marker-off</v-icon>
-                  <h3 class="text-h6 text-warning mb-2">No Location Data</h3>
-                  <p class="text-body-2 text-grey">This task doesn't have current location coordinates</p>
+                  <v-icon
+                    size="64"
+                    color="warning"
+                    class="mb-4"
+                  >
+                    mdi-map-marker-off
+                  </v-icon>
+                  <h3 class="text-h6 text-warning mb-2">
+                    No Location Data
+                  </h3>
+                  <p class="text-body-2 text-grey">
+                    This task doesn't have current location coordinates
+                  </p>
                 </div>
               </div>
 
@@ -261,43 +365,49 @@
               <div class="map-controls">
                 <v-btn
                   v-if="selectedTask && hasCurrentLocation(selectedTask)"
-                  @click="centerOnCurrentLocation"
                   icon
                   variant="text"
                   size="small"
                   class="mr-2"
+                  @click="centerOnCurrentLocation"
                 >
                   <v-icon>mdi-crosshairs-gps</v-icon>
-                  <v-tooltip activator="parent">Center on Current Location</v-tooltip>
+                  <v-tooltip activator="parent">
+                    Center on Current Location
+                  </v-tooltip>
                 </v-btn>
                 <v-btn
                   v-if="selectedTask && hasDestination(selectedTask)"
-                  @click="centerOnDestination"
                   icon
                   variant="text"
                   size="small"
                   class="mr-2"
+                  @click="centerOnDestination"
                 >
                   <v-icon>mdi-map-marker</v-icon>
-                  <v-tooltip activator="parent">Center on Destination</v-tooltip>
+                  <v-tooltip activator="parent">
+                    Center on Destination
+                  </v-tooltip>
                 </v-btn>
                 <v-btn
                   v-if="selectedTask && hasCurrentLocation(selectedTask) && hasDestination(selectedTask)"
-                  @click="fitBothMarkers"
                   icon
                   variant="text"
                   size="small"
                   class="mr-2"
+                  @click="fitBothMarkers"
                 >
                   <v-icon>mdi-fit-to-screen</v-icon>
-                  <v-tooltip activator="parent">Fit Both Locations</v-tooltip>
+                  <v-tooltip activator="parent">
+                    Fit Both Locations
+                  </v-tooltip>
                 </v-btn>
                 <v-btn
-                  @click="toggleMapType"
                   icon
                   variant="text"
                   size="small"
                   class="mr-2"
+                  @click="toggleMapType"
                 >
                   <v-icon>{{ mapType === 'roadmap' ? 'mdi-satellite-variant' : 'mdi-road-variant' }}</v-icon>
                   <v-tooltip activator="parent">
@@ -305,10 +415,10 @@
                   </v-tooltip>
                 </v-btn>
                 <v-btn
-                  @click="toggleDrawingMode"
                   icon
                   variant="text"
                   size="small"
+                  @click="toggleDrawingMode"
                 >
                   <v-icon>{{ drawingMode ? 'mdi-pencil-off' : 'mdi-pencil' }}</v-icon>
                   <v-tooltip activator="parent">
@@ -330,10 +440,10 @@
                   <div class="d-flex align-center justify-space-between">
                     <span class="text-subtitle-1 font-weight-bold">Task Details</span>
                     <v-btn
-                      @click="selectedTask = null"
                       icon
                       variant="text"
                       size="small"
+                      @click="selectedTask = null"
                     >
                       <v-icon>mdi-close</v-icon>
                     </v-btn>
@@ -344,7 +454,10 @@
                 
                 <v-card-text class="pa-3">
                   <v-row dense>
-                    <v-col cols="12" md="6">
+                    <v-col
+                      cols="12"
+                      md="6"
+                    >
                       <div class="detail-item mb-2">
                         <span class="detail-label">Title:</span>
                         <span class="detail-value font-weight-medium">{{ selectedTask.title }}</span>
@@ -374,23 +487,38 @@
                         <span class="detail-value font-weight-medium">{{ formatDistance(selectedTask.distanceKm) }}</span>
                       </div>
                     </v-col>
-                    <v-col cols="12" md="6">
+                    <v-col
+                      cols="12"
+                      md="6"
+                    >
                       <!-- Current Location -->
                       <div class="detail-item mb-2">
                         <span class="detail-label">Current Location:</span>
-                        <span class="detail-value font-mono" v-if="hasCurrentLocation(selectedTask)">
+                        <span
+                          v-if="hasCurrentLocation(selectedTask)"
+                          class="detail-value font-mono"
+                        >
                           {{ formatCoordinate(selectedTask.currentLat) }}, {{ formatCoordinate(selectedTask.currentLng) }}
                         </span>
-                        <span class="detail-value text-warning" v-else>Not Available</span>
+                        <span
+                          v-else
+                          class="detail-value text-warning"
+                        >Not Available</span>
                       </div>
                       
                       <!-- Destination -->
                       <div class="detail-item mb-2">
                         <span class="detail-label">Destination:</span>
-                        <span class="detail-value font-mono" v-if="hasDestination(selectedTask)">
+                        <span
+                          v-if="hasDestination(selectedTask)"
+                          class="detail-value font-mono"
+                        >
                           {{ formatCoordinate(selectedTask.lat) }}, {{ formatCoordinate(selectedTask.lng) }}
                         </span>
-                        <span class="detail-value text-warning" v-else>Not Available</span>
+                        <span
+                          v-else
+                          class="detail-value text-warning"
+                        >Not Available</span>
                       </div>
                     </v-col>
                   </v-row>

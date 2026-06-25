@@ -3,28 +3,38 @@
     <v-btn
       color="primary"
       :loading="isDownloading"
-      @click="startDownload"
       class="download-btn"
       variant="text"
       size="large"
       title="Download Excel"
+      @click="startDownload"
     >
-      <v-icon class="mr-1">mdi-microsoft-excel</v-icon>
+      <v-icon class="mr-1">
+        mdi-microsoft-excel
+      </v-icon>
       Excel
     </v-btn>
 
-    <v-dialog v-model="showProgressDialog" persistent max-width="400">
+    <v-dialog
+      v-model="showProgressDialog"
+      persistent
+      max-width="400"
+    >
       <v-card>
-        <v-card-title class="text-h6">Generating Excel</v-card-title>
+        <v-card-title class="text-h6">
+          Generating Excel
+        </v-card-title>
         <v-card-text>
-          <p class="mb-2">{{ progressMessage }}</p>
+          <p class="mb-2">
+            {{ progressMessage }}
+          </p>
           <v-progress-linear
             :value="progressPercentage"
             height="25"
             color="primary"
             striped
           >
-            <template v-slot:default>
+            <template #default>
               <strong>{{ progressPercentage }}%</strong>
             </template>
           </v-progress-linear>

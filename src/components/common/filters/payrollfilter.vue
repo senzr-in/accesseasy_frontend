@@ -17,15 +17,26 @@
       :class="{ collapsed: !isFilterVisible }"
     >
       <div class="filter-content">
-        <div v-if="error" class="error-message">
+        <div
+          v-if="error"
+          class="error-message"
+        >
           <svg
             class="error-icon"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
           >
-            <circle cx="12" cy="12" r="10" stroke-width="2" />
-            <path d="M12 8v4m0 4h.01" stroke-width="2" />
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+              stroke-width="2"
+            />
+            <path
+              d="M12 8v4m0 4h.01"
+              stroke-width="2"
+            />
           </svg>
           {{ error }}
         </div>
@@ -43,7 +54,7 @@
                 fill="none"
                 stroke="currentColor"
               >
-                <g v-html="getIconSvg(filter.key, filter.type)"></g>
+                <g v-html="getIconSvg(filter.key, filter.type)" />
               </svg>
               {{ filter.label }}
             </label>
@@ -53,18 +64,20 @@
               v-if="filter.type === 'month'"
               type="month"
               :value="localFilters[filter.key]"
-              @change="handleMonthChange($event.target.value)"
               class="filter-input"
-            />
+              @change="handleMonthChange($event.target.value)"
+            >
 
             <!-- Organization Select -->
             <select
               v-else-if="filter.key === 'organization'"
               :value="localFilters[filter.key]"
-              @change="handleInputChange(filter.key, $event.target.value)"
               class="filter-input"
+              @change="handleInputChange(filter.key, $event.target.value)"
             >
-              <option value="">All Organizations</option>
+              <option value="">
+                All Organizations
+              </option>
               <option
                 v-for="org in organizations"
                 :key="org.id"
@@ -78,10 +91,12 @@
             <select
               v-else-if="filter.key === 'branch'"
               :value="localFilters[filter.key]"
-              @change="handleInputChange(filter.key, $event.target.value)"
               class="filter-input"
+              @change="handleInputChange(filter.key, $event.target.value)"
             >
-              <option value="">All Branches</option>
+              <option value="">
+                All Branches
+              </option>
               <option
                 v-for="branch in branches"
                 :key="branch.id"
@@ -95,10 +110,12 @@
             <select
               v-else-if="filter.key === 'department'"
               :value="localFilters[filter.key]"
-              @change="handleInputChange(filter.key, $event.target.value)"
               class="filter-input"
+              @change="handleInputChange(filter.key, $event.target.value)"
             >
-              <option value="">All Departments</option>
+              <option value="">
+                All Departments
+              </option>
               <option
                 v-for="dept in departments"
                 :key="dept.id"
@@ -115,11 +132,13 @@
             >
               <select
                 :value="localFilters[filter.key]"
-                @change="handleAttendanceCycleChange($event.target.value)"
                 class="filter-input"
                 :disabled="isLoadingCycles"
+                @change="handleAttendanceCycleChange($event.target.value)"
               >
-                <option value="">Select Attendance Cycle</option>
+                <option value="">
+                  Select Attendance Cycle
+                </option>
                 <option
                   v-for="cycle in attendanceCycles"
                   :key="cycle.cycleId"
@@ -130,7 +149,10 @@
               </select>
 
               <!-- Loading indicator for cycles -->
-              <div v-if="isLoadingCycles" class="loading-indicator">
+              <div
+                v-if="isLoadingCycles"
+                class="loading-indicator"
+              >
                 Loading attendance cycles...
               </div>
 
@@ -159,10 +181,12 @@
             <select
               v-else-if="filter.key === 'cycleType'"
               :value="localFilters[filter.key]"
-              @change="handleInputChange(filter.key, $event.target.value)"
               class="filter-input"
+              @change="handleInputChange(filter.key, $event.target.value)"
             >
-              <option value="">All Cycle Types</option>
+              <option value="">
+                All Cycle Types
+              </option>
               <option
                 v-for="type in cycleTypeOptions"
                 :key="type.value"
@@ -176,10 +200,12 @@
             <select
               v-else-if="filter.key === 'status'"
               :value="localFilters[filter.key]"
-              @change="handleInputChange(filter.key, $event.target.value)"
               class="filter-input"
+              @change="handleInputChange(filter.key, $event.target.value)"
             >
-              <option value="">All Statuses</option>
+              <option value="">
+                All Statuses
+              </option>
               <option
                 v-for="status in statusOptions"
                 :key="status"
@@ -193,10 +219,12 @@
             <select
               v-else-if="filter.key === 'mode'"
               :value="localFilters[filter.key]"
-              @change="handleInputChange(filter.key, $event.target.value)"
               class="filter-input"
+              @change="handleInputChange(filter.key, $event.target.value)"
             >
-              <option value="">All Modes</option>
+              <option value="">
+                All Modes
+              </option>
               <option
                 v-for="option in modeOptions"
                 :key="option.value"
@@ -210,10 +238,12 @@
             <select
               v-else-if="filter.key === 'attendance'"
               :value="localFilters[filter.key]"
-              @change="handleInputChange(filter.key, $event.target.value)"
               class="filter-input"
+              @change="handleInputChange(filter.key, $event.target.value)"
             >
-              <option value="">All Attendance Types</option>
+              <option value="">
+                All Attendance Types
+              </option>
               <option
                 v-for="attendance in attendanceOptions"
                 :key="attendance"
@@ -221,10 +251,10 @@
               >
                 {{
                   attendance.charAt(0).toUpperCase() +
-                  attendance
-                    .slice(1)
-                    .replace(/([A-Z])/g, " $1")
-                    .trim()
+                    attendance
+                      .slice(1)
+                      .replace(/([A-Z])/g, " $1")
+                      .trim()
                 }}
               </option>
             </select>
@@ -233,8 +263,8 @@
             <select
               v-else-if="filter.type === 'select' && filter.options"
               :value="localFilters[filter.key]"
-              @change="handleInputChange(filter.key, $event.target.value)"
               class="filter-input"
+              @change="handleInputChange(filter.key, $event.target.value)"
             >
               <option value="">
                 {{ filter.placeholder || `All ${filter.label}` }}
@@ -253,29 +283,29 @@
               v-else-if="filter.type === 'text'"
               type="text"
               :value="localFilters[filter.key]"
-              @input="handleInputChange(filter.key, $event.target.value)"
               :placeholder="filter.placeholder || ''"
               class="filter-input"
-            />
+              @input="handleInputChange(filter.key, $event.target.value)"
+            >
 
             <!-- Date Input -->
             <input
               v-else-if="filter.type === 'date'"
               type="date"
               :value="localFilters[filter.key]"
-              @change="handleInputChange(filter.key, $event.target.value)"
               class="filter-input"
-            />
+              @change="handleInputChange(filter.key, $event.target.value)"
+            >
 
             <!-- Number Input -->
             <input
               v-else-if="filter.type === 'number'"
               type="number"
               :value="localFilters[filter.key]"
-              @input="handleInputChange(filter.key, $event.target.value)"
               :placeholder="filter.placeholder || ''"
               class="filter-input"
-            />
+              @input="handleInputChange(filter.key, $event.target.value)"
+            >
           </div>
         </div>
       </div>

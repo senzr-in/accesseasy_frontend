@@ -1,41 +1,51 @@
 <template>
   <div class="employee-container">
-    <div class="main-content" :class="{ 'with-filter': showFilters }">
+    <div
+      class="main-content"
+      :class="{ 'with-filter': showFilters }"
+    >
       <!-- Delete Confirmation Dialog -->
       <ConfirmDeleteModal
         :show="deleteDialog"
         title="Delete Confirmation"
-        :confirmMessage="`Are you sure you want to delete ${selected.length} ${selected.length === 1 ? 'department' : 'departments'}?`"
-        itemLabel="Department(s)"
-        :itemName="
+        :confirm-message="`Are you sure you want to delete ${selected.length} ${selected.length === 1 ? 'department' : 'departments'}?`"
+        item-label="Department(s)"
+        :item-name="
           selected.length === 1
             ? selected[0]?.departmentName
             : `${selected.length} departments`
         "
         description="This action cannot be undone."
-        cancelText="Cancel"
-        confirmText="Delete"
-        deletingText="Deleting..."
+        cancel-text="Cancel"
+        confirm-text="Delete"
+        deleting-text="Deleting..."
         :deleting="deleting"
         @close="closeDelete"
         @confirm="confirmDelete"
       />
 
       <!-- Add/Edit Department Dialog -->
-      <v-dialog v-model="departmentDialog" max-width="400px" persistent>
+      <v-dialog
+        v-model="departmentDialog"
+        max-width="400px"
+        persistent
+      >
         <v-card>
           <v-card-title class="text-h6 d-flex justify-center py-4">
             {{ isEditing ? "Edit Department" : "Add Department" }}
           </v-card-title>
           <v-card-text>
-            <v-form ref="departmentForm" v-model="formValid">
+            <v-form
+              ref="departmentForm"
+              v-model="formValid"
+            >
               <v-text-field
                 v-model="departmentFormData.departmentName"
                 label="Department Name"
                 :rules="[rules.required]"
                 variant="outlined"
                 density="compact"
-              ></v-text-field>
+              />
 
               <!-- <v-col cols="12" md="6"> -->
               <!-- <v-text-field
@@ -74,7 +84,7 @@
             </v-form>
           </v-card-text>
           <v-card-actions>
-            <v-spacer></v-spacer>
+            <v-spacer />
             <v-btn
               color="grey-darken-1"
               variant="text"
@@ -85,9 +95,9 @@
             <v-btn
               color="primary"
               variant="text"
-              @click="saveDepartment"
               :loading="saving"
               :disabled="!formValid"
+              @click="saveDepartment"
             >
               {{ isEditing ? "Update" : "Save" }}
             </v-btn>
@@ -99,7 +109,7 @@
         :search-query="search"
         :has-error="false"
         search-placeholder="Search departments..."
-        @update:searchQuery="updateSearchQuery"
+        @update:search-query="updateSearchQuery"
       >
         <!-- Toolbar actions slot -->
         <template #toolbar-actions>
@@ -107,7 +117,7 @@
             <BaseButton
               variant="primary"
               text="Add Department"
-              :leftIcon="Plus"
+              :left-icon="Plus"
               width="100px"
               @click="openAddDialog"
             />
@@ -138,11 +148,11 @@
             :selected-items="selected"
             :sort-by="currentSortBy"
             :sort-direction="currentSortDirection"
-            @update:selectedItems="updateSelectedItems"
-            @update:sortBy="updateSortBy"
-            @update:sortDirection="updateSortDirection"
+            @update:selected-items="updateSelectedItems"
+            @update:sort-by="updateSortBy"
+            @update:sort-direction="updateSortDirection"
             @sort="handleSort"
-            @rowClick="handleRowClick"
+            @row-click="handleRowClick"
           >
             <!-- Custom cell for organization name -->
             <template #cell-orgName="{ item, value }">

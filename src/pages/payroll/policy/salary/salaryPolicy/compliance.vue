@@ -1,11 +1,24 @@
 <template>
-  <v-card flat class="compliance-card">
+  <v-card
+    flat
+    class="compliance-card"
+  >
     <v-card-text>
-      <h3 class="text-h5 mb-6">Compliances</h3>
+      <h3 class="text-h5 mb-6">
+        Compliances
+      </h3>
 
-      <v-tabs v-model="activeTab" color="black" class="mb-6">
-        <v-tab value="employer">Employer Contributions</v-tab>
-        <v-tab value="employee">Employee Contributions</v-tab>
+      <v-tabs
+        v-model="activeTab"
+        color="black"
+        class="mb-6"
+      >
+        <v-tab value="employer">
+          Employer Contributions
+        </v-tab>
+        <v-tab value="employee">
+          Employee Contributions
+        </v-tab>
       </v-tabs>
 
       <v-window v-model="activeTab">
@@ -13,12 +26,16 @@
         <v-window-item value="employer">
           <div class="d-flex flex-wrap gap-6">
             <!-- Employer PF Contribution -->
-            <v-card width="400" variant="outlined" class="flex-grow-1">
+            <v-card
+              width="400"
+              variant="outlined"
+              class="flex-grow-1"
+            >
               <v-card-text>
                 <div class="d-flex justify-space-between align-center mb-4">
                   <span class="text-h6">Employer PF Contribution</span>
                   <v-tooltip location="bottom">
-                    <template v-slot:activator="{ props }">
+                    <template #activator="{ props }">
                       <v-btn
                         v-bind="props"
                         icon="mdi-information"
@@ -26,7 +43,7 @@
                         size="small"
                         color="grey"
                         @click="showInfoDialog('pf')"
-                      ></v-btn>
+                      />
                     </template>
                     <span>PF contribution information</span>
                   </v-tooltip>
@@ -59,12 +76,16 @@
             </v-card>
 
             <!-- Employer ESI Contribution -->
-            <v-card width="400" variant="outlined" class="flex-grow-1">
+            <v-card
+              width="400"
+              variant="outlined"
+              class="flex-grow-1"
+            >
               <v-card-text>
                 <div class="d-flex justify-space-between align-center mb-4">
                   <span class="text-h6">Employer ESI Contribution</span>
                   <v-tooltip location="bottom">
-                    <template v-slot:activator="{ props }">
+                    <template #activator="{ props }">
                       <v-btn
                         v-bind="props"
                         icon="mdi-information"
@@ -72,7 +93,7 @@
                         size="small"
                         color="grey"
                         @click="showInfoDialog('esi')"
-                      ></v-btn>
+                      />
                     </template>
                     <span>ESI contribution information</span>
                   </v-tooltip>
@@ -110,12 +131,16 @@
         <v-window-item value="employee">
           <div class="d-flex flex-wrap gap-6">
             <!-- Employee PF Contribution -->
-            <v-card width="400" variant="outlined" class="flex-grow-1">
+            <v-card
+              width="400"
+              variant="outlined"
+              class="flex-grow-1"
+            >
               <v-card-text>
                 <div class="d-flex justify-space-between align-center mb-4">
                   <span class="text-h6">Employee PF Contribution</span>
                   <v-tooltip location="bottom">
-                    <template v-slot:activator="{ props }">
+                    <template #activator="{ props }">
                       <v-btn
                         v-bind="props"
                         icon="mdi-information"
@@ -123,7 +148,7 @@
                         size="small"
                         color="grey"
                         @click="showInfoDialog('employeePf')"
-                      ></v-btn>
+                      />
                     </template>
                     <span>Employee PF contribution information</span>
                   </v-tooltip>
@@ -156,12 +181,16 @@
             </v-card>
 
             <!-- Employee ESI Contribution -->
-            <v-card width="400" variant="outlined" class="flex-grow-1">
+            <v-card
+              width="400"
+              variant="outlined"
+              class="flex-grow-1"
+            >
               <v-card-text>
                 <div class="d-flex justify-space-between align-center mb-4">
                   <span class="text-h6">Employee ESI Contribution</span>
                   <v-tooltip location="bottom">
-                    <template v-slot:activator="{ props }">
+                    <template #activator="{ props }">
                       <v-btn
                         v-bind="props"
                         icon="mdi-information"
@@ -169,7 +198,7 @@
                         size="small"
                         color="grey"
                         @click="showInfoDialog('employeeEsi')"
-                      ></v-btn>
+                      />
                     </template>
                     <span>Employee ESI contribution information</span>
                   </v-tooltip>
@@ -205,7 +234,10 @@
       </v-window>
 
       <!-- Add Component Dialog -->
-      <v-dialog v-model="showAddComponentDialog" max-width="500">
+      <v-dialog
+        v-model="showAddComponentDialog"
+        max-width="500"
+      >
         <v-card>
           <v-card-title>Add Component</v-card-title>
           <v-card-text>
@@ -215,10 +247,10 @@
               label="Select Component"
               variant="outlined"
               density="comfortable"
-            ></v-select>
+            />
           </v-card-text>
           <v-card-actions>
-            <v-spacer></v-spacer>
+            <v-spacer />
             <v-btn
               color="white"
               style="background-color: black"
@@ -230,8 +262,8 @@
             <v-btn
               style="background-color: black"
               color="white"
-              @click="addComponent"
               :disabled="!selectedComponent"
+              @click="addComponent"
             >
               Add
             </v-btn>
@@ -240,12 +272,15 @@
       </v-dialog>
 
       <!-- Info Dialog -->
-      <v-dialog v-model="showInfoDialog" max-width="500">
+      <v-dialog
+        v-model="showInfoDialog"
+        max-width="500"
+      >
         <v-card>
           <v-card-title>{{ infoDialogTitle }}</v-card-title>
           <v-card-text>{{ infoDialogContent }}</v-card-text>
           <v-card-actions>
-            <v-spacer></v-spacer>
+            <v-spacer />
             <v-btn
               style="background-color: black"
               color="white"

@@ -2,7 +2,10 @@
   <div class="attendance-dashboard">
     <!-- Show main table view when showMonthlyReport is false -->
     <template v-if="!showMonthlyReport">
-      <v-container fluid class="pa-6">
+      <v-container
+        fluid
+        class="pa-6"
+      >
         <div
           class="d-flex flex-column flex-md-row justify-space-between align-center mb-6"
         >
@@ -16,11 +19,11 @@
               density="comfortable"
               dense
               class="search-field mr-2"
-            ></v-text-field>
+            />
             <v-btn
               color="primary"
-              @click="viewSelectedEmployees"
               :disabled="selected.length === 0"
+              @click="viewSelectedEmployees"
             >
               EDIT Selected ({{ selected.length }})
             </v-btn>
@@ -40,22 +43,28 @@
             class="elevation-1"
             @click:row="handleRowClick"
           >
-            <template v-slot:item.name="{ item }">
+            <template #item.name="{ item }">
               <div class="d-flex align-center">
-                <v-avatar :color="getAvatarColor(item)" size="36" class="mr-2">
+                <v-avatar
+                  :color="getAvatarColor(item)"
+                  size="36"
+                  class="mr-2"
+                >
                   <span class="text-white text-subtitle-2">{{
                     getInitials(item)
                   }}</span>
                 </v-avatar>
-                <div class="font-weight-medium">{{ item.name }}</div>
+                <div class="font-weight-medium">
+                  {{ item.name }}
+                </div>
               </div>
             </template>
 
-            <template v-slot:item.employeeId="{ item }">
+            <template #item.employeeId="{ item }">
               {{ item.employeeId }}
             </template>
 
-            <template v-slot:item.department="{ item }">
+            <template #item.department="{ item }">
               {{ item.department }}
             </template>
           </v-data-table>
@@ -65,7 +74,10 @@
 
     <!-- Show monthly report view when showMonthlyReport is true -->
     <template v-else>
-      <v-container fluid class="pa-6">
+      <v-container
+        fluid
+        class="pa-6"
+      >
         <div class="d-flex justify-space-between align-center">
           <v-btn
             color="primary"
@@ -79,9 +91,9 @@
 
         <UserAttendanceReport
           v-if="selectedUsers.length > 0"
-          :selectedUsers="selectedUsers"
-          :attendanceData="selectedUsers"
-          :selectedUserIds="selectedUserIds"
+          :selected-users="selectedUsers"
+          :attendance-data="selectedUsers"
+          :selected-user-ids="selectedUserIds"
         />
       </v-container>
     </template>

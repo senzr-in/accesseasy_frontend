@@ -8,7 +8,9 @@
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-check-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-check-circle
+        </v-icon>
         {{ successMessage }}
       </div>
     </v-snackbar>
@@ -20,7 +22,9 @@
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-alert-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-alert-circle
+        </v-icon>
         {{ errorMessage }}
       </div>
     </v-snackbar>
@@ -28,8 +32,11 @@
     <!-- Breadcrumb and Action Buttons -->
     <div class="form-heade">
       <div class="header-conten">
-        <v-breadcrumbs :items="breadcrumbs" class="pa-0">
-          <template v-slot:prepend>
+        <v-breadcrumbs
+          :items="breadcrumbs"
+          class="pa-0"
+        >
+          <template #prepend>
             <!-- <v-btn
               icon
               variant="text"
@@ -39,11 +46,11 @@
               <v-icon>mdi-arrow-left</v-icon>
             </v-btn> -->
           </template>
-          <template v-slot:item="{ item }">
+          <template #item="{ item }">
             <v-breadcrumbs-item
-              @click="$router.push('/employee-details')"
               :disabled="item.disabled"
               class="breadcrum"
+              @click="$router.push('/employee-details')"
             >
               {{ item.text }}
             </v-breadcrumbs-item>
@@ -51,14 +58,18 @@
         </v-breadcrumbs>
       </div>
       <div class="action-buttons">
-        <v-btn color="error" variant="text" @click="$emit('cancel')"
-          >CANCEL</v-btn
+        <v-btn
+          color="error"
+          variant="text"
+          @click="$emit('cancel')"
         >
+          CANCEL
+        </v-btn>
         <BaseButton
           color="black"
-          @click="saveEmployee"
           :text="`SAVE`"
-        ></BaseButton>
+          @click="saveEmployee"
+        />
       </div>
     </div>
 
@@ -110,22 +121,34 @@
 
     <!-- Main Content Area -->
     <div class="form-content">
-      <v-form ref="form" v-model="valid" @submit.prevent="saveEmployee">
+      <v-form
+        ref="form"
+        v-model="valid"
+        @submit.prevent="saveEmployee"
+      >
         <!-- Personal Details Section -->
-        <div v-show="currentTab === 'personal'" class="form-section">
-          <div v-if="loadingStates.personal" class="tab-loading-container">
+        <div
+          v-show="currentTab === 'personal'"
+          class="form-section"
+        >
+          <div
+            v-if="loadingStates.personal"
+            class="tab-loading-container"
+          >
             <v-progress-circular
               indeterminate
               color="#059367"
               size="32"
-            ></v-progress-circular>
+            />
             <p>Loading personal details...</p>
           </div>
           <div v-else>
             <!-- Employee Details Card -->
             <div class="detail-card">
               <div class="card-header">
-                <h3 class="section-title">Employee Details</h3>
+                <h3 class="section-title">
+                  Employee Details
+                </h3>
               </div>
               <div class="card-body">
                 <!-- Top Row: Avatar + Fields -->
@@ -138,29 +161,35 @@
                           v-if="avatarImage"
                           :src="avatarImage"
                           alt="Avatar"
-                        ></v-img>
-                        <div v-else class="avatar-placeholder-large">
-                          <v-icon size="120" color="grey lighten-1"
-                            >mdi-account-tie</v-icon
+                        />
+                        <div
+                          v-else
+                          class="avatar-placeholder-large"
+                        >
+                          <v-icon
+                            size="120"
+                            color="grey lighten-1"
                           >
+                            mdi-account-tie
+                          </v-icon>
                         </div>
                       </div>
                       <v-btn
                         icon
                         class="edit-avatar-btn-large"
-                        @click="triggerFileInput"
                         color="white"
+                        @click="triggerFileInput"
                       >
                         <v-icon>mdi-camera</v-icon>
                       </v-btn>
                     </div>
                     <input
-                      type="file"
                       ref="fileInput"
+                      type="file"
                       style="display: none"
                       accept="image/*"
                       @change="handleAvatarChange"
-                    />
+                    >
                   </div>
                   <!-- Fields Container -->
                   <div class="fields-container">
@@ -174,10 +203,10 @@
                           :error-messages="getFieldErrorMessage('firstName')"
                           variant="outlined"
                           density="comfortable"
+                          hide-details="auto"
                           @blur="markFieldAsTouched('firstName')"
                           @input="capitalizeFirstLetterEachWord('firstName')"
-                          hide-details="auto"
-                        ></v-text-field>
+                        />
                       </div>
                       <div class="field-group">
                         <label>Middle Name</label>
@@ -185,9 +214,9 @@
                           v-model="formData.middleName"
                           variant="outlined"
                           density="comfortable"
-                          @input="capitalizeFirstLetterEachWord('middleName')"
                           hide-details="auto"
-                        ></v-text-field>
+                          @input="capitalizeFirstLetterEachWord('middleName')"
+                        />
                       </div>
                       <div class="field-group">
                         <label>Last Name</label>
@@ -195,9 +224,9 @@
                           v-model="formData.lastName"
                           variant="outlined"
                           density="comfortable"
-                          @input="capitalizeFirstLetterEachWord('lastName')"
                           hide-details="auto"
-                        ></v-text-field>
+                          @input="capitalizeFirstLetterEachWord('lastName')"
+                        />
                       </div>
                       <div class="field-group">
                         <label>Role *</label>
@@ -209,9 +238,9 @@
                           :error-messages="getFieldErrorMessage('role')"
                           variant="outlined"
                           density="comfortable"
-                          @blur="markFieldAsTouched('role')"
                           hide-details="auto"
-                        ></v-select>
+                          @blur="markFieldAsTouched('role')"
+                        />
                       </div>
                     </div>
                     <!-- Employee ID, Designation, Phone, Email Row -->
@@ -224,9 +253,9 @@
                           :error-messages="getFieldErrorMessage('employeeId')"
                           variant="outlined"
                           density="comfortable"
-                          @blur="markFieldAsTouched('employeeId')"
                           hide-details="auto"
-                        ></v-text-field>
+                          @blur="markFieldAsTouched('employeeId')"
+                        />
                       </div>
                       <div class="field-group">
                         <label>Designation</label>
@@ -234,9 +263,9 @@
                           v-model="formData.designation"
                           variant="outlined"
                           density="comfortable"
-                          @input="handleInputChange('designation')"
                           hide-details="auto"
-                        ></v-text-field>
+                          @input="handleInputChange('designation')"
+                        />
                       </div>
                       <div class="field-group">
                         <label>Phone</label>
@@ -246,9 +275,9 @@
                           :error-messages="phoneErrorMessage"
                           variant="outlined"
                           density="comfortable"
-                          @blur="validatePhone"
                           hide-details="auto"
-                        ></v-text-field>
+                          @blur="validatePhone"
+                        />
                       </div>
                       <div class="field-group">
                         <label>Email</label>
@@ -257,13 +286,13 @@
                           :error-messages="emailErrorMessage"
                           variant="outlined"
                           density="comfortable"
+                          hide-details="auto"
                           @blur="validateEmail"
                           @input="
                             clearEmailError();
                             toLowerCase('email');
                           "
-                          hide-details="auto"
-                        ></v-text-field>
+                        />
                       </div>
                     </div>
                   </div>
@@ -274,7 +303,9 @@
             <!-- Details Card -->
             <div class="detail-card">
               <div class="card-header">
-                <h3 class="section-title">Details</h3>
+                <h3 class="section-title">
+                  Details
+                </h3>
               </div>
               <div class="card-body">
                 <!-- Details Row 1: Blood Group, Marital Status, DOB, Gender -->
@@ -297,7 +328,7 @@
                         variant="outlined"
                         density="comfortable"
                         hide-details="auto"
-                      ></v-select>
+                      />
                     </div>
                     <div class="field-group">
                       <label>Marital Status</label>
@@ -307,7 +338,7 @@
                         variant="outlined"
                         density="comfortable"
                         hide-details="auto"
-                      ></v-select>
+                      />
                     </div>
                   </div>
                   <div class="field-group dob-gender-column">
@@ -321,10 +352,10 @@
                         :error-messages="getFieldErrorMessage('DOB')"
                         :max="maxDate"
                         :min="minDate"
+                        hide-details="auto"
                         @input="handleInputChange('assignedUser.DOB')"
                         @blur="markFieldAsTouched('DOB')"
-                        hide-details="auto"
-                      ></v-text-field>
+                      />
                     </div>
                     <div class="sub-field">
                       <label>Gender *</label>
@@ -335,9 +366,9 @@
                         :error-messages="getFieldErrorMessage('gender')"
                         variant="outlined"
                         density="comfortable"
-                        @blur="markFieldAsTouched('gender')"
                         hide-details="auto"
-                      ></v-select>
+                        @blur="markFieldAsTouched('gender')"
+                      />
                     </div>
                   </div>
                   <div class="field-group address-field">
@@ -349,7 +380,7 @@
                       rows="3"
                       auto-grow
                       hide-details="auto"
-                    ></v-textarea>
+                    />
                   </div>
                   <div class="field-group address-field">
                     <label>Communication Address</label>
@@ -360,7 +391,7 @@
                       rows="3"
                       auto-grow
                       hide-details="auto"
-                    ></v-textarea>
+                    />
                   </div>
                 </div>
               </div>
@@ -369,7 +400,9 @@
             <!-- Company Details Card -->
             <div class="detail-card">
               <div class="card-header">
-                <h3 class="section-title">Company Details</h3>
+                <h3 class="section-title">
+                  Company Details
+                </h3>
               </div>
               <div class="card-body">
                 <!-- Company Row 1: Organization, Date of Joining, Attendance Cycle -->
@@ -383,9 +416,9 @@
                       item-value="id"
                       variant="outlined"
                       density="comfortable"
-                      @update:model-value="handleBranchLocationChange"
                       hide-details="auto"
-                    ></v-select>
+                      @update:model-value="handleBranchLocationChange"
+                    />
                   </div>
                   <div class="field-group">
                     <label>Department</label>
@@ -397,9 +430,9 @@
                       :error-messages="getFieldErrorMessage('department')"
                       variant="outlined"
                       density="comfortable"
-                      @update:model-value="handleDepartmentChange"
                       hide-details="auto"
-                    ></v-select>
+                      @update:model-value="handleDepartmentChange"
+                    />
                   </div>
                   <div class="field-group">
                     <label>Attendance Cycle</label>
@@ -411,7 +444,7 @@
                       variant="outlined"
                       density="comfortable"
                       hide-details="auto"
-                    ></v-select>
+                    />
                   </div>
                 </div>
 
@@ -429,7 +462,7 @@
                       clearable
                       hide-details="auto"
                     >
-                      <template v-slot:prepend-item>
+                      <template #prepend-item>
                         <div class="approver-search">
                           <v-text-field
                             v-model="searchApprover"
@@ -439,7 +472,7 @@
                             prepend-inner-icon="mdi-magnify"
                             hide-details
                             @input="debounceFilterApprover"
-                          ></v-text-field>
+                          />
                           <v-btn
                             variant="text"
                             density="compact"
@@ -451,7 +484,7 @@
                             @click.stop="
                               showApproverFilters = !showApproverFilters
                             "
-                          ></v-btn>
+                          />
                         </div>
                         <v-expand-transition>
                           <div
@@ -470,11 +503,11 @@
                               density="compact"
                               variant="outlined"
                               hide-details
-                              @update:modelValue="filterApprovers"
-                            ></v-select>
+                              @update:model-value="filterApprovers"
+                            />
                           </div>
                         </v-expand-transition>
-                        <v-divider class="mt-2"></v-divider>
+                        <v-divider class="mt-2" />
                       </template>
                     </v-select>
                   </div>
@@ -486,7 +519,7 @@
                       variant="outlined"
                       density="comfortable"
                       hide-details="auto"
-                    ></v-text-field>
+                    />
                   </div>
 
                   <div class="field-group">
@@ -497,7 +530,7 @@
                       variant="outlined"
                       density="comfortable"
                       hide-details="auto"
-                    ></v-text-field>
+                    />
                   </div>
                 </div>
               </div>
@@ -570,21 +603,30 @@
         </div> -->
 
         <!-- Company Details Section -->
-        <div v-show="currentTab === 'company'" class="form-section">
+        <div
+          v-show="currentTab === 'company'"
+          class="form-section"
+        >
           <h3>Company Details</h3>
-          <br />
+          <br>
           <v-row>
-            <v-col cols="12" md="6">
+            <v-col
+              cols="12"
+              md="6"
+            >
               <v-text-field
                 v-model="formData.designation"
                 label="Designation"
                 variant="outlined"
                 density="comfortable"
                 @input="handleInputChange('designation')"
-              ></v-text-field>
+              />
             </v-col>
             <!-- Department -->
-            <v-col cols="12" md="6">
+            <v-col
+              cols="12"
+              md="6"
+            >
               <v-select
                 v-model="formData.department"
                 :items="departmentOptions"
@@ -595,10 +637,13 @@
                 variant="outlined"
                 density="comfortable"
                 @update:model-value="handleDepartmentChange"
-              ></v-select>
+              />
             </v-col>
             <!-- Branch Location -->
-            <v-col cols="12" md="6">
+            <v-col
+              cols="12"
+              md="6"
+            >
               <v-select
                 v-model="formData.branchLocation"
                 :items="locationOptions"
@@ -608,20 +653,26 @@
                 variant="outlined"
                 density="comfortable"
                 @update:model-value="handleBranchLocationChange"
-              ></v-select>
+              />
             </v-col>
             <!-- Date of Joining -->
-            <v-col cols="12" md="6">
+            <v-col
+              cols="12"
+              md="6"
+            >
               <v-text-field
                 v-model="formData.dateOfJoining"
                 label="Date of Joining"
                 type="date"
                 variant="outlined"
                 density="comfortable"
-              ></v-text-field>
+              />
             </v-col>
             <!-- Date of Leaving -->
-            <v-col cols="12" md="6">
+            <v-col
+              cols="12"
+              md="6"
+            >
               <v-select
                 v-model="formData.cycleType"
                 :items="cycleTypeOptions"
@@ -631,46 +682,55 @@
                 variant="outlined"
                 density="comfortable"
                 @update:model-value="handleCycleTypeChange"
-              ></v-select>
+              />
             </v-col>
 
             <v-col cols="12">
               <h3>PF and ESI Account</h3>
-              <br />
+              <br>
             </v-col>
 
-            <v-col cols="12" md="6">
+            <v-col
+              cols="12"
+              md="6"
+            >
               <v-text-field
                 v-model="formData.ESIAccountNumber"
                 type="number"
                 label="ESI Account Number"
                 variant="outlined"
                 density="comfortable"
-              ></v-text-field>
+              />
             </v-col>
-            <v-col cols="12" md="6">
+            <v-col
+              cols="12"
+              md="6"
+            >
               <v-text-field
                 v-model="formData.PFAccountNumber"
                 type="string"
                 label="UAN PF AccountNumber"
                 variant="outlined"
                 density="comfortable"
-              ></v-text-field>
+              />
             </v-col>
           </v-row>
         </div>
 
         <!-- Attendance Category Section -->
-        <div v-show="currentTab === 'attendanceCategory'" class="form-section">
+        <div
+          v-show="currentTab === 'attendanceCategory'"
+          class="form-section"
+        >
           <v-row>
             <v-col cols="12">
               <AttendanceSettingsEditor
                 v-model="formData.attendanceCategory"
                 :tenant-id="tenantId"
-                @update:workingHoursData="
+                @update:working-hours-data="
                   (data) => (formData.employeeWorkingHours = data)
                 "
-                @update:holidayIds="(ids) => (formData.employeeHolidays = ids)"
+                @update:holiday-ids="(ids) => (formData.employeeHolidays = ids)"
               />
             </v-col>
           </v-row>
@@ -706,13 +766,19 @@
         </div> -->
 
         <!-- Leave Policy Section -->
-        <div v-show="currentTab === 'LeavePolicy'" class="form-section">
-          <div v-if="loadingStates.LeavePolicy" class="tab-loading-container">
+        <div
+          v-show="currentTab === 'LeavePolicy'"
+          class="form-section"
+        >
+          <div
+            v-if="loadingStates.LeavePolicy"
+            class="tab-loading-container"
+          >
             <v-progress-circular
               indeterminate
               color="#059367"
               size="32"
-            ></v-progress-circular>
+            />
             <p>Loading leave policies...</p>
           </div>
           <div v-else>
@@ -743,7 +809,7 @@
                           hide-details
                           inset
                           @change="handleLeaveToggle(item)"
-                        ></v-switch>
+                        />
                       </template>
 
                       <template #cell-days="{ item }">
@@ -756,11 +822,14 @@
                             dense
                             outlined
                             hide-details
+                            label="Days"
                             @blur="saveLeaveEdit(item)"
                             @keyup.enter="saveLeaveEdit(item)"
-                            label="Days"
-                          ></v-text-field>
-                          <span v-else class="text-body-1">
+                          />
+                          <span
+                            v-else
+                            class="text-body-1"
+                          >
                             {{ item.leaveConfig?.days || 0 }}
                           </span>
                           <!-- <v-btn
@@ -789,7 +858,10 @@
                       </template>
 
                       <template #empty-state>
-                        <v-alert type="info" variant="tonal">
+                        <v-alert
+                          type="info"
+                          variant="tonal"
+                        >
                           No active leave policies found for the current year.
                         </v-alert>
                       </template>
@@ -873,7 +945,10 @@
           </v-row>
         </div> -->
         <!-- Access Management Section -->
-        <div v-show="currentTab === 'accessManagement'" class="form-section">
+        <div
+          v-show="currentTab === 'accessManagement'"
+          class="form-section"
+        >
           <div
             v-if="loadingStates.accessManagement"
             class="tab-loading-container"
@@ -882,7 +957,7 @@
               indeterminate
               color="#059367"
               size="32"
-            ></v-progress-circular>
+            />
             <p>Loading access management settings...</p>
           </div>
           <AccessManagement
@@ -896,21 +971,33 @@
         </div>
         <!-- App Access -->
 
-        <div v-show="currentTab === 'Appaccess'" class="form-section">
-          <div v-if="loadingStates.Appaccess" class="tab-loading-container">
+        <div
+          v-show="currentTab === 'Appaccess'"
+          class="form-section"
+        >
+          <div
+            v-if="loadingStates.Appaccess"
+            class="tab-loading-container"
+          >
             <v-progress-circular
               indeterminate
               color="#059367"
               size="32"
-            ></v-progress-circular>
+            />
             <p>Loading app access settings...</p>
           </div>
           <div v-else>
-            <v-card class="app-access-card mb-6 pa-6" elevation="0" outlined>
+            <v-card
+              class="app-access-card mb-6 pa-6"
+              elevation="0"
+              outlined
+            >
               <div class="d-flex justify-space-between align-start">
                 <div>
                   <div class="d-flex align-center mb-2">
-                    <h2 class="text-h6 font-weight-bold me-4">App Access</h2>
+                    <h2 class="text-h6 font-weight-bold me-4">
+                      App Access
+                    </h2>
                     <div class="d-flex align-center">
                       <!-- <span class="text-body-1 font-weight-medium me-2">
                         {{ formData.appAccess ? "Enabled" : "Disabled" }}
@@ -923,7 +1010,7 @@
                         class="app-access-switch"
                         :true-value="true"
                         :false-value="false"
-                      ></v-switch>
+                      />
                     </div>
                   </div>
                   <p class="text-body-2 text-grey-darken-1 mb-0">
@@ -935,29 +1022,40 @@
             </v-card>
 
             <!-- Attendance Mode Toggles -->
-            <v-card class="attendance-modes-card pa-6" elevation="0" outlined>
+            <v-card
+              class="attendance-modes-card pa-6"
+              elevation="0"
+              outlined
+            >
               <div class="mb-6">
-                <h2 class="text-h6 font-weight-bold mb-1">Attendance Modes</h2>
+                <h2 class="text-h6 font-weight-bold mb-1">
+                  Attendance Modes
+                </h2>
                 <p class="text-body-2 text-grey-darken-1">
                   Select the attendance tracking methods for this employee
                 </p>
               </div>
 
               <v-row>
-                <v-col cols="12" sm="6" md="3">
+                <v-col
+                  cols="12"
+                  sm="6"
+                  md="3"
+                >
                   <div class="attendance-option">
                     <div
                       class="attendance-icon-wrapper"
                       :class="formData.GeoAttendance ? 'enabled' : 'disabled'"
                     >
-                      <v-icon size="32" color="white"
-                        >mdi-crosshairs-gps</v-icon
+                      <v-icon
+                        size="32"
+                        color="white"
                       >
+                        mdi-crosshairs-gps
+                      </v-icon>
                     </div>
                     <div class="text-center mt-3 mb-2">
-                      <span class="text-body-1 font-weight-medium"
-                        >Geo Attendance</span
-                      >
+                      <span class="text-body-1 font-weight-medium">Geo Attendance</span>
                     </div>
                     <v-switch
                       v-model="formData.GeoAttendance"
@@ -967,24 +1065,29 @@
                       class="attendance-switch"
                       :true-value="true"
                       :false-value="false"
-                    ></v-switch>
+                    />
                   </div>
                 </v-col>
 
-                <v-col cols="12" sm="6" md="3">
+                <v-col
+                  cols="12"
+                  sm="6"
+                  md="3"
+                >
                   <div class="attendance-option">
                     <div
                       class="attendance-icon-wrapper"
                       :class="formData.faceAttendance ? 'enabled' : 'disabled'"
                     >
-                      <v-icon size="32" color="white"
-                        >mdi-account-circle</v-icon
+                      <v-icon
+                        size="32"
+                        color="white"
                       >
+                        mdi-account-circle
+                      </v-icon>
                     </div>
                     <div class="text-center mt-3 mb-2">
-                      <span class="text-body-1 font-weight-medium"
-                        >Face Attendance</span
-                      >
+                      <span class="text-body-1 font-weight-medium">Face Attendance</span>
                     </div>
                     <v-switch
                       v-model="formData.faceAttendance"
@@ -994,11 +1097,15 @@
                       class="attendance-switch"
                       :true-value="true"
                       :false-value="false"
-                    ></v-switch>
+                    />
                   </div>
                 </v-col>
 
-                <v-col cols="12" sm="6" md="3">
+                <v-col
+                  cols="12"
+                  sm="6"
+                  md="3"
+                >
                   <div class="attendance-option">
                     <div
                       class="attendance-icon-wrapper"
@@ -1006,12 +1113,15 @@
                         formData.selfieAttendance ? 'enabled' : 'disabled'
                       "
                     >
-                      <v-icon size="32" color="white">mdi-camera</v-icon>
+                      <v-icon
+                        size="32"
+                        color="white"
+                      >
+                        mdi-camera
+                      </v-icon>
                     </div>
                     <div class="text-center mt-3 mb-2">
-                      <span class="text-body-1 font-weight-medium"
-                        >Selfie Attendance</span
-                      >
+                      <span class="text-body-1 font-weight-medium">Selfie Attendance</span>
                     </div>
                     <v-switch
                       v-model="formData.selfieAttendance"
@@ -1021,22 +1131,29 @@
                       class="attendance-switch"
                       :true-value="true"
                       :false-value="false"
-                    ></v-switch>
+                    />
                   </div>
                 </v-col>
 
-                <v-col cols="12" sm="6" md="3">
+                <v-col
+                  cols="12"
+                  sm="6"
+                  md="3"
+                >
                   <div class="attendance-option">
                     <div
                       class="attendance-icon-wrapper"
                       :class="formData.QrAttendance ? 'enabled' : 'disabled'"
                     >
-                      <v-icon size="32" color="white">mdi-qrcode-scan</v-icon>
+                      <v-icon
+                        size="32"
+                        color="white"
+                      >
+                        mdi-qrcode-scan
+                      </v-icon>
                     </div>
                     <div class="text-center mt-3 mb-2">
-                      <span class="text-body-1 font-weight-medium"
-                        >QR Attendance</span
-                      >
+                      <span class="text-body-1 font-weight-medium">QR Attendance</span>
                     </div>
                     <v-switch
                       v-model="formData.QrAttendance"
@@ -1046,7 +1163,7 @@
                       class="attendance-switch"
                       :true-value="true"
                       :false-value="false"
-                    ></v-switch>
+                    />
                   </div>
                 </v-col>
               </v-row>

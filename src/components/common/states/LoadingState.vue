@@ -1,24 +1,53 @@
 <template>
-  <div class="loading-state" :class="stateClass">
+  <div
+    class="loading-state"
+    :class="stateClass"
+  >
     <div class="loading-content">
       <!-- Custom Loading Icon -->
-      <div v-if="customIcon" class="loading-icon-custom">
-        <component :is="customIcon" :size="iconSize" />
+      <div
+        v-if="customIcon"
+        class="loading-icon-custom"
+      >
+        <component
+          :is="customIcon"
+          :size="iconSize"
+        />
       </div>
 
       <!-- Default Spinner -->
-      <div v-else class="loading-spinner" :style="spinnerStyle"></div>
+      <div
+        v-else
+        class="loading-spinner"
+        :style="spinnerStyle"
+      />
 
       <!-- Loading Text -->
       <div class="loading-text">
-        <h3 v-if="title" class="loading-title">{{ title }}</h3>
-        <p v-if="message" class="loading-message">{{ message }}</p>
+        <h3
+          v-if="title"
+          class="loading-title"
+        >
+          {{ title }}
+        </h3>
+        <p
+          v-if="message"
+          class="loading-message"
+        >
+          {{ message }}
+        </p>
       </div>
 
       <!-- Progress Bar -->
-      <div v-if="showProgress && progress !== null" class="loading-progress">
+      <div
+        v-if="showProgress && progress !== null"
+        class="loading-progress"
+      >
         <div class="progress-bar">
-          <div class="progress-fill" :style="{ width: `${progress}%` }"></div>
+          <div
+            class="progress-fill"
+            :style="{ width: `${progress}%` }"
+          />
         </div>
         <span class="progress-text">{{ progress }}%</span>
       </div>

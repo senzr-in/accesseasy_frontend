@@ -1,39 +1,59 @@
 <template>
   <div class="add-site-container">
     <!-- Main Form Heading -->
-    <h1 class="text-h4 mb-6">Add New Site</h1>
+    <h1 class="text-h4 mb-6">
+      Add New Site
+    </h1>
 
     <v-form ref="form">
       <!-- Header -->
-      <v-toolbar flat color="white" class="mb-4" elevation="1">
-        <v-btn icon @click="handleClose">
+      <v-toolbar
+        flat
+        color="white"
+        class="mb-4"
+        elevation="1"
+      >
+        <v-btn
+          icon
+          @click="handleClose"
+        >
           <v-icon>mdi-arrow-left</v-icon>
         </v-btn>
         <v-toolbar-title>Add Site</v-toolbar-title>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <BaseButton
           variant="danger"
-          @click="handleClose"
           :text="'Cancel'"
           class="mr-2"
+          @click="handleClose"
         />
         <BaseButton
           variant="primary"
           :loading="isSaving"
-          @click="handleSave"
           :text="'Save'"
           class="mr-2"
+          @click="handleSave"
         />
       </v-toolbar>
 
       <div class="form-container pa-4">
         <v-row>
           <!-- Left Column: Form Fields -->
-          <v-col cols="12" md="6">
-            <v-card flat class="pa-4" elevation="2">
-              <v-card-title class="text-h6 pa-0 mb-4" style="color: #059367"
-                >Site Details</v-card-title
+          <v-col
+            cols="12"
+            md="6"
+          >
+            <v-card
+              flat
+              class="pa-4"
+              elevation="2"
+            >
+              <v-card-title
+                class="text-h6 pa-0 mb-4"
+                style="color: #059367"
               >
+                Site Details
+              </v-card-title>
               <!-- Organization Selection (Mandatory) -->
               <v-select
                 v-model="formData.orgLocation"
@@ -45,7 +65,7 @@
                 :loading="organizationsLoading"
                 required
               >
-                <template v-slot:selection="{ item }">
+                <template #selection="{ item }">
                   <div class="d-flex align-center">
                     <span class="mr-2">{{ getOrgName(item.value) }}</span>
                     <v-chip
@@ -57,9 +77,9 @@
                     </v-chip>
                   </div>
                 </template>
-                <template v-slot:item="{ props, item }">
+                <template #item="{ props, item }">
                   <v-list-item v-bind="props">
-                    <template v-slot:append>
+                    <template #append>
                       <v-chip
                         :color="getOrgTypeColor(item.value)"
                         size="small"
@@ -80,7 +100,7 @@
                 :rules="locationNameRules"
                 class="mt-4"
                 required
-              ></v-text-field>
+              />
               <!-- Contact Person (Optional) -->
               <v-text-field
                 v-model="formData.contactPerson"
@@ -89,7 +109,7 @@
                 density="comfortable"
                 :rules="contactPersonRules"
                 class="mt-4"
-              ></v-text-field>
+              />
               <!-- Contact Number (Optional) -->
               <v-text-field
                 v-model="formData.contactNumber"
@@ -100,15 +120,25 @@
                 :rules="contactNumberRules"
                 class="mt-4"
                 maxlength="10"
-              ></v-text-field>
+              />
             </v-card>
           </v-col>
           <!-- Right Column: Pincode, Radius, Address, and Map -->
-          <v-col cols="12" md="6">
-            <v-card flat class="pa-4" elevation="2">
-              <v-card-title class="text-h6 pa-0 mb-4" style="color: #059367"
-                >Location Details</v-card-title
+          <v-col
+            cols="12"
+            md="6"
+          >
+            <v-card
+              flat
+              class="pa-4"
+              elevation="2"
+            >
+              <v-card-title
+                class="text-h6 pa-0 mb-4"
+                style="color: #059367"
               >
+                Location Details
+              </v-card-title>
               <!-- Address (Mandatory) -->
               <v-textarea
                 v-model="formData.address"
@@ -119,7 +149,7 @@
                 class="mb-4"
                 :rules="addressRules"
                 required
-              ></v-textarea>
+              />
               <!-- Pincode (Optional) -->
               <v-text-field
                 v-model="formData.pincodes[0]"
@@ -131,7 +161,7 @@
                 :rules="pincodeRules"
                 class="mb-4"
                 @input="validateSinglePincode"
-              ></v-text-field>
+              />
               <!-- Radius -->
               <v-slider
                 v-model="formData.radiusM"
@@ -143,7 +173,7 @@
                 :rules="radiusRules"
                 color="#059367"
                 class="mb-2"
-              ></v-slider>
+              />
               <div class="text-caption text-grey-darken-1 mb-4">
                 Selected: {{ formData.radiusM }} meters
               </div>
@@ -157,9 +187,21 @@
             </v-card>
           </v-col>
         </v-row>
-        <v-card flat class="mt-4" elevation="2">
-          <v-card-title class="text-h6 pa-4" style="color: #059367">
-            <v-icon class="mr-2" color="#059367">mdi-map-marker</v-icon>
+        <v-card
+          flat
+          class="mt-4"
+          elevation="2"
+        >
+          <v-card-title
+            class="text-h6 pa-4"
+            style="color: #059367"
+          >
+            <v-icon
+              class="mr-2"
+              color="#059367"
+            >
+              mdi-map-marker
+            </v-icon>
             Location
           </v-card-title>
           <v-card-text>
@@ -171,19 +213,24 @@
               density="compact"
               prepend-inner-icon="mdi-magnify"
               clearable
-              @click:clear="clearSearch"
               :loading="searchLoading"
               class="mb-2"
-            ></v-text-field>
+              @click:clear="clearSearch"
+            />
             <div class="map-wrapper">
-              <div id="map" class="map-container"></div>
+              <div
+                id="map"
+                class="map-container"
+              />
               <div class="coordinates-display">
                 <v-chip
                   v-if="formData.lat && formData.lng"
                   color="primary"
                   size="small"
                 >
-                  <v-icon start>mdi-crosshairs-gps</v-icon>
+                  <v-icon start>
+                    mdi-crosshairs-gps
+                  </v-icon>
                   {{ parseFloat(formData.lat).toFixed(6) }},
                   {{ parseFloat(formData.lng).toFixed(6) }}
                 </v-chip>
@@ -207,8 +254,12 @@
           location="top"
         >
           {{ errorMessage }}
-          <template v-slot:actions>
-            <v-btn color="white" variant="text" @click="showErrorAlert = false">
+          <template #actions>
+            <v-btn
+              color="white"
+              variant="text"
+              @click="showErrorAlert = false"
+            >
               Close
             </v-btn>
           </template>

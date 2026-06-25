@@ -1,9 +1,14 @@
 <template>
-  <v-card flat class="salary-structure-manager">
+  <v-card
+    flat
+    class="salary-structure-manager"
+  >
     <div class="sticky-header">
       <v-card-text>
         <div class="d-flex justify-space-between align-center mb-4">
-          <h3 class="text-h6">Earnings</h3>
+          <h3 class="text-h6">
+            Earnings
+          </h3>
           <div class="d-flex">
             <!-- <v-btn v-if="!isEditing" color="black" @click="startEdit">
               Edit
@@ -50,7 +55,7 @@
                 hide-details
                 class="ml-4"
                 :disabled="!isEditing"
-              ></v-select>
+              />
             </v-col>
 
             <!-- <v-col cols="1" class="d-flex align-center">
@@ -89,15 +94,24 @@
           </v-list>
         </v-menu> -->
       </v-card-text>
-       <!-- Snackbar for notifications -->
-    <v-snackbar v-model="snackbar" :color="snackbarColor" :timeout="2000" location="top">
-      {{ snackbarText }}
-      <template v-slot:actions>
-        <v-btn color="white" variant="text" @click="snackbar = false">
-          Close
-        </v-btn>
-      </template>
-    </v-snackbar>
+      <!-- Snackbar for notifications -->
+      <v-snackbar
+        v-model="snackbar"
+        :color="snackbarColor"
+        :timeout="2000"
+        location="top"
+      >
+        {{ snackbarText }}
+        <template #actions>
+          <v-btn
+            color="white"
+            variant="text"
+            @click="snackbar = false"
+          >
+            Close
+          </v-btn>
+        </template>
+      </v-snackbar>
     </div>
   </v-card>
 </template>

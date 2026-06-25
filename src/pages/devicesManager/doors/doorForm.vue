@@ -8,27 +8,36 @@
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-check-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-check-circle
+        </v-icon>
         {{ successMessage }}
       </div>
     </v-snackbar>
 
     <v-snackbar
-      class="errormessge"
       v-model="showErrorSnackbar"
+      class="errormessge"
       color="error"
       timeout="2000"
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-alert-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-alert-circle
+        </v-icon>
         {{ errorMessage }}
       </div>
     </v-snackbar>
     <!-- Header -->
     <div class="form-header">
       <div class="header-content">
-        <v-btn icon variant="text" @click="$emit('cancel')" class="back-button">
+        <v-btn
+          icon
+          variant="text"
+          class="back-button"
+          @click="$emit('cancel')"
+        >
           <v-icon>mdi-arrow-left</v-icon>
         </v-btn>
         <h2 class="text-h6">
@@ -36,10 +45,19 @@
         </h2>
       </div>
       <div class="action-buttons">
-        <v-btn color="error" variant="text" @click="$emit('cancel')"
-          >CANCEL</v-btn
+        <v-btn
+          color="error"
+          variant="text"
+          @click="$emit('cancel')"
         >
-        <v-btn color="black" @click="saveDoor">SAVE</v-btn>
+          CANCEL
+        </v-btn>
+        <v-btn
+          color="black"
+          @click="saveDoor"
+        >
+          SAVE
+        </v-btn>
       </div>
     </div>
 
@@ -51,10 +69,10 @@
             :key="index"
             :value="tab"
             :active="currentTab === tab.id"
-            @click="currentTab = tab.id"
             :class="{ 'has-error': tabHasError(tab.id) }"
+            @click="currentTab = tab.id"
           >
-            <template v-slot:prepend>
+            <template #prepend>
               <v-icon :color="tabHasError(tab.id) ? 'error' : 'default'">
                 {{ tab.icon }}
               </v-icon>
@@ -77,11 +95,21 @@
 
       <!-- Right Content Area -->
       <div class="form-content">
-        <v-form ref="form" v-model="valid" @submit.prevent="saveDoor">
-          <div v-show="currentTab === 'basic'" class="form-section">
+        <v-form
+          ref="form"
+          v-model="valid"
+          @submit.prevent="saveDoor"
+        >
+          <div
+            v-show="currentTab === 'basic'"
+            class="form-section"
+          >
             <v-row>
               <!-- Door Name -->
-              <v-col cols="12" md="6">
+              <v-col
+                cols="12"
+                md="6"
+              >
                 <v-text-field
                   v-model="formData.doorName"
                   label="Door Name *"
@@ -90,37 +118,48 @@
                   variant="outlined"
                   density="comfortable"
                   @blur="markFieldAsTouched('doorName')"
-                ></v-text-field>
+                />
               </v-col>
               <!-- Door Group Dropdown -->
-              <v-col cols="12" md="6">
+              <v-col
+                cols="12"
+                md="6"
+              >
                 <div class="door-group-container">
                   <div class="custom-dropdown">
                     <div
                       class="dropdown-trigger"
-                      @click="toggleDoorGroupDropdown"
                       :class="{ 'dropdown-active': showDoorGroupDropdown }"
+                      @click="toggleDoorGroupDropdown"
                     >
                       <span v-if="formData.doorGroup">{{
                         formData.doorGroup
                       }}</span>
-                      <span v-else class="placeholder">Select door group</span>
-                      <v-icon>{{
-                        showDoorGroupDropdown
-                          ? "mdi-chevron-up"
-                          : "mdi-chevron-down"
-                      }}</v-icon>
+                      <span
+                        v-else
+                        class="placeholder"
+                      >Select door group</span>
+                      <v-icon>
+                        {{
+                          showDoorGroupDropdown
+                            ? "mdi-chevron-up"
+                            : "mdi-chevron-down"
+                        }}
+                      </v-icon>
                     </div>
 
-                    <div v-if="showDoorGroupDropdown" class="dropdown-content">
+                    <div
+                      v-if="showDoorGroupDropdown"
+                      class="dropdown-content"
+                    >
                       <div class="search-container">
                         <input
-                          type="text"
                           v-model="doorGroupSearch"
+                          type="text"
                           placeholder="Search groups..."
-                          @input="filterDoorGroups"
                           class="search-input"
-                        />
+                          @input="filterDoorGroups"
+                        >
                       </div>
 
                       <div class="dropdown-items">
@@ -128,8 +167,8 @@
                           v-for="group in filteredDoorGroups"
                           :key="group"
                           class="dropdown-item"
-                          @click="selectDoorGroup(group)"
                           :class="{ selected: formData.doorGroup === group }"
+                          @click="selectDoorGroup(group)"
                         >
                           {{ group }}
                         </div>
@@ -138,7 +177,12 @@
                           class="dropdown-item add-new"
                           @click="showAddDoorGroupPopup = true"
                         >
-                          <v-icon size="small" class="me-2">mdi-plus</v-icon>
+                          <v-icon
+                            size="small"
+                            class="me-2"
+                          >
+                            mdi-plus
+                          </v-icon>
                           Add
                         </div>
                       </div>
@@ -148,7 +192,10 @@
               </v-col>
 
               <!-- Department -->
-              <v-col cols="12" md="6">
+              <v-col
+                cols="12"
+                md="6"
+              >
                 <v-select
                   v-model="formData.assignedDepts"
                   :items="departmentOptions"
@@ -157,34 +204,42 @@
                   label="Department"
                   variant="outlined"
                   density="comfortable"
-                ></v-select>
+                />
               </v-col>
-
             </v-row>
           </div>
 
           <!-- Access Control Section -->
-          <div v-show="currentTab === 'access'" class="form-section">
+          <div
+            v-show="currentTab === 'access'"
+            class="form-section"
+          >
             <v-row>
               <!-- Time Settings -->
-              <v-col cols="12" md="6">
+              <v-col
+                cols="12"
+                md="6"
+              >
                 <v-text-field
                   v-model="formData.accessStartTime"
                   label="Access Start Time"
                   type="time"
                   variant="outlined"
                   density="comfortable"
-                ></v-text-field>
+                />
               </v-col>
 
-              <v-col cols="12" md="6">
+              <v-col
+                cols="12"
+                md="6"
+              >
                 <v-text-field
                   v-model="formData.accessEndTime"
                   label="Access End Time"
                   type="time"
                   variant="outlined"
                   density="comfortable"
-                ></v-text-field>
+                />
               </v-col>
             </v-row>
           </div>
@@ -201,30 +256,36 @@
       <div class="popup-container">
         <div class="popup-header">
           <h3>Add New Door Group</h3>
-          <v-icon @click="showAddDoorGroupPopup = false" class="close-icon"
-            >mdi-close</v-icon
+          <v-icon
+            class="close-icon"
+            @click="showAddDoorGroupPopup = false"
           >
+            mdi-close
+          </v-icon>
         </div>
         <div class="popup-content">
           <div class="input-group">
             <label for="newGroupName">Group Name</label>
             <input
-              type="text"
               id="newGroupName"
-              v-model="newDoorGroup"
-              placeholder="Enter group name"
               ref="newDoorGroupInput"
+              v-model="newDoorGroup"
+              type="text"
+              placeholder="Enter group name"
               @keyup.enter="addNewDoorGroup"
-            />
+            >
           </div>
           <div class="popup-actions">
-            <button class="cancel-btn" @click="showAddDoorGroupPopup = false">
+            <button
+              class="cancel-btn"
+              @click="showAddDoorGroupPopup = false"
+            >
               Cancel
             </button>
             <button
               class="add-btn"
-              @click="addNewDoorGroup"
               :disabled="!newDoorGroup.trim()"
+              @click="addNewDoorGroup"
             >
               Add
             </button>

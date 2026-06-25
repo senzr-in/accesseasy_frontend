@@ -9,24 +9,37 @@
     <v-card class="logs-card">
       <v-card-title class="card-header">
         <div class="employee-meta">
-          <v-avatar size="48" class="employee-avatar">
+          <v-avatar
+            size="48"
+            class="employee-avatar"
+          >
             <span class="avatar-initials">{{ employeeInitials }}</span>
           </v-avatar>
 
           <div class="employee-text">
-            <div class="employee-name">Name : {{ employeeName }}</div>
+            <div class="employee-name">
+              Name : {{ employeeName }}
+            </div>
             <div class="employee-details">
               <span>Employee ID : {{ employeeCode }}</span>
               <span class="separator">|</span>
               <span>Start : {{ startTimeLabel }}</span>
-              <v-icon size="16" class="icon-arrow">mdi-arrow-right</v-icon>
+              <v-icon
+                size="16"
+                class="icon-arrow"
+              >
+                mdi-arrow-right
+              </v-icon>
               <span>End : {{ endTimeLabel }}</span>
             </div>
           </div>
         </div>
 
         <div class="header-actions">
-          <div class="last-activity" v-if="lastActivityLabel">
+          <div
+            v-if="lastActivityLabel"
+            class="last-activity"
+          >
             Last activity : {{ lastActivityLabel }}
           </div>
 
@@ -36,7 +49,12 @@
             height="40"
             @click="$emit('refresh')"
           >
-            <v-icon start size="18">mdi-refresh</v-icon>
+            <v-icon
+              start
+              size="18"
+            >
+              mdi-refresh
+            </v-icon>
           </v-btn>
 
           <v-btn
@@ -47,10 +65,19 @@
             :loading="exporting"
             @click="handleExport"
           >
-            <v-icon start size="18">mdi-download</v-icon>
+            <v-icon
+              start
+              size="18"
+            >
+              mdi-download
+            </v-icon>
           </v-btn>
 
-          <v-btn icon variant="text" @click="closeDialog">
+          <v-btn
+            icon
+            variant="text"
+            @click="closeDialog"
+          >
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </div>
@@ -63,8 +90,12 @@
           <section class="timeline-panel">
             <div class="panel-header">
               <div>
-                <div class="panel-title">Timeline</div>
-                <div class="panel-date">{{ formattedDate }}</div>
+                <div class="panel-title">
+                  Timeline
+                </div>
+                <div class="panel-date">
+                  {{ formattedDate }}
+                </div>
               </div>
 
               <div class="metrics-group">
@@ -72,19 +103,32 @@
                   <div class="metric-value">
                     {{ totalDistanceKm.toFixed(2) }} km
                   </div>
-                  <div class="metric-label">Travelled</div>
+                  <div class="metric-label">
+                    Travelled
+                  </div>
                 </div>
                 <div class="metric-item">
-                  <div class="metric-value">{{ totalWorkingHours }}</div>
-                  <div class="metric-label">Working hours</div>
+                  <div class="metric-value">
+                    {{ totalWorkingHours }}
+                  </div>
+                  <div class="metric-label">
+                    Working hours
+                  </div>
                 </div>
               </div>
             </div>
 
             <v-divider />
 
-            <div class="timeline-scroll" v-if="timelineLogs.length">
-              <v-timeline density="compact" side="start" align="start">
+            <div
+              v-if="timelineLogs.length"
+              class="timeline-scroll"
+            >
+              <v-timeline
+                density="compact"
+                side="start"
+                align="start"
+              >
                 <v-timeline-item
                   v-for="(log, index) in timelineLogs"
                   :key="log.id ?? index"
@@ -98,12 +142,19 @@
                   </template>
 
                   <div class="timeline-card">
-                    <div class="status-chip" :class="statusClass(log.status)">
+                    <div
+                      class="status-chip"
+                      :class="statusClass(log.status)"
+                    >
                       {{ statusLabel(log.status) }}
                     </div>
 
                     <div class="timeline-location">
-                      <v-icon size="16" color="primary" class="me-1">
+                      <v-icon
+                        size="16"
+                        color="primary"
+                        class="me-1"
+                      >
                         mdi-map-marker
                       </v-icon>
                       <span>
@@ -112,7 +163,10 @@
                       </span>
                     </div>
 
-                    <div v-if="log.address" class="timeline-address">
+                    <div
+                      v-if="log.address"
+                      class="timeline-address"
+                    >
                       {{ log.address }}
                     </div>
 
@@ -127,8 +181,16 @@
               </v-timeline>
             </div>
 
-            <div v-else class="empty-state">
-              <v-icon size="36" color="primary">mdi-map-marker-off</v-icon>
+            <div
+              v-else
+              class="empty-state"
+            >
+              <v-icon
+                size="36"
+                color="primary"
+              >
+                mdi-map-marker-off
+              </v-icon>
               <p>No logs available for this date.</p>
             </div>
           </section>
@@ -143,22 +205,43 @@
                   density="compact"
                   class="map-toggle"
                 >
-                  <v-btn value="roadmap">Map</v-btn>
-                  <v-btn value="satellite">Satellite</v-btn>
+                  <v-btn value="roadmap">
+                    Map
+                  </v-btn>
+                  <v-btn value="satellite">
+                    Satellite
+                  </v-btn>
                 </v-btn-toggle>
               </div>
             </div>
 
-            <div ref="mapContainer" class="map-container">
-              <div v-if="mapError" class="map-error">
-                <v-icon size="24" color="primary" class="me-2"
-                  >mdi-alert-circle</v-icon
+            <div
+              ref="mapContainer"
+              class="map-container"
+            >
+              <div
+                v-if="mapError"
+                class="map-error"
+              >
+                <v-icon
+                  size="24"
+                  color="primary"
+                  class="me-2"
                 >
+                  mdi-alert-circle
+                </v-icon>
                 {{ mapError }}
               </div>
 
-              <div v-else-if="!mapReady" class="map-loader">
-                <v-progress-circular indeterminate color="primary" size="32" />
+              <div
+                v-else-if="!mapReady"
+                class="map-loader"
+              >
+                <v-progress-circular
+                  indeterminate
+                  color="primary"
+                  size="32"
+                />
                 <span class="loader-text">Loading map…</span>
               </div>
             </div>

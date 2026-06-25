@@ -1,7 +1,14 @@
 <!-- /senzrGo/senzrfieldopsfrontend/src/components/modals/workOrderForm_Modals/addFormModal.vue -->
 <template>
-  <div v-if="show" class="modal-overlay" @click="$emit('close')">
-    <div class="modal-content enhanced-modal" @click.stop>
+  <div
+    v-if="show"
+    class="modal-overlay"
+    @click="$emit('close')"
+  >
+    <div
+      class="modal-content enhanced-modal"
+      @click.stop
+    >
       <div class="modal-header">
         <div class="modal-title-section">
           <h3 class="modal-title">
@@ -12,7 +19,10 @@
             Add a new form to the existing work order configuration
           </p>
         </div>
-        <button @click="$emit('close')" class="modal-close">
+        <button
+          class="modal-close"
+          @click="$emit('close')"
+        >
           <XIcon class="w-6 h-6" />
         </button>
       </div>
@@ -27,8 +37,10 @@
             type="text"
             class="form-input"
             placeholder="e.g., Additional Task Form"
-          />
-          <div class="field-help">Provide a unique name for this form</div>
+          >
+          <div class="field-help">
+            Provide a unique name for this form
+          </div>
         </div>
         <div class="form-group">
           <label class="form-label">
@@ -61,7 +73,10 @@
             This will copy fields from the selected template, excluding any
             restricted fields already present in other forms.
           </div>
-          <div v-else class="template-info">
+          <div
+            v-else
+            class="template-info"
+          >
             <CheckCircleIcon class="inline-icon" />
             Will create an empty form with no fields.
           </div>
@@ -78,10 +93,8 @@
             </div>
             <div class="tip-item">
               <CheckCircleIcon class="tip-icon" />
-              <span
-                >Existing fields like orgId or UsersId will not be
-                duplicated</span
-              >
+              <span>Existing fields like orgId or UsersId will not be
+                duplicated</span>
             </div>
             <div class="tip-item">
               <CheckCircleIcon class="tip-icon" />
@@ -91,16 +104,25 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button @click="$emit('close')" class="btn btn-secondary">
+        <button
+          class="btn btn-secondary"
+          @click="$emit('close')"
+        >
           Cancel
         </button>
         <button
-          @click="handleAddForm"
           class="btn btn-primary"
           :disabled="!formData.form_name.trim() || adding || loadingTemplates"
+          @click="handleAddForm"
         >
-          <div v-if="adding" class="loading-spinner-small"></div>
-          <PlusIcon v-else class="btn-icon" />
+          <div
+            v-if="adding"
+            class="loading-spinner-small"
+          />
+          <PlusIcon
+            v-else
+            class="btn-icon"
+          />
           {{ adding ? "Adding..." : "Add Form" }}
         </button>
       </div>

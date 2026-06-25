@@ -2,21 +2,29 @@
   <v-card flat>
     <v-container v-if="loading">
       <v-row>
-        <v-col cols="12" class="text-center">
+        <v-col
+          cols="12"
+          class="text-center"
+        >
           <v-progress-circular
             indeterminate
             color="black"
-          ></v-progress-circular>
+          />
         </v-col>
       </v-row>
     </v-container>
-    <v-card-text v-else class="pa-0">
+    <v-card-text
+      v-else
+      class="pa-0"
+    >
       <div class="sticky-header">
         <div class="d-flex justify-space-between align-center pa-4">
           <div class="d-flex align-center">
-            <h3 class="text-h6">Deductions</h3>
+            <h3 class="text-h6">
+              Deductions
+            </h3>
             <v-tooltip location="bottom">
-              <template v-slot:activator="{ props }">
+              <template #activator="{ props }">
                 <v-btn
                   v-bind="props"
                   icon="mdi-information"
@@ -25,7 +33,7 @@
                   color="grey"
                   class="ml-2"
                   @click="showInfoDialog"
-                ></v-btn>
+                />
               </template>
               <span>Click for more information about deductions</span>
             </v-tooltip>
@@ -54,19 +62,37 @@
           <!-- Employee PF -->
           <v-row class="mb-4 align-center">
             <v-col cols="4">
-              <div class="field-label">Employee PF</div>
+              <div class="field-label">
+                Employee PF
+              </div>
             </v-col>
 
             <v-col cols="8">
-              <v-row class="align-center" v-if="!hasPFAccount">
-                <v-col cols="6" class="d-flex align-center">
-                  <v-icon color="red" class="mr-2">mdi-alert-circle</v-icon>
-                  <span class="text-red font-weight-bold"
-                    >PF Not Available</span
+              <v-row
+                v-if="!hasPFAccount"
+                class="align-center"
+              >
+                <v-col
+                  cols="6"
+                  class="d-flex align-center"
+                >
+                  <v-icon
+                    color="red"
+                    class="mr-2"
                   >
+                    mdi-alert-circle
+                  </v-icon>
+                  <span class="text-red font-weight-bold">PF Not Available</span>
                 </v-col>
-                <v-col cols="6" class="text-right">
-                  <v-btn color="primary" small @click="addAccount">
+                <v-col
+                  cols="6"
+                  class="text-right"
+                >
+                  <v-btn
+                    color="primary"
+                    small
+                    @click="addAccount"
+                  >
                     Add PF Account
                   </v-btn>
                 </v-col>
@@ -75,8 +101,8 @@
               <v-row v-if="hasPFAccount">
                 <v-col cols="6">
                   <v-select
-                    :items="employeePFOptions"
                     v-model="employeePF.value"
+                    :items="employeePFOptions"
                     label="Value"
                     variant="outlined"
                     density="comfortable"
@@ -86,13 +112,13 @@
                     item-title="text"
                     item-value="value"
                     @change="updateEmployeePF"
-                  ></v-select>
+                  />
                 </v-col>
 
                 <v-col cols="6">
                   <v-select
-                    :items="employeePF.calculations"
                     v-model="employeePF.component"
+                    :items="employeePF.calculations"
                     label="Component"
                     variant="outlined"
                     density="comfortable"
@@ -101,7 +127,7 @@
                     multiple
                     chips
                     :disabled="!isEditing"
-                  ></v-select>
+                  />
                 </v-col>
               </v-row>
             </v-col>
@@ -110,15 +136,35 @@
           <!-- Employee ESI -->
           <v-row class="mb-4 align-center">
             <v-col cols="4">
-              <div class="field-label">Employee ESI</div>
+              <div class="field-label">
+                Employee ESI
+              </div>
             </v-col>
-            <v-row class="align-center" v-if="!hasESIAccount">
-              <v-col cols="6" class="d-flex align-center">
-                <v-icon color="red" class="mr-2">mdi-alert-circle</v-icon>
+            <v-row
+              v-if="!hasESIAccount"
+              class="align-center"
+            >
+              <v-col
+                cols="6"
+                class="d-flex align-center"
+              >
+                <v-icon
+                  color="red"
+                  class="mr-2"
+                >
+                  mdi-alert-circle
+                </v-icon>
                 <span class="text-red font-weight-bold">ESI Not Available</span>
               </v-col>
-              <v-col cols="6" class="text-right">
-                <v-btn color="primary" small @click="this.addAccount()">
+              <v-col
+                cols="6"
+                class="text-right"
+              >
+                <v-btn
+                  color="primary"
+                  small
+                  @click="addAccount()"
+                >
                   Add ESI Account
                 </v-btn>
               </v-col>
@@ -126,8 +172,8 @@
             <v-row v-if="hasESIAccount">
               <v-col cols="4">
                 <v-select
-                  :items="employeeESIOptions"
                   v-model="employeeESI.value"
+                  :items="employeeESIOptions"
                   label="Value"
                   variant="outlined"
                   density="comfortable"
@@ -137,13 +183,13 @@
                   item-title="text"
                   item-value="value"
                   @change="updateEmployeeESI"
-                ></v-select>
+                />
               </v-col>
 
               <v-col cols="4">
                 <v-select
-                  :items="employeeESI.calculations"
                   v-model="employeeESI.component"
+                  :items="employeeESI.calculations"
                   label="Component"
                   variant="outlined"
                   density="comfortable"
@@ -152,7 +198,7 @@
                   multiple
                   chips
                   :disabled="!isEditing"
-                ></v-select>
+                />
               </v-col>
             </v-row>
           </v-row>
@@ -214,13 +260,21 @@
           <!-- Professional Tax -->
           <v-row class="mb-4 align-center">
             <v-col cols="4">
-              <div class="field-label">Professional Tax</div>
+              <div class="field-label">
+                Professional Tax
+              </div>
             </v-col>
             <v-row class="align-center">
-              <v-col cols="6" class="d-flex align-center">
-                <v-icon color="grey-darken-1" class="mr-2"
-                  >mdi-information-outline</v-icon
+              <v-col
+                cols="6"
+                class="d-flex align-center"
+              >
+                <v-icon
+                  color="grey-darken-1"
+                  class="mr-2"
                 >
+                  mdi-information-outline
+                </v-icon>
                 <span class="text-grey-darken-1">System Calculated</span>
               </v-col>
             </v-row>
@@ -229,37 +283,66 @@
           <!-- Labour Welfare Fund -->
           <v-row class="mb-4 align-center">
             <v-col cols="4">
-              <div class="field-label">Labour Welfare Fund</div>
+              <div class="field-label">
+                Labour Welfare Fund
+              </div>
             </v-col>
             <v-col cols="8">
-              <v-row class="align-center" v-if="!hasShopEstablishment">
-                <v-col cols="6" class="d-flex align-center">
-                  <v-icon color="red" class="mr-2">mdi-alert-circle</v-icon>
-                  <span class="text-red font-weight-bold"
-                    >shopAccount Not Available</span
+              <v-row
+                v-if="!hasShopEstablishment"
+                class="align-center"
+              >
+                <v-col
+                  cols="6"
+                  class="d-flex align-center"
+                >
+                  <v-icon
+                    color="red"
+                    class="mr-2"
                   >
+                    mdi-alert-circle
+                  </v-icon>
+                  <span class="text-red font-weight-bold">shopAccount Not Available</span>
                 </v-col>
-                <v-col cols="6" class="text-right">
-                  <v-btn color="primary" small @click="this.addAccount()">
+                <v-col
+                  cols="6"
+                  class="text-right"
+                >
+                  <v-btn
+                    color="primary"
+                    small
+                    @click="addAccount()"
+                  >
                     Add shop Account
                   </v-btn>
                 </v-col>
               </v-row>
-              <v-row class="align-center" v-else>
-                <v-col cols="6" class="d-flex align-center">
-                  <v-icon color="grey-darken-1" class="mr-2"
-                    >mdi-information-outline</v-icon
+              <v-row
+                v-else
+                class="align-center"
+              >
+                <v-col
+                  cols="6"
+                  class="d-flex align-center"
+                >
+                  <v-icon
+                    color="grey-darken-1"
+                    class="mr-2"
                   >
-                  <span class="text-grey-darken-1"
-                    >value based on stateRules</span
-                  >
+                    mdi-information-outline
+                  </v-icon>
+                  <span class="text-grey-darken-1">value based on stateRules</span>
                 </v-col>
               </v-row>
             </v-col>
           </v-row>
 
           <!-- Dynamic Fields -->
-          <v-row v-for="(field, index) in fields" :key="index" class="mb-4">
+          <v-row
+            v-for="(field, index) in fields"
+            :key="index"
+            class="mb-4"
+          >
             <v-col cols="4">
               <div class="field-label">
                 {{ field.label }}
@@ -278,7 +361,7 @@
                 :placeholder="getPlaceholder(field.type)"
                 :disabled="!isEditing"
                 @input="validateFieldInput(field)"
-              ></v-text-field>
+              />
             </v-col>
 
             <v-col cols="2">
@@ -291,7 +374,7 @@
                   color="error"
                   class="ml-2"
                   @click="deleteField(index)"
-                ></v-btn>
+                />
               </div>
             </v-col>
           </v-row>
@@ -301,7 +384,7 @@
       <div class="sticky-footer">
         <!-- Add Field Button -->
         <v-menu>
-          <template v-slot:activator="{ props }">
+          <template #activator="{ props }">
             <!-- <v-btn color="black" class="px-4 mt-4" v-bind="props">
               <v-icon start>mdi-plus</v-icon>
               Add Field
@@ -334,20 +417,30 @@
       location="top"
     >
       {{ snackbarText }}
-      <template v-slot:actions>
-        <v-btn color="white" variant="text" @click="snackbar = false">
+      <template #actions>
+        <v-btn
+          color="white"
+          variant="text"
+          @click="snackbar = false"
+        >
           Close
         </v-btn>
       </template>
     </v-snackbar>
 
     <!-- Dialog for Professional Tax Information -->
-    <v-dialog v-model="ptInfoDialog" max-width="500px">
+    <v-dialog
+      v-model="ptInfoDialog"
+      max-width="500px"
+    >
       <v-card><strong>System calculated</strong></v-card>
     </v-dialog>
 
     <!-- Dialog for Labour Welfare Fund Information -->
-    <v-dialog v-model="lwfInfoDialog" max-width="500px">
+    <v-dialog
+      v-model="lwfInfoDialog"
+      max-width="500px"
+    >
       <v-card>
         <v-card-title>Labour Welfare Fund Information</v-card-title>
         <v-card-text>
@@ -359,14 +452,22 @@
           </div>
         </v-card-text>
         <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="primary" @click="lwfInfoDialog = false">Close</v-btn>
+          <v-spacer />
+          <v-btn
+            color="primary"
+            @click="lwfInfoDialog = false"
+          >
+            Close
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
     <!-- Dialog for General Deductions Information -->
-    <v-dialog v-model="infoDialog" max-width="600px">
+    <v-dialog
+      v-model="infoDialog"
+      max-width="600px"
+    >
       <v-card>
         <v-card-title>Deductions Information</v-card-title>
         <v-card-text>
@@ -402,8 +503,13 @@
           </p>
         </v-card-text>
         <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="primary" @click="infoDialog = false">Close</v-btn>
+          <v-spacer />
+          <v-btn
+            color="primary"
+            @click="infoDialog = false"
+          >
+            Close
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -555,17 +661,17 @@ export default {
       infoDialog: false,
     };
   },
-  async created() {
-    await this.user();
-
-    await this.fetchData();
-  },
   watch: {
     staffEssentials(newState) {
       if (newState) {
         this.updateAmounts();
       }
     },
+  },
+  async created() {
+    await this.user();
+
+    await this.fetchData();
   },
   methods: {
     addAccount() {

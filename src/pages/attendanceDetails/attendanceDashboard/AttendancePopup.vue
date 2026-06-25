@@ -1,10 +1,27 @@
 <template>
-  <div class="popup-overlay" @click="$emit('close')">
-    <div class="popup-content" @click.stop>
-      <h3 class="text-h6 mb-4">Select Attendance for {{ formattedDate }}</h3>
+  <div
+    class="popup-overlay"
+    @click="$emit('close')"
+  >
+    <div
+      class="popup-content"
+      @click.stop
+    >
+      <h3 class="text-h6 mb-4">
+        Select Attendance for {{ formattedDate }}
+      </h3>
 
-      <div v-if="isLocked" class="locked-message">
-        <v-icon small color="warning" class="mr-1">mdi-lock</v-icon>
+      <div
+        v-if="isLocked"
+        class="locked-message"
+      >
+        <v-icon
+          small
+          color="warning"
+          class="mr-1"
+        >
+          mdi-lock
+        </v-icon>
         Attendance is locked and cannot be modified
       </div>
 
@@ -20,15 +37,30 @@
                 currentStatus.toLowerCase() === status.label.toLowerCase(),
             },
           ]"
-          @click="updateAttendance(status.label)"
           :disabled="isLoading || isLocked"
+          @click="updateAttendance(status.label)"
         >
           {{ status.label }}
         </button>
       </div>
-      <div v-if="isLoading" class="loading-indicator">Updating...</div>
-      <div v-if="error" class="error-message">{{ error }}</div>
-      <button class="close-button" @click="$emit('close')">Close</button>
+      <div
+        v-if="isLoading"
+        class="loading-indicator"
+      >
+        Updating...
+      </div>
+      <div
+        v-if="error"
+        class="error-message"
+      >
+        {{ error }}
+      </div>
+      <button
+        class="close-button"
+        @click="$emit('close')"
+      >
+        Close
+      </button>
     </div>
   </div>
 </template>

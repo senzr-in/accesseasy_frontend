@@ -1,13 +1,19 @@
 <template>
   <v-app>
-    <v-container class="app-wrapper" fluid>
-      <div v-if="loading" class="d-flex justify-center align-center pa-6">
+    <v-container
+      class="app-wrapper"
+      fluid
+    >
+      <div
+        v-if="loading"
+        class="d-flex justify-center align-center pa-6"
+      >
         <v-progress-circular
           indeterminate
           color="#68ade1"
           size="48"
           width="5"
-        ></v-progress-circular>
+        />
       </div>
       <div v-else>
         <div class="d-flex justify-end mb-4">
@@ -15,14 +21,17 @@
             variant="primary"
             size="md"
             text="Generate All Access Levels Report"
-            :leftIcon="Shield"
+            :left-icon="Shield"
             :loading="isGeneratingAll"
             :disabled="isGeneratingAll || loadingAccessLevels"
             @click="generateAllAccessLevelsReport"
           />
         </div>
         <!-- Access Levels Table -->
-        <DataTableWrapper title="Access Levels" :showSearch="true">
+        <DataTableWrapper
+          title="Access Levels"
+          :show-search="true"
+        >
           <!-- Loading State -->
           <SkeletonLoader
             v-if="loadingAccessLevels"
@@ -52,7 +61,7 @@
             v-else
             :items="formattedAccessLevels"
             :columns="accessLevelHeaders"
-            :showSelection="false"
+            :show-selection="false"
             :expandable="false"
             show-header
             :row-clickable="false"
@@ -63,7 +72,7 @@
                 variant="primary"
                 size="sm"
                 text="Generate Report"
-                :leftIcon="Shield"
+                :left-icon="Shield"
                 :loading="isGenerating && selectedAccessLevel === item.id"
                 :disabled="isGenerating"
                 @click="() => generateAccessLevelReport(item.id)"
@@ -72,10 +81,16 @@
 
             <template #no-data>
               <div class="text-center py-8">
-                <v-icon size="64" color="grey" class="mb-4"
-                  >mdi-shield-account-outline</v-icon
+                <v-icon
+                  size="64"
+                  color="grey"
+                  class="mb-4"
                 >
-                <p class="text-grey mb-4">No access levels found</p>
+                  mdi-shield-account-outline
+                </v-icon>
+                <p class="text-grey mb-4">
+                  No access levels found
+                </p>
                 <BaseButton
                   text="Refresh"
                   variant="primary"
@@ -88,7 +103,11 @@
         </DataTableWrapper>
 
         <!-- Dialog for Report Configuration -->
-        <v-dialog v-model="dialog" max-width="600px" persistent>
+        <v-dialog
+          v-model="dialog"
+          max-width="600px"
+          persistent
+        >
           <v-card>
             <v-card-title class="text-h6">
               {{
@@ -98,9 +117,15 @@
               }}
             </v-card-title>
             <v-card-text>
-              <v-form ref="form" @submit.prevent="generateReport">
+              <v-form
+                ref="form"
+                @submit.prevent="generateReport"
+              >
                 <!-- Access Level Selection -->
-                <div v-if="dialogType === 'AccessLevel'" class="select-wrapper">
+                <div
+                  v-if="dialogType === 'AccessLevel'"
+                  class="select-wrapper"
+                >
                   <v-select
                     v-model="selectedAccessLevel"
                     :items="availableAccessLevels"
@@ -113,29 +138,29 @@
                     dense
                     required
                   >
-                    <template v-slot:prepend-inner>
-                      <v-icon v-if="!loadingAccessLevels"
-                        >mdi-shield-account</v-icon
-                      >
+                    <template #prepend-inner>
+                      <v-icon v-if="!loadingAccessLevels">
+                        mdi-shield-account
+                      </v-icon>
                       <v-progress-circular
                         v-else
                         indeterminate
                         size="20"
                         width="2"
                         color="primary"
-                      ></v-progress-circular>
+                      />
                     </template>
                   </v-select>
                 </div>
               </v-form>
             </v-card-text>
             <v-card-actions>
-              <v-spacer></v-spacer>
+              <v-spacer />
               <BaseButton
                 variant="danger"
                 size="md"
                 text="Cancel"
-                :leftIcon="XCircle"
+                :left-icon="XCircle"
                 @click="dialog = false"
               />
 
@@ -143,7 +168,7 @@
                 variant="primary"
                 size="md"
                 :text="isGenerating ? 'Generating...' : 'Generate Report'"
-                :leftIcon="isGenerating ? null : Check"
+                :left-icon="isGenerating ? null : Check"
                 :loading="isGenerating"
                 :disabled="isGenerating"
                 @click="generateReport"
@@ -153,29 +178,55 @@
         </v-dialog>
 
         <!-- Error Snackbar -->
-        <v-snackbar v-model="showError" color="error" :timeout="5000">
+        <v-snackbar
+          v-model="showError"
+          color="error"
+          :timeout="5000"
+        >
           {{ errorMessage }}
-          <template v-slot:action="{ attrs }">
-            <v-btn text v-bind="attrs" @click="showError = false">Close</v-btn>
+          <template #action="{ attrs }">
+            <v-btn
+              text
+              v-bind="attrs"
+              @click="showError = false"
+            >
+              Close
+            </v-btn>
           </template>
         </v-snackbar>
 
         <!-- Success Snackbar -->
-        <v-snackbar v-model="showSuccess" color="success" :timeout="3000">
+        <v-snackbar
+          v-model="showSuccess"
+          color="success"
+          :timeout="3000"
+        >
           {{ successMessage }}
-          <template v-slot:action="{ attrs }">
-            <v-btn text v-bind="attrs" @click="showSuccess = false"
-              >Close</v-btn
+          <template #action="{ attrs }">
+            <v-btn
+              text
+              v-bind="attrs"
+              @click="showSuccess = false"
             >
+              Close
+            </v-btn>
           </template>
         </v-snackbar>
         <!-- Warning Snackbar (Yellow) -->
-        <v-snackbar v-model="showWarning" color="warning" :timeout="4000">
+        <v-snackbar
+          v-model="showWarning"
+          color="warning"
+          :timeout="4000"
+        >
           {{ warningMessage }}
-          <template v-slot:action="{ attrs }">
-            <v-btn text v-bind="attrs" @click="showWarning = false"
-              >Close</v-btn
+          <template #action="{ attrs }">
+            <v-btn
+              text
+              v-bind="attrs"
+              @click="showWarning = false"
             >
+              Close
+            </v-btn>
           </template>
         </v-snackbar>
       </div>

@@ -1,19 +1,19 @@
 <template>
   <div class="connector">
-
     <main class="dashboard-main">
       <div class="content-wrapper">
         <!-- Page Title -->
 
         <!-- System Selection -->
         <section class="section">
-          <h3 class="section-title">Select CRM System</h3>
+          <h3 class="section-title">
+            Select CRM System
+          </h3>
           <div class="system-selector">
             <div
               class="system-option"
               :class="{ active: selectedSystem === 'zoho' }"
               @click="setSystem('zoho')"
-              
             >
               <div class="system-icon zoho">
                 <svg
@@ -49,7 +49,14 @@
                   stroke="currentColor"
                   stroke-width="2"
                 >
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                  <rect
+                    x="3"
+                    y="3"
+                    width="18"
+                    height="18"
+                    rx="2"
+                    ry="2"
+                  />
                   <path d="M9 9h6v6H9z" />
                 </svg>
               </div>
@@ -62,9 +69,14 @@
         </section>
 
         <!-- ERP Next Configuration -->
-        <section v-if="selectedSystem === 'erpnext'" class="section">
+        <section
+          v-if="selectedSystem === 'erpnext'"
+          class="section"
+        >
           <div class="section-header">
-            <h3 class="section-title">ERP Next Configuration</h3>
+            <h3 class="section-title">
+              ERP Next Configuration
+            </h3>
             <div
               class="config-status"
               :class="erpNextConfig.isConfigured ? 'configured' : 'pending'"
@@ -77,9 +89,20 @@
                 stroke="currentColor"
                 stroke-width="2"
               >
-                <path v-if="erpNextConfig.isConfigured" d="M9 12l2 2 4-4" />
-                <circle v-else cx="12" cy="12" r="10" />
-                <path v-if="!erpNextConfig.isConfigured" d="M12 6v6l4 2" />
+                <path
+                  v-if="erpNextConfig.isConfigured"
+                  d="M9 12l2 2 4-4"
+                />
+                <circle
+                  v-else
+                  cx="12"
+                  cy="12"
+                  r="10"
+                />
+                <path
+                  v-if="!erpNextConfig.isConfigured"
+                  d="M12 6v6l4 2"
+                />
               </svg>
               {{ erpNextConfig.isConfigured ? "Configured" : "Setup Required" }}
             </div>
@@ -95,7 +118,11 @@
                 stroke="currentColor"
                 stroke-width="2"
               >
-                <circle cx="12" cy="12" r="10" />
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                />
                 <path d="M12 16v-4" />
                 <path d="M12 8h.01" />
               </svg>
@@ -136,8 +163,11 @@
                     class="field-input"
                     placeholder="https://your-site.erpnext.com"
                     @blur="validateUrl"
-                  />
-                  <span v-if="erpNextConfig.errors.siteUrl" class="field-error">
+                  >
+                  <span
+                    v-if="erpNextConfig.errors.siteUrl"
+                    class="field-error"
+                  >
                     {{ erpNextConfig.errors.siteUrl }}
                   </span>
                 </div>
@@ -154,7 +184,14 @@
                   stroke="currentColor"
                   stroke-width="2"
                 >
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <rect
+                    x="3"
+                    y="11"
+                    width="18"
+                    height="11"
+                    rx="2"
+                    ry="2"
+                  />
                   <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                 </svg>
                 API Credentials
@@ -174,7 +211,7 @@
                     type="text"
                     class="field-input"
                     placeholder="Generated after login or enter manually"
-                  />
+                  >
                 </div>
 
                 <div class="form-field">
@@ -185,7 +222,7 @@
                       :type="showApiSecret ? 'text' : 'password'"
                       class="field-input"
                       placeholder="Generated after login or enter manually"
-                    />
+                    >
                     <button
                       type="button"
                       class="password-toggle"
@@ -203,12 +240,20 @@
                           v-if="showApiSecret"
                           d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
                         />
-                        <path v-if="showApiSecret" d="M1 1l22 22" />
+                        <path
+                          v-if="showApiSecret"
+                          d="M1 1l22 22"
+                        />
                         <path
                           v-else
                           d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"
                         />
-                        <circle v-if="!showApiSecret" cx="12" cy="12" r="3" />
+                        <circle
+                          v-if="!showApiSecret"
+                          cx="12"
+                          cy="12"
+                          r="3"
+                        />
                       </svg>
                     </button>
                   </div>
@@ -240,10 +285,13 @@
               <button
                 type="button"
                 class="action-btn primary"
-                @click="testErpNextConnection"
                 :disabled="isTestingConnection || !isErpNextConfigValid"
+                @click="testErpNextConnection"
               >
-                <div v-if="isTestingConnection" class="spinner"></div>
+                <div
+                  v-if="isTestingConnection"
+                  class="spinner"
+                />
                 <svg
                   v-else
                   width="16"
@@ -291,7 +339,9 @@
         <!-- Sync Configuration -->
         <section class="section">
           <div class="section-header">
-            <h3 class="section-title">Sync Configuration</h3>
+            <h3 class="section-title">
+              Sync Configuration
+            </h3>
             <div class="sync-mode-toggle">
               <button
                 class="mode-btn"
@@ -311,14 +361,20 @@
           </div>
 
           <!-- Manual Sync Content -->
-          <div v-if="syncMode === 'manual'" class="sync-content">
+          <div
+            v-if="syncMode === 'manual'"
+            class="sync-content"
+          >
             <div class="sync-actions-bar">
               <button
                 class="action-btn primary"
-                @click="fetchCustomerData"
                 :disabled="isLoading"
+                @click="fetchCustomerData"
               >
-                <div v-if="isLoading" class="spinner"></div>
+                <div
+                  v-if="isLoading"
+                  class="spinner"
+                />
                 <svg
                   v-else
                   width="20"
@@ -330,7 +386,12 @@
                 >
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                   <polyline points="7,10 12,15 17,10" />
-                  <line x1="12" y1="15" x2="12" y2="3" />
+                  <line
+                    x1="12"
+                    y1="15"
+                    x2="12"
+                    y2="3"
+                  />
                 </svg>
                 {{ isLoading ? "Fetching..." : "Fetch Customer Data" }}
               </button>
@@ -352,16 +413,31 @@
                   <path
                     d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
                   />
-                  <line x1="12" y1="9" x2="12" y2="13" />
-                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                  <line
+                    x1="12"
+                    y1="9"
+                    x2="12"
+                    y2="13"
+                  />
+                  <line
+                    x1="12"
+                    y1="17"
+                    x2="12.01"
+                    y2="17"
+                  />
                 </svg>
                 ERP Next configuration required before fetching data
               </div>
             </div>
 
             <!-- Field Mapping -->
-            <div v-if="showFieldMapping" class="field-mapping-section">
-              <h4 class="subsection-title">Field Mapping</h4>
+            <div
+              v-if="showFieldMapping"
+              class="field-mapping-section"
+            >
+              <h4 class="subsection-title">
+                Field Mapping
+              </h4>
               <p class="subsection-subtitle">
                 Configure how your data maps to
                 {{ selectedSystem === "zoho" ? "Zoho CRM" : "ERP Next" }}
@@ -375,7 +451,9 @@
                 >
                   <div class="source-field">
                     <label>{{ mapping.sourceLabel }}</label>
-                    <div class="field-preview">{{ mapping.sourceField }}</div>
+                    <div class="field-preview">
+                      {{ mapping.sourceField }}
+                    </div>
                   </div>
                   <div class="mapping-connector">
                     <svg
@@ -386,12 +464,20 @@
                       stroke="currentColor"
                       stroke-width="2"
                     >
-                      <line x1="5" y1="12" x2="19" y2="12" />
+                      <line
+                        x1="5"
+                        y1="12"
+                        x2="19"
+                        y2="12"
+                      />
                       <polyline points="12,5 19,12 12,19" />
                     </svg>
                   </div>
                   <div class="target-field">
-                    <select v-model="mapping.targetField" class="field-select">
+                    <select
+                      v-model="mapping.targetField"
+                      class="field-select"
+                    >
                       <option value="">
                         Select
                         {{
@@ -414,16 +500,23 @@
 
             <!-- Customer Form -->
             <div class="customer-form-section">
-              <h4 class="subsection-title">Customer Information</h4>
+              <h4 class="subsection-title">
+                Customer Information
+              </h4>
 
               <!-- Customer Selection -->
-              <div v-if="customerData.length > 0" class="customer-selector">
+              <div
+                v-if="customerData.length > 0"
+                class="customer-selector"
+              >
                 <select
                   v-model="selectedCustomerId"
-                  @change="populateCustomerData"
                   class="customer-select"
+                  @change="populateCustomerData"
                 >
-                  <option value="">Create New Customer</option>
+                  <option value="">
+                    Create New Customer
+                  </option>
                   <option
                     v-for="customer in customerData"
                     :key="customer.id"
@@ -445,7 +538,7 @@
                       type="text"
                       class="field-input"
                       placeholder="Enter customer name"
-                    />
+                    >
                   </div>
 
                   <div class="form-field">
@@ -455,7 +548,7 @@
                       type="email"
                       class="field-input"
                       placeholder="Enter email address"
-                    />
+                    >
                   </div>
 
                   <div class="form-field">
@@ -465,7 +558,7 @@
                       type="tel"
                       class="field-input"
                       placeholder="Enter phone number"
-                    />
+                    >
                   </div>
 
                   <div class="form-field">
@@ -475,7 +568,7 @@
                       type="text"
                       class="field-input"
                       placeholder="Enter company name"
-                    />
+                    >
                   </div>
 
                   <div class="form-field">
@@ -486,12 +579,12 @@
                         type="text"
                         class="field-input"
                         placeholder="Enter location"
-                      />
+                      >
                       <button
                         type="button"
                         class="input-addon-btn"
-                        @click="showLocationMap(currentCustomer.location)"
                         :disabled="!currentCustomer.location"
+                        @click="showLocationMap(currentCustomer.location)"
                       >
                         <svg
                           width="16"
@@ -504,7 +597,11 @@
                           <path
                             d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"
                           />
-                          <circle cx="12" cy="10" r="3" />
+                          <circle
+                            cx="12"
+                            cy="10"
+                            r="3"
+                          />
                         </svg>
                       </button>
                     </div>
@@ -517,7 +614,7 @@
                       type="text"
                       class="field-input"
                       placeholder="Enter GST number"
-                    />
+                    >
                   </div>
                 </div>
 
@@ -533,15 +630,18 @@
                   <button
                     type="button"
                     class="action-btn success"
-                    @click="syncCurrentCustomer"
                     :disabled="
                       !isFormValid ||
-                      isSyncing ||
-                      (selectedSystem === 'erpnext' &&
-                        !erpNextConfig.isConfigured)
+                        isSyncing ||
+                        (selectedSystem === 'erpnext' &&
+                          !erpNextConfig.isConfigured)
                     "
+                    @click="syncCurrentCustomer"
                   >
-                    <div v-if="isSyncing" class="spinner"></div>
+                    <div
+                      v-if="isSyncing"
+                      class="spinner"
+                    />
                     <svg
                       v-else
                       width="18"
@@ -567,22 +667,28 @@
             </div>
 
             <!-- Bulk Operations -->
-            <div v-if="customerData.length > 0" class="bulk-operations">
+            <div
+              v-if="customerData.length > 0"
+              class="bulk-operations"
+            >
               <div class="bulk-header">
-                <h4 class="subsection-title">Bulk Operations</h4>
-                <span class="customer-count"
-                  >{{ customerData.length }} customers available</span
-                >
+                <h4 class="subsection-title">
+                  Bulk Operations
+                </h4>
+                <span class="customer-count">{{ customerData.length }} customers available</span>
               </div>
               <button
                 class="action-btn danger"
-                @click="syncAllCustomers"
                 :disabled="
                   isSyncing ||
-                  (selectedSystem === 'erpnext' && !erpNextConfig.isConfigured)
+                    (selectedSystem === 'erpnext' && !erpNextConfig.isConfigured)
                 "
+                @click="syncAllCustomers"
               >
-                <div v-if="isSyncing" class="spinner"></div>
+                <div
+                  v-if="isSyncing"
+                  class="spinner"
+                />
                 <svg
                   v-else
                   width="18"
@@ -607,7 +713,10 @@
           </div>
 
           <!-- Auto Sync Content -->
-          <div v-if="syncMode === 'auto'" class="sync-content">
+          <div
+            v-if="syncMode === 'auto'"
+            class="sync-content"
+          >
             <div class="auto-sync-container">
               <div class="auto-sync-header">
                 <div class="auto-sync-info">
@@ -619,11 +728,14 @@
                   :class="{ active: autoSyncEnabled }"
                   @click="toggleAutoSync"
                 >
-                  <div class="toggle-slider"></div>
+                  <div class="toggle-slider" />
                 </div>
               </div>
 
-              <div v-if="autoSyncEnabled" class="auto-sync-settings">
+              <div
+                v-if="autoSyncEnabled"
+                class="auto-sync-settings"
+              >
                 <div class="setting-item">
                   <label class="setting-label">
                     <svg
@@ -634,21 +746,39 @@
                       stroke="currentColor"
                       stroke-width="2"
                     >
-                      <circle cx="12" cy="12" r="10" />
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="10"
+                      />
                       <polyline points="12,6 12,12 16,14" />
                     </svg>
                     Sync Interval
                   </label>
-                  <select v-model="syncInterval" class="setting-select">
-                    <option value="1h">Every hour</option>
-                    <option value="3h">Every 3 hours</option>
-                    <option value="6h">Every 6 hours</option>
-                    <option value="24h">Daily</option>
+                  <select
+                    v-model="syncInterval"
+                    class="setting-select"
+                  >
+                    <option value="1h">
+                      Every hour
+                    </option>
+                    <option value="3h">
+                      Every 3 hours
+                    </option>
+                    <option value="6h">
+                      Every 6 hours
+                    </option>
+                    <option value="24h">
+                      Daily
+                    </option>
                   </select>
                 </div>
               </div>
 
-              <div v-else class="auto-sync-disabled">
+              <div
+                v-else
+                class="auto-sync-disabled"
+              >
                 <div class="disabled-state">
                   <svg
                     width="48"
@@ -658,8 +788,17 @@
                     stroke="currentColor"
                     stroke-width="2"
                   >
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                    />
+                    <line
+                      x1="4.93"
+                      y1="4.93"
+                      x2="19.07"
+                      y2="19.07"
+                    />
                   </svg>
                   <h4>Auto Sync Disabled</h4>
                   <p>
@@ -675,11 +814,23 @@
     </main>
 
     <!-- Location Modal -->
-    <div v-if="showMapModal" class="modal-overlay" @click="closeMapModal">
-      <div class="modal-container" @click.stop>
+    <div
+      v-if="showMapModal"
+      class="modal-overlay"
+      @click="closeMapModal"
+    >
+      <div
+        class="modal-container"
+        @click.stop
+      >
         <div class="modal-header">
-          <h3 class="modal-title">Location Preview</h3>
-          <button class="modal-close" @click="closeMapModal">
+          <h3 class="modal-title">
+            Location Preview
+          </h3>
+          <button
+            class="modal-close"
+            @click="closeMapModal"
+          >
             <svg
               width="20"
               height="20"
@@ -688,8 +839,18 @@
               stroke="currentColor"
               stroke-width="2"
             >
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
+              <line
+                x1="18"
+                y1="6"
+                x2="6"
+                y2="18"
+              />
+              <line
+                x1="6"
+                y1="6"
+                x2="18"
+                y2="18"
+              />
             </svg>
           </button>
         </div>
@@ -704,7 +865,11 @@
               stroke-width="2"
             >
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-              <circle cx="12" cy="10" r="3" />
+              <circle
+                cx="12"
+                cy="10"
+                r="3"
+              />
             </svg>
             <h4>{{ selectedLocation }}</h4>
             <p>Map integration would be implemented here</p>
@@ -715,8 +880,14 @@
 
     <!-- Toast Notification -->
     <transition name="toast">
-      <div v-if="showToast" class="toast-container">
-        <div class="toast-content" :class="toastType">
+      <div
+        v-if="showToast"
+        class="toast-container"
+      >
+        <div
+          class="toast-content"
+          :class="toastType"
+        >
           <div class="toast-icon">
             <svg
               width="20"
@@ -726,14 +897,30 @@
               stroke="currentColor"
               stroke-width="2"
             >
-              <path v-if="toastType === 'success'" d="M9 12l2 2 4-4" />
-              <path v-if="toastType === 'error'" d="M18 6L6 18M6 6l12 12" />
-              <path v-if="toastType === 'info'" d="M12 16v-4M12 8h.01" />
-              <circle cx="12" cy="12" r="10" />
+              <path
+                v-if="toastType === 'success'"
+                d="M9 12l2 2 4-4"
+              />
+              <path
+                v-if="toastType === 'error'"
+                d="M18 6L6 18M6 6l12 12"
+              />
+              <path
+                v-if="toastType === 'info'"
+                d="M12 16v-4M12 8h.01"
+              />
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+              />
             </svg>
           </div>
           <span class="toast-message">{{ toastMessage }}</span>
-          <button class="toast-close" @click="hideToast">
+          <button
+            class="toast-close"
+            @click="hideToast"
+          >
             <svg
               width="16"
               height="16"
@@ -742,8 +929,18 @@
               stroke="currentColor"
               stroke-width="2"
             >
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
+              <line
+                x1="18"
+                y1="6"
+                x2="6"
+                y2="18"
+              />
+              <line
+                x1="6"
+                y1="6"
+                x2="18"
+                y2="18"
+              />
             </svg>
           </button>
         </div>

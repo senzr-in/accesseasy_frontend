@@ -2,11 +2,11 @@
   <div class="zones-container">
     <DataTableWrapper
       title="Zones Management"
-      :searchQuery="search"
-      @update:searchQuery="search = $event"
-      searchPlaceholder="Search zones..."
-      :isLoading="loading"
-      :isEmpty="items.length === 0 && !loading"
+      :search-query="search"
+      search-placeholder="Search zones..."
+      :is-loading="loading"
+      :is-empty="items.length === 0 && !loading"
+      @update:search-query="search = $event"
     >
       <template #toolbar-actions>
         <BaseButton
@@ -29,11 +29,11 @@
       <!-- Data Table -->
       <DataTable
         v-else-if="filteredItems.length > 0"
+        v-model:selected-items="selected"
         :items="paginatedItems"
         :columns="tableColumns"
-        :showSelection="true"
-        v-model:selectedItems="selected"
-        @rowClick="handleRowClick"
+        :show-selection="true"
+        @row-click="handleRowClick"
       >
         <!-- Entry Doors Column -->
         <template #cell-entry_doors="{ value }">
@@ -51,12 +51,16 @@
             <v-icon
               small
               class="mr-2"
-              @click.stop="editItem(item)"
               color="primary"
+              @click.stop="editItem(item)"
             >
               mdi-pencil
             </v-icon>
-            <v-icon small @click.stop="deleteItem(item)" color="error">
+            <v-icon
+              small
+              color="error"
+              @click.stop="deleteItem(item)"
+            >
               mdi-delete
             </v-icon>
           </div>
@@ -67,11 +71,11 @@
       <template #pagination>
         <CustomPagination
           :page="page"
-          :itemsPerPage="itemsPerPage"
+          :items-per-page="itemsPerPage"
           :total-items="totalItems"
           :is-searching="!!search"
           @update:page="handlePageChange"
-          @update:itemsPerPage="handleItemsPerPageChange"
+          @update:items-per-page="handleItemsPerPageChange"
         />
       </template>
     </DataTableWrapper>
@@ -84,15 +88,22 @@
       width="400"
       class="zone-form-drawer"
     >
-      <v-card class="h-100 d-flex flex-column" elevation="0">
+      <v-card
+        class="h-100 d-flex flex-column"
+        elevation="0"
+      >
         <v-card-title class="text-h5 pa-4 border-b">
           {{ isEditing ? "Edit Zone" : "Create Zone" }}
-          <v-spacer></v-spacer>
-          <v-btn icon @click="closeDialog" size="small">
+          <v-spacer />
+          <v-btn
+            icon
+            size="small"
+            @click="closeDialog"
+          >
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-card-title>
-        <v-divider></v-divider>
+        <v-divider />
         <v-card-text class="pa-4 flex-grow-1 overflow-y-auto">
           <ZoneForm
             :is-editing="isEditing"
@@ -105,18 +116,29 @@
     </v-navigation-drawer>
 
     <!-- Delete Confirmation Dialog -->
-    <v-dialog v-model="deleteDialog" max-width="500px">
+    <v-dialog
+      v-model="deleteDialog"
+      max-width="500px"
+    >
       <v-card>
-        <v-card-title class="text-h5">Confirm Delete</v-card-title>
+        <v-card-title class="text-h5">
+          Confirm Delete
+        </v-card-title>
         <v-card-text>
           Are you sure you want to delete the zone "{{ itemToDelete?.zoneName }}"?
         </v-card-text>
         <v-card-actions>
-          <v-spacer></v-spacer>
-          <BaseButton variant="secondary" @click="deleteDialog = false">
+          <v-spacer />
+          <BaseButton
+            variant="secondary"
+            @click="deleteDialog = false"
+          >
             Cancel
           </BaseButton>
-          <BaseButton variant="danger" @click="confirmDelete">
+          <BaseButton
+            variant="danger"
+            @click="confirmDelete"
+          >
             Delete
           </BaseButton>
         </v-card-actions>

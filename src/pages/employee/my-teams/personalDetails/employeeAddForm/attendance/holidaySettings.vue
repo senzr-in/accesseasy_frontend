@@ -1,6 +1,9 @@
 <template>
   <div class="holiday-settings-container">
-    <v-card flat class="pa-4">
+    <v-card
+      flat
+      class="pa-4"
+    >
       <v-card-text>
         <v-alert
           v-if="loading"
@@ -12,8 +15,16 @@
           Loading holidays...
         </v-alert>
 
-        <div v-else-if="!availableHolidays.length" class="no-holidays-message">
-          <v-icon size="48" color="grey-lighten-1">mdi-calendar-off</v-icon>
+        <div
+          v-else-if="!availableHolidays.length"
+          class="no-holidays-message"
+        >
+          <v-icon
+            size="48"
+            color="grey-lighten-1"
+          >
+            mdi-calendar-off
+          </v-icon>
           <p class="text-h6 text-grey-lighten-1 mt-2">
             No holidays found for this tenant.
           </p>
@@ -22,21 +33,26 @@
           </p>
         </div>
 
-        <v-list v-else class="holiday-list">
+        <v-list
+          v-else
+          class="holiday-list"
+        >
           <v-list-item
             v-for="holiday in availableHolidays"
             :key="holiday.id"
             class="holiday-list-item mb-3"
             :class="{ 'holiday-disabled': !isSelected(holiday.id) }"
           >
-            <template v-slot:prepend>
-              <v-icon :color="isSelected(holiday.id) ? 'success' : 'grey'"
-                >mdi-calendar-check</v-icon
-              >
+            <template #prepend>
+              <v-icon :color="isSelected(holiday.id) ? 'success' : 'grey'">
+                mdi-calendar-check
+              </v-icon>
             </template>
-            <v-list-item-title class="font-weight-medium">{{
-              holiday.event
-            }}</v-list-item-title>
+            <v-list-item-title class="font-weight-medium">
+              {{
+                holiday.event
+              }}
+            </v-list-item-title>
             <v-list-item-subtitle
               class="text-caption text-purple font-weight-bold"
             >
@@ -44,21 +60,21 @@
               <span
                 v-if="
                   holiday.assignedBranchNames &&
-                  holiday.assignedBranchNames.length
+                    holiday.assignedBranchNames.length
                 "
               >
                 (Branches: {{ holiday.assignedBranchNames.join(", ") }})
               </span>
               <span v-else> (All Branches) </span>
             </v-list-item-subtitle>
-            <template v-slot:append>
+            <template #append>
               <v-switch
                 :model-value="isSelected(holiday.id)"
                 color="success"
                 inset
                 hide-details
                 @update:model-value="toggleHolidaySelection(holiday.id, $event)"
-              ></v-switch>
+              />
             </template>
           </v-list-item>
         </v-list>

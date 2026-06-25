@@ -1,19 +1,32 @@
 <template>
-  <div v-if="show" class="modal-overlay" @click="$emit('close')">
-    <div class="modal-content" @click.stop>
+  <div
+    v-if="show"
+    class="modal-overlay"
+    @click="$emit('close')"
+  >
+    <div
+      class="modal-content"
+      @click.stop
+    >
       <!-- Header -->
       <div class="modal-header">
         <h3 class="modal-title">
           {{ isEdit ? "Edit Attendance Cycle" : "Add New Attendance Cycle" }}
         </h3>
-        <button @click="$emit('close')" class="modal-close">
+        <button
+          class="modal-close"
+          @click="$emit('close')"
+        >
           <XIcon class="w-6 h-6" />
         </button>
       </div>
 
       <!-- Body -->
       <div class="modal-body">
-        <form @submit.prevent="handleSubmit" class="cycle-form">
+        <form
+          class="cycle-form"
+          @submit.prevent="handleSubmit"
+        >
           <!-- Cycle Name -->
           <div class="form-group">
             <label class="form-label">Cycle Name</label>
@@ -23,7 +36,7 @@
               class="form-input"
               placeholder="Enter cycle name"
               required
-            />
+            >
           </div>
 
           <!-- Date Range -->
@@ -38,7 +51,7 @@
                 max="31"
                 required
                 @input="updateEndDate"
-              />
+              >
             </div>
 
             <div class="form-group">
@@ -51,7 +64,7 @@
                 class="form-input"
                 readonly
                 disabled
-              />
+              >
 
               <!-- Else show calculated number -->
               <input
@@ -61,9 +74,11 @@
                 class="form-input"
                 readonly
                 disabled
-              />
+              >
 
-              <div class="info-text">End date is automatically calculated</div>
+              <div class="info-text">
+                End date is automatically calculated
+              </div>
             </div>
           </div>
 
@@ -78,8 +93,8 @@
                       v-model="form.includeWeekends"
                       type="checkbox"
                       class="toggle-input"
-                    />
-                    <span class="toggle-slider"></span>
+                    >
+                    <span class="toggle-slider" />
                   </div>
                 </label>
               </div>
@@ -91,8 +106,8 @@
                       v-model="form.includeHolidays"
                       type="checkbox"
                       class="toggle-input"
-                    />
-                    <span class="toggle-slider"></span>
+                    >
+                    <span class="toggle-slider" />
                   </div>
                 </label>
               </div>
@@ -103,13 +118,17 @@
 
       <!-- Footer -->
       <div class="modal-footer">
-        <BaseButton variant="secondary" text="Cancel" @click="$emit('close')" />
+        <BaseButton
+          variant="secondary"
+          text="Cancel"
+          @click="$emit('close')"
+        />
         <BaseButton
           variant="primary"
           :text="isEdit ? 'Update Cycle' : 'Create Cycle'"
           :loading="loading"
-          @click="handleSubmit"
           :disabled="!isFormValid"
+          @click="handleSubmit"
         />
       </div>
     </div>

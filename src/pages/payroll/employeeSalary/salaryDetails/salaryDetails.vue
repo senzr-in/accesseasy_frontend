@@ -1,12 +1,15 @@
 <template>
   <div class="salary-container">
     <!-- Filter Panel -->
-    <div class="filter-panel" v-if="showFilters && !showForm">
+    <div
+      v-if="showFilters && !showForm"
+      class="filter-panel"
+    >
       <div class="filter-content">
         <FilterComponent
-          :tenantId="tenantId"
-          :initialFilters="initialFilters"
-          :initiallyVisible="true"
+          :tenant-id="tenantId"
+          :initial-filters="initialFilters"
+          :initially-visible="true"
           :filter-schema="pageFilters"
           @apply-filters="handleApplyFilters"
           @filter-visibility-changed="onFilterVisibilityChanged"
@@ -20,22 +23,22 @@
       :class="{ 'full-width': !showFilters }"
     >
       <DataTableWrapper
-        v-model:searchQuery="search"
-        :showSearch="true"
-        :searchPlaceholder="'Search Employee'"
-        :isEmpty="filteredItems.length === 0 && !search"
-        :hasError="error"
-        @update:searchQuery="debouncedSearch"
+        v-model:search-query="search"
+        :show-search="true"
+        :search-placeholder="'Search Employee'"
+        :is-empty="filteredItems.length === 0 && !search"
+        :has-error="error"
+        @update:search-query="debouncedSearch"
       >
         <template #before-search>
           <!-- Filter Toggle Button -->
           <button
             v-if="!showForm"
             class="filter-toggle-static"
-            @click="toggleFilters"
             :class="{ active: hasActiveFilters }"
             :title="showFilters ? 'Hide filters' : 'Show filters'"
             aria-label="Toggle filters"
+            @click="toggleFilters"
           >
             <svg
               width="20"
@@ -47,7 +50,10 @@
             >
               <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46" />
             </svg>
-            <div v-if="hasActiveFilters" class="filter-indicator"></div>
+            <div
+              v-if="hasActiveFilters"
+              class="filter-indicator"
+            />
           </button>
         </template>
         <template #toolbar-actions>
@@ -55,12 +61,12 @@
             variant="primary"
             size="md"
             :left-icon="Upload"
-            @click="importAttendance"
             class="ms-2"
+            @click="importAttendance"
           >
             Import Salaries
-          </BaseButton></template
-        >
+          </BaseButton>
+        </template>
 
         <template #default>
           <SkeletonLoader
@@ -82,8 +88,8 @@
             <EmptyState
               title="No Salary Details found"
               message="Try adjusting your filters or search term"
-              :primaryAction="{ text: 'Clear Filters', icon: 'X' }"
-              @primaryAction="clearFilters"
+              :primary-action="{ text: 'Clear Filters', icon: 'X' }"
+              @primary-action="clearFilters"
             />
           </div>
 
@@ -91,16 +97,16 @@
             <DataTable
               :items="filteredItems"
               :columns="columns"
-              :selectedItems="selected"
-              :showSelection="true"
-              :sortBy="sortBy[0]?.key || ''"
-              :sortDirection="sortBy[0]?.order || 'asc'"
-              :itemKey="'id'"
-              :rowClickable="true"
-              @update:selectedItems="selected = $event"
-              @update:sortBy="updateSortBy"
-              @update:sortDirection="updateSortDirection"
-              @rowClick="handleRowClick"
+              :selected-items="selected"
+              :show-selection="true"
+              :sort-by="sortBy[0]?.key || ''"
+              :sort-direction="sortBy[0]?.order || 'asc'"
+              :item-key="'id'"
+              :row-clickable="true"
+              @update:selected-items="selected = $event"
+              @update:sort-by="updateSortBy"
+              @update:sort-direction="updateSortDirection"
+              @row-click="handleRowClick"
               @sort="handleSort"
             >
               <!-- Checkbox Column -->
@@ -111,7 +117,7 @@
                   :checked="selected.includes(item.id)"
                   :disabled="isEmployeeLeft(item)"
                   @change="toggleItemSelection(item.id)"
-                />
+                >
               </template>
 
               <!-- Profile Column -->
@@ -123,8 +129,11 @@
                     :alt="item.employee?.assignedUser?.first_name"
                     class="avatar-image"
                     :class="{ grayscale: isEmployeeLeft(item) }"
-                  />
-                  <div v-else class="avatar-placeholder">
+                  >
+                  <div
+                    v-else
+                    class="avatar-placeholder"
+                  >
                     <svg
                       width="20"
                       height="20"
@@ -134,7 +143,11 @@
                       stroke-width="2"
                     >
                       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                      <circle cx="12" cy="7" r="4" />
+                      <circle
+                        cx="12"
+                        cy="7"
+                        r="4"
+                      />
                     </svg>
                   </div>
                 </div>
@@ -258,18 +271,22 @@
           </div>
         </template>
         <!-- Pagination Slot -->
-        <template v-slot:pagination>
+        <template #pagination>
           <CustomPagination
             v-model:page="page"
-            v-model:itemsPerPage="itemsPerPage"
+            v-model:items-per-page="itemsPerPage"
             :total-items="totalItems"
             @update:page="handlePageChange"
-            @update:itemsPerPage="handleItemsPerPageChange"
+            @update:items-per-page="handleItemsPerPageChange"
           />
         </template>
       </DataTableWrapper>
     </div>
-    <v-dialog v-model="showImportDialog" max-width="600px" persistent>
+    <v-dialog
+      v-model="showImportDialog"
+      max-width="600px"
+      persistent
+    >
       <v-card class="bg-gray-900 rounded-lg shadow-lg">
         <!-- Header -->
         <v-card-title class="text-h6 font-bold text-white">
@@ -420,8 +437,8 @@
             <v-btn
               color="success"
               variant="tonal"
-              @click="downloadTemplate"
               class="text-sm w-full md:w-auto"
+              @click="downloadTemplate"
             >
               ⬇ Download Template
             </v-btn>
@@ -448,7 +465,12 @@
           >
             Cancel
           </v-btn>
-          <v-btn color="primary" @click="handleImport">Import</v-btn>
+          <v-btn
+            color="primary"
+            @click="handleImport"
+          >
+            Import
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

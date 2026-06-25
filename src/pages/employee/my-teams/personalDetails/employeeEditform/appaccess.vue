@@ -2,11 +2,14 @@
   <div class="personal-details">
     <v-container v-if="loading">
       <v-row>
-        <v-col cols="12" class="text-center">
+        <v-col
+          cols="12"
+          class="text-center"
+        >
           <v-progress-circular
             indeterminate
             color="#059367"
-          ></v-progress-circular>
+          />
           <p>Loading Mobile app access...</p>
         </v-col>
       </v-row>
@@ -21,18 +24,24 @@
           size="large"
           :disabled="!hasChanges"
           :loading="updating"
-          @click="handleUpdate"
           class="px-8"
+          @click="handleUpdate"
         >
           Update
         </v-btn>
       </div>
       <!-- App Access Toggle -->
-      <v-card class="mb-6 pa-6" elevation="0" outlined>
+      <v-card
+        class="mb-6 pa-6"
+        elevation="0"
+        outlined
+      >
         <div class="d-flex justify-space-between align-center">
           <div class="app-access-left">
             <div class="d-flex align-center mb-2">
-              <h2 class="text-h6 font-weight-bold me-3 mb-0">App Access</h2>
+              <h2 class="text-h6 font-weight-bold me-3 mb-0">
+                App Access
+              </h2>
               <div class="d-flex align-center">
                 <v-switch
                   v-model="localData.appAccess"
@@ -40,7 +49,7 @@
                   hide-details
                   inset
                   class="app-access-switch"
-                ></v-switch>
+                />
               </div>
             </div>
             <p class="text-body-2 text-grey-darken-1 mb-0">
@@ -51,9 +60,15 @@
       </v-card>
 
       <!-- Attendance Mode Toggles -->
-      <v-card class="pa-6 mb-4" elevation="0" outlined>
+      <v-card
+        class="pa-6 mb-4"
+        elevation="0"
+        outlined
+      >
         <div class="mb-6">
-          <h2 class="text-h6 font-weight-bold mb-1">Attendance Modes</h2>
+          <h2 class="text-h6 font-weight-bold mb-1">
+            Attendance Modes
+          </h2>
           <p class="text-body-2 text-grey-darken-1">
             Select the attendance tracking methods for this employee
           </p>
@@ -61,18 +76,25 @@
 
         <v-row>
           <!-- Face Attendance -->
-          <v-col cols="12" sm="6" md="4">
+          <v-col
+            cols="12"
+            sm="6"
+            md="4"
+          >
             <div class="attendance-option">
               <div
                 class="attendance-icon-wrapper"
                 :class="localData.face ? 'enabled' : 'disabled'"
               >
-                <v-icon size="32" color="white"> mdi-account-circle </v-icon>
+                <v-icon
+                  size="32"
+                  color="white"
+                >
+                  mdi-account-circle
+                </v-icon>
               </div>
               <div class="text-center mt-3 mb-2">
-                <span class="text-body-1 font-weight-medium"
-                  >Face Attendance</span
-                >
+                <span class="text-body-1 font-weight-medium">Face Attendance</span>
               </div>
               <v-switch
                 v-model="localData.face"
@@ -80,23 +102,30 @@
                 hide-details
                 inset
                 class="attendance-switch"
-              ></v-switch>
+              />
             </div>
           </v-col>
 
           <!-- Finger Attendance -->
-          <v-col cols="12" sm="6" md="4">
+          <v-col
+            cols="12"
+            sm="6"
+            md="4"
+          >
             <div class="attendance-option">
               <div
                 class="attendance-icon-wrapper"
                 :class="localData.finger ? 'enabled' : 'disabled'"
               >
-                <v-icon size="32" color="white"> mdi-fingerprint </v-icon>
+                <v-icon
+                  size="32"
+                  color="white"
+                >
+                  mdi-fingerprint
+                </v-icon>
               </div>
               <div class="text-center mt-3 mb-2">
-                <span class="text-body-1 font-weight-medium"
-                  >Finger Attendance</span
-                >
+                <span class="text-body-1 font-weight-medium">Finger Attendance</span>
               </div>
               <v-switch
                 v-model="localData.finger"
@@ -104,23 +133,30 @@
                 hide-details
                 inset
                 class="attendance-switch"
-              ></v-switch>
+              />
             </div>
           </v-col>
 
           <!-- RFID Attendance -->
-          <v-col cols="12" sm="6" md="4">
+          <v-col
+            cols="12"
+            sm="6"
+            md="4"
+          >
             <div class="attendance-option">
               <div
                 class="attendance-icon-wrapper"
                 :class="localData.rfid ? 'enabled' : 'disabled'"
               >
-                <v-icon size="32" color="white"> mdi-credit-card-scan </v-icon>
+                <v-icon
+                  size="32"
+                  color="white"
+                >
+                  mdi-credit-card-scan
+                </v-icon>
               </div>
               <div class="text-center mt-3 mb-2">
-                <span class="text-body-1 font-weight-medium"
-                  >RFID Attendance</span
-                >
+                <span class="text-body-1 font-weight-medium">RFID Attendance</span>
               </div>
               <v-switch
                 v-model="localData.rfid"
@@ -128,7 +164,7 @@
                 hide-details
                 inset
                 class="attendance-switch"
-              ></v-switch>
+              />
             </div>
           </v-col>
         </v-row>
@@ -250,7 +286,9 @@
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-check-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-check-circle
+        </v-icon>
         {{ successMessage }}
       </div>
     </v-snackbar>
@@ -262,7 +300,9 @@
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-alert-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-alert-circle
+        </v-icon>
         {{ errorMessage }}
       </div>
     </v-snackbar>

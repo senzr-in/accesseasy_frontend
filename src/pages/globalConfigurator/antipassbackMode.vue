@@ -1,196 +1,228 @@
 <template>
   <div>
     <v-window v-model="activeTab">
-            <!-- ==================== ANTIPASSBACK TAB ==================== -->
-            <v-window-item value="antipassback">
-              <!-- Add / Edit Form Panel -->
-              <div v-if="showForm" class="mb-6">
-                <div class="d-flex align-center mb-6">
-                  <v-btn
-                    icon
-                    variant="text"
-                    size="small"
-                    class="mr-3"
-                    @click="closeForm"
-                  >
-                    <v-icon>mdi-arrow-left</v-icon>
-                  </v-btn>
-                  <h2 class="text-h6 font-weight-bold">
-                    {{
-                      isEditing
-                        ? "Edit Antipassback Rule"
-                        : "Add New Antipassback Rule"
-                    }}
-                  </h2>
-                </div>
+      <!-- ==================== ANTIPASSBACK TAB ==================== -->
+      <v-window-item value="antipassback">
+        <!-- Add / Edit Form Panel -->
+        <div
+          v-if="showForm"
+          class="mb-6"
+        >
+          <div class="d-flex align-center mb-6">
+            <v-btn
+              icon
+              variant="text"
+              size="small"
+              class="mr-3"
+              @click="closeForm"
+            >
+              <v-icon>mdi-arrow-left</v-icon>
+            </v-btn>
+            <h2 class="text-h6 font-weight-bold">
+              {{
+                isEditing
+                  ? "Edit Antipassback Rule"
+                  : "Add New Antipassback Rule"
+              }}
+            </h2>
+          </div>
 
-                <v-form ref="formRef" v-model="formValid">
-                  <v-row>
-                    <v-col cols="12">
-                      <v-text-field
-                        v-model="form.zoneName"
-                        label="Zone Name *"
-                        variant="outlined"
-                        density="compact"
-                        placeholder="e.g., Server Room, Parking Area"
-                        :rules="[(v) => !!v || 'Zone name is required']"
-                      />
-                    </v-col>
+          <v-form
+            ref="formRef"
+            v-model="formValid"
+          >
+            <v-row>
+              <v-col cols="12">
+                <v-text-field
+                  v-model="form.zoneName"
+                  label="Zone Name *"
+                  variant="outlined"
+                  density="compact"
+                  placeholder="e.g., Server Room, Parking Area"
+                  :rules="[(v) => !!v || 'Zone name is required']"
+                />
+              </v-col>
 
-                    <v-col cols="12" md="6">
-                      <v-select
-                        v-model="form.entryDoors"
-                        :items="doorOptions"
-                        label="Entry Doors *"
-                        variant="outlined"
-                        density="compact"
-                        placeholder="Select entry doors"
-                        multiple
-                        chips
-                        closable-chips
-                        :rules="[
-                          (v) =>
-                            !!v && v.length > 0 || 'At least one entry door is required',
-                        ]"
-                      />
-                    </v-col>
+              <v-col
+                cols="12"
+                md="6"
+              >
+                <v-select
+                  v-model="form.entryDoors"
+                  :items="doorOptions"
+                  label="Entry Doors *"
+                  variant="outlined"
+                  density="compact"
+                  placeholder="Select entry doors"
+                  multiple
+                  chips
+                  closable-chips
+                  :rules="[
+                    (v) =>
+                      !!v && v.length > 0 || 'At least one entry door is required',
+                  ]"
+                />
+              </v-col>
 
-                    <v-col cols="12" md="6">
-                      <v-select
-                        v-model="form.exitDoors"
-                        :items="doorOptions"
-                        label="Exit Doors *"
-                        variant="outlined"
-                        density="compact"
-                        placeholder="Select exit doors"
-                        multiple
-                        chips
-                        closable-chips
-                        :rules="[
-                          (v) =>
-                            !!v && v.length > 0 || 'At least one exit door is required',
-                        ]"
-                      />
-                    </v-col>
+              <v-col
+                cols="12"
+                md="6"
+              >
+                <v-select
+                  v-model="form.exitDoors"
+                  :items="doorOptions"
+                  label="Exit Doors *"
+                  variant="outlined"
+                  density="compact"
+                  placeholder="Select exit doors"
+                  multiple
+                  chips
+                  closable-chips
+                  :rules="[
+                    (v) =>
+                      !!v && v.length > 0 || 'At least one exit door is required',
+                  ]"
+                />
+              </v-col>
 
-                    <v-col cols="12" class="d-flex justify-end gap-3">
-                      <BaseButton
-                        variant="text"
-                        size="md"
-                        text="Cancel"
-                        @click="closeForm"
-                      />
-                      <BaseButton
-                        variant="primary"
-                        size="md"
-                        :text="isEditing ? 'Update' : 'Save'"
-                        :loading="saving"
-                        :disabled="!formValid"
-                        @click="saveRule"
-                      />
-                    </v-col>
-                  </v-row>
-                </v-form>
-              </div>
+              <v-col
+                cols="12"
+                class="d-flex justify-end gap-3"
+              >
+                <BaseButton
+                  variant="text"
+                  size="md"
+                  text="Cancel"
+                  @click="closeForm"
+                />
+                <BaseButton
+                  variant="primary"
+                  size="md"
+                  :text="isEditing ? 'Update' : 'Save'"
+                  :loading="saving"
+                  :disabled="!formValid"
+                  @click="saveRule"
+                />
+              </v-col>
+            </v-row>
+          </v-form>
+        </div>
 
-              <!-- Rules List -->
-              <div v-else>
-                <DataTableWrapper
-                  subtitle="Define zones and allowed entry/exit doors to prevent passback violations"
-                  :showSearch="true"
-                >
-                  <template #toolbar-actions>
-                    <BaseButton
-                      variant="primary"
-                      size="md"
-                      text="Add Rule"
-                      :leftIcon="PlusIcon"
-                      @click="openAddForm"
-                    />
-                  </template>
+        <!-- Rules List -->
+        <div v-else>
+          <DataTableWrapper
+            subtitle="Define zones and allowed entry/exit doors to prevent passback violations"
+            :show-search="true"
+          >
+            <template #toolbar-actions>
+              <BaseButton
+                variant="primary"
+                size="md"
+                text="Add Rule"
+                :left-icon="PlusIcon"
+                @click="openAddForm"
+              />
+            </template>
 
-                  <!-- Loading -->
-                  <SkeletonLoader
-                    v-if="loading"
-                    variant="data-table"
-                    :rows="6"
-                    :columns="4"
-                  />
+            <!-- Loading -->
+            <SkeletonLoader
+              v-if="loading"
+              variant="data-table"
+              :rows="6"
+              :columns="4"
+            />
 
-                  <!-- Error -->
-                  <div v-else-if="error" class="text-center py-12">
-                    <v-icon color="error" size="64" class="mb-4"
-                      >mdi-alert-circle</v-icon
-                    >
-                    <p class="text-h6 text-error mb-4">{{ error }}</p>
-                    <BaseButton
-                      variant="primary"
-                      text="Retry"
-                      @click="fetchRules"
-                    />
-                  </div>
-
-                  <!-- Table -->
-                  <DataTable
-                    v-else
-                    :items="antipassbackRules"
-                    :columns="tableColumns"
-                    :showSelection="false"
-                    :expandable="false"
-                    show-header
-                    :row-clickable="true"
-                    @rowClick="editRule"
-                  >
-                    <!-- Entry Doors -->
-                    <template #column-entryDoors="{ item }">
-                      <div class="text-body-2">
-                        {{ item.entryDoors }}
-                      </div>
-                    </template>
-
-                    <!-- Exit Doors -->
-                    <template #column-exitDoors="{ item }">
-                      <div class="text-body-2">
-                        {{ item.exitDoors }}
-                      </div>
-                    </template>
-
-                    <!-- Actions -->
-                    <template #column-actions="{ item }">
-                      <div class="d-flex ga-2" @click.stop>
-                        <BaseButton
-                          variant="text"
-                          size="sm"
-                          icon="mdi-pencil"
-                          @click="editRule(item)"
-                        />
-                        <BaseButton
-                          variant="text"
-                          size="sm"
-                          :icon="TrashIcon"
-                          color="error"
-                          @click="openDeleteConfirm(item)"
-                        />
-                      </div>
-                    </template>
-                  </DataTable>
-                </DataTableWrapper>
-              </div>
-            </v-window-item>
-
-            <!-- ==================== INTERLOCK TAB (Placeholder) ==================== -->
-            <v-window-item value="interlock">
-              <!-- You can apply the same pattern here later -->
-              <p class="text-center py-12 text-h6">
-                Interlock configuration coming soon...
+            <!-- Error -->
+            <div
+              v-else-if="error"
+              class="text-center py-12"
+            >
+              <v-icon
+                color="error"
+                size="64"
+                class="mb-4"
+              >
+                mdi-alert-circle
+              </v-icon>
+              <p class="text-h6 text-error mb-4">
+                {{ error }}
               </p>
-            </v-window-item>
+              <BaseButton
+                variant="primary"
+                text="Retry"
+                @click="fetchRules"
+              />
+            </div>
+
+            <!-- Table -->
+            <DataTable
+              v-else
+              :items="antipassbackRules"
+              :columns="tableColumns"
+              :show-selection="false"
+              :expandable="false"
+              show-header
+              :row-clickable="true"
+              @row-click="editRule"
+            >
+              <!-- Entry Doors -->
+              <template #column-entryDoors="{ item }">
+                <div class="text-body-2">
+                  {{ item.entryDoors }}
+                </div>
+              </template>
+
+              <!-- Exit Doors -->
+              <template #column-exitDoors="{ item }">
+                <div class="text-body-2">
+                  {{ item.exitDoors }}
+                </div>
+              </template>
+
+              <!-- Actions -->
+              <template #column-actions="{ item }">
+                <div
+                  class="d-flex ga-2"
+                  @click.stop
+                >
+                  <BaseButton
+                    variant="text"
+                    size="sm"
+                    icon="mdi-pencil"
+                    @click="editRule(item)"
+                  />
+                  <BaseButton
+                    variant="text"
+                    size="sm"
+                    :icon="TrashIcon"
+                    color="error"
+                    @click="openDeleteConfirm(item)"
+                  />
+                </div>
+              </template>
+            </DataTable>
+          </DataTableWrapper>
+        </div>
+      </v-window-item>
+
+      <!-- ==================== INTERLOCK TAB (Placeholder) ==================== -->
+      <v-window-item value="interlock">
+        <!-- You can apply the same pattern here later -->
+        <p class="text-center py-12 text-h6">
+          Interlock configuration coming soon...
+        </p>
+      </v-window-item>
     </v-window>
 
     <!-- Delete Confirmation Dialog -->
-    <v-dialog v-model="deleteDialog" max-width="420">
+    <v-dialog
+      v-model="deleteDialog"
+      max-width="420"
+    >
       <v-card>
-        <v-card-title class="text-h6">Delete Rule?</v-card-title>
+        <v-card-title class="text-h6">
+          Delete Rule?
+        </v-card-title>
         <v-card-text>
           Are you sure you want to delete the antipassback rule
           <strong>"{{ ruleToDelete?.zoneName }}"</strong>? This action cannot be
@@ -215,7 +247,11 @@
     </v-dialog>
 
     <!-- Snackbar -->
-    <v-snackbar v-model="snackbar.show" :color="snackbar.color" timeout="4000">
+    <v-snackbar
+      v-model="snackbar.show"
+      :color="snackbar.color"
+      timeout="4000"
+    >
       {{ snackbar.message }}
     </v-snackbar>
   </div>

@@ -4,9 +4,14 @@
     <ToastContainer ref="toastContainer" />
 
     <!-- Loading Overlay -->
-    <div v-if="isLoading" class="loading-overlay">
-      <div class="loading-spinner"></div>
-      <p class="loading-text">{{ loadingMessage }}</p>
+    <div
+      v-if="isLoading"
+      class="loading-overlay"
+    >
+      <div class="loading-spinner" />
+      <p class="loading-text">
+        {{ loadingMessage }}
+      </p>
     </div>
 
     <!-- ==================== LEFT SIDEBAR ==================== -->
@@ -31,9 +36,9 @@
 
       <div class="sidebar-content">
         <button
-          @click="showAddDrawer"
           class="add-role-btn"
           :disabled="isLoading"
+          @click="showAddDrawer"
         >
           <svg
             width="16"
@@ -59,18 +64,23 @@
               stroke-width="2"
             >
               <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-              <circle cx="9" cy="7" r="4" />
+              <circle
+                cx="9"
+                cy="7"
+                r="4"
+              />
               <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
               <path d="M16 3.13a4 4 0 0 1 0 7.75" />
             </svg>
-            <h3 class="roles-title">Existing Roles</h3>
+            <h3 class="roles-title">
+              Existing Roles
+            </h3>
           </div>
 
           <div class="roles-list">
             <div
               v-for="role in roles"
               :key="role.id"
-              @click="selectRole(role)"
               :class="[
                 'role-item',
                 selectedRole?.id === role.id ? 'role-item-active' : '',
@@ -78,6 +88,7 @@
                   ? 'role-item-modified'
                   : '',
               ]"
+              @click="selectRole(role)"
             >
               <div class="role-item-header">
                 <div class="role-icon">
@@ -110,8 +121,16 @@
                     <path
                       d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"
                     />
-                    <circle cx="17" cy="18" r="2" />
-                    <circle cx="7" cy="18" r="2" />
+                    <circle
+                      cx="17"
+                      cy="18"
+                      r="2"
+                    />
+                    <circle
+                      cx="7"
+                      cy="18"
+                      r="2"
+                    />
                   </svg>
                   <svg
                     v-else
@@ -123,15 +142,24 @@
                     stroke-width="2"
                   >
                     <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
+                    <circle
+                      cx="9"
+                      cy="7"
+                      r="4"
+                    />
                     <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
                     <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                   </svg>
                 </div>
                 <div class="role-details">
-                  <div class="role-name">{{ role.roleName }}</div>
+                  <div class="role-name">
+                    {{ role.roleName }}
+                  </div>
                   <div class="role-type">
-                    <span class="org-badge" :class="`org-${role.orgType}`">
+                    <span
+                      class="org-badge"
+                      :class="`org-${role.orgType}`"
+                    >
                       {{ role.orgType }}
                     </span>
                   </div>
@@ -152,7 +180,11 @@
                 >
                   <path d="M12 9v4" />
                   <path d="M12 17h.01" />
-                  <circle cx="12" cy="12" r="10" />
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
                 </svg>
                 <span>Unsaved changes</span>
               </div>
@@ -166,7 +198,10 @@
     <div class="main-content">
       <!-- ==================== RIGHT DRAWER (Add Role) ==================== -->
       <transition name="drawer">
-        <div v-if="isDrawerVisible" class="right-drawer">
+        <div
+          v-if="isDrawerVisible"
+          class="right-drawer"
+        >
           <div class="drawer-header">
             <div class="drawer-title-section">
               <svg
@@ -178,16 +213,22 @@
                 stroke-width="2"
               >
                 <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
+                <circle
+                  cx="9"
+                  cy="7"
+                  r="4"
+                />
                 <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
                 <path d="M16 3.13a4 4 0 0 1 0 7.75" />
               </svg>
-              <h3 class="drawer-title">Create New Role</h3>
+              <h3 class="drawer-title">
+                Create New Role
+              </h3>
             </div>
             <button
-              @click="hideAddDrawer"
               class="close-btn"
               :disabled="isLoading"
+              @click="hideAddDrawer"
             >
               <svg
                 width="18"
@@ -202,7 +243,10 @@
             </button>
           </div>
 
-          <form @submit.prevent="addRole" class="drawer-form">
+          <form
+            class="drawer-form"
+            @submit.prevent="addRole"
+          >
             <div class="form-row">
               <div class="form-group">
                 <label class="form-label">
@@ -215,7 +259,11 @@
                     stroke-width="2"
                   >
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
+                    <circle
+                      cx="12"
+                      cy="7"
+                      r="4"
+                    />
                   </svg>
                   Role Name
                 </label>
@@ -226,7 +274,7 @@
                   class="form-input"
                   placeholder="Enter role name"
                   :disabled="isLoading"
-                />
+                >
               </div>
 
               <div class="form-group">
@@ -252,10 +300,18 @@
                   class="form-select"
                   :disabled="isLoading"
                 >
-                  <option value="">Select organization type</option>
-                  <option value="tenant">Tenant</option>
-                  <option value="distributor">Distributor</option>
-                  <option value="client">Client</option>
+                  <option value="">
+                    Select organization type
+                  </option>
+                  <option value="tenant">
+                    Tenant
+                  </option>
+                  <option value="distributor">
+                    Distributor
+                  </option>
+                  <option value="client">
+                    Client
+                  </option>
                 </select>
               </div>
             </div>
@@ -274,8 +330,18 @@
                     d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
                   />
                   <polyline points="14,2 14,8 20,8" />
-                  <line x1="16" y1="13" x2="8" y2="13" />
-                  <line x1="16" y1="17" x2="8" y2="17" />
+                  <line
+                    x1="16"
+                    y1="13"
+                    x2="8"
+                    y2="13"
+                  />
+                  <line
+                    x1="16"
+                    y1="17"
+                    x2="8"
+                    y2="17"
+                  />
                   <polyline points="10,9 9,9 8,9" />
                 </svg>
                 Description
@@ -286,15 +352,15 @@
                 class="form-textarea"
                 placeholder="Enter role description"
                 :disabled="isLoading"
-              ></textarea>
+              />
             </div>
 
             <div class="form-actions">
               <button
                 type="button"
-                @click="hideAddDrawer"
                 class="cancel-btn"
                 :disabled="isLoading"
+                @click="hideAddDrawer"
               >
                 <svg
                   width="14"
@@ -308,7 +374,11 @@
                 </svg>
                 Cancel
               </button>
-              <button type="submit" class="submit-btn" :disabled="isLoading">
+              <button
+                type="submit"
+                class="submit-btn"
+                :disabled="isLoading"
+              >
                 <svg
                   width="14"
                   height="14"
@@ -328,7 +398,10 @@
 
       <!-- ==================== CONFIG SCREEN ==================== -->
       <div :class="['config-screen', isDrawerVisible ? 'config-shifted' : '']">
-        <div v-if="selectedRole" class="config-content">
+        <div
+          v-if="selectedRole"
+          class="config-content"
+        >
           <div class="config-header">
             <div class="config-title-section">
               <div class="config-icon">
@@ -361,8 +434,16 @@
                   <path
                     d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"
                   />
-                  <circle cx="17" cy="18" r="2" />
-                  <circle cx="7" cy="18" r="2" />
+                  <circle
+                    cx="17"
+                    cy="18"
+                    r="2"
+                  />
+                  <circle
+                    cx="7"
+                    cy="18"
+                    r="2"
+                  />
                 </svg>
                 <svg
                   v-else
@@ -374,13 +455,19 @@
                   stroke-width="2"
                 >
                   <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
+                  <circle
+                    cx="9"
+                    cy="7"
+                    r="4"
+                  />
                   <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
                   <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                 </svg>
               </div>
               <div>
-                <h2 class="config-title">{{ selectedRole.roleName }}</h2>
+                <h2 class="config-title">
+                  {{ selectedRole.roleName }}
+                </h2>
                 <p class="config-subtitle">
                   <span
                     class="org-badge"
@@ -394,7 +481,10 @@
               </div>
             </div>
 
-            <div v-if="hasUnsavedChanges" class="unsaved-banner">
+            <div
+              v-if="hasUnsavedChanges"
+              class="unsaved-banner"
+            >
               <svg
                 width="16"
                 height="16"
@@ -405,7 +495,11 @@
               >
                 <path d="M12 9v4" />
                 <path d="M12 17h.01" />
-                <circle cx="12" cy="12" r="10" />
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                />
               </svg>
               <span>You have unsaved changes</span>
             </div>
@@ -428,7 +522,9 @@
                     d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"
                   />
                 </svg>
-                <h3 class="section-title">Permissions & Actions</h3>
+                <h3 class="section-title">
+                  Permissions & Actions
+                </h3>
               </div>
             </div>
 
@@ -451,7 +547,11 @@
                         stroke-width="2"
                       >
                         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                        <circle cx="9" cy="7" r="4" />
+                        <circle
+                          cx="9"
+                          cy="7"
+                          r="4"
+                        />
                         <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
                         <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                       </svg>
@@ -468,8 +568,18 @@
                           d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
                         />
                         <polyline points="14,2 14,8 20,8" />
-                        <line x1="16" y1="13" x2="8" y2="13" />
-                        <line x1="16" y1="17" x2="8" y2="17" />
+                        <line
+                          x1="16"
+                          y1="13"
+                          x2="8"
+                          y2="13"
+                        />
+                        <line
+                          x1="16"
+                          y1="17"
+                          x2="8"
+                          y2="17"
+                        />
                         <polyline points="10,9 9,9 8,9" />
                       </svg>
                       <svg
@@ -489,11 +599,23 @@
                           rx="2"
                           ry="2"
                         />
-                        <line x1="8" y1="21" x2="16" y2="21" />
-                        <line x1="12" y1="17" x2="12" y2="21" />
+                        <line
+                          x1="8"
+                          y1="21"
+                          x2="16"
+                          y2="21"
+                        />
+                        <line
+                          x1="12"
+                          y1="17"
+                          x2="12"
+                          y2="21"
+                        />
                       </svg>
                     </div>
-                    <h4 class="action-title">{{ action.name }}</h4>
+                    <h4 class="action-title">
+                      {{ action.name }}
+                    </h4>
                   </div>
 
                   <div class="permissions-list">
@@ -506,9 +628,9 @@
                         v-model="localRole.actions[action.key][permission]"
                         type="checkbox"
                         class="permission-checkbox"
-                        @change="markAsModified"
                         :disabled="isLoading"
-                      />
+                        @change="markAsModified"
+                      >
                       <div class="permission-content">
                         <svg
                           v-if="permission === 'create'"
@@ -550,8 +672,18 @@
                           <path
                             d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
                           />
-                          <line x1="10" y1="11" x2="10" y2="17" />
-                          <line x1="14" y1="11" x2="14" y2="17" />
+                          <line
+                            x1="10"
+                            y1="11"
+                            x2="10"
+                            y2="17"
+                          />
+                          <line
+                            x1="14"
+                            y1="11"
+                            x2="14"
+                            y2="17"
+                          />
                         </svg>
                         <span class="permission-label">{{ permission }}</span>
                       </div>
@@ -574,12 +706,28 @@
                   stroke="currentColor"
                   stroke-width="2"
                 >
-                  <circle cx="12" cy="12" r="10" />
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
                   <path d="M8 14s1.5 2 4 2 4-2 4-2" />
-                  <line x1="9" y1="9" x2="9.01" y2="9" />
-                  <line x1="15" y1="9" x2="15.01" y2="9" />
+                  <line
+                    x1="9"
+                    y1="9"
+                    x2="9.01"
+                    y2="9"
+                  />
+                  <line
+                    x1="15"
+                    y1="9"
+                    x2="15.01"
+                    y2="9"
+                  />
                 </svg>
-                <h3 class="section-title">Data Access Scope</h3>
+                <h3 class="section-title">
+                  Data Access Scope
+                </h3>
               </div>
             </div>
 
@@ -602,7 +750,11 @@
                         stroke-width="2"
                       >
                         <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                        <circle cx="9" cy="7" r="4" />
+                        <circle
+                          cx="9"
+                          cy="7"
+                          r="4"
+                        />
                         <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
                         <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                       </svg>
@@ -619,8 +771,18 @@
                           d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
                         />
                         <polyline points="14,2 14,8 20,8" />
-                        <line x1="16" y1="13" x2="8" y2="13" />
-                        <line x1="16" y1="17" x2="8" y2="17" />
+                        <line
+                          x1="16"
+                          y1="13"
+                          x2="8"
+                          y2="13"
+                        />
+                        <line
+                          x1="16"
+                          y1="17"
+                          x2="8"
+                          y2="17"
+                        />
                         <polyline points="10,9 9,9 8,9" />
                       </svg>
                       <svg
@@ -640,20 +802,34 @@
                           rx="2"
                           ry="2"
                         />
-                        <line x1="8" y1="21" x2="16" y2="21" />
-                        <line x1="12" y1="17" x2="12" y2="21" />
+                        <line
+                          x1="8"
+                          y1="21"
+                          x2="16"
+                          y2="21"
+                        />
+                        <line
+                          x1="12"
+                          y1="17"
+                          x2="12"
+                          y2="21"
+                        />
                       </svg>
                     </div>
-                    <h4 class="scope-title">{{ scope.name }}</h4>
+                    <h4 class="scope-title">
+                      {{ scope.name }}
+                    </h4>
                   </div>
 
                   <select
                     v-model="localRole.dataScope[scope.key]"
                     class="scope-select"
-                    @change="markAsModified"
                     :disabled="isLoading"
+                    @change="markAsModified"
                   >
-                    <option value="">Select access scope</option>
+                    <option value="">
+                      Select access scope
+                    </option>
                     <option
                       v-for="option in scopeOptions"
                       :key="option.value"
@@ -670,9 +846,9 @@
           <!-- Save Configuration -->
           <div class="save-section">
             <button
-              @click="discardChanges"
               class="discard-btn"
               :disabled="isLoading || !hasUnsavedChanges"
+              @click="discardChanges"
             >
               <svg
                 width="14"
@@ -688,9 +864,9 @@
               Discard Changes
             </button>
             <button
-              @click="saveConfiguration"
               class="save-btn"
               :disabled="isLoading || !hasUnsavedChanges"
+              @click="saveConfiguration"
             >
               <svg
                 width="14"
@@ -712,7 +888,10 @@
         </div>
 
         <!-- Empty State -->
-        <div v-else class="empty-state">
+        <div
+          v-else
+          class="empty-state"
+        >
           <div class="empty-content">
             <div class="empty-icon">
               <svg
@@ -728,7 +907,9 @@
                 <path d="M2 12l10 5 10-5" />
               </svg>
             </div>
-            <h3 class="empty-title">No role selected</h3>
+            <h3 class="empty-title">
+              No role selected
+            </h3>
             <p class="empty-subtitle">
               Select a role from the sidebar or create a new one to configure
               permissions and access scope.

@@ -7,18 +7,32 @@
     >
       <span v-if="encryptedValue">{{ maskedValue }}</span>
       <span v-else>-</span>
-      <v-icon size="small" color="primary" class="ms-2"> mdi-eye </v-icon>
+      <v-icon
+        size="small"
+        color="primary"
+        class="ms-2"
+      >
+        mdi-eye
+      </v-icon>
     </div>
 
-    <v-dialog v-model="dialog" max-width="500">
+    <v-dialog
+      v-model="dialog"
+      max-width="500"
+    >
       <v-card>
-        <v-card-title class="text-h6"> Sensitive Information </v-card-title>
+        <v-card-title class="text-h6">
+          Sensitive Information
+        </v-card-title>
         <v-card-text>
-          <div v-if="loading" class="d-flex justify-center align-center pa-4">
+          <div
+            v-if="loading"
+            class="d-flex justify-center align-center pa-4"
+          >
             <v-progress-circular
               indeterminate
               color="primary"
-            ></v-progress-circular>
+            />
           </div>
           <div v-else>
             <p class="text-subtitle-1 font-weight-bold mb-2">
@@ -52,10 +66,14 @@
           >
             Copy
           </v-btn>
-          <v-spacer></v-spacer>
-          <v-btn color="primary" variant="text" @click="dialog = false"
-            >Close</v-btn
+          <v-spacer />
+          <v-btn
+            color="primary"
+            variant="text"
+            @click="dialog = false"
           >
+            Close
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

@@ -3,28 +3,28 @@
     <!-- Main Content -->
     <div class="main-content full-width">
       <DataTableWrapper
-        v-model:searchQuery="search"
-        :showSearch="true"
-        :searchPlaceholder="'Search Card Details'"
-        :isEmpty="filteredCardManagementData.length === 0 && !search"
-        :hasError="error"
-        @update:searchQuery="debouncedSearch"
+        v-model:search-query="search"
+        :show-search="true"
+        :search-placeholder="'Search Card Details'"
+        :is-empty="filteredCardManagementData.length === 0 && !search"
+        :has-error="error"
+        @update:search-query="debouncedSearch"
       >
         <!-- Import Button (updated to BaseButton) -->
         <template #toolbar-actions>
           <BaseButton
             variant="primary"
-            @click="showAddCardDialog = true"
             prepend-icon="mdi-plus"
             class="add-card-btn mr-2"
+            @click="showAddCardDialog = true"
           >
             Add Card
           </BaseButton>
           <BaseButton
             variant="primary"
-            @click="showImportDialog = true"
             prepend-icon="mdi-file-import"
             class="import-btn"
+            @click="showImportDialog = true"
           >
             Import Cards
           </BaseButton>
@@ -51,8 +51,8 @@
           <EmptyState
             title="No card details found"
             message="Try adjusting your filters or search term"
-            :primaryAction="{ text: 'Clear Filters' }"
-            @primaryAction="clearFilters"
+            :primary-action="{ text: 'Clear Filters' }"
+            @primary-action="clearFilters"
           />
         </div>
 
@@ -60,16 +60,16 @@
           <DataTable
             :items="filteredCardManagementData"
             :columns="columns"
-            :selectedItems="selectedItems"
-            :showSelection="false"
-            :sortBy="sortBy[0]?.key || ''"
-            :sortDirection="sortBy[0]?.order || 'asc'"
-            :itemKey="'id'"
-            :rowClickable="true"
-            @update:selectedItems="selectedItems = $event"
-            @update:sortBy="updateSortBy"
-            @update:sortDirection="updateSortDirection"
-            @rowClick="handleRowClick"
+            :selected-items="selectedItems"
+            :show-selection="false"
+            :sort-by="sortBy[0]?.key || ''"
+            :sort-direction="sortBy[0]?.order || 'asc'"
+            :item-key="'id'"
+            :row-clickable="true"
+            @update:selected-items="selectedItems = $event"
+            @update:sort-by="updateSortBy"
+            @update:sort-direction="updateSortDirection"
+            @row-click="handleRowClick"
             @sort="handleSort"
           >
             <!-- RFID Card Column -->
@@ -113,35 +113,44 @@
         </div>
 
         <!-- Pagination Slot -->
-        <template v-slot:pagination>
+        <template #pagination>
           <CustomPagination
             v-model:page="page"
-            v-model:itemsPerPage="itemsPerPage"
+            v-model:items-per-page="itemsPerPage"
             :total-items="totalItems"
             @update:page="handlePageChange"
-            @update:itemsPerPage="handleItemsPerPageChange"
+            @update:items-per-page="handleItemsPerPageChange"
           />
         </template>
       </DataTableWrapper>
     </div>
-    <v-dialog v-model="showAddCardDialog" max-width="600px" persistent>
+    <v-dialog
+      v-model="showAddCardDialog"
+      max-width="600px"
+      persistent
+    >
       <v-card class="add-card-dialog">
         <v-card-title class="d-flex align-center">
-          <v-icon class="mr-2">mdi-plus</v-icon>
+          <v-icon class="mr-2">
+            mdi-plus
+          </v-icon>
           Add New Card
-          <v-spacer></v-spacer>
+          <v-spacer />
           <BaseButton
             icon
-            @click="closeAddCardDialog"
             :disabled="isAddingCard"
             variant="text"
+            @click="closeAddCardDialog"
           >
             <v-icon>mdi-close</v-icon>
           </BaseButton>
         </v-card-title>
 
         <v-card-text class="pa-6">
-          <v-form ref="addCardForm" v-model="addCardFormValid">
+          <v-form
+            ref="addCardForm"
+            v-model="addCardFormValid"
+          >
             <!-- Card Number Field -->
             <v-text-field
               v-model="newCard.cardNumber"
@@ -150,7 +159,7 @@
               :rules="cardNumberRules"
               required
               class="mb-4"
-            ></v-text-field>
+            />
 
             <!-- Access Level Number Field -->
             <v-select
@@ -164,7 +173,7 @@
               clearable
               placeholder="Select access level (optional)"
               class="mb-4"
-            ></v-select>
+            />
             <!-- Type Field -->
             <v-select
               v-model="newCard.type"
@@ -174,23 +183,23 @@
               :rules="typeRules"
               required
               class="mb-6"
-            ></v-select>
+            />
 
             <div class="add-card-actions d-flex justify-end">
               <BaseButton
                 variant="outlined"
-                @click="closeAddCardDialog"
                 class="mr-2"
                 :disabled="isAddingCard"
+                @click="closeAddCardDialog"
               >
                 CANCEL
               </BaseButton>
               <BaseButton
                 color="primary"
-                @click="saveSingleCard"
                 :disabled="!addCardFormValid || isAddingCard"
                 :loading="isAddingCard"
                 prepend-icon="mdi-content-save"
+                @click="saveSingleCard"
               >
                 SAVE CARD
               </BaseButton>
@@ -200,17 +209,23 @@
       </v-card>
     </v-dialog>
     <!-- Import Cards Dialog -->
-    <v-dialog v-model="showImportDialog" max-width="800px" persistent>
+    <v-dialog
+      v-model="showImportDialog"
+      max-width="800px"
+      persistent
+    >
       <v-card class="import-dialog">
         <v-card-title class="d-flex align-center">
-          <v-icon class="mr-2">mdi-file-import</v-icon>
+          <v-icon class="mr-2">
+            mdi-file-import
+          </v-icon>
           Import Cards from Excel
-          <v-spacer></v-spacer>
+          <v-spacer />
           <BaseButton
             icon
-            @click="closeImportDialog"
             :disabled="isImporting"
             variant="text"
+            @click="closeImportDialog"
           >
             <v-icon>mdi-close</v-icon>
           </BaseButton>
@@ -219,27 +234,57 @@
         <v-card-text class="pa-6">
           <!-- Import Steps -->
           <div class="import-steps">
-            <div class="step" :class="{ active: importStep === 1 }">
-              <div class="step-number">1</div>
-              <div class="step-label">Upload Excel File</div>
+            <div
+              class="step"
+              :class="{ active: importStep === 1 }"
+            >
+              <div class="step-number">
+                1
+              </div>
+              <div class="step-label">
+                Upload Excel File
+              </div>
             </div>
-            <div class="step" :class="{ active: importStep === 2 }">
-              <div class="step-number">2</div>
-              <div class="step-label">Preview Data</div>
+            <div
+              class="step"
+              :class="{ active: importStep === 2 }"
+            >
+              <div class="step-number">
+                2
+              </div>
+              <div class="step-label">
+                Preview Data
+              </div>
             </div>
-            <div class="step" :class="{ active: importStep === 3 }">
-              <div class="step-number">3</div>
-              <div class="step-label">Import Cards</div>
+            <div
+              class="step"
+              :class="{ active: importStep === 3 }"
+            >
+              <div class="step-number">
+                3
+              </div>
+              <div class="step-label">
+                Import Cards
+              </div>
             </div>
           </div>
 
           <!-- Step 1: File Upload -->
-          <div v-if="importStep === 1" class="upload-section">
+          <div
+            v-if="importStep === 1"
+            class="upload-section"
+          >
             <div class="text-center pa-4">
-              <v-icon size="64" color="primary" class="mb-4"
-                >mdi-file-excel</v-icon
+              <v-icon
+                size="64"
+                color="primary"
+                class="mb-4"
               >
-              <h3 class="mb-2">Upload Excel File</h3>
+                mdi-file-excel
+              </v-icon>
+              <h3 class="mb-2">
+                Upload Excel File
+              </h3>
               <p class="text-medium-emphasis mb-6">
                 Upload an Excel file (.xlsx, .xls) containing card numbers
               </p>
@@ -249,8 +294,8 @@
                 color="secondary"
                 variant="outlined"
                 class="mb-4"
-                @click="downloadTemplate"
                 prepend-icon="mdi-download"
+                @click="downloadTemplate"
               >
                 Download Template
               </BaseButton>
@@ -261,14 +306,16 @@
                 label="Choose Excel file"
                 variant="outlined"
                 prepend-icon="mdi-paperclip"
-                @update:model-value="handleFileSelect"
                 :error-messages="fileError"
                 hide-details
                 class="mb-4"
-              ></v-file-input>
+                @update:model-value="handleFileSelect"
+              />
 
               <div class="file-requirements">
-                <h4 class="mb-2">File Requirements:</h4>
+                <h4 class="mb-2">
+                  File Requirements:
+                </h4>
                 <ul class="text-caption text-medium-emphasis">
                   <li>File must be in Excel format (.xlsx or .xls)</li>
                   <li>First column should contain card numbers</li>
@@ -277,13 +324,16 @@
               </div>
 
               <!-- Import button (appears only after file selected) -->
-              <div class="mt-6" v-if="importFile">
+              <div
+                v-if="importFile"
+                class="mt-6"
+              >
                 <BaseButton
                   color="primary"
                   size="large"
-                  @click="startImportFromFile"
                   :disabled="isImporting"
                   prepend-icon="mdi-import"
+                  @click="startImportFromFile"
                 >
                   IMPORT CARDS
                 </BaseButton>
@@ -292,12 +342,17 @@
           </div>
 
           <!-- Step 2: Data Preview -->
-          <div v-else-if="importStep === 2" class="preview-section">
+          <div
+            v-else-if="importStep === 2"
+            class="preview-section"
+          >
             <v-card variant="outlined">
               <v-card-title class="d-flex align-center">
-                <v-icon class="mr-2">mdi-table-eye</v-icon>
+                <v-icon class="mr-2">
+                  mdi-table-eye
+                </v-icon>
                 Preview Import Data
-                <v-spacer></v-spacer>
+                <v-spacer />
                 <span class="text-caption text-medium-emphasis">
                   {{ previewData.length }} cards found
                 </span>
@@ -305,7 +360,10 @@
 
               <v-card-text>
                 <div class="preview-table-container">
-                  <v-table density="comfortable" class="preview-table">
+                  <v-table
+                    density="comfortable"
+                    class="preview-table"
+                  >
                     <thead>
                       <tr>
                         <th>#</th>
@@ -317,13 +375,19 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <tr v-for="(item, index) in previewData" :key="index">
+                      <tr
+                        v-for="(item, index) in previewData"
+                        :key="index"
+                      >
                         <td>{{ index + 1 }}</td>
                         <td>{{ item.cardNumber }}</td>
                         <td>{{ item.accessLevelNumber || "N/A" }}</td>
                         <td>{{ item.accessLevelName || "N/A" }}</td>
                         <td>
-                          <v-chip size="small" variant="tonal">
+                          <v-chip
+                            size="small"
+                            variant="tonal"
+                          >
                             {{ item.type }}
                           </v-chip>
                         </td>
@@ -346,17 +410,17 @@
                 <div class="preview-actions mt-4">
                   <BaseButton
                     variant="outlined"
-                    @click="importStep = 1"
                     prepend-icon="mdi-arrow-left"
                     class="mr-2"
+                    @click="importStep = 1"
                   >
                     BACK
                   </BaseButton>
                   <BaseButton
                     color="primary"
-                    @click="startImport"
                     :disabled="!hasValidCards"
                     prepend-icon="mdi-import"
+                    @click="startImport"
                   >
                     START IMPORT
                   </BaseButton>
@@ -366,12 +430,17 @@
           </div>
 
           <!-- Step 3: Import Progress -->
-          <div v-else-if="importStep === 3" class="import-section">
+          <div
+            v-else-if="importStep === 3"
+            class="import-section"
+          >
             <v-card variant="outlined">
               <v-card-title class="d-flex align-center">
-                <v-icon class="mr-2">mdi-progress-upload</v-icon>
+                <v-icon class="mr-2">
+                  mdi-progress-upload
+                </v-icon>
                 Importing Cards...
-                <v-spacer></v-spacer>
+                <v-spacer />
                 <span class="text-caption">
                   {{ importProgress.current }}/{{ importProgress.total }}
                 </span>
@@ -387,7 +456,7 @@
                     color="primary"
                     class="mb-2"
                   >
-                    <template v-slot:default="{ value }">
+                    <template #default="{ value }">
                       <strong>{{ Math.ceil(value) }}%</strong>
                     </template>
                   </v-progress-linear>
@@ -404,8 +473,12 @@
                       color="success"
                       class="text-center pa-3"
                     >
-                      <div class="text-h6">{{ importResults.success }}</div>
-                      <div class="text-caption">Success</div>
+                      <div class="text-h6">
+                        {{ importResults.success }}
+                      </div>
+                      <div class="text-caption">
+                        Success
+                      </div>
                     </v-card>
                   </v-col>
                   <v-col cols="3">
@@ -414,8 +487,12 @@
                       color="error"
                       class="text-center pa-3"
                     >
-                      <div class="text-h6">{{ importResults.failed }}</div>
-                      <div class="text-caption">Failed</div>
+                      <div class="text-h6">
+                        {{ importResults.failed }}
+                      </div>
+                      <div class="text-caption">
+                        Failed
+                      </div>
                     </v-card>
                   </v-col>
                   <v-col cols="3">
@@ -424,8 +501,12 @@
                       color="warning"
                       class="text-center pa-3"
                     >
-                      <div class="text-h6">{{ importResults.duplicate }}</div>
-                      <div class="text-caption">Duplicate</div>
+                      <div class="text-h6">
+                        {{ importResults.duplicate }}
+                      </div>
+                      <div class="text-caption">
+                        Duplicate
+                      </div>
                     </v-card>
                   </v-col>
                   <v-col cols="3">
@@ -434,16 +515,25 @@
                       color="info"
                       class="text-center pa-3"
                     >
-                      <div class="text-h6">{{ importResults.total }}</div>
-                      <div class="text-caption">Total</div>
+                      <div class="text-h6">
+                        {{ importResults.total }}
+                      </div>
+                      <div class="text-caption">
+                        Total
+                      </div>
                     </v-card>
                   </v-col>
                 </v-row>
 
                 <!-- Import Log -->
                 <div class="import-log mt-6">
-                  <h4 class="mb-2">Import Log</h4>
-                  <v-card variant="outlined" class="log-container">
+                  <h4 class="mb-2">
+                    Import Log
+                  </h4>
+                  <v-card
+                    variant="outlined"
+                    class="log-container"
+                  >
                     <v-card-text class="pa-0">
                       <v-list density="compact">
                         <v-list-item
@@ -451,8 +541,11 @@
                           :key="index"
                           :class="getLogClass(log.type)"
                         >
-                          <template v-slot:prepend>
-                            <v-icon :color="getLogColor(log.type)" size="small">
+                          <template #prepend>
+                            <v-icon
+                              :color="getLogColor(log.type)"
+                              size="small"
+                            >
                               {{ getLogIcon(log.type) }}
                             </v-icon>
                           </template>
@@ -469,8 +562,8 @@
                   <BaseButton
                     v-if="importProgress.completed"
                     color="primary"
-                    @click="finishImport"
                     prepend-icon="mdi-check"
+                    @click="finishImport"
                   >
                     FINISH
                   </BaseButton>
@@ -478,9 +571,9 @@
                     v-else
                     color="error"
                     variant="outlined"
-                    @click="cancelImport"
                     :disabled="!isImporting"
                     prepend-icon="mdi-cancel"
+                    @click="cancelImport"
                   >
                     CANCEL IMPORT
                   </BaseButton>
@@ -500,7 +593,9 @@
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-check-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-check-circle
+        </v-icon>
         {{ successMessage }}
       </div>
     </v-snackbar>
@@ -512,7 +607,9 @@
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-alert-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-alert-circle
+        </v-icon>
         {{ errorMessage }}
       </div>
     </v-snackbar>

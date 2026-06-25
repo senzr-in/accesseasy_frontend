@@ -1,37 +1,52 @@
 <template>
-    <div 
-      class="product-card" 
-      :class="{ 'hover': isHovering }"
-      @mouseenter="isHovering = true"
-      @mouseleave="isHovering = false"
-      @click="$emit('click', product)"
-    >
-      <div class="product-image">
-        <img 
-          v-if="product.imageUrl" 
-          :src="`${product.imageUrl}?access_token=bennGJlPG_qUNKhCSE9WFUo6G_RnQAts`" 
-          :alt="product.productName"
-          @error="handleImageError"
-        />
-        <div v-else class="product-image-placeholder">
-          {{ product.productName.charAt(0).toUpperCase() }}
-        </div>
-      </div>
-      <div class="product-details">
-        <h3 class="product-name">{{ product.productName }}</h3>
-        <p v-if="product.productId" class="product-model">Model: {{ product.productId }}</p>
-        <p v-if="product.deviceType" class="product-type">Type: {{ product.deviceType }}</p>
-        <div class="product-status">
-          <span 
-            class="status-badge" 
-            :class="{ 'draft': product.status === 'draft', 'active': product.status !== 'draft' }"
-          >
-            {{ product.status.toUpperCase() }}
-          </span>
-        </div>
+  <div 
+    class="product-card" 
+    :class="{ 'hover': isHovering }"
+    @mouseenter="isHovering = true"
+    @mouseleave="isHovering = false"
+    @click="$emit('click', product)"
+  >
+    <div class="product-image">
+      <img 
+        v-if="product.imageUrl" 
+        :src="`${product.imageUrl}?access_token=bennGJlPG_qUNKhCSE9WFUo6G_RnQAts`" 
+        :alt="product.productName"
+        @error="handleImageError"
+      >
+      <div
+        v-else
+        class="product-image-placeholder"
+      >
+        {{ product.productName.charAt(0).toUpperCase() }}
       </div>
     </div>
-  </template>
+    <div class="product-details">
+      <h3 class="product-name">
+        {{ product.productName }}
+      </h3>
+      <p
+        v-if="product.productId"
+        class="product-model"
+      >
+        Model: {{ product.productId }}
+      </p>
+      <p
+        v-if="product.deviceType"
+        class="product-type"
+      >
+        Type: {{ product.deviceType }}
+      </p>
+      <div class="product-status">
+        <span 
+          class="status-badge" 
+          :class="{ 'draft': product.status === 'draft', 'active': product.status !== 'draft' }"
+        >
+          {{ product.status.toUpperCase() }}
+        </span>
+      </div>
+    </div>
+  </div>
+</template>
   
   <script>
   export default {

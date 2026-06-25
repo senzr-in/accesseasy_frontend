@@ -1,12 +1,15 @@
 <template>
   <div class="employee-container">
     <!-- Filter Panel -->
-    <div class="filter-panel" v-if="showFilters && tenantId">
+    <div
+      v-if="showFilters && tenantId"
+      class="filter-panel"
+    >
       <div class="filter-content">
         <FilterComponent
-          :tenantId="tenantId"
-          :initialFilters="initialFilters"
-          :initiallyVisible="true"
+          :tenant-id="tenantId"
+          :initial-filters="initialFilters"
+          :initially-visible="true"
           :filter-schema="pageFilters"
           @apply-filters="handleApplyFilters"
           @filter-visibility-changed="onFilterVisibilityChanged"
@@ -25,10 +28,10 @@
         <button
           v-if="isAdmin"
           class="filter-toggle-static"
-          @click="toggleFilters"
           :class="{ active: hasActiveFilters }"
           :title="showFilters ? 'Hide filters' : 'Show filters'"
           aria-label="Toggle filters"
+          @click="toggleFilters"
         >
           <svg
             width="20"
@@ -40,15 +43,18 @@
           >
             <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46" />
           </svg>
-          <div v-if="hasActiveFilters" class="filter-indicator"></div>
+          <div
+            v-if="hasActiveFilters"
+            class="filter-indicator"
+          />
         </button>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <BaseButton
           color="primary"
           :text="`Add request`"
-          @click="toggleAddForm"
           size="md"
           :left-icon="Plus"
+          @click="toggleAddForm"
         />
       </div>
 
@@ -62,13 +68,19 @@
       >
         <add
           v-if="showAddForm"
-          @closeAddPage="toggleAddForm"
-          @leaveApplied="handleLeaveApplied"
+          @close-add-page="toggleAddForm"
+          @leave-applied="handleLeaveApplied"
         />
       </v-navigation-drawer>
 
-      <div v-if="loading" class="d-flex justify-center align-center py-2">
-        <v-progress-linear indeterminate color="black"></v-progress-linear>
+      <div
+        v-if="loading"
+        class="d-flex justify-center align-center py-2"
+      >
+        <v-progress-linear
+          indeterminate
+          color="black"
+        />
       </div>
 
       <!-- Table Container -->
@@ -101,7 +113,11 @@
           <template #cell-status="{ item }">
             <div class="d-flex align-center">
               <span class="status-chip status-requested compact">
-                <v-icon size="small" class="me-1" color="amber-darken-3">
+                <v-icon
+                  size="small"
+                  class="me-1"
+                  color="amber-darken-3"
+                >
                   mdi-clock-outline
                 </v-icon>
                 Requested
@@ -113,7 +129,12 @@
                   class="me-2 status-btn compact"
                   @click.stop="updateStatus(item.id, 'approved')"
                 >
-                  <v-icon size="x-small" start>mdi-check</v-icon>
+                  <v-icon
+                    size="x-small"
+                    start
+                  >
+                    mdi-check
+                  </v-icon>
                   Accept
                 </v-btn>
                 <v-btn
@@ -122,7 +143,12 @@
                   class="status-btn compact"
                   @click.stop="updateStatus(item.id, 'declined')"
                 >
-                  <v-icon size="x-small" start>mdi-close</v-icon>
+                  <v-icon
+                    size="x-small"
+                    start
+                  >
+                    mdi-close
+                  </v-icon>
                   Reject
                 </v-btn>
               </div>
@@ -132,7 +158,9 @@
           <!-- Empty state -->
           <template #empty-state>
             <div class="empty-content">
-              <div class="empty-icon">📋</div>
+              <div class="empty-icon">
+                📋
+              </div>
               <h3>No pending leave requests found</h3>
               <p>There are no pending leave requests to display.</p>
             </div>
@@ -142,11 +170,11 @@
 
       <CustomPagination
         v-model:page="page"
-        v-model:itemsPerPage="itemsPerPage"
+        v-model:items-per-page="itemsPerPage"
         :total-items="totalItems"
         :is-searching="!!search"
         @update:page="handlePageChange"
-        @update:itemsPerPage="handleItemsPerPageChange"
+        @update:items-per-page="handleItemsPerPageChange"
       />
     </div>
   </div>

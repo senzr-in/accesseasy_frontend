@@ -10,7 +10,9 @@
             QR Access Management
             <QrCode class="w-6 h-6 text-emerald-600 dark:text-emerald-500" />
           </h1>
-          <p class="text-slate-500 dark:text-slate-400 mt-1">Generate and track secure, time-limited mobile access keys.</p>
+          <p class="text-slate-500 dark:text-slate-400 mt-1">
+            Generate and track secure, time-limited mobile access keys.
+          </p>
         </div>
       </div>
     </div>
@@ -33,8 +35,18 @@
                   v-model="selectedEmployeeId"
                   class="flex h-10 w-full rounded-md border border-slate-200 dark:border-slate-800 bg-transparent px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 appearance-none"
                 >
-                  <option value="" disabled>Search employee...</option>
-                  <option v-for="emp in employees" :key="emp.id" :value="emp.id" class="text-slate-700 dark:bg-slate-900 dark:text-white">
+                  <option
+                    value=""
+                    disabled
+                  >
+                    Search employee...
+                  </option>
+                  <option
+                    v-for="emp in employees"
+                    :key="emp.id"
+                    :value="emp.id"
+                    class="text-slate-700 dark:bg-slate-900 dark:text-white"
+                  >
                     {{ emp.name }} ({{ emp.email }})
                   </option>
                 </select>
@@ -48,8 +60,18 @@
                   v-model="selectedAccessLevelId"
                   class="flex h-10 w-full rounded-md border border-slate-200 dark:border-slate-800 bg-transparent px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 appearance-none"
                 >
-                  <option value="" disabled>Default permissions</option>
-                  <option v-for="al in accessLevels" :key="al.id" :value="al.id" class="text-slate-700 dark:bg-slate-900 dark:text-white">
+                  <option
+                    value=""
+                    disabled
+                  >
+                    Default permissions
+                  </option>
+                  <option
+                    v-for="al in accessLevels"
+                    :key="al.id"
+                    :value="al.id"
+                    class="text-slate-700 dark:bg-slate-900 dark:text-white"
+                  >
                     {{ al.name }}
                   </option>
                 </select>
@@ -63,30 +85,61 @@
                   v-model="validity"
                   class="flex h-10 w-full rounded-md border border-slate-200 dark:border-slate-800 bg-transparent px-3 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 appearance-none"
                 >
-                  <option value="15" class="text-slate-700 dark:bg-slate-900 dark:text-white">15 Minutes</option>
-                  <option value="60" class="text-slate-700 dark:bg-slate-900 dark:text-white">1 Hour</option>
-                  <option value="480" class="text-slate-700 dark:bg-slate-900 dark:text-white">8 Hours</option>
-                  <option value="1440" class="text-slate-700 dark:bg-slate-900 dark:text-white">24 Hours</option>
+                  <option
+                    value="15"
+                    class="text-slate-700 dark:bg-slate-900 dark:text-white"
+                  >
+                    15 Minutes
+                  </option>
+                  <option
+                    value="60"
+                    class="text-slate-700 dark:bg-slate-900 dark:text-white"
+                  >
+                    1 Hour
+                  </option>
+                  <option
+                    value="480"
+                    class="text-slate-700 dark:bg-slate-900 dark:text-white"
+                  >
+                    8 Hours
+                  </option>
+                  <option
+                    value="1440"
+                    class="text-slate-700 dark:bg-slate-900 dark:text-white"
+                  >
+                    24 Hours
+                  </option>
                 </select>
               </div>
             </div>
 
             <button
-              @click="handleGenerate"
               :disabled="isGenerating || !selectedEmployeeId"
               class="w-full h-10 inline-flex items-center justify-center rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium transition-colors mt-2 disabled:opacity-50 disabled:pointer-events-none"
+              @click="handleGenerate"
             >
-              <RefreshCw v-if="isGenerating" class="w-4 h-4 animate-spin mr-2" />
-              <Zap v-else class="w-4 h-4 mr-2" />
+              <RefreshCw
+                v-if="isGenerating"
+                class="w-4 h-4 animate-spin mr-2"
+              />
+              <Zap
+                v-else
+                class="w-4 h-4 mr-2"
+              />
               Generate Mobile Key
             </button>
           </div>
         </div>
 
-        <div v-if="currentQR" class="rounded-xl border-2 border-emerald-500 bg-white dark:bg-slate-900 shadow-2xl shadow-emerald-500/10 animate-in zoom-in duration-300">
+        <div
+          v-if="currentQR"
+          class="rounded-xl border-2 border-emerald-500 bg-white dark:bg-slate-900 shadow-2xl shadow-emerald-500/10 animate-in zoom-in duration-300"
+        >
           <div class="text-center p-4 pb-0">
             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500 text-white mb-2 mx-auto">Active Key</span>
-            <h3 class="text-sm font-black uppercase tracking-tight text-slate-900 dark:text-white">Access Token</h3>
+            <h3 class="text-sm font-black uppercase tracking-tight text-slate-900 dark:text-white">
+              Access Token
+            </h3>
             <p class="text-xs text-slate-500 dark:text-slate-400">
               Expires {{ new Date(currentQR.expiresAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
             </p>
@@ -100,7 +153,10 @@
               <button class="flex-1 h-8 inline-flex items-center justify-center rounded-md border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                 <Share2 class="w-3 h-3 mr-1" /> Share
               </button>
-              <button @click="currentQR = null" class="flex-1 h-8 inline-flex items-center justify-center rounded-md text-xs font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors">
+              <button
+                class="flex-1 h-8 inline-flex items-center justify-center rounded-md text-xs font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors"
+                @click="currentQR = null"
+              >
                 Dismiss
               </button>
             </div>
@@ -121,21 +177,32 @@
             <table class="w-full text-left border-collapse whitespace-nowrap">
               <thead class="bg-slate-50 dark:bg-slate-950/50">
                 <tr>
-                  <th class="px-6 py-4 text-xs font-semibold text-slate-600 dark:text-slate-400">Employee</th>
-                  <th class="px-6 py-4 text-xs font-semibold text-slate-600 dark:text-slate-400">Generated At</th>
-                  <th class="px-6 py-4 text-xs font-semibold text-slate-600 dark:text-slate-400">Expires At</th>
-                  <th class="px-6 py-4 text-xs font-semibold text-slate-600 dark:text-slate-400">Status</th>
+                  <th class="px-6 py-4 text-xs font-semibold text-slate-600 dark:text-slate-400">
+                    Employee
+                  </th>
+                  <th class="px-6 py-4 text-xs font-semibold text-slate-600 dark:text-slate-400">
+                    Generated At
+                  </th>
+                  <th class="px-6 py-4 text-xs font-semibold text-slate-600 dark:text-slate-400">
+                    Expires At
+                  </th>
+                  <th class="px-6 py-4 text-xs font-semibold text-slate-600 dark:text-slate-400">
+                    Status
+                  </th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100 dark:divide-slate-800/50">
                 <tr v-if="history.length === 0">
-                  <td colspan="4" class="px-6 py-48 text-center text-slate-500 dark:text-slate-400 italic text-sm">
+                  <td
+                    colspan="4"
+                    class="px-6 py-48 text-center text-slate-500 dark:text-slate-400 italic text-sm"
+                  >
                     No QR keys generated yet.
                   </td>
                 </tr>
                 <tr 
-                  v-else
-                  v-for="log in history" 
+                  v-for="log in history"
+                  v-else 
                   :key="log.id"
                   class="hover:bg-emerald-50/50 dark:hover:bg-emerald-500/[0.02] transition-colors"
                 >

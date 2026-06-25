@@ -1,6 +1,9 @@
 <template>
   <div class="tasks-container">
-    <div class="main-content" :class="{ 'with-filter': showFilters }">
+    <div
+      class="main-content"
+      :class="{ 'with-filter': showFilters }"
+    >
       <!-- Header -->
       <header class="header">
         <div class="header-content">
@@ -15,15 +18,19 @@
                 stroke="currentColor"
                 stroke-width="2"
               >
-                <circle cx="11" cy="11" r="8" />
+                <circle
+                  cx="11"
+                  cy="11"
+                  r="8"
+                />
                 <path d="m21 21-4.35-4.35" />
               </svg>
               <input
-                type="text"
                 v-model="searchQuery"
+                type="text"
                 placeholder="Search tasks..."
                 @input="debouncedApplyFilters"
-              />
+              >
               <button
                 v-if="searchQuery"
                 class="clear-button"
@@ -37,8 +44,18 @@
                   stroke="currentColor"
                   stroke-width="2"
                 >
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
+                  <line
+                    x1="18"
+                    y1="6"
+                    x2="6"
+                    y2="18"
+                  />
+                  <line
+                    x1="6"
+                    y1="6"
+                    x2="18"
+                    y2="18"
+                  />
                 </svg>
               </button>
             </div>
@@ -47,8 +64,8 @@
           <div class="header-actions">
             <button
               class="filter-toggle-btn"
-              @click="toggleFilters"
               :class="{ active: hasActiveFilters }"
+              @click="toggleFilters"
             >
               <svg
                 width="16"
@@ -61,7 +78,10 @@
                 <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46" />
               </svg>
               <span>Filters</span>
-              <div v-if="hasActiveFilters" class="filter-indicator"></div>
+              <div
+                v-if="hasActiveFilters"
+                class="filter-indicator"
+              />
             </button>
             <button
               v-if="selectedTaskIds.length > 0"
@@ -86,7 +106,10 @@
               </svg>
               Delete ({{ selectedTaskIds.length }} selected)
             </button>
-            <button class="btn-primary" @click="navigateToAddTask">
+            <button
+              class="btn-primary"
+              @click="navigateToAddTask"
+            >
               <svg
                 width="16"
                 height="16"
@@ -95,8 +118,18 @@
                 stroke="currentColor"
                 stroke-width="2"
               >
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
+                <line
+                  x1="12"
+                  y1="5"
+                  x2="12"
+                  y2="19"
+                />
+                <line
+                  x1="5"
+                  y1="12"
+                  x2="19"
+                  y2="12"
+                />
               </svg>
               Create Work Orders
             </button>
@@ -116,7 +149,12 @@
                 >
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                   <polyline points="7 10 12 15 17 10" />
-                  <line x1="12" y1="15" x2="12" y2="3" />
+                  <line
+                    x1="12"
+                    y1="15"
+                    x2="12"
+                    y2="3"
+                  />
                 </svg>
                 <span>Export</span>
                 <svg
@@ -131,10 +169,13 @@
                   <path d="m6 9 6 6 6-6" />
                 </svg>
               </button>
-              <div v-if="showExportDropdown" class="export-dropdown-menu">
+              <div
+                v-if="showExportDropdown"
+                class="export-dropdown-menu"
+              >
                 <button
-                  @click="exportData('excel')"
                   class="export-dropdown-item"
+                  @click="exportData('excel')"
                 >
                   <svg
                     width="16"
@@ -153,7 +194,10 @@
                   </svg>
                   Export to Excel
                 </button>
-                <button @click="exportData('csv')" class="export-dropdown-item">
+                <button
+                  class="export-dropdown-item"
+                  @click="exportData('csv')"
+                >
                   <svg
                     width="16"
                     height="16"
@@ -166,9 +210,24 @@
                       d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"
                     />
                     <polyline points="14 2 14 8 20 8" />
-                    <line x1="12" y1="12" x2="12" y2="12" />
-                    <line x1="12" y1="16" x2="12" y2="16" />
-                    <line x1="12" y1="20" x2="12" y2="20" />
+                    <line
+                      x1="12"
+                      y1="12"
+                      x2="12"
+                      y2="12"
+                    />
+                    <line
+                      x1="12"
+                      y1="16"
+                      x2="12"
+                      y2="16"
+                    />
+                    <line
+                      x1="12"
+                      y1="20"
+                      x2="12"
+                      y2="20"
+                    />
                   </svg>
                   Export to CSV
                 </button>
@@ -180,12 +239,18 @@
       <!-- Main Content -->
       <main class="main-content-area">
         <!-- Loading State -->
-        <div v-if="loading" class="loading-container">
-          <div class="loading-spinner"></div>
+        <div
+          v-if="loading"
+          class="loading-container"
+        >
+          <div class="loading-spinner" />
           <p>Loading tasks...</p>
         </div>
         <!-- Error State -->
-        <div v-else-if="error" class="error-state">
+        <div
+          v-else-if="error"
+          class="error-state"
+        >
           <div class="error-icon">
             <svg
               width="48"
@@ -195,17 +260,39 @@
               stroke="currentColor"
               stroke-width="1.5"
             >
-              <circle cx="12" cy="12" r="10" />
-              <line x1="12" y1="8" x2="12" y2="12" />
-              <line x1="12" y1="16" x2="12.01" y2="16" />
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+              />
+              <line
+                x1="12"
+                y1="8"
+                x2="12"
+                y2="12"
+              />
+              <line
+                x1="12"
+                y1="16"
+                x2="12.01"
+                y2="16"
+              />
             </svg>
           </div>
           <h3>Unable to load tasks</h3>
           <p>{{ error }}</p>
-          <button class="btn-primary" @click="fetchTasks">Try Again</button>
+          <button
+            class="btn-primary"
+            @click="fetchTasks"
+          >
+            Try Again
+          </button>
         </div>
         <!-- Empty State -->
-        <div v-else-if="tasks.length === 0 && !loading" class="empty-state">
+        <div
+          v-else-if="tasks.length === 0 && !loading"
+          class="empty-state"
+        >
           <div class="empty-icon">
             <svg
               width="48"
@@ -221,16 +308,25 @@
           <h3>No WorkOrder found</h3>
           <p>Try adjusting your filters or create a new task</p>
           <div class="empty-actions">
-            <button class="btn-secondary" @click="clearAllFilters">
+            <button
+              class="btn-secondary"
+              @click="clearAllFilters"
+            >
               Clear Filters
             </button>
-            <button class="btn-primary" @click="navigateToAddTask">
+            <button
+              class="btn-primary"
+              @click="navigateToAddTask"
+            >
               Create WorkOrder
             </button>
           </div>
         </div>
         <!-- Tasks List -->
-        <div v-else class="tasks-list">
+        <div
+          v-else
+          class="tasks-list"
+        >
           <!-- List Header -->
           <div class="list-header">
             <div class="header-cell checkbox-col">
@@ -240,70 +336,83 @@
                 :checked="allTasksSelected"
                 :indeterminate="someTasksSelected && !allTasksSelected"
                 @change="toggleSelectAll"
-              />
+              >
             </div>
-            <div class="header-cell task-col" @click="requestSort('title')">
+            <div
+              class="header-cell task-col"
+              @click="requestSort('title')"
+            >
               Work Orders
-              <span class="sort-icon" v-if="sortBy === 'title'"
-                ><svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  :class="{ 'rotate-180': sortDirection === 'desc' }"
-                >
-                  <path d="m6 9 6 6 6-6" /></svg
-              ></span>
+              <span
+                v-if="sortBy === 'title'"
+                class="sort-icon"
+              ><svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                :class="{ 'rotate-180': sortDirection === 'desc' }"
+              >
+                <path d="m6 9 6 6 6-6" /></svg></span>
             </div>
             <div
               class="header-cell description-col"
               @click="requestSort('description')"
             >
               Description
-              <span class="sort-icon" v-if="sortBy === 'description'"
-                ><svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  :class="{ 'rotate-180': sortDirection === 'desc' }"
-                >
-                  <path d="m6 9 6 6 6-6" /></svg
-              ></span>
+              <span
+                v-if="sortBy === 'description'"
+                class="sort-icon"
+              ><svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                :class="{ 'rotate-180': sortDirection === 'desc' }"
+              >
+                <path d="m6 9 6 6 6-6" /></svg></span>
             </div>
-            <div class="header-cell type-col" @click="requestSort('taskType')">
+            <div
+              class="header-cell type-col"
+              @click="requestSort('taskType')"
+            >
               Type
-              <span class="sort-icon" v-if="sortBy === 'taskType'"
-                ><svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  :class="{ 'rotate-180': sortDirection === 'desc' }"
-                >
-                  <path d="m6 9 6 6 6-6" /></svg
-              ></span>
+              <span
+                v-if="sortBy === 'taskType'"
+                class="sort-icon"
+              ><svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                :class="{ 'rotate-180': sortDirection === 'desc' }"
+              >
+                <path d="m6 9 6 6 6-6" /></svg></span>
             </div>
-            <div class="header-cell status-col" @click="requestSort('status')">
+            <div
+              class="header-cell status-col"
+              @click="requestSort('status')"
+            >
               Status
-              <span class="sort-icon" v-if="sortBy === 'status'"
-                ><svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  :class="{ 'rotate-180': sortDirection === 'desc' }"
-                >
-                  <path d="m6 9 6 6 6-6" /></svg
-              ></span>
+              <span
+                v-if="sortBy === 'status'"
+                class="sort-icon"
+              ><svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                :class="{ 'rotate-180': sortDirection === 'desc' }"
+              >
+                <path d="m6 9 6 6 6-6" /></svg></span>
             </div>
             <div
               class="header-cell assigned-col"
@@ -311,39 +420,41 @@
             >
               Assigned To
               <span
-                class="sort-icon"
                 v-if="sortBy === 'employeeId.assignedUser.first_name'"
-                ><svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  :class="{ 'rotate-180': sortDirection === 'desc' }"
-                >
-                  <path d="m6 9 6 6 6-6" /></svg
-              ></span>
+                class="sort-icon"
+              ><svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                :class="{ 'rotate-180': sortDirection === 'desc' }"
+              >
+                <path d="m6 9 6 6 6-6" /></svg></span>
             </div>
             <div
               class="header-cell client-col"
               @click="requestSort('clientId.customerName')"
             >
               Client Name
-              <span class="sort-icon" v-if="sortBy === 'clientId.customerName'"
-                ><svg
-                  width="12"
-                  height="12"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  :class="{ 'rotate-180': sortDirection === 'desc' }"
-                >
-                  <path d="m6 9 6 6 6-6" /></svg
-              ></span>
+              <span
+                v-if="sortBy === 'clientId.customerName'"
+                class="sort-icon"
+              ><svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                :class="{ 'rotate-180': sortDirection === 'desc' }"
+              >
+                <path d="m6 9 6 6 6-6" /></svg></span>
             </div>
-            <div class="header-cell actions-col">Actions</div>
+            <div class="header-cell actions-col">
+              Actions
+            </div>
           </div>
           <!-- List Items -->
           <div
@@ -355,13 +466,16 @@
           >
             <!-- Main Row -->
             <div class="item-row">
-              <div class="list-cell checkbox-col" @click.stop>
+              <div
+                class="list-cell checkbox-col"
+                @click.stop
+              >
                 <input
                   type="checkbox"
                   class="custom-checkbox"
                   :checked="selectedTaskIds.includes(task.id)"
                   @change="toggleTaskSelection(task.id)"
-                />
+                >
               </div>
               <!-- Task Column -->
               <div class="list-cell task-col">
@@ -385,7 +499,10 @@
               </div>
               <!-- Status Column -->
               <div class="list-cell status-col">
-                <span class="status-badge" :class="`status-${task.status}`">
+                <span
+                  class="status-badge"
+                  :class="`status-${task.status}`"
+                >
                   <template v-if="task.status === 'pending'">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -399,7 +516,11 @@
                       stroke-linejoin="round"
                       class="lucide lucide-clock"
                     >
-                      <circle cx="12" cy="12" r="10" />
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="10"
+                      />
                       <polyline points="12 6 12 12 16 14" />
                     </svg>
                   </template>
@@ -456,13 +577,26 @@
                       stroke-linejoin="round"
                       class="lucide lucide-alert-circle"
                     >
-                      <circle cx="12" cy="12" r="10" />
-                      <line x1="12" x2="12" y1="8" y2="12" />
-                      <line x1="12" x2="12.01" y1="16" y2="16" />
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="10"
+                      />
+                      <line
+                        x1="12"
+                        x2="12"
+                        y1="8"
+                        y2="12"
+                      />
+                      <line
+                        x1="12"
+                        x2="12.01"
+                        y1="16"
+                        y2="16"
+                      />
                     </svg>
                   </template>
-                  {{ formatStatus(task.status) }}</span
-                >
+                  {{ formatStatus(task.status) }}</span>
               </div>
               <!-- Assigned To Column -->
               <div class="list-cell assigned-col">
@@ -476,7 +610,11 @@
                     stroke-width="2"
                   >
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
+                    <circle
+                      cx="12"
+                      cy="7"
+                      r="4"
+                    />
                   </svg>
                   <span>{{ task.assignedUser || "Unassigned" }}</span>
                 </div>
@@ -497,7 +635,11 @@
                     class="lucide lucide-users"
                   >
                     <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
+                    <circle
+                      cx="9"
+                      cy="7"
+                      r="4"
+                    />
                     <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
                     <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                   </svg>
@@ -508,8 +650,8 @@
               <div class="list-cell actions-col">
                 <button
                   class="action-btn"
-                  @click.stop="toggleExpandedDetails(task.id)"
                   title="Toggle Details"
+                  @click.stop="toggleExpandedDetails(task.id)"
                 >
                   <svg
                     width="16"
@@ -528,7 +670,10 @@
               </div>
             </div>
             <!-- Expanded Details -->
-            <div v-if="expandedTaskId === task.id" class="expanded-details">
+            <div
+              v-if="expandedTaskId === task.id"
+              class="expanded-details"
+            >
               <div class="details-content">
                 <div class="detail-section">
                   <h4>Task Information</h4>
@@ -544,20 +689,27 @@
         <!-- Custom Pagination -->
         <CustomPagination
           v-model:page="currentPage"
-          v-model:itemsPerPage="itemsPerPage"
+          v-model:items-per-page="itemsPerPage"
           :total-items="totalItems"
           :is-searching="!!searchQuery"
           @update:page="handlePageChange"
-          @update:itemsPerPage="handleItemsPerPageChange"
+          @update:items-per-page="handleItemsPerPageChange"
         />
       </main>
     </div>
     <!-- Right Filter Panel -->
     <transition name="slide">
-      <div v-if="showFilters" class="filter-panel">
+      <div
+        v-if="showFilters"
+        class="filter-panel"
+      >
         <div class="filter-header">
           <div class="filter-header-content">
-            <button class="back-btn" @click="toggleFilters" aria-label="Back">
+            <button
+              class="back-btn"
+              aria-label="Back"
+              @click="toggleFilters"
+            >
               <svg
                 width="20"
                 height="20"
@@ -569,8 +721,13 @@
                 <path d="m15 18-6-6 6-6" />
               </svg>
             </button>
-            <h3 class="filter-title">Filters</h3>
-            <button class="close-btn" @click="toggleFilters">
+            <h3 class="filter-title">
+              Filters
+            </h3>
+            <button
+              class="close-btn"
+              @click="toggleFilters"
+            >
               <svg
                 width="20"
                 height="20"
@@ -579,8 +736,18 @@
                 stroke="currentColor"
                 stroke-width="2"
               >
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
+                <line
+                  x1="18"
+                  y1="6"
+                  x2="6"
+                  y2="18"
+                />
+                <line
+                  x1="6"
+                  y1="6"
+                  x2="18"
+                  y2="18"
+                />
               </svg>
             </button>
           </div>
@@ -601,10 +768,32 @@
                 stroke-linejoin="round"
                 class="lucide lucide-calendar"
               >
-                <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-                <line x1="16" x2="16" y1="2" y2="6" />
-                <line x1="8" x2="8" y1="2" y2="6" />
-                <line x1="3" x2="21" y1="10" y2="10" />
+                <rect
+                  width="18"
+                  height="18"
+                  x="3"
+                  y="4"
+                  rx="2"
+                  ry="2"
+                />
+                <line
+                  x1="16"
+                  x2="16"
+                  y1="2"
+                  y2="6"
+                />
+                <line
+                  x1="8"
+                  x2="8"
+                  y1="2"
+                  y2="6"
+                />
+                <line
+                  x1="3"
+                  x2="21"
+                  y1="10"
+                  y2="10"
+                />
               </svg>
               Date Range
             </h4>
@@ -612,26 +801,29 @@
               <div class="date-input-group">
                 <label class="date-label">From Date</label>
                 <input
-                  type="date"
                   v-model="filters.dateFrom"
-                  @change="applyFilters"
+                  type="date"
                   class="date-input"
-                />
+                  @change="applyFilters"
+                >
               </div>
               <div class="date-input-group">
                 <label class="date-label">To Date</label>
                 <input
-                  type="date"
                   v-model="filters.dateTo"
-                  @change="applyFilters"
+                  type="date"
                   class="date-input"
-                />
+                  @change="applyFilters"
+                >
               </div>
               <div
                 v-if="filters.dateFrom || filters.dateTo"
                 class="date-filter-actions"
               >
-                <button class="btn-clear-date" @click="clearDateFilter">
+                <button
+                  class="btn-clear-date"
+                  @click="clearDateFilter"
+                >
                   <svg
                     width="14"
                     height="14"
@@ -640,8 +832,18 @@
                     stroke="currentColor"
                     stroke-width="2"
                   >
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
+                    <line
+                      x1="18"
+                      y1="6"
+                      x2="6"
+                      y2="18"
+                    />
+                    <line
+                      x1="6"
+                      y1="6"
+                      x2="18"
+                      y2="18"
+                    />
                   </svg>
                   Clear Dates
                 </button>
@@ -673,10 +875,12 @@
             <div class="filter-input custom-select-wrapper">
               <select
                 v-model="filters.status"
-                @change="applyFilters"
                 class="custom-select"
+                @change="applyFilters"
               >
-                <option value="">All Status ({{ taskCounts.total }})</option>
+                <option value="">
+                  All Status ({{ taskCounts.total }})
+                </option>
                 <option value="pending">
                   Pending ({{ taskCounts.pending }})
                 </option>
@@ -731,10 +935,12 @@
             <div class="filter-input custom-select-wrapper">
               <select
                 v-model="filters.assignFormId"
-                @change="applyFilters"
                 class="custom-select"
+                @change="applyFilters"
               >
-                <option value="">All Task Types</option>
+                <option value="">
+                  All Task Types
+                </option>
                 <option
                   v-for="form in formTemplates"
                   :key="form.id"
@@ -784,10 +990,12 @@
             <div class="filter-input custom-select-wrapper">
               <select
                 v-model="filters.branch"
-                @change="applyFilters"
                 class="custom-select"
+                @change="applyFilters"
               >
-                <option value="">All Branches</option>
+                <option value="">
+                  All Branches
+                </option>
                 <option
                   v-for="branch in branches"
                   :key="branch.id"
@@ -814,10 +1022,16 @@
           </div>
         </div>
         <div class="filter-actions">
-          <button class="btn-secondary" @click="clearAllFilters">
+          <button
+            class="btn-secondary"
+            @click="clearAllFilters"
+          >
             Clear All
           </button>
-          <button class="btn-primary" @click="applyFilters">
+          <button
+            class="btn-primary"
+            @click="applyFilters"
+          >
             Apply Filters
           </button>
         </div>

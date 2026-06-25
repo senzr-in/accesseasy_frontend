@@ -6,7 +6,7 @@
       show-arrows
       background-color="transparent"
       class="custom-tabs"
-      @update:modelValue="handleTabChange"
+      @update:model-value="handleTabChange"
     >
       <v-tab
         v-for="tab in tabs"
@@ -14,7 +14,10 @@
         :value="tab.value"
         class="custom-tab"
       >
-        <v-icon :icon="tab.icon" class="mr-2"></v-icon>
+        <v-icon
+          :icon="tab.icon"
+          class="mr-2"
+        />
         {{ tab.title }}
       </v-tab>
     </v-tabs>
@@ -23,10 +26,10 @@
     <router-view v-slot="{ Component }">
       <component
         :is="Component"
-        @showAddPage="handleShowAdd"
-        @showEditPage="handleShowEdit"
-        @closeAddPage="handleClose"
-        @closeEditPage="handleClose"
+        @show-add-page="handleShowAdd"
+        @show-edit-page="handleShowEdit"
+        @close-add-page="handleClose"
+        @close-edit-page="handleClose"
       />
     </router-view>
   </v-container>

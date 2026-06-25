@@ -1,21 +1,35 @@
 <template>
   <div class="h-screen flex flex-col bg-slate-50 dark:bg-zinc-950 font-sans overflow-hidden">
-
     <!-- ── Header ────────────────────────────────────────────────────────── -->
     <div class="h-16 flex items-center justify-between px-6 bg-white dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 shrink-0 shadow-sm">
       <div>
-        <h1 class="text-base font-black text-slate-900 dark:text-white">Visitor Portal Settings</h1>
-        <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">Configure your check-in portal</p>
+        <h1 class="text-base font-black text-slate-900 dark:text-white">
+          Visitor Portal Settings
+        </h1>
+        <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
+          Configure your check-in portal
+        </p>
       </div>
       <div class="flex items-center gap-3">
-        <button @click="router.push('/dashboard/visitor-portals')"
-          class="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800">
+        <button
+          class="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800"
+          @click="router.push('/dashboard/visitor-portals')"
+        >
           ← Back
         </button>
-        <button @click="savePage" :disabled="saving"
-          class="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-xs font-black rounded-xl transition-all shadow-md shadow-blue-500/20">
-          <Loader2 v-if="saving" class="w-3.5 h-3.5 animate-spin" />
-          <Save v-else class="w-3.5 h-3.5" />
+        <button
+          :disabled="saving"
+          class="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-xs font-black rounded-xl transition-all shadow-md shadow-blue-500/20"
+          @click="savePage"
+        >
+          <Loader2
+            v-if="saving"
+            class="w-3.5 h-3.5 animate-spin"
+          />
+          <Save
+            v-else
+            class="w-3.5 h-3.5"
+          />
           Save &amp; Publish
         </button>
       </div>
@@ -24,10 +38,8 @@
     <!-- ── Body: Simplified Form ──────────────────────────────────────────── -->
     <div class="flex-1 overflow-y-auto p-6 md:p-12 flex justify-center">
       <div class="w-full max-w-2xl space-y-8 pb-12">
-        
         <!-- Form Card -->
         <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-sm overflow-hidden">
-          
           <!-- Section: Identity -->
           <div class="p-8 border-b border-slate-100 dark:border-zinc-800 space-y-6">
             <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
@@ -37,34 +49,65 @@
             <div class="flex flex-col md:flex-row gap-8 items-start">
               <!-- Logo Upload -->
               <div class="shrink-0">
-                <div @click="$refs.logoInput.click()"
-                  class="w-32 h-32 rounded-2xl border-2 border-dashed border-slate-200 dark:border-zinc-700 flex items-center justify-center cursor-pointer hover:border-blue-500 overflow-hidden transition-all group bg-slate-50 dark:bg-zinc-950">
-                  <img v-if="pageConfig.logoPreview" :src="pageConfig.logoPreview" class="max-w-full max-h-full object-contain p-4 transition-transform group-hover:scale-105" />
-                  <div v-else class="flex flex-col items-center gap-1 text-slate-400 group-hover:text-blue-500">
+                <div
+                  class="w-32 h-32 rounded-2xl border-2 border-dashed border-slate-200 dark:border-zinc-700 flex items-center justify-center cursor-pointer hover:border-blue-500 overflow-hidden transition-all group bg-slate-50 dark:bg-zinc-950"
+                  @click="$refs.logoInput.click()"
+                >
+                  <img
+                    v-if="pageConfig.logoPreview"
+                    :src="pageConfig.logoPreview"
+                    class="max-w-full max-h-full object-contain p-4 transition-transform group-hover:scale-105"
+                  >
+                  <div
+                    v-else
+                    class="flex flex-col items-center gap-1 text-slate-400 group-hover:text-blue-500"
+                  >
                     <Plus class="w-8 h-8" />
                     <span class="text-[10px] font-bold uppercase tracking-widest">Logo</span>
                   </div>
                 </div>
-                <input ref="logoInput" type="file" class="hidden" accept="image/*" @change="handleLogoChange" />
-                <button @click="$refs.logoInput.click()" class="w-full mt-3 text-[10px] text-blue-500 font-bold hover:underline">Change Logo</button>
+                <input
+                  ref="logoInput"
+                  type="file"
+                  class="hidden"
+                  accept="image/*"
+                  @change="handleLogoChange"
+                >
+                <button
+                  class="w-full mt-3 text-[10px] text-blue-500 font-bold hover:underline"
+                  @click="$refs.logoInput.click()"
+                >
+                  Change Logo
+                </button>
               </div>
 
               <!-- General Fields -->
               <div class="flex-1 w-full space-y-5">
                 <div class="space-y-1.5">
                   <label class="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Portal Title</label>
-                  <input v-model="pageConfig.title" type="text" placeholder="e.g. Main Office Reception"
-                    class="w-full h-11 px-4 border border-slate-200 dark:border-zinc-700 rounded-xl bg-white dark:bg-zinc-950 text-sm font-medium text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all" />
+                  <input
+                    v-model="pageConfig.title"
+                    type="text"
+                    placeholder="e.g. Main Office Reception"
+                    class="w-full h-11 px-4 border border-slate-200 dark:border-zinc-700 rounded-xl bg-white dark:bg-zinc-950 text-sm font-medium text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all"
+                  >
                 </div>
                 
                 <div class="space-y-1.5">
                   <label class="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Brand Color</label>
                   <div class="flex items-center gap-4">
                     <div class="relative w-12 h-11 overflow-hidden rounded-xl border border-slate-200 dark:border-zinc-700">
-                      <input v-model="pageConfig.primaryColor" type="color" class="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer bg-transparent border-0" />
+                      <input
+                        v-model="pageConfig.primaryColor"
+                        type="color"
+                        class="absolute inset-[-10px] w-[200%] h-[200%] cursor-pointer bg-transparent border-0"
+                      >
                     </div>
-                    <input v-model="pageConfig.primaryColor" type="text"
-                      class="flex-1 h-11 px-4 border border-slate-200 dark:border-zinc-700 rounded-xl bg-white dark:bg-zinc-950 text-sm font-mono text-slate-600 dark:text-zinc-300 outline-none" />
+                    <input
+                      v-model="pageConfig.primaryColor"
+                      type="text"
+                      class="flex-1 h-11 px-4 border border-slate-200 dark:border-zinc-700 rounded-xl bg-white dark:bg-zinc-950 text-sm font-mono text-slate-600 dark:text-zinc-300 outline-none"
+                    >
                   </div>
                 </div>
               </div>
@@ -78,48 +121,91 @@
                 <ClipboardSignature class="w-3.5 h-3.5 text-blue-500" /> Check-in Experience
               </h3>
               <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" v-model="pageConfig.enableRegistrationForm" class="sr-only peer">
-                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                <input
+                  v-model="pageConfig.enableRegistrationForm"
+                  type="checkbox"
+                  class="sr-only peer"
+                >
+                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600" />
                 <span class="ms-3 text-[10px] font-black text-slate-500 uppercase tracking-widest">Enabled</span>
               </label>
             </div>
 
-            <div v-if="pageConfig.enableRegistrationForm" class="space-y-4">
-               <div class="space-y-1.5">
-                 <label class="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Default Visitor Access Group</label>
-                 <select v-model="pageConfig.defaultAccessLevel"
-                   class="w-full h-11 px-4 border border-slate-200 dark:border-zinc-700 rounded-xl bg-white dark:bg-zinc-950 text-sm font-medium text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all cursor-pointer">
-                   <option :value="null" disabled>Select Access Group</option>
-                   <option v-for="group in accessLevels" :key="group.id" :value="group.id">{{ group.accessLevelName }}</option>
-                 </select>
-                 <p class="text-[10px] text-slate-400 font-medium">This access group will be automatically assigned to all new visitors.</p>
-               </div>
+            <div
+              v-if="pageConfig.enableRegistrationForm"
+              class="space-y-4"
+            >
+              <div class="space-y-1.5">
+                <label class="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Default Visitor Access Group</label>
+                <select
+                  v-model="pageConfig.defaultAccessLevel"
+                  class="w-full h-11 px-4 border border-slate-200 dark:border-zinc-700 rounded-xl bg-white dark:bg-zinc-950 text-sm font-medium text-slate-800 dark:text-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all cursor-pointer"
+                >
+                  <option
+                    :value="null"
+                    disabled
+                  >
+                    Select Access Group
+                  </option>
+                  <option
+                    v-for="group in accessLevels"
+                    :key="group.id"
+                    :value="group.id"
+                  >
+                    {{ group.accessLevelName }}
+                  </option>
+                </select>
+                <p class="text-[10px] text-slate-400 font-medium">
+                  This access group will be automatically assigned to all new visitors.
+                </p>
+              </div>
             </div>
           </div>
 
           <!-- Section: Form Fields Customizer -->
-          <div v-if="pageConfig.enableRegistrationForm" class="p-8 border-t border-slate-100 dark:border-zinc-800 space-y-5">
+          <div
+            v-if="pageConfig.enableRegistrationForm"
+            class="p-8 border-t border-slate-100 dark:border-zinc-800 space-y-5"
+          >
             <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
               <SlidersHorizontal class="w-3.5 h-3.5 text-blue-500" /> Form Fields Customizer
             </h3>
-            <p class="text-[10px] font-medium text-slate-400 -mt-2">Choose which fields are displayed, which are required, and customize their labels and placeholders.</p>
+            <p class="text-[10px] font-medium text-slate-400 -mt-2">
+              Choose which fields are displayed, which are required, and customize their labels and placeholders.
+            </p>
 
             <div class="space-y-4">
-              <div v-for="(field, key) in pageConfig.fieldsConfig" :key="key" 
+              <div
+                v-for="(field, key) in pageConfig.fieldsConfig"
+                :key="key" 
                 class="p-4 rounded-xl bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 transition-all duration-300"
-                :class="{ 'opacity-60': !field.visible }">
-                
+                :class="{ 'opacity-60': !field.visible }"
+              >
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <!-- Field Header & Icon -->
                   <div class="flex items-center gap-4">
                     <div class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center shrink-0">
-                      <Camera v-if="key === 'photo'" class="w-4 h-4 text-blue-500" />
-                      <FileUp v-else-if="key === 'proofDocument'" class="w-4 h-4 text-blue-500" />
-                      <ShieldOff v-else-if="key === 'govtId'" class="w-4 h-4 text-blue-500" />
-                      <SlidersHorizontal v-else class="w-4 h-4 text-blue-500" />
+                      <Camera
+                        v-if="key === 'photo'"
+                        class="w-4 h-4 text-blue-500"
+                      />
+                      <FileUp
+                        v-else-if="key === 'proofDocument'"
+                        class="w-4 h-4 text-blue-500"
+                      />
+                      <ShieldOff
+                        v-else-if="key === 'govtId'"
+                        class="w-4 h-4 text-blue-500"
+                      />
+                      <SlidersHorizontal
+                        v-else
+                        class="w-4 h-4 text-blue-500"
+                      />
                     </div>
                     <div>
-                      <h4 class="text-xs font-bold text-slate-700 dark:text-slate-200 capitalize">{{ key.replace(/([A-Z])/g, ' $1') }}</h4>
+                      <h4 class="text-xs font-bold text-slate-700 dark:text-slate-200 capitalize">
+                        {{ key.replace(/([A-Z])/g, ' $1') }}
+                      </h4>
                       <p class="text-[9px] font-semibold text-slate-400 uppercase tracking-widest">
                         {{ key === 'name' || key === 'mobile' ? 'Core Field' : 'Optional Field' }}
                       </p>
@@ -130,40 +216,67 @@
                   <div class="flex items-center gap-6 justify-between md:justify-end">
                     <div class="flex items-center gap-2">
                       <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Visible</span>
-                      <label class="relative inline-flex items-center cursor-pointer" :class="{ 'pointer-events-none opacity-50': key === 'name' || key === 'mobile' }">
-                        <input type="checkbox" v-model="field.visible" :disabled="key === 'name' || key === 'mobile'" @change="!field.visible && (field.required = false)" class="sr-only peer">
-                        <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                      <label
+                        class="relative inline-flex items-center cursor-pointer"
+                        :class="{ 'pointer-events-none opacity-50': key === 'name' || key === 'mobile' }"
+                      >
+                        <input
+                          v-model="field.visible"
+                          type="checkbox"
+                          :disabled="key === 'name' || key === 'mobile'"
+                          class="sr-only peer"
+                          @change="!field.visible && (field.required = false)"
+                        >
+                        <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600" />
                       </label>
                     </div>
                     
                     <div class="flex items-center gap-2">
-                      <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest" :class="{ 'opacity-50': !field.visible }">Required</span>
-                      <label class="relative inline-flex items-center cursor-pointer" :class="{ 'pointer-events-none opacity-50': !field.visible || key === 'name' || key === 'mobile' }">
-                        <input type="checkbox" v-model="field.required" :disabled="!field.visible || key === 'name' || key === 'mobile'" class="sr-only peer">
-                        <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+                      <span
+                        class="text-[10px] font-bold text-slate-400 uppercase tracking-widest"
+                        :class="{ 'opacity-50': !field.visible }"
+                      >Required</span>
+                      <label
+                        class="relative inline-flex items-center cursor-pointer"
+                        :class="{ 'pointer-events-none opacity-50': !field.visible || key === 'name' || key === 'mobile' }"
+                      >
+                        <input
+                          v-model="field.required"
+                          type="checkbox"
+                          :disabled="!field.visible || key === 'name' || key === 'mobile'"
+                          class="sr-only peer"
+                        >
+                        <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600" />
                       </label>
                     </div>
                   </div>
                 </div>
 
                 <!-- Editable Labels & Placeholders -->
-                <div v-if="field.visible" class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4 pt-3 border-t border-slate-100 dark:border-zinc-900 animate-in fade-in duration-200">
+                <div
+                  v-if="field.visible"
+                  class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4 pt-3 border-t border-slate-100 dark:border-zinc-900 animate-in fade-in duration-200"
+                >
                   <div class="space-y-1">
                     <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Custom Field Label</span>
-                    <input v-model="field.label" type="text" 
-                      class="w-full h-9 px-3 border border-slate-200 dark:border-zinc-800 rounded-xl bg-slate-50 dark:bg-zinc-900 text-xs font-semibold text-slate-700 dark:text-zinc-200 outline-none focus:border-blue-500 transition-colors" />
+                    <input
+                      v-model="field.label"
+                      type="text" 
+                      class="w-full h-9 px-3 border border-slate-200 dark:border-zinc-800 rounded-xl bg-slate-50 dark:bg-zinc-900 text-xs font-semibold text-slate-700 dark:text-zinc-200 outline-none focus:border-blue-500 transition-colors"
+                    >
                   </div>
                   <div class="space-y-1">
                     <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Custom Placeholder</span>
-                    <input v-model="field.placeholder" type="text" 
-                      class="w-full h-9 px-3 border border-slate-200 dark:border-zinc-800 rounded-xl bg-slate-50 dark:bg-zinc-900 text-xs font-semibold text-slate-700 dark:text-zinc-200 outline-none focus:border-blue-500 transition-colors" />
+                    <input
+                      v-model="field.placeholder"
+                      type="text" 
+                      class="w-full h-9 px-3 border border-slate-200 dark:border-zinc-800 rounded-xl bg-slate-50 dark:bg-zinc-900 text-xs font-semibold text-slate-700 dark:text-zinc-200 outline-none focus:border-blue-500 transition-colors"
+                    >
                   </div>
                 </div>
-
               </div>
             </div>
           </div>
-
         </div>
 
         <!-- Preview Note -->
@@ -172,38 +285,57 @@
             <Layout class="w-4 h-4" />
           </div>
           <div>
-            <p class="text-xs font-bold text-blue-900 dark:text-blue-300">Live Preview Link</p>
-            <p class="text-[10px] font-medium text-blue-700/70 dark:text-blue-400/70">{{ previewUrl }}</p>
+            <p class="text-xs font-bold text-blue-900 dark:text-blue-300">
+              Live Preview Link
+            </p>
+            <p class="text-[10px] font-medium text-blue-700/70 dark:text-blue-400/70">
+              {{ previewUrl }}
+            </p>
           </div>
         </div>
-
       </div>
     </div>
 
     <!-- ── Save Success Modal ─────────────────────────────────────────────── -->
-    <div v-if="saveSuccessDialog" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="saveSuccessDialog = false"></div>
+    <div
+      v-if="saveSuccessDialog"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    >
+      <div
+        class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        @click="saveSuccessDialog = false"
+      />
       <div class="relative bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-8 max-w-sm w-full text-center shadow-2xl animate-in zoom-in-95 duration-200">
         <div class="w-16 h-16 bg-emerald-100 dark:bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-5">
           <Check class="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
         </div>
-        <h3 class="text-xl font-black text-slate-900 dark:text-white mb-2">Portal Published!</h3>
-        <p class="text-sm font-medium text-slate-500 mb-6">Your visitor portal is now ready to use.</p>
+        <h3 class="text-xl font-black text-slate-900 dark:text-white mb-2">
+          Portal Published!
+        </h3>
+        <p class="text-sm font-medium text-slate-500 mb-6">
+          Your visitor portal is now ready to use.
+        </p>
 
         <!-- Share Row -->
         <div class="flex justify-center gap-2 mb-6">
-          <button @click="copyToClipboard(previewUrl)"
-            class="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 text-xs font-bold hover:bg-slate-200 transition-colors">
+          <button
+            class="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 text-xs font-bold hover:bg-slate-200 transition-colors"
+            @click="copyToClipboard(previewUrl)"
+          >
             <Copy class="w-3.5 h-3.5" /> Copy Link
           </button>
-          <button @click="shareWhatsApp(previewUrl)"
-            class="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold hover:bg-emerald-100 transition-colors">
+          <button
+            class="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold hover:bg-emerald-100 transition-colors"
+            @click="shareWhatsApp(previewUrl)"
+          >
             <MessageCircle class="w-3.5 h-3.5" /> WhatsApp
           </button>
         </div>
 
-        <button @click="saveSuccessDialog = false; router.push('/dashboard/visitor-portals')"
-          class="w-full py-3 rounded-xl font-black text-sm text-white bg-slate-900 dark:bg-blue-600 hover:opacity-90 active:scale-95 transition-all shadow-lg">
+        <button
+          class="w-full py-3 rounded-xl font-black text-sm text-white bg-slate-900 dark:bg-blue-600 hover:opacity-90 active:scale-95 transition-all shadow-lg"
+          @click="saveSuccessDialog = false; router.push('/dashboard/visitor-portals')"
+        >
           Back to My Portals
         </button>
       </div>

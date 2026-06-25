@@ -2,18 +2,23 @@
   <v-card flat>
     <v-container v-if="loading">
       <v-row>
-        <v-col cols="12" class="text-center">
+        <v-col
+          cols="12"
+          class="text-center"
+        >
           <v-progress-circular
             indeterminate
             color="black"
-          ></v-progress-circular>
+          />
         </v-col>
       </v-row>
     </v-container>
     <v-card-text v-else>
       <div class="d-flex justify-space-between align-center mb-4">
         <div class="d-flex align-center">
-          <h3 class="text-h6">Employer Contributions</h3>
+          <h3 class="text-h6">
+            Employer Contributions
+          </h3>
         </div>
         <!-- <div class="d-flex">
           <v-btn v-if="!isEditing" color="black" @click="startEdit">
@@ -31,19 +36,37 @@
           <!-- Employer PF -->
           <v-row class="mb-4 align-center">
             <v-col cols="4">
-              <div class="field-name">Employer PF</div>
+              <div class="field-name">
+                Employer PF
+              </div>
             </v-col>
 
             <v-col cols="8">
-              <v-row class="align-center" v-if="!hasPFAccount">
-                <v-col cols="6" class="d-flex align-center">
-                  <v-icon color="red" class="mr-2">mdi-alert-circle</v-icon>
-                  <span class="text-red font-weight-bold"
-                    >PF Not Available</span
+              <v-row
+                v-if="!hasPFAccount"
+                class="align-center"
+              >
+                <v-col
+                  cols="6"
+                  class="d-flex align-center"
+                >
+                  <v-icon
+                    color="red"
+                    class="mr-2"
                   >
+                    mdi-alert-circle
+                  </v-icon>
+                  <span class="text-red font-weight-bold">PF Not Available</span>
                 </v-col>
-                <v-col cols="6" class="text-right">
-                  <v-btn color="primary" small @click="this.addAccount()">
+                <v-col
+                  cols="6"
+                  class="text-right"
+                >
+                  <v-btn
+                    color="primary"
+                    small
+                    @click="addAccount()"
+                  >
                     Add PF Account
                   </v-btn>
                 </v-col>
@@ -57,17 +80,17 @@
                     :disabled="!isEditing"
                     density="comfortable"
                     hide-details
-                  ></v-checkbox>
+                  />
                 </v-col>
 
                 <v-col cols="4">
                   <v-select
+                    v-model="employerPF.selectedOption"
                     :items="[
                       { title: '12% No limit', value: 12 },
                       { title: '12% ₹1800 limit', value: 1800 },
                       { title: 'NoValue', value: null },
                     ]"
-                    v-model="employerPF.selectedOption"
                     label="Value"
                     variant="outlined"
                     density="comfortable"
@@ -76,13 +99,13 @@
                     :disabled="!isEditing"
                     item-title="title"
                     item-value="value"
-                  ></v-select>
+                  />
                 </v-col>
 
                 <v-col cols="4">
                   <v-select
-                    :items="employerPF.component"
                     v-model="employerPF.calculations"
+                    :items="employerPF.component"
                     label="Component"
                     variant="outlined"
                     density="comfortable"
@@ -91,9 +114,9 @@
                     :disabled="!isEditing"
                     item-title="title"
                     item-value="value"
-                    @update:modelValue="updateCalculations('PF', $event)"
+                    @update:model-value="updateCalculations('PF', $event)"
                   >
-                    <template v-slot:selection="{ item }">
+                    <template #selection="{ item }">
                       <v-chip
                         size="small"
                         label
@@ -104,18 +127,18 @@
                       </v-chip>
                     </template>
 
-                    <template v-slot:item="{ item }">
+                    <template #item="{ item }">
                       <v-list-item
                         class="px-4"
                         @click="toggleSelection('PF', item)"
                       >
-                        <template v-slot:prepend>
+                        <template #prepend>
                           <v-checkbox-btn
                             :model-value="isItemSelected('PF', item)"
                             color="primary"
                             hide-details
                             density="compact"
-                          ></v-checkbox-btn>
+                          />
                         </template>
                         <v-list-item-title>{{ item.title }}</v-list-item-title>
                       </v-list-item>
@@ -129,18 +152,36 @@
           <!-- Employer ESI -->
           <v-row class="mb-4 align-center">
             <v-col cols="4">
-              <div class="field-name">Employer ESI</div>
+              <div class="field-name">
+                Employer ESI
+              </div>
             </v-col>
             <v-col cols="8">
-              <v-row class="align-center" v-if="!hasESIAccount">
-                <v-col cols="6" class="d-flex align-center">
-                  <v-icon color="red" class="mr-2">mdi-alert-circle</v-icon>
-                  <span class="text-red font-weight-bold"
-                    >ESI Not Available</span
+              <v-row
+                v-if="!hasESIAccount"
+                class="align-center"
+              >
+                <v-col
+                  cols="6"
+                  class="d-flex align-center"
+                >
+                  <v-icon
+                    color="red"
+                    class="mr-2"
                   >
+                    mdi-alert-circle
+                  </v-icon>
+                  <span class="text-red font-weight-bold">ESI Not Available</span>
                 </v-col>
-                <v-col cols="6" class="text-right">
-                  <v-btn color="primary" small @click="this.addAccount()">
+                <v-col
+                  cols="6"
+                  class="text-right"
+                >
+                  <v-btn
+                    color="primary"
+                    small
+                    @click="addAccount()"
+                  >
                     Add ESI Account
                   </v-btn>
                 </v-col>
@@ -154,16 +195,16 @@
                     :disabled="!isEditing"
                     density="comfortable"
                     hide-details
-                  ></v-checkbox>
+                  />
                 </v-col>
 
                 <v-col cols="4">
                   <v-select
+                    v-model="employerESI.selectedOption"
                     :items="[
                       { title: '3.25%', value: 3.25 },
                       { title: 'None', value: null },
                     ]"
-                    v-model="employerESI.selectedOption"
                     label="Value"
                     variant="outlined"
                     density="comfortable"
@@ -172,13 +213,13 @@
                     :disabled="!isEditing"
                     item-title="title"
                     item-value="value"
-                  ></v-select>
+                  />
                 </v-col>
 
                 <v-col cols="4">
                   <v-select
-                    :items="employerESI.component"
                     v-model="employerESI.calculations"
+                    :items="employerESI.component"
                     label="Component"
                     variant="outlined"
                     density="comfortable"
@@ -187,9 +228,9 @@
                     :disabled="!isEditing"
                     item-title="title"
                     item-value="value"
-                    @update:modelValue="updateCalculations('ESI', $event)"
+                    @update:model-value="updateCalculations('ESI', $event)"
                   >
-                    <template v-slot:selection="{ item }">
+                    <template #selection="{ item }">
                       <v-chip
                         size="small"
                         label
@@ -200,18 +241,18 @@
                       </v-chip>
                     </template>
 
-                    <template v-slot:item="{ item }">
+                    <template #item="{ item }">
                       <v-list-item
                         class="px-4"
                         @click="toggleSelection('ESI', item)"
                       >
-                        <template v-slot:prepend>
+                        <template #prepend>
                           <v-checkbox-btn
                             :model-value="isItemSelected('ESI', item)"
                             color="primary"
                             hide-details
                             density="compact"
-                          ></v-checkbox-btn>
+                          />
                         </template>
                         <v-list-item-title>{{ item.title }}</v-list-item-title>
                       </v-list-item>
@@ -225,7 +266,9 @@
           <!-- PF EDLI & Admin Charges -->
           <v-row class="mb-4 align-center">
             <v-col cols="4">
-              <div class="field-name">PF EDLI & Admin Charges</div>
+              <div class="field-name">
+                PF EDLI & Admin Charges
+              </div>
             </v-col>
             <v-col cols="8">
               <v-row>
@@ -237,7 +280,7 @@
                     :disabled="!isEditing || employerPF.selectedOption === null"
                     color="success"
                     inset
-                  ></v-switch>
+                  />
                 </v-col>
                 <v-col cols="6">
                   <v-text-field
@@ -248,7 +291,7 @@
                     class="component-input"
                     readonly
                     :value="adminCharges.charge"
-                  ></v-text-field>
+                  />
                 </v-col>
               </v-row>
             </v-col>
@@ -257,30 +300,55 @@
           <!-- Labour Welfare Fund -->
           <v-row class="mb-4 align-center">
             <v-col cols="4">
-              <div class="field-name">Labour Welfare Fund</div>
+              <div class="field-name">
+                Labour Welfare Fund
+              </div>
             </v-col>
             <v-col cols="8">
-              <v-row class="align-center" v-if="!hasShopEstablishment">
-                <v-col cols="6" class="d-flex align-center">
-                  <v-icon color="red" class="mr-2">mdi-alert-circle</v-icon>
-                  <span class="text-red font-weight-bold"
-                    >shopAccount Not Available</span
+              <v-row
+                v-if="!hasShopEstablishment"
+                class="align-center"
+              >
+                <v-col
+                  cols="6"
+                  class="d-flex align-center"
+                >
+                  <v-icon
+                    color="red"
+                    class="mr-2"
                   >
+                    mdi-alert-circle
+                  </v-icon>
+                  <span class="text-red font-weight-bold">shopAccount Not Available</span>
                 </v-col>
-                <v-col cols="6" class="text-right">
-                  <v-btn color="primary" small @click="this.addAccount()">
+                <v-col
+                  cols="6"
+                  class="text-right"
+                >
+                  <v-btn
+                    color="primary"
+                    small
+                    @click="addAccount()"
+                  >
                     Add shop Account
                   </v-btn>
                 </v-col>
               </v-row>
-              <v-row class="align-center" v-else>
-                <v-col cols="6" class="d-flex align-center">
-                  <v-icon color="grey-darken-1" class="mr-2"
-                    >mdi-information-outline</v-icon
+              <v-row
+                v-else
+                class="align-center"
+              >
+                <v-col
+                  cols="6"
+                  class="d-flex align-center"
+                >
+                  <v-icon
+                    color="grey-darken-1"
+                    class="mr-2"
                   >
-                  <span class="text-grey-darken-1"
-                    >value based on stateRules</span
-                  >
+                    mdi-information-outline
+                  </v-icon>
+                  <span class="text-grey-darken-1">value based on stateRules</span>
                 </v-col>
               </v-row>
             </v-col>
@@ -296,8 +364,12 @@
       location="top"
     >
       {{ snackbarText }}
-      <template v-slot:actions>
-        <v-btn color="white" variant="text" @click="snackbar = false">
+      <template #actions>
+        <v-btn
+          color="white"
+          variant="text"
+          @click="snackbar = false"
+        >
           Close
         </v-btn>
       </template>
@@ -367,16 +439,6 @@ export default {
       },
     };
   },
-  watch: {
-    pfEdliEnabled(newValue) {
-      this.adminCharges.enable = newValue;
-    },
-    "employerPF.selectedOption"(newVal) {
-      if (newVal === null) {
-        this.pfEdliEnabled = false;
-      }
-    },
-  },
 
   computed: {
     lwfSummary() {
@@ -393,6 +455,21 @@ export default {
         )
         .join("\n");
     },
+  },
+  watch: {
+    pfEdliEnabled(newValue) {
+      this.adminCharges.enable = newValue;
+    },
+    "employerPF.selectedOption"(newVal) {
+      if (newVal === null) {
+        this.pfEdliEnabled = false;
+      }
+    },
+  },
+  async mounted() {
+    await this.user();
+    await this.fetchData();
+    
   },
   methods: {
     addAccount() {
@@ -714,11 +791,6 @@ export default {
       console.log(`Opening ${accountType} account dialog`);
       this.$router.push("/settings/organization");
     },
-  },
-  async mounted() {
-    await this.user();
-    await this.fetchData();
-    
   },
 };
 </script>

@@ -1,20 +1,24 @@
 <template>
-    <div class="empty-state">
-      <div class="icon-container">
-        <i :class="iconClass"></i>
-      </div>
-      <h3 class="title">{{ title }}</h3>
-      <p class="description">{{ description }}</p>
-      <button 
-        v-if="buttonText" 
-        class="action-button"
-        @click="$emit('button-click')"
-      >
-        <i class="fas fa-plus"></i>
-        <span>{{ buttonText }}</span>
-      </button>
+  <div class="empty-state">
+    <div class="icon-container">
+      <i :class="iconClass" />
     </div>
-  </template>
+    <h3 class="title">
+      {{ title }}
+    </h3>
+    <p class="description">
+      {{ description }}
+    </p>
+    <button 
+      v-if="buttonText" 
+      class="action-button"
+      @click="$emit('button-click')"
+    >
+      <i class="fas fa-plus" />
+      <span>{{ buttonText }}</span>
+    </button>
+  </div>
+</template>
   
   <script>
   export default {

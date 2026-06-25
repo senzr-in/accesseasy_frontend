@@ -3,9 +3,20 @@
     <!-- Header -->
     <header class="header">
       <div class="header-left">
-        <button class="btn-icon" @click="goBack" aria-label="Go back">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="m15 18-6-6 6-6"/>
+        <button
+          class="btn-icon"
+          aria-label="Go back"
+          @click="goBack"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="m15 18-6-6 6-6" />
           </svg>
         </button>
         <div class="header-title">
@@ -16,12 +27,28 @@
       <div class="header-actions">
         <button 
           class="btn-secondary" 
-          @click="toggleMultiSelectMode"
           :class="{ active: isMultiSelectMode }"
+          @click="toggleMultiSelectMode"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="18" height="18" rx="2"/>
-            <path v-if="isMultiSelectMode" d="m9 12 2 2 4-4"/>
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <rect
+              x="3"
+              y="3"
+              width="18"
+              height="18"
+              rx="2"
+            />
+            <path
+              v-if="isMultiSelectMode"
+              d="m9 12 2 2 4-4"
+            />
           </svg>
           {{ isMultiSelectMode ? 'Exit Select' : 'Select Mode' }}
         </button>
@@ -30,11 +57,32 @@
           class="btn-primary"
           @click="fetchCustomerData"
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-            <circle cx="9" cy="7" r="4"/>
-            <line x1="19" y1="8" x2="19" y2="14"/>
-            <line x1="22" y1="11" x2="16" y2="11"/>
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle
+              cx="9"
+              cy="7"
+              r="4"
+            />
+            <line
+              x1="19"
+              y1="8"
+              x2="19"
+              y2="14"
+            />
+            <line
+              x1="22"
+              y1="11"
+              x2="16"
+              y2="11"
+            />
           </svg>
           Assign Customer
         </button>
@@ -47,51 +95,130 @@
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-icon devices">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-              <line x1="8" y1="21" x2="16" y2="21"/>
-              <line x1="12" y1="17" x2="12" y2="21"/>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <rect
+                x="2"
+                y="3"
+                width="20"
+                height="14"
+                rx="2"
+                ry="2"
+              />
+              <line
+                x1="8"
+                y1="21"
+                x2="16"
+                y2="21"
+              />
+              <line
+                x1="12"
+                y1="17"
+                x2="12"
+                y2="21"
+              />
             </svg>
           </div>
           <div class="stat-content">
-            <div class="stat-value">{{ devices.length }}</div>
-            <div class="stat-label">Total Devices</div>
+            <div class="stat-value">
+              {{ devices.length }}
+            </div>
+            <div class="stat-label">
+              Total Devices
+            </div>
           </div>
         </div>
         <div class="stat-card">
           <div class="stat-icon assigned">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M9 12l2 2 4-4"/>
-              <circle cx="12" cy="12" r="10"/>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M9 12l2 2 4-4" />
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+              />
             </svg>
           </div>
           <div class="stat-content">
-            <div class="stat-value">{{ assignedCount }}</div>
-            <div class="stat-label">Assigned</div>
+            <div class="stat-value">
+              {{ assignedCount }}
+            </div>
+            <div class="stat-label">
+              Assigned
+            </div>
           </div>
         </div>
         <div class="stat-card">
           <div class="stat-icon unassigned">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="15" y1="9" x2="9" y2="15"/>
-              <line x1="9" y1="9" x2="15" y2="15"/>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+              />
+              <line
+                x1="15"
+                y1="9"
+                x2="9"
+                y2="15"
+              />
+              <line
+                x1="9"
+                y1="9"
+                x2="15"
+                y2="15"
+              />
             </svg>
           </div>
           <div class="stat-content">
-            <div class="stat-value">{{ unassignedCount }}</div>
-            <div class="stat-label">Unassigned</div>
+            <div class="stat-value">
+              {{ unassignedCount }}
+            </div>
+            <div class="stat-label">
+              Unassigned
+            </div>
           </div>
         </div>
         <div class="stat-card">
           <div class="stat-icon maintenance">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
             </svg>
           </div>
           <div class="stat-content">
-            <div class="stat-value">{{ maintenanceCount }}</div>
-            <div class="stat-label">Maintenance</div>
+            <div class="stat-value">
+              {{ maintenanceCount }}
+            </div>
+            <div class="stat-label">
+              Maintenance
+            </div>
           </div>
         </div>
       </div>
@@ -100,32 +227,64 @@
       <div class="search-section">
         <div class="search-container">
           <div class="search-input-wrapper">
-            <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="11" cy="11" r="8"/>
-              <path d="m21 21-4.35-4.35"/>
+            <svg
+              class="search-icon"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle
+                cx="11"
+                cy="11"
+                r="8"
+              />
+              <path d="m21 21-4.35-4.35" />
             </svg>
             <input 
-              type="text" 
               v-model="searchQuery" 
+              type="text" 
               placeholder="Search by serial number or device name..."
               class="search-input"
               @input="filterDevices"
-            />
+            >
             <button 
               v-if="searchQuery" 
               class="clear-search"
               @click="clearSearch"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <line x1="18" y1="6" x2="6" y2="18"/>
-                <line x1="6" y1="6" x2="18" y2="18"/>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <line
+                  x1="18"
+                  y1="6"
+                  x2="6"
+                  y2="18"
+                />
+                <line
+                  x1="6"
+                  y1="6"
+                  x2="18"
+                  y2="18"
+                />
               </svg>
             </button>
           </div>
         </div>
         <div class="results-info">
           <span>{{ filteredDevices.length }} of {{ devices.length }} devices</span>
-          <div v-if="selectedDeviceIds.length > 0" class="selected-info">
+          <div
+            v-if="selectedDeviceIds.length > 0"
+            class="selected-info"
+          >
             {{ selectedDeviceIds.length }} selected
           </div>
         </div>
@@ -134,54 +293,123 @@
       <!-- Device List -->
       <div class="device-list-container">
         <!-- Loading State -->
-        <div v-if="isLoading" class="state-container">
-          <div class="loading-spinner"></div>
+        <div
+          v-if="isLoading"
+          class="state-container"
+        >
+          <div class="loading-spinner" />
           <p>Loading devices...</p>
         </div>
 
         <!-- Error State -->
-        <div v-else-if="errorMessage" class="state-container error">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="15" y1="9" x2="9" y2="15"/>
-            <line x1="9" y1="9" x2="15" y2="15"/>
+        <div
+          v-else-if="errorMessage"
+          class="state-container error"
+        >
+          <svg
+            width="48"
+            height="48"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="10"
+            />
+            <line
+              x1="15"
+              y1="9"
+              x2="9"
+              y2="15"
+            />
+            <line
+              x1="9"
+              y1="9"
+              x2="15"
+              y2="15"
+            />
           </svg>
           <p>{{ errorMessage }}</p>
         </div>
 
         <!-- Empty State -->
-        <div v-else-if="filteredDevices.length === 0" class="state-container empty">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="11" cy="11" r="8"/>
-            <path d="m21 21-4.35-4.35"/>
-            <line x1="11" y1="8" x2="11" y2="14"/>
-            <line x1="8" y1="11" x2="14" y2="11"/>
+        <div
+          v-else-if="filteredDevices.length === 0"
+          class="state-container empty"
+        >
+          <svg
+            width="48"
+            height="48"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle
+              cx="11"
+              cy="11"
+              r="8"
+            />
+            <path d="m21 21-4.35-4.35" />
+            <line
+              x1="11"
+              y1="8"
+              x2="11"
+              y2="14"
+            />
+            <line
+              x1="8"
+              y1="11"
+              x2="14"
+              y2="11"
+            />
           </svg>
           <p>No devices found</p>
-          <button v-if="searchQuery" class="btn-secondary" @click="clearSearch">
+          <button
+            v-if="searchQuery"
+            class="btn-secondary"
+            @click="clearSearch"
+          >
             Clear search
           </button>
         </div>
 
         <!-- Device Table -->
-        <div v-else class="table-container">
+        <div
+          v-else
+          class="table-container"
+        >
           <table class="device-table">
             <thead>
               <tr>
-                <th v-if="isMultiSelectMode" class="checkbox-col">
+                <th
+                  v-if="isMultiSelectMode"
+                  class="checkbox-col"
+                >
                   <label class="checkbox-wrapper">
                     <input 
                       type="checkbox" 
                       :checked="selectedDeviceIds.length === filteredDevices.length && filteredDevices.length > 0"
                       @change="toggleSelectAll"
-                    />
-                    <span class="checkmark"></span>
+                    >
+                    <span class="checkmark" />
                   </label>
                 </th>
-                <th class="id-col">#</th>
-                <th class="serial-col">Serial Number</th>
-                <th class="status-col">Status</th>
-                <th class="actions-col">Actions</th>
+                <th class="id-col">
+                  #
+                </th>
+                <th class="serial-col">
+                  Serial Number
+                </th>
+                <th class="status-col">
+                  Status
+                </th>
+                <th class="actions-col">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -191,28 +419,38 @@
                 class="device-row"
                 :class="{ selected: isDeviceSelected(device.serialNumber) }"
               >
-                <td v-if="isMultiSelectMode" class="checkbox-col">
+                <td
+                  v-if="isMultiSelectMode"
+                  class="checkbox-col"
+                >
                   <label class="checkbox-wrapper">
                     <input 
                       type="checkbox" 
                       :checked="isDeviceSelected(device.serialNumber)"
                       @change="toggleDeviceSelection(device.serialNumber)"
-                    />
-                    <span class="checkmark"></span>
+                    >
+                    <span class="checkmark" />
                   </label>
                 </td>
-                <td class="id-col">{{ index + 1 }}</td>
+                <td class="id-col">
+                  {{ index + 1 }}
+                </td>
                 <td class="serial-col">
                   <div class="device-info">
-                    <div class="device-serial">{{ device.serialNumber }}</div>
-                    <div v-if="device.name && device.name !== device.serialNumber" class="device-name">
+                    <div class="device-serial">
+                      {{ device.serialNumber }}
+                    </div>
+                    <div
+                      v-if="device.name && device.name !== device.serialNumber"
+                      class="device-name"
+                    >
                       {{ device.name }}
                     </div>
                   </div>
                 </td>
                 <td class="status-col">
                   <span :class="['status-badge', getStatusClass(device.status)]">
-                    <span class="status-dot"></span>
+                    <span class="status-dot" />
                     {{ device.status || 'unassigned' }}
                   </span>
                 </td>
@@ -220,44 +458,94 @@
                   <div class="action-buttons">
                     <button 
                       class="btn-icon action-btn"
-                      @click="showAssignCustomerForDevice(device)"
                       title="Assign Customer"
+                      @click="showAssignCustomerForDevice(device)"
                     >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-                        <circle cx="9" cy="7" r="4"/>
-                        <line x1="19" y1="8" x2="19" y2="14"/>
-                        <line x1="22" y1="11" x2="16" y2="11"/>
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                        <circle
+                          cx="9"
+                          cy="7"
+                          r="4"
+                        />
+                        <line
+                          x1="19"
+                          y1="8"
+                          x2="19"
+                          y2="14"
+                        />
+                        <line
+                          x1="22"
+                          y1="11"
+                          x2="16"
+                          y2="11"
+                        />
                       </svg>
                     </button>
                     <button 
                       class="btn-icon action-btn"
-                      @click="showEditDeviceForDevice(device)"
                       title="Edit Device"
+                      @click="showEditDeviceForDevice(device)"
                     >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
                       </svg>
                     </button>
                     <button 
                       class="btn-icon action-btn"
-                      @click="showQRCodeForDevice(device)"
                       title="Show QR Code"
+                      @click="showQRCodeForDevice(device)"
                     >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="3" width="5" height="5"/>
-                        <rect x="16" y="3" width="5" height="5"/>
-                        <rect x="3" y="16" width="5" height="5"/>
-                        <path d="M21 16h-3a2 2 0 0 0-2 2v3"/>
-                        <path d="M21 21v.01"/>
-                        <path d="M12 7v3a2 2 0 0 1-2 2H7"/>
-                        <path d="M3 12h.01"/>
-                        <path d="M12 3h.01"/>
-                        <path d="M12 16v.01"/>
-                        <path d="M16 12h1"/>
-                        <path d="M21 12v.01"/>
-                        <path d="M12 21v-1"/>
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <rect
+                          x="3"
+                          y="3"
+                          width="5"
+                          height="5"
+                        />
+                        <rect
+                          x="16"
+                          y="3"
+                          width="5"
+                          height="5"
+                        />
+                        <rect
+                          x="3"
+                          y="16"
+                          width="5"
+                          height="5"
+                        />
+                        <path d="M21 16h-3a2 2 0 0 0-2 2v3" />
+                        <path d="M21 21v.01" />
+                        <path d="M12 7v3a2 2 0 0 1-2 2H7" />
+                        <path d="M3 12h.01" />
+                        <path d="M12 3h.01" />
+                        <path d="M12 16v.01" />
+                        <path d="M16 12h1" />
+                        <path d="M21 12v.01" />
+                        <path d="M12 21v-1" />
                       </svg>
                     </button>
                   </div>
@@ -270,25 +558,73 @@
     </main>
 
     <!-- Assign Customer Modal -->
-    <div v-if="showAssignModal" class="modal-overlay" @click="closeAssignModal">
-      <div class="modal" @click.stop>
+    <div
+      v-if="showAssignModal"
+      class="modal-overlay"
+      @click="closeAssignModal"
+    >
+      <div
+        class="modal"
+        @click.stop
+      >
         <div class="modal-header">
           <div class="modal-title">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
-              <circle cx="9" cy="7" r="4"/>
-              <line x1="19" y1="8" x2="19" y2="14"/>
-              <line x1="22" y1="11" x2="16" y2="11"/>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+              <circle
+                cx="9"
+                cy="7"
+                r="4"
+              />
+              <line
+                x1="19"
+                y1="8"
+                x2="19"
+                y2="14"
+              />
+              <line
+                x1="22"
+                y1="11"
+                x2="16"
+                y2="11"
+              />
             </svg>
             <div>
               <h3>Assign Customer</h3>
               <p>{{ selectedDeviceIds.length > 1 ? `${selectedDeviceIds.length} devices selected` : `Device: ${selectedDeviceIds[0]}` }}</p>
             </div>
           </div>
-          <button class="btn-icon" @click="closeAssignModal">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
+          <button
+            class="btn-icon"
+            @click="closeAssignModal"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <line
+                x1="18"
+                y1="6"
+                x2="6"
+                y2="18"
+              />
+              <line
+                x1="6"
+                y1="6"
+                x2="18"
+                y2="18"
+              />
             </svg>
           </button>
         </div>
@@ -296,42 +632,98 @@
         <div class="modal-body">
           <div class="search-container">
             <div class="search-input-wrapper">
-              <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="11" cy="11" r="8"/>
-                <path d="m21 21-4.35-4.35"/>
+              <svg
+                class="search-icon"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <circle
+                  cx="11"
+                  cy="11"
+                  r="8"
+                />
+                <path d="m21 21-4.35-4.35" />
               </svg>
               <input 
-                type="text" 
                 v-model="customerSearchQuery" 
+                type="text" 
                 placeholder="Search customers..."
                 class="search-input"
                 @input="filterCustomers"
-              />
+              >
             </div>
           </div>
 
-          <div v-if="isLoadingCustomers" class="state-container">
-            <div class="loading-spinner"></div>
+          <div
+            v-if="isLoadingCustomers"
+            class="state-container"
+          >
+            <div class="loading-spinner" />
             <p>Loading customers...</p>
           </div>
-          <div v-else-if="customerError" class="state-container error">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <line x1="15" y1="9" x2="9" y2="15"/>
-              <line x1="9" y1="9" x2="15" y2="15"/>
+          <div
+            v-else-if="customerError"
+            class="state-container error"
+          >
+            <svg
+              width="48"
+              height="48"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+              />
+              <line
+                x1="15"
+                y1="9"
+                x2="9"
+                y2="15"
+              />
+              <line
+                x1="9"
+                y1="9"
+                x2="15"
+                y2="15"
+              />
             </svg>
             <p>{{ customerError }}</p>
           </div>
-          <div v-else-if="filteredCustomers.length === 0" class="state-container empty">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-              <circle cx="9" cy="7" r="4"/>
-              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          <div
+            v-else-if="filteredCustomers.length === 0"
+            class="state-container empty"
+          >
+            <svg
+              width="48"
+              height="48"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle
+                cx="9"
+                cy="7"
+                r="4"
+              />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
             </svg>
             <p>No customers found</p>
           </div>
-          <div v-else class="customers-grid">
+          <div
+            v-else
+            class="customers-grid"
+          >
             <div 
               v-for="customer in filteredCustomers" 
               :key="customer.id"
@@ -339,19 +731,48 @@
               @click="selectCustomer(customer.id)"
             >
               <div class="customer-avatar">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                  <circle cx="12" cy="7" r="4"/>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle
+                    cx="12"
+                    cy="7"
+                    r="4"
+                  />
                 </svg>
               </div>
               <div class="customer-info">
-                <div class="customer-name">{{ customer.customerName }}</div>
-                <div class="customer-company">{{ customer.company }}</div>
+                <div class="customer-name">
+                  {{ customer.customerName }}
+                </div>
+                <div class="customer-company">
+                  {{ customer.company }}
+                </div>
               </div>
-              <div v-if="selectedCustomerId === customer.id" class="customer-selected">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M9 12l2 2 4-4"/>
-                  <circle cx="12" cy="12" r="10"/>
+              <div
+                v-if="selectedCustomerId === customer.id"
+                class="customer-selected"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M9 12l2 2 4-4" />
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
                 </svg>
               </div>
             </div>
@@ -359,13 +780,21 @@
         </div>
 
         <div class="modal-footer">
-          <button class="btn-secondary" @click="closeAssignModal">Cancel</button>
+          <button
+            class="btn-secondary"
+            @click="closeAssignModal"
+          >
+            Cancel
+          </button>
           <button 
             class="btn-primary" 
             :disabled="!selectedCustomerId || isAssigning"
             @click="assignCustomer"
           >
-            <div v-if="isAssigning" class="loading-spinner small"></div>
+            <div
+              v-if="isAssigning"
+              class="loading-spinner small"
+            />
             {{ selectedDeviceIds.length > 1 ? 'Assign All' : 'Assign' }}
           </button>
         </div>
@@ -373,23 +802,57 @@
     </div>
 
     <!-- Edit Device Modal -->
-    <div v-if="showEditModal" class="modal-overlay" @click="closeEditModal">
-      <div class="modal" @click.stop>
+    <div
+      v-if="showEditModal"
+      class="modal-overlay"
+      @click="closeEditModal"
+    >
+      <div
+        class="modal"
+        @click.stop
+      >
         <div class="modal-header">
           <div class="modal-title">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
             </svg>
             <div>
               <h3>Edit Device</h3>
               <p>{{ selectedDevice?.serialNumber }}</p>
             </div>
           </div>
-          <button class="btn-icon" @click="closeEditModal">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
+          <button
+            class="btn-icon"
+            @click="closeEditModal"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <line
+                x1="18"
+                y1="6"
+                x2="6"
+                y2="18"
+              />
+              <line
+                x1="6"
+                y1="6"
+                x2="18"
+                y2="18"
+              />
             </svg>
           </button>
         </div>
@@ -409,23 +872,31 @@
           <div class="form-group">
             <label for="deviceName">Device Name</label>
             <input 
-              type="text" 
               id="deviceName" 
               v-model="deviceNameInput" 
+              type="text" 
               class="form-input"
               placeholder="Enter device name"
-            />
+            >
           </div>
         </div>
 
         <div class="modal-footer">
-          <button class="btn-secondary" @click="closeEditModal">Cancel</button>
+          <button
+            class="btn-secondary"
+            @click="closeEditModal"
+          >
+            Cancel
+          </button>
           <button 
             class="btn-primary" 
             :disabled="isUpdating"
             @click="updateDeviceName"
           >
-            <div v-if="isUpdating" class="loading-spinner small"></div>
+            <div
+              v-if="isUpdating"
+              class="loading-spinner small"
+            />
             Save Changes
           </button>
         </div>
@@ -433,33 +904,82 @@
     </div>
 
     <!-- QR Code Modal -->
-    <div v-if="showQRModal" class="modal-overlay" @click="closeQRModal">
-      <div class="modal qr-modal" @click.stop>
+    <div
+      v-if="showQRModal"
+      class="modal-overlay"
+      @click="closeQRModal"
+    >
+      <div
+        class="modal qr-modal"
+        @click.stop
+      >
         <div class="modal-header">
           <div class="modal-title">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="3" y="3" width="5" height="5"/>
-              <rect x="16" y="3" width="5" height="5"/>
-              <rect x="3" y="16" width="5" height="5"/>
-              <path d="M21 16h-3a2 2 0 0 0-2 2v3"/>
-              <path d="M21 21v.01"/>
-              <path d="M12 7v3a2 2 0 0 1-2 2H7"/>
-              <path d="M3 12h.01"/>
-              <path d="M12 3h.01"/>
-              <path d="M12 16v.01"/>
-              <path d="M16 12h1"/>
-              <path d="M21 12v.01"/>
-              <path d="M12 21v-1"/>
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <rect
+                x="3"
+                y="3"
+                width="5"
+                height="5"
+              />
+              <rect
+                x="16"
+                y="3"
+                width="5"
+                height="5"
+              />
+              <rect
+                x="3"
+                y="16"
+                width="5"
+                height="5"
+              />
+              <path d="M21 16h-3a2 2 0 0 0-2 2v3" />
+              <path d="M21 21v.01" />
+              <path d="M12 7v3a2 2 0 0 1-2 2H7" />
+              <path d="M3 12h.01" />
+              <path d="M12 3h.01" />
+              <path d="M12 16v.01" />
+              <path d="M16 12h1" />
+              <path d="M21 12v.01" />
+              <path d="M12 21v-1" />
             </svg>
             <div>
               <h3>Device QR Code</h3>
               <p>{{ selectedDevice?.serialNumber }}</p>
             </div>
           </div>
-          <button class="btn-icon" @click="closeQRModal">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
+          <button
+            class="btn-icon"
+            @click="closeQRModal"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <line
+                x1="18"
+                y1="6"
+                x2="6"
+                y2="18"
+              />
+              <line
+                x1="6"
+                y1="6"
+                x2="18"
+                y2="18"
+              />
             </svg>
           </button>
         </div>
@@ -496,7 +1016,7 @@
             <div class="detail-row">
               <span class="detail-label">Status:</span>
               <span :class="['status-badge', getStatusClass(selectedDevice?.status)]">
-                <span class="status-dot"></span>
+                <span class="status-dot" />
                 {{ selectedDevice?.status || 'unassigned' }}
               </span>
             </div>

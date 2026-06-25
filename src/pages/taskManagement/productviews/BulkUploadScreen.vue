@@ -3,9 +3,20 @@
     <!-- Header -->
     <header class="header">
       <div class="header-content">
-        <button class="btn-back" @click="goBack" aria-label="Go back">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="m15 18-6-6 6-6"/>
+        <button
+          class="btn-back"
+          aria-label="Go back"
+          @click="goBack"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="m15 18-6-6 6-6" />
           </svg>
         </button>
         <div class="header-title">
@@ -16,16 +27,36 @@
     </header>
 
     <!-- Main Content -->
-    <main class="main-content" v-if="!isLoading">
+    <main
+      v-if="!isLoading"
+      class="main-content"
+    >
       <!-- Welcome Card -->
       <div class="welcome-card">
         <div class="welcome-icon">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-            <polyline points="14,2 14,8 20,8"/>
-            <line x1="16" y1="13" x2="8" y2="13"/>
-            <line x1="16" y1="17" x2="8" y2="17"/>
-            <polyline points="10,9 9,9 8,9"/>
+          <svg
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14,2 14,8 20,8" />
+            <line
+              x1="16"
+              y1="13"
+              x2="8"
+              y2="13"
+            />
+            <line
+              x1="16"
+              y1="17"
+              x2="8"
+              y2="17"
+            />
+            <polyline points="10,9 9,9 8,9" />
           </svg>
         </div>
         <div class="welcome-content">
@@ -39,28 +70,36 @@
         <h3>How it works</h3>
         <div class="instructions-grid">
           <div class="instruction-item">
-            <div class="instruction-number">1</div>
+            <div class="instruction-number">
+              1
+            </div>
             <div class="instruction-content">
               <h4>Download Template</h4>
               <p>Get the CSV template with required fields: productName, productId, product (image), category, and document files.</p>
             </div>
           </div>
           <div class="instruction-item">
-            <div class="instruction-number">2</div>
+            <div class="instruction-number">
+              2
+            </div>
             <div class="instruction-content">
               <h4>Fill Template</h4>
               <p>Complete the template with your product data. Maximum 10 products per batch. File names must match uploaded files.</p>
             </div>
           </div>
           <div class="instruction-item">
-            <div class="instruction-number">3</div>
+            <div class="instruction-number">
+              3
+            </div>
             <div class="instruction-content">
               <h4>Upload Files</h4>
               <p>Upload your CSV, product images (.jpg/.png), and documents (.pdf/.doc) that match your template references.</p>
             </div>
           </div>
           <div class="instruction-item">
-            <div class="instruction-number">4</div>
+            <div class="instruction-number">
+              4
+            </div>
             <div class="instruction-content">
               <h4>Submit & Track</h4>
               <p>Review your data and submit. Track the upload progress and receive detailed success or error feedback.</p>
@@ -73,10 +112,15 @@
       <div class="progress-section">
         <div class="progress-header">
           <h3>Upload Progress</h3>
-          <div class="progress-counter">Step {{ currentStep + 1 }} of {{ steps.length }}</div>
+          <div class="progress-counter">
+            Step {{ currentStep + 1 }} of {{ steps.length }}
+          </div>
         </div>
         <div class="progress-bar">
-          <div class="progress-fill" :style="{ width: `${((currentStep + 1) / steps.length) * 100}%` }"></div>
+          <div
+            class="progress-fill"
+            :style="{ width: `${((currentStep + 1) / steps.length) * 100}%` }"
+          />
         </div>
         <div class="steps-container">
           <div 
@@ -90,33 +134,83 @@
             }"
           >
             <div class="step-circle">
-              <svg v-if="currentStep > index" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
-                <polyline points="20,6 9,17 4,12"/>
+              <svg
+                v-if="currentStep > index"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="3"
+              >
+                <polyline points="20,6 9,17 4,12" />
               </svg>
               <span v-else>{{ index + 1 }}</span>
             </div>
             <div class="step-info">
-              <div class="step-title">{{ step.title }}</div>
-              <div class="step-description">{{ step.description }}</div>
+              <div class="step-title">
+                {{ step.title }}
+              </div>
+              <div class="step-description">
+                {{ step.description }}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Messages -->
-      <div v-if="successMessage" class="alert alert-success">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M9 12l2 2 4-4"/>
-          <circle cx="12" cy="12" r="10"/>
+      <div
+        v-if="successMessage"
+        class="alert alert-success"
+      >
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="M9 12l2 2 4-4" />
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
         </svg>
         <span>{{ successMessage }}</span>
       </div>
 
-      <div v-if="errorMessage" class="alert alert-error">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="15" y1="9" x2="9" y2="15"/>
-          <line x1="9" y1="9" x2="15" y2="15"/>
+      <div
+        v-if="errorMessage"
+        class="alert alert-error"
+      >
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle
+            cx="12"
+            cy="12"
+            r="10"
+          />
+          <line
+            x1="15"
+            y1="9"
+            x2="9"
+            y2="15"
+          />
+          <line
+            x1="9"
+            y1="9"
+            x2="15"
+            y2="15"
+          />
         </svg>
         <span>{{ errorMessage }}</span>
       </div>
@@ -124,15 +218,35 @@
       <!-- Step Content -->
       <div class="step-content-container">
         <!-- Step 1: Download Template -->
-        <div v-if="currentStep === 0" class="step-content">
+        <div
+          v-if="currentStep === 0"
+          class="step-content"
+        >
           <div class="step-card">
             <div class="step-header">
               <div class="step-icon template">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                  <polyline points="14,2 14,8 20,8"/>
-                  <line x1="16" y1="13" x2="8" y2="13"/>
-                  <line x1="16" y1="17" x2="8" y2="17"/>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14,2 14,8 20,8" />
+                  <line
+                    x1="16"
+                    y1="13"
+                    x2="8"
+                    y2="13"
+                  />
+                  <line
+                    x1="16"
+                    y1="17"
+                    x2="8"
+                    y2="17"
+                  />
                 </svg>
               </div>
               <div>
@@ -141,26 +255,56 @@
               </div>
             </div>
             <div class="step-actions">
-              <button class="btn-primary" @click="downloadTemplate">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                  <polyline points="7,10 12,15 17,10"/>
-                  <line x1="12" y1="15" x2="12" y2="3"/>
+              <button
+                class="btn-primary"
+                @click="downloadTemplate"
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7,10 12,15 17,10" />
+                  <line
+                    x1="12"
+                    y1="15"
+                    x2="12"
+                    y2="3"
+                  />
                 </svg>
                 Download Template
               </button>
-              <button class="btn-secondary" @click="pickCSVFile">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                  <polyline points="17,8 12,3 7,8"/>
-                  <line x1="12" y1="3" x2="12" y2="15"/>
+              <button
+                class="btn-secondary"
+                @click="pickCSVFile"
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="17,8 12,3 7,8" />
+                  <line
+                    x1="12"
+                    y1="3"
+                    x2="12"
+                    y2="15"
+                  />
                 </svg>
                 Upload Existing CSV
               </button>
             </div>
             <input 
-              type="file" 
               ref="csvInput" 
+              type="file" 
               accept=".csv" 
               class="file-input" 
               @change="onCSVSelected"
@@ -169,13 +313,23 @@
         </div>
 
         <!-- Step 2: Upload CSV -->
-        <div v-if="currentStep === 1" class="step-content">
+        <div
+          v-if="currentStep === 1"
+          class="step-content"
+        >
           <div class="step-card">
             <div class="step-header">
               <div class="step-icon csv">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                  <polyline points="14,2 14,8 20,8"/>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14,2 14,8 20,8" />
                 </svg>
               </div>
               <div>
@@ -184,30 +338,65 @@
               </div>
             </div>
             
-            <div v-if="csvFile" class="file-preview">
+            <div
+              v-if="csvFile"
+              class="file-preview"
+            >
               <div class="file-icon">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                  <polyline points="14,2 14,8 20,8"/>
+                <svg
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14,2 14,8 20,8" />
                 </svg>
               </div>
               <div class="file-info">
-                <div class="file-name">{{ csvFileName }}</div>
-                <div class="file-details">{{ parsedProducts.length }} products found</div>
+                <div class="file-name">
+                  {{ csvFileName }}
+                </div>
+                <div class="file-details">
+                  {{ parsedProducts.length }} products found
+                </div>
               </div>
               <div class="file-status success">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M9 12l2 2 4-4"/>
-                  <circle cx="12" cy="12" r="10"/>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M9 12l2 2 4-4" />
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
                 </svg>
               </div>
             </div>
             
             <div class="step-actions">
-              <button class="btn-secondary" @click="pickCSVFile">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2H5a2 2 0 0 0-2-2z"/>
-                  <path d="M8 21v-4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4"/>
+              <button
+                class="btn-secondary"
+                @click="pickCSVFile"
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2H5a2 2 0 0 0-2-2z" />
+                  <path d="M8 21v-4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v4" />
                 </svg>
                 {{ csvFile ? 'Change CSV File' : 'Upload CSV File' }}
               </button>
@@ -217,8 +406,15 @@
                 @click="pickImageFiles"
               >
                 Next: Upload Images
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="m9 18 6-6-6-6"/>
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="m9 18 6-6-6-6" />
                 </svg>
               </button>
             </div>
@@ -294,16 +490,36 @@
         </div> -->
 
         <!-- Step 4: Upload Documents -->
-        <div v-if="currentStep === 2" class="step-content">
+        <div
+          v-if="currentStep === 2"
+          class="step-content"
+        >
           <div class="step-card">
             <div class="step-header">
               <div class="step-icon documents">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                  <polyline points="14,2 14,8 20,8"/>
-                  <line x1="16" y1="13" x2="8" y2="13"/>
-                  <line x1="16" y1="17" x2="8" y2="17"/>
-                  <polyline points="10,9 9,9 8,9"/>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14,2 14,8 20,8" />
+                  <line
+                    x1="16"
+                    y1="13"
+                    x2="8"
+                    y2="13"
+                  />
+                  <line
+                    x1="16"
+                    y1="17"
+                    x2="8"
+                    y2="17"
+                  />
+                  <polyline points="10,9 9,9 8,9" />
                 </svg>
               </div>
               <div>
@@ -312,36 +528,71 @@
               </div>
             </div>
             
-            <div v-if="selectedDocumentFiles.length > 0" class="file-preview">
+            <div
+              v-if="selectedDocumentFiles.length > 0"
+              class="file-preview"
+            >
               <div class="file-icon">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                  <polyline points="14,2 14,8 20,8"/>
+                <svg
+                  width="32"
+                  height="32"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14,2 14,8 20,8" />
                 </svg>
               </div>
               <div class="file-info">
-                <div class="file-name">{{ selectedDocumentFiles.length }} document files</div>
-                <div class="file-details">{{ Object.keys(documentFileMap).length }} document references matched</div>
+                <div class="file-name">
+                  {{ selectedDocumentFiles.length }} document files
+                </div>
+                <div class="file-details">
+                  {{ Object.keys(documentFileMap).length }} document references matched
+                </div>
               </div>
               <div class="file-status success">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M9 12l2 2 4-4"/>
-                  <circle cx="12" cy="12" r="10"/>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M9 12l2 2 4-4" />
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
                 </svg>
               </div>
             </div>
             
             <div class="step-actions">
-              <button class="btn-secondary" @click="pickDocumentFiles">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                  <polyline points="14,2 14,8 20,8"/>
+              <button
+                class="btn-secondary"
+                @click="pickDocumentFiles"
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14,2 14,8 20,8" />
                 </svg>
                 {{ selectedDocumentFiles.length > 0 ? 'Change Documents' : 'Upload Documents' }}
               </button>
               <input 
-                type="file" 
                 ref="documentInput" 
+                type="file" 
                 accept=".pdf,.doc,.docx" 
                 class="file-input" 
                 multiple
@@ -353,8 +604,15 @@
                 @click="goToSubmitStep"
               >
                 Next: Review & Submit
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="m9 18 6-6-6-6"/>
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="m9 18 6-6-6-6" />
                 </svg>
               </button>
             </div>
@@ -362,13 +620,23 @@
         </div>
 
         <!-- Step 5: Submit -->
-        <div v-if="currentStep === 3" class="step-content">
+        <div
+          v-if="currentStep === 3"
+          class="step-content"
+        >
           <div class="step-card">
             <div class="step-header">
               <div class="step-icon submit">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="m4 12 8-8 8 8"/>
-                  <path d="m6 20 7-7 7 7"/>
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="m4 12 8-8 8 8" />
+                  <path d="m6 20 7-7 7 7" />
                 </svg>
               </div>
               <div>
@@ -382,68 +650,148 @@
               <div class="summary-grid">
                 <div class="summary-item">
                   <div class="summary-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                      <polyline points="14,2 14,8 20,8"/>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                      <polyline points="14,2 14,8 20,8" />
                     </svg>
                   </div>
                   <div class="summary-details">
-                    <div class="summary-label">CSV File</div>
-                    <div class="summary-value">{{ csvFileName }}</div>
+                    <div class="summary-label">
+                      CSV File
+                    </div>
+                    <div class="summary-value">
+                      {{ csvFileName }}
+                    </div>
                   </div>
                 </div>
                 <div class="summary-item">
                   <div class="summary-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                      <circle cx="12" cy="7" r="4"/>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                      <circle
+                        cx="12"
+                        cy="7"
+                        r="4"
+                      />
                     </svg>
                   </div>
                   <div class="summary-details">
-                    <div class="summary-label">Products</div>
-                    <div class="summary-value">{{ parsedProducts.length }} items</div>
+                    <div class="summary-label">
+                      Products
+                    </div>
+                    <div class="summary-value">
+                      {{ parsedProducts.length }} items
+                    </div>
                   </div>
                 </div>
                 <div class="summary-item">
                   <div class="summary-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                      <circle cx="9" cy="9" r="2"/>
-                      <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <rect
+                        x="3"
+                        y="3"
+                        width="18"
+                        height="18"
+                        rx="2"
+                        ry="2"
+                      />
+                      <circle
+                        cx="9"
+                        cy="9"
+                        r="2"
+                      />
+                      <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
                     </svg>
                   </div>
                   <div class="summary-details">
-                    <div class="summary-label">Images</div>
-                    <div class="summary-value">{{ selectedImageFiles.length }} files</div>
+                    <div class="summary-label">
+                      Images
+                    </div>
+                    <div class="summary-value">
+                      {{ selectedImageFiles.length }} files
+                    </div>
                   </div>
                 </div>
                 <div class="summary-item">
                   <div class="summary-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                      <polyline points="14,2 14,8 20,8"/>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                      <polyline points="14,2 14,8 20,8" />
                     </svg>
                   </div>
                   <div class="summary-details">
-                    <div class="summary-label">Documents</div>
-                    <div class="summary-value">{{ selectedDocumentFiles.length }} files</div>
+                    <div class="summary-label">
+                      Documents
+                    </div>
+                    <div class="summary-value">
+                      {{ selectedDocumentFiles.length }} files
+                    </div>
                   </div>
                 </div>
               </div>
               <div class="summary-note">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="m9 12 2 2 4-4"/>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <path d="m9 12 2 2 4-4" />
                 </svg>
                 All products will be created with draft status for review
               </div>
             </div>
             
             <div class="step-actions">
-              <button class="btn-submit" @click="uploadProducts">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="m4 12 8-8 8 8"/>
-                  <path d="m6 20 7-7 7 7"/>
+              <button
+                class="btn-submit"
+                @click="uploadProducts"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="m4 12 8-8 8 8" />
+                  <path d="m6 20 7-7 7 7" />
                 </svg>
                 Upload {{ parsedProducts.length }} Products
               </button>
@@ -453,62 +801,166 @@
       </div>
 
       <!-- Product Preview -->
-      <div v-if="parsedProducts.length > 0" class="preview-section">
+      <div
+        v-if="parsedProducts.length > 0"
+        class="preview-section"
+      >
         <div class="preview-header">
           <h3>Product Preview</h3>
-          <div class="preview-count">{{ parsedProducts.length }} products ready</div>
+          <div class="preview-count">
+            {{ parsedProducts.length }} products ready
+          </div>
         </div>
         <div class="preview-grid">
-          <div v-for="(product, index) in parsedProducts" :key="index" class="preview-card">
+          <div
+            v-for="(product, index) in parsedProducts"
+            :key="index"
+            class="preview-card"
+          >
             <div class="preview-image">
               <img 
                 v-if="imageFileMap[product.imageFileName]" 
                 :src="getImagePreview(product.imageFileName)" 
                 alt="Product preview"
               >
-              <div v-else class="preview-placeholder">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                  <circle cx="9" cy="9" r="2"/>
-                  <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+              <div
+                v-else
+                class="preview-placeholder"
+              >
+                <svg
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <rect
+                    x="3"
+                    y="3"
+                    width="18"
+                    height="18"
+                    rx="2"
+                    ry="2"
+                  />
+                  <circle
+                    cx="9"
+                    cy="9"
+                    r="2"
+                  />
+                  <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
                 </svg>
               </div>
             </div>
             <div class="preview-content">
-              <div class="preview-title">{{ product.productName }}</div>
-              <div class="preview-id">{{ product.productId }}</div>
-              <div class="preview-category">{{ getCategoryName(product) }}</div>
+              <div class="preview-title">
+                {{ product.productName }}
+              </div>
+              <div class="preview-id">
+                {{ product.productId }}
+              </div>
+              <div class="preview-category">
+                {{ getCategoryName(product) }}
+              </div>
               <div class="preview-files">
-                <span class="file-tag image" v-if="imageFileMap[product.imageFileName]">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                    <circle cx="9" cy="9" r="2"/>
-                    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                <span
+                  v-if="imageFileMap[product.imageFileName]"
+                  class="file-tag image"
+                >
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <rect
+                      x="3"
+                      y="3"
+                      width="18"
+                      height="18"
+                      rx="2"
+                      ry="2"
+                    />
+                    <circle
+                      cx="9"
+                      cy="9"
+                      r="2"
+                    />
+                    <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
                   </svg>
                   Image
                 </span>
-                <span class="file-tag docs" v-if="hasDocuments(product)">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <polyline points="14,2 14,8 20,8"/>
+                <span
+                  v-if="hasDocuments(product)"
+                  class="file-tag docs"
+                >
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14,2 14,8 20,8" />
                   </svg>
                   {{ countDocuments(product) }} docs
                 </span>
               </div>
             </div>
             <div class="preview-status">
-              <div class="status-indicator" :class="{ 
-                success: imageFileMap[product.imageFileName] && (!hasDocuments(product) || allDocumentsFound(product)),
-                warning: !imageFileMap[product.imageFileName] || (hasDocuments(product) && !allDocumentsFound(product))
-              }">
-                <svg v-if="imageFileMap[product.imageFileName] && (!hasDocuments(product) || allDocumentsFound(product))" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M9 12l2 2 4-4"/>
-                  <circle cx="12" cy="12" r="10"/>
+              <div
+                class="status-indicator"
+                :class="{ 
+                  success: imageFileMap[product.imageFileName] && (!hasDocuments(product) || allDocumentsFound(product)),
+                  warning: !imageFileMap[product.imageFileName] || (hasDocuments(product) && !allDocumentsFound(product))
+                }"
+              >
+                <svg
+                  v-if="imageFileMap[product.imageFileName] && (!hasDocuments(product) || allDocumentsFound(product))"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M9 12l2 2 4-4" />
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
                 </svg>
-                <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <line x1="12" y1="8" x2="12" y2="12"/>
-                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                <svg
+                  v-else
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                  />
+                  <line
+                    x1="12"
+                    y1="8"
+                    x2="12"
+                    y2="12"
+                  />
+                  <line
+                    x1="12"
+                    y1="16"
+                    x2="12.01"
+                    y2="16"
+                  />
                 </svg>
               </div>
             </div>
@@ -518,8 +970,11 @@
     </main>
 
     <!-- Loading State -->
-    <div v-else class="loading-state">
-      <div class="loading-spinner"></div>
+    <div
+      v-else
+      class="loading-state"
+    >
+      <div class="loading-spinner" />
       <h3>{{ loadingMessage }}</h3>
       <p>Please wait while we process your request...</p>
     </div>

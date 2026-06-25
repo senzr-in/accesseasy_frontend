@@ -1,6 +1,12 @@
 <template>
-  <div v-if="!showReport" class="employee-container">
-    <div class="main-content" :class="{ 'with-filter': showFilters }">
+  <div
+    v-if="!showReport"
+    class="employee-container"
+  >
+    <div
+      class="main-content"
+      :class="{ 'with-filter': showFilters }"
+    >
       <v-data-table
         :headers="headers"
         hide-default-footer
@@ -12,14 +18,17 @@
         fixed-header
         @click:row="(event, { item }) => editItem(item)"
       >
-        <template v-slot:item.status="{ item }">
-          <v-icon color="green" @click="download(item.generatedFile)"
-            >mdi-download</v-icon
+        <template #item.status="{ item }">
+          <v-icon
+            color="green"
+            @click="download(item.generatedFile)"
           >
+            mdi-download
+          </v-icon>
           download
         </template>
 
-        <template v-slot:top>
+        <template #top>
           <div class="d-flex align-center py-2 px-4">
             <v-text-field
               v-model="search"
@@ -29,10 +38,16 @@
               variant="outlined"
               class="search-field"
               hide-details
-            ></v-text-field>
-            <v-spacer></v-spacer>
-            <v-btn color="black" class="ms-2" @click="showReport = true">
-              <v-icon start>mdi-plus</v-icon>
+            />
+            <v-spacer />
+            <v-btn
+              color="black"
+              class="ms-2"
+              @click="showReport = true"
+            >
+              <v-icon start>
+                mdi-plus
+              </v-icon>
               Report
             </v-btn>
           </div>
@@ -41,15 +56,18 @@
 
       <CustomPagination
         :page="page"
-        :itemsPerPage="itemsPerPage"
+        :items-per-page="itemsPerPage"
         :total-items="totalItems"
         :is-searching="!!search"
         @update:page="handlePageChange"
-        @update:itemsPerPage="handleItemsPerPageChange"
+        @update:items-per-page="handleItemsPerPageChange"
       />
     </div>
   </div>
-  <generate-report v-else @closeAddPage="showReport = false" />
+  <generate-report
+    v-else
+    @close-add-page="showReport = false"
+  />
 </template>
 <script setup>
 import { ref, onMounted, computed } from "vue";

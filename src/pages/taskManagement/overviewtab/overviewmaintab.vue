@@ -5,14 +5,14 @@
         v-for="tab in tabs"
         :key="tab.name"
         :class="['tab-button', { active: currentTab === tab.name }]"
-        @click="navigateTo(tab)"
         :disabled="!hasAccess(tab.meta.roles)"
+        @click="navigateTo(tab)"
       >
         {{ tab.label }}
       </button>
     </div>
     <div class="tab-content">
-      <router-view></router-view>
+      <router-view />
     </div>
   </div>
 </template>
@@ -43,6 +43,14 @@ export default {
     userRoles() {
       return ["Admin"]; // Example: assuming user has Admin role
     },
+  },
+  watch: {
+    "$route.name"(newName) {
+      this.currentTab = newName;
+    },
+  },
+  mounted() {
+    this.initializeCurrentTab();
   },
   methods: {
     navigateTo(tab) {
@@ -84,14 +92,6 @@ export default {
         }
       }
     },
-  },
-  watch: {
-    "$route.name"(newName) {
-      this.currentTab = newName;
-    },
-  },
-  mounted() {
-    this.initializeCurrentTab();
   },
 };
 </script>

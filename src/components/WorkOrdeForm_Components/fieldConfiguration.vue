@@ -11,7 +11,9 @@
           <Lightbulb class="w-8 h-8" />
         </div>
         <div class="guide-text">
-          <h3 class="guide-title">Getting Started with Form Fields</h3>
+          <h3 class="guide-title">
+            Getting Started with Form Fields
+          </h3>
           <p class="guide-description">
             Add forms and fields to collect information in your work orders.
             Start with basic forms and fields like title, description, and
@@ -38,17 +40,25 @@
     <!-- Forms Header with Add Form Button -->
     <div class="fields-header">
       <div class="fields-header-content">
-        <h3 class="fields-title">Forms and Fields</h3>
+        <h3 class="fields-title">
+          Forms and Fields
+        </h3>
         <p class="fields-description">
           Add and configure forms and their fields for your work order
         </p>
       </div>
       <div class="fields-actions">
-        <button @click="$emit('showAddFormModal')" class="btn btn-success">
+        <button
+          class="btn btn-success"
+          @click="$emit('showAddFormModal')"
+        >
           <PlusIcon class="btn-icon" />
           Add New Form
         </button>
-        <button @click="$emit('showFieldWizard')" class="btn btn-success">
+        <button
+          class="btn btn-success"
+          @click="$emit('showFieldWizard')"
+        >
           <PlusIcon class="btn-icon" />
           Add Field
         </button>
@@ -64,12 +74,17 @@
         <div class="empty-fields-icon-wrapper">
           <ListPlusIcon class="empty-fields-icon" />
         </div>
-        <h3 class="empty-fields-title">No Forms Yet</h3>
+        <h3 class="empty-fields-title">
+          No Forms Yet
+        </h3>
         <p class="empty-fields-description">
           Start building your work order by adding forms. Each form can have
           fields like text inputs, dropdowns, date pickers, and more.
         </p>
-        <button @click="$emit('showAddFormModal')" class="btn btn-primary">
+        <button
+          class="btn btn-primary"
+          @click="$emit('showAddFormModal')"
+        >
           <PlusIcon class="btn-icon" />
           Add Your First Form
         </button>
@@ -83,23 +98,31 @@
       class="form-section"
     >
       <div class="form-header">
-        <h3 class="form-title">{{ form.form_name }}</h3>
+        <h3 class="form-title">
+          {{ form.form_name }}
+        </h3>
         <div class="form-details">
-          <span class="form-badge"
-            >Location Required:
-            {{ form.requires_location ? "Yes" : "No" }}</span
-          >
+          <span class="form-badge">Location Required:
+            {{ form.requires_location ? "Yes" : "No" }}</span>
         </div>
       </div>
 
       <!-- Empty Fields State for Form -->
-      <div v-if="!form.fields?.length" class="empty-fields-state">
+      <div
+        v-if="!form.fields?.length"
+        class="empty-fields-state"
+      >
         <div class="empty-fields-content">
-          <h3 class="empty-fields-title">No Fields in {{ form.form_name }}</h3>
+          <h3 class="empty-fields-title">
+            No Fields in {{ form.form_name }}
+          </h3>
           <p class="empty-fields-description">
             Add fields to this form to collect specific information.
           </p>
-          <button @click="$emit('showFieldWizard')" class="btn btn-primary">
+          <button
+            class="btn btn-primary"
+            @click="$emit('showFieldWizard')"
+          >
             <PlusIcon class="btn-icon" />
             Add Field to {{ form.form_name }}
           </button>
@@ -115,10 +138,15 @@
         <div class="field-header">
           <div class="field-header-left">
             <div class="field-type-icon">
-              <component :is="getFieldTypeIcon(field.type)" class="w-5 h-5" />
+              <component
+                :is="getFieldTypeIcon(field.type)"
+                class="w-5 h-5"
+              />
             </div>
             <div class="field-info">
-              <h3 class="field-title">{{ field.label }}</h3>
+              <h3 class="field-title">
+                {{ field.label }}
+              </h3>
               <div class="field-badges">
                 <span class="field-type-badge">{{
                   getFieldTypeDisplay(field.type)
@@ -127,23 +155,22 @@
                 <span
                   v-if="field.validations?.required"
                   class="field-required-badge"
-                  >Required</span
-                >
+                >Required</span>
               </div>
             </div>
           </div>
           <div class="field-actions">
             <button
-              @click="duplicateField(form, index)"
               class="action-btn action-btn-secondary"
               title="Duplicate Field"
+              @click="duplicateField(form, index)"
             >
               <CopyIcon class="w-4 h-4" />
             </button>
             <button
-              @click="removeField(form, index)"
               class="action-btn action-btn-danger"
               title="Remove Field"
+              @click="removeField(form, index)"
             >
               <Trash2Icon class="w-4 h-4" />
             </button>
@@ -162,7 +189,7 @@
               type="text"
               class="form-input"
               placeholder="Enter field label"
-            />
+            >
           </div>
           <div class="form-group">
             <label class="form-label">
@@ -174,7 +201,7 @@
               type="text"
               class="form-input"
               placeholder="Enter placeholder text"
-            />
+            >
           </div>
           <div class="form-group">
             <label class="form-label">
@@ -183,23 +210,45 @@
             </label>
             <select
               v-model="field.type"
-              @change="updateFieldType(field)"
               class="form-select"
+              @change="updateFieldType(field)"
             >
-              <option value="text">📝 Text</option>
-              <option value="number">🔢 Number</option>
-              <option value="bigtext">📄 Big Text</option>
-              <option value="dropdown">📋 Dropdown</option>
-              <option value="boolean">✅ Boolean</option>
-              <option :value="{ date: true }">📅 Date</option>
-              <option value="image">🖼️ Image</option>
-              <option value="gps">📍 Client Location</option>
+              <option value="text">
+                📝 Text
+              </option>
+              <option value="number">
+                🔢 Number
+              </option>
+              <option value="bigtext">
+                📄 Big Text
+              </option>
+              <option value="dropdown">
+                📋 Dropdown
+              </option>
+              <option value="boolean">
+                ✅ Boolean
+              </option>
+              <option :value="{ date: true }">
+                📅 Date
+              </option>
+              <option value="image">
+                🖼️ Image
+              </option>
+              <option value="gps">
+                📍 Client Location
+              </option>
               <option value="gps-currentLocation">
                 📍 Employee Current Location
               </option>
-              <option value="clientSelector">👥 Client Selector</option>
-              <option value="UsersId">👥 Employee Selector</option>
-              <option value="happy-code">😊 Happy Code</option>
+              <option value="clientSelector">
+                👥 Client Selector
+              </option>
+              <option value="UsersId">
+                👥 Employee Selector
+              </option>
+              <option value="happy-code">
+                😊 Happy Code
+              </option>
             </select>
           </div>
           <div class="form-group">
@@ -207,10 +256,20 @@
               <ClockIcon class="label-icon" />
               Field Phase
             </label>
-            <select v-model="field.field_type" class="form-select" disabled>
-              <option value="creation">Creation</option>
-              <option value="completion">Completion</option>
-              <option value="creation/completion">Creation/Completion</option>
+            <select
+              v-model="field.field_type"
+              class="form-select"
+              disabled
+            >
+              <option value="creation">
+                Creation
+              </option>
+              <option value="completion">
+                Completion
+              </option>
+              <option value="creation/completion">
+                Creation/Completion
+              </option>
             </select>
           </div>
         </div>
@@ -235,6 +294,7 @@
                     <input
                       type="checkbox"
                       :checked="field.roleBasedRequired?.[role.name] || false"
+                      class="toggle-input"
                       @change="
                         updateRoleBasedProperty(
                           field,
@@ -243,9 +303,8 @@
                           $event.target.checked,
                         )
                       "
-                      class="toggle-input"
-                    />
-                    <span class="toggle-slider toggle-slider-small"></span>
+                    >
+                    <span class="toggle-slider toggle-slider-small" />
                   </label>
                   <span class="toggle-label">{{ role.name }}</span>
                 </div>
@@ -264,6 +323,7 @@
                     <input
                       type="checkbox"
                       :checked="field.roleBasedMandatory?.[role.name] || false"
+                      class="toggle-input"
                       @change="
                         updateRoleBasedProperty(
                           field,
@@ -272,9 +332,8 @@
                           $event.target.checked,
                         )
                       "
-                      class="toggle-input"
-                    />
-                    <span class="toggle-slider toggle-slider-small"></span>
+                    >
+                    <span class="toggle-slider toggle-slider-small" />
                   </label>
                   <span class="toggle-label">{{ role.name }}</span>
                 </div>
@@ -293,11 +352,11 @@
             <div class="toggle-item validation-required">
               <label class="toggle-switch">
                 <input
-                  type="checkbox"
                   v-model="field.validations.required"
+                  type="checkbox"
                   class="toggle-input"
-                />
-                <span class="toggle-slider toggle-slider-small"></span>
+                >
+                <span class="toggle-slider toggle-slider-small" />
               </label>
               <span class="toggle-label">Required Field</span>
             </div>
@@ -314,7 +373,7 @@
                   type="text"
                   class="form-input"
                   placeholder="This field is required"
-                />
+                >
               </div>
               <!-- Text/BigText Validations -->
               <div
@@ -327,7 +386,7 @@
                   type="number"
                   class="form-input"
                   min="0"
-                />
+                >
               </div>
               <div
                 v-if="field.type === 'text' || field.type === 'bigtext'"
@@ -339,24 +398,30 @@
                   type="number"
                   class="form-input"
                   min="1"
-                />
+                >
               </div>
               <!-- Number Validations -->
-              <div v-if="field.type === 'number'" class="form-group">
+              <div
+                v-if="field.type === 'number'"
+                class="form-group"
+              >
                 <label class="form-label">Min Value</label>
                 <input
                   v-model.number="field.validations.min"
                   type="number"
                   class="form-input"
-                />
+                >
               </div>
-              <div v-if="field.type === 'number'" class="form-group">
+              <div
+                v-if="field.type === 'number'"
+                class="form-group"
+              >
                 <label class="form-label">Max Value</label>
                 <input
                   v-model.number="field.validations.max"
                   type="number"
                   class="form-input"
-                />
+                >
               </div>
               <!-- Image Validations -->
               <template v-if="field.type === 'image'">
@@ -368,7 +433,7 @@
                     class="form-input"
                     min="1"
                     max="50"
-                  />
+                  >
                 </div>
                 <div class="form-group">
                   <label class="form-label">Allowed File Types</label>
@@ -380,12 +445,12 @@
                           :checked="
                             field.validations.fileTypeAllowed?.includes('jpg')
                           "
+                          class="toggle-input"
                           @change="
                             toggleFileType(field, 'jpg', $event.target.checked)
                           "
-                          class="toggle-input"
-                        />
-                        <span class="toggle-slider toggle-slider-small"></span>
+                        >
+                        <span class="toggle-slider toggle-slider-small" />
                       </label>
                       <span class="toggle-label">JPG</span>
                     </div>
@@ -396,12 +461,12 @@
                           :checked="
                             field.validations.fileTypeAllowed?.includes('jpeg')
                           "
+                          class="toggle-input"
                           @change="
                             toggleFileType(field, 'jpeg', $event.target.checked)
                           "
-                          class="toggle-input"
-                        />
-                        <span class="toggle-slider toggle-slider-small"></span>
+                        >
+                        <span class="toggle-slider toggle-slider-small" />
                       </label>
                       <span class="toggle-label">JPEG</span>
                     </div>
@@ -412,12 +477,12 @@
                           :checked="
                             field.validations.fileTypeAllowed?.includes('png')
                           "
+                          class="toggle-input"
                           @change="
                             toggleFileType(field, 'png', $event.target.checked)
                           "
-                          class="toggle-input"
-                        />
-                        <span class="toggle-slider toggle-slider-small"></span>
+                        >
+                        <span class="toggle-slider toggle-slider-small" />
                       </label>
                       <span class="toggle-label">PNG</span>
                     </div>
@@ -435,13 +500,13 @@
                   Code Length
                 </label>
                 <input
-                  type="number"
                   v-model.number="field.validations.length"
+                  type="number"
                   min="4"
                   max="10"
                   class="form-input"
                   placeholder="Enter code length (e.g., 4 for 4-digit code)"
-                />
+                >
                 <div class="field-help">
                   Define how many digits the OTP/Happy Code should have.
                 </div>
@@ -452,11 +517,11 @@
               <div class="toggle-item">
                 <label class="toggle-switch">
                   <input
-                    type="checkbox"
                     v-model="field.validations.within_range"
+                    type="checkbox"
                     class="toggle-input"
-                  />
-                  <span class="toggle-slider toggle-slider-small"></span>
+                  >
+                  <span class="toggle-slider toggle-slider-small" />
                 </label>
                 <span class="toggle-label">Within Range</span>
               </div>
@@ -484,15 +549,18 @@
                 type="text"
                 class="form-input"
                 placeholder="Option value"
-              />
+              >
               <button
-                @click="removeOption(field, optionIndex)"
                 class="action-btn action-btn-danger"
+                @click="removeOption(field, optionIndex)"
               >
                 <XIcon class="w-4 h-4" />
               </button>
             </div>
-            <button @click="addOption(field)" class="btn btn-primary btn-sm">
+            <button
+              class="btn btn-primary btn-sm"
+              @click="addOption(field)"
+            >
               <PlusIcon class="btn-icon" />
               Add Option
             </button>

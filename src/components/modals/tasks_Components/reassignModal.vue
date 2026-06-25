@@ -1,5 +1,8 @@
 <template>
-  <div class="modal" v-if="show">
+  <div
+    v-if="show"
+    class="modal"
+  >
     <div class="modal-content">
       <h2>Reassign Task(s)</h2>
       <p>Selected tasks: {{ taskIds.length }}</p>
@@ -9,12 +12,16 @@
         placeholder="Select Employee"
       />
       <div class="modal-actions">
-        <BaseButton variant="secondary" text="Cancel" @click="$emit('close')" />
+        <BaseButton
+          variant="secondary"
+          text="Cancel"
+          @click="$emit('close')"
+        />
         <BaseButton
           variant="primary"
           text="Reassign"
-          @click="handleSubmit"
           :disabled="!selectedEmployee"
+          @click="handleSubmit"
         />
       </div>
     </div>

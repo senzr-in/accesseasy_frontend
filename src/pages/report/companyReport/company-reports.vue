@@ -8,22 +8,34 @@
       color="#68ade1"
       size="48"
       width="5"
-    ></v-progress-circular>
+    />
   </div>
-  <div v-else class="generate-report-container">
+  <div
+    v-else
+    class="generate-report-container"
+  >
     <!-- Modern Header -->
-    <v-toolbar flat class="header-toolbar px-4" height="64">
+    <v-toolbar
+      flat
+      class="header-toolbar px-4"
+      height="64"
+    >
       <div class="d-flex align-center">
-        <v-icon color="primary" class="mr-2">mdi-file-chart</v-icon>
+        <v-icon
+          color="primary"
+          class="mr-2"
+        >
+          mdi-file-chart
+        </v-icon>
         <span class="text-h6 font-weight-medium">Generate Report</span>
       </div>
-      <v-spacer></v-spacer>
+      <v-spacer />
       <div class="d-flex align-center">
         <BaseButton
           variant="primary"
           size="md"
           text="Generate"
-          :leftIcon="Check"
+          :left-icon="Check"
           @click="generateReport"
         />
       </div>
@@ -44,7 +56,7 @@
                 density="comfortable"
                 class="mb-4"
                 :rules="[(v) => !!v || 'Report Type is required']"
-              ></v-select>
+              />
             </div>
 
             <div class="form-group">
@@ -61,7 +73,7 @@
                 class="mb-4"
                 :loading="loadingBranches"
                 :rules="[(v) => !!v || 'Branch is required']"
-              ></v-select>
+              />
             </div>
 
             <div class="form-group">
@@ -80,7 +92,7 @@
                 class="mb-4"
                 :loading="loadingDepartments"
                 :rules="[(v) => !!v || 'Department is required']"
-              ></v-select>
+              />
             </div>
           </div>
         </v-form>
@@ -93,7 +105,11 @@
           <!-- Filters -->
           <div class="filter-section mb-4">
             <v-row>
-              <v-col cols="12" sm="6" md="4">
+              <v-col
+                cols="12"
+                sm="6"
+                md="4"
+              >
                 <v-select
                   v-model="selectedBranchForAccessLevel"
                   :items="branchOptions"
@@ -102,9 +118,13 @@
                   hide-details="auto"
                   density="comfortable"
                   :loading="loadingBranches"
-                ></v-select>
+                />
               </v-col>
-              <v-col cols="12" sm="6" md="4">
+              <v-col
+                cols="12"
+                sm="6"
+                md="4"
+              >
                 <v-select
                   v-model="selectedDepartmentForAccessLevel"
                   :items="departmentOptions"
@@ -113,16 +133,21 @@
                   hide-details="auto"
                   density="comfortable"
                   :loading="loadingDepartments"
-                ></v-select>
+                />
               </v-col>
-              <v-col cols="12" sm="6" md="4" class="d-flex align-center">
+              <v-col
+                cols="12"
+                sm="6"
+                md="4"
+                class="d-flex align-center"
+              >
                 <BaseButton
                   variant="primary"
                   size="md"
                   text="Fetch Employees"
-                  :leftIcon="RefreshCw"
-                  @click="fetchAccessLevelEmployees"
+                  :left-icon="RefreshCw"
                   :loading="loadingAccessLevelData"
+                  @click="fetchAccessLevelEmployees"
                 />
               </v-col>
             </v-row>
@@ -130,20 +155,23 @@
 
           <!-- Data Table -->
           <div class="table-section">
-            <v-card elevation="1" class="pa-4">
+            <v-card
+              elevation="1"
+              class="pa-4"
+            >
               <v-data-table
+                v-model="selectedEmployees"
                 :headers="accessLevelHeaders"
                 :items="accessLevelEmployees"
                 :loading="loadingAccessLevelData"
                 class="elevation-1"
-                v-model="selectedEmployees"
               >
                 <!-- UPDATED TOP TOOLBAR WITH SELECT ALL & BULK GENERATE -->
-                <template v-slot:top>
+                <template #top>
                   <v-toolbar flat>
-                    <v-toolbar-title
-                      >Access Level Assigned Employees</v-toolbar-title
-                    >
+                    <v-toolbar-title>
+                      Access Level Assigned Employees
+                    </v-toolbar-title>
 
                     <!-- Select All Checkbox -->
                     <v-checkbox
@@ -152,59 +180,59 @@
                       hide-details
                       density="compact"
                       @change="toggleSelectAll"
-                    ></v-checkbox>
+                    />
 
-                    <v-spacer></v-spacer>
+                    <v-spacer />
 
                     <!-- Generate Selected Button -->
                     <BaseButton
                       variant="primary"
                       size="md"
                       text="Generate Selected"
-                      :leftIcon="Check"
-                      @click="generateSelectedReports"
+                      :left-icon="Check"
                       :disabled="!selectedEmployees.length"
                       class="mr-2"
+                      @click="generateSelectedReports"
                     />
                     <!-- Export to Excel -->
                     <BaseButton
                       variant="primary"
                       size="md"
                       text="Export to Excel"
-                      :leftIcon="Download"
-                      @click="exportAccessLevelToExcel"
+                      :left-icon="Download"
                       :disabled="accessLevelEmployees.length === 0"
+                      @click="exportAccessLevelToExcel"
                     />
                   </v-toolbar>
                 </template>
 
                 <!-- Checkbox Column -->
-                <template v-slot:item.select="{ item }">
+                <template #item.select="{ item }">
                   <v-checkbox
                     v-model="selectedEmployees"
                     :value="item"
                     hide-details
                     class="mt-1"
                     @click.stop
-                  ></v-checkbox>
+                  />
                 </template>
 
-                <template v-slot:item.employeeId="{ item }">
+                <template #item.employeeId="{ item }">
                   {{ item.employeeId || "N/A" }}
                 </template>
 
-                <template v-slot:item.assignedUser.first_name="{ item }">
+                <template #item.assignedUser.first_name="{ item }">
                   {{ item.assignedUser?.first_name || "N/A" }}
                 </template>
 
-                <template v-slot:item.accessLevelNumber="{ item }">
+                <template #item.accessLevelNumber="{ item }">
                   {{
                     item.assignedAccessLevel?.accessLevelNumber ||
-                    "Not Assigned"
+                      "Not Assigned"
                   }}
                 </template>
 
-                <template v-slot:item.rfidCards="{ item }">
+                <template #item.rfidCards="{ item }">
                   <v-chip
                     v-if="item.cardDetails && item.cardDetails.length > 0"
                     size="small"
@@ -213,37 +241,49 @@
                   >
                     {{ item.cardDetails.length }} Card(s)
                   </v-chip>
-                  <span v-else class="text-caption text-grey">No Cards</span>
+                  <span
+                    v-else
+                    class="text-caption text-grey"
+                  >No Cards</span>
                 </template>
 
-                <template v-slot:item.actions="{ item }">
+                <template #item.actions="{ item }">
                   <BaseButton
                     variant="outline"
                     size="sm"
                     text="Generate"
-                    @click="generateEmployeeReport(item)"
                     :disabled="!item.assignedAccessLevel"
+                    @click="generateEmployeeReport(item)"
                   />
                 </template>
 
-                <template v-slot:loading>
-                  <v-row justify="center" align="center" class="pa-6">
+                <template #loading>
+                  <v-row
+                    justify="center"
+                    align="center"
+                    class="pa-6"
+                  >
                     <v-progress-circular
                       indeterminate
                       color="#68ade1"
                       size="32"
                       width="3"
-                    ></v-progress-circular>
+                    />
                     <span class="ml-3">Loading employees data...</span>
                   </v-row>
                 </template>
 
-                <template v-slot:no-data>
+                <template #no-data>
                   <div class="text-center pa-6">
-                    <v-icon size="64" color="grey lighten-2"
-                      >mdi-account-off</v-icon
+                    <v-icon
+                      size="64"
+                      color="grey lighten-2"
                     >
-                    <div class="text-h6 mt-2">No employees found</div>
+                      mdi-account-off
+                    </v-icon>
+                    <div class="text-h6 mt-2">
+                      No employees found
+                    </div>
                     <div class="text-body-2 mt-1">
                       Click "Fetch Employees" to load data
                     </div>

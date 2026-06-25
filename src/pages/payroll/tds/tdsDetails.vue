@@ -2,7 +2,10 @@
   <v-app>
     <v-main>
       <v-container fluid>
-        <v-tabs background-color="primary" dark>
+        <v-tabs
+          background-color="primary"
+          dark
+        >
           <v-tab
             v-for="(t, i) in filteredTabs"
             :key="i"

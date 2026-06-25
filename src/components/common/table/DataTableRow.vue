@@ -7,15 +7,22 @@
       clickable: $attrs.onClick || rowClickable,
     }"
   >
-    <div class="row-content" @click="handleRowClick">
+    <div
+      class="row-content"
+      @click="handleRowClick"
+    >
       <!-- Selection Column -->
-      <div v-if="showSelection" class="row-cell selection-col" @click.stop>
+      <div
+        v-if="showSelection"
+        class="row-cell selection-col"
+        @click.stop
+      >
         <input
           type="checkbox"
           class="table-checkbox"
           :checked="isSelected"
           @change="toggleSelection"
-        />
+        >
       </div>
 
       <!-- Dynamic Columns -->
@@ -37,20 +44,33 @@
       </DataTableCell>
 
       <!-- Expand Button -->
-      <div v-if="expandable" class="row-cell expand-col" @click.stop>
+      <div
+        v-if="expandable"
+        class="row-cell expand-col"
+        @click.stop
+      >
         <button
           class="expand-button"
-          @click="toggleExpanded"
           :aria-expanded="isExpanded"
+          @click="toggleExpanded"
         >
-          <ChevronDown :class="{ 'rotate-180': isExpanded }" :size="16" />
+          <ChevronDown
+            :class="{ 'rotate-180': isExpanded }"
+            :size="16"
+          />
         </button>
       </div>
     </div>
 
     <!-- Expanded Content -->
-    <div v-if="isExpanded && expandable" class="expanded-content">
-      <slot name="expanded-content" :item="item">
+    <div
+      v-if="isExpanded && expandable"
+      class="expanded-content"
+    >
+      <slot
+        name="expanded-content"
+        :item="item"
+      >
         <div class="default-expanded">
           <pre>{{ JSON.stringify(item, null, 2) }}</pre>
         </div>

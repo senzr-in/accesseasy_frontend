@@ -2,39 +2,49 @@
   <v-card>
     <v-card-title class="d-flex align-center">
       <span class="text-h5">{{ isEditing ? "Edit" : "Add" }} Access Level</span>
-      <v-spacer></v-spacer>
+      <v-spacer />
 
       <!-- Save/Cancel Buttons moved to title row -->
       <div class="d-flex align-center">
         <BaseButton
           variant="ghost"
           text="Cancel"
-          @click="$emit('cancel')"
           class="mr-2"
-        ></BaseButton>
+          @click="$emit('cancel')"
+        />
         <BaseButton
           variant="primary"
           text="Save"
           :loading="isSaving"
           @click="handleSave"
-        ></BaseButton>
+        />
       </div>
     </v-card-title>
 
     <v-card-text>
       <!-- Access Level Name Field with Access Type Toggle -->
-      <v-row dense class="mb-6 align-center">
-        <v-col cols="12" sm="6">
+      <v-row
+        dense
+        class="mb-6 align-center"
+      >
+        <v-col
+          cols="12"
+          sm="6"
+        >
           <v-text-field
+            v-model="accessLevelName"
             label="Access Level Name"
             placeholder="e.g. 'Staff Access'"
             variant="outlined"
             dense
-            v-model="accessLevelName"
             :rules="[requiredRule]"
-          ></v-text-field>
+          />
         </v-col>
-        <v-col cols="12" sm="6" class="d-flex justify-end">
+        <v-col
+          cols="12"
+          sm="6"
+          class="d-flex justify-end"
+        >
           <!-- Access Type Toggle moved to field row -->
           <div class="d-flex align-center">
             <span class="mr-2">Access Type:</span>
@@ -45,17 +55,22 @@
               hide-details
               inset
               density="compact"
-            ></v-switch>
+            />
           </div>
         </v-col>
       </v-row>
 
       <!-- Access Timing Section -->
       <div class="section-title mb-4">
-        <h3 class="text-h6">Access Timing</h3>
+        <h3 class="text-h6">
+          Access Timing
+        </h3>
       </div>
 
-      <v-card class="mb-6" variant="flat">
+      <v-card
+        class="mb-6"
+        variant="flat"
+      >
         <v-card-text class="pa-4">
           <!-- Current Active Option Message -->
           <v-alert
@@ -82,14 +97,23 @@
           </v-alert>
 
           <!-- 24 Hours Access -->
-          <v-row dense class="mb-4 align-center">
-            <v-col cols="12" sm="5">
-              <v-row align="center" no-gutters>
+          <v-row
+            dense
+            class="mb-4 align-center"
+          >
+            <v-col
+              cols="12"
+              sm="5"
+            >
+              <v-row
+                align="center"
+                no-gutters
+              >
                 <v-col>
                   <div class="d-flex align-center">
                     <span>24 Hours Access</span>
                     <v-tooltip location="top">
-                      <template v-slot:activator="{ props }">
+                      <template #activator="{ props }">
                         <v-icon
                           v-bind="props"
                           size="small"
@@ -99,10 +123,8 @@
                           mdi-information
                         </v-icon>
                       </template>
-                      <span
-                        >This access level allows entry at any time, 24 hours a
-                        day.</span
-                      >
+                      <span>This access level allows entry at any time, 24 hours a
+                        day.</span>
                     </v-tooltip>
                     <v-chip
                       v-if="access24Hours"
@@ -112,12 +134,20 @@
                     >
                       ACTIVE
                     </v-chip>
-                    <v-chip v-else size="small" color="grey" class="ml-2">
+                    <v-chip
+                      v-else
+                      size="small"
+                      color="grey"
+                      class="ml-2"
+                    >
                       INACTIVE
                     </v-chip>
                   </div>
                 </v-col>
-                <v-col cols="auto" class="ml-3">
+                <v-col
+                  cols="auto"
+                  class="ml-3"
+                >
                   <v-switch
                     v-model="access24Hours"
                     :disabled="isAnyOtherTimingOptionActive('24Hours')"
@@ -126,21 +156,30 @@
                     inset
                     density="compact"
                     @change="handle24HoursToggle"
-                  ></v-switch>
+                  />
                 </v-col>
               </v-row>
             </v-col>
           </v-row>
 
           <!-- Time Zone -->
-          <v-row dense class="mb-4 align-center">
-            <v-col cols="12" sm="5">
-              <v-row align="center" no-gutters>
+          <v-row
+            dense
+            class="mb-4 align-center"
+          >
+            <v-col
+              cols="12"
+              sm="5"
+            >
+              <v-row
+                align="center"
+                no-gutters
+              >
                 <v-col>
                   <div class="d-flex align-center">
                     <span>Time Zone</span>
                     <v-tooltip location="top">
-                      <template v-slot:activator="{ props }">
+                      <template #activator="{ props }">
                         <v-icon
                           v-bind="props"
                           size="small"
@@ -150,10 +189,8 @@
                           mdi-information
                         </v-icon>
                       </template>
-                      <span
-                        >The selected time zone determines when this access
-                        level is active.</span
-                      >
+                      <span>The selected time zone determines when this access
+                        level is active.</span>
                     </v-tooltip>
                     <v-chip
                       v-if="accessTiming"
@@ -163,12 +200,20 @@
                     >
                       ACTIVE
                     </v-chip>
-                    <v-chip v-else size="small" color="grey" class="ml-2">
+                    <v-chip
+                      v-else
+                      size="small"
+                      color="grey"
+                      class="ml-2"
+                    >
                       INACTIVE
                     </v-chip>
                   </div>
                 </v-col>
-                <v-col cols="auto" class="ml-3">
+                <v-col
+                  cols="auto"
+                  class="ml-3"
+                >
                   <v-switch
                     v-model="accessTiming"
                     :disabled="isAnyOtherTimingOptionActive('timeZone')"
@@ -177,26 +222,33 @@
                     inset
                     density="compact"
                     @change="handleAccessTimingToggle"
-                  ></v-switch>
+                  />
                 </v-col>
               </v-row>
             </v-col>
-            <v-col cols="12" sm="4" v-if="accessTiming">
+            <v-col
+              v-if="accessTiming"
+              cols="12"
+              sm="4"
+            >
               <v-select
+                v-model="selectedTimeSchedule"
                 label="Select Time Zone"
                 :items="timeOptions"
                 :loading="loadingTimeSchedules"
                 variant="outlined"
                 dense
-                v-model="selectedTimeSchedule"
                 class="small-select"
                 :rules="accessTiming ? [requiredRule] : []"
-              ></v-select>
+              />
             </v-col>
           </v-row>
 
           <!-- Date Validity Section (Optional) - Visible only when Time Zone is enabled -->
-          <div v-if="accessTiming" class="mb-6 ml-4 pl-4 border-l-2 border-gray-200">
+          <div
+            v-if="accessTiming"
+            class="mb-6 ml-4 pl-4 border-l-2 border-gray-200"
+          >
             <div class="text-subtitle-2 mb-2 font-weight-bold">
               Date Validity (Optional)
             </div>
@@ -204,15 +256,35 @@
               Access level will be disabled automatically after expiry date
             </div>
 
-            <v-radio-group v-model="dateValidityType" inline density="compact" class="mb-2">
-              <v-radio label="No Date Selected" :value="null"></v-radio>
-              <v-radio label="Single Date" value="single"></v-radio>
-              <v-radio label="Date Range" value="range"></v-radio>
+            <v-radio-group
+              v-model="dateValidityType"
+              inline
+              density="compact"
+              class="mb-2"
+            >
+              <v-radio
+                label="No Date Selected"
+                :value="null"
+              />
+              <v-radio
+                label="Single Date"
+                value="single"
+              />
+              <v-radio
+                label="Date Range"
+                value="range"
+              />
             </v-radio-group>
 
             <!-- Single Date Picker -->
-            <v-row v-if="dateValidityType === 'single'" dense>
-              <v-col cols="12" sm="6">
+            <v-row
+              v-if="dateValidityType === 'single'"
+              dense
+            >
+              <v-col
+                cols="12"
+                sm="6"
+              >
                 <v-text-field
                   v-model="singleDate"
                   label="Select Date"
@@ -221,13 +293,19 @@
                   dense
                   :rules="[requiredRule]"
                   :min="todayDate"
-                ></v-text-field>
+                />
               </v-col>
             </v-row>
 
             <!-- Date Range Picker -->
-            <v-row v-if="dateValidityType === 'range'" dense>
-              <v-col cols="12" sm="6">
+            <v-row
+              v-if="dateValidityType === 'range'"
+              dense
+            >
+              <v-col
+                cols="12"
+                sm="6"
+              >
                 <v-text-field
                   v-model="startDate"
                   label="Start Date"
@@ -236,9 +314,12 @@
                   dense
                   :rules="[requiredRule]"
                   :min="todayDate"
-                ></v-text-field>
+                />
               </v-col>
-              <v-col cols="12" sm="6">
+              <v-col
+                cols="12"
+                sm="6"
+              >
                 <v-text-field
                   v-model="endDate"
                   label="End Date"
@@ -247,20 +328,29 @@
                   dense
                   :rules="[requiredRule, endDateRule]"
                   :min="startDate || todayDate"
-                ></v-text-field>
+                />
               </v-col>
             </v-row>
           </div>
 
           <!-- Max Work Hours -->
-          <v-row dense class="mb-4 align-center">
-            <v-col cols="12" sm="5">
-              <v-row align="center" no-gutters>
+          <v-row
+            dense
+            class="mb-4 align-center"
+          >
+            <v-col
+              cols="12"
+              sm="5"
+            >
+              <v-row
+                align="center"
+                no-gutters
+              >
                 <v-col>
                   <div class="d-flex align-center">
                     <span>Max Work Hours</span>
                     <v-tooltip location="top">
-                      <template v-slot:activator="{ props }">
+                      <template #activator="{ props }">
                         <v-icon
                           v-bind="props"
                           size="small"
@@ -270,10 +360,8 @@
                           mdi-information
                         </v-icon>
                       </template>
-                      <span
-                        >The total number of working hours allowed for this
-                        access level.</span
-                      >
+                      <span>The total number of working hours allowed for this
+                        access level.</span>
                     </v-tooltip>
                     <v-chip
                       v-if="maxWorkHours"
@@ -283,7 +371,12 @@
                     >
                       ACTIVE
                     </v-chip>
-                    <v-chip v-else size="small" color="grey" class="ml-2">
+                    <v-chip
+                      v-else
+                      size="small"
+                      color="grey"
+                      class="ml-2"
+                    >
                       INACTIVE
                     </v-chip>
                   </div>
@@ -297,32 +390,45 @@
                     inset
                     density="compact"
                     @change="handleMaxWorkHoursToggle"
-                  ></v-switch>
+                  />
                 </v-col>
               </v-row>
             </v-col>
-            <v-col cols="12" sm="4" v-if="maxWorkHours">
+            <v-col
+              v-if="maxWorkHours"
+              cols="12"
+              sm="4"
+            >
               <v-text-field
+                v-model="maxWorkHoursValue"
                 label="Time Zone"
                 placeholder="e.g. 40 hours"
                 variant="outlined"
                 dense
-                v-model="maxWorkHoursValue"
                 class="small-field"
                 :rules="maxWorkHours ? [requiredRule] : []"
-              ></v-text-field>
+              />
             </v-col>
           </v-row>
 
           <!-- Holiday Access -->
-          <v-row dense class="align-center">
-            <v-col cols="12" sm="5">
-              <v-row align="center" no-gutters>
+          <v-row
+            dense
+            class="align-center"
+          >
+            <v-col
+              cols="12"
+              sm="5"
+            >
+              <v-row
+                align="center"
+                no-gutters
+              >
                 <v-col>
                   <div class="d-flex align-center">
                     <span>Holiday Access</span>
                     <v-tooltip location="top">
-                      <template v-slot:activator="{ props }">
+                      <template #activator="{ props }">
                         <v-icon
                           v-bind="props"
                           size="small"
@@ -332,10 +438,8 @@
                           mdi-information
                         </v-icon>
                       </template>
-                      <span
-                        >Allows entry even on holidays for this access
-                        level.</span
-                      >
+                      <span>Allows entry even on holidays for this access
+                        level.</span>
                     </v-tooltip>
                     <v-chip
                       v-if="holidayAccess"
@@ -345,7 +449,12 @@
                     >
                       ACTIVE
                     </v-chip>
-                    <v-chip v-else size="small" color="grey" class="ml-2">
+                    <v-chip
+                      v-else
+                      size="small"
+                      color="grey"
+                      class="ml-2"
+                    >
                       INACTIVE
                     </v-chip>
                   </div>
@@ -359,7 +468,7 @@
                     inset
                     density="compact"
                     @change="handleHolidayAccessToggle"
-                  ></v-switch>
+                  />
                 </v-col>
               </v-row>
             </v-col>
@@ -369,7 +478,9 @@
 
       <!-- Doors Section -->
       <div class="section-title mb-4">
-        <h3 class="text-h6">Doors</h3>
+        <h3 class="text-h6">
+          Doors
+        </h3>
       </div>
 
       <v-card variant="flat">
@@ -390,7 +501,7 @@
                 :loading="loadingDoors"
               >
                 <!-- Custom search input slot -->
-                <template v-slot:prepend-item>
+                <template #prepend-item>
                   <v-text-field
                     v-model="doorSearch"
                     label="Search Doors"
@@ -398,15 +509,23 @@
                     dense
                     class="ma-2"
                     @input="filterDoors"
-                  ></v-text-field>
-                  <v-divider></v-divider>
+                  />
+                  <v-divider />
                 </template>
                 <!-- Display selected doors as chips -->
-                <template v-slot:selection="{ item, index }">
-                  <v-chip v-if="index < 3" color="primary" small class="ma-1">
+                <template #selection="{ item, index }">
+                  <v-chip
+                    v-if="index < 3"
+                    color="primary"
+                    small
+                    class="ma-1"
+                  >
                     {{ item.title || item.doorName }}
                   </v-chip>
-                  <span v-if="index === 3" class="text-grey text-caption">
+                  <span
+                    v-if="index === 3"
+                    class="text-grey text-caption"
+                  >
                     (+{{ selectedDoors.length - 3 }} more)
                   </span>
                 </template>

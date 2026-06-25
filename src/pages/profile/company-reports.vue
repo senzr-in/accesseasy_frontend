@@ -1,19 +1,28 @@
 <template>
   <div class="generate-report-container">
     <!-- Modern Header -->
-    <v-toolbar flat class="header-toolbar px-4" height="64">
+    <v-toolbar
+      flat
+      class="header-toolbar px-4"
+      height="64"
+    >
       <div class="d-flex align-center">
-        <v-icon color="primary" class="mr-2">mdi-file-chart</v-icon>
+        <v-icon
+          color="primary"
+          class="mr-2"
+        >
+          mdi-file-chart
+        </v-icon>
         <span class="text-h6 font-weight-medium">Generate Report</span>
       </div>
-      <v-spacer></v-spacer>
+      <v-spacer />
       <div class="d-flex align-center">
         <v-btn
           color="white"
           style="background-color: black !important"
           prepend-icon="mdi-check"
-          @click="generateReport"
           elevation="0"
+          @click="generateReport"
         >
           Generate
         </v-btn>
@@ -35,7 +44,7 @@
                 density="comfortable"
                 class="mb-4"
                 :rules="[(v) => !!v || 'Report Type is required']"
-              ></v-select>
+              />
             </div>
 
             <!-- <div class="form-group">
@@ -85,20 +94,20 @@
                 hide-details="auto"
                 density="comfortable"
                 class="mb-4"
-              ></v-select>
+              />
             </div>
 
             <div class="form-group">
               <v-text-field
-                label="Date"
                 v-model="duration"
+                label="Date"
                 type="month"
                 variant="outlined"
                 hide-details="auto"
                 density="comfortable"
                 class="mb-4"
                 :disabled="payrollAttendanceCycle"
-              ></v-text-field>
+              />
             </div>
 
             <!-- <div class="form-group">

@@ -37,23 +37,29 @@
     </button> -->
 
     <!-- Main Content -->
-    <div class="main-content" :class="{ 'full-width': !showFilters }">
+    <div
+      class="main-content"
+      :class="{ 'full-width': !showFilters }"
+    >
       <data-table-wrapper
         v-if="!showForm && !showAddForm"
-        v-model:searchQuery="search"
+        v-model:search-query="search"
         :search-placeholder="'Search Logs...'"
         :show-search="true"
         :has-error="showError"
         wrapper-class="logs-table-wrapper"
       >
         <template #toolbar-actions>
-          <div class="d-flex align-center" style="gap: 8px">
+          <div
+            class="d-flex align-center"
+            style="gap: 8px"
+          >
             <BaseButton
               v-if="userRole === 'Admin'"
               variant="primary"
               size="md"
               text="Create Policies"
-              :leftIcon="Plus"
+              :left-icon="Plus"
               @click="openDialog"
             />
           </div>
@@ -82,7 +88,7 @@
             title="No logs data found"
             message="Try adjusting your filters or check back later"
             :primary-action="{ text: 'Clear Filters', icon: 'X' }"
-            @primaryAction="clearFilters"
+            @primary-action="clearFilters"
           />
         </template>
 
@@ -94,7 +100,7 @@
             :sort-by="sortBy.key"
             :sort-direction="sortBy.order"
             :row-clickable="true"
-            @rowClick="handleRowClick"
+            @row-click="handleRowClick"
             @sort="handleSort"
           >
             <!-- 💼 Salary Setting Table Custom Cells -->
@@ -149,13 +155,13 @@
         </template>
 
         <!-- Pagination Slot -->
-        <template v-slot:pagination>
+        <template #pagination>
           <CustomPagination
             v-model:page="page"
-            v-model:itemsPerPage="itemsPerPage"
+            v-model:items-per-page="itemsPerPage"
             :total-items="totalItems"
             @update:page="handlePageChange"
-            @update:itemsPerPage="handleItemsPerPageChange"
+            @update:items-per-page="handleItemsPerPageChange"
           />
         </template>
       </data-table-wrapper>

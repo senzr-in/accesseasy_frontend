@@ -1,23 +1,46 @@
 <template>
   <div class="access-management">
     <!-- Loading State -->
-    <div v-if="loading" class="loading-container">
-      <v-progress-circular indeterminate color="primary"></v-progress-circular>
+    <div
+      v-if="loading"
+      class="loading-container"
+    >
+      <v-progress-circular
+        indeterminate
+        color="primary"
+      />
     </div>
 
     <!-- Main Content -->
-    <div v-else class="content-container">
+    <div
+      v-else
+      class="content-container"
+    >
       <!-- Header -->
       <div class="header">
         <div class="title">
-          <v-icon size="24" color="primary" class="mr-2">mdi-shield-key</v-icon>
+          <v-icon
+            size="24"
+            color="primary"
+            class="mr-2"
+          >
+            mdi-shield-key
+          </v-icon>
           <h1>Access Management</h1>
         </div>
       </div>
 
       <!-- Warning Message -->
-      <div v-if="!formData.accessOn" class="warning-message">
-        <v-icon color="warning" class="mr-2">mdi-alert-circle</v-icon>
+      <div
+        v-if="!formData.accessOn"
+        class="warning-message"
+      >
+        <v-icon
+          color="warning"
+          class="mr-2"
+        >
+          mdi-alert-circle
+        </v-icon>
         <span>
           To assign cards, please enable access or check the Access Level's
           access type.
@@ -29,29 +52,38 @@
         <!-- Access Level Details -->
         <div class="access-details">
           <div class="section-header">
-            <v-icon size="20" color="primary" class="mr-2"
-              >mdi-shield-account</v-icon
+            <v-icon
+              size="20"
+              color="primary"
+              class="mr-2"
             >
+              mdi-shield-account
+            </v-icon>
             <h2>Access Level Details</h2>
           </div>
 
           <!-- Access Controls -->
           <div class="access-controls">
             <div class="access-level-container">
-              <div class="access-level-label">Access Level Category</div>
+              <div class="access-level-label">
+                Access Level Category
+              </div>
               <v-select
                 v-model="formData.accessLevel"
                 :items="props.accessLevelOptions"
                 item-title="accessLevelName"
                 item-value="accessLevelName"
-                @update:model-value="handleAccessLevelChange"
                 variant="outlined"
                 hide-details
                 class="access-level-select"
+                @update:model-value="handleAccessLevelChange"
               >
-                <template v-slot:item="{ item, props }">
-                  <v-list-item v-bind="props" :disabled="!item.raw.accessType">
-                    <template v-slot:prepend>
+                <template #item="{ item, props }">
+                  <v-list-item
+                    v-bind="props"
+                    :disabled="!item.raw.accessType"
+                  >
+                    <template #prepend>
                       <v-icon
                         :color="item.raw.accessType ? 'success' : 'error'"
                       >
@@ -62,7 +94,7 @@
                         }}
                       </v-icon>
                     </template>
-                    <template v-slot:append>
+                    <template #append>
                       <span
                         :class="
                           item.raw.accessType ? 'text-success' : 'text-error'
@@ -78,13 +110,13 @@
 
             <div class="access-toggle">
               <v-switch
+                :key="accessToggleKey"
                 v-model="formData.accessOn"
                 color="success"
                 hide-details
                 @update:model-value="handleAccessToggle"
-                :key="accessToggleKey"
               >
-                <template v-slot:label>
+                <template #label>
                   <span class="access-label">
                     Access: {{ formData.accessOn ? "Enabled" : "Disabled" }}
                   </span>
@@ -93,14 +125,22 @@
             </div>
           </div>
 
-          <div v-if="selectedAccessLevel" class="details-content">
+          <div
+            v-if="selectedAccessLevel"
+            class="details-content"
+          >
             <div class="tabs">
               <div
                 class="tab"
                 :class="{ active: activeAccessTab === 'general' }"
                 @click="activeAccessTab = 'general'"
               >
-                <v-icon size="18" class="mr-1">mdi-information</v-icon>
+                <v-icon
+                  size="18"
+                  class="mr-1"
+                >
+                  mdi-information
+                </v-icon>
                 GENERAL
               </div>
               <div
@@ -108,12 +148,20 @@
                 :class="{ active: activeAccessTab === 'doors' }"
                 @click="activeAccessTab = 'doors'"
               >
-                <v-icon size="18" class="mr-1">mdi-door</v-icon>
+                <v-icon
+                  size="18"
+                  class="mr-1"
+                >
+                  mdi-door
+                </v-icon>
                 ASSIGNED DOORS
               </div>
             </div>
 
-            <div v-if="activeAccessTab === 'general'" class="general-info">
+            <div
+              v-if="activeAccessTab === 'general'"
+              class="general-info"
+            >
               <div
                 class="info-card"
                 :class="{ 'disabled-card': !selectedAccessLevel._24hrs }"
@@ -135,9 +183,13 @@
 
               <div class="info-card">
                 <div class="info-header">
-                  <v-icon color="primary" size="24" class="mr-2"
-                    >mdi-timer-outline</v-icon
+                  <v-icon
+                    color="primary"
+                    size="24"
+                    class="mr-2"
                   >
+                    mdi-timer-outline
+                  </v-icon>
                   <span class="info-title">Max Hours</span>
                 </div>
                 <div class="info-value">
@@ -147,9 +199,13 @@
 
               <div class="info-card">
                 <div class="info-header">
-                  <v-icon color="primary" size="24" class="mr-2"
-                    >mdi-calendar-clock</v-icon
+                  <v-icon
+                    color="primary"
+                    size="24"
+                    class="mr-2"
                   >
+                    mdi-calendar-clock
+                  </v-icon>
                   <span class="info-title">Working Hours</span>
                 </div>
                 <div class="info-value">
@@ -159,9 +215,13 @@
 
               <div class="info-card">
                 <div class="info-header">
-                  <v-icon color="primary" size="24" class="mr-2"
-                    >mdi-calendar-star</v-icon
+                  <v-icon
+                    color="primary"
+                    size="24"
+                    class="mr-2"
                   >
+                    mdi-calendar-star
+                  </v-icon>
                   <span class="info-title">Holidays</span>
                 </div>
                 <div class="info-value">
@@ -170,39 +230,60 @@
               </div>
             </div>
 
-            <div v-if="activeAccessTab === 'doors'" class="doors-info">
+            <div
+              v-if="activeAccessTab === 'doors'"
+              class="doors-info"
+            >
               <div
                 v-if="
                   !selectedAccessLevel.assignedDoors ||
-                  selectedAccessLevel.assignedDoors.length === 0
+                    selectedAccessLevel.assignedDoors.length === 0
                 "
                 class="no-doors"
               >
                 No doors assigned to this access level
               </div>
 
-              <div v-else class="doors-grid">
+              <div
+                v-else
+                class="doors-grid"
+              >
                 <div
                   v-for="door in selectedAccessLevel.assignedDoors"
                   :key="door.doors_id.doorNumber"
                   class="door-item"
                 >
-                  <v-icon color="primary" size="20" class="mr-2"
-                    >mdi-door</v-icon
+                  <v-icon
+                    color="primary"
+                    size="20"
+                    class="mr-2"
                   >
+                    mdi-door
+                  </v-icon>
                   <div>
                     <div class="door-number">
                       {{ door.doors_id.doorNumber }}
                     </div>
-                    <div class="door-name">{{ door.doors_id.doorName }}</div>
+                    <div class="door-name">
+                      {{ door.doors_id.doorName }}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <div v-else class="no-access-level">
-            <v-icon size="40" color="grey" class="mb-2">mdi-shield-off</v-icon>
+          <div
+            v-else
+            class="no-access-level"
+          >
+            <v-icon
+              size="40"
+              color="grey"
+              class="mb-2"
+            >
+              mdi-shield-off
+            </v-icon>
             <div>No access level selected</div>
           </div>
         </div>
@@ -213,29 +294,45 @@
           :class="{ 'disabled-section': !formData.accessOn }"
         >
           <div class="section-header">
-            <v-icon size="20" color="primary" class="mr-2"
-              >mdi-credit-card-multiple</v-icon
+            <v-icon
+              size="20"
+              color="primary"
+              class="mr-2"
             >
+              mdi-credit-card-multiple
+            </v-icon>
             <h2>Card Management</h2>
           </div>
 
           <!-- Disabled Message -->
-          <div v-if="!formData.accessOn" class="disabled-message">
-            <v-icon color="warning" size="48" class="mb-3">mdi-lock</v-icon>
+          <div
+            v-if="!formData.accessOn"
+            class="disabled-message"
+          >
+            <v-icon
+              color="warning"
+              size="48"
+              class="mb-3"
+            >
+              mdi-lock
+            </v-icon>
             <h3>Card Management Disabled</h3>
             <p>Please enable access to manage cards for this employee.</p>
             <v-btn
               color="primary"
               variant="outlined"
-              @click="enableAccess"
               class="mt-3"
+              @click="enableAccess"
             >
               Enable Access
             </v-btn>
           </div>
 
           <!-- Card Management Content -->
-          <div v-else class="card-management-content">
+          <div
+            v-else
+            class="card-management-content"
+          >
             <div class="card-input-container">
               <v-text-field
                 v-model="cardInput"
@@ -243,13 +340,13 @@
                 variant="outlined"
                 type="number"
                 density="comfortable"
-                @focus="handleCardFocus"
                 maxlength="10"
                 minlength="10"
-                @input="handleCardInput"
                 hide-details
                 class="card-input"
-              ></v-text-field>
+                @focus="handleCardFocus"
+                @input="handleCardInput"
+              />
 
               <v-select
                 v-model="selectedCardType"
@@ -258,16 +355,16 @@
                 density="comfortable"
                 hide-details
                 class="card-type"
-              ></v-select>
+              />
             </div>
 
             <v-btn
               color="black"
               variant="elevated"
-              @click="addNewCard"
               :disabled="!cardInput"
               class="add-card-btn"
               prepend-icon="mdi-plus"
+              @click="addNewCard"
             >
               ADD NEW CARD
             </v-btn>
@@ -279,7 +376,10 @@
               </div>
 
               <div class="cards-list">
-                <div v-if="assignedCards.length === 0" class="no-cards">
+                <div
+                  v-if="assignedCards.length === 0"
+                  class="no-cards"
+                >
                   No cards assigned
                 </div>
 
@@ -289,11 +389,17 @@
                   class="card-item"
                 >
                   <div class="card-info">
-                    <v-icon size="20" color="primary" class="mr-2"
-                      >mdi-credit-card</v-icon
+                    <v-icon
+                      size="20"
+                      color="primary"
+                      class="mr-2"
                     >
+                      mdi-credit-card
+                    </v-icon>
                     <div>
-                      <div class="card-number">{{ card.rfidCard }}</div>
+                      <div class="card-number">
+                        {{ card.rfidCard }}
+                      </div>
                       <div class="card-type-label">
                         Type: {{ card.type.toUpperCase() }}
                       </div>
@@ -302,21 +408,21 @@
 
                   <div class="card-actions">
                     <v-switch
+                      :key="`card-${card.id}-${cardToggleKey}`"
                       v-model="card.enabled"
                       color="success"
                       density="compact"
                       hide-details
-                      @update:model-value="updateCardAccess(card)"
                       class="card-toggle"
-                      :key="`card-${card.id}-${cardToggleKey}`"
-                    ></v-switch>
+                      @update:model-value="updateCardAccess(card)"
+                    />
 
                     <v-btn
                       icon
                       variant="text"
                       color="error"
-                      @click="removeCard(card.id)"
                       class="delete-btn"
+                      @click="removeCard(card.id)"
                     >
                       <v-icon>mdi-delete</v-icon>
                     </v-btn>
@@ -331,16 +437,22 @@
       <!-- Footer -->
       <div class="footer">
         <div class="info-text">
-          <v-icon color="info" size="18" class="mr-2">mdi-information</v-icon>
+          <v-icon
+            color="info"
+            size="18"
+            class="mr-2"
+          >
+            mdi-information
+          </v-icon>
           <span>Need to modify access level categories?</span>
         </div>
 
         <v-btn
           color="primary"
           variant="tonal"
-          @click="redirectToAccessLevelCategory"
           class="settings-btn"
           prepend-icon="mdi-cog"
+          @click="redirectToAccessLevelCategory"
         >
           ACCESS LEVEL CATEGORY SETTINGS
         </v-btn>
@@ -355,7 +467,9 @@
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-alert-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-alert-circle
+        </v-icon>
         {{ errorMessage }}
       </div>
     </v-snackbar>
@@ -367,7 +481,9 @@
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-check-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-check-circle
+        </v-icon>
         {{ successMessage }}
       </div>
     </v-snackbar>

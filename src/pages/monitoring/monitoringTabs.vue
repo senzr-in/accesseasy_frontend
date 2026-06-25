@@ -2,7 +2,11 @@
   <v-app>
     <v-main>
       <v-container fluid>
-        <v-tabs v-model="activeTab" color="black" show-arrows>
+        <v-tabs
+          v-model="activeTab"
+          color="black"
+          show-arrows
+        >
           <v-tab
             v-for="tab in tabs"
             :key="tab.value"
@@ -10,12 +14,15 @@
             style="text-transform: none"
             class="tab-text"
           >
-            <v-icon :icon="tab.icon" class="mr-2"></v-icon>
+            <v-icon
+              :icon="tab.icon"
+              class="mr-2"
+            />
             {{ tab.title }}
           </v-tab>
         </v-tabs>
 
-        <router-view></router-view>
+        <router-view />
       </v-container>
     </v-main>
   </v-app>

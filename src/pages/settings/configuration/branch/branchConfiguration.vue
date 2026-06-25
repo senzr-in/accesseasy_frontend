@@ -3,7 +3,9 @@
   <div class="h-full flex flex-col gap-4 overflow-hidden">
     <!-- Page Header -->
     <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-zinc-800">
-      <h1 class="text-xl font-black text-slate-900 dark:text-white tracking-tight">Branches</h1>
+      <h1 class="text-xl font-black text-slate-900 dark:text-white tracking-tight">
+        Branches
+      </h1>
     </div>
 
     <!-- Toolbar -->
@@ -11,16 +13,16 @@
       <div class="relative flex-1 max-w-sm">
         <Search class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
         <input
+          v-model="searchQuery"
           type="search"
           placeholder="Search branches..."
-          v-model="searchQuery"
-          @input="handleSearch"
           class="w-full pl-9 pr-4 h-10 text-sm bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm text-slate-900 dark:text-white placeholder:text-slate-400"
-        />
+          @input="handleSearch"
+        >
       </div>
       <button
-        @click="createLocation"
         class="flex items-center gap-2 h-10 px-4 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all shadow-sm shrink-0"
+        @click="createLocation"
       >
         <Plus class="w-4 h-4" /> Create Branch
       </button>
@@ -32,47 +34,77 @@
         <table class="w-full text-left border-collapse relative min-w-[800px]">
           <thead class="bg-slate-50 dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-10">
             <tr>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">Location Name</th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">Address</th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">State</th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">Coordinates</th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest text-right whitespace-nowrap">Actions</th>
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">
+                Location Name
+              </th>
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">
+                Address
+              </th>
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">
+                State
+              </th>
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">
+                Coordinates
+              </th>
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest text-right whitespace-nowrap">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 dark:divide-zinc-800 bg-white dark:bg-zinc-950">
             <!-- Loading -->
             <tr v-if="loading">
-              <td colspan="5" class="px-5 py-24 text-center">
+              <td
+                colspan="5"
+                class="px-5 py-24 text-center"
+              >
                 <Loader2 class="w-8 h-8 animate-spin text-blue-500 mx-auto" />
               </td>
             </tr>
 
             <!-- Error -->
             <tr v-else-if="error">
-              <td colspan="5" class="px-5 py-24 text-center">
+              <td
+                colspan="5"
+                class="px-5 py-24 text-center"
+              >
                 <div class="flex flex-col items-center justify-center space-y-3">
                   <AlertCircle class="w-10 h-10 text-rose-300 dark:text-rose-700" />
-                  <p class="text-[10px] font-black uppercase tracking-widest text-rose-500">{{ error }}</p>
-                  <button @click="fetchLocations" class="text-xs font-bold text-blue-500 hover:underline">Try Again</button>
+                  <p class="text-[10px] font-black uppercase tracking-widest text-rose-500">
+                    {{ error }}
+                  </p>
+                  <button
+                    class="text-xs font-bold text-blue-500 hover:underline"
+                    @click="fetchLocations"
+                  >
+                    Try Again
+                  </button>
                 </div>
               </td>
             </tr>
 
             <!-- Empty -->
             <tr v-else-if="locations.length === 0">
-              <td colspan="5" class="px-5 py-24 text-center">
+              <td
+                colspan="5"
+                class="px-5 py-24 text-center"
+              >
                 <div class="flex flex-col items-center justify-center space-y-3">
                   <Building2 class="w-10 h-10 text-slate-300 dark:text-zinc-700" />
-                  <p class="text-[10px] font-black uppercase tracking-widest text-slate-500">No branches found.</p>
+                  <p class="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                    No branches found.
+                  </p>
                   <button
                     v-if="searchQuery"
-                    @click="searchQuery = ''; debouncedSearch = ''; handleSearch()"
                     class="text-xs font-bold text-blue-500 hover:underline"
-                  >Clear search</button>
+                    @click="searchQuery = ''; debouncedSearch = ''; handleSearch()"
+                  >
+                    Clear search
+                  </button>
                   <button
                     v-else
-                    @click="createLocation"
                     class="h-9 px-4 rounded-lg bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-black uppercase tracking-widest hover:opacity-90 transition-opacity"
+                    @click="createLocation"
                   >
                     <Plus class="w-4 h-4 inline mr-1" /> Add First Branch
                   </button>
@@ -82,8 +114,8 @@
 
             <!-- Rows -->
             <tr
-              v-else
               v-for="item in paginatedItems"
+              v-else
               :key="item.id"
               class="group/row hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors duration-200"
             >
@@ -94,12 +126,20 @@
                   </div>
                   <div>
                     <span class="text-[13px] font-semibold text-slate-800 dark:text-white block">{{ item.locationName || 'Unnamed' }}</span>
-                    <p v-if="item.pincodes" class="text-[11px] text-slate-400 font-mono mt-0.5">PIN: {{ item.pincodes }}</p>
+                    <p
+                      v-if="item.pincodes"
+                      class="text-[11px] text-slate-400 font-mono mt-0.5"
+                    >
+                      PIN: {{ item.pincodes }}
+                    </p>
                   </div>
                 </div>
               </td>
               <td class="px-5 py-3 max-w-[250px] truncate">
-                <span class="text-[12px] font-medium text-slate-500 dark:text-slate-400 block truncate" :title="item.address">{{ item.address || '—' }}</span>
+                <span
+                  class="text-[12px] font-medium text-slate-500 dark:text-slate-400 block truncate"
+                  :title="item.address"
+                >{{ item.address || '—' }}</span>
               </td>
               <td class="px-5 py-3 whitespace-nowrap">
                 <span class="text-[12px] font-medium text-slate-500 dark:text-slate-400">{{ item.state || '—' }}</span>
@@ -107,18 +147,18 @@
               <td class="px-5 py-3 whitespace-nowrap">
                 <div class="flex items-center gap-2">
                   <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-mono font-bold bg-amber-50 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-500/20">
-                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> {{ toFixedNumber(item.lat, 4) }}
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500" /> {{ toFixedNumber(item.lat, 4) }}
                   </span>
                   <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-mono font-bold bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400 border border-purple-200 dark:border-purple-500/20">
-                    <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span> {{ toFixedNumber(item.lng, 4) }}
+                    <span class="w-1.5 h-1.5 rounded-full bg-purple-500" /> {{ toFixedNumber(item.lng, 4) }}
                   </span>
                 </div>
               </td>
               <td class="px-5 py-3 text-right whitespace-nowrap">
                 <div class="flex justify-end pr-2 opacity-0 group-hover/row:opacity-100 transition-opacity">
                   <button
-                    @click="() => { selectedItem = item; handleEdit(); }"
                     class="h-7 px-3 text-[10px] font-black uppercase tracking-widest bg-transparent border border-slate-200 dark:border-zinc-700 rounded-md hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 transition-colors shadow-sm"
+                    @click="() => { selectedItem = item; handleEdit(); }"
                   >
                     Edit
                   </button>
@@ -133,20 +173,20 @@
       <div class="flex items-center justify-between p-4 border-t border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 shrink-0">
         <button
           class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-950 disabled:opacity-50 transition-colors shadow-sm text-slate-700 dark:text-slate-300"
-          @click="page--"
           :disabled="page <= 1 || loading"
+          @click="page--"
         >
           Previous
         </button>
         <div class="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-3">
           <span>Page {{ page }} of {{ totalPages || 1 }}</span>
-          <span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-zinc-700"></span>
+          <span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-zinc-700" />
           <span>{{ locations.length }} total</span>
         </div>
         <button
           class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-950 disabled:opacity-50 transition-colors shadow-sm text-slate-700 dark:text-slate-300"
-          @click="page++"
           :disabled="page >= totalPages || loading"
+          @click="page++"
         >
           Next
         </button>

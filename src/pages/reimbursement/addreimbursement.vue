@@ -3,13 +3,13 @@
     <div class="main-content">
       <!-- Tab Navigation -->
       <div class="d-flex align-center py-2 px-4">
-        <v-spacer></v-spacer>
+        <v-spacer />
         <BaseButton
           size="md"
           variant="primary"
-          :leftIcon="Plus"
-          @click="toggleAddDrawer"
+          :left-icon="Plus"
           :text="'Add Expense'"
+          @click="toggleAddDrawer"
         />
       </div>
 
@@ -24,70 +24,89 @@
         :item-key="'id'"
         :row-clickable="true"
         :loading="loading"
+        class="data-table"
         @update:selected-items="selected = $event"
         @update:sort-by="sortBy = $event"
         @update:sort-direction="sortDirection = $event"
         @row-click="handleRowClick"
         @sort="handleSort"
-        class="data-table"
       >
         <!-- Custom Cell Content Slots -->
-        <template v-slot:[`cell-date`]="{ item }">
+        <template #[`cell-date`]="{ item }">
           {{ formatDateOnly(item.date) }}
         </template>
-        <template v-slot:[`cell-date_created`]="{ item }">
+        <template #[`cell-date_created`]="{ item }">
           {{ formatDateOnly(item.date_created) }}
         </template>
-        <template v-slot:[`cell-totalReimbursement`]="{ item }">
+        <template #[`cell-totalReimbursement`]="{ item }">
           {{ currencySymbol
           }}{{ item.totalReimbursement?.toFixed(2) || "0.00" }}
         </template>
-        <template v-slot:[`cell-subTotal`]="{ item }">
+        <template #[`cell-subTotal`]="{ item }">
           {{ currencySymbol }}{{ item.subTotal?.toFixed(2) || "0.00" }}
         </template>
-        <template v-slot:[`cell-ModeOfTransport.transportName`]="{ item }">
+        <template #[`cell-ModeOfTransport.transportName`]="{ item }">
           <v-chip
             v-if="item.ModeOfTransport?.transportName"
             size="small"
             color="primary"
             variant="outlined"
           >
-            <v-icon start size="small">mdi-car</v-icon>
+            <v-icon
+              start
+              size="small"
+            >
+              mdi-car
+            </v-icon>
             {{ item.ModeOfTransport.transportName }}
-            <span v-if="item.ModeOfTransport.ratePerKm" class="ml-1">
+            <span
+              v-if="item.ModeOfTransport.ratePerKm"
+              class="ml-1"
+            >
               ({{ currencySymbol }}{{ item.ModeOfTransport.ratePerKm }}/km)
             </span>
           </v-chip>
-          <span v-else class="text-muted">Not specified</span>
+          <span
+            v-else
+            class="text-muted"
+          >Not specified</span>
         </template>
-        <template v-slot:[`cell-itemizedExpenses`]="{ item }">
+        <template #[`cell-itemizedExpenses`]="{ item }">
           <div v-if="item.itemizedExpenses && item.itemizedExpenses.length > 0">
             <div
               v-for="(expense, index) in item.itemizedExpenses.slice(0, 2)"
               :key="index"
               class="expense-item"
             >
-              <small
-                >{{ expense.description }} - {{ currencySymbol
-                }}{{ expense.cost }}</small
-              >
+              <small>{{ expense.description }} - {{ currencySymbol
+              }}{{ expense.cost }}</small>
             </div>
-            <small v-if="item.itemizedExpenses.length > 2" class="text-muted">
+            <small
+              v-if="item.itemizedExpenses.length > 2"
+              class="text-muted"
+            >
               +{{ item.itemizedExpenses.length - 2 }} more items
             </small>
           </div>
-          <span v-else class="text-muted">No expenses</span>
+          <span
+            v-else
+            class="text-muted"
+          >No expenses</span>
         </template>
-        <template v-slot:[`cell-status`]="{ item }">
+        <template #[`cell-status`]="{ item }">
           <div class="status-cell">
             <span
               v-if="
                 item.status !== 'submitted' ||
-                item.reimbBy?.assignedUser?.id !== userId
+                  item.reimbBy?.assignedUser?.id !== userId
               "
               :class="['status-chip', getStatusClass(item.status)]"
             >
-              <v-icon size="14" class="me-1" :color="getIconColor(item.status)">
+              <v-icon
+                size="14"
+                class="me-1"
+                :color="getIconColor(item.status)"
+              >
                 {{ getStatusIcon(item.status) }}
               </v-icon>
               {{ formatStatus(item.status, item.reimbBy?.assignedUser?.id) }}
@@ -98,22 +117,30 @@
 
       <CustomPagination
         v-model:page="page"
-        v-model:itemsPerPage="itemsPerPage"
+        v-model:items-per-page="itemsPerPage"
         :total-items="totalItems"
         :is-searching="!!search"
-        @update:page="handlePageChange"
-        @update:itemsPerPage="handleItemsPerPageChange"
         class="pagination"
+        @update:page="handlePageChange"
+        @update:items-per-page="handleItemsPerPageChange"
       />
     </div>
 
     <!-- Add Reimbursement Drawer -->
     <transition name="slide">
-      <div v-if="showAddDrawer" class="add-drawer">
+      <div
+        v-if="showAddDrawer"
+        class="add-drawer"
+      >
         <div class="drawer-header">
           <div class="d-flex align-center justify-space-between px-4">
-            <h3 class="text-h6 font-weight-medium">Add Expense</h3>
-            <v-btn icon @click="toggleAddDrawer">
+            <h3 class="text-h6 font-weight-medium">
+              Add Expense
+            </h3>
+            <v-btn
+              icon
+              @click="toggleAddDrawer"
+            >
               <v-icon>mdi-close</v-icon>
             </v-btn>
           </div>
@@ -173,7 +200,7 @@
               density="compact"
               class="mb-4"
               :required="activeTab === 'withTask'"
-            ></v-text-field>
+            />
 
             <v-select
               v-model="newReimbursement.transportId"
@@ -188,7 +215,7 @@
               density="compact"
               class="mb-4"
               :loading="transportLoading"
-            ></v-select>
+            />
 
             <v-text-field
               v-model.number="newReimbursement.subTotal"
@@ -199,7 +226,7 @@
               class="mb-4"
               :prefix="currencySymbol"
               required
-            ></v-text-field>
+            />
 
             <v-text-field
               v-model.number="newReimbursement.totalReimbursement"
@@ -210,7 +237,7 @@
               class="mb-4"
               :prefix="currencySymbol"
               required
-            ></v-text-field>
+            />
 
             <v-textarea
               v-model="newReimbursement.notes"
@@ -218,10 +245,12 @@
               variant="outlined"
               density="compact"
               class="mb-4"
-            ></v-textarea>
+            />
 
             <div class="mb-4">
-              <p class="text-subtitle-2 mb-2">Expense Details</p>
+              <p class="text-subtitle-2 mb-2">
+                Expense Details
+              </p>
               <v-text-field
                 v-model.number="newReimbursement.taskExpense.travel_cost"
                 label="Travel Cost"
@@ -230,7 +259,7 @@
                 density="compact"
                 class="mb-2"
                 :prefix="currencySymbol"
-              ></v-text-field>
+              />
               <v-text-field
                 v-model.number="newReimbursement.taskExpense.material_cost"
                 label="Material Cost"
@@ -239,7 +268,7 @@
                 density="compact"
                 class="mb-2"
                 :prefix="currencySymbol"
-              ></v-text-field>
+              />
               <v-text-field
                 v-model.number="newReimbursement.taskExpense.food_allowance"
                 label="Food Allowance"
@@ -248,7 +277,7 @@
                 density="compact"
                 class="mb-2"
                 :prefix="currencySymbol"
-              ></v-text-field>
+              />
               <v-text-field
                 v-model.number="newReimbursement.taskExpense.misc"
                 label="Miscellaneous"
@@ -257,18 +286,22 @@
                 density="compact"
                 class="mb-2"
                 :prefix="currencySymbol"
-              ></v-text-field>
+              />
               <v-textarea
                 v-model="newReimbursement.taskExpense.remarks"
                 label="Remarks"
                 variant="outlined"
                 density="compact"
                 class="mb-2"
-              ></v-textarea>
+              />
             </div>
 
             <div class="drawer-actions">
-              <v-btn color="error" variant="text" @click="clearAddForm">
+              <v-btn
+                color="error"
+                variant="text"
+                @click="clearAddForm"
+              >
                 Clear
               </v-btn>
               <BaseButton
@@ -292,8 +325,12 @@
       top
     >
       {{ snackbar.message }}
-      <template v-slot:actions>
-        <v-btn color="white" variant="text" @click="snackbar.show = false">
+      <template #actions>
+        <v-btn
+          color="white"
+          variant="text"
+          @click="snackbar.show = false"
+        >
           Close
         </v-btn>
       </template>

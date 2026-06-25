@@ -1,6 +1,13 @@
 <template>
-  <span class="status-badge" :class="`status-${normalizedStatus}`">
-    <component :is="statusIcon" :size="16" v-if="statusIcon" />
+  <span
+    class="status-badge"
+    :class="`status-${normalizedStatus}`"
+  >
+    <component
+      :is="statusIcon"
+      v-if="statusIcon"
+      :size="16"
+    />
     {{ formatStatus(status) }}
   </span>
 </template>

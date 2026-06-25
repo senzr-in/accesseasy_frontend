@@ -1,13 +1,11 @@
 <template>
   <div class="flex h-screen bg-slate-50 dark:bg-slate-950 relative overflow-hidden text-slate-900 dark:text-slate-100 font-sans">
     <div class="relative z-10 flex w-full h-full overflow-hidden">
-      
       <!-- Sidebar Navigation -->
       <Sidebar />
       
       <!-- Main Content Area -->
       <div class="flex flex-1 flex-col overflow-hidden min-w-0">
-        
         <!-- Header / Topbar -->
         <header class="flex h-20 shrink-0 items-center justify-between border-b border-slate-200 dark:border-slate-800/60 bg-white/50 dark:bg-slate-950/50 backdrop-blur-xl px-6">
           <div class="flex items-center gap-4">
@@ -38,7 +36,6 @@
         <main class="flex-1 flex flex-col overflow-hidden px-6 pt-4 pb-6 relative">
           <router-view class="flex-1 min-h-0" />
         </main>
-
       </div>
     </div>
   </div>

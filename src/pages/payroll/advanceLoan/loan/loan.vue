@@ -1,15 +1,21 @@
 <template>
-  <div class="employee-container" :class="{ 'drawer-open': showAdvanceDrawer }">
+  <div
+    class="employee-container"
+    :class="{ 'drawer-open': showAdvanceDrawer }"
+  >
     <!-- toast msg -->
     <ToastContainer ref="toastRef" />
 
     <!-- Filter Panel -->
-    <div class="filter-panel" v-if="showFilters && tenantId">
+    <div
+      v-if="showFilters && tenantId"
+      class="filter-panel"
+    >
       <div class="filter-content">
         <FilterComponent
-          :tenantId="tenantId"
-          :initialFilters="initialFilters"
-          :initiallyVisible="true"
+          :tenant-id="tenantId"
+          :initial-filters="initialFilters"
+          :initially-visible="true"
           :filter-schema="pageFilters"
           @apply-filters="handleApplyFilters"
           @filter-visibility-changed="onFilterVisibilityChanged"
@@ -19,26 +25,26 @@
 
     <!-- Main Content -->
     <div
-      class="main-content"
       v-if="tenantId"
+      class="main-content"
       :class="{ 'full-width': !showFilters }"
     >
       <DataTableWrapper
-        v-model:searchQuery="search"
-        :showSearch="true"
-        :searchPlaceholder="'Search Employee...'"
-        :isEmpty="items.length === 0 && !search"
-        :hasError="error"
-        @update:searchQuery="debouncedSearch"
+        v-model:search-query="search"
+        :show-search="true"
+        :search-placeholder="'Search Employee...'"
+        :is-empty="items.length === 0 && !search"
+        :has-error="error"
+        @update:search-query="debouncedSearch"
       >
         <template #before-search>
           <!-- Filter Toggle Button -->
           <button
             class="filter-toggle-static"
-            @click="toggleFilters"
             :class="{ active: hasActiveFilters }"
             :title="showFilters ? 'Hide filters' : 'Show filters'"
             aria-label="Toggle filters"
+            @click="toggleFilters"
           >
             <svg
               width="20"
@@ -50,7 +56,10 @@
             >
               <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46" />
             </svg>
-            <div v-if="hasActiveFilters" class="filter-indicator"></div>
+            <div
+              v-if="hasActiveFilters"
+              class="filter-indicator"
+            />
           </button>
         </template>
         <!-- Loading State -->
@@ -76,8 +85,8 @@
           <EmptyState
             title="No employee data found"
             message="Try adjusting your search criteria"
-            :primaryAction="{ text: 'Clear Filters', icon: 'X' }"
-            @primaryAction="clearFilters"
+            :primary-action="{ text: 'Clear Filters', icon: 'X' }"
+            @primary-action="clearFilters"
           />
         </div>
 
@@ -87,13 +96,13 @@
             v-model="selected"
             :items="paginatedItems"
             :columns="headers"
-            :sortBy="sortBy"
-            :sortDirection="sortDirection"
-            :showSelection="true"
+            :sort-by="sortBy"
+            :sort-direction="sortDirection"
+            :show-selection="true"
             :expandable="false"
-            :rowClickable="true"
+            :row-clickable="true"
             @sort="handleSort"
-            @rowClick="openViewDrawer($event, 'view')"
+            @row-click="openViewDrawer($event, 'view')"
           >
             <!-- Employee Name Column -->
             <template #cell-employee.assignedUser.first_name="{ item }">
@@ -123,12 +132,12 @@
                   color="primary"
                   variant="text"
                   size="small"
+                  class="mr-2"
+                  clickable
                   @click.stop="
                     openViewDrawer(item.id, 'add');
                     resetBenefitsForm();
                   "
-                  class="mr-2"
-                  clickable
                 >
                   Add Loan
                 </v-btn>
@@ -137,9 +146,9 @@
                     color="info"
                     variant="outlined"
                     size="small"
-                    @click.stop="openViewDrawer(item.id, 'view')"
                     class="view-chip"
                     clickable
+                    @click.stop="openViewDrawer(item.id, 'view')"
                   >
                     View Details
                   </v-chip>
@@ -150,13 +159,13 @@
         </div>
 
         <!-- Pagination Slot -->
-        <template v-slot:pagination>
+        <template #pagination>
           <CustomPagination
             v-model:page="page"
-            v-model:itemsPerPage="itemsPerPage"
+            v-model:items-per-page="itemsPerPage"
             :total-items="totalFilteredItems"
             @update:page="handlePageChange"
-            @update:itemsPerPage="handleItemsPerPageChange"
+            @update:items-per-page="handleItemsPerPageChange"
           />
         </template>
       </DataTableWrapper>

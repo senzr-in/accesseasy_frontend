@@ -1,23 +1,26 @@
 <template>
-    <div class="search-bar" :class="{ 'focused': isFocused }">
-      <i class="search-icon fas fa-search"></i>
-      <input
-        type="text"
-        :placeholder="placeholder"
-        v-model="searchValue"
-        @focus="isFocused = true"
-        @blur="isFocused = false"
-        class="search-input"
-      />
-      <button 
-        v-if="searchValue" 
-        class="clear-button"
-        @click="clearSearch"
-      >
-        <i class="fas fa-times"></i>
-      </button>
-    </div>
-  </template>
+  <div
+    class="search-bar"
+    :class="{ 'focused': isFocused }"
+  >
+    <i class="search-icon fas fa-search" />
+    <input
+      v-model="searchValue"
+      type="text"
+      :placeholder="placeholder"
+      class="search-input"
+      @focus="isFocused = true"
+      @blur="isFocused = false"
+    >
+    <button 
+      v-if="searchValue" 
+      class="clear-button"
+      @click="clearSearch"
+    >
+      <i class="fas fa-times" />
+    </button>
+  </div>
+</template>
   
   <script>
   export default {

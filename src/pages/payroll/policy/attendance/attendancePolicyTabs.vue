@@ -5,7 +5,11 @@
         <!-- Tabs -->
         <v-row class="align-center mb-4">
           <v-col cols="auto">
-            <v-btn icon="mdi-arrow-left" variant="text" @click="goBack"></v-btn>
+            <v-btn
+              icon="mdi-arrow-left"
+              variant="text"
+              @click="goBack"
+            />
           </v-col>
           <v-col cols="3">
             <div
@@ -29,9 +33,12 @@
             <PenaltyOverTime
               v-if="selectedConfig && policyPatchId"
               :config="selectedConfig"
-              :policyPatch="policyPatchId"
+              :policy-patch="policyPatchId"
             />
-            <div v-else class="pa-4 text-center text-muted-foreground">
+            <div
+              v-else
+              class="pa-4 text-center text-muted-foreground"
+            >
               Please select an attendance policy to configure penalty and
               overtime settings.
             </div>
@@ -40,10 +47,13 @@
             <AssignEmployee
               v-if="selectedConfig"
               :config="selectedConfig"
-              gradeName="Default Grade"
-              :updateAlteredData="() => {}"
+              grade-name="Default Grade"
+              :update-altered-data="() => {}"
             />
-            <div v-else class="pa-4 text-center text-muted-foreground">
+            <div
+              v-else
+              class="pa-4 text-center text-muted-foreground"
+            >
               Please select an attendance policy to assign employees.
             </div>
           </v-window-item>

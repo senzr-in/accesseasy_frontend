@@ -1,12 +1,15 @@
 <template>
   <div class="card-management-container">
     <!-- Filter Panel -->
-    <div class="filter-panel" v-if="showFilters">
+    <div
+      v-if="showFilters"
+      class="filter-panel"
+    >
       <div class="filter-content">
         <FilterComponent
-          :tenantId="tenantId"
-          :initialFilters="initialFilters"
-          :initiallyVisible="true"
+          :tenant-id="tenantId"
+          :initial-filters="initialFilters"
+          :initially-visible="true"
           :filter-schema="pageFilters"
           @apply-filters="handleApplyFilters"
           @filter-visibility-changed="onFilterVisibilityChanged"
@@ -14,23 +17,26 @@
       </div>
     </div>
 
-    <div class="main-content" :class="{ 'full-width': !showFilters }">
+    <div
+      class="main-content"
+      :class="{ 'full-width': !showFilters }"
+    >
       <DataTableWrapper
-        v-model:searchQuery="search"
-        :showSearch="true"
-        :searchPlaceholder="'Search Card Details'"
-        :isEmpty="filteredCardManagementData.length === 0 && !search"
-        :hasError="error"
-        @update:searchQuery="debouncedSearch"
+        v-model:search-query="search"
+        :show-search="true"
+        :search-placeholder="'Search Card Details'"
+        :is-empty="filteredCardManagementData.length === 0 && !search"
+        :has-error="error"
+        @update:search-query="debouncedSearch"
       >
         <!-- Filter Toggle Button -->
         <template #before-search>
           <button
             class="filter-toggle-static"
-            @click="toggleFilters"
             :class="{ active: hasActiveFilters }"
             :title="showFilters ? 'Hide filters' : 'Show filters'"
             aria-label="Toggle filters"
+            @click="toggleFilters"
           >
             <svg
               width="20"
@@ -42,7 +48,10 @@
             >
               <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46" />
             </svg>
-            <div v-if="hasActiveFilters" class="filter-indicator"></div>
+            <div
+              v-if="hasActiveFilters"
+              class="filter-indicator"
+            />
           </button>
         </template>
 
@@ -67,8 +76,8 @@
           <EmptyState
             title="No card details found"
             message="Try adjusting your filters or search term"
-            :primaryAction="{ text: 'Clear Filters' }"
-            @primaryAction="clearFilters"
+            :primary-action="{ text: 'Clear Filters' }"
+            @primary-action="clearFilters"
           />
         </div>
 
@@ -76,16 +85,16 @@
           <DataTable
             :items="filteredCardManagementData"
             :columns="columns"
-            :selectedItems="selectedItems"
-            :showSelection="false"
-            :sortBy="sortBy[0]?.key || ''"
-            :sortDirection="sortBy[0]?.order || 'asc'"
-            :itemKey="'id'"
-            :rowClickable="true"
-            @update:selectedItems="selectedItems = $event"
-            @update:sortBy="updateSortBy"
-            @update:sortDirection="updateSortDirection"
-            @rowClick="handleRowClick"
+            :selected-items="selectedItems"
+            :show-selection="false"
+            :sort-by="sortBy[0]?.key || ''"
+            :sort-direction="sortBy[0]?.order || 'asc'"
+            :item-key="'id'"
+            :row-clickable="true"
+            @update:selected-items="selectedItems = $event"
+            @update:sort-by="updateSortBy"
+            @update:sort-direction="updateSortDirection"
+            @row-click="handleRowClick"
             @sort="handleSort"
           >
             <!-- Employee ID Column -->
@@ -136,12 +145,12 @@
         <!-- Pagination Info -->
         <template #before-pagination>
           <div
-            class="pagination-info"
             v-if="
               !loading &&
-              filteredCardManagementData.length > 0 &&
-              totalItems > 0
+                filteredCardManagementData.length > 0 &&
+                totalItems > 0
             "
+            class="pagination-info"
           >
             Showing {{ (page - 1) * itemsPerPage + 1 }} to
             {{ Math.min(page * itemsPerPage, totalItems) }} of
@@ -150,15 +159,15 @@
         </template>
 
         <!-- Pagination Slot -->
-        <template v-slot:pagination>
+        <template #pagination>
           <CustomPagination
             v-model:page="page"
-            v-model:itemsPerPage="itemsPerPage"
+            v-model:items-per-page="itemsPerPage"
             :total-items="totalItems"
             :loading="loading"
             :items-per-page-options="[10, 25, 50, 100]"
             @update:page="handlePageChange"
-            @update:itemsPerPage="handleItemsPerPageChange"
+            @update:items-per-page="handleItemsPerPageChange"
           />
         </template>
       </DataTableWrapper>

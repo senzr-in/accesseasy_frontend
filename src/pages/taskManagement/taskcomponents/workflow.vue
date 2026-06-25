@@ -42,7 +42,10 @@
           />
 
           <!-- Configuration Container -->
-          <div v-else class="config-container">
+          <div
+            v-else
+            class="config-container"
+          >
             <!-- Form Header Info -->
             <div class="form-header">
               <div class="form-header-main">
@@ -67,11 +70,14 @@
                 <button
                   v-for="tab in tabs"
                   :key="tab.id"
-                  @click="activeTab = tab.id"
                   class="tab-button"
                   :class="{ 'tab-button-active': activeTab === tab.id }"
+                  @click="activeTab = tab.id"
                 >
-                  <component :is="getTabIcon(tab.id)" class="tab-icon" />
+                  <component
+                    :is="getTabIcon(tab.id)"
+                    class="tab-icon"
+                  />
                   {{ tab.name }}
                 </button>
               </nav>
@@ -151,7 +157,10 @@
       @show-notification="showNotification"
     />
 
-    <HelpModal :show="showHelpModal" @close="showHelpModal = false" />
+    <HelpModal
+      :show="showHelpModal"
+      @close="showHelpModal = false"
+    />
   </div>
 </template>
 

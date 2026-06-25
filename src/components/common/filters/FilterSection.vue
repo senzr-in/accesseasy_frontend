@@ -1,10 +1,23 @@
 <!-- scr/components/common/filters/filterSection.vue -->
 <template>
-  <div class="filter-section" :class="sectionClass">
-    <h4 v-if="title" class="filter-section-title">
-      <component v-if="icon" :is="icon" :size="18" />
+  <div
+    class="filter-section"
+    :class="sectionClass"
+  >
+    <h4
+      v-if="title"
+      class="filter-section-title"
+    >
+      <component
+        :is="icon"
+        v-if="icon"
+        :size="18"
+      />
       {{ title }}
-      <span v-if="count !== null" class="filter-count">({{ count }})</span>
+      <span
+        v-if="count !== null"
+        class="filter-count"
+      >({{ count }})</span>
     </h4>
 
     <div class="filter-section-content">

@@ -14,8 +14,16 @@
         <div class="policy-header">
           <div class="policy-title">
             <div class="policy-icon general">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                <circle cx="12" cy="12" r="3" />
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="3"
+                />
                 <path d="M12 1v6m0 6v6m11-7h-6m-6 0H1" />
               </svg>
             </div>
@@ -23,11 +31,11 @@
           </div>
           <div class="header-actions">
             <BaseButton
+              v-if="!isEditing"
               variant="primary"
               size="md"
               :left-icon="Pencil"
               @click="toggleEditing"
-              v-if="!isEditing"
             >
               Edit
             </BaseButton>
@@ -37,8 +45,8 @@
                 variant="danger"
                 size="md"
                 :left-icon="X"
-                @click="cancelEdit"
                 class="ms-2"
+                @click="cancelEdit"
               >
                 Cancel
               </BaseButton>
@@ -47,8 +55,8 @@
                 variant="primary"
                 size="md"
                 :left-icon="Save"
-                @click="saveChanges"
                 class="ms-2"
+                @click="saveChanges"
               >
                 Save Changes
               </BaseButton>
@@ -75,23 +83,28 @@
           <!-- Added Total Working Hours field below Location Centric -->
           <div class="setting-item">
             <div class="setting-info">
-              <div class="setting-label">Total Working Hours</div>
+              <div class="setting-label">
+                Total Working Hours
+              </div>
               <div class="setting-description">
                 Set maximum working hours per day (max 9 hours)
               </div>
             </div>
             <div class="hours-input-wrapper">
               <input
-                type="number"
                 v-model="generalSettings.totalWorkingHours"
+                type="number"
                 :disabled="!isEditing"
                 class="form-input hours-input"
                 min="1"
                 max="9"
                 placeholder="9"
-              />
+              >
               <span class="hours-suffix">hours</span>
-              <div v-if="errors.totalWorkingHours" class="error-message">
+              <div
+                v-if="errors.totalWorkingHours"
+                class="error-message"
+              >
                 {{ errors.totalWorkingHours }}
               </div>
             </div>
@@ -130,33 +143,43 @@
                 color: white;
               "
             >
-              <v-icon color="white" size="22">mdi-calendar-outline</v-icon>
+              <v-icon
+                color="white"
+                size="22"
+              >
+                mdi-calendar-outline
+              </v-icon>
             </div>
 
             <span>Working Hours</span>
           </div>
           <label class="toggle">
             <input
-              type="checkbox"
               v-model="workingHours.enabled"
+              type="checkbox"
               :disabled="!isEditing"
-            />
-            <span class="toggle-slider"></span>
+            >
+            <span class="toggle-slider" />
           </label>
         </div>
-        <div v-if="workingHours.enabled" class="policy-content">
+        <div
+          v-if="workingHours.enabled"
+          class="policy-content"
+        >
           <div class="policy-type-section">
-            <div class="section-label">POLICY TYPE</div>
+            <div class="section-label">
+              POLICY TYPE
+            </div>
             <div class="policy-type-buttons">
               <button
                 v-for="type in ['fixed', 'leave', 'lop']"
                 :key="type"
-                @click="!isEditing || (workingHours.penaltyType = type)"
                 :class="[
                   'policy-type-btn',
                   { active: workingHours.penaltyType === type },
                 ]"
                 :disabled="!isEditing"
+                @click="!isEditing || (workingHours.penaltyType = type)"
               >
                 {{
                   type === "fixed"
@@ -179,7 +202,7 @@
                   variant="outlined"
                   suffix="hours"
                   hide-details
-                ></v-text-field>
+                />
               </div>
             </div>
             <div class="form-group">
@@ -190,9 +213,12 @@
                 type="number"
                 variant="outlined"
                 hide-details
-              ></v-text-field>
+              />
 
-              <div v-if="errors.workingHoursDaysLimit" class="error-message">
+              <div
+                v-if="errors.workingHoursDaysLimit"
+                class="error-message"
+              >
                 {{ errors.workingHoursDaysLimit }}
               </div>
             </div>
@@ -212,7 +238,7 @@
                 :items="['Fixed Hourly Rate', 'Custom Multiplier']"
                 variant="outlined"
                 hide-details
-              ></v-select>
+              />
 
               <!-- For LOP, show only custom option with help icon -->
               <div
@@ -223,14 +249,27 @@
                   <span class="custom-lop-text">Fixed</span>
                   <button
                     type="button"
-                    @click="showWorkingHoursLopHelpModal = true"
                     class="help-icon-btn"
                     :disabled="!isEditing"
+                    @click="showWorkingHoursLopHelpModal = true"
                   >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                      <circle cx="12" cy="12" r="10" />
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                    >
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="10"
+                      />
                       <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-                      <line x1="12" y1="17" x2="12.01" y2="17" />
+                      <line
+                        x1="12"
+                        y1="17"
+                        x2="12.01"
+                        y2="17"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -244,7 +283,7 @@
                 item-value="value"
                 variant="outlined"
                 hide-details
-              ></v-select>
+              />
             </div>
             <!-- Added fine amount field for working hours fixed penalty -->
             <div v-if="workingHours.penaltyType === 'fixed'">
@@ -265,7 +304,7 @@
                 "
                 variant="outlined"
                 hide-details
-              ></v-text-field>
+              />
             </div>
           </div>
         </div>
@@ -293,18 +332,23 @@
 
           <label class="toggle">
             <input
-              type="checkbox"
               v-model="overtime.enabled"
+              type="checkbox"
               :disabled="!isEditing"
-            />
-            <span class="toggle-slider"></span>
+            >
+            <span class="toggle-slider" />
           </label>
         </div>
 
-        <div v-if="overtime.enabled" class="policy-content">
+        <div
+          v-if="overtime.enabled"
+          class="policy-content"
+        >
           <!-- Working Hours OT -->
           <div class="subsection">
-            <div class="subsection-title">Working Hours OT</div>
+            <div class="subsection-title">
+              Working Hours OT
+            </div>
             <div class="form-grid">
               <div class="form-group">
                 <label class="form-label">Grace Period</label>
@@ -315,7 +359,7 @@
                   variant="outlined"
                   suffix="hours"
                   hide-details
-                ></v-text-field>
+                />
               </div>
 
               <div class="form-group">
@@ -326,7 +370,7 @@
                   :items="['Fixed Hourly Rate', 'Custom Multiplier']"
                   variant="outlined"
                   hide-details
-                ></v-select>
+                />
               </div>
 
               <div class="form-group">
@@ -347,14 +391,16 @@
                   "
                   variant="outlined"
                   hide-details
-                ></v-text-field>
+                />
               </div>
             </div>
           </div>
 
           <!-- Holiday Pay -->
           <div class="subsection">
-            <div class="subsection-title">Holiday Pay</div>
+            <div class="subsection-title">
+              Holiday Pay
+            </div>
             <div class="form-grid">
               <div class="form-group">
                 <label class="form-label">Public Holiday Pay Type</label>
@@ -364,7 +410,7 @@
                   :items="['Fixed Hourly Rate', 'Custom Multiplier']"
                   variant="outlined"
                   hide-details
-                ></v-select>
+                />
               </div>
 
               <div class="form-group">
@@ -385,14 +431,16 @@
                   "
                   variant="outlined"
                   hide-details
-                ></v-text-field>
+                />
               </div>
             </div>
           </div>
 
           <!-- Week Off Pay -->
           <div class="subsection">
-            <div class="subsection-title">Week Off Pay</div>
+            <div class="subsection-title">
+              Week Off Pay
+            </div>
             <div class="form-grid">
               <div class="form-group">
                 <label class="form-label">Week Off Pay Type</label>
@@ -402,7 +450,7 @@
                   :items="['Fixed Hourly Rate', 'Custom Multiplier']"
                   variant="outlined"
                   hide-details
-                ></v-select>
+                />
               </div>
 
               <div class="form-group">
@@ -423,7 +471,7 @@
                   "
                   variant="outlined"
                   hide-details
-                ></v-text-field>
+                />
               </div>
             </div>
           </div>
@@ -454,27 +502,32 @@
           <!-- Native checkbox toggle -->
           <label class="toggle">
             <input
-              type="checkbox"
               v-model="lateComing.enabled"
+              type="checkbox"
               :disabled="!isEditing"
-            />
-            <span class="toggle-slider"></span>
+            >
+            <span class="toggle-slider" />
           </label>
         </div>
 
-        <div v-if="lateComing.enabled" class="policy-content">
+        <div
+          v-if="lateComing.enabled"
+          class="policy-content"
+        >
           <div class="policy-type-section">
-            <div class="section-label">POLICY TYPE</div>
+            <div class="section-label">
+              POLICY TYPE
+            </div>
             <div class="policy-type-buttons">
               <button
                 v-for="type in ['fixed', 'leave', 'lop']"
                 :key="type"
-                @click="!isEditing || (lateComing.penaltyType = type)"
                 :class="[
                   'policy-type-btn',
                   { active: lateComing.penaltyType === type },
                 ]"
                 :disabled="!isEditing"
+                @click="!isEditing || (lateComing.penaltyType = type)"
               >
                 {{
                   type === "fixed"
@@ -498,7 +551,7 @@
                 suffix="hours"
                 variant="outlined"
                 hide-details
-              ></v-text-field>
+              />
             </div>
             <!-- Waive Off Days -->
             <div class="form-group">
@@ -511,7 +564,7 @@
                 suffix="days"
                 variant="outlined"
                 hide-details
-              ></v-text-field>
+              />
             </div>
             <!-- Deduction Type -->
             <div class="form-group">
@@ -523,7 +576,7 @@
                 :items="['Fixed Hourly Rate', 'Custom Multiplier']"
                 variant="outlined"
                 hide-details
-              ></v-select>
+              />
 
               <div
                 v-else-if="lateComing.penaltyType === 'lop'"
@@ -533,14 +586,27 @@
                   <span class="custom-lop-text">Fixed</span>
                   <button
                     type="button"
-                    @click="showLopHelpModal = true"
                     class="help-icon-btn"
                     :disabled="!isEditing"
+                    @click="showLopHelpModal = true"
                   >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                      <circle cx="12" cy="12" r="10" />
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                    >
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="10"
+                      />
                       <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-                      <line x1="12" y1="17" x2="12.01" y2="17" />
+                      <line
+                        x1="12"
+                        y1="17"
+                        x2="12.01"
+                        y2="17"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -555,11 +621,14 @@
                 item-value="value"
                 variant="outlined"
                 hide-details
-              ></v-select>
+              />
             </div>
 
             <!-- Fine Amount -->
-            <div class="form-group" v-if="lateComing.penaltyType === 'fixed'">
+            <div
+              v-if="lateComing.penaltyType === 'fixed'"
+              class="form-group"
+            >
               <label class="form-label">Amount</label>
               <v-text-field
                 v-model="lateComing.fineAmount"
@@ -577,7 +646,7 @@
                 "
                 variant="outlined"
                 hide-details
-              ></v-text-field>
+              />
             </div>
           </div>
         </div>
@@ -607,27 +676,32 @@
           <!-- Native checkbox toggle -->
           <label class="toggle">
             <input
-              type="checkbox"
               v-model="earlyLeaving.enabled"
+              type="checkbox"
               :disabled="!isEditing"
-            />
-            <span class="toggle-slider"></span>
+            >
+            <span class="toggle-slider" />
           </label>
         </div>
 
-        <div v-if="earlyLeaving.enabled" class="policy-content">
+        <div
+          v-if="earlyLeaving.enabled"
+          class="policy-content"
+        >
           <div class="policy-type-section">
-            <div class="section-label">POLICY TYPE</div>
+            <div class="section-label">
+              POLICY TYPE
+            </div>
             <div class="policy-type-buttons">
               <button
                 v-for="type in ['fixed', 'leave', 'lop']"
                 :key="type"
-                @click="!isEditing || (earlyLeaving.penaltyType = type)"
                 :class="[
                   'policy-type-btn',
                   { active: earlyLeaving.penaltyType === type },
                 ]"
                 :disabled="!isEditing"
+                @click="!isEditing || (earlyLeaving.penaltyType = type)"
               >
                 {{
                   type === "fixed"
@@ -651,7 +725,7 @@
                 suffix="hours"
                 variant="outlined"
                 hide-details
-              ></v-text-field>
+              />
             </div>
             <!-- Waive Off Days -->
             <div>
@@ -663,7 +737,7 @@
                 suffix="days"
                 variant="outlined"
                 hide-details
-              ></v-text-field>
+              />
             </div>
             <!-- Deduction Type -->
             <div>
@@ -675,7 +749,7 @@
                 :items="['Fixed Hourly Rate', 'Custom Multiplier']"
                 variant="outlined"
                 hide-details
-              ></v-select>
+              />
 
               <div
                 v-else-if="earlyLeaving.penaltyType === 'lop'"
@@ -685,14 +759,27 @@
                   <span class="custom-lop-text">Fixed</span>
                   <button
                     type="button"
-                    @click="showEarlyLopHelpModal = true"
                     class="help-icon-btn"
                     :disabled="!isEditing"
+                    @click="showEarlyLopHelpModal = true"
                   >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                      <circle cx="12" cy="12" r="10" />
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                    >
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="10"
+                      />
                       <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-                      <line x1="12" y1="17" x2="12.01" y2="17" />
+                      <line
+                        x1="12"
+                        y1="17"
+                        x2="12.01"
+                        y2="17"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -707,7 +794,7 @@
                 item-value="value"
                 variant="outlined"
                 hide-details
-              ></v-select>
+              />
             </div>
 
             <!-- Fine Amount -->
@@ -729,7 +816,7 @@
                 "
                 variant="outlined"
                 hide-details
-              ></v-text-field>
+              />
             </div>
           </div>
         </div>
@@ -743,13 +830,33 @@
       class="modal-overlay"
       @click="showLopHelpModal = false"
     >
-      <div class="modal-content" @click.stop>
+      <div
+        class="modal-content"
+        @click.stop
+      >
         <div class="modal-header">
           <h3>Late Coming LOP Fixed Calculation</h3>
-          <button @click="showLopHelpModal = false" class="modal-close">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
+          <button
+            class="modal-close"
+            @click="showLopHelpModal = false"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <line
+                x1="18"
+                y1="6"
+                x2="6"
+                y2="18"
+              />
+              <line
+                x1="6"
+                y1="6"
+                x2="18"
+                y2="18"
+              />
             </svg>
           </button>
         </div>
@@ -786,13 +893,33 @@
       class="modal-overlay"
       @click="showEarlyLopHelpModal = false"
     >
-      <div class="modal-content" @click.stop>
+      <div
+        class="modal-content"
+        @click.stop
+      >
         <div class="modal-header">
           <h3>Early Leaving LOP Fixed Calculation</h3>
-          <button @click="showEarlyLopHelpModal = false" class="modal-close">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
+          <button
+            class="modal-close"
+            @click="showEarlyLopHelpModal = false"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <line
+                x1="18"
+                y1="6"
+                x2="6"
+                y2="18"
+              />
+              <line
+                x1="6"
+                y1="6"
+                x2="18"
+                y2="18"
+              />
             </svg>
           </button>
         </div>
@@ -829,16 +956,33 @@
       class="modal-overlay"
       @click="showWorkingHoursLopHelpModal = false"
     >
-      <div class="modal-content" @click.stop>
+      <div
+        class="modal-content"
+        @click.stop
+      >
         <div class="modal-header">
           <h3>Working Hours LOP Fixed Calculation</h3>
           <button
-            @click="showWorkingHoursLopHelpModal = false"
             class="modal-close"
+            @click="showWorkingHoursLopHelpModal = false"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+            >
+              <line
+                x1="18"
+                y1="6"
+                x2="6"
+                y2="18"
+              />
+              <line
+                x1="6"
+                y1="6"
+                x2="18"
+                y2="18"
+              />
             </svg>
           </button>
         </div>

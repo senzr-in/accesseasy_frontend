@@ -3,96 +3,227 @@
     <!-- Header -->
     <header class="header">
       <div class="header-content">
-        <button class="back-button" @click="goBack">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="m15 18-6-6 6-6"/>
+        <button
+          class="back-button"
+          @click="goBack"
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="m15 18-6-6 6-6" />
           </svg>
         </button>
-        <h1 class="title">Assets Types</h1>
+        <h1 class="title">
+          Assets Types
+        </h1>
         <!-- Search Bar -->
         <div class="search-container">
           <div class="search-input">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="11" cy="11" r="8"/>
-              <path d="m21 21-4.35-4.35"/>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle
+                cx="11"
+                cy="11"
+                r="8"
+              />
+              <path d="m21 21-4.35-4.35" />
             </svg>
             <input
-              type="text"
               v-model="searchQuery"
+              type="text"
               placeholder="Search assets types..."
               class="form-input"
-            />
+            >
           </div>
         </div>
         <!-- Filter Toggle -->
-        <button class="filter-toggle" @click="showFilters = !showFilters" :class="{ active: showFilters }">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46"/>
+        <button
+          class="filter-toggle"
+          :class="{ active: showFilters }"
+          @click="showFilters = !showFilters"
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46" />
           </svg>
           Filters
-          <span v-if="activeFiltersCount > 0" class="filter-badge">{{ activeFiltersCount }}</span>
+          <span
+            v-if="activeFiltersCount > 0"
+            class="filter-badge"
+          >{{ activeFiltersCount }}</span>
         </button>
         <!-- Add Button -->
-        <button class="btn-primary" @click="toggleAddAssetSlider">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="12" y1="5" x2="12" y2="19"/>
-            <line x1="5" y1="12" x2="19" y2="12"/>
+        <button
+          class="btn-primary"
+          @click="toggleAddAssetSlider"
+        >
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <line
+              x1="12"
+              y1="5"
+              x2="12"
+              y2="19"
+            />
+            <line
+              x1="5"
+              y1="12"
+              x2="19"
+              y2="12"
+            />
           </svg>
           Add Asset Types
         </button>
       </div>
     </header>
     <!-- Filter Sidebar -->
-    <div class="filter-sidebar-overlay" :class="{ 'show': showFilters }" @click="showFilters = false">
-      <div class="filter-sidebar" @click.stop>
+    <div
+      class="filter-sidebar-overlay"
+      :class="{ 'show': showFilters }"
+      @click="showFilters = false"
+    >
+      <div
+        class="filter-sidebar"
+        @click.stop
+      >
         <div class="filter-sidebar-header">
           <h3>Filters</h3>
-          <button class="close-btn" @click="showFilters = false">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
+          <button
+            class="close-btn"
+            @click="showFilters = false"
+          >
+            <svg
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <line
+                x1="18"
+                y1="6"
+                x2="6"
+                y2="18"
+              />
+              <line
+                x1="6"
+                y1="6"
+                x2="18"
+                y2="18"
+              />
             </svg>
           </button>
         </div>
         <div class="filter-sidebar-content">
           <div class="filter-group">
             <label class="filter-label">Branch</label>
-            <select v-model="selectedBranch" class="filter-select">
-              <option value="">All Branches</option>
-              <option v-for="branch in branches" :key="branch.id" :value="branch.id">
+            <select
+              v-model="selectedBranch"
+              class="filter-select"
+            >
+              <option value="">
+                All Branches
+              </option>
+              <option
+                v-for="branch in branches"
+                :key="branch.id"
+                :value="branch.id"
+              >
                 {{ branch.name }}
               </option>
             </select>
           </div>
           <div class="filter-group">
             <label class="filter-label">Category</label>
-            <select v-model="selectedCategoryFilter" class="filter-select">
-              <option value="">All Categories</option>
-              <option v-for="category in categories.filter(c => c.id !== 'all')" :key="category.id" :value="category.id">
+            <select
+              v-model="selectedCategoryFilter"
+              class="filter-select"
+            >
+              <option value="">
+                All Categories
+              </option>
+              <option
+                v-for="category in categories.filter(c => c.id !== 'all')"
+                :key="category.id"
+                :value="category.id"
+              >
                 {{ category.categoryName }}
               </option>
             </select>
           </div>
           <div class="filter-group">
             <label class="filter-label">Status</label>
-            <select v-model="selectedStatus" class="filter-select">
-              <option value="">All Status</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-              <option value="draft">Draft</option>
+            <select
+              v-model="selectedStatus"
+              class="filter-select"
+            >
+              <option value="">
+                All Status
+              </option>
+              <option value="active">
+                Active
+              </option>
+              <option value="inactive">
+                Inactive
+              </option>
+              <option value="draft">
+                Draft
+              </option>
             </select>
           </div>
           <div class="filter-group">
             <label class="filter-label">Date Range</label>
             <div class="date-range">
-              <input type="date" v-model="dateFrom" class="filter-input">
+              <input
+                v-model="dateFrom"
+                type="date"
+                class="filter-input"
+              >
               <span class="date-separator">to</span>
-              <input type="date" v-model="dateTo" class="filter-input">
+              <input
+                v-model="dateTo"
+                type="date"
+                class="filter-input"
+              >
             </div>
           </div>
           <div class="filter-actions">
-            <button class="btn-secondary" @click="clearFilters">Clear All</button>
-            <button class="btn-primary" @click="applyFilters">Apply</button>
+            <button
+              class="btn-secondary"
+              @click="clearFilters"
+            >
+              Clear All
+            </button>
+            <button
+              class="btn-primary"
+              @click="applyFilters"
+            >
+              Apply
+            </button>
           </div>
         </div>
       </div>
@@ -108,13 +239,18 @@
           @click="onCategoryTabSelected(index)"
         >
           {{ category.categoryName }}
-          <span v-if="category.id !== 'all' && category.id !== 'uncategorized'"
-                class="delete-btn"
-                @click.stop="deleteCategory(category)">
+          <span
+            v-if="category.id !== 'all' && category.id !== 'uncategorized'"
+            class="delete-btn"
+            @click.stop="deleteCategory(category)"
+          >
             ×
           </span>
         </button>
-        <button class="add-category-btn" @click="showAddCategoryDialog">
+        <button
+          class="add-category-btn"
+          @click="showAddCategoryDialog"
+        >
           + Add Category
         </button>
       </div>
@@ -122,25 +258,44 @@
     <!-- Main Content -->
     <main class="main-content">
       <!-- Loading State -->
-      <div v-if="isLoading" class="loading-container">
-        <div class="loading-spinner"></div>
+      <div
+        v-if="isLoading"
+        class="loading-container"
+      >
+        <div class="loading-spinner" />
         <p>Loading products...</p>
       </div>
       <!-- Empty State -->
-      <div v-else-if="filteredProducts.length === 0" class="empty-state">
+      <div
+        v-else-if="filteredProducts.length === 0"
+        class="empty-state"
+      >
         <div class="empty-icon">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M9 1v6m6-6v6"/>
+          <svg
+            width="40"
+            height="40"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+          >
+            <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M9 1v6m6-6v6" />
           </svg>
         </div>
         <h3>{{ emptyStateTitle }}</h3>
         <p>{{ emptyStateDescription }}</p>
-        <button class="btn-primary" @click="toggleAddAssetSlider">
+        <button
+          class="btn-primary"
+          @click="toggleAddAssetSlider"
+        >
           Add First Product
         </button>
       </div>
       <!-- Products List -->
-      <div v-else class="products-list">
+      <div
+        v-else
+        class="products-list"
+      >
         <table class="product-table">
           <thead>
             <tr>
@@ -150,7 +305,7 @@
                   :checked="selected.length === filteredProducts.length && filteredProducts.length > 0"
                   :indeterminate="selected.length > 0 && selected.length < filteredProducts.length"
                   @change="toggleAll"
-                />
+                >
               </th>
               <th
                 v-for="header in headers"
@@ -158,9 +313,18 @@
                 :class="['column', header.sortable ? 'sortable' : '', pagination.sortBy === header.value ? (pagination.descending ? 'desc' : 'asc') : '']"
                 @click="header.sortable && changeSort(header.value)"
               >
-                <svg v-if="header.sortable" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="sort-icon">
-                  <path d="m6 17 6 6 6-6"/>
-                  <path d="m12 18V6"/>
+                <svg
+                  v-if="header.sortable"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  class="sort-icon"
+                >
+                  <path d="m6 17 6 6 6-6" />
+                  <path d="m12 18V6" />
                 </svg>
                 {{ header.text }}
               </th>
@@ -178,15 +342,29 @@
                   type="checkbox"
                   :checked="selected.includes(product.id)"
                   @click.stop="toggleSelection(product.id)"
-                />
+                >
               </td>
               <td class="product-col">
                 <div class="product-info">
                   <div class="product-image">
-                    <img v-if="product.image" :src="product.image" :alt="product.productName" />
-                    <div v-else class="placeholder-image">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M9 1v6m6-6v6"/>
+                    <img
+                      v-if="product.image"
+                      :src="product.image"
+                      :alt="product.productName"
+                    >
+                    <div
+                      v-else
+                      class="placeholder-image"
+                    >
+                      <svg
+                        width="20"
+                        height="20"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                      >
+                        <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M9 1v6m6-6v6" />
                       </svg>
                     </div>
                   </div>
@@ -199,9 +377,14 @@
               <td class="branch-col">
                 <span class="branch-badge">{{ getBranchName(product.branch) }}</span>
               </td>
-              <td class="id-col">{{ product.productId || 'N/A' }}</td>
+              <td class="id-col">
+                {{ product.productId || 'N/A' }}
+              </td>
               <td class="status-col">
-                <span class="status-badge" :class="product.status || 'draft'">
+                <span
+                  class="status-badge"
+                  :class="product.status || 'draft'"
+                >
                   {{ (product.status || 'draft').charAt(0).toUpperCase() + (product.status || 'draft').slice(1) }}
                 </span>
               </td>
@@ -211,23 +394,60 @@
       </div>
     </main>
     <!-- Add Asset Slider -->
-    <div class="slider-overlay" :class="{ 'show': showAddAssetSlider }" @click="closeAddAssetSlider">
-      <div class="slider-panel" @click.stop>
+    <div
+      class="slider-overlay"
+      :class="{ 'show': showAddAssetSlider }"
+      @click="closeAddAssetSlider"
+    >
+      <div
+        class="slider-panel"
+        @click.stop
+      >
         <div class="slider-header">
           <h2>Add New Asset</h2>
-          <button class="close-btn" @click="closeAddAssetSlider">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
+          <button
+            class="close-btn"
+            @click="closeAddAssetSlider"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <line
+                x1="18"
+                y1="6"
+                x2="6"
+                y2="18"
+              />
+              <line
+                x1="6"
+                y1="6"
+                x2="18"
+                y2="18"
+              />
             </svg>
           </button>
         </div>
         <div class="slider-content">
-          <div class="add-option" @click="navigateToManualEntry">
+          <div
+            class="add-option"
+            @click="navigateToManualEntry"
+          >
             <div class="option-icon manual">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
               </svg>
             </div>
             <div class="option-content">
@@ -235,18 +455,45 @@
               <p>Add a single asset with detailed information</p>
             </div>
             <div class="option-arrow">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="m9 18 6-6-6-6"/>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="m9 18 6-6-6-6" />
               </svg>
             </div>
           </div>
-          <div class="add-option" @click="navigateToBulkUpload">
+          <div
+            class="add-option"
+            @click="navigateToBulkUpload"
+          >
             <div class="option-icon bulk">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14,2 14,8 20,8"/>
-                <line x1="16" y1="13" x2="8" y2="13"/>
-                <line x1="16" y1="17" x2="8" y2="17"/>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14,2 14,8 20,8" />
+                <line
+                  x1="16"
+                  y1="13"
+                  x2="8"
+                  y2="13"
+                />
+                <line
+                  x1="16"
+                  y1="17"
+                  x2="8"
+                  y2="17"
+                />
               </svg>
             </div>
             <div class="option-content">
@@ -254,8 +501,15 @@
               <p>Import multiple assets from CSV or Excel file</p>
             </div>
             <div class="option-arrow">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="m9 18 6-6-6-6"/>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="m9 18 6-6-6-6" />
               </svg>
             </div>
           </div>
@@ -263,14 +517,41 @@
       </div>
     </div>
     <!-- Add Category Modal -->
-    <div v-if="showAddCategoryModalFlag" class="modal-overlay" @click="showAddCategoryModalFlag = false">
-      <div class="modal-content" @click.stop>
+    <div
+      v-if="showAddCategoryModalFlag"
+      class="modal-overlay"
+      @click="showAddCategoryModalFlag = false"
+    >
+      <div
+        class="modal-content"
+        @click.stop
+      >
         <div class="modal-header">
           <h2>Add New Category</h2>
-          <button class="close-btn" @click="showAddCategoryModalFlag = false">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <line x1="18" y1="6" x2="6" y2="18"/>
-              <line x1="6" y1="6" x2="18" y2="18"/>
+          <button
+            class="close-btn"
+            @click="showAddCategoryModalFlag = false"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <line
+                x1="18"
+                y1="6"
+                x2="6"
+                y2="18"
+              />
+              <line
+                x1="6"
+                y1="6"
+                x2="18"
+                y2="18"
+              />
             </svg>
           </button>
         </div>
@@ -278,16 +559,25 @@
           <div class="form-group">
             <label>Category Name</label>
             <input
-              type="text"
               v-model="newCategoryName"
+              type="text"
               placeholder="Enter category name"
               class="form-input"
-            />
+            >
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn-secondary" @click="showAddCategoryModalFlag = false">Cancel</button>
-          <button class="btn-primary" @click="addCategory" :disabled="!newCategoryName || isAddingCategory">
+          <button
+            class="btn-secondary"
+            @click="showAddCategoryModalFlag = false"
+          >
+            Cancel
+          </button>
+          <button
+            class="btn-primary"
+            :disabled="!newCategoryName || isAddingCategory"
+            @click="addCategory"
+          >
             {{ isAddingCategory ? 'Adding...' : 'Add Category' }}
           </button>
         </div>

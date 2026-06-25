@@ -1,77 +1,132 @@
 <template>
   <div class="h-full flex flex-col pt-2 pb-6 px-4 max-w-2xl mx-auto w-full relative animate-in fade-in duration-500">
-    
     <div class="text-center mb-6">
       <h1 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight flex justify-center items-center gap-2">
         <Scan class="w-6 h-6 text-indigo-500" />
         Mobile Key Scanner
       </h1>
-      <p class="text-sm text-slate-500 dark:text-zinc-400 font-medium mt-1">Point the camera at an Employee's generated QR code to verify their identity and authorize access.</p>
+      <p class="text-sm text-slate-500 dark:text-zinc-400 font-medium mt-1">
+        Point the camera at an Employee's generated QR code to verify their identity and authorize access.
+      </p>
     </div>
 
     <!-- Scanner Container -->
     <div class="relative flex-1 bg-black rounded-3xl overflow-hidden shadow-2xl border-4 border-slate-900 dark:border-zinc-800 flex flex-col items-center justify-center min-h-[400px]">
-      
       <!-- Video Element -->
-      <video ref="videoEl" class="absolute inset-0 w-full h-full object-cover" playsinline autoplay muted></video>
-      <canvas ref="canvasEl" class="hidden"></canvas>
+      <video
+        ref="videoEl"
+        class="absolute inset-0 w-full h-full object-cover"
+        playsinline
+        autoplay
+        muted
+      />
+      <canvas
+        ref="canvasEl"
+        class="hidden"
+      />
 
       <!-- Idle/Scanning UI -->
-      <div v-if="cameraStatus === 'scanning'" class="absolute inset-0 z-10 pointer-events-none flex flex-col items-center justify-center">
+      <div
+        v-if="cameraStatus === 'scanning'"
+        class="absolute inset-0 z-10 pointer-events-none flex flex-col items-center justify-center"
+      >
         <!-- Target Reticle -->
         <div class="w-64 h-64 border-2 border-indigo-500/50 rounded-xl relative">
           <!-- Corners -->
-          <div class="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-indigo-500 rounded-tl-lg"></div>
-          <div class="absolute -top-1 -right-1 w-6 h-6 border-t-4 border-r-4 border-indigo-500 rounded-tr-lg"></div>
-          <div class="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-indigo-500 rounded-bl-lg"></div>
-          <div class="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-indigo-500 rounded-br-lg"></div>
+          <div class="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-indigo-500 rounded-tl-lg" />
+          <div class="absolute -top-1 -right-1 w-6 h-6 border-t-4 border-r-4 border-indigo-500 rounded-tr-lg" />
+          <div class="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-indigo-500 rounded-bl-lg" />
+          <div class="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-indigo-500 rounded-br-lg" />
           <!-- Scanning Laser -->
-          <div class="absolute top-0 left-0 w-full h-[2px] bg-red-500/80 shadow-[0_0_15px_rgba(239,68,68,0.8)] animate-[scan_2s_ease-in-out_infinite]"></div>
+          <div class="absolute top-0 left-0 w-full h-[2px] bg-red-500/80 shadow-[0_0_15px_rgba(239,68,68,0.8)] animate-[scan_2s_ease-in-out_infinite]" />
         </div>
-        <p class="mt-8 text-white font-bold tracking-widest uppercase text-xs animate-pulse drop-shadow-md">Awaiting QR Code...</p>
+        <p class="mt-8 text-white font-bold tracking-widest uppercase text-xs animate-pulse drop-shadow-md">
+          Awaiting QR Code...
+        </p>
       </div>
 
       <!-- Loading / Validating API -->
-      <div v-else-if="cameraStatus === 'validating'" class="absolute inset-0 z-20 bg-indigo-900/90 backdrop-blur-md flex flex-col items-center justify-center text-white animate-in zoom-in-95 duration-200">
+      <div
+        v-else-if="cameraStatus === 'validating'"
+        class="absolute inset-0 z-20 bg-indigo-900/90 backdrop-blur-md flex flex-col items-center justify-center text-white animate-in zoom-in-95 duration-200"
+      >
         <Loader2 class="w-16 h-16 animate-spin text-indigo-400 mb-6 drop-shadow-lg" />
-        <h2 class="text-xl font-black tracking-widest uppercase">Decryption in progress</h2>
-        <p class="text-indigo-200 text-sm mt-2 font-medium">Validating token securely via Directus...</p>
+        <h2 class="text-xl font-black tracking-widest uppercase">
+          Decryption in progress
+        </h2>
+        <p class="text-indigo-200 text-sm mt-2 font-medium">
+          Validating token securely via Directus...
+        </p>
       </div>
 
       <!-- Result: AUTHORIZED -->
-      <div v-else-if="authResult === 'success'" class="absolute inset-0 z-30 bg-emerald-600/95 backdrop-blur-xl flex flex-col items-center justify-center text-white animate-in zoom-in-95 duration-300">
+      <div
+        v-else-if="authResult === 'success'"
+        class="absolute inset-0 z-30 bg-emerald-600/95 backdrop-blur-xl flex flex-col items-center justify-center text-white animate-in zoom-in-95 duration-300"
+      >
         <div class="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mb-6 shadow-inner animate-bounce">
           <ShieldCheck class="w-12 h-12 text-white" />
         </div>
-        <h2 class="text-4xl font-black uppercase tracking-tight text-white drop-shadow-xl mb-2">Authorized</h2>
+        <h2 class="text-4xl font-black uppercase tracking-tight text-white drop-shadow-xl mb-2">
+          Authorized
+        </h2>
         <div class="bg-black/20 p-4 rounded-2xl border border-white/20 text-center max-w-sm w-full mx-6 mb-8 shadow-sm">
-          <p class="text-[10px] uppercase tracking-widest font-black text-emerald-200 mb-1">Identity Verified</p>
-          <p class="text-xl font-bold">{{ scannedEmployee?.first_name }} {{ scannedEmployee?.last_name || '' }}</p>
-          <p class="text-sm font-medium mt-1 text-emerald-100">Access Level: C-{{ accessData?.accessLevelsId || 'Standard' }}</p>
+          <p class="text-[10px] uppercase tracking-widest font-black text-emerald-200 mb-1">
+            Identity Verified
+          </p>
+          <p class="text-xl font-bold">
+            {{ scannedEmployee?.first_name }} {{ scannedEmployee?.last_name || '' }}
+          </p>
+          <p class="text-sm font-medium mt-1 text-emerald-100">
+            Access Level: C-{{ accessData?.accessLevelsId || 'Standard' }}
+          </p>
         </div>
-        <button @click="resetScanner" class="h-12 px-8 bg-white text-emerald-700 font-bold uppercase tracking-widest text-sm rounded-xl hover:bg-emerald-50 transition-colors shadow-lg active:scale-95 flex items-center justify-center gap-2">
+        <button
+          class="h-12 px-8 bg-white text-emerald-700 font-bold uppercase tracking-widest text-sm rounded-xl hover:bg-emerald-50 transition-colors shadow-lg active:scale-95 flex items-center justify-center gap-2"
+          @click="resetScanner"
+        >
           <RefreshCw class="w-4 h-4" /> Scan Another Key
         </button>
       </div>
 
       <!-- Result: DENIED -->
-      <div v-else-if="authResult === 'failed'" class="absolute inset-0 z-30 bg-rose-600/95 backdrop-blur-xl flex flex-col items-center justify-center text-white animate-in zoom-in-95 duration-300">
+      <div
+        v-else-if="authResult === 'failed'"
+        class="absolute inset-0 z-30 bg-rose-600/95 backdrop-blur-xl flex flex-col items-center justify-center text-white animate-in zoom-in-95 duration-300"
+      >
         <div class="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mb-6 shadow-inner animate-pulse">
           <ShieldAlert class="w-12 h-12 text-white" />
         </div>
-        <h2 class="text-4xl font-black uppercase tracking-tight text-white drop-shadow-xl mb-2">Access Denied</h2>
-        <p class="text-rose-100 font-medium max-w-xs text-center mb-8">This token is invalid, expired, or holds insufficient clearance.</p>
-        <button @click="resetScanner" class="h-12 px-8 bg-white text-rose-700 font-bold uppercase tracking-widest text-sm rounded-xl hover:bg-rose-50 transition-colors shadow-lg active:scale-95 flex items-center justify-center gap-2">
+        <h2 class="text-4xl font-black uppercase tracking-tight text-white drop-shadow-xl mb-2">
+          Access Denied
+        </h2>
+        <p class="text-rose-100 font-medium max-w-xs text-center mb-8">
+          This token is invalid, expired, or holds insufficient clearance.
+        </p>
+        <button
+          class="h-12 px-8 bg-white text-rose-700 font-bold uppercase tracking-widest text-sm rounded-xl hover:bg-rose-50 transition-colors shadow-lg active:scale-95 flex items-center justify-center gap-2"
+          @click="resetScanner"
+        >
           <RefreshCw class="w-4 h-4" /> Try Again
         </button>
       </div>
 
       <!-- Error (Camera) -->
-      <div v-else-if="cameraStatus === 'error'" class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/80 px-4 text-center">
+      <div
+        v-else-if="cameraStatus === 'error'"
+        class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/80 px-4 text-center"
+      >
         <VideoOff class="w-12 h-12 text-slate-500 mb-4" />
-        <p class="text-white font-bold mb-2">Camera Access Failed</p>
-        <p class="text-slate-400 text-xs max-w-xs">Please ensure you have granted camera permissions to use the authorization scanner.</p>
-        <button @click="startScanner" class="mt-6 px-4 py-2 border border-slate-700 text-slate-300 text-xs uppercase tracking-widest font-bold rounded-lg hover:bg-slate-800 transition-colors">
+        <p class="text-white font-bold mb-2">
+          Camera Access Failed
+        </p>
+        <p class="text-slate-400 text-xs max-w-xs">
+          Please ensure you have granted camera permissions to use the authorization scanner.
+        </p>
+        <button
+          class="mt-6 px-4 py-2 border border-slate-700 text-slate-300 text-xs uppercase tracking-widest font-bold rounded-lg hover:bg-slate-800 transition-colors"
+          @click="startScanner"
+        >
           Retry Access
         </button>
       </div>

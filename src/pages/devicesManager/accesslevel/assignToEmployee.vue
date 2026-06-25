@@ -1,16 +1,22 @@
 <template>
   <div>
     <v-row>
-      <v-col cols="12" sm="4">
+      <v-col
+        cols="12"
+        sm="4"
+      >
         <v-text-field
           v-model="search"
           label="Search"
           variant="outlined"
           prepend-inner-icon="mdi-magnify"
           @input="fetchEmployees"
-        ></v-text-field>
+        />
       </v-col>
-      <v-col cols="12" sm="4">
+      <v-col
+        cols="12"
+        sm="4"
+      >
         <v-select
           v-model="selectedBranch"
           :items="branches"
@@ -18,10 +24,13 @@
           item-value="id"
           label="Branch"
           variant="outlined"
-          @update:modelValue="fetchEmployees"
-        ></v-select>
+          @update:model-value="fetchEmployees"
+        />
       </v-col>
-      <v-col cols="12" sm="4">
+      <v-col
+        cols="12"
+        sm="4"
+      >
         <v-select
           v-model="selectedDepartment"
           :items="departments"
@@ -29,18 +38,29 @@
           item-value="id"
           label="Department"
           variant="outlined"
-          @update:modelValue="fetchEmployees"
-        ></v-select>
+          @update:model-value="fetchEmployees"
+        />
       </v-col>
     </v-row>
 
-    <v-tabs v-model="activeTab" @update:modelValue="handleTabChange">
-      <v-tab color="primary" value="unassigned" style="text-transform: none"
-        >Unassigned Employees</v-tab
+    <v-tabs
+      v-model="activeTab"
+      @update:model-value="handleTabChange"
+    >
+      <v-tab
+        color="primary"
+        value="unassigned"
+        style="text-transform: none"
       >
-      <v-tab color="primary" value="assigned" style="text-transform: none"
-        >Assigned Employees</v-tab
+        Unassigned Employees
+      </v-tab>
+      <v-tab
+        color="primary"
+        value="assigned"
+        style="text-transform: none"
       >
+        Assigned Employees
+      </v-tab>
     </v-tabs>
 
     <v-window v-model="activeTab">
@@ -52,20 +72,20 @@
           class="elevation-1"
           height="calc(62vh - 170px)"
         >
-          <template v-slot:top>
+          <template #top>
             <v-toolbar flat>
               <v-toolbar-title>Assigned Employees</v-toolbar-title>
             </v-toolbar>
           </template>
-          <template v-slot:item.actions="{ item }">
+          <template #item.actions="{ item }">
             <v-switch
+              v-model="item.assigned"
               color="success"
               hide-details
               inset
-              v-model="item.assigned"
-              @change="toggleAssignment(item)"
               :label="item.assigned ? 'Assigned' : 'Unassigned'"
-            ></v-switch>
+              @change="toggleAssignment(item)"
+            />
           </template>
         </v-data-table>
       </v-window-item>
@@ -78,24 +98,27 @@
           class="elevation-1"
           height="calc(62vh - 170px)"
         >
-          <template v-slot:top>
+          <template #top>
             <v-toolbar flat>
               <v-toolbar-title>Unassigned Employees</v-toolbar-title>
-              <v-spacer></v-spacer>
-              <v-btn color="primary" @click="assignToAllEmployees">
+              <v-spacer />
+              <v-btn
+                color="primary"
+                @click="assignToAllEmployees"
+              >
                 Assign to All Employees
               </v-btn>
             </v-toolbar>
           </template>
-          <template v-slot:item.actions="{ item }">
+          <template #item.actions="{ item }">
             <v-switch
+              v-model="item.assigned"
               color="success"
               hide-details
               inset
-              v-model="item.assigned"
-              @change="toggleAssignment(item)"
               :label="item.assigned ? 'Assigned' : 'Unassigned'"
-            ></v-switch>
+              @change="toggleAssignment(item)"
+            />
           </template>
         </v-data-table>
       </v-window-item>

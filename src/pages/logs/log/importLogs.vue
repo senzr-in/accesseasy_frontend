@@ -1,11 +1,25 @@
 <template>
   <div>
     <!-- Main Import Dialog -->
-    <v-dialog v-model="dialog.open" max-width="1100" persistent scrollable>
+    <v-dialog
+      v-model="dialog.open"
+      max-width="1100"
+      persistent
+      scrollable
+    >
       <v-card elevation="2">
         <!-- Polished header -->
-        <v-toolbar color="#122f68" density="comfortable" flat>
-          <v-btn icon variant="text" class="mr-2" color="white">
+        <v-toolbar
+          color="#122f68"
+          density="comfortable"
+          flat
+        >
+          <v-btn
+            icon
+            variant="text"
+            class="mr-2"
+            color="white"
+          >
             <v-icon>mdi-database-import</v-icon>
           </v-btn>
           <v-toolbar-title class="text-white text-pretty">
@@ -14,11 +28,11 @@
           <v-spacer />
           <v-btn
             icon
-            @click="closeDialog"
             :disabled="importing"
             color="white"
             variant="text"
             :aria-label="'Close dialog'"
+            @click="closeDialog"
           >
             <v-icon>mdi-close</v-icon>
           </v-btn>
@@ -26,15 +40,24 @@
 
         <v-card-text class="pa-6">
           <!-- Visual step indicators (purely presentational) -->
-          <v-row class="mb-4" align="center" no-gutters>
-            <v-col cols="12" class="d-flex align-center flex-wrap ga-2">
+          <v-row
+            class="mb-4"
+            align="center"
+            no-gutters
+          >
+            <v-col
+              cols="12"
+              class="d-flex align-center flex-wrap ga-2"
+            >
               <v-chip
                 :color="state.fileName ? 'success' : 'grey-lighten-2'"
                 variant="elevated"
                 size="small"
                 class="text-body-2"
               >
-                <v-icon start>mdi-upload</v-icon>
+                <v-icon start>
+                  mdi-upload
+                </v-icon>
                 1. Upload
               </v-chip>
               <v-icon>mdi-chevron-right</v-icon>
@@ -50,7 +73,9 @@
                 size="small"
                 class="text-body-2"
               >
-                <v-icon start>mdi-account-check</v-icon>
+                <v-icon start>
+                  mdi-account-check
+                </v-icon>
                 2. Validate
               </v-chip>
               <v-icon>mdi-chevron-right</v-icon>
@@ -66,7 +91,9 @@
                 size="small"
                 class="text-body-2"
               >
-                <v-icon start>mdi-database-arrow-down</v-icon>
+                <v-icon start>
+                  mdi-database-arrow-down
+                </v-icon>
                 3. Import
               </v-chip>
               <v-spacer />
@@ -77,7 +104,9 @@
                 variant="tonal"
                 class="text-body-2"
               >
-                <v-icon start>mdi-file</v-icon>
+                <v-icon start>
+                  mdi-file
+                </v-icon>
                 {{ state.fileName }}
               </v-chip>
               <v-chip
@@ -87,16 +116,25 @@
                 variant="tonal"
                 class="text-body-2"
               >
-                <v-icon start>mdi-progress-clock</v-icon>
+                <v-icon start>
+                  mdi-progress-clock
+                </v-icon>
                 Validating: {{ validation.progress }}%
               </v-chip>
             </v-col>
           </v-row>
 
           <!-- Step: File upload and options -->
-          <v-sheet rounded="lg" class="pa-4 mb-4" color="surface">
+          <v-sheet
+            rounded="lg"
+            class="pa-4 mb-4"
+            color="surface"
+          >
             <v-row dense>
-              <v-col cols="12" md="7">
+              <v-col
+                cols="12"
+                md="7"
+              >
                 <v-file-input
                   v-model="state.file"
                   accept=".xlsx,.xls,.csv"
@@ -105,21 +143,28 @@
                   variant="outlined"
                   density="comfortable"
                   :disabled="importing"
-                  @change="onFileSelected"
                   show-size
                   hide-details="auto"
+                  @change="onFileSelected"
                 />
                 <div
                   v-if="state.fileName"
                   class="text-caption mt-2 d-flex align-center"
                 >
-                  <v-icon size="16" class="mr-1"
-                    >mdi-information-outline</v-icon
+                  <v-icon
+                    size="16"
+                    class="mr-1"
                   >
+                    mdi-information-outline
+                  </v-icon>
                   <!-- Selected: <strong class="ml-1">{{ state.fileName }}</strong> -->
                 </div>
               </v-col>
-              <v-col cols="12" md="5" class="d-flex align-center">
+              <v-col
+                cols="12"
+                md="5"
+                class="d-flex align-center"
+              >
                 <v-btn
                   color="primary"
                   variant="text"
@@ -224,12 +269,19 @@
             >
               <thead>
                 <tr>
-                  <th class="text-left">Employee ID</th>
-                  <th class="text-left">Employee Name</th>
+                  <th class="text-left">
+                    Employee ID
+                  </th>
+                  <th class="text-left">
+                    Employee Name
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(u, idx) in validation.missing" :key="idx">
+                <tr
+                  v-for="(u, idx) in validation.missing"
+                  :key="idx"
+                >
                   <td>{{ u.employeeId }}</td>
                   <td>{{ u.employeeName || "Unknown" }}</td>
                 </tr>
@@ -246,16 +298,23 @@
           >
             <v-card variant="text">
               <v-card-title class="py-3 d-flex align-center">
-                <v-icon class="mr-2" color="primary">mdi-table-eye</v-icon>
+                <v-icon
+                  class="mr-2"
+                  color="primary"
+                >
+                  mdi-table-eye
+                </v-icon>
                 Uploaded File Preview
                 <v-spacer />
-                <span class="text-caption text-medium-emphasis"
-                  >All {{ preview.rows.length }} rows</span
-                >
+                <span class="text-caption text-medium-emphasis">All {{ preview.rows.length }} rows</span>
               </v-card-title>
               <v-divider />
               <v-card-text class="pa-0">
-                <v-table density="comfortable" fixed-header height="400">
+                <v-table
+                  density="comfortable"
+                  fixed-header
+                  height="400"
+                >
                   <thead>
                     <tr>
                       <th
@@ -268,8 +327,14 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="(row, rIdx) in preview.rows" :key="rIdx">
-                      <td v-for="(col, cIdx) in preview.headers" :key="cIdx">
+                    <tr
+                      v-for="(row, rIdx) in preview.rows"
+                      :key="rIdx"
+                    >
+                      <td
+                        v-for="(col, cIdx) in preview.headers"
+                        :key="cIdx"
+                      >
                         {{ displayCell(row[col]) }}
                       </td>
                     </tr>
@@ -280,9 +345,16 @@
           </v-sheet>
 
           <!-- Import progress by date -->
-          <v-card v-if="importing" class="mt-2" variant="outlined" rounded="lg">
+          <v-card
+            v-if="importing"
+            class="mt-2"
+            variant="outlined"
+            rounded="lg"
+          >
             <v-card-title class="py-3 d-flex align-center">
-              <v-icon class="mr-2">mdi-progress-clock</v-icon>
+              <v-icon class="mr-2">
+                mdi-progress-clock
+              </v-icon>
               Import Progress by Date
               <v-spacer />
               <span class="text-caption">
@@ -296,8 +368,8 @@
                 :model-value="
                   progress.totalDates
                     ? Math.round(
-                        (progress.completedDates / progress.totalDates) * 100,
-                      )
+                      (progress.completedDates / progress.totalDates) * 100,
+                    )
                     : 0
                 "
                 color="primary"
@@ -305,22 +377,45 @@
                 rounded
                 class="mb-4"
               />
-              <v-table density="comfortable" fixed-header height="300">
+              <v-table
+                density="comfortable"
+                fixed-header
+                height="300"
+              >
                 <thead>
                   <tr>
-                    <th class="text-left">Date</th>
-                    <th class="text-left">Total Rows</th>
-                    <th class="text-left">Imported</th>
-                    <th class="text-left">Errors</th>
-                    <th class="text-center">Status</th>
+                    <th class="text-left">
+                      Date
+                    </th>
+                    <th class="text-left">
+                      Total Rows
+                    </th>
+                    <th class="text-left">
+                      Imported
+                    </th>
+                    <th class="text-left">
+                      Errors
+                    </th>
+                    <th class="text-center">
+                      Status
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="date in progress.dateOrder" :key="date">
-                    <td class="text-no-wrap">{{ date }}</td>
+                  <tr
+                    v-for="date in progress.dateOrder"
+                    :key="date"
+                  >
+                    <td class="text-no-wrap">
+                      {{ date }}
+                    </td>
                     <td>{{ progress.byDate[date]?.total || 0 }}</td>
                     <td>
-                      <v-chip size="small" color="success" variant="tonal">
+                      <v-chip
+                        size="small"
+                        color="success"
+                        variant="tonal"
+                      >
                         {{ progress.byDate[date]?.success || 0 }}
                       </v-chip>
                     </td>
@@ -341,18 +436,21 @@
                       <v-icon
                         v-if="progress.byDate[date]?.status === 'success'"
                         color="success"
-                        >mdi-checkbox-marked-circle</v-icon
                       >
+                        mdi-checkbox-marked-circle
+                      </v-icon>
                       <v-icon
                         v-else-if="progress.byDate[date]?.status === 'error'"
                         color="error"
-                        >mdi-close-circle</v-icon
                       >
+                        mdi-close-circle
+                      </v-icon>
                       <v-icon
                         v-else-if="progress.byDate[date]?.status === 'partial'"
                         color="warning"
-                        >mdi-alert-circle</v-icon
                       >
+                        mdi-alert-circle
+                      </v-icon>
                       <v-progress-circular
                         v-else
                         indeterminate
@@ -384,7 +482,7 @@
             size="md"
             text="Import"
             :disabled="!readyToImport || importing || validation.loading"
-            :leftIcon="import"
+            :left-icon="import"
             @click="onImportClicked"
           />
         </v-card-actions>
@@ -392,10 +490,19 @@
     </v-dialog>
 
     <!-- Missing Users Confirmation Dialog -->
-    <v-dialog v-model="confirmMissing.open" max-width="520" persistent>
+    <v-dialog
+      v-model="confirmMissing.open"
+      max-width="520"
+      persistent
+    >
       <v-card rounded="xl">
         <v-card-title class="text-h6 d-flex align-center">
-          <v-icon class="mr-2" color="warning">mdi-account-alert</v-icon>
+          <v-icon
+            class="mr-2"
+            color="warning"
+          >
+            mdi-account-alert
+          </v-icon>
           Import with Missing Users?
         </v-card-title>
         <v-card-text class="pt-2">
@@ -440,8 +547,13 @@
       location="top right"
     >
       {{ snackbar.message }}
-      <template v-slot:actions>
-        <v-btn variant="text" @click="snackbar.show = false">Close</v-btn>
+      <template #actions>
+        <v-btn
+          variant="text"
+          @click="snackbar.show = false"
+        >
+          Close
+        </v-btn>
       </template>
     </v-snackbar>
   </div>

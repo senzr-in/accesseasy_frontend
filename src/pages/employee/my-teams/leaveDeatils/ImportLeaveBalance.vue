@@ -1,6 +1,10 @@
 <template>
   <div class="import-leave-container">
-    <button class="import-btn" @click="openImportModal" :disabled="loading">
+    <button
+      class="import-btn"
+      :disabled="loading"
+      @click="openImportModal"
+    >
       <svg
         width="16"
         height="16"
@@ -11,17 +15,32 @@
       >
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
         <polyline points="7,10 12,15 17,10" />
-        <line x1="12" y1="15" x2="12" y2="3" />
+        <line
+          x1="12"
+          y1="15"
+          x2="12"
+          y2="3"
+        />
       </svg>
       <span v-if="!loading">Import Leave Balance</span>
       <span v-else>Importing...</span>
     </button>
 
-    <div v-if="showImportModal" class="modal-overlay" @click="closeImportModal">
-      <div class="modal-content" @click.stop>
+    <div
+      v-if="showImportModal"
+      class="modal-overlay"
+      @click="closeImportModal"
+    >
+      <div
+        class="modal-content"
+        @click.stop
+      >
         <div class="modal-header">
           <h3>Import Leave Balance</h3>
-          <button class="close-btn" @click="closeImportModal">
+          <button
+            class="close-btn"
+            @click="closeImportModal"
+          >
             <svg
               width="20"
               height="20"
@@ -30,8 +49,18 @@
               stroke="currentColor"
               stroke-width="2"
             >
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
+              <line
+                x1="18"
+                y1="6"
+                x2="6"
+                y2="18"
+              />
+              <line
+                x1="6"
+                y1="6"
+                x2="18"
+                y2="18"
+              />
             </svg>
           </button>
         </div>
@@ -47,14 +76,17 @@
               @dragleave="isDragOver = false"
             >
               <input
-                type="file"
                 ref="fileInput"
-                @change="handleFileSelect"
+                type="file"
                 accept=".csv,.xlsx,.xls"
                 style="display: none"
-              />
+                @change="handleFileSelect"
+              >
 
-              <div v-if="!selectedFile" class="upload-placeholder">
+              <div
+                v-if="!selectedFile"
+                class="upload-placeholder"
+              >
                 <svg
                   width="48"
                   height="48"
@@ -67,16 +99,26 @@
                     d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
                   />
                   <polyline points="14,2 14,8 20,8" />
-                  <line x1="16" y1="13" x2="8" y2="13" />
-                  <line x1="16" y1="17" x2="8" y2="17" />
+                  <line
+                    x1="16"
+                    y1="13"
+                    x2="8"
+                    y2="13"
+                  />
+                  <line
+                    x1="16"
+                    y1="17"
+                    x2="8"
+                    y2="17"
+                  />
                   <polyline points="10,9 9,9 8,9" />
                 </svg>
                 <p>
                   Drag and drop your file here or
                   <button
                     type="button"
-                    @click="$refs.fileInput.click()"
                     class="browse-btn"
+                    @click="$refs.fileInput.click()"
                   >
                     browse
                   </button>
@@ -84,7 +126,10 @@
                 <small>Supported formats: CSV, Excel (.xlsx, .xls)</small>
               </div>
 
-              <div v-else class="file-selected">
+              <div
+                v-else
+                class="file-selected"
+              >
                 <svg
                   width="24"
                   height="24"
@@ -106,8 +151,8 @@
                 </div>
                 <button
                   type="button"
-                  @click="removeFile"
                   class="remove-file-btn"
+                  @click="removeFile"
                 >
                   <svg
                     width="16"
@@ -117,8 +162,18 @@
                     stroke="currentColor"
                     stroke-width="2"
                   >
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
+                    <line
+                      x1="18"
+                      y1="6"
+                      x2="6"
+                      y2="18"
+                    />
+                    <line
+                      x1="6"
+                      y1="6"
+                      x2="18"
+                      y2="18"
+                    />
                   </svg>
                 </button>
               </div>
@@ -130,33 +185,42 @@
             <div class="option-group">
               <label class="option-label">
                 <input
-                  type="checkbox"
                   v-model="importOptions.overwriteExisting"
-                />
+                  type="checkbox"
+                >
                 Overwrite existing leave balances
               </label>
             </div>
             <div class="option-group">
               <label class="option-label">
-                <input type="checkbox" v-model="importOptions.validateData" />
+                <input
+                  v-model="importOptions.validateData"
+                  type="checkbox"
+                >
                 Validate data before import
               </label>
             </div>
           </div>
 
           <!-- Progress Bar -->
-          <div v-if="importProgress > 0" class="progress-container">
+          <div
+            v-if="importProgress > 0"
+            class="progress-container"
+          >
             <div class="progress-bar">
               <div
                 class="progress-fill"
                 :style="{ width: importProgress + '%' }"
-              ></div>
+              />
             </div>
             <span class="progress-text">{{ importProgress }}% Complete</span>
           </div>
 
           <!-- Error Messages -->
-          <div v-if="errorMessage" class="error-message">
+          <div
+            v-if="errorMessage"
+            class="error-message"
+          >
             <svg
               width="16"
               height="16"
@@ -165,15 +229,32 @@
               stroke="currentColor"
               stroke-width="2"
             >
-              <circle cx="12" cy="12" r="10" />
-              <line x1="15" y1="9" x2="9" y2="15" />
-              <line x1="9" y1="9" x2="15" y2="15" />
+              <circle
+                cx="12"
+                cy="12"
+                r="10"
+              />
+              <line
+                x1="15"
+                y1="9"
+                x2="9"
+                y2="15"
+              />
+              <line
+                x1="9"
+                y1="9"
+                x2="15"
+                y2="15"
+              />
             </svg>
             {{ errorMessage }}
           </div>
 
           <!-- Success Message -->
-          <div v-if="successMessage" class="success-message">
+          <div
+            v-if="successMessage"
+            class="success-message"
+          >
             <svg
               width="16"
               height="16"
@@ -191,15 +272,15 @@
         <div class="modal-footer">
           <button
             class="btn-secondary"
-            @click="closeImportModal"
             :disabled="loading"
+            @click="closeImportModal"
           >
             Cancel
           </button>
           <button
             class="btn-primary"
-            @click="importLeaveBalance"
             :disabled="!selectedFile || loading"
+            @click="importLeaveBalance"
           >
             <span v-if="!loading">Import</span>
             <span v-else>Importing...</span>

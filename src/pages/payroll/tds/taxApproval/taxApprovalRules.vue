@@ -1,6 +1,9 @@
 <template>
   <v-main>
-    <v-card flat class="tab-container">
+    <v-card
+      flat
+      class="tab-container"
+    >
       <v-card-text class="pa-0">
         <v-tabs
           v-model="activeTab"
@@ -10,14 +13,13 @@
           height="64"
           show-arrows
         >
-
-        <v-btn
-  icon
-  @click="$router.push('/payroll/tds/approval')"
-  class="ma-2"
->
-  <v-icon>mdi-arrow-left</v-icon>
-</v-btn>
+          <v-btn
+            icon
+            class="ma-2"
+            @click="$router.push('/payroll/tds/approval')"
+          >
+            <v-icon>mdi-arrow-left</v-icon>
+          </v-btn>
           <v-tab
             v-for="tab in tabs"
             :key="tab.route"
@@ -41,7 +43,7 @@
           </v-tab>
         </v-tabs>
 
-        <v-divider class="tab-divider"></v-divider>
+        <v-divider class="tab-divider" />
       </v-card-text>
     </v-card>
 

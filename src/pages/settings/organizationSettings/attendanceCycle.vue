@@ -2,14 +2,14 @@
   <div class="attendance-cycles-page">
     <div class="page-header">
       <div class="header-content">
-        <div class="header-text"></div>
+        <div class="header-text" />
         <div class="header-actions">
           <BaseButton
             variant="primary"
             :left-icon="PlusIcon"
-            @click="openAddModal"
             text="Add Cycle"
             :loading="externalLoading"
+            @click="openAddModal"
           />
         </div>
       </div>
@@ -67,7 +67,10 @@
         </DataTable>
 
         <!-- Pagination -->
-        <div class="pagination-wrapper" v-if="!loading">
+        <div
+          v-if="!loading"
+          class="pagination-wrapper"
+        >
           <CustomPagination
             v-model:page="currentPage"
             v-model:items-per-page="itemsPerPage"

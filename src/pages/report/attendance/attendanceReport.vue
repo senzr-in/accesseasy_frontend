@@ -1,17 +1,26 @@
 <template>
   <div class="generate-report-container">
-    <v-toolbar flat class="header-toolbar px-4" height="64">
+    <v-toolbar
+      flat
+      class="header-toolbar px-4"
+      height="64"
+    >
       <div class="d-flex align-center">
         <v-btn
           icon="mdi-arrow-left"
           variant="text"
           class="mr-2"
           @click="$emit('closeAddPage')"
-        ></v-btn>
-        <v-icon color="primary" class="mr-2">mdi-file-chart</v-icon>
+        />
+        <v-icon
+          color="primary"
+          class="mr-2"
+        >
+          mdi-file-chart
+        </v-icon>
         <span class="text-h6 font-weight-medium">Generate Report</span>
       </div>
-      <v-spacer></v-spacer>
+      <v-spacer />
       <div class="d-flex align-center">
         <v-btn
           prepend-icon="mdi-close"
@@ -27,8 +36,8 @@
           color="white"
           style="background-color: black !important"
           prepend-icon="mdi-check"
-          @click="fetchAttendanceData"
           elevation="0"
+          @click="fetchAttendanceData"
         >
           Generate
         </v-btn>
@@ -39,7 +48,9 @@
       <div class="content-area pa-8">
         <v-form ref="form">
           <div class="form-header mb-6">
-            <h2 class="text-h6 font-weight-medium">Report Details</h2>
+            <h2 class="text-h6 font-weight-medium">
+              Report Details
+            </h2>
           </div>
 
           <div class="form-grid">
@@ -54,10 +65,13 @@
                 :rules="[(v) => !!v || 'Report Type is required']"
                 hide-details="auto"
               >
-                <template v-slot:prepend>
-                  <v-icon color="primary" size="20"
-                    >mdi-file-document-outline</v-icon
+                <template #prepend>
+                  <v-icon
+                    color="primary"
+                    size="20"
                   >
+                    mdi-file-document-outline
+                  </v-icon>
                 </template>
               </v-select>
             </div>
@@ -76,8 +90,13 @@
                 :rules="[(v) => !!v || 'Branch is required']"
                 hide-details="auto"
               >
-                <template v-slot:prepend>
-                  <v-icon color="primary" size="20">mdi-office-building</v-icon>
+                <template #prepend>
+                  <v-icon
+                    color="primary"
+                    size="20"
+                  >
+                    mdi-office-building
+                  </v-icon>
                 </template>
               </v-select>
             </div>
@@ -96,7 +115,7 @@
                 class="mb-4"
                 :loading="loadingDepartments"
                 :rules="[(v) => !!v || 'Department is required']"
-              ></v-select>
+              />
             </div>
 
             <div class="form-group">
@@ -110,8 +129,13 @@
                 :rules="[(v) => !!v || 'Start Date is required']"
                 hide-details="auto"
               >
-                <template v-slot:prepend>
-                  <v-icon color="primary" size="20">mdi-calendar-start</v-icon>
+                <template #prepend>
+                  <v-icon
+                    color="primary"
+                    size="20"
+                  >
+                    mdi-calendar-start
+                  </v-icon>
                 </template>
               </v-text-field>
             </div>
@@ -127,8 +151,13 @@
                 :rules="[(v) => !!v || 'End Date is required']"
                 hide-details="auto"
               >
-                <template v-slot:prepend>
-                  <v-icon color="primary" size="20">mdi-calendar-end</v-icon>
+                <template #prepend>
+                  <v-icon
+                    color="primary"
+                    size="20"
+                  >
+                    mdi-calendar-end
+                  </v-icon>
                 </template>
               </v-text-field>
             </div>
@@ -142,7 +171,7 @@
                 density="comfortable"
                 class="mb-4"
                 :rules="[(v) => !!v || 'Format is required']"
-              ></v-select>
+              />
             </div>
           </div>
         </v-form>

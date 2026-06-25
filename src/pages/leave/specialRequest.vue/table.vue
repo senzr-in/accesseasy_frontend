@@ -1,14 +1,17 @@
 <template>
   <div class="employee-container">
     <!-- Main Content with Table -->
-    <div class="main-content" :class="{ 'drawer-open': showDrawer }">
+    <div
+      class="main-content"
+      :class="{ 'drawer-open': showDrawer }"
+    >
       <DataTableWrapper
-        :searchQuery="search"
-        @update:searchQuery="handleSearchUpdate"
-        :showSearch="false"
-        :isEmpty="false"
-        :hasError="showError"
-        wrapperClass="employee-table-wrapper"
+        :search-query="search"
+        :show-search="false"
+        :is-empty="false"
+        :has-error="showError"
+        wrapper-class="employee-table-wrapper"
+        @update:search-query="handleSearchUpdate"
       >
         <!-- Toolbar Actions Slot -->
         <template #toolbar-actions>
@@ -17,7 +20,7 @@
               variant="primary"
               size="md"
               text="Work Preference"
-              :leftIcon="Plus"
+              :left-icon="Plus"
               @click="showDrawer = true"
             />
           </div>
@@ -47,7 +50,10 @@
             </template>
             <template #cell-status="{ item }">
               <div class="d-flex align-center">
-                <span class="status-chip" :class="getStatusClass(item.status)">
+                <span
+                  class="status-chip"
+                  :class="getStatusClass(item.status)"
+                >
                   <v-icon
                     size="small"
                     class="me-1"
@@ -68,9 +74,13 @@
             </template>
             <template #empty>
               <div class="d-flex flex-column align-center pa-4">
-                <v-icon size="large" color="grey" class="mb-2"
-                  >mdi-calendar-blank</v-icon
+                <v-icon
+                  size="large"
+                  color="grey"
+                  class="mb-2"
                 >
+                  mdi-calendar-blank
+                </v-icon>
                 <div class="text-subtitle-1 text-medium-emphasis">
                   No work preference requests found
                 </div>
@@ -83,11 +93,11 @@
         <template #pagination>
           <CustomPagination
             v-model:page="page"
-            v-model:itemsPerPage="itemsPerPage"
+            v-model:items-per-page="itemsPerPage"
             :total-items="totalItems"
             :is-searching="!!search"
             @update:page="handlePageChange"
-            @update:itemsPerPage="handleItemsPerPageChange"
+            @update:items-per-page="handleItemsPerPageChange"
           />
         </template>
       </DataTableWrapper>
@@ -102,7 +112,7 @@
       >
         <AddWorkPreferenceForm
           v-if="showDrawer"
-          @closeAddPage="showDrawer = false"
+          @close-add-page="showDrawer = false"
           @saved="refreshData"
         />
       </v-navigation-drawer>

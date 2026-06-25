@@ -1,15 +1,23 @@
 <template>
-  <v-container fluid class="pa-6">
+  <v-container
+    fluid
+    class="pa-6"
+  >
     <!-- Header with date and time -->
     <v-row class="mb-6">
-      <v-col cols="12" class="d-flex justify-space-between align-center">
+      <v-col
+        cols="12"
+        class="d-flex justify-space-between align-center"
+      >
         <div>
           <h2 class="text-h5 font-weight-bold text-grey-darken-3">
             Dashboard Overview
           </h2>
         </div>
         <div class="text-right">
-          <p class="text-body-2 text-grey-600">{{ currentDate }}</p>
+          <p class="text-body-2 text-grey-600">
+            {{ currentDate }}
+          </p>
           <p class="text-h6 font-weight-bold text-grey-darken-2">
             {{ currentTime }}
           </p>
@@ -19,57 +27,129 @@
 
     <!-- Statistics Cards -->
     <v-row class="mb-6">
-      <v-col cols="12" md="3">
-        <v-card class="pa-4" elevation="2">
+      <v-col
+        cols="12"
+        md="3"
+      >
+        <v-card
+          class="pa-4"
+          elevation="2"
+        >
           <div class="d-flex align-center">
-            <v-avatar size="48" class="bg-blue-lighten-4 mr-4">
-              <v-icon color="blue-darken-2" size="24">mdi-account-group</v-icon>
+            <v-avatar
+              size="48"
+              class="bg-blue-lighten-4 mr-4"
+            >
+              <v-icon
+                color="blue-darken-2"
+                size="24"
+              >
+                mdi-account-group
+              </v-icon>
             </v-avatar>
             <div>
-              <p class="text-body-2 text-grey-600 mb-1">Total Dealers</p>
-              <p class="text-h4 font-weight-bold text-grey-darken-3">45</p>
+              <p class="text-body-2 text-grey-600 mb-1">
+                Total Dealers
+              </p>
+              <p class="text-h4 font-weight-bold text-grey-darken-3">
+                45
+              </p>
             </div>
           </div>
         </v-card>
       </v-col>
 
-      <v-col cols="12" md="3">
-        <v-card class="pa-4" elevation="2">
+      <v-col
+        cols="12"
+        md="3"
+      >
+        <v-card
+          class="pa-4"
+          elevation="2"
+        >
           <div class="d-flex align-center">
-            <v-avatar size="48" class="bg-green-lighten-4 mr-4">
-              <v-icon color="green-darken-2" size="24">mdi-check-circle</v-icon>
+            <v-avatar
+              size="48"
+              class="bg-green-lighten-4 mr-4"
+            >
+              <v-icon
+                color="green-darken-2"
+                size="24"
+              >
+                mdi-check-circle
+              </v-icon>
             </v-avatar>
             <div>
-              <p class="text-body-2 text-grey-600 mb-1">Active Dealers</p>
-              <p class="text-h4 font-weight-bold text-green-darken-2">32</p>
+              <p class="text-body-2 text-grey-600 mb-1">
+                Active Dealers
+              </p>
+              <p class="text-h4 font-weight-bold text-green-darken-2">
+                32
+              </p>
             </div>
           </div>
         </v-card>
       </v-col>
 
-      <v-col cols="12" md="3">
-        <v-card class="pa-4" elevation="2">
+      <v-col
+        cols="12"
+        md="3"
+      >
+        <v-card
+          class="pa-4"
+          elevation="2"
+        >
           <div class="d-flex align-center">
-            <v-avatar size="48" class="bg-red-lighten-4 mr-4">
-              <v-icon color="red-darken-2" size="24">mdi-close-circle</v-icon>
+            <v-avatar
+              size="48"
+              class="bg-red-lighten-4 mr-4"
+            >
+              <v-icon
+                color="red-darken-2"
+                size="24"
+              >
+                mdi-close-circle
+              </v-icon>
             </v-avatar>
             <div>
-              <p class="text-body-2 text-grey-600 mb-1">Inactive Dealers</p>
-              <p class="text-h4 font-weight-bold text-red-darken-2">8</p>
+              <p class="text-body-2 text-grey-600 mb-1">
+                Inactive Dealers
+              </p>
+              <p class="text-h4 font-weight-bold text-red-darken-2">
+                8
+              </p>
             </div>
           </div>
         </v-card>
       </v-col>
 
-      <v-col cols="12" md="3">
-        <v-card class="pa-4" elevation="2">
+      <v-col
+        cols="12"
+        md="3"
+      >
+        <v-card
+          class="pa-4"
+          elevation="2"
+        >
           <div class="d-flex align-center">
-            <v-avatar size="48" class="bg-orange-lighten-4 mr-4">
-              <v-icon color="orange-darken-2" size="24">mdi-clock-alert</v-icon>
+            <v-avatar
+              size="48"
+              class="bg-orange-lighten-4 mr-4"
+            >
+              <v-icon
+                color="orange-darken-2"
+                size="24"
+              >
+                mdi-clock-alert
+              </v-icon>
             </v-avatar>
             <div>
-              <p class="text-body-2 text-grey-600 mb-1">Pending Requests</p>
-              <p class="text-h4 font-weight-bold text-orange-darken-2">5</p>
+              <p class="text-body-2 text-grey-600 mb-1">
+                Pending Requests
+              </p>
+              <p class="text-h4 font-weight-bold text-orange-darken-2">
+                5
+              </p>
             </div>
           </div>
         </v-card>
@@ -78,13 +158,19 @@
 
     <!-- Charts Section -->
     <v-row>
-      <v-col cols="12" lg="8">
+      <v-col
+        cols="12"
+        lg="8"
+      >
         <v-card elevation="2">
           <v-card-title class="text-h6 font-weight-bold text-grey-darken-3">
             Dealers Added Per Month (2025)
           </v-card-title>
           <v-card-text>
-            <div class="chart-container" style="height: 300px">
+            <div
+              class="chart-container"
+              style="height: 300px"
+            >
               <div
                 class="d-flex align-end justify-space-between pa-4"
                 style="height: 100%"
@@ -102,10 +188,10 @@
                       width: '100%',
                       maxWidth: '40px',
                     }"
+                    :class="{ 'bg-blue-darken-2': hoveredBar === index }"
                     @mouseover="hoveredBar = index"
                     @mouseleave="hoveredBar = null"
-                    :class="{ 'bg-blue-darken-2': hoveredBar === index }"
-                  ></div>
+                  />
                   <div class="mt-2 text-center">
                     <div class="text-caption font-weight-medium">
                       {{ data.month }}
@@ -121,20 +207,32 @@
         </v-card>
       </v-col>
 
-      <v-col cols="12" lg="4">
+      <v-col
+        cols="12"
+        lg="4"
+      >
         <v-card elevation="2">
           <v-card-title class="text-h6 font-weight-bold text-grey-darken-3">
             Request Status Overview
           </v-card-title>
           <v-card-text class="pa-4">
             <div class="mb-4">
-              <v-card class="pa-4 bg-green-lighten-5" elevation="0">
+              <v-card
+                class="pa-4 bg-green-lighten-5"
+                elevation="0"
+              >
                 <div class="d-flex align-center justify-space-between">
                   <div class="d-flex align-center">
-                    <v-avatar size="32" class="bg-green-lighten-4 mr-3">
-                      <v-icon color="green-darken-2" size="20"
-                        >mdi-check-circle</v-icon
+                    <v-avatar
+                      size="32"
+                      class="bg-green-lighten-4 mr-3"
+                    >
+                      <v-icon
+                        color="green-darken-2"
+                        size="20"
                       >
+                        mdi-check-circle
+                      </v-icon>
                     </v-avatar>
                     <div>
                       <p class="font-weight-medium text-grey-darken-3 mb-1">
@@ -146,22 +244,29 @@
                     </div>
                   </div>
                   <div class="text-right">
-                    <span class="text-h5 font-weight-bold text-green-darken-2"
-                      >28</span
-                    >
+                    <span class="text-h5 font-weight-bold text-green-darken-2">28</span>
                   </div>
                 </div>
               </v-card>
             </div>
 
             <div class="mb-4">
-              <v-card class="pa-4 bg-red-lighten-5" elevation="0">
+              <v-card
+                class="pa-4 bg-red-lighten-5"
+                elevation="0"
+              >
                 <div class="d-flex align-center justify-space-between">
                   <div class="d-flex align-center">
-                    <v-avatar size="32" class="bg-red-lighten-4 mr-3">
-                      <v-icon color="red-darken-2" size="20"
-                        >mdi-close-circle</v-icon
+                    <v-avatar
+                      size="32"
+                      class="bg-red-lighten-4 mr-3"
+                    >
+                      <v-icon
+                        color="red-darken-2"
+                        size="20"
                       >
+                        mdi-close-circle
+                      </v-icon>
                     </v-avatar>
                     <div>
                       <p class="font-weight-medium text-grey-darken-3 mb-1">
@@ -173,34 +278,41 @@
                     </div>
                   </div>
                   <div class="text-right">
-                    <span class="text-h5 font-weight-bold text-red-darken-2"
-                      >12</span
-                    >
+                    <span class="text-h5 font-weight-bold text-red-darken-2">12</span>
                   </div>
                 </div>
               </v-card>
             </div>
 
             <div>
-              <v-card class="pa-4 bg-orange-lighten-5" elevation="0">
+              <v-card
+                class="pa-4 bg-orange-lighten-5"
+                elevation="0"
+              >
                 <div class="d-flex align-center justify-space-between">
                   <div class="d-flex align-center">
-                    <v-avatar size="32" class="bg-orange-lighten-4 mr-3">
-                      <v-icon color="orange-darken-2" size="20"
-                        >mdi-clock-alert</v-icon
+                    <v-avatar
+                      size="32"
+                      class="bg-orange-lighten-4 mr-3"
+                    >
+                      <v-icon
+                        color="orange-darken-2"
+                        size="20"
                       >
+                        mdi-clock-alert
+                      </v-icon>
                     </v-avatar>
                     <div>
                       <p class="font-weight-medium text-grey-darken-3 mb-1">
                         Pending Requests
                       </p>
-                      <p class="text-body-2 text-grey-600">Awaiting review</p>
+                      <p class="text-body-2 text-grey-600">
+                        Awaiting review
+                      </p>
                     </div>
                   </div>
                   <div class="text-right">
-                    <span class="text-h5 font-weight-bold text-orange-darken-2"
-                      >5</span
-                    >
+                    <span class="text-h5 font-weight-bold text-orange-darken-2">5</span>
                   </div>
                 </div>
               </v-card>

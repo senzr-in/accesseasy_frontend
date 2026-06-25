@@ -1,5 +1,8 @@
 <template>
-  <v-container fluid class="leave-container">
+  <v-container
+    fluid
+    class="leave-container"
+  >
     <!-- ToastContainer Component for Success/Error Messages -->
     <ToastContainer ref="toastContainer" />
 
@@ -32,9 +35,16 @@
                     background: #fff;
                   "
                 >
-                  <v-icon icon="mdi-calendar" size="16" class="mr-2"></v-icon>
+                  <v-icon
+                    icon="mdi-calendar"
+                    size="16"
+                    class="mr-2"
+                  />
                   <span>{{ selectedYear }}</span>
-                  <v-icon icon="mdi-chevron-down" class="ml-2"></v-icon>
+                  <v-icon
+                    icon="mdi-chevron-down"
+                    class="ml-2"
+                  />
                 </div>
               </template>
               <v-list>
@@ -58,8 +68,8 @@
               :left-icon="plusIcon"
               variant="primary"
               size="md"
-              @click="openAddLeaveDialog"
               class="add-leave-btn"
+              @click="openAddLeaveDialog"
             />
           </div>
         </div>
@@ -72,8 +82,8 @@
           :columns="columns"
           :sort-by="sortBy"
           :sort-direction="sortDirection"
-          @update:sortBy="sortBy = $event"
-          @update:sortDirection="sortDirection = $event"
+          @update:sort-by="sortBy = $event"
+          @update:sort-direction="sortDirection = $event"
           @sort="handleSort"
         >
           <!-- Leave Name Cell -->
@@ -126,11 +136,11 @@
           <template #cell-isEnabled="{ item }">
             <label class="toggle-switch">
               <input
-                type="checkbox"
                 v-model="item.isEnabled"
+                type="checkbox"
                 @change="toggleLeaveType(item)"
-              />
-              <span class="toggle-slider"></span>
+              >
+              <span class="toggle-slider" />
             </label>
           </template>
 
@@ -160,7 +170,12 @@
 
       <!-- Skeleton Loader for Table -->
       <template v-else>
-        <SkeletonLoading variant="data-table" :rows="5" :columns="7" animated />
+        <SkeletonLoading
+          variant="data-table"
+          :rows="5"
+          :columns="7"
+          animated
+        />
       </template>
 
       <!-- Pagination Slot -->
@@ -187,21 +202,26 @@
         <div class="dialog-header">
           <div class="dialog-header-content">
             <div class="dialog-title-section">
-              <h2 class="dialog-title">Add New Leave Type</h2>
+              <h2 class="dialog-title">
+                Add New Leave Type
+              </h2>
             </div>
           </div>
           <v-btn
             icon="mdi-close"
             variant="text"
             size="small"
-            @click="closeAddLeaveDialog"
             class="dialog-close-btn"
+            @click="closeAddLeaveDialog"
           />
         </div>
 
         <!-- Dialog Content -->
         <div class="dialog-content">
-          <v-form ref="addForm" v-model="validAdd">
+          <v-form
+            ref="addForm"
+            v-model="validAdd"
+          >
             <div class="form-section">
               <div class="form-row">
                 <label class="form-label">Leave Type Name:</label>
@@ -259,10 +279,10 @@
                 <div class="switch-input-group">
                   <label class="switch">
                     <input
-                      type="checkbox"
                       v-model="newLeaveConfig.clubWithOtherLeaves"
-                    />
-                    <span class="slider"></span>
+                      type="checkbox"
+                    >
+                    <span class="slider" />
                   </label>
                 </div>
               </div>
@@ -270,8 +290,11 @@
                 <label class="form-label"> Yearly Carry Forward:</label>
                 <div class="switch-input-group">
                   <label class="switch">
-                    <input type="checkbox" v-model="newLeaveConfig.isenabled" />
-                    <span class="slider"></span>
+                    <input
+                      v-model="newLeaveConfig.isenabled"
+                      type="checkbox"
+                    >
+                    <span class="slider" />
                   </label>
                   <v-text-field
                     v-model="newLeaveConfig.carryForwardLimit"
@@ -297,8 +320,8 @@
             variant="danger"
             size="md"
             rounded="md"
-            @click="closeAddLeaveDialog"
             class="footer-btn"
+            @click="closeAddLeaveDialog"
           />
           <BaseButton
             text="Save Leave"
@@ -311,8 +334,8 @@
                 return h(VIcon, { icon: 'mdi-check', size: 18 });
               },
             }"
-            @click="saveNewLeaveType"
             class="footer-btn primary-btn"
+            @click="saveNewLeaveType"
           />
         </div>
       </v-card>
@@ -339,14 +362,17 @@
             icon="mdi-close"
             variant="text"
             size="small"
-            @click="closeDialog"
             class="dialog-close-btn"
+            @click="closeDialog"
           />
         </div>
 
         <!-- Dialog Content -->
         <div class="dialog-content">
-          <v-form ref="editForm" v-model="validEdit">
+          <v-form
+            ref="editForm"
+            v-model="validEdit"
+          >
             <div class="form-section">
               <div class="form-row">
                 <label class="form-label">Annual Leaves:</label>
@@ -359,8 +385,8 @@
                     density="comfortable"
                     min="0"
                     :disabled="!editingLeave.isEnabled"
-                    @input="validateMonthLimit"
                     hide-details="auto"
+                    @input="validateMonthLimit"
                   />
                 </div>
               </div>
@@ -378,10 +404,13 @@
                     step="0.5"
                     :max="editingLeave.days"
                     :disabled="!editingLeave.isEnabled"
-                    @input="validateMonthLimit"
                     hide-details="auto"
+                    @input="validateMonthLimit"
                   />
-                  <span v-if="showMonthLimitError" class="error-message">
+                  <span
+                    v-if="showMonthLimitError"
+                    class="error-message"
+                  >
                     Month limit cannot exceed Allowed Leaves
                   </span>
                 </div>
@@ -392,11 +421,11 @@
                 <div class="switch-input-group">
                   <label class="switch">
                     <input
-                      type="checkbox"
                       v-model="editingLeave.isenabled"
+                      type="checkbox"
                       :disabled="!editingLeave.isEnabled"
-                    />
-                    <span class="slider"></span>
+                    >
+                    <span class="slider" />
                   </label>
                   <v-text-field
                     v-model="editingLeave.carryForwardLimit"
@@ -419,12 +448,12 @@
                 <div class="switch-input-group">
                   <label class="switch">
                     <input
-                      type="checkbox"
                       v-model="editingLeave.clubWithOtherLeaves"
-                      @change="handleClubbingChange"
+                      type="checkbox"
                       :disabled="!editingLeave.isEnabled"
-                    />
-                    <span class="slider"></span>
+                      @change="handleClubbingChange"
+                    >
+                    <span class="slider" />
                   </label>
                 </div>
               </div>
@@ -439,8 +468,8 @@
             variant="danger"
             size="md"
             rounded="md"
-            @click="closeDialog"
             class="footer-btn"
+            @click="closeDialog"
           />
           <BaseButton
             text="Update Leave"
@@ -453,8 +482,8 @@
                 return h(VIcon, { icon: 'mdi-check', size: 18 });
               },
             }"
-            @click="handleSubmit"
             class="footer-btn primary-btn"
+            @click="handleSubmit"
           />
         </div>
       </v-card>
@@ -464,13 +493,13 @@
     <ConfirmDeleteModal
       :show="showConfirmDeleteDialog"
       title="Delete Leave Type"
-      :confirmMessage="'Are you sure you want to delete this leave type?'"
-      :itemLabel="'Leave Type'"
-      :itemName="leaveToDelete?.leaveName || ''"
+      :confirm-message="'Are you sure you want to delete this leave type?'"
+      :item-label="'Leave Type'"
+      :item-name="leaveToDelete?.leaveName || ''"
       description="This action cannot be undone and will remove the leave type from all associated records."
-      cancelText="Cancel"
-      confirmText="Delete"
-      deletingText="Deleting..."
+      cancel-text="Cancel"
+      confirm-text="Delete"
+      deleting-text="Deleting..."
       :deleting="isDeleting"
       @close="closeConfirmDeleteDialog"
       @confirm="confirmDelete"

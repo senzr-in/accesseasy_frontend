@@ -1,6 +1,9 @@
 <!-- src/components/common/filters/SearchableSelect.vue -->
 <template>
-  <div class="searchable-select" ref="root">
+  <div
+    ref="root"
+    class="searchable-select"
+  >
     <!-- Trigger -->
     <div
       class="trigger"
@@ -10,12 +13,23 @@
       <span class="label">
         {{ selectedLabel || placeholder }}
       </span>
-      <ChevronDown class="icon" :class="{ rotated: isOpen }" />
-      <X v-if="modelValue" class="clear" @click.stop="clear" />
+      <ChevronDown
+        class="icon"
+        :class="{ rotated: isOpen }"
+      />
+      <X
+        v-if="modelValue"
+        class="clear"
+        @click.stop="clear"
+      />
     </div>
 
     <!-- Dropdown -->
-    <div v-if="isOpen" class="dropdown" ref="panel">
+    <div
+      v-if="isOpen"
+      ref="panel"
+      class="dropdown"
+    >
       <div class="search-box">
         <Search class="search-icon" />
         <input
@@ -24,11 +38,18 @@
           class="search-input"
           placeholder="Search..."
           @keydown.stop
+        >
+        <X
+          v-if="query"
+          class="clear-search"
+          @click="query = ''"
         />
-        <X v-if="query" class="clear-search" @click="query = ''" />
       </div>
 
-      <div class="options" ref="options">
+      <div
+        ref="options"
+        class="options"
+      >
         <div
           v-for="opt in filtered"
           :key="opt.value"
@@ -39,11 +60,17 @@
           {{ opt.label }}
         </div>
 
-        <div v-if="loading" class="option loading">
+        <div
+          v-if="loading"
+          class="option loading"
+        >
           <Loader2 class="spin" /> Loading…
         </div>
 
-        <div v-if="!loading && filtered.length === 0" class="option empty">
+        <div
+          v-if="!loading && filtered.length === 0"
+          class="option empty"
+        >
           No results
         </div>
       </div>

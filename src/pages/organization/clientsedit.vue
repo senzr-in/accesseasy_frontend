@@ -31,7 +31,11 @@
       </div>
     </div>
 
-    <form @submit.prevent="handleSubmit" class="sidebar-layout" id="clientForm">
+    <form
+      id="clientForm"
+      class="sidebar-layout"
+      @submit.prevent="handleSubmit"
+    >
       <!-- Client Info -->
       <div class="info-box">
         <h2 class="box-title">
@@ -45,25 +49,27 @@
           <div class="form-group">
             <label for="category">Category *</label>
             <select
-              v-model="client.category"
               id="category"
+              v-model="client.category"
               class="input"
               required
             >
-              <option value="clientorg">Client-Company</option>
-              <option value="contact">Individual</option>
+              <option value="clientorg">
+                Client-Company
+              </option>
+              <option value="contact">
+                Individual
+              </option>
             </select>
           </div>
           <div class="form-group">
-            <label for="clientName"
-              >{{
-                client.category === "contact" ? "Contact Name" : "Client Name"
-              }}
-              *</label
-            >
+            <label for="clientName">{{
+              client.category === "contact" ? "Contact Name" : "Client Name"
+            }}
+              *</label>
             <input
-              v-model="client.orgName"
               id="clientName"
+              v-model="client.orgName"
               type="text"
               class="input"
               :placeholder="
@@ -72,15 +78,18 @@
                   : 'Enter Client name'
               "
               required
-            />
+            >
           </div>
           <div class="form-group">
             <label for="supervisor">Supervisor</label>
-            <div class="searchable-select" @click="toggleSupervisorDropdown">
+            <div
+              class="searchable-select"
+              @click="toggleSupervisorDropdown"
+            >
               <div class="input-wrapper">
                 <input
-                  v-model="supervisorSearch"
                   id="supervisor"
+                  v-model="supervisorSearch"
                   type="text"
                   class="input"
                   :placeholder="
@@ -90,16 +99,18 @@
                   "
                   @focus="showSupervisorDropdown = true"
                   @input="showSupervisorDropdown = true"
-                />
+                >
 
                 <span
                   v-if="supervisorSearch"
                   class="clear-icon"
                   @click.stop="clearSupervisor"
-                  >×</span
-                >
+                >×</span>
               </div>
-              <div v-if="showSupervisorDropdown" class="dropdown-list">
+              <div
+                v-if="showSupervisorDropdown"
+                class="dropdown-list"
+              >
                 <ul>
                   <li
                     v-for="sup in filteredSupervisors"
@@ -109,7 +120,10 @@
                     {{ sup.name }}
                   </li>
                 </ul>
-                <div v-if="filteredSupervisors.length === 0" class="no-results">
+                <div
+                  v-if="filteredSupervisors.length === 0"
+                  class="no-results"
+                >
                   No supervisors found
                 </div>
               </div>
@@ -118,17 +132,15 @@
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label for="phoneNumber"
-              >{{
-                client.category === "contact"
-                  ? "Contact Number"
-                  : "Client Number"
-              }}
-              *</label
-            >
+            <label for="phoneNumber">{{
+              client.category === "contact"
+                ? "Contact Number"
+                : "Client Number"
+            }}
+              *</label>
             <input
-              v-model="client.orgNumber"
               id="phoneNumber"
+              v-model="client.orgNumber"
               type="tel"
               class="input"
               :placeholder="
@@ -139,18 +151,23 @@
               maxlength="10"
               pattern="[0-9]{10}"
               title="Please enter exactly 10 digits"
-              @input="validatePhoneNumber"
               required
-            />
-            <div v-if="phoneError" class="error-message">{{ phoneError }}</div>
+              @input="validatePhoneNumber"
+            >
+            <div
+              v-if="phoneError"
+              class="error-message"
+            >
+              {{ phoneError }}
+            </div>
           </div>
           <div class="form-group">
             <label for="clientEmail">{{
               client.category === "contact" ? "Contact Email" : "Client Email"
             }}</label>
             <input
-              v-model="client.email"
               id="clientEmail"
+              v-model="client.email"
               type="email"
               class="input"
               :placeholder="
@@ -158,19 +175,19 @@
                   ? 'Enter Contact email'
                   : 'Enter Client email'
               "
-            />
+            >
           </div>
         </div>
         <div class="form-group">
           <label for="address"> Billing Address *</label>
           <input
-            v-model="client.orgAddress"
             id="address"
+            v-model="client.orgAddress"
             type="text"
             class="input"
             placeholder="Enter full address"
             required
-          />
+          >
         </div>
       </div>
 
@@ -181,11 +198,14 @@
           type="text"
           placeholder="Search for address..."
           class="input"
-        />
+        >
       </div>
 
       <!-- Map -->
-      <div id="map" class="map"></div>
+      <div
+        id="map"
+        class="map"
+      />
 
       <!-- Toast Notification -->
     </form>

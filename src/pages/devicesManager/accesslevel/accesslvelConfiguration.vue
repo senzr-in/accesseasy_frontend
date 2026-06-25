@@ -1,15 +1,27 @@
 <template>
   <div>
-    <v-form ref="form" v-model="valid" @submit.prevent="handleSave">
-      <v-toolbar density="compact" color="grey-lighten-4">
+    <v-form
+      ref="form"
+      v-model="valid"
+      @submit.prevent="handleSave"
+    >
+      <v-toolbar
+        density="compact"
+        color="grey-lighten-4"
+      >
         <div class="d-flex align-center">
           <span class="text-h7">Edit Access Level</span>
           <div class="access-level-name ml-2">
-            <v-icon size="medium" color="black">mdi-account-lock</v-icon>
+            <v-icon
+              size="medium"
+              color="black"
+            >
+              mdi-account-lock
+            </v-icon>
             <span class="ml-1">{{ formData.accessLevelName }}</span>
           </div>
         </div>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-btn
           color="error"
           variant="text"
@@ -30,22 +42,25 @@
 
       <div class="d-flex content-wrapper">
         <div class="side-nav pa-4">
-          <v-list density="compact" nav>
+          <v-list
+            density="compact"
+            nav
+          >
             <v-list-item
               v-for="(item, i) in menuItems"
               :key="i"
               :value="item"
               :active="selectedTab === item.value"
-              @click="selectedTab = item.value"
               color="black"
               rounded
               :class="{ 'has-error': tabHasError(item.value) }"
+              @click="selectedTab = item.value"
             >
-              <template v-slot:prepend>
+              <template #prepend>
                 <v-icon
                   :icon="item.icon"
                   :color="tabHasError(item.value) ? 'error' : 'default'"
-                ></v-icon>
+                />
               </template>
               <v-list-item-title>
                 {{ item.title }}
@@ -68,7 +83,10 @@
             <v-window v-model="selectedTab">
               <v-window-item value="basic">
                 <v-row>
-                  <v-col cols="12" sm="6">
+                  <v-col
+                    cols="12"
+                    sm="6"
+                  >
                     <v-switch
                       v-model="formData.accessType"
                       label="Access Type"
@@ -77,9 +95,12 @@
                       inset
                       disabled
                       class="mr-6"
-                    ></v-switch>
+                    />
                   </v-col>
-                  <v-col cols="12" sm="6">
+                  <v-col
+                    cols="12"
+                    sm="6"
+                  >
                     <v-switch
                       v-model="formData.holidays"
                       label="Holidays"
@@ -88,12 +109,15 @@
                       inset
                       class="mr-6"
                       @update:model-value="handleHolidaysChange"
-                    ></v-switch>
+                    />
                   </v-col>
                 </v-row>
 
                 <v-row>
-                  <v-col cols="12" sm="6">
+                  <v-col
+                    cols="12"
+                    sm="6"
+                  >
                     <v-switch
                       v-model="formData._24hrs"
                       label="24 Hours"
@@ -102,9 +126,12 @@
                       inset
                       class="mr-6"
                       @update:model-value="handle24HrsChange"
-                    ></v-switch>
+                    />
                   </v-col>
-                  <v-col cols="12" sm="6">
+                  <v-col
+                    cols="12"
+                    sm="6"
+                  >
                     <v-switch
                       v-model="formData.workingHours"
                       label="Working Hours"
@@ -113,12 +140,15 @@
                       inset
                       class="mr-6"
                       @update:model-value="handleWorkingHoursChange"
-                    ></v-switch>
+                    />
                   </v-col>
                 </v-row>
 
                 <v-row>
-                  <v-col cols="12" sm="6">
+                  <v-col
+                    cols="12"
+                    sm="6"
+                  >
                     <v-text-field
                       v-model="formData.maxWorkHours"
                       label="Max Work Hours"
@@ -126,9 +156,12 @@
                       variant="outlined"
                       :rules="[maxWorkHoursRule]"
                       :disabled="!formData.workingHours"
-                    ></v-text-field>
+                    />
                   </v-col>
-                  <v-col cols="12" sm="6">
+                  <v-col
+                    cols="12"
+                    sm="6"
+                  >
                     <v-autocomplete
                       v-model="formData.assignedDoors"
                       label="Assigned Doors"
@@ -144,7 +177,7 @@
                       :error-messages="getFieldErrorMessage('assignedDoors')"
                       required
                     >
-                      <template v-slot:prepend-item>
+                      <template #prepend-item>
                         <v-list-item>
                           <v-select
                             v-model="selectedDoorBranch"
@@ -157,7 +190,7 @@
                             dense
                             hide-details
                             class="mb-2"
-                          ></v-select>
+                          />
                         </v-list-item>
                       </template>
                     </v-autocomplete>
@@ -166,27 +199,36 @@
 
                 <!-- Group Type and Assignment in same row -->
                 <v-row>
-                  <v-col cols="12" sm="6">
+                  <v-col
+                    cols="12"
+                    sm="6"
+                  >
                     <div class="group-type-section">
                       <div class="section-title font-weight-bold mb-2">
                         Group Type
                       </div>
-                      <v-radio-group v-model="formData.groupType" inline>
+                      <v-radio-group
+                        v-model="formData.groupType"
+                        inline
+                      >
                         <v-radio
                           label="Doors"
                           value="doors"
                           color="black"
-                        ></v-radio>
+                        />
                         <v-radio
                           label="Devices"
                           value="devices"
                           color="black"
-                        ></v-radio>
+                        />
                       </v-radio-group>
                     </div>
                   </v-col>
 
-                  <v-col cols="12" sm="6">
+                  <v-col
+                    cols="12"
+                    sm="6"
+                  >
                     <div class="group-assignment-section">
                       <v-autocomplete
                         v-if="formData.groupType === 'doors'"
@@ -199,7 +241,7 @@
                         closable-chips
                         :loading="loadingDoorGroups"
                       >
-                        <template v-slot:selection="{ item, index }">
+                        <template #selection="{ item, index }">
                           <v-chip
                             v-if="index < 3"
                             closable
@@ -227,7 +269,7 @@
                         closable-chips
                         :loading="loadingDeviceGroups"
                       >
-                        <template v-slot:selection="{ item, index }">
+                        <template #selection="{ item, index }">
                           <v-chip
                             v-if="index < 3"
                             closable
@@ -248,7 +290,7 @@
                 </v-row>
               </v-window-item>
               <v-window-item value="assignEmployee">
-                <AssignToEmployee :accessLevelId="formData.id" />
+                <AssignToEmployee :access-level-id="formData.id" />
               </v-window-item>
             </v-window>
           </v-card>

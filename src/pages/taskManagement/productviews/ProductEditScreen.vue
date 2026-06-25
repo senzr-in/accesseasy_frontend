@@ -8,54 +8,71 @@
       <!-- Header -->
       <header class="content-header">
         <div class="header-left">
-          <button class="back-button" @click="goBack" aria-label="Go back">
-            <i class="fas fa-arrow-left"></i>
+          <button
+            class="back-button"
+            aria-label="Go back"
+            @click="goBack"
+          >
+            <i class="fas fa-arrow-left" />
           </button>
-          <h1 class="page-title">{{ isEditMode ? 'Edit asset type' : 'Add New Product' }}</h1>
+          <h1 class="page-title">
+            {{ isEditMode ? 'Edit asset type' : 'Add New Product' }}
+          </h1>
         </div>
         <div class="header-right">
           <span class="date-info">Today: June 20, 2025</span>
           <div class="user-info">
             <span class="user-name">KAWIN S V</span>
-            <i class="fas fa-chevron-down"></i>
+            <i class="fas fa-chevron-down" />
           </div>
         </div>
       </header>
 
       <!-- Loading State -->
-      <div v-if="isLoading" class="loading-container">
-        <div class="loading-spinner"></div>
+      <div
+        v-if="isLoading"
+        class="loading-container"
+      >
+        <div class="loading-spinner" />
         <p>Loading...</p>
       </div>
 
       <!-- Form Content -->
-      <div v-else class="form-container">
-        <form @submit.prevent="submitProduct" class="product-form">
+      <div
+        v-else
+        class="form-container"
+      >
+        <form
+          class="product-form"
+          @submit.prevent="submitProduct"
+        >
           <!-- Product Details Section -->
           <div class="form-card">
             <div class="card-header">
-              <h2 class="card-title">Asset type Details</h2>
+              <h2 class="card-title">
+                Asset type Details
+              </h2>
             </div>
             <div class="card-content">
               <div class="form-row">
                 <div class="form-group">
                   <label class="form-label">Asset type Name</label>
                   <input 
+                    v-model="productName" 
                     type="text" 
                     class="form-input" 
-                    v-model="productName" 
                     placeholder="Asset"
                     required
-                  />
+                  >
                 </div>
                 <div class="form-group">
                   <label class="form-label">Model Name</label>
                   <input 
+                    v-model="modelNumber" 
                     type="text" 
                     class="form-input" 
-                    v-model="modelNumber" 
                     placeholder="Assets-01"
-                  />
+                  >
                 </div>
               </div>
               <div class="form-row">
@@ -71,8 +88,13 @@
                 <div class="form-group">
                   <label class="form-label">Category</label>
                   <div class="select-wrapper">
-                    <select class="form-select" v-model="selectedCategoryId">
-                      <option :value="null">mdj</option>
+                    <select
+                      v-model="selectedCategoryId"
+                      class="form-select"
+                    >
+                      <option :value="null">
+                        mdj
+                      </option>
                       <option 
                         v-for="category in categories" 
                         :key="category.id" 
@@ -81,7 +103,7 @@
                         {{ category.categoryName }}
                       </option>
                     </select>
-                    <i class="fas fa-chevron-down select-icon"></i>
+                    <i class="fas fa-chevron-down select-icon" />
                   </div>
                 </div>
               </div>
@@ -110,7 +132,7 @@
                 class="add-category-link" 
                 @click="showAddCategoryDialog"
               >
-                <i class="fas fa-plus"></i>
+                <i class="fas fa-plus" />
                 Add New Category
               </button>
             </div>
@@ -119,7 +141,9 @@
           <!-- Product Image Section -->
           <div class="form-card">
             <div class="card-header">
-              <h2 class="card-title">Asset type Image</h2>
+              <h2 class="card-title">
+                Asset type Image
+              </h2>
             </div>
             <div class="card-content">
               <div class="image-upload-area">
@@ -135,19 +159,28 @@
                     :src="imagePreview" 
                     alt="Product preview" 
                     class="preview-image"
-                  />
+                  >
                   <img 
                     v-else-if="existingImageUrl" 
                     :src="`${existingImageUrl}?access_token=${token}`" 
                     alt="Product image" 
                     class="preview-image"
                     @error="handleImageError"
-                  />
-                  <div v-else class="dropzone-content">
-                    <i class="fas fa-image dropzone-icon"></i>
-                    <p class="dropzone-text">Drag & drop Asset image here</p>
-                    <p class="dropzone-subtext">or click to browse files</p>
-                    <p class="dropzone-format">Supported formats: JPEG, PNG, WebP. Max size: 5MB</p>
+                  >
+                  <div
+                    v-else
+                    class="dropzone-content"
+                  >
+                    <i class="fas fa-image dropzone-icon" />
+                    <p class="dropzone-text">
+                      Drag & drop Asset image here
+                    </p>
+                    <p class="dropzone-subtext">
+                      or click to browse files
+                    </p>
+                    <p class="dropzone-format">
+                      Supported formats: JPEG, PNG, WebP. Max size: 5MB
+                    </p>
                   </div>
                   <button 
                     v-if="imageFile || existingImageUrl" 
@@ -155,17 +188,22 @@
                     class="remove-image-btn" 
                     @click.stop="removeImage"
                   >
-                    <i class="fas fa-times"></i>
+                    <i class="fas fa-times" />
                   </button>
                 </div>
                 <input 
-                  type="file" 
                   ref="fileInput" 
+                  type="file" 
                   accept="image/jpeg,image/png,image/webp" 
                   style="display: none" 
                   @change="onFileSelected"
-                />
-                <p v-if="imageError" class="error-message">{{ imageError }}</p>
+                >
+                <p
+                  v-if="imageError"
+                  class="error-message"
+                >
+                  {{ imageError }}
+                </p>
               </div>
             </div>
           </div>
@@ -173,7 +211,9 @@
           <!-- Product Documents Section -->
           <div class="form-card">
             <div class="card-header">
-              <h2 class="card-title">Asset Documents</h2>
+              <h2 class="card-title">
+                Asset Documents
+              </h2>
             </div>
             <div class="card-content">
               <div class="documents-grid">
@@ -184,10 +224,12 @@
                   @click="handleDocumentClick('manual')"
                 >
                   <div class="document-icon blue">
-                    <i class="fas fa-file-alt"></i>
+                    <i class="fas fa-file-alt" />
                   </div>
                   <div class="document-info">
-                    <h3 class="document-title">User Manual</h3>
+                    <h3 class="document-title">
+                      User Manual
+                    </h3>
                     <p class="document-status">
                       {{ manualFileName || 'Upload PDF, DOC, or DOCX' }}
                     </p>
@@ -198,7 +240,7 @@
                     class="remove-doc-btn" 
                     @click.stop="removeDocument('manual')"
                   >
-                    <i class="fas fa-times"></i>
+                    <i class="fas fa-times" />
                   </button>
                 </div>
 
@@ -209,10 +251,12 @@
                   @click="handleDocumentClick('technical')"
                 >
                   <div class="document-icon green">
-                    <i class="fas fa-file-alt"></i>
+                    <i class="fas fa-file-alt" />
                   </div>
                   <div class="document-info">
-                    <h3 class="document-title">Specification Sheet</h3>
+                    <h3 class="document-title">
+                      Specification Sheet
+                    </h3>
                     <p class="document-status">
                       {{ technicalFileName || 'Upload XLS, or XLSX' }}
                     </p>
@@ -223,7 +267,7 @@
                     class="remove-doc-btn" 
                     @click.stop="removeDocument('technical')"
                   >
-                    <i class="fas fa-times"></i>
+                    <i class="fas fa-times" />
                   </button>
                 </div>
 
@@ -234,10 +278,12 @@
                   @click="handleDocumentClick('warranty')"
                 >
                   <div class="document-icon purple">
-                    <i class="fas fa-file-alt"></i>
+                    <i class="fas fa-file-alt" />
                   </div>
                   <div class="document-info">
-                    <h3 class="document-title">Warranty Certificate</h3>
+                    <h3 class="document-title">
+                      Warranty Certificate
+                    </h3>
                     <p class="document-status">
                       {{ warrantyFileName || 'Upload PDF or JPG' }}
                     </p>
@@ -248,23 +294,35 @@
                     class="remove-doc-btn" 
                     @click.stop="removeDocument('warranty')"
                   >
-                    <i class="fas fa-times"></i>
+                    <i class="fas fa-times" />
                   </button>
                 </div>
               </div>
-              <p v-if="documentError" class="error-message">{{ documentError }}</p>
+              <p
+                v-if="documentError"
+                class="error-message"
+              >
+                {{ documentError }}
+              </p>
             </div>
           </div>
 
           <!-- Info Message -->
-          <div v-if="!isEditMode" class="info-alert">
-            <i class="fas fa-info-circle"></i>
+          <div
+            v-if="!isEditMode"
+            class="info-alert"
+          >
+            <i class="fas fa-info-circle" />
             <span>Asset will be created in "draft" status by default</span>
           </div>
 
           <!-- Action Buttons -->
           <div class="form-actions">
-            <button type="button" class="btn btn-secondary" @click="goBack">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              @click="goBack"
+            >
               Cancel
             </button>
             <button 
@@ -272,7 +330,10 @@
               class="btn btn-primary" 
               :disabled="isSubmitting"
             >
-              <span v-if="isSubmitting" class="btn-spinner"></span>
+              <span
+                v-if="isSubmitting"
+                class="btn-spinner"
+              />
               {{ isEditMode ? 'Update' : 'Add Product' }}
             </button>
           </div>
@@ -281,23 +342,35 @@
     </div>
 
     <!-- Add Category Modal -->
-    <div v-if="showAddCategoryModal" class="modal-overlay" @click="showAddCategoryModal = false">
-      <div class="modal-content" @click.stop>
+    <div
+      v-if="showAddCategoryModal"
+      class="modal-overlay"
+      @click="showAddCategoryModal = false"
+    >
+      <div
+        class="modal-content"
+        @click.stop
+      >
         <div class="modal-header">
-          <h3 class="modal-title">Add New Category</h3>
-          <button class="modal-close" @click="showAddCategoryModal = false">
-            <i class="fas fa-times"></i>
+          <h3 class="modal-title">
+            Add New Category
+          </h3>
+          <button
+            class="modal-close"
+            @click="showAddCategoryModal = false"
+          >
+            <i class="fas fa-times" />
           </button>
         </div>
         <div class="modal-body">
           <div class="form-group">
             <label class="form-label">Category Name</label>
             <input 
+              v-model="newCategoryName" 
               type="text" 
               class="form-input" 
-              v-model="newCategoryName" 
               placeholder="Enter category name"
-            />
+            >
           </div>
           
           <div class="form-group">
@@ -310,7 +383,7 @@
                 :class="{ 'selected': selectedIcon === icon }"
                 @click="selectedIcon = icon"
               >
-                <i :class="icon"></i>
+                <i :class="icon" />
               </div>
             </div>
           </div>
@@ -326,19 +399,25 @@
                 :class="{ 'selected': selectedColor === color }"
                 @click="selectedColor = color"
               >
-                <i v-if="selectedColor === color" class="fas fa-check"></i>
+                <i
+                  v-if="selectedColor === color"
+                  class="fas fa-check"
+                />
               </div>
             </div>
           </div>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-secondary" @click="showAddCategoryModal = false">
+          <button
+            class="btn btn-secondary"
+            @click="showAddCategoryModal = false"
+          >
             Cancel
           </button>
           <button 
             class="btn btn-primary" 
-            @click="addCategory" 
-            :disabled="!newCategoryName || isAddingCategory"
+            :disabled="!newCategoryName || isAddingCategory" 
+            @click="addCategory"
           >
             <span v-if="isAddingCategory">Adding...</span>
             <span v-else>Add Category</span>

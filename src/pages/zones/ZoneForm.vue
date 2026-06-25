@@ -1,100 +1,122 @@
 <template>
   <div class="zone-form-container">
-    <v-form ref="formRef" v-model="valid" @submit.prevent="handleSubmit">
-        <v-row>
-          <!-- Zone Name -->
-          <v-col cols="12">
-            <v-text-field
-              v-model="formData.zoneName"
-              label="Zone Name"
-              placeholder="Enter zone name"
-              variant="outlined"
-              density="comfortable"
-              :rules="zoneNameRules"
-              required
-            ></v-text-field>
-          </v-col>
+    <v-form
+      ref="formRef"
+      v-model="valid"
+      @submit.prevent="handleSubmit"
+    >
+      <v-row>
+        <!-- Zone Name -->
+        <v-col cols="12">
+          <v-text-field
+            v-model="formData.zoneName"
+            label="Zone Name"
+            placeholder="Enter zone name"
+            variant="outlined"
+            density="comfortable"
+            :rules="zoneNameRules"
+            required
+          />
+        </v-col>
 
-          <!-- Entry Doors -->
-          <v-col cols="12" md="6">
-            <v-select
-              v-model="selectedEntryDoors"
-              :items="availableDoors"
-              item-title="displayName"
-              item-value="id"
-              label="Entry Doors"
-              placeholder="Select entry doors"
-              variant="outlined"
-              density="comfortable"
-              multiple
-              chips
-              closable-chips
-              :rules="doorsValidationRules"
-            >
-              <template v-slot:chip="{ item, props }">
-                <v-chip
-                  v-bind="props"
-                  :text="item.raw.displayName"
-                  closable
-                ></v-chip>
-              </template>
-            </v-select>
-          </v-col>
+        <!-- Entry Doors -->
+        <v-col
+          cols="12"
+          md="6"
+        >
+          <v-select
+            v-model="selectedEntryDoors"
+            :items="availableDoors"
+            item-title="displayName"
+            item-value="id"
+            label="Entry Doors"
+            placeholder="Select entry doors"
+            variant="outlined"
+            density="comfortable"
+            multiple
+            chips
+            closable-chips
+            :rules="doorsValidationRules"
+          >
+            <template #chip="{ item, props }">
+              <v-chip
+                v-bind="props"
+                :text="item.raw.displayName"
+                closable
+              />
+            </template>
+          </v-select>
+        </v-col>
 
-          <!-- Exit Doors -->
-          <v-col cols="12" md="6">
-            <v-select
-              v-model="selectedExitDoors"
-              :items="availableDoors"
-              item-title="displayName"
-              item-value="id"
-              label="Exit Doors"
-              placeholder="Select exit doors"
-              variant="outlined"
-              density="comfortable"
-              multiple
-              chips
-              closable-chips
-              :rules="doorsValidationRules"
-            >
-              <template v-slot:chip="{ item, props }">
-                <v-chip
-                  v-bind="props"
-                  :text="item.raw.displayName"
-                  closable
-                ></v-chip>
-              </template>
-            </v-select>
-          </v-col>
+        <!-- Exit Doors -->
+        <v-col
+          cols="12"
+          md="6"
+        >
+          <v-select
+            v-model="selectedExitDoors"
+            :items="availableDoors"
+            item-title="displayName"
+            item-value="id"
+            label="Exit Doors"
+            placeholder="Select exit doors"
+            variant="outlined"
+            density="comfortable"
+            multiple
+            chips
+            closable-chips
+            :rules="doorsValidationRules"
+          >
+            <template #chip="{ item, props }">
+              <v-chip
+                v-bind="props"
+                :text="item.raw.displayName"
+                closable
+              />
+            </template>
+          </v-select>
+        </v-col>
 
-          <!-- Overlap Warning -->
-          <v-col cols="12" v-if="hasOverlappingDoors">
-            <v-alert type="warning" variant="tonal" density="compact">
-              <v-icon start>mdi-alert</v-icon>
-              Warning: Some doors are selected in both Entry and Exit doors.
-            </v-alert>
-          </v-col>
+        <!-- Overlap Warning -->
+        <v-col
+          v-if="hasOverlappingDoors"
+          cols="12"
+        >
+          <v-alert
+            type="warning"
+            variant="tonal"
+            density="compact"
+          >
+            <v-icon start>
+              mdi-alert
+            </v-icon>
+            Warning: Some doors are selected in both Entry and Exit doors.
+          </v-alert>
+        </v-col>
 
-          <!-- Action Buttons -->
-          <v-col cols="12" class="d-flex justify-end gap-2">
-            <BaseButton
-              variant="secondary"
-              @click="handleCancel"
-              :disabled="loading"
-            >
-              Cancel
-            </BaseButton>
-            <BaseButton
-              variant="primary"
-              @click="handleSubmit"
-              :loading="loading"
-              :disabled="!valid"
-            >
-              {{ isEditing ? "Update Zone" : "Create Zone" }}
-            </BaseButton>
-          </v-col>
-        </v-row>
-      </v-form>
+        <!-- Action Buttons -->
+        <v-col
+          cols="12"
+          class="d-flex justify-end gap-2"
+        >
+          <BaseButton
+            variant="secondary"
+            :disabled="loading"
+            @click="handleCancel"
+          >
+            Cancel
+          </BaseButton>
+          <BaseButton
+            variant="primary"
+            :loading="loading"
+            :disabled="!valid"
+            @click="handleSubmit"
+          >
+            {{ isEditing ? "Update Zone" : "Create Zone" }}
+          </BaseButton>
+        </v-col>
+      </v-row>
+    </v-form>
   </div>
 </template>
 

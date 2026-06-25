@@ -2,22 +2,32 @@
   <v-app>
     <v-main>
       <v-container fluid>
-        <div v-if="!isFormRoute" class="flex items-center gap-2 mb-6 border-b border-slate-200 dark:border-slate-800 pb-px">
+        <div
+          v-if="!isFormRoute"
+          class="flex items-center gap-2 mb-6 border-b border-slate-200 dark:border-slate-800 pb-px"
+        >
           <button
             v-for="tab in tabs"
             :key="tab.value"
-            @click="activeTab = tab.value; handleTabChange(tab.value)"
             :class="[
               'flex items-center gap-2 px-4 h-10 text-sm font-semibold transition-colors relative',
               activeTab === tab.value 
                 ? 'text-blue-600 dark:text-blue-400' 
                 : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
             ]"
+            @click="activeTab = tab.value; handleTabChange(tab.value)"
           >
-            <v-icon :icon="tab.icon" size="18" :color="activeTab === tab.value ? 'primary' : ''"></v-icon>
+            <v-icon
+              :icon="tab.icon"
+              size="18"
+              :color="activeTab === tab.value ? 'primary' : ''"
+            />
             {{ tab.title }}
             <!-- Active Indicator Line -->
-            <div v-if="activeTab === tab.value" class="absolute bottom-[-1px] left-0 right-0 h-0.5 bg-blue-600 dark:bg-blue-500 rounded-t-full"></div>
+            <div
+              v-if="activeTab === tab.value"
+              class="absolute bottom-[-1px] left-0 right-0 h-0.5 bg-blue-600 dark:bg-blue-500 rounded-t-full"
+            />
           </button>
         </div>
 
@@ -28,7 +38,7 @@
             { 'pt-2': isFormRoute },
           ]"
         >
-          <router-view></router-view>
+          <router-view />
         </div>
       </v-container>
     </v-main>

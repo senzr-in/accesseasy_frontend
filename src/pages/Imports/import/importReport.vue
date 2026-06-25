@@ -2,20 +2,27 @@
 <template>
   <div class="import-container">
     <!-- Modern Header -->
-    <v-toolbar flat class="header-toolbar px-4" height="64">
+    <v-toolbar
+      flat
+      class="header-toolbar px-4"
+      height="64"
+    >
       <div class="d-flex align-center">
         <v-btn
           icon="mdi-arrow-left"
           variant="text"
           class="mr-2"
           @click="$emit('closeAddPage')"
-        ></v-btn>
-        <v-icon color="primary" class="mr-2">mdi-database-import</v-icon>
-        <span class="text-h6 font-weight-medium"
-          >Import Attendance Logs Data</span
+        />
+        <v-icon
+          color="primary"
+          class="mr-2"
         >
+          mdi-database-import
+        </v-icon>
+        <span class="text-h6 font-weight-medium">Import Attendance Logs Data</span>
       </div>
-      <v-spacer></v-spacer>
+      <v-spacer />
       <div class="d-flex align-center">
         <v-btn
           prepend-icon="mdi-close"
@@ -60,7 +67,9 @@
       <div class="content-area pa-8">
         <v-form ref="form">
           <div class="form-header mb-6">
-            <h2 class="text-h6 font-weight-medium">Import Details</h2>
+            <h2 class="text-h6 font-weight-medium">
+              Import Details
+            </h2>
           </div>
 
           <div class="form-grid">
@@ -76,8 +85,13 @@
                 :rules="[(v) => !!v || 'Collection Name is required']"
                 hide-details="auto"
               >
-                <template v-slot:prepend>
-                  <v-icon color="primary" size="20">mdi-database</v-icon>
+                <template #prepend>
+                  <v-icon
+                    color="primary"
+                    size="20"
+                  >
+                    mdi-database
+                  </v-icon>
                 </template>
               </v-select>
             </div>
@@ -97,8 +111,13 @@
                 :rules="[(v) => !!v || 'Branch is required']"
                 hide-details="auto"
               >
-                <template v-slot:prepend>
-                  <v-icon color="primary" size="20">mdi-office-building</v-icon>
+                <template #prepend>
+                  <v-icon
+                    color="primary"
+                    size="20"
+                  >
+                    mdi-office-building
+                  </v-icon>
                 </template>
               </v-autocomplete>
             </div>
@@ -116,7 +135,7 @@
                 class="file-input"
                 hide-details="auto"
               >
-                <template v-slot:selection="{ fileNames }">
+                <template #selection="{ fileNames }">
                   <span class="text-body-2">{{ fileNames.join(", ") }}</span>
                 </template>
               </v-file-input>

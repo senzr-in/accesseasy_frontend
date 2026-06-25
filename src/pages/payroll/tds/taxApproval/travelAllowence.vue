@@ -1,23 +1,50 @@
 <template>
   <v-app>
-    <v-container fluid class="pa-0">
+    <v-container
+      fluid
+      class="pa-0"
+    >
       <!-- Navigation Tabs -->
       <v-card flat>
-        <v-tabs v-model="activeTab" background-color="white" class="border-b">
-          <v-tab value="tds-summary" class="text-none">
-            <v-icon start>mdi-calculator</v-icon>
+        <v-tabs
+          v-model="activeTab"
+          background-color="white"
+          class="border-b"
+        >
+          <v-tab
+            value="tds-summary"
+            class="text-none"
+          >
+            <v-icon start>
+              mdi-calculator
+            </v-icon>
             TDS Summary
           </v-tab>
-          <v-tab value="declare" class="text-none">
-            <v-icon start>mdi-plus</v-icon>
+          <v-tab
+            value="declare"
+            class="text-none"
+          >
+            <v-icon start>
+              mdi-plus
+            </v-icon>
             Declare
           </v-tab>
-          <v-tab value="review" class="text-none">
-            <v-icon start>mdi-check-circle-outline</v-icon>
+          <v-tab
+            value="review"
+            class="text-none"
+          >
+            <v-icon start>
+              mdi-check-circle-outline
+            </v-icon>
             Review
           </v-tab>
-          <v-tab value="tax-regime" class="text-none">
-            <v-icon start>mdi-file-document-outline</v-icon>
+          <v-tab
+            value="tax-regime"
+            class="text-none"
+          >
+            <v-icon start>
+              mdi-file-document-outline
+            </v-icon>
             Tax Regime
           </v-tab>
         </v-tabs>
@@ -26,13 +53,22 @@
       <!-- Main Content -->
       <v-container>
         <div class="d-flex align-center mb-6">
-          <v-icon size="28" class="mr-2">mdi-calculator-variant</v-icon>
-          <h1 class="text-h5 font-weight-bold">TDS Calculations Summary</h1>
+          <v-icon
+            size="28"
+            class="mr-2"
+          >
+            mdi-calculator-variant
+          </v-icon>
+          <h1 class="text-h5 font-weight-bold">
+            TDS Calculations Summary
+          </h1>
         </div>
 
         <!-- Annual Salary Input -->
         <div class="d-flex align-center mb-6">
-          <div class="text-subtitle-1 mr-4">Annual Salary:</div>
+          <div class="text-subtitle-1 mr-4">
+            Annual Salary:
+          </div>
           <v-text-field
             v-model="annualSalary"
             variant="outlined"
@@ -40,78 +76,92 @@
             hide-details
             class="max-width-200"
             @input="calculateTax"
-          ></v-text-field>
+          />
         </div>
 
         <!-- Tax Regime Comparison -->
         <v-row>
           <!-- New Regime -->
-          <v-col cols="12" md="6">
-            <v-card variant="outlined" class="h-100">
+          <v-col
+            cols="12"
+            md="6"
+          >
+            <v-card
+              variant="outlined"
+              class="h-100"
+            >
               <v-card-title class="text-success font-weight-bold">
                 New Regime
               </v-card-title>
               <v-card-text>
                 <v-list>
                   <v-list-item>
-                    <template v-slot:prepend>
-                      <div class="text-body-1">Annual Earnings</div>
+                    <template #prepend>
+                      <div class="text-body-1">
+                        Annual Earnings
+                      </div>
                     </template>
-                    <template v-slot:append>
+                    <template #append>
                       <div class="text-body-1 font-weight-medium">
                         ₹{{ formatCurrency(newRegime.annualEarnings) }}
                       </div>
                     </template>
                   </v-list-item>
 
-                  <v-divider></v-divider>
+                  <v-divider />
 
                   <v-list-item>
-                    <template v-slot:prepend>
-                      <div class="text-body-1">Annual Deductions</div>
+                    <template #prepend>
+                      <div class="text-body-1">
+                        Annual Deductions
+                      </div>
                     </template>
-                    <template v-slot:append>
+                    <template #append>
                       <div class="text-body-1 font-weight-medium">
                         ₹{{ formatCurrency(newRegime.annualDeductions) }}
                       </div>
                     </template>
                   </v-list-item>
 
-                  <v-divider></v-divider>
+                  <v-divider />
 
                   <v-list-item>
-                    <template v-slot:prepend>
-                      <div class="text-body-1">Standard Deduction</div>
+                    <template #prepend>
+                      <div class="text-body-1">
+                        Standard Deduction
+                      </div>
                     </template>
-                    <template v-slot:append>
+                    <template #append>
                       <div class="text-body-1 font-weight-medium">
                         ₹{{ formatCurrency(newRegime.standardDeduction) }}
                       </div>
                     </template>
                   </v-list-item>
 
-                  <v-divider></v-divider>
+                  <v-divider />
 
                   <v-list-item>
-                    <template v-slot:prepend>
-                      <div class="text-body-1">Exemption</div>
+                    <template #prepend>
+                      <div class="text-body-1">
+                        Exemption
+                      </div>
                     </template>
-                    <template v-slot:append>
+                    <template #append>
                       <div class="text-body-1 font-weight-medium">
                         ₹{{ formatCurrency(newRegime.exemption) }}
                       </div>
                     </template>
                   </v-list-item>
 
-                  <v-divider></v-divider>
+                  <v-divider />
 
                   <v-list-item class="bg-grey-lighten-4">
-                    <template v-slot:prepend>
+                    <template #prepend>
                       <div class="text-body-1 font-weight-bold">
                         Taxable Income
                       </div>
                     </template>
-                    <template v-slot:append>
+                    <template #append>
                       <div class="text-body-1 font-weight-bold">
                         ₹{{ formatCurrency(newRegime.taxableIncome) }}
                       </div>
@@ -120,56 +170,62 @@
 
                   <v-list-item
                     class="bg-red-lighten-5 clickable-item"
-                    @click="showTaxBreakdown('new')"
                     style="cursor: pointer"
+                    @click="showTaxBreakdown('new')"
                   >
-                    <template v-slot:prepend>
+                    <template #prepend>
                       <div
                         class="text-body-1 font-weight-bold d-flex align-center"
                       >
                         Tax Liability
-                        <v-icon size="16" class="ml-2 text-grey"
-                          >mdi-information-outline</v-icon
+                        <v-icon
+                          size="16"
+                          class="ml-2 text-grey"
                         >
+                          mdi-information-outline
+                        </v-icon>
                       </div>
                     </template>
-                    <template v-slot:append>
+                    <template #append>
                       <div
                         class="text-body-1 font-weight-bold text-red d-flex align-center"
                       >
                         ₹{{ formatCurrency(newRegime.taxLiability) }}
-                        <v-icon size="16" class="ml-2"
-                          >mdi-chevron-right</v-icon
+                        <v-icon
+                          size="16"
+                          class="ml-2"
                         >
+                          mdi-chevron-right
+                        </v-icon>
                       </div>
                     </template>
                   </v-list-item>
 
-                  <v-divider></v-divider>
+                  <v-divider />
 
                   <v-list-item>
-                    <template v-slot:prepend>
+                    <template #prepend>
                       <div class="text-body-1">
                         Less: Rebate Under Section 87A(a)
                       </div>
                     </template>
-                    <template v-slot:append>
+                    <template #append>
                       <div class="text-body-1 font-weight-medium">
                         ₹{{ formatCurrency(newRegime.rebate) }}
                       </div>
                     </template>
                   </v-list-item>
 
-                  <v-divider></v-divider>
+                  <v-divider />
 
                   <v-list-item>
-                    <template v-slot:prepend>
+                    <template #prepend>
                       <div class="text-body-1">
                         Health and Education Cess (4% of Tax on taxable Income +
                         Surcharge)
                       </div>
                     </template>
-                    <template v-slot:append>
+                    <template #append>
                       <div class="text-body-1 font-weight-medium">
                         ₹{{ formatCurrency(newRegime.cess) }}
                       </div>
@@ -181,72 +237,86 @@
           </v-col>
 
           <!-- Old Regime -->
-          <v-col cols="12" md="6">
-            <v-card variant="outlined" class="h-100">
+          <v-col
+            cols="12"
+            md="6"
+          >
+            <v-card
+              variant="outlined"
+              class="h-100"
+            >
               <v-card-title class="text-primary font-weight-bold">
                 Old Regime
               </v-card-title>
               <v-card-text>
                 <v-list>
                   <v-list-item>
-                    <template v-slot:prepend>
-                      <div class="text-body-1">Annual Earnings</div>
+                    <template #prepend>
+                      <div class="text-body-1">
+                        Annual Earnings
+                      </div>
                     </template>
-                    <template v-slot:append>
+                    <template #append>
                       <div class="text-body-1 font-weight-medium">
                         ₹{{ formatCurrency(oldRegime.annualEarnings) }}
                       </div>
                     </template>
                   </v-list-item>
 
-                  <v-divider></v-divider>
+                  <v-divider />
 
                   <v-list-item>
-                    <template v-slot:prepend>
-                      <div class="text-body-1">Annual Deductions</div>
+                    <template #prepend>
+                      <div class="text-body-1">
+                        Annual Deductions
+                      </div>
                     </template>
-                    <template v-slot:append>
+                    <template #append>
                       <div class="text-body-1 font-weight-medium">
                         ₹{{ formatCurrency(oldRegime.annualDeductions) }}
                       </div>
                     </template>
                   </v-list-item>
 
-                  <v-divider></v-divider>
+                  <v-divider />
 
                   <v-list-item>
-                    <template v-slot:prepend>
-                      <div class="text-body-1">Standard Deduction</div>
+                    <template #prepend>
+                      <div class="text-body-1">
+                        Standard Deduction
+                      </div>
                     </template>
-                    <template v-slot:append>
+                    <template #append>
                       <div class="text-body-1 font-weight-medium">
                         ₹{{ formatCurrency(oldRegime.standardDeduction) }}
                       </div>
                     </template>
                   </v-list-item>
 
-                  <v-divider></v-divider>
+                  <v-divider />
 
                   <v-list-item>
-                    <template v-slot:prepend>
-                      <div class="text-body-1">Exemption</div>
+                    <template #prepend>
+                      <div class="text-body-1">
+                        Exemption
+                      </div>
                     </template>
-                    <template v-slot:append>
+                    <template #append>
                       <div class="text-body-1 font-weight-medium">
                         ₹{{ formatCurrency(oldRegime.exemption) }}
                       </div>
                     </template>
                   </v-list-item>
 
-                  <v-divider></v-divider>
+                  <v-divider />
 
                   <v-list-item class="bg-grey-lighten-4">
-                    <template v-slot:prepend>
+                    <template #prepend>
                       <div class="text-body-1 font-weight-bold">
                         Taxable Income
                       </div>
                     </template>
-                    <template v-slot:append>
+                    <template #append>
                       <div class="text-body-1 font-weight-bold">
                         ₹{{ formatCurrency(oldRegime.taxableIncome) }}
                       </div>
@@ -255,56 +325,62 @@
 
                   <v-list-item
                     class="bg-red-lighten-5 clickable-item"
-                    @click="showTaxBreakdown('old')"
                     style="cursor: pointer"
+                    @click="showTaxBreakdown('old')"
                   >
-                    <template v-slot:prepend>
+                    <template #prepend>
                       <div
                         class="text-body-1 font-weight-bold d-flex align-center"
                       >
                         Tax Liability
-                        <v-icon size="16" class="ml-2 text-grey"
-                          >mdi-information-outline</v-icon
+                        <v-icon
+                          size="16"
+                          class="ml-2 text-grey"
                         >
+                          mdi-information-outline
+                        </v-icon>
                       </div>
                     </template>
-                    <template v-slot:append>
+                    <template #append>
                       <div
                         class="text-body-1 font-weight-bold text-red d-flex align-center"
                       >
                         ₹{{ formatCurrency(oldRegime.taxLiability) }}
-                        <v-icon size="16" class="ml-2"
-                          >mdi-chevron-right</v-icon
+                        <v-icon
+                          size="16"
+                          class="ml-2"
                         >
+                          mdi-chevron-right
+                        </v-icon>
                       </div>
                     </template>
                   </v-list-item>
 
-                  <v-divider></v-divider>
+                  <v-divider />
 
                   <v-list-item>
-                    <template v-slot:prepend>
+                    <template #prepend>
                       <div class="text-body-1">
                         Less: Rebate Under Section 87A(a)
                       </div>
                     </template>
-                    <template v-slot:append>
+                    <template #append>
                       <div class="text-body-1 font-weight-medium">
                         ₹{{ formatCurrency(oldRegime.rebate) }}
                       </div>
                     </template>
                   </v-list-item>
 
-                  <v-divider></v-divider>
+                  <v-divider />
 
                   <v-list-item>
-                    <template v-slot:prepend>
+                    <template #prepend>
                       <div class="text-body-1">
                         Health and Education Cess (4% of Tax on taxable Income +
                         Surcharge)
                       </div>
                     </template>
-                    <template v-slot:append>
+                    <template #append>
                       <div class="text-body-1 font-weight-medium">
                         ₹{{ formatCurrency(oldRegime.cess) }}
                       </div>
@@ -317,16 +393,25 @@
         </v-row>
 
         <!-- Tax Breakdown Dialog -->
-        <v-dialog v-model="showBreakdownDialog" max-width="600px">
+        <v-dialog
+          v-model="showBreakdownDialog"
+          max-width="600px"
+        >
           <v-card>
             <v-card-title class="d-flex align-center">
-              <v-icon class="mr-2">mdi-calculator-variant</v-icon>
+              <v-icon class="mr-2">
+                mdi-calculator-variant
+              </v-icon>
               Tax Liability Breakdown -
               {{ selectedRegime === "new" ? "New Regime" : "Old Regime" }}
             </v-card-title>
 
             <v-card-text>
-              <v-alert type="info" variant="tonal" class="mb-4">
+              <v-alert
+                type="info"
+                variant="tonal"
+                class="mb-4"
+              >
                 <div class="text-subtitle-2">
                   Total Taxable Income: ₹{{
                     formatCurrency(
@@ -350,17 +435,34 @@
               <v-table>
                 <thead>
                   <tr>
-                    <th class="text-left">Tax Slab</th>
-                    <th class="text-left">Rate</th>
-                    <th class="text-left">Taxable Amount</th>
-                    <th class="text-left">Tax Amount</th>
-                    <th class="text-left">% of Total Tax</th>
+                    <th class="text-left">
+                      Tax Slab
+                    </th>
+                    <th class="text-left">
+                      Rate
+                    </th>
+                    <th class="text-left">
+                      Taxable Amount
+                    </th>
+                    <th class="text-left">
+                      Tax Amount
+                    </th>
+                    <th class="text-left">
+                      % of Total Tax
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr v-for="(item, index) in breakdownData" :key="index">
-                    <td class="text-body-2">{{ item.slab }}</td>
-                    <td class="text-body-2">{{ item.rate }}%</td>
+                  <tr
+                    v-for="(item, index) in breakdownData"
+                    :key="index"
+                  >
+                    <td class="text-body-2">
+                      {{ item.slab }}
+                    </td>
+                    <td class="text-body-2">
+                      {{ item.rate }}%
+                    </td>
                     <td class="text-body-2">
                       ₹{{ formatCurrency(item.taxableAmount) }}
                     </td>
@@ -386,7 +488,7 @@
                 </tbody>
               </v-table>
 
-              <v-divider class="my-4"></v-divider>
+              <v-divider class="my-4" />
 
               <div class="text-caption text-grey">
                 * Surcharge and cess are calculated separately and added to the
@@ -395,10 +497,13 @@
             </v-card-text>
 
             <v-card-actions>
-              <v-spacer></v-spacer>
-              <v-btn color="primary" @click="showBreakdownDialog = false"
-                >Close</v-btn
+              <v-spacer />
+              <v-btn
+                color="primary"
+                @click="showBreakdownDialog = false"
               >
+                Close
+              </v-btn>
             </v-card-actions>
           </v-card>
         </v-dialog>

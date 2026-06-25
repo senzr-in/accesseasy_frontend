@@ -9,7 +9,7 @@
         variant="outlined"
         clearable
         class="mb-4"
-      ></v-text-field>
+      />
 
       <!-- Employee Task Summary Cards -->
       <v-row>
@@ -22,7 +22,10 @@
         >
           <v-card class="elevation-2 mb-4">
             <v-card-title class="d-flex align-center">
-              <v-avatar color="primary" class="mr-3">
+              <v-avatar
+                color="primary"
+                class="mr-3"
+              >
                 {{ getInitials(employee.assignedUser.first_name) }}
               </v-avatar>
               <div>
@@ -44,19 +47,25 @@
                   <div class="text-h6 text-orange">
                     {{ employee.taskCounts.inProgress || 0 }}
                   </div>
-                  <div class="text-caption text-grey">In Progress</div>
+                  <div class="text-caption text-grey">
+                    In Progress
+                  </div>
                 </v-col>
                 <v-col cols="4">
                   <div class="text-h6 text-red">
                     {{ employee.taskCounts.pending || 0 }}
                   </div>
-                  <div class="text-caption text-grey">Pending</div>
+                  <div class="text-caption text-grey">
+                    Pending
+                  </div>
                 </v-col>
                 <v-col cols="4">
                   <div class="text-h6 text-green">
                     {{ employee.taskCounts.completed || 0 }}
                   </div>
-                  <div class="text-caption text-grey">Completed</div>
+                  <div class="text-caption text-grey">
+                    Completed
+                  </div>
                 </v-col>
               </v-row>
 
@@ -72,7 +81,9 @@
                   :key="status"
                   cols="6"
                 >
-                  <div class="text-body-2 text-blue">{{ count }}</div>
+                  <div class="text-body-2 text-blue">
+                    {{ count }}
+                  </div>
                   <div class="text-caption text-grey">
                     {{ formatStatus(status) }}
                   </div>
@@ -94,21 +105,42 @@
       </v-row>
 
       <!-- Loading State -->
-      <v-row v-if="loading" class="justify-center">
-        <v-col cols="12" class="text-center">
+      <v-row
+        v-if="loading"
+        class="justify-center"
+      >
+        <v-col
+          cols="12"
+          class="text-center"
+        >
           <v-progress-circular
             indeterminate
             color="primary"
-          ></v-progress-circular>
-          <div class="mt-2">Loading employees and task counts...</div>
+          />
+          <div class="mt-2">
+            Loading employees and task counts...
+          </div>
         </v-col>
       </v-row>
 
       <!-- Empty State -->
-      <v-row v-if="!loading && employees.length === 0" class="justify-center">
-        <v-col cols="12" class="text-center">
-          <v-icon size="64" color="grey">mdi-account-off</v-icon>
-          <h3 class="text-grey mt-2">No employees found</h3>
+      <v-row
+        v-if="!loading && employees.length === 0"
+        class="justify-center"
+      >
+        <v-col
+          cols="12"
+          class="text-center"
+        >
+          <v-icon
+            size="64"
+            color="grey"
+          >
+            mdi-account-off
+          </v-icon>
+          <h3 class="text-grey mt-2">
+            No employees found
+          </h3>
         </v-col>
       </v-row>
     </v-container>

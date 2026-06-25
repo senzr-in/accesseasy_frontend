@@ -37,23 +37,29 @@
     </button> -->
 
     <!-- Main Content -->
-    <div class="main-content" :class="{ 'full-width': !showFilters }">
+    <div
+      class="main-content"
+      :class="{ 'full-width': !showFilters }"
+    >
       <data-table-wrapper
         v-if="!showTabs"
-        v-model:searchQuery="search"
+        v-model:search-query="search"
         :search-placeholder="'Search Logs...'"
         :show-search="true"
         :has-error="showError"
         wrapper-class="logs-table-wrapper"
       >
         <template #toolbar-actions>
-          <div class="d-flex align-center" style="gap: 8px">
+          <div
+            class="d-flex align-center"
+            style="gap: 8px"
+          >
             <BaseButton
               v-if="userRole === 'Admin'"
               variant="primary"
               size="md"
               text="Create Penalties"
-              :leftIcon="Plus"
+              :left-icon="Plus"
               @click="openDialog"
             />
           </div>
@@ -82,7 +88,7 @@
             title="No logs data found"
             message="Try adjusting your filters or check back later"
             :primary-action="{ text: 'Clear Filters', icon: 'X' }"
-            @primaryAction="clearFilters"
+            @primary-action="clearFilters"
           />
         </template>
 
@@ -96,7 +102,7 @@
             :row-clickable="true"
             item-key="id"
             @sort="handleSort"
-            @rowClick="showTemplateConfig"
+            @row-click="showTemplateConfig"
           >
             <!-- 💼 Salary Setting Table Custom Cells -->
             <template #cell-configName="{ item }">
@@ -146,27 +152,30 @@
         </template>
 
         <!-- Pagination Slot -->
-        <template v-slot:pagination>
+        <template #pagination>
           <CustomPagination
             v-model:page="page"
-            v-model:itemsPerPage="itemsPerPage"
+            v-model:items-per-page="itemsPerPage"
             :total-items="totalItems"
             @update:page="handlePageChange"
-            @update:itemsPerPage="handleItemsPerPageChange"
+            @update:items-per-page="handleItemsPerPageChange"
           />
         </template>
       </data-table-wrapper>
       <AttendancePolicyTabs
         v-if="selectedTemplate"
-        :selectedConfig="selectedTemplate"
-        :policyPatchId="selectedID"
-        @save-changes="handleSaveChanges"
-        :showSnackbar="showSnackbar"
-        @close="handleClose"
         ref="policyTabs"
+        :selected-config="selectedTemplate"
+        :policy-patch-id="selectedID"
+        :show-snackbar="showSnackbar"
+        @save-changes="handleSaveChanges"
+        @close="handleClose"
       />
     </div>
-    <v-dialog v-model="createDialog" max-width="500px">
+    <v-dialog
+      v-model="createDialog"
+      max-width="500px"
+    >
       <v-card>
         <v-card-title>Create New Category</v-card-title>
         <v-card-text>
@@ -176,28 +185,38 @@
             variant="outlined"
             required
             :rules="[(v) => !!v || 'Category name is required']"
-          ></v-text-field>
-          <v-alert v-if="customTemplates.length >= 10" type="warning" dense>
+          />
+          <v-alert
+            v-if="customTemplates.length >= 10"
+            type="warning"
+            dense
+          >
             Maximum number of categories (10) reached. You cannot create more
             categories.
           </v-alert>
         </v-card-text>
         <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="error" text @click="createDialog = false">Cancel</v-btn>
+          <v-spacer />
           <v-btn
-            @click="saveTemplate"
+            color="error"
+            text
+            @click="createDialog = false"
+          >
+            Cancel
+          </v-btn>
+          <v-btn
             :loading="isSaving"
             :disabled="isSaving"
             color="primary"
             class="save-button"
+            @click="saveTemplate"
           >
-            <template v-slot:loader>
+            <template #loader>
               <v-progress-circular
                 indeterminate
                 size="20"
                 width="2"
-              ></v-progress-circular>
+              />
             </template>
             {{ isSaving ? "Saving..." : "Save Changes" }}
           </v-btn>

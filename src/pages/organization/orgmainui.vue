@@ -1,11 +1,14 @@
 <template>
   <div class="main-container">
     <!-- Main Content -->
-    <div class="tasks-container" :class="{ 'sidebar-open': showSidebar }">
+    <div
+      class="tasks-container"
+      :class="{ 'sidebar-open': showSidebar }"
+    >
       <DataTableWrapper
         :search-query="searchQuery"
-        @update:searchQuery="debouncedSearch"
         search-placeholder="Search Clients & Individual..."
+        @update:search-query="debouncedSearch"
       >
         <!-- Toolbar Actions -->
         <template #toolbar-actions>
@@ -47,7 +50,7 @@
             <BaseButton
               variant="primary"
               text="Create"
-              :leftIcon="Plus"
+              :left-icon="Plus"
               width="100px"
               @click="toggleSidebar"
             />
@@ -117,7 +120,7 @@
 
             <template #cell-organization="{ item }">
               <div class="organization-info">
-                <div class="organization-avatar"></div>
+                <div class="organization-avatar" />
                 <div class="organization-details">
                   <span class="organization-name">{{ item.orgName }}</span>
                 </div>
@@ -144,7 +147,7 @@
             <template #cell-contactPerson="{ item }">
               <span class="org-gst">{{
                 item.contactPerson ||
-                (item.orgType === "contact" ? "N/A" : "No Contact Person")
+                  (item.orgType === "contact" ? "N/A" : "No Contact Person")
               }}</span>
             </template>
 
@@ -169,17 +172,20 @@
         <template #pagination>
           <CustomPagination
             v-model:page="currentPage"
-            v-model:itemsPerPage="itemsPerPage"
+            v-model:items-per-page="itemsPerPage"
             :total-items="totalItems"
             @update:page="handlePageChange"
-            @update:itemsPerPage="handleItemsPerPageChange"
+            @update:items-per-page="handleItemsPerPageChange"
           />
         </template>
       </DataTableWrapper>
     </div>
 
     <!-- Sidebar for AddClient -->
-    <div class="sidebar" :class="{ active: showSidebar }">
+    <div
+      class="sidebar"
+      :class="{ active: showSidebar }"
+    >
       <div class="sidebar-contet">
         <AddClient
           v-if="sidebarMode === 'add'"
@@ -188,7 +194,7 @@
         />
         <EditClient
           v-if="sidebarMode === 'edit'"
-          :organizationId="selectedOrganizationId"
+          :organization-id="selectedOrganizationId"
           @close="toggleSidebar"
           @saved="handleEditSuccess"
         />

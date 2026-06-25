@@ -1,29 +1,38 @@
 <template>
   <div class="regularization-container">
-    <div class="main-content" :class="{ 'with-filter': showFilters }">
+    <div
+      class="main-content"
+      :class="{ 'with-filter': showFilters }"
+    >
       <!-- Tab Navigation -->
       <div class="d-flex align-center py-2 px-4">
         <div class="left-tabs">
           <button
-            @click="switchTab('activity')"
             :class="{ active: activeLeftTab === 'activity' }"
+            @click="switchTab('activity')"
           >
-            <i class="fas fa-clock"></i>
+            <i class="fas fa-clock" />
             Recent Activity
           </button>
           <button
-            @click="switchTab('history')"
             :class="{ active: activeLeftTab === 'history' }"
+            @click="switchTab('history')"
           >
-            <i class="fas fa-history"></i>
+            <i class="fas fa-history" />
             History
           </button>
         </div>
-        <v-spacer></v-spacer>
+        <v-spacer />
       </div>
 
-      <div v-if="tabLoading" class="d-flex justify-center align-center py-2">
-        <v-progress-linear indeterminate color="black"></v-progress-linear>
+      <div
+        v-if="tabLoading"
+        class="d-flex justify-center align-center py-2"
+      >
+        <v-progress-linear
+          indeterminate
+          color="black"
+        />
       </div>
 
       <!-- Table Container -->
@@ -69,9 +78,16 @@
                 </v-icon>
                 {{ formatStatus(item.status) }}
               </span>
-              <div v-else class="d-flex align-center">
+              <div
+                v-else
+                class="d-flex align-center"
+              >
                 <span class="status-chip status-requested compact">
-                  <v-icon size="small" class="me-1" color="amber-darken-3">
+                  <v-icon
+                    size="small"
+                    class="me-1"
+                    color="amber-darken-3"
+                  >
                     mdi-clock-outline
                   </v-icon>
                   Requested
@@ -83,7 +99,12 @@
                     class="me-2 status-btn compact"
                     @click.stop="updateStatus(item.id, 'approved')"
                   >
-                    <v-icon size="x-small" start>mdi-check</v-icon>
+                    <v-icon
+                      size="x-small"
+                      start
+                    >
+                      mdi-check
+                    </v-icon>
                     Accept
                   </v-btn>
                   <v-btn
@@ -92,7 +113,12 @@
                     class="status-btn compact"
                     @click.stop="updateStatus(item.id, 'declined')"
                   >
-                    <v-icon size="x-small" start>mdi-close</v-icon>
+                    <v-icon
+                      size="x-small"
+                      start
+                    >
+                      mdi-close
+                    </v-icon>
                     Reject
                   </v-btn>
                 </div>
@@ -103,7 +129,9 @@
           <!-- Empty state -->
           <template #empty-state>
             <div class="empty-content">
-              <div class="empty-icon">📋</div>
+              <div class="empty-icon">
+                📋
+              </div>
               <h3>No regularization requests found</h3>
               <p>There are no regularization requests to display.</p>
             </div>
@@ -113,11 +141,11 @@
 
       <CustomPagination
         v-model:page="page"
-        v-model:itemsPerPage="itemsPerPage"
+        v-model:items-per-page="itemsPerPage"
         :total-items="totalItems"
         :is-searching="!!search"
         @update:page="handlePageChange"
-        @update:itemsPerPage="handleItemsPerPageChange"
+        @update:items-per-page="handleItemsPerPageChange"
       />
     </div>
   </div>

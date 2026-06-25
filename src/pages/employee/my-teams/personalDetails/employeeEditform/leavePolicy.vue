@@ -2,18 +2,24 @@
   <div class="leave-policy">
     <v-container v-if="loading">
       <v-row>
-        <v-col cols="12" class="text-center">
+        <v-col
+          cols="12"
+          class="text-center"
+        >
           <v-progress-circular
             indeterminate
             color="#059367"
-          ></v-progress-circular>
+          />
           <p>Loading leave details...</p>
         </v-col>
       </v-row>
     </v-container>
-    <v-container v-else class="pa-4">
+    <v-container
+      v-else
+      class="pa-4"
+    >
       <div class="d-flex justify-space-between align-center mb-4">
-        <h3></h3>
+        <h3 />
         <div class="d-flex gap-2">
           <BaseButton
             v-if="!isEditMode"
@@ -36,18 +42,18 @@
           </template>
         </div>
       </div>
-      <br />
+      <br>
       <DataTable
         :items="enabledLeaves"
         :columns="columns"
-        :selectedItems="selectedItems"
-        :showSelection="false"
-        :sortBy="sortBy"
-        :sortDirection="sortDirection"
+        :selected-items="selectedItems"
+        :show-selection="false"
+        :sort-by="sortBy"
+        :sort-direction="sortDirection"
         :expandable="false"
-        itemKey="leaveName"
-        @update:sortBy="sortBy = $event"
-        @update:sortDirection="sortDirection = $event"
+        item-key="leaveName"
+        @update:sort-by="sortBy = $event"
+        @update:sort-direction="sortDirection = $event"
         @sort="handleSort"
       >
         <!-- Custom Cell Content for leaveName -->
@@ -69,8 +75,8 @@
             variant="outlined"
             hide-details
             style="max-width: 80px"
-            @blur="finishEditing(item)"
             :disabled="!item.isAssigned"
+            @blur="finishEditing(item)"
           />
           <span v-else>{{ item.leaveConfig?.days || 0 }}</span>
         </template>
@@ -140,19 +146,23 @@
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-check-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-check-circle
+        </v-icon>
         {{ successMessage }}
       </div>
     </v-snackbar>
     <v-snackbar
-      class="errormessge"
       v-model="showErrorSnackbar"
+      class="errormessge"
       color="error"
       timeout="2000"
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-alert-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-alert-circle
+        </v-icon>
         {{ errorMessage }}
       </div>
     </v-snackbar>

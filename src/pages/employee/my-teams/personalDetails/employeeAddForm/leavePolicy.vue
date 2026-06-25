@@ -1,7 +1,7 @@
 <template>
   <div class="form-section">
     <h3>Leave Policy</h3>
-    <br />
+    <br>
 
     <v-card v-if="leavePolicies.length > 0">
       <v-card-text>
@@ -12,7 +12,7 @@
             :title="policy.leaveName"
             :subtitle="`${policy.leaveConfig?.days || 0}`"
           >
-            <template v-slot:append>
+            <template #append>
               <v-switch
                 v-model="policy.isActive"
                 color="primary"
@@ -20,9 +20,9 @@
                 inset
                 class="mr-3"
                 :label="policy.isActive ? 'Assigned' : 'Not assigned'"
-                @change="updateAssignedLeaves(policy)"
                 :loading="policy.loading"
-              ></v-switch>
+                @change="updateAssignedLeaves(policy)"
+              />
 
               <v-chip
                 v-if="policy.leaveConfig?.carryForward > 0"
@@ -46,7 +46,12 @@
       </v-card-text>
     </v-card>
 
-    <v-alert v-else type="info" variant="tonal" class="mt-4">
+    <v-alert
+      v-else
+      type="info"
+      variant="tonal"
+      class="mt-4"
+    >
       No active leave policies found for this tenant.
     </v-alert>
   </div>

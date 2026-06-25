@@ -1,16 +1,20 @@
 <template>
   <v-container fluid>
     <!-- Routed Component with Event Emission -->
-    <v-card class="content-wrapper" elevation="0">
+    <v-card
+      class="content-wrapper"
+      elevation="0"
+    >
       <router-view v-slot="{ Component }">
         <component
           :is="Component"
-          @showAddPage="handleShowAdd"
-          @showEditPage="handleShowEdit"
-          @closeAddPage="handleClose"
-          @closeEditPage="handleClose"
-        /> </router-view
-    ></v-card>
+          @show-add-page="handleShowAdd"
+          @show-edit-page="handleShowEdit"
+          @close-add-page="handleClose"
+          @close-edit-page="handleClose"
+        />
+      </router-view>
+    </v-card>
   </v-container>
 </template>
 

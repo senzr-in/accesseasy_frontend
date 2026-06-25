@@ -23,7 +23,7 @@
           }
         "
       >
-        <template v-slot:top>
+        <template #top>
           <div class="d-flex align-center py-2 px-4">
             <v-text-field
               v-model="search"
@@ -33,10 +33,16 @@
               variant="outlined"
               class="search-field"
               hide-details
-            ></v-text-field>
-            <v-spacer></v-spacer>
-            <v-btn color="black" class="ms-2" @click="showAddDoorForm">
-              <v-icon start>mdi-plus</v-icon>
+            />
+            <v-spacer />
+            <v-btn
+              color="black"
+              class="ms-2"
+              @click="showAddDoorForm"
+            >
+              <v-icon start>
+                mdi-plus
+              </v-icon>
               Add Door
             </v-btn>
           </div>
@@ -45,11 +51,11 @@
 
       <CustomPagination
         :page="page"
-        :itemsPerPage="itemsPerPage"
+        :items-per-page="itemsPerPage"
         :total-items="totalItems"
         :is-searching="!!search"
         @update:page="handlePageChange"
-        @update:itemsPerPage="handleItemsPerPageChange"
+        @update:items-per-page="handleItemsPerPageChange"
       />
     </div>
 

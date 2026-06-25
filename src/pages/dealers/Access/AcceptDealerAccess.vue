@@ -2,60 +2,93 @@
   <div class="dealer-container">
     <!-- Summary Cards -->
     <div class="summary-cards">
-      <v-card class="summary-card" elevation="1">
+      <v-card
+        class="summary-card"
+        elevation="1"
+      >
         <div class="card-content">
           <div class="card-icon blue">
             <v-icon>mdi-account-group</v-icon>
           </div>
           <div class="card-info">
-            <div class="card-label">Total Dealers</div>
-            <div class="card-value">{{ totalDealersCount }}</div>
+            <div class="card-label">
+              Total Dealers
+            </div>
+            <div class="card-value">
+              {{ totalDealersCount }}
+            </div>
           </div>
         </div>
       </v-card>
 
-      <v-card class="summary-card" elevation="1">
+      <v-card
+        class="summary-card"
+        elevation="1"
+      >
         <div class="card-content">
           <div class="card-icon green">
             <v-icon>mdi-check-circle</v-icon>
           </div>
           <div class="card-info">
-            <div class="card-label">Approved Dealers</div>
-            <div class="card-value">{{ approvedDealersCount }}</div>
+            <div class="card-label">
+              Approved Dealers
+            </div>
+            <div class="card-value">
+              {{ approvedDealersCount }}
+            </div>
           </div>
         </div>
       </v-card>
 
-      <v-card class="summary-card" elevation="1">
+      <v-card
+        class="summary-card"
+        elevation="1"
+      >
         <div class="card-content">
           <div class="card-icon orange">
             <v-icon>mdi-clock-outline</v-icon>
           </div>
           <div class="card-info">
-            <div class="card-label">Pending Requests</div>
-            <div class="card-value">{{ pendingDealersCount }}</div>
+            <div class="card-label">
+              Pending Requests
+            </div>
+            <div class="card-value">
+              {{ pendingDealersCount }}
+            </div>
           </div>
         </div>
       </v-card>
 
-      <v-card class="summary-card" elevation="1">
+      <v-card
+        class="summary-card"
+        elevation="1"
+      >
         <div class="card-content">
           <div class="card-icon red">
             <v-icon>mdi-close-circle</v-icon>
           </div>
           <div class="card-info">
-            <div class="card-label">Rejected Dealers</div>
-            <div class="card-value">{{ rejectedDealersCount }}</div>
+            <div class="card-label">
+              Rejected Dealers
+            </div>
+            <div class="card-value">
+              {{ rejectedDealersCount }}
+            </div>
           </div>
         </div>
       </v-card>
     </div>
 
     <!-- Dealer Details Section -->
-    <v-card class="dealer-details-card" elevation="1">
+    <v-card
+      class="dealer-details-card"
+      elevation="1"
+    >
       <div class="card-header">
         <div class="header-left">
-          <h2 class="header-title">Dealer Access Management</h2>
+          <h2 class="header-title">
+            Dealer Access Management
+          </h2>
           <v-text-field
             v-model="search"
             label="Search dealers..."
@@ -64,7 +97,7 @@
             variant="outlined"
             hide-details
             class="search-field-inline"
-          ></v-text-field>
+          />
         </div>
         <div class="header-actions">
           <v-btn
@@ -89,18 +122,21 @@
             variant="outlined"
             prepend-icon="mdi-filter"
             class="me-2"
-            @click="toggleFilters"
             :class="{ 'position-relative': hasActiveFilters }"
+            @click="toggleFilters"
           >
             Filters
-            <div v-if="hasActiveFilters" class="filter-indicator"></div>
+            <div
+              v-if="hasActiveFilters"
+              class="filter-indicator"
+            />
           </v-btn>
           <v-btn
             color="primary"
             variant="outlined"
             prepend-icon="mdi-refresh"
-            @click="refreshData"
             :loading="loading"
+            @click="refreshData"
           >
             Refresh
           </v-btn>
@@ -117,9 +153,14 @@
           class="dealer-table"
           hide-default-footer
         >
-          <template v-slot:item.tenantInfo="{ item }">
+          <template #item.tenantInfo="{ item }">
             <div class="tenant-info">
-              <v-icon class="tenant-icon" color="primary">mdi-domain</v-icon>
+              <v-icon
+                class="tenant-icon"
+                color="primary"
+              >
+                mdi-domain
+              </v-icon>
               <div>
                 <div class="tenant-name">
                   {{
@@ -135,11 +176,11 @@
             </div>
           </template>
 
-          <template v-slot:item.contactPerson="{ item }">
+          <template #item.contactPerson="{ item }">
             <div>{{ item.requestedBy?.assignedUser?.first_name || "N/A" }}</div>
           </template>
 
-          <template v-slot:item.status="{ item }">
+          <template #item.status="{ item }">
             <div class="status-container">
               <v-chip
                 size="small"
@@ -152,25 +193,30 @@
             </div>
           </template>
 
-          <template v-slot:item.email="{ item }">
+          <template #item.email="{ item }">
             {{ item.requestedBy?.assignedUser?.email || "N/A" }}
           </template>
 
-          <template v-slot:item.phone="{ item }">
+          <template #item.phone="{ item }">
             {{ item.requestedBy?.assignedUser?.phone || "N/A" }}
           </template>
 
-          <template v-slot:item.role="{ item }">
-            <v-chip size="small" color="secondary" variant="tonal" label>
+          <template #item.role="{ item }">
+            <v-chip
+              size="small"
+              color="secondary"
+              variant="tonal"
+              label
+            >
               {{ item.requestedBy?.assignedUser?.role?.name || "N/A" }}
             </v-chip>
           </template>
 
-          <template v-slot:item.created="{ item }">
+          <template #item.created="{ item }">
             {{ formatDate(item.date_created) }}
           </template>
 
-          <template v-slot:item.actions="{ item }">
+          <template #item.actions="{ item }">
             <div class="actions-cell">
               <v-btn
                 icon
@@ -204,7 +250,12 @@
                 <v-icon>mdi-close</v-icon>
               </v-btn>
 
-              <v-btn icon size="small" color="secondary" variant="text">
+              <v-btn
+                icon
+                size="small"
+                color="secondary"
+                variant="text"
+              >
                 <v-icon>mdi-cog</v-icon>
               </v-btn>
             </div>
@@ -229,9 +280,7 @@
             >
               <v-icon>mdi-chevron-left</v-icon>
             </v-btn>
-            <span class="text-body-2"
-              >{{ page }} of {{ Math.ceil(totalItems / itemsPerPage) }}</span
-            >
+            <span class="text-body-2">{{ page }} of {{ Math.ceil(totalItems / itemsPerPage) }}</span>
             <v-btn
               icon
               size="small"
@@ -247,11 +296,19 @@
 
     <!-- Right Filter Panel -->
     <transition name="slide">
-      <div v-if="showFilters" class="filter-panel">
+      <div
+        v-if="showFilters"
+        class="filter-panel"
+      >
         <div class="filter-header">
           <div class="d-flex align-center justify-space-between px-4">
-            <h3 class="text-h6 font-weight-medium">Advanced Filters</h3>
-            <v-btn icon @click="toggleFilters">
+            <h3 class="text-h6 font-weight-medium">
+              Advanced Filters
+            </h3>
+            <v-btn
+              icon
+              @click="toggleFilters"
+            >
               <v-icon>mdi-close</v-icon>
             </v-btn>
           </div>
@@ -268,7 +325,7 @@
             variant="outlined"
             class="mb-4"
             @update:model-value="handleFilterChange"
-          ></v-select>
+          />
 
           <v-select
             v-model="filters.role"
@@ -280,7 +337,7 @@
             variant="outlined"
             class="mb-4"
             @update:model-value="handleFilterChange"
-          ></v-select>
+          />
 
           <v-select
             v-model="filters.tenant"
@@ -292,13 +349,21 @@
             variant="outlined"
             class="mb-4"
             @update:model-value="handleFilterChange"
-          ></v-select>
+          />
 
           <div class="filter-actions">
-            <v-btn color="error" variant="text" @click="clearFilters">
+            <v-btn
+              color="error"
+              variant="text"
+              @click="clearFilters"
+            >
               Clear
             </v-btn>
-            <v-btn color="primary" @click="applyFilters" class="ms-2">
+            <v-btn
+              color="primary"
+              class="ms-2"
+              @click="applyFilters"
+            >
               Apply
             </v-btn>
           </div>
@@ -314,8 +379,14 @@
       location="top right"
     >
       {{ toast.message }}
-      <template v-slot:actions>
-        <v-btn color="white" variant="text" @click="hideToast"> Close </v-btn>
+      <template #actions>
+        <v-btn
+          color="white"
+          variant="text"
+          @click="hideToast"
+        >
+          Close
+        </v-btn>
       </template>
     </v-snackbar>
   </div>

@@ -14,7 +14,7 @@
           hide-details
           clearable
           style="width: 200px; margin-right: 16px;"
-        ></v-select>
+        />
         <v-select
           v-model="gridSize"
           :items="[1, 2, 3, 4]"
@@ -23,7 +23,7 @@
           variant="outlined"
           hide-details
           style="width: 120px"
-        ></v-select>
+        />
       </div>
     </div>
 
@@ -39,13 +39,22 @@
             <v-card-title class="text-subtitle-2 py-1 px-2 d-flex justify-space-between bg-grey-lighten-4">
               <span>{{ camera.name }}</span>
               <div class="d-flex align-center">
-                <span class="text-caption text-grey mr-2" v-if="camera.locationName">{{ camera.locationName }}</span>
-                <v-icon size="small" :color="camera.status === 'online' ? 'success' : 'error'">
+                <span
+                  v-if="camera.locationName"
+                  class="text-caption text-grey mr-2"
+                >{{ camera.locationName }}</span>
+                <v-icon
+                  size="small"
+                  :color="camera.status === 'online' ? 'success' : 'error'"
+                >
                   mdi-circle
                 </v-icon>
               </div>
             </v-card-title>
-            <div class="feed-container bg-black" style="aspect-ratio: 16/9; position: relative;">
+            <div
+              class="feed-container bg-black"
+              style="aspect-ratio: 16/9; position: relative;"
+            >
               <!-- Show video when camera is online -->
               <video 
                 v-if="camera.status === 'online' && camera.videoUrl"
@@ -56,7 +65,7 @@
                 playsinline
                 class="camera-video"
                 style="width: 100%; height: 100%; object-fit: cover;"
-              ></video>
+              />
               <!-- Show placeholder when camera is offline -->
               <div 
                 v-else
@@ -64,20 +73,34 @@
                 style="width: 100%; height: 100%;"
               >
                 <div class="text-center">
-                  <v-icon color="grey-darken-2" size="48">mdi-cctv</v-icon>
-                  <div class="text-grey text-caption mt-1">Live Feed Unavailable</div>
+                  <v-icon
+                    color="grey-darken-2"
+                    size="48"
+                  >
+                    mdi-cctv
+                  </v-icon>
+                  <div class="text-grey text-caption mt-1">
+                    Live Feed Unavailable
+                  </div>
                 </div>
               </div>
             </div>
             <v-card-actions class="py-1">
-              <v-spacer></v-spacer>
-              <v-btn size="small" variant="text" icon="mdi-fullscreen"></v-btn>
+              <v-spacer />
+              <v-btn
+                size="small"
+                variant="text"
+                icon="mdi-fullscreen"
+              />
             </v-card-actions>
           </v-card>
         </v-col>
       </v-row>
       
-      <div v-if="filteredCameras.length === 0" class="text-center mt-8 text-grey">
+      <div
+        v-if="filteredCameras.length === 0"
+        class="text-center mt-8 text-grey"
+      >
         No cameras found for the selected location.
       </div>
     </div>

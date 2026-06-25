@@ -1,19 +1,27 @@
 <template>
   <div class="flex min-h-screen w-full bg-[#f8fafc] dark:bg-[#020617] text-slate-900 dark:text-slate-100 flex-col lg:flex-row relative overflow-hidden font-sans">
-    
     <!-- Left Side: Marketing Content -->
     <div class="flex-1 flex flex-col justify-center px-6 py-8 lg:px-14 lg:py-6 bg-white/10 dark:bg-black/20 backdrop-blur-md border-r border-slate-200 dark:border-white/10 relative overflow-hidden border-b lg:border-b-0">
       <!-- Grid Background Pattern -->
       <div 
         class="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none"
         style="background-image: radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0); background-size: 24px 24px;"
-      ></div>
+      />
 
       <div class="max-w-xl relative z-10 animate-fade-in-left">
         <div class="flex items-center gap-3 mb-6">
           <div class="h-10 w-10 rounded-xl bg-blue-600/20 flex items-center justify-center border border-blue-600/20 shadow-xl shadow-blue-600/10">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-blue-600">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="w-6 h-6 text-blue-600"
+            >
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
             </svg>
           </div>
           <div class="flex flex-col">
@@ -23,7 +31,7 @@
         </div>
 
         <h1 class="text-3xl lg:text-4xl font-black tracking-tight leading-[1] mb-4 text-slate-900 dark:text-white">
-          Manage multiple <br />
+          Manage multiple <br>
           <span class="text-blue-600">Security</span> Profiles.
         </h1>
 
@@ -32,22 +40,42 @@
         </p>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-5 mb-8">
-          <div class="flex items-center gap-3 group" v-for="(h, i) in highlights" :key="i">
+          <div
+            v-for="(h, i) in highlights"
+            :key="i"
+            class="flex items-center gap-3 group"
+          >
             <div class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-md group-hover:scale-110 group-hover:border-blue-500/50 transition-all duration-300">
-              <component :is="h.icon" class="h-4 w-4 text-blue-600" />
+              <component
+                :is="h.icon"
+                class="h-4 w-4 text-blue-600"
+              />
             </div>
             <div>
-              <h3 class="font-black text-[10px] tracking-[0.05em] uppercase text-slate-900 dark:text-white">{{ h.text }}</h3>
-              <p class="text-[9px] font-bold text-slate-500 leading-snug mt-0.5 uppercase tracking-widest">{{ h.sub }}</p>
+              <h3 class="font-black text-[10px] tracking-[0.05em] uppercase text-slate-900 dark:text-white">
+                {{ h.text }}
+              </h3>
+              <p class="text-[9px] font-bold text-slate-500 leading-snug mt-0.5 uppercase tracking-widest">
+                {{ h.sub }}
+              </p>
             </div>
           </div>
         </div>
 
         <div class="pt-6 border-t border-slate-200 dark:border-white/5">
-          <p class="text-[8px] font-black tracking-[0.3em] text-slate-400 dark:text-slate-600 mb-4 uppercase">Connected Modules</p>
+          <p class="text-[8px] font-black tracking-[0.3em] text-slate-400 dark:text-slate-600 mb-4 uppercase">
+            Connected Modules
+          </p>
           <div class="flex flex-wrap gap-x-6 gap-y-3">
-            <div class="flex items-center gap-2 opacity-50 hover:opacity-100 transition-all duration-300 cursor-default group" v-for="(ind, i) in industries" :key="i">
-              <component :is="ind.icon" class="h-4 w-4 group-hover:text-blue-600 transition-colors" />
+            <div
+              v-for="(ind, i) in industries"
+              :key="i"
+              class="flex items-center gap-2 opacity-50 hover:opacity-100 transition-all duration-300 cursor-default group"
+            >
+              <component
+                :is="ind.icon"
+                class="h-4 w-4 group-hover:text-blue-600 transition-colors"
+              />
               <span class="text-[9px] font-black tracking-widest uppercase">{{ ind.name }}</span>
             </div>
           </div>
@@ -58,35 +86,38 @@
     <!-- Right Side: Switch Account Form -->
     <div class="flex-1 flex items-center justify-center p-4 lg:p-10 relative overflow-hidden bg-slate-50/50 dark:bg-transparent">
       <!-- Glow effect -->
-      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-emerald-600/5 rounded-full blur-[100px] pointer-events-none"></div>
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-emerald-600/5 rounded-full blur-[100px] pointer-events-none" />
 
       <div class="w-full max-w-[420px] rounded-[2rem] bg-white/90 dark:bg-[#0a0e1a]/80 backdrop-blur-xl p-8 shadow-2xl border border-slate-200 dark:border-white/10 relative z-10 animate-fade-in-up">
-        
         <div class="text-center mb-8">
           <div class="mx-auto mb-4 h-12 w-12 flex items-center justify-center rounded-[1rem] bg-emerald-600 text-white shadow-lg shadow-emerald-600/30 border border-emerald-500/20">
             <Users class="h-5 w-5" />
           </div>
-          <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight uppercase mb-1">Switch Account</h2>
-          <p class="text-[9px] text-emerald-600 font-black tracking-[0.4em] uppercase">Connect via phone or email</p>
+          <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight uppercase mb-1">
+            Switch Account
+          </h2>
+          <p class="text-[9px] text-emerald-600 font-black tracking-[0.4em] uppercase">
+            Connect via phone or email
+          </p>
         </div>
 
         <!-- Mode Toggle Tabs -->
         <div class="flex p-1 bg-slate-100 dark:bg-slate-900 rounded-2xl mb-8">
           <button 
-            @click="setMode('phone')"
             :class="[
               'flex-1 py-2.5 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all duration-300',
               mode === 'phone' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-md' : 'text-slate-500 hover:text-slate-700'
             ]"
+            @click="setMode('phone')"
           >
             Phone
           </button>
           <button 
-            @click="setMode('email')"
             :class="[
               'flex-1 py-2.5 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all duration-300',
               mode === 'email' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-md' : 'text-slate-500 hover:text-slate-700'
             ]"
+            @click="setMode('email')"
           >
             E-Mail
           </button>
@@ -94,22 +125,31 @@
 
         <!-- Form Elements -->
         <div class="space-y-6">
-          
           <div
             v-if="showTimeoutMessage"
             class="flex items-start gap-3 p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl animate-shake relative"
           >
             <AlertCircle class="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
             <div class="flex-1">
-              <p class="text-[10px] font-black uppercase tracking-widest text-rose-500">Session timed out</p>
-              <p class="text-[9px] font-bold text-rose-400 uppercase tracking-widest mt-1">Please sign in again to continue.</p>
+              <p class="text-[10px] font-black uppercase tracking-widest text-rose-500">
+                Session timed out
+              </p>
+              <p class="text-[9px] font-bold text-rose-400 uppercase tracking-widest mt-1">
+                Please sign in again to continue.
+              </p>
             </div>
-            <button @click="dismissTimeoutMessage" class="text-rose-500/50 hover:text-rose-500 transition-colors">
+            <button
+              class="text-rose-500/50 hover:text-rose-500 transition-colors"
+              @click="dismissTimeoutMessage"
+            >
               <X class="w-4 h-4" />
             </button>
           </div>
 
-          <div v-if="mode === 'phone'" class="space-y-4">
+          <div
+            v-if="mode === 'phone'"
+            class="space-y-4"
+          >
             <div class="space-y-1.5">
               <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 ml-1 uppercase">Mobile Number</label>
               <div class="flex gap-2">
@@ -122,18 +162,26 @@
                     type="tel"
                     maxlength="10"
                     placeholder="Enter phone"
+                    class="w-full h-12 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-emerald-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-emerald-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
                     @input="sanitizePhone"
                     @keyup.enter="handleSubmit"
-                    class="w-full h-12 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-emerald-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-emerald-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
-                  />
+                  >
                   <Phone class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-emerald-600 transition-colors" />
                 </div>
               </div>
             </div>
-            <p v-if="phoneError" class="text-[10px] font-bold text-rose-500 uppercase tracking-wide ml-1 animate-shake">{{ phoneError }}</p>
+            <p
+              v-if="phoneError"
+              class="text-[10px] font-bold text-rose-500 uppercase tracking-wide ml-1 animate-shake"
+            >
+              {{ phoneError }}
+            </p>
           </div>
 
-          <div v-if="mode === 'email'" class="space-y-4">
+          <div
+            v-if="mode === 'email'"
+            class="space-y-4"
+          >
             <div class="space-y-1.5">
               <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 ml-1 uppercase">Work Email</label>
               <div class="relative group">
@@ -141,13 +189,18 @@
                   v-model.trim="email"
                   type="email"
                   placeholder="name@company.com"
-                  @keyup.enter="handleSubmit"
                   class="w-full h-12 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-emerald-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-emerald-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
-                />
+                  @keyup.enter="handleSubmit"
+                >
                 <Mail class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-emerald-600 transition-colors" />
               </div>
             </div>
-            <p v-if="emailError" class="text-[10px] font-bold text-rose-500 uppercase tracking-wide ml-1 animate-shake">{{ emailError }}</p>
+            <p
+              v-if="emailError"
+              class="text-[10px] font-bold text-rose-500 uppercase tracking-wide ml-1 animate-shake"
+            >
+              {{ emailError }}
+            </p>
           </div>
 
           <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-white/5 flex gap-3">
@@ -158,9 +211,9 @@
           </div>
 
           <button
-            @click="handleSubmit"
             :disabled="loading || emailLoading"
             class="w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/30 transition-all disabled:opacity-70 disabled:cursor-not-allowed group"
+            @click="handleSubmit"
           >
             <span v-if="loading || emailLoading">Initialising...</span>
             <template v-else>
@@ -171,7 +224,12 @@
 
           <p class="text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider">
             Don't have an account? 
-            <router-link to="/register" class="text-emerald-600 hover:text-emerald-700 underline underline-offset-4 cursor-pointer">Signup Now</router-link>
+            <router-link
+              to="/register"
+              class="text-emerald-600 hover:text-emerald-700 underline underline-offset-4 cursor-pointer"
+            >
+              Signup Now
+            </router-link>
           </p>
         </div>
 

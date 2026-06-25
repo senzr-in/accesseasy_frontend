@@ -2,7 +2,9 @@
   <div class="past-experience-container">
     <!-- Header with title and action button -->
     <div class="experience-header">
-      <h3 class="section-title">Past Experience</h3>
+      <h3 class="section-title">
+        Past Experience
+      </h3>
       <v-chip
         v-if="hasPreviousRecord"
         color="#122f68"
@@ -18,10 +20,10 @@
       <v-btn
         color="#122f68"
         prepend-icon="mdi-plus"
-        @click="addNewPreviousRecord"
         variant="tonal"
         rounded="pill"
         size="small"
+        @click="addNewPreviousRecord"
       >
         Add Experience
       </v-btn>
@@ -35,9 +37,16 @@
     >
       <v-card-text class="text-center pa-6">
         <div class="empty-icon-container mb-4">
-          <v-icon size="64" color="grey-lighten-1">mdi-briefcase-clock</v-icon>
+          <v-icon
+            size="64"
+            color="grey-lighten-1"
+          >
+            mdi-briefcase-clock
+          </v-icon>
         </div>
-        <h4 class="text-h6 mb-2">No Work Experience</h4>
+        <h4 class="text-h6 mb-2">
+          No Work Experience
+        </h4>
         <p class="text-body-1 text-grey mb-6">
           Add the employee's previous work experience to build their
           professional history.
@@ -45,10 +54,10 @@
         <v-btn
           color="#122f68"
           prepend-icon="mdi-plus"
-          @click="addNewPreviousRecord"
           class="px-6"
           rounded="pill"
           variant="elevated"
+          @click="addNewPreviousRecord"
         >
           Add Experience
         </v-btn>
@@ -61,41 +70,53 @@
       class="experience-list"
     >
       <div class="timeline-container">
-        <div class="timeline-line"></div>
+        <div class="timeline-line" />
         <div
           v-for="(record, index) in previousRecords"
           :key="index"
           class="timeline-item"
         >
           <div class="timeline-dot">
-            <v-icon size="small" color="white">mdi-briefcase</v-icon>
+            <v-icon
+              size="small"
+              color="white"
+            >
+              mdi-briefcase
+            </v-icon>
           </div>
-          <v-card variant="outlined" class="timeline-card">
+          <v-card
+            variant="outlined"
+            class="timeline-card"
+          >
             <v-card-item>
-              <template v-slot:prepend>
-                <v-avatar color="primary" variant="tonal" class="mr-3">
+              <template #prepend>
+                <v-avatar
+                  color="primary"
+                  variant="tonal"
+                  class="mr-3"
+                >
                   <v-icon>mdi-office-building</v-icon>
                 </v-avatar>
               </template>
               <v-card-title>{{ record.companyName }}</v-card-title>
               <v-card-subtitle>{{ record.Designation }}</v-card-subtitle>
 
-              <template v-slot:append>
+              <template #append>
                 <div class="card-actions">
                   <v-btn
                     icon="mdi-pencil"
                     variant="text"
                     size="small"
-                    @click="editPreviousRecord(index)"
                     color="#122f68"
-                  ></v-btn>
+                    @click="editPreviousRecord(index)"
+                  />
                   <v-btn
                     icon="mdi-delete"
                     variant="text"
                     size="small"
-                    @click="deletePreviousRecord(index)"
                     color="error"
-                  ></v-btn>
+                    @click="deletePreviousRecord(index)"
+                  />
                 </div>
               </template>
             </v-card-item>
@@ -103,20 +124,31 @@
             <v-card-text>
               <div class="record-details">
                 <div class="detail-item">
-                  <v-icon size="small" color="primary"
-                    >mdi-calendar-range</v-icon
+                  <v-icon
+                    size="small"
+                    color="primary"
                   >
-                  <span
-                    >{{ formatDate(record.joiningDate) }} -
-                    {{ formatDate(record.leavingDate) }}</span
-                  >
+                    mdi-calendar-range
+                  </v-icon>
+                  <span>{{ formatDate(record.joiningDate) }} -
+                    {{ formatDate(record.leavingDate) }}</span>
                 </div>
                 <div class="detail-item">
-                  <v-icon size="small" color="success">mdi-cash</v-icon>
+                  <v-icon
+                    size="small"
+                    color="success"
+                  >
+                    mdi-cash
+                  </v-icon>
                   <span>{{ record.Currency }} {{ record.salary }}</span>
                 </div>
                 <div class="detail-item">
-                  <v-icon size="small" color="info">mdi-clock-outline</v-icon>
+                  <v-icon
+                    size="small"
+                    color="info"
+                  >
+                    mdi-clock-outline
+                  </v-icon>
                   <span>{{
                     calculateDuration(record.joiningDate, record.leavingDate)
                   }}</span>
@@ -129,10 +161,16 @@
     </div>
 
     <!-- Add/Edit Form -->
-    <v-card v-if="showPreviousRecordForm" class="form-card">
+    <v-card
+      v-if="showPreviousRecordForm"
+      class="form-card"
+    >
       <v-card-item>
         <v-card-title>
-          <v-icon color="#122f68" class="mr-2">
+          <v-icon
+            color="#122f68"
+            class="mr-2"
+          >
             {{ isEditingRecord ? "mdi-pencil" : "mdi-plus-circle" }}
           </v-icon>
           {{ isEditingRecord ? "Edit Experience" : "Add New Experience" }}
@@ -146,7 +184,10 @@
           @submit.prevent="savePreviousRecord"
         >
           <v-row>
-            <v-col cols="12" md="6">
+            <v-col
+              cols="12"
+              md="6"
+            >
               <v-text-field
                 v-model="currentRecord.company"
                 label="Company Name"
@@ -155,10 +196,13 @@
                 variant="outlined"
                 prepend-inner-icon="mdi-office-building"
                 placeholder="Enter company name"
-              ></v-text-field>
+              />
             </v-col>
 
-            <v-col cols="12" md="6">
+            <v-col
+              cols="12"
+              md="6"
+            >
               <v-text-field
                 v-model="currentRecord.designation"
                 label="Job Title"
@@ -167,10 +211,13 @@
                 variant="outlined"
                 prepend-inner-icon="mdi-badge-account"
                 placeholder="Enter job title"
-              ></v-text-field>
+              />
             </v-col>
 
-            <v-col cols="12" md="6">
+            <v-col
+              cols="12"
+              md="6"
+            >
               <v-text-field
                 v-model="currentRecord.joiningDate"
                 label="Start Date"
@@ -179,10 +226,13 @@
                 required
                 variant="outlined"
                 prepend-inner-icon="mdi-calendar-start"
-              ></v-text-field>
+              />
             </v-col>
 
-            <v-col cols="12" md="6">
+            <v-col
+              cols="12"
+              md="6"
+            >
               <v-text-field
                 v-model="currentRecord.leavingDate"
                 label="End Date"
@@ -191,10 +241,13 @@
                 required
                 variant="outlined"
                 prepend-inner-icon="mdi-calendar-end"
-              ></v-text-field>
+              />
             </v-col>
 
-            <v-col cols="12" md="6">
+            <v-col
+              cols="12"
+              md="6"
+            >
               <v-select
                 v-model="currentRecord.currency"
                 :items="currencyOptions"
@@ -202,10 +255,13 @@
                 :rules="[(v) => !!v || 'Currency is required']"
                 required
                 variant="outlined"
-              ></v-select>
+              />
             </v-col>
 
-            <v-col cols="12" md="6">
+            <v-col
+              cols="12"
+              md="6"
+            >
               <v-text-field
                 v-model="currentRecord.salary"
                 label="Salary"
@@ -215,31 +271,36 @@
                 variant="outlined"
                 prepend-inner-icon="mdi-cash"
                 placeholder="Enter salary amount"
-              ></v-text-field>
+              />
             </v-col>
           </v-row>
         </v-form>
       </v-card-text>
 
-      <v-divider></v-divider>
+      <v-divider />
 
       <v-card-actions class="pa-4">
-        <v-spacer></v-spacer>
-        <v-btn color="grey" variant="text" @click="cancelForm" class="mr-2">
+        <v-spacer />
+        <v-btn
+          color="grey"
+          variant="text"
+          class="mr-2"
+          @click="cancelForm"
+        >
           Cancel
         </v-btn>
         <v-btn
           color="#122f68"
-          @click="savePreviousRecord"
           :disabled="
             !currentRecord.company ||
-            !currentRecord.designation ||
-            !currentRecord.joiningDate ||
-            !currentRecord.leavingDate ||
-            !currentRecord.currency ||
-            !currentRecord.salary
+              !currentRecord.designation ||
+              !currentRecord.joiningDate ||
+              !currentRecord.leavingDate ||
+              !currentRecord.currency ||
+              !currentRecord.salary
           "
           variant="elevated"
+          @click="savePreviousRecord"
         >
           {{ isEditingRecord ? "Update" : "Save" }}
         </v-btn>
@@ -255,7 +316,9 @@
       rounded="pill"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-check-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-check-circle
+        </v-icon>
         {{ successMessage }}
       </div>
     </v-snackbar>
@@ -268,7 +331,9 @@
       rounded="pill"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-alert-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-alert-circle
+        </v-icon>
         {{ errorMessage }}
       </div>
     </v-snackbar>

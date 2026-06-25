@@ -4,13 +4,13 @@
       <!-- Table Header -->
       <DataTableHeader
         :columns="columns"
-        :selectedItems="selectedItems"
-        :allItems="items"
-        :sortBy="currentSortBy"
-        :sortDirection="currentSortDirection"
-        :showSelection="showSelection"
-        @toggleSelectAll="handleToggleSelectAll"
-        @requestSort="handleSort"
+        :selected-items="selectedItems"
+        :all-items="items"
+        :sort-by="currentSortBy"
+        :sort-direction="currentSortDirection"
+        :show-selection="showSelection"
+        @toggle-select-all="handleToggleSelectAll"
+        @request-sort="handleSort"
       />
 
       <!-- Table Body -->
@@ -20,17 +20,23 @@
           :key="getItemKey(item)"
           :item="item"
           :columns="columns"
-          :isSelected="isItemSelected(item)"
-          :isExpanded="expandedItemId === getItemKey(item)"
-          :showSelection="showSelection"
+          :is-selected="isItemSelected(item)"
+          :is-expanded="expandedItemId === getItemKey(item)"
+          :show-selection="showSelection"
           :expandable="expandable"
-          @toggleSelection="handleToggleSelection(item)"
-          @rowClick="handleRowClick(item)"
-          @toggleExpanded="handleToggleExpanded(item)"
+          @toggle-selection="handleToggleSelection(item)"
+          @row-click="handleRowClick(item)"
+          @toggle-expanded="handleToggleExpanded(item)"
         >
           <!-- Expandable Content Slot -->
-          <template #expanded-content="{ item }" v-if="expandable">
-            <slot name="expanded-content" :item="item" />
+          <template
+            v-if="expandable"
+            #expanded-content="{ item }"
+          >
+            <slot
+              name="expanded-content"
+              :item="item"
+            />
           </template>
 
           <!-- Custom Cell Content Slots -->
@@ -54,10 +60,15 @@
     </div>
 
     <!-- Empty State -->
-    <div v-if="items.length === 0" class="empty-state">
+    <div
+      v-if="items.length === 0"
+      class="empty-state"
+    >
       <slot name="empty-state">
         <div class="empty-content">
-          <div class="empty-icon">📋</div>
+          <div class="empty-icon">
+            📋
+          </div>
           <h3>No data found</h3>
           <p>There are no items to display</p>
         </div>

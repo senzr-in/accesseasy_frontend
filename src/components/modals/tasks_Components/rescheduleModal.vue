@@ -1,5 +1,8 @@
 <template>
-  <div class="modal" v-if="show">
+  <div
+    v-if="show"
+    class="modal"
+  >
     <div class="modal-content">
       <h2>Reschedule Task(s)</h2>
 
@@ -23,13 +26,16 @@
           </div>
         </div>
         <input
-          type="datetime-local"
           v-model="fromLocal"
+          type="datetime-local"
           :min="minDateTime"
-          @change="validateFromDate"
           :class="{ 'input-error': fromInvalid }"
-        />
-        <div v-if="showFromWarning && fromInvalid" class="warning-message">
+          @change="validateFromDate"
+        >
+        <div
+          v-if="showFromWarning && fromInvalid"
+          class="warning-message"
+        >
           ⚠️ Start date cannot be in the past. Please select a current or future
           date.
         </div>
@@ -48,25 +54,32 @@
           </div>
         </div>
         <input
-          type="datetime-local"
           v-model="dueTimeLocal"
+          type="datetime-local"
           :min="fromLocal || minDateTime"
-          @change="validateDueDate"
           :class="{ 'input-error': dueInvalid }"
-        />
-        <div v-if="showDueWarning && dueInvalid" class="warning-message">
+          @change="validateDueDate"
+        >
+        <div
+          v-if="showDueWarning && dueInvalid"
+          class="warning-message"
+        >
           ⚠️ End date must be after the start date and cannot be in the past.
         </div>
       </div>
 
       <!-- Modal Actions -->
       <div class="modal-actions">
-        <BaseButton variant="secondary" text="Cancel" @click="$emit('close')" />
+        <BaseButton
+          variant="secondary"
+          text="Cancel"
+          @click="$emit('close')"
+        />
         <BaseButton
           variant="primary"
           text="Reschedule"
-          @click="handleSubmit"
           :disabled="isInvalid"
+          @click="handleSubmit"
         />
       </div>
     </div>

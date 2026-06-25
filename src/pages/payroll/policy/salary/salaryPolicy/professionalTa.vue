@@ -1,14 +1,23 @@
 <template>
-  <v-card flat class="professional-tax-lwf">
+  <v-card
+    flat
+    class="professional-tax-lwf"
+  >
     <v-card-text>
       <v-row>
         <!-- Professional Tax Section -->
-        <v-col cols="12" md="6">
-          <v-card variant="outlined" class="mb-6">
+        <v-col
+          cols="12"
+          md="6"
+        >
+          <v-card
+            variant="outlined"
+            class="mb-6"
+          >
             <v-card-title class="d-flex align-center">
               Professional Tax
               <v-tooltip location="right">
-                <template v-slot:activator="{ props }">
+                <template #activator="{ props }">
                   <v-btn
                     v-bind="props"
                     icon="mdi-information"
@@ -16,7 +25,7 @@
                     size="small"
                     color="grey"
                     class="ml-2"
-                  ></v-btn>
+                  />
                 </template>
                 <span>Professional Tax information</span>
               </v-tooltip>
@@ -28,12 +37,15 @@
                 label="Select State"
                 variant="outlined"
                 @update:model-value="updatePTValues"
-              ></v-autocomplete>
+              />
               <v-list
                 v-if="selectedPTState && ptValues.length > 0"
                 class="bg-grey-lighten-4"
               >
-                <v-list-item v-for="(value, index) in ptValues" :key="index">
+                <v-list-item
+                  v-for="(value, index) in ptValues"
+                  :key="index"
+                >
                   <v-list-item-title>{{ value.range }}</v-list-item-title>
                   <v-list-item-subtitle>{{ value.tax }}</v-list-item-subtitle>
                 </v-list-item>
@@ -51,12 +63,18 @@
         </v-col>
 
         <!-- Employee LWF Section -->
-        <v-col cols="12" md="6">
-          <v-card variant="outlined" class="mb-6">
+        <v-col
+          cols="12"
+          md="6"
+        >
+          <v-card
+            variant="outlined"
+            class="mb-6"
+          >
             <v-card-title class="d-flex align-center">
               Employee LWF
               <v-tooltip location="right">
-                <template v-slot:activator="{ props }">
+                <template #activator="{ props }">
                   <v-btn
                     v-bind="props"
                     icon="mdi-information"
@@ -64,7 +82,7 @@
                     size="small"
                     color="grey"
                     class="ml-2"
-                  ></v-btn>
+                  />
                 </template>
                 <span>Labour Welfare Fund information</span>
               </v-tooltip>
@@ -76,7 +94,7 @@
                 label="Select State"
                 variant="outlined"
                 @update:model-value="updateLWFValues"
-              ></v-autocomplete>
+              />
               <v-list
                 v-if="selectedLWFState && lwfValue"
                 class="bg-grey-lighten-4"
@@ -100,11 +118,21 @@
       </v-row>
 
       <!-- Note about real-time updates -->
-      <v-alert type="info" variant="tonal" border="start" class="mt-4">
-        <template v-slot:prepend>
-          <v-icon icon="mdi-information-outline" size="small"></v-icon>
+      <v-alert
+        type="info"
+        variant="tonal"
+        border="start"
+        class="mt-4"
+      >
+        <template #prepend>
+          <v-icon
+            icon="mdi-information-outline"
+            size="small"
+          />
         </template>
-        <div class="text-subtitle-1 font-weight-medium">Note:</div>
+        <div class="text-subtitle-1 font-weight-medium">
+          Note:
+        </div>
         <div class="text-body-2">
           The professional tax information provided on this platform is based on
           the latest government regulations and state-specific laws. While every

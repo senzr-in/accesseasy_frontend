@@ -10,7 +10,9 @@
             Fingerprint Management
             <Fingerprint class="w-6 h-6 text-emerald-600" />
           </h1>
-          <p class="text-slate-500 mt-1 text-sm">Register and manage high-precision fingerprint biometric credentials.</p>
+          <p class="text-slate-500 mt-1 text-sm">
+            Register and manage high-precision fingerprint biometric credentials.
+          </p>
         </div>
       </div>
       <div class="flex items-center gap-2 flex-wrap">
@@ -39,26 +41,38 @@
     <!-- Stats -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <div class="rounded-xl border border-emerald-200 dark:border-emerald-500/20 bg-white dark:bg-slate-900 p-4 shadow-sm">
-        <p class="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider mb-1">Total Templates</p>
-        <p class="text-2xl font-black text-slate-900 dark:text-white">{{ templates.length }}</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider mb-1">
+          Total Templates
+        </p>
+        <p class="text-2xl font-black text-slate-900 dark:text-white">
+          {{ templates.length }}
+        </p>
       </div>
       <div class="rounded-xl border border-emerald-200 dark:border-emerald-500/20 bg-white dark:bg-slate-900 p-4 shadow-sm">
-        <p class="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider mb-1">Scanner Status</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider mb-1">
+          Scanner Status
+        </p>
         <div class="flex items-center gap-2 text-2xl font-black text-emerald-600 dark:text-emerald-500">
           Online
-          <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+          <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
         </div>
       </div>
       <div class="rounded-xl border border-emerald-200 dark:border-emerald-500/20 bg-white dark:bg-slate-900 p-4 shadow-sm">
-        <p class="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider mb-1">Storage Usage</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider mb-1">
+          Storage Usage
+        </p>
         <div class="flex items-center gap-2 text-2xl font-black text-blue-600 dark:text-blue-500">
           <HardDrive class="w-5 h-5" />
           Secure
         </div>
       </div>
       <div class="rounded-xl border border-emerald-200 dark:border-emerald-500/20 bg-white dark:bg-slate-900 p-4 shadow-sm">
-        <p class="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider mb-1">High precision</p>
-        <p class="text-2xl font-black text-emerald-600 dark:text-emerald-500">99.9%</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider mb-1">
+          High precision
+        </p>
+        <p class="text-2xl font-black text-emerald-600 dark:text-emerald-500">
+          99.9%
+        </p>
       </div>
     </div>
 
@@ -76,7 +90,7 @@
             type="text"
             placeholder="Search employees..."
             class="w-full h-10 pl-9 pr-4 rounded-md border border-emerald-100 dark:border-emerald-500/20 bg-slate-50 dark:bg-slate-950 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all text-slate-900 dark:text-white placeholder:text-slate-400"
-          />
+          >
         </div>
       </div>
 
@@ -84,22 +98,35 @@
         <table class="w-full text-left border-collapse whitespace-nowrap">
           <thead class="bg-slate-50 dark:bg-slate-950">
             <tr>
-              <th class="px-6 py-4 text-xs font-semibold text-slate-600 dark:text-slate-400">Employee</th>
-              <th class="px-6 py-4 text-xs font-semibold text-slate-600 dark:text-slate-400">Finger</th>
-              <th class="px-6 py-4 text-xs font-semibold text-slate-600 dark:text-slate-400">Quality</th>
-              <th class="px-6 py-4 text-xs font-semibold text-slate-600 dark:text-slate-400">Created At</th>
-              <th class="px-6 py-4 text-xs font-semibold text-right text-slate-600 dark:text-slate-400">Actions</th>
+              <th class="px-6 py-4 text-xs font-semibold text-slate-600 dark:text-slate-400">
+                Employee
+              </th>
+              <th class="px-6 py-4 text-xs font-semibold text-slate-600 dark:text-slate-400">
+                Finger
+              </th>
+              <th class="px-6 py-4 text-xs font-semibold text-slate-600 dark:text-slate-400">
+                Quality
+              </th>
+              <th class="px-6 py-4 text-xs font-semibold text-slate-600 dark:text-slate-400">
+                Created At
+              </th>
+              <th class="px-6 py-4 text-xs font-semibold text-right text-slate-600 dark:text-slate-400">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 dark:divide-slate-800/50">
             <tr v-if="filteredTemplates.length === 0">
-              <td colspan="5" class="px-6 py-12 text-center text-slate-500 dark:text-slate-400 italic text-sm">
+              <td
+                colspan="5"
+                class="px-6 py-12 text-center text-slate-500 dark:text-slate-400 italic text-sm"
+              >
                 No fingerprint templates found.
               </td>
             </tr>
             <tr 
-              v-else
-              v-for="temp in filteredTemplates" 
+              v-for="temp in filteredTemplates"
+              v-else 
               :key="temp.id" 
               class="hover:bg-emerald-50/50 dark:hover:bg-emerald-500/[0.02] transition-colors"
             >
@@ -112,7 +139,9 @@
                     <div class="font-bold text-sm text-slate-900 dark:text-white">
                       {{ temp.employee.firstName }} {{ temp.employee.lastName }}
                     </div>
-                    <div class="text-xs text-slate-500 dark:text-slate-400">ID: {{ temp.employee.employeeId }}</div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400">
+                      ID: {{ temp.employee.employeeId }}
+                    </div>
                   </div>
                 </div>
               </td>
@@ -128,7 +157,7 @@
                       class="h-full rounded-full transition-all duration-1000"
                       :class="temp.qualityScore > 0.9 ? 'bg-emerald-500' : temp.qualityScore > 0.8 ? 'bg-amber-500' : 'bg-rose-500'"
                       :style="{ width: `${temp.qualityScore * 100}%` }"
-                    ></div>
+                    />
                   </div>
                   <span class="text-xs font-bold text-slate-700 dark:text-slate-300">{{ temp.qualityScore.toFixed(2) }}</span>
                 </div>
@@ -138,8 +167,8 @@
               </td>
               <td class="px-6 py-4 text-right">
                 <button 
-                  @click="handleDelete(temp)"
                   class="h-8 w-8 inline-flex items-center justify-center rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
+                  @click="handleDelete(temp)"
                 >
                   <Trash2 class="w-4 h-4" />
                 </button>

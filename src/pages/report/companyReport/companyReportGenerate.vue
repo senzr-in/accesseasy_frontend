@@ -1,18 +1,27 @@
 <template>
   <div class="generate-report-container">
     <!-- Modern Header -->
-    <v-toolbar flat class="header-toolbar px-4" height="64">
+    <v-toolbar
+      flat
+      class="header-toolbar px-4"
+      height="64"
+    >
       <div class="d-flex align-center">
         <v-btn
           icon="mdi-arrow-left"
           variant="text"
           class="mr-2"
           @click="cancelPopup"
-        ></v-btn>
-        <v-icon color="primary" class="mr-2">mdi-file-chart</v-icon>
+        />
+        <v-icon
+          color="primary"
+          class="mr-2"
+        >
+          mdi-file-chart
+        </v-icon>
         <span class="text-h6 font-weight-medium">Generate Report</span>
       </div>
-      <v-spacer></v-spacer>
+      <v-spacer />
       <div class="d-flex align-center">
         <v-btn
           prepend-icon="mdi-close"
@@ -28,8 +37,8 @@
           color="white"
           style="background-color: black !important"
           prepend-icon="mdi-check"
-          @click="generateReport"
           elevation="0"
+          @click="generateReport"
         >
           Generate
         </v-btn>
@@ -41,7 +50,9 @@
       <div class="content-area pa-8">
         <v-form ref="form">
           <div class="form-header mb-6">
-            <h2 class="text-h6 font-weight-medium">Report Details</h2>
+            <h2 class="text-h6 font-weight-medium">
+              Report Details
+            </h2>
           </div>
 
           <div class="form-grid">
@@ -55,7 +66,7 @@
                 density="comfortable"
                 class="mb-4"
                 :rules="[(v) => !!v || 'Report Type is required']"
-              ></v-select>
+              />
             </div>
 
             <div class="form-group">
@@ -74,7 +85,7 @@
                 class="mb-4"
                 :loading="loadingBranches"
                 :rules="[(v) => !!v || 'Branch is required']"
-              ></v-select>
+              />
             </div>
 
             <div class="form-group">
@@ -93,20 +104,20 @@
                 class="mb-4"
                 :loading="loadingDepartments"
                 :rules="[(v) => !!v || 'Department is required']"
-              ></v-select>
+              />
             </div>
 
             <div class="form-group">
               <v-text-field
-                label="Date"
                 v-model="duration"
+                label="Date"
                 type="month"
                 variant="outlined"
                 hide-details="auto"
                 density="comfortable"
                 class="mb-4"
                 :disabled="payrollAttendanceCycle"
-              ></v-text-field>
+              />
             </div>
 
             <div class="form-group">
@@ -119,7 +130,7 @@
                 density="comfortable"
                 class="mb-4"
                 :rules="[(v) => !!v || 'Format is required']"
-              ></v-select>
+              />
             </div>
 
             <div class="checkbox-row">
@@ -128,8 +139,7 @@
                 label="Payroll Attendance Cycle"
                 hide-details="auto"
                 @update:model-value="handlePayrollCycleChange"
-              >
-              </v-checkbox>
+              />
             </div>
 
             <div

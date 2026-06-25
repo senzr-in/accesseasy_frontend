@@ -1,15 +1,18 @@
 <template>
   <div class="main-container">
     <!-- Main Content -->
-    <div class="locations-container" :class="{ 'sidebar-open': showSidebar }">
+    <div
+      class="locations-container"
+      :class="{ 'sidebar-open': showSidebar }"
+    >
       <DataTableWrapper
         :is-empty="!loading && !error && locations.length === 0"
         :has-error="!!error"
         :is-loading="loading"
         :search-query="searchQuery"
-        @update:search-query="debouncedSearch"
         search-placeholder="Search Sites..."
         wrapper-class="attendance-table-wrapper"
+        @update:search-query="debouncedSearch"
       >
         <!-- Custom Toolbar with Stats and Create Button -->
         <template #toolbar-actions>
@@ -18,7 +21,7 @@
             <BaseButton
               variant="primary"
               text="Create Site"
-              :leftIcon="Plus"
+              :left-icon="Plus"
               width="100px"
               @click="toggleSidebar('add')"
             />
@@ -90,14 +93,19 @@
                     stroke-width="2"
                   >
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                    <circle cx="12" cy="10" r="3" />
+                    <circle
+                      cx="12"
+                      cy="10"
+                      r="3"
+                    />
                   </svg>
                 </div>
                 <div class="location-details">
                   <span class="location-name">{{ item.locationName }}</span>
-                  <span v-if="item.pincodes" class="location-pincode"
-                    >PIN: {{ item.pincodes }}</span
-                  >
+                  <span
+                    v-if="item.pincodes"
+                    class="location-pincode"
+                  >PIN: {{ item.pincodes }}</span>
                 </div>
               </div>
             </template>
@@ -121,9 +129,23 @@
                     <path d="m9 11 3 3L22 4" />
                   </template>
                   <template v-else>
-                    <circle cx="12" cy="12" r="10" />
-                    <line x1="15" y1="9" x2="9" y2="15" />
-                    <line x1="9" y1="9" x2="15" y2="15" />
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                    />
+                    <line
+                      x1="15"
+                      y1="9"
+                      x2="9"
+                      y2="15"
+                    />
+                    <line
+                      x1="9"
+                      y1="9"
+                      x2="15"
+                      y2="15"
+                    />
                   </template>
                 </svg>
                 {{ item.orgName || "Unassigned" }}
@@ -169,7 +191,11 @@
                     stroke-width="2"
                   >
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                    <circle cx="12" cy="10" r="3" />
+                    <circle
+                      cx="12"
+                      cy="10"
+                      r="3"
+                    />
                   </svg>
                   {{ toFixedNumber(item.lat, 4) }}
                 </span>
@@ -182,7 +208,11 @@
                     stroke="currentColor"
                     stroke-width="2"
                   >
-                    <circle cx="12" cy="12" r="10" />
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                    />
                     <path
                       d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
                     />
@@ -227,17 +257,20 @@
         <template #pagination>
           <CustomPagination
             v-model:page="page"
-            v-model:itemsPerPage="itemsPerPage"
+            v-model:items-per-page="itemsPerPage"
             :total-items="totalItems"
             @update:page="handlePageChange"
-            @update:itemsPerPage="handleItemsPerPageChange"
+            @update:items-per-page="handleItemsPerPageChange"
           />
         </template>
       </DataTableWrapper>
     </div>
 
     <!-- Sidebar for Add/Edit Location -->
-    <div class="sidebar" :class="{ active: showSidebar }">
+    <div
+      class="sidebar"
+      :class="{ active: showSidebar }"
+    >
       <div class="sidebar-content">
         <CreateSiteForm
           v-if="sidebarMode === 'add'"

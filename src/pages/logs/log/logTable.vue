@@ -1,12 +1,15 @@
 <template>
   <div class="logs-container">
     <!-- Filter Panel -->
-    <div class="filter-panel" v-if="showFilters && tenantId">
+    <div
+      v-if="showFilters && tenantId"
+      class="filter-panel"
+    >
       <div class="filter-content">
         <FilterComponent
-          :tenantId="tenantId"
-          :initialFilters="initialFilters"
-          :initiallyVisible="true"
+          :tenant-id="tenantId"
+          :initial-filters="initialFilters"
+          :initially-visible="true"
           :filter-schema="pageFilters"
           @apply-filters="handleApplyFilters"
           @filter-visibility-changed="onFilterVisibilityChanged"
@@ -17,9 +20,12 @@
     <!-- Filter Toggle Button -->
 
     <!-- Main Content -->
-    <div class="main-content" :class="{ 'full-width': !showFilters }">
+    <div
+      class="main-content"
+      :class="{ 'full-width': !showFilters }"
+    >
       <data-table-wrapper
-        v-model:searchQuery="search"
+        v-model:search-query="search"
         :search-placeholder="'Search Logs...'"
         :show-search="true"
         :has-error="showError"
@@ -29,10 +35,10 @@
           <button
             v-if="tenantId"
             class="filter-toggle-static"
-            @click="toggleFilters"
             :class="{ active: hasActiveFilters }"
             :title="showFilters ? 'Hide filters' : 'Show filters'"
             aria-label="Toggle filters"
+            @click="toggleFilters"
           >
             <svg
               width="20"
@@ -44,18 +50,24 @@
             >
               <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46" />
             </svg>
-            <div v-if="hasActiveFilters" class="filter-indicator"></div>
+            <div
+              v-if="hasActiveFilters"
+              class="filter-indicator"
+            />
           </button>
         </template>
         <!-- Toolbar Actions Slot -->
         <template #toolbar-actions>
-          <div class="d-flex align-center" style="gap: 8px">
+          <div
+            class="d-flex align-center"
+            style="gap: 8px"
+          >
             <BaseButton
               v-if="userRole === 'Admin'"
               variant="primary"
               size="md"
               text="Import Logs"
-              :leftIcon="Upload"
+              :left-icon="Upload"
               @click="openImportDialog"
             />
             <!-- <BaseButton
@@ -120,7 +132,7 @@
             title="No logs data found"
             message="Try adjusting your filters or check back later"
             :primary-action="{ text: 'Clear Filters', icon: 'X' }"
-            @primaryAction="clearFilters"
+            @primary-action="clearFilters"
           />
         </template>
 
@@ -143,8 +155,11 @@
                   :src="item.avatarImage"
                   :alt="item.employeeId?.assignedUser?.first_name"
                   class="avatar-image"
-                />
-                <div v-else class="avatar-placeholder">
+                >
+                <div
+                  v-else
+                  class="avatar-placeholder"
+                >
                   <svg
                     width="20"
                     height="20"
@@ -154,7 +169,11 @@
                     stroke-width="2"
                   >
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
+                    <circle
+                      cx="12"
+                      cy="7"
+                      r="4"
+                    />
                   </svg>
                 </div>
               </div>
@@ -196,9 +215,14 @@
                 variant="flat"
                 class="font-weight-medium attendance-count"
               >
-                <v-icon start size="16">{{
-                  getActionIcon(item.action)
-                }}</v-icon>
+                <v-icon
+                  start
+                  size="16"
+                >
+                  {{
+                    getActionIcon(item.action)
+                  }}
+                </v-icon>
                 {{ item.action?.toUpperCase() || "N/A" }}
               </v-chip>
             </template>
@@ -212,7 +236,12 @@
                 class="font-weight-medium attendance-count"
                 :class="getModeClass(item.mode)"
               >
-                <v-icon start size="16">{{ getModeIcon(item.mode) }}</v-icon>
+                <v-icon
+                  start
+                  size="16"
+                >
+                  {{ getModeIcon(item.mode) }}
+                </v-icon>
                 {{ getModeDisplayName(item.mode) || "-" }}
               </v-chip>
             </template>
@@ -225,9 +254,14 @@
                 variant="flat"
                 class="font-weight-medium attendance-count"
               >
-                <v-icon start size="16">{{
-                  getValidLogsIcon(item.ValidLogs)
-                }}</v-icon>
+                <v-icon
+                  start
+                  size="16"
+                >
+                  {{
+                    getValidLogsIcon(item.ValidLogs)
+                  }}
+                </v-icon>
                 {{ getValidLogsText(item.ValidLogs) }}
               </v-chip>
             </template>
@@ -259,76 +293,102 @@
 
             <!-- Custom Cell for Base64 Image -->
             <template #cell-base64Data="{ item }">
-              <div v-if="item.base64Data" class="image-cell">
+              <div
+                v-if="item.base64Data"
+                class="image-cell"
+              >
                 <v-img
                   :src="getImageSrc(item.base64Data)"
                   width="60"
                   height="60"
                   class="thumbnail-image"
-                  @click="openImagePopup(item.base64Data, item)"
                   style="
                     cursor: pointer;
                     border-radius: 8px;
                     border: 2px solid #e0e0e0;
                   "
                   cover
+                  @click="openImagePopup(item.base64Data, item)"
                 >
-                  <template v-slot:error>
+                  <template #error>
                     <div class="error-placeholder">
-                      <v-icon size="24">mdi-image-broken</v-icon>
+                      <v-icon size="24">
+                        mdi-image-broken
+                      </v-icon>
                     </div>
                   </template>
-                  <template v-slot:placeholder>
+                  <template #placeholder>
                     <div class="loading-placeholder">
                       <v-progress-circular
                         indeterminate
                         size="20"
-                      ></v-progress-circular>
+                      />
                     </div>
                   </template>
                 </v-img>
                 <div class="image-overlay">
-                  <v-icon size="16" color="white">mdi-magnify</v-icon>
+                  <v-icon
+                    size="16"
+                    color="white"
+                  >
+                    mdi-magnify
+                  </v-icon>
                 </div>
               </div>
-              <span v-else class="null-value">No Image</span>
+              <span
+                v-else
+                class="null-value"
+              >No Image</span>
             </template>
 
             <!-- Custom Cell for Face ID -->
             <template #cell-faceId="{ item }">
-              <div v-if="item.faceIdImage" class="image-cell">
+              <div
+                v-if="item.faceIdImage"
+                class="image-cell"
+              >
                 <v-img
                   :src="item.faceIdImage"
                   width="60"
                   height="60"
                   class="thumbnail-image"
-                  @click="openImagePopup(item.faceIdImage, item, 'faceId')"
                   style="
                     cursor: pointer;
                     border-radius: 8px;
                     border: 2px solid #e0e0e0;
                   "
                   cover
+                  @click="openImagePopup(item.faceIdImage, item, 'faceId')"
                 >
-                  <template v-slot:error>
+                  <template #error>
                     <div class="error-placeholder">
-                      <v-icon size="24">mdi-image-broken</v-icon>
+                      <v-icon size="24">
+                        mdi-image-broken
+                      </v-icon>
                     </div>
                   </template>
-                  <template v-slot:placeholder>
+                  <template #placeholder>
                     <div class="loading-placeholder">
                       <v-progress-circular
                         indeterminate
                         size="20"
-                      ></v-progress-circular>
+                      />
                     </div>
                   </template>
                 </v-img>
                 <div class="image-overlay">
-                  <v-icon size="16" color="white">mdi-magnify</v-icon>
+                  <v-icon
+                    size="16"
+                    color="white"
+                  >
+                    mdi-magnify
+                  </v-icon>
                 </div>
               </div>
-              <span v-else class="null-value">{{
+              <span
+                v-else
+                class="null-value"
+              >{{
                 item.faceId || "No Face ID"
               }}</span>
             </template>
@@ -341,18 +401,21 @@
         </template>
 
         <!-- Pagination Slot -->
-        <template v-slot:pagination>
+        <template #pagination>
           <CustomPagination
             v-model:page="page"
-            v-model:itemsPerPage="itemsPerPage"
+            v-model:items-per-page="itemsPerPage"
             :total-items="totalItems"
             @update:page="handlePageChange"
-            @update:itemsPerPage="handleItemsPerPageChange"
+            @update:items-per-page="handleItemsPerPageChange"
           />
         </template>
       </data-table-wrapper>
     </div>
-    <v-dialog v-model="showImportDialog" max-width="650">
+    <v-dialog
+      v-model="showImportDialog"
+      max-width="650"
+    >
       <v-card>
         <v-card-title> Upload Excel File </v-card-title>
 
@@ -365,7 +428,7 @@
             label="Select a file"
             accept=".xls"
             variant="outlined"
-          ></v-file-input>
+          />
           <div
             v-if="isLoading"
             class="d-flex flex-column align-center justify-center py-10"
@@ -374,8 +437,10 @@
               indeterminate
               color="blue-lighten-2"
               size="50"
-            ></v-progress-circular>
-            <p class="mt-3 text-blue-200">Processing file... Please wait</p>
+            />
+            <p class="mt-3 text-blue-200">
+              Processing file... Please wait
+            </p>
           </div>
         </v-card-text>
 
@@ -399,22 +464,33 @@
     </v-dialog>
 
     <!-- Image Popup Dialog -->
-    <v-dialog v-model="imageDialog" max-width="900px" persistent>
+    <v-dialog
+      v-model="imageDialog"
+      max-width="900px"
+      persistent
+    >
       <v-card>
         <v-card-title class="d-flex justify-space-between align-center pa-4">
           <div>
             <span class="text-h5">{{ imageDialogTitle }}</span>
-            <div class="text-caption text-grey mt-1" v-if="selectedLogItem">
+            <div
+              v-if="selectedLogItem"
+              class="text-caption text-grey mt-1"
+            >
               Employee: {{ getEmployeeName(selectedLogItem) }} | Date:
               {{ formatDate(selectedLogItem.date_created) }} | Action:
               {{ selectedLogItem.action }}
             </div>
           </div>
-          <v-btn icon variant="text" @click="closeImageDialog">
+          <v-btn
+            icon
+            variant="text"
+            @click="closeImageDialog"
+          >
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-card-title>
-        <v-divider></v-divider>
+        <v-divider />
         <v-card-text class="pa-0">
           <div class="image-container">
             <v-img
@@ -424,38 +500,53 @@
               contain
               class="full-image"
             >
-              <template v-slot:error>
+              <template #error>
                 <div class="error-placeholder-large">
-                  <v-icon size="64" color="error">mdi-image-broken</v-icon>
-                  <p class="mt-2">Failed to load image</p>
-                  <p class="text-caption">The image data may be corrupted</p>
+                  <v-icon
+                    size="64"
+                    color="error"
+                  >
+                    mdi-image-broken
+                  </v-icon>
+                  <p class="mt-2">
+                    Failed to load image
+                  </p>
+                  <p class="text-caption">
+                    The image data may be corrupted
+                  </p>
                 </div>
               </template>
-              <template v-slot:placeholder>
+              <template #placeholder>
                 <div class="loading-placeholder-large">
                   <v-progress-circular
                     indeterminate
                     size="48"
-                  ></v-progress-circular>
-                  <p class="mt-2">Loading image...</p>
+                  />
+                  <p class="mt-2">
+                    Loading image...
+                  </p>
                 </div>
               </template>
             </v-img>
           </div>
         </v-card-text>
-        <v-divider></v-divider>
+        <v-divider />
         <v-card-actions class="pa-4">
-          <v-spacer></v-spacer>
+          <v-spacer />
           <v-btn
+            v-if="selectedImage"
             color="primary"
             variant="elevated"
-            @click="downloadImage"
-            v-if="selectedImage"
             prepend-icon="mdi-download"
+            @click="downloadImage"
           >
             Download Image
           </v-btn>
-          <v-btn color="grey" variant="text" @click="closeImageDialog">
+          <v-btn
+            color="grey"
+            variant="text"
+            @click="closeImageDialog"
+          >
             Close
           </v-btn>
         </v-card-actions>

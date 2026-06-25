@@ -1,9 +1,17 @@
 <template>
   <div class="min-h-screen">
-    <v-container fluid class="pa-8">
+    <v-container
+      fluid
+      class="pa-8"
+    >
       <div class="mb-8">
         <div class="d-flex align-center ga-3 mb-2">
-          <v-icon color="blue-darken-2" size="32">mdi-cog</v-icon>
+          <v-icon
+            color="blue-darken-2"
+            size="32"
+          >
+            mdi-cog
+          </v-icon>
           <h2>Financial Year ({{ fy }})</h2>
         </div>
       </div>
@@ -36,20 +44,26 @@
             </v-col> -->
 
             <!-- Declaration Section -->
-            <v-col cols="6" lg="4">
+            <v-col
+              cols="6"
+              lg="4"
+            >
               <v-card
                 class="pa-6 bg-grey-lighten-5"
                 variant="outlined"
                 :disabled="!editMode"
               >
                 <div class="d-flex align-center ga-3 mb-4">
-                  <div class="accent-bar bg-blue-darken-2"></div>
+                  <div class="accent-bar bg-blue-darken-2" />
                   <h2 class="text-h6 font-weight-medium text-grey-darken-3">
                     Declaration Period
                   </h2>
                 </div>
                 <v-row>
-                  <v-col cols="12" sm="6">
+                  <v-col
+                    cols="12"
+                    sm="6"
+                  >
                     <v-text-field
                       v-model="formData.declarationStart"
                       type="date"
@@ -57,9 +71,12 @@
                       variant="outlined"
                       density="comfortable"
                       prepend-inner-icon="mdi-calendar"
-                    ></v-text-field>
+                    />
                   </v-col>
-                  <v-col cols="12" sm="6">
+                  <v-col
+                    cols="12"
+                    sm="6"
+                  >
                     <v-text-field
                       v-model="formData.declarationEnd"
                       type="date"
@@ -67,26 +84,32 @@
                       variant="outlined"
                       density="comfortable"
                       prepend-inner-icon="mdi-calendar"
-                    ></v-text-field>
+                    />
                   </v-col>
                 </v-row>
               </v-card>
             </v-col>
 
-            <v-col cols="6" lg="4">
+            <v-col
+              cols="6"
+              lg="4"
+            >
               <v-card
                 class="pa-6 bg-grey-lighten-5"
                 variant="outlined"
                 :disabled="!editMode"
               >
                 <div class="d-flex align-center ga-3 mb-4">
-                  <div class="accent-bar bg-green-darken-2"></div>
+                  <div class="accent-bar bg-green-darken-2" />
                   <h2 class="text-h6 font-weight-medium text-grey-darken-3">
                     Reconcile Period
                   </h2>
                 </div>
                 <v-row>
-                  <v-col cols="12" sm="6">
+                  <v-col
+                    cols="12"
+                    sm="6"
+                  >
                     <v-text-field
                       v-model="formData.reconcileStart"
                       type="date"
@@ -94,9 +117,12 @@
                       variant="outlined"
                       density="comfortable"
                       prepend-inner-icon="mdi-calendar"
-                    ></v-text-field>
+                    />
                   </v-col>
-                  <v-col cols="12" sm="6">
+                  <v-col
+                    cols="12"
+                    sm="6"
+                  >
                     <v-text-field
                       v-model="formData.reconcileEnd"
                       type="date"
@@ -104,7 +130,7 @@
                       variant="outlined"
                       density="comfortable"
                       prepend-inner-icon="mdi-calendar"
-                    ></v-text-field>
+                    />
                   </v-col>
                 </v-row>
               </v-card>
@@ -113,20 +139,26 @@
 
           <v-row class="mb-8">
             <!-- Document Upload Section -->
-            <v-col cols="6" lg="4">
+            <v-col
+              cols="6"
+              lg="4"
+            >
               <v-card
                 class="pa-6 bg-grey-lighten-5"
                 variant="outlined"
                 :disabled="!editMode"
               >
                 <div class="d-flex align-center ga-3 mb-4">
-                  <div class="accent-bar bg-orange-darken-2"></div>
+                  <div class="accent-bar bg-orange-darken-2" />
                   <h2 class="text-h6 font-weight-medium text-grey-darken-3">
                     Document Upload Closure Date
                   </h2>
                 </div>
                 <v-row>
-                  <v-col cols="12" sm="6">
+                  <v-col
+                    cols="12"
+                    sm="6"
+                  >
                     <v-text-field
                       v-model="formData.uploadStart"
                       type="date"
@@ -134,9 +166,12 @@
                       variant="outlined"
                       density="comfortable"
                       prepend-inner-icon="mdi-calendar"
-                    ></v-text-field>
+                    />
                   </v-col>
-                  <v-col cols="12" sm="6">
+                  <v-col
+                    cols="12"
+                    sm="6"
+                  >
                     <v-text-field
                       v-model="formData.uploadEnd"
                       type="date"
@@ -144,7 +179,7 @@
                       variant="outlined"
                       density="comfortable"
                       prepend-inner-icon="mdi-calendar"
-                    ></v-text-field>
+                    />
                   </v-col>
                 </v-row>
               </v-card>
@@ -153,8 +188,15 @@
 
           <div class="d-flex flex-column flex-sm-row ga-4">
             <template v-if="editMode">
-              <v-btn type="submit" color="black" size="large" class="px-8">
-                <v-icon start>mdi-file-document</v-icon>
+              <v-btn
+                type="submit"
+                color="black"
+                size="large"
+                class="px-8"
+              >
+                <v-icon start>
+                  mdi-file-document
+                </v-icon>
                 Save
               </v-btn>
 
@@ -164,7 +206,9 @@
                 class="px-8"
                 @click="cancelEdit"
               >
-                <v-icon start>mdi-cancel</v-icon>
+                <v-icon start>
+                  mdi-cancel
+                </v-icon>
                 Cancel
               </v-btn>
             </template>
@@ -175,7 +219,9 @@
                 class="px-8"
                 @click="editMode = true"
               >
-                <v-icon start>mdi-pencil</v-icon>
+                <v-icon start>
+                  mdi-pencil
+                </v-icon>
                 Edit
               </v-btn>
             </template>

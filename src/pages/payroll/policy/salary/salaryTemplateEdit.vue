@@ -10,9 +10,9 @@
           icon="mdi-arrow-left"
           variant="text"
           color="black"
-          @click="goBack"
           class="mr-2"
-        ></v-btn>
+          @click="goBack"
+        />
         <h2 class="text-h5 font-weight-bold text-black mb-0">
           View {{ categoryName }}
         </h2>
@@ -28,18 +28,29 @@
         indeterminate
         color="primary"
         size="64"
-      ></v-progress-circular>
-      <div class="loading-text mt-4">Loading data...</div>
+      />
+      <div class="loading-text mt-4">
+        Loading data...
+      </div>
     </div>
 
-    <div v-else class="clean-layout" style="height: 70vh; overflow-y: auto">
+    <div
+      v-else
+      class="clean-layout"
+      style="height: 70vh; overflow-y: auto"
+    >
       <!-- Earning Components -->
       <div class="section-header mb-4">
         <div
           class="section-indicator earning-indicator"
           style="background-color: #22c55e"
-        ></div>
-        <h3 class="section-title" style="color: #166534">Earning Components</h3>
+        />
+        <h3
+          class="section-title"
+          style="color: #166534"
+        >
+          Earning Components
+        </h3>
       </div>
 
       <v-row
@@ -88,7 +99,10 @@
         </v-col>
 
         <!-- Column 4: Action (empty for view mode) -->
-        <v-col cols="3" class="text-left">
+        <v-col
+          cols="3"
+          class="text-left"
+        >
           <!-- No action button in view mode -->
         </v-col>
       </v-row>
@@ -98,23 +112,28 @@
         <div
           class="section-indicator employer-indicator"
           style="background-color: #3b82f6"
-        ></div>
-        <h3 class="section-title" style="color: #1e40af">
+        />
+        <h3
+          class="section-title"
+          style="color: #1e40af"
+        >
           Employer Contribution
         </h3>
       </div>
 
       <!-- Employer PF -->
       <v-row class="align-center mb-4 pb-2 border-bottom">
-        <v-col cols="3"> Employer PF </v-col>
+        <v-col cols="3">
+          Employer PF
+        </v-col>
         <v-col cols="3">
           <v-select
+            v-model="form.employerPF.value"
             :items="[
               { title: '12% No limit', value: 12 },
               { title: '12% ₹1800 limit', value: 1800 },
               { title: 'NoValue', value: null },
             ]"
-            v-model="form.employerPF.value"
             label="Value"
             variant="outlined"
             density="compact"
@@ -127,8 +146,8 @@
         </v-col>
         <v-col cols="3">
           <v-select
-            :items="componentOptions"
             v-model="form.employerPF.calculations"
+            :items="componentOptions"
             label="Component"
             variant="outlined"
             density="compact"
@@ -153,14 +172,16 @@
 
       <!-- Employer ESI -->
       <v-row class="align-center mb-4 pb-2 border-bottom">
-        <v-col cols="3"> Employer ESI </v-col>
+        <v-col cols="3">
+          Employer ESI
+        </v-col>
         <v-col cols="3">
           <v-select
+            v-model="form.employerESI.value"
             :items="[
               { title: '3.25%', value: 3.25 },
               { title: 'NoValue', value: null },
             ]"
-            v-model="form.employerESI.value"
             label="Value"
             variant="outlined"
             density="compact"
@@ -173,8 +194,8 @@
         </v-col>
         <v-col cols="3">
           <v-select
-            :items="componentOptions"
             v-model="form.employerESI.calculations"
+            :items="componentOptions"
             label="Component"
             variant="outlined"
             density="compact"
@@ -199,7 +220,9 @@
 
       <!-- PF EDLI & Admin Charges -->
       <v-row class="align-center mb-4 pb-2 border-bottom">
-        <v-col cols="3"> PF EDLI & Admin Charges </v-col>
+        <v-col cols="3">
+          PF EDLI & Admin Charges
+        </v-col>
         <v-col cols="3">
           <v-switch
             v-model="form.includeEdli"
@@ -210,7 +233,10 @@
             readonly
           />
         </v-col>
-        <v-col cols="3" v-if="form.includeEdli">
+        <v-col
+          v-if="form.includeEdli"
+          cols="3"
+        >
           <v-text-field
             variant="outlined"
             density="compact"
@@ -225,11 +251,19 @@
 
       <!-- Labour Welfare Fund -->
       <v-row class="align-center mb-4 pb-2 border-bottom">
-        <v-col cols="3"> Labour Welfare Fund </v-col>
-        <v-col cols="3" class="d-flex align-center">
-          <v-icon color="grey-darken-1" class="mr-2"
-            >mdi-information-outline</v-icon
+        <v-col cols="3">
+          Labour Welfare Fund
+        </v-col>
+        <v-col
+          cols="3"
+          class="d-flex align-center"
+        >
+          <v-icon
+            color="grey-darken-1"
+            class="mr-2"
           >
+            mdi-information-outline
+          </v-icon>
           <span class="text-grey-darken-1">Value based on state rules</span>
         </v-col>
         <v-col cols="3">
@@ -253,23 +287,28 @@
         <div
           class="section-indicator deduction-indicator"
           style="background-color: #ef4444"
-        ></div>
-        <h3 class="section-title" style="color: #dc2626">
+        />
+        <h3
+          class="section-title"
+          style="color: #dc2626"
+        >
           Deduction Components
         </h3>
       </div>
 
       <!-- Employee PF -->
       <v-row class="align-center mb-4 pb-2 border-bottom">
-        <v-col cols="3"> Employee PF </v-col>
+        <v-col cols="3">
+          Employee PF
+        </v-col>
         <v-col cols="3">
           <v-select
+            v-model="form.employeePF.value"
             :items="[
               { title: '12% No limit', value: 12 },
               { title: '12% ₹1800 limit', value: 1800 },
               { title: 'NoValue', value: null },
             ]"
-            v-model="form.employeePF.value"
             label="Value"
             variant="outlined"
             density="compact"
@@ -282,8 +321,8 @@
         </v-col>
         <v-col cols="3">
           <v-select
-            :items="componentOptions"
             v-model="form.employeePF.calculations"
+            :items="componentOptions"
             label="Component"
             variant="outlined"
             density="compact"
@@ -295,19 +334,21 @@
             style="background-color: #f5f5f5"
           />
         </v-col>
-        <v-col cols="3"></v-col>
+        <v-col cols="3" />
       </v-row>
 
       <!-- Employee ESI -->
       <v-row class="align-center mb-4 pb-2 border-bottom">
-        <v-col cols="3"> Employee ESI </v-col>
+        <v-col cols="3">
+          Employee ESI
+        </v-col>
         <v-col cols="3">
           <v-select
+            v-model="form.employeeESI.value"
             :items="[
               { title: '0.75%', value: 0.75 },
               { title: 'NoValue', value: null },
             ]"
-            v-model="form.employeeESI.value"
             label="Value"
             variant="outlined"
             density="compact"
@@ -320,8 +361,8 @@
         </v-col>
         <v-col cols="3">
           <v-select
-            :items="componentOptions"
             v-model="form.employeeESI.calculations"
+            :items="componentOptions"
             label="Component"
             variant="outlined"
             density="compact"
@@ -333,16 +374,24 @@
             style="background-color: #f5f5f5"
           />
         </v-col>
-        <v-col cols="3"></v-col>
+        <v-col cols="3" />
       </v-row>
 
       <!-- Labour Welfare Fund -->
       <v-row class="align-center mb-4 pb-2 border-bottom">
-        <v-col cols="3"> Labour Welfare Fund </v-col>
-        <v-col cols="3" class="d-flex align-center">
-          <v-icon color="grey-darken-1" class="mr-2"
-            >mdi-information-outline</v-icon
+        <v-col cols="3">
+          Labour Welfare Fund
+        </v-col>
+        <v-col
+          cols="3"
+          class="d-flex align-center"
+        >
+          <v-icon
+            color="grey-darken-1"
+            class="mr-2"
           >
+            mdi-information-outline
+          </v-icon>
           <span class="text-grey-darken-1">Value based on state rules</span>
         </v-col>
         <v-col cols="3">
@@ -359,16 +408,24 @@
             hide-details
           />
         </v-col>
-        <v-col cols="3"></v-col>
+        <v-col cols="3" />
       </v-row>
 
       <!-- Professional Tax -->
       <v-row class="align-center mb-4 pb-2 border-bottom">
-        <v-col cols="3"> Professional Tax </v-col>
-        <v-col cols="3" class="d-flex align-center">
-          <v-icon color="grey-darken-1" class="mr-2"
-            >mdi-information-outline</v-icon
+        <v-col cols="3">
+          Professional Tax
+        </v-col>
+        <v-col
+          cols="3"
+          class="d-flex align-center"
+        >
+          <v-icon
+            color="grey-darken-1"
+            class="mr-2"
           >
+            mdi-information-outline
+          </v-icon>
           <span class="text-grey-darken-1">System Calculated</span>
         </v-col>
         <v-col cols="3">
@@ -385,7 +442,7 @@
             hide-details
           />
         </v-col>
-        <v-col cols="3"></v-col>
+        <v-col cols="3" />
       </v-row>
 
       <!-- Dynamic Deduction Rows -->
@@ -397,7 +454,7 @@
         <v-col cols="3">
           <strong>{{ row.label }}</strong>
         </v-col>
-        <v-col cols="3"></v-col>
+        <v-col cols="3" />
         <v-col cols="3">
           <v-text-field
             v-model.number="row.value"
@@ -420,15 +477,21 @@
     </div>
 
     <!-- Professional Tax Dialog (keep existing) -->
-    <v-dialog v-model="showProfessionalTaxDialog" max-width="500px">
+    <v-dialog
+      v-model="showProfessionalTaxDialog"
+      max-width="500px"
+    >
       <v-card>
-        <v-card-title class="text-h6 font-weight-bold"
-          >Professional Tax Rules</v-card-title
-        >
+        <v-card-title class="text-h6 font-weight-bold">
+          Professional Tax Rules
+        </v-card-title>
         <v-card-text>
           <div style="max-width: 300px">
             <ul>
-              <li v-for="rule in professionalTaxRules" :key="rule.salaryRange">
+              <li
+                v-for="rule in professionalTaxRules"
+                :key="rule.salaryRange"
+              >
                 Salary Range: {{ rule.salaryRange }} - Tax: ₹{{
                   rule.professionalTax
                 }}
@@ -437,19 +500,25 @@
           </div>
         </v-card-text>
         <v-card-actions class="justify-end">
-          <v-btn variant="text" @click="showProfessionalTaxDialog = false"
-            >Close</v-btn
+          <v-btn
+            variant="text"
+            @click="showProfessionalTaxDialog = false"
           >
+            Close
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
     <!-- Disabled dialogs (keep existing but simplified) -->
-    <v-dialog v-model="showAddDialog" max-width="500px">
+    <v-dialog
+      v-model="showAddDialog"
+      max-width="500px"
+    >
       <v-card>
-        <v-card-title class="text-h6 font-weight-bold"
-          >Add ESI Account</v-card-title
-        >
+        <v-card-title class="text-h6 font-weight-bold">
+          Add ESI Account
+        </v-card-title>
         <v-card-text>
           <v-text-field
             v-model="newAccount.number"
@@ -460,10 +529,19 @@
           />
         </v-card-text>
         <v-card-actions class="justify-end">
-          <v-btn variant="text" @click="showAddDialog = false" disabled
-            >Cancel</v-btn
+          <v-btn
+            variant="text"
+            disabled
+            @click="showAddDialog = false"
           >
-          <v-btn color="green" disabled>Save</v-btn>
+            Cancel
+          </v-btn>
+          <v-btn
+            color="green"
+            disabled
+          >
+            Save
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

@@ -1,16 +1,21 @@
 <!-- Changed from full-screen modal to right-side sidebar drawer -->
 <template>
   <Transition name="slide-fade">
-    <div v-if="open" class="cwo-overlay">
+    <div
+      v-if="open"
+      class="cwo-overlay"
+    >
       <!-- Sidebar drawer that slides in from right -->
       <div class="cwo-sidebar">
         <div class="cwo-header">
           <div class="header-content">
-            <h3 class="title">Create Field Job</h3>
+            <h3 class="title">
+              Create Field Job
+            </h3>
             <button
               class="close-btn"
-              @click="onClose"
               aria-label="Close sidebar"
+              @click="onClose"
             >
               <svg
                 width="24"
@@ -20,8 +25,18 @@
                 stroke="currentColor"
                 stroke-width="2"
               >
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
+                <line
+                  x1="18"
+                  y1="6"
+                  x2="6"
+                  y2="18"
+                />
+                <line
+                  x1="6"
+                  y1="6"
+                  x2="18"
+                  y2="18"
+                />
               </svg>
             </button>
           </div>
@@ -29,7 +44,10 @@
 
         <!-- Form content inside sidebar with proper scrolling -->
         <div class="cwo-body">
-          <CreateWorkOrder :embedded="true" @created="onCreated" />
+          <CreateWorkOrder
+            :embedded="true"
+            @created="onCreated"
+          />
         </div>
       </div>
     </div>

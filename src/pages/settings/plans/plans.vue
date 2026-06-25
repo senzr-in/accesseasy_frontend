@@ -13,17 +13,22 @@
               :key="plan.key"
               class="plan-tag"
               @click="showActivePlanModal = true"
-              >{{ plan.name }}</span
-            >
+            >{{ plan.name }}</span>
           </div>
         </div>
 
         <!-- Header controls including trial status, employee count, currency, billing toggle, and action buttons -->
         <div class="header-controls">
           <!-- Free trial badge and upgrade button -->
-          <div v-if="isFreeTrial" class="free-trial">
+          <div
+            v-if="isFreeTrial"
+            class="free-trial"
+          >
             <span class="free-trial-badge">🎉 Free Trial Active</span>
-            <button @click="handleUpgradeFromTrial" class="btn upgrade-btn">
+            <button
+              class="btn upgrade-btn"
+              @click="handleUpgradeFromTrial"
+            >
               Upgrade Now
             </button>
           </div>
@@ -31,32 +36,46 @@
           <!-- Employee count adjustment controls -->
           <div class="employees-control">
             <button
-              @click="adjustEmployees(-1)"
               :disabled="employees <= 1"
               class="btn employee-btn"
+              @click="adjustEmployees(-1)"
             >
               -
             </button>
             <div class="employee-count">
-              <div class="employee-number">{{ employees }}</div>
-              <div class="employee-label">employees</div>
+              <div class="employee-number">
+                {{ employees }}
+              </div>
+              <div class="employee-label">
+                employees
+              </div>
             </div>
             <button
-              @click="adjustEmployees(1)"
               :disabled="isFreeTrial && employees >= 5"
               class="btn employee-btn employee-btn-primary"
+              @click="adjustEmployees(1)"
             >
               +
             </button>
-            <div v-if="isFreeTrial && employees >= 5" class="trial-warning">
+            <div
+              v-if="isFreeTrial && employees >= 5"
+              class="trial-warning"
+            >
               Trial limit reached. Upgrade to add more employees.
             </div>
           </div>
 
           <!-- Currency selection dropdown -->
-          <select v-model="currency" class="currency-select">
-            <option value="USD">USD ($)</option>
-            <option value="INR">INR (₹)</option>
+          <select
+            v-model="currency"
+            class="currency-select"
+          >
+            <option value="USD">
+              USD ($)
+            </option>
+            <option value="INR">
+              INR (₹)
+            </option>
           </select>
 
           <!-- Billing cycle toggle (monthly/annual) -->
@@ -82,25 +101,25 @@
           <div class="header-actions">
             <button
               v-if="isFreeTrial"
-              @click="handleStartFreeTrial"
               class="btn start-trial-btn"
+              @click="handleStartFreeTrial"
             >
               Start Free Trial
             </button>
             <button
               v-else
-              @click="showPaymentModal = true"
               class="btn payment-btn"
+              @click="showPaymentModal = true"
             >
               Proceed to Payment
             </button>
             <button
               v-if="!isFreeTrial"
+              class="btn try-trial-btn"
               @click="
                 isFreeTrial = true;
                 employees = 5;
               "
-              class="btn try-trial-btn"
             >
               Try Free Trial Instead
             </button>
@@ -143,10 +162,10 @@
                         isFreeTrial
                           ? "Free"
                           : formatPrice(
-                              plan.perUser[currency][
-                                annual ? "annual" : "monthly"
-                              ],
-                            ) + `/user/${annual ? "year" : "month"}`
+                            plan.perUser[currency][
+                              annual ? "annual" : "monthly"
+                            ],
+                          ) + `/user/${annual ? "year" : "month"}`
                       }}
                     </div>
                     <div class="total-cost">
@@ -160,8 +179,8 @@
                     <div
                       v-if="
                         annual &&
-                        !isFreeTrial &&
-                        calculateAnnualSavingsPerPlan(plan) > 0
+                          !isFreeTrial &&
+                          calculateAnnualSavingsPerPlan(plan) > 0
                       "
                       class="savings"
                     >
@@ -173,7 +192,10 @@
                   </div>
                 </div>
                 <ul class="plan-features">
-                  <li v-for="feature in plan.features" :key="feature">
+                  <li
+                    v-for="feature in plan.features"
+                    :key="feature"
+                  >
                     {{ feature }}
                   </li>
                   <li
@@ -182,19 +204,22 @@
                     class="add-on-feature"
                   >
                     <input
+                      v-model="selectedAddOns"
                       type="checkbox"
                       :value="`${plan.key}_${addOn.key}`"
-                      v-model="selectedAddOns"
-                      @click.stop="toggleAddOn(plan.key, addOn.key)"
                       :disabled="!selectedPlans.has(plan.key) || isFreeTrial"
-                    />
+                      @click.stop="toggleAddOn(plan.key, addOn.key)"
+                    >
                     {{ addOn.name }} (+{{
                       formatPrice(
                         addOn.perUser[currency][annual ? "annual" : "monthly"],
                       )
                     }}/user/{{ annual ? "year" : "month" }})
                     <ul>
-                      <li v-for="feature in addOn.features" :key="feature">
+                      <li
+                        v-for="feature in addOn.features"
+                        :key="feature"
+                      >
                         {{ feature }}
                       </li>
                     </ul>
@@ -205,11 +230,16 @@
             <div class="plan-checkbox">
               <input
                 v-if="plan.key !== 'lite'"
-                type="checkbox"
                 v-model="selectedPlans"
+                type="checkbox"
                 :value="plan.key"
-              />
-              <div v-else class="required-label">Required</div>
+              >
+              <div
+                v-else
+                class="required-label"
+              >
+                Required
+              </div>
             </div>
           </div>
         </div>
@@ -217,11 +247,17 @@
     </div>
 
     <!-- Payment Modal -->
-    <div v-if="showPaymentModal" class="payment-modal">
+    <div
+      v-if="showPaymentModal"
+      class="payment-modal"
+    >
       <div class="payment-modal-content">
         <div class="modal-header">
           <h3>Complete Payment</h3>
-          <button @click="showPaymentModal = false" class="modal-close-btn">
+          <button
+            class="modal-close-btn"
+            @click="showPaymentModal = false"
+          >
             ×
           </button>
         </div>
@@ -230,7 +266,9 @@
         <div class="modal-plan-summary">
           <h4>Plan Summary</h4>
           <div class="billing-info">
-            <div class="label">Billing for</div>
+            <div class="label">
+              Billing for
+            </div>
             <div class="employees-count">
               {{ effectiveEmployees }} employees
             </div>
@@ -246,7 +284,9 @@
           </div>
 
           <div class="selected-plans-list">
-            <div class="label">Selected Plans:</div>
+            <div class="label">
+              Selected Plans:
+            </div>
             <div
               v-for="planKey in selectedPlans"
               :key="planKey"
@@ -261,24 +301,25 @@
               >
                 + Locate
               </span>
-              <span v-if="isFreeTrial" class="free-trial-badge-small"
-                >Free Trial</span
-              >
+              <span
+                v-if="isFreeTrial"
+                class="free-trial-badge-small"
+              >Free Trial</span>
               <span class="selected-plan-cost">
                 {{
                   isFreeTrial
                     ? "FREE"
                     : annual
                       ? formatPrice(
-                          calculatePlanCost(
-                            plansData.find((p) => p.key === planKey),
-                          ),
-                        ) + "/year"
+                        calculatePlanCost(
+                          plansData.find((p) => p.key === planKey),
+                        ),
+                      ) + "/year"
                       : formatPrice(
-                          calculatePlanCost(
-                            plansData.find((p) => p.key === planKey),
-                          ),
-                        ) + "/month"
+                        calculatePlanCost(
+                          plansData.find((p) => p.key === planKey),
+                        ),
+                      ) + "/month"
                 }}
               </span>
             </div>
@@ -317,7 +358,10 @@
                 isFreeTrial ? "FREE" : formatPrice(totalCost)
               }}</span>
             </div>
-            <div class="billing-note" v-if="!isFreeTrial">
+            <div
+              v-if="!isFreeTrial"
+              class="billing-note"
+            >
               {{ annual ? "Billed annually, save 20%" : "Billed monthly" }}
             </div>
           </div>
@@ -325,47 +369,72 @@
 
         <!-- Payment methods -->
         <div class="payment-methods">
-          <div class="method-label">For Indian Companies:</div>
+          <div class="method-label">
+            For Indian Companies:
+          </div>
           <button
-            @click="handlePayment('razorpay')"
             :disabled="isProcessingPayment"
             class="payment-method-btn razorpay-btn"
+            @click="handlePayment('razorpay')"
           >
-            <div class="method-icon">₹</div>
+            <div class="method-icon">
+              ₹
+            </div>
             <div class="method-info">
-              <div class="method-name">Razorpay</div>
-              <div class="method-desc">UPI, Cards, Net Banking</div>
+              <div class="method-name">
+                Razorpay
+              </div>
+              <div class="method-desc">
+                UPI, Cards, Net Banking
+              </div>
             </div>
           </button>
 
-          <div class="method-label">International:</div>
+          <div class="method-label">
+            International:
+          </div>
           <button
-            @click="handlePayment('stripe')"
             :disabled="isProcessingPayment"
             class="payment-method-btn stripe-btn"
+            @click="handlePayment('stripe')"
           >
-            <div class="method-icon">$</div>
+            <div class="method-icon">
+              $
+            </div>
             <div class="method-info">
-              <div class="method-name">Stripe</div>
-              <div class="method-desc">Cards, Apple Pay, Google Pay</div>
+              <div class="method-name">
+                Stripe
+              </div>
+              <div class="method-desc">
+                Cards, Apple Pay, Google Pay
+              </div>
             </div>
           </button>
         </div>
 
         <!-- Payment processing indicator -->
-        <div v-if="isProcessingPayment" class="processing-payment">
-          <div class="spinner"></div>
+        <div
+          v-if="isProcessingPayment"
+          class="processing-payment"
+        >
+          <div class="spinner" />
           <span>Processing Payment...</span>
         </div>
       </div>
     </div>
 
     <!-- Active Plan Details Modal -->
-    <div v-if="showActivePlanModal" class="active-plan-modal">
+    <div
+      v-if="showActivePlanModal"
+      class="active-plan-modal"
+    >
       <div class="active-plan-modal-content">
         <div class="modal-header">
           <h3>Active Plans Details</h3>
-          <button @click="showActivePlanModal = false" class="modal-close-btn">
+          <button
+            class="modal-close-btn"
+            @click="showActivePlanModal = false"
+          >
             ×
           </button>
         </div>

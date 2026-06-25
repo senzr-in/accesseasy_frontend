@@ -6,12 +6,17 @@
       class="w-1/3 p-4 bg-gray-50 border-r border-gray-200 h-screen overflow-y-auto"
     >
       <!-- Show loading state when fetching device details -->
-      <div v-if="loadingDeviceDetails" class="text-center p-8">
+      <div
+        v-if="loadingDeviceDetails"
+        class="text-center p-8"
+      >
         <v-progress-circular
           indeterminate
           color="primary"
-        ></v-progress-circular>
-        <p class="mt-2">Loading device details...</p>
+        />
+        <p class="mt-2">
+          Loading device details...
+        </p>
       </div>
 
       <!-- Show AddDeviceDetails only when not loading -->
@@ -27,9 +32,12 @@
     </div>
 
     <!-- Main Content -->
-    <div :class="showAddDevicePanel ? 'w-2/3' : 'w-full'" class="p-4">
+    <div
+      :class="showAddDevicePanel ? 'w-2/3' : 'w-full'"
+      class="p-4"
+    >
       <DataTableWrapper
-        :showSearch="true"
+        :show-search="true"
         :search-query="searchQuery"
         @update:search-query="searchQuery = $event"
       >
@@ -38,7 +46,7 @@
             variant="primary"
             size="md"
             text="Add Device"
-            :leftIcon="Plus"
+            :left-icon="Plus"
             @click="openAddDevicePanel"
           />
         </template>
@@ -52,7 +60,10 @@
         />
 
         <!-- Error -->
-        <div v-else-if="error" class="text-center p-8 text-red-500">
+        <div
+          v-else-if="error"
+          class="text-center p-8 text-red-500"
+        >
           Failed to load devices: {{ error }}
         </div>
 
@@ -61,11 +72,11 @@
           <DataTable
             :items="paginatedDevices"
             :columns="headers"
-            :showSelection="false"
+            :show-selection="false"
             :expandable="false"
             show-header
             :row-clickable="true"
-            @rowClick="handleRowClick"
+            @row-click="handleRowClick"
           >
             <!-- Assigned Doors Cell -->
             <template #cell-assignedDoors="{ item }">
@@ -90,7 +101,11 @@
                     variant="tonal"
                     class="mr-1 mb-1"
                   >
-                    <v-icon icon="mdi-door" size="12" class="mr-1" />
+                    <v-icon
+                      icon="mdi-door"
+                      size="12"
+                      class="mr-1"
+                    />
                     {{ item.assignedDoors[0] }}
                   </v-chip>
 
@@ -116,15 +131,18 @@
             :total-items="formattedDevices.length"
             :items-per-page="itemsPerPage"
             :current-page="currentPage"
+            class="mt-4"
             @page-change="handlePageChange"
             @items-per-page-change="handleItemsPerPageChange"
-            class="mt-4"
           />
         </div>
       </DataTableWrapper>
 
       <!-- Dialog: Show All Assigned Doors -->
-      <v-dialog v-model="showDoorViewDialog" max-width="400px">
+      <v-dialog
+        v-model="showDoorViewDialog"
+        max-width="400px"
+      >
         <v-card>
           <v-card-title class="pa-6 pb-4 dialog-header">
             <div class="d-flex align-center justify-space-between w-100">
@@ -133,10 +151,10 @@
               </h3>
               <v-btn
                 icon="mdi-close"
-                @click="showDoorViewDialog = false"
                 variant="text"
                 size="small"
                 class="rounded-lg dialog-close-btn"
+                @click="showDoorViewDialog = false"
               />
             </div>
           </v-card-title>
@@ -147,7 +165,11 @@
                 :key="index"
               >
                 <v-list-item-title>
-                  <v-icon icon="mdi-door" size="16" class="mr-2" />
+                  <v-icon
+                    icon="mdi-door"
+                    size="16"
+                    class="mr-2"
+                  />
                   {{ door }}
                 </v-list-item-title>
               </v-list-item>
@@ -160,8 +182,8 @@
               variant="danger"
               color="grey-darken-1"
               size="md"
-              @click="showDoorViewDialog = false"
               class="footer-btn"
+              @click="showDoorViewDialog = false"
             />
           </v-card-actions>
         </v-card>

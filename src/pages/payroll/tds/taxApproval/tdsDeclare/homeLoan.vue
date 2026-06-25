@@ -1,22 +1,41 @@
 <template>
   <div class="deductions-container">
-    <v-toolbar density="compact" color="grey-lighten-4">
-      <v-btn icon color="black" @click="handleClose">
+    <v-toolbar
+      density="compact"
+      color="grey-lighten-4"
+    >
+      <v-btn
+        icon
+        color="black"
+        @click="handleClose"
+      >
         <v-icon>mdi-arrow-left</v-icon>
       </v-btn>
-      <v-toolbar-title class="ml-4">Add TDSDetails</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-btn color="error" variant="text" class="mr-2" @click="handleClose">
+      <v-toolbar-title class="ml-4">
+        Add TDSDetails
+      </v-toolbar-title>
+      <v-spacer />
+      <v-btn
+        color="error"
+        variant="text"
+        class="mr-2"
+        @click="handleClose"
+      >
         CANCEL
       </v-btn>
     </v-toolbar>
     <!-- House Property Deductions Section -->
     <div class="section">
-      <h2 class="section-title">Deductions Under House Property</h2>
+      <h2 class="section-title">
+        Deductions Under House Property
+      </h2>
       <div class="info-text">
         Homeowners can claim a deduction of up to ₹2,00,000 on their home loan
         interest under Section 24. For more information, please
-        <a href="#" class="link">click here</a>.
+        <a
+          href="#"
+          class="link"
+        >click here</a>.
       </div>
       <v-data-table
         :headers="headers"
@@ -24,32 +43,47 @@
         class="elevation-1 mb-6"
         hide-default-footer
       >
-        <template v-slot:item.fileId="{ item }">
+        <template #item.fileId="{ item }">
           <td>
             <v-btn
               icon
               :disabled="!item.fileId"
-              @click="downloadFile(item.fileId)"
               title="Download Proof Document"
+              @click="downloadFile(item.fileId)"
             >
               <v-icon>mdi-download</v-icon>
             </v-btn>
           </td>
         </template>
-        <template v-slot:item.actions="{ item }">
+        <template #item.actions="{ item }">
           <td>
-            <v-icon small @click="deleteItem(item)" class="cursor-pointer"
-              >mdi-delete</v-icon
+            <v-icon
+              small
+              class="cursor-pointer"
+              @click="deleteItem(item)"
             >
+              mdi-delete
+            </v-icon>
           </td>
         </template>
-        <template v-slot:item.status="{ item }">
+        <template #item.status="{ item }">
           <td>
             <div v-if="item.status === 'pending' && userRole === 'Admin'">
-              <v-btn small color="green" class="mr-2" @click="acceptItem(item)"
-                >Accept</v-btn
+              <v-btn
+                small
+                color="green"
+                class="mr-2"
+                @click="acceptItem(item)"
               >
-              <v-btn small color="red" @click="rejectItem(item)">Reject</v-btn>
+                Accept
+              </v-btn>
+              <v-btn
+                small
+                color="red"
+                @click="rejectItem(item)"
+              >
+                Reject
+              </v-btn>
             </div>
             <div v-else>
               <v-chip color="pink lighten-4">
@@ -59,8 +93,14 @@
           </td>
         </template>
       </v-data-table>
-      <div class="action-buttons" v-if="userRole == 'Admin'">
-        <button class="add-btn" @click="openAddInvestmentDialog">
+      <div
+        v-if="userRole == 'Admin'"
+        class="action-buttons"
+      >
+        <button
+          class="add-btn"
+          @click="openAddInvestmentDialog"
+        >
           Add New Home Loan
         </button>
       </div>
@@ -68,7 +108,9 @@
 
     <!-- Section 80EE/80EEA Deductions -->
     <div class="section gray-bg">
-      <h2 class="section-title">Section 80EE/80EEA Deductions</h2>
+      <h2 class="section-title">
+        Section 80EE/80EEA Deductions
+      </h2>
       <div class="info-text">
         Section 80EE/80EEA allows further tax benefits for first time home
         buyers. Through these sections, an additional deduction of ₹1,50,000 can
@@ -79,7 +121,9 @@
 
     <!-- Section 80EE Investments -->
     <div class="section">
-      <h3 class="subsection-title">Investments under Section 80EE</h3>
+      <h3 class="subsection-title">
+        Investments under Section 80EE
+      </h3>
 
       <!-- Grid container -->
       <div class="grid-wrapper">
@@ -96,10 +140,18 @@
 
         <!-- Right: Amount table -->
         <div class="amounts-table-grid">
-          <div class="grid-item label">Declared Amount</div>
-          <div class="grid-item value">₹ {{ declareddeduction }}</div>
-          <div class="grid-item label">Approved Amount</div>
-          <div class="grid-item value">₹ {{ approveddeduction }}</div>
+          <div class="grid-item label">
+            Declared Amount
+          </div>
+          <div class="grid-item value">
+            ₹ {{ declareddeduction }}
+          </div>
+          <div class="grid-item label">
+            Approved Amount
+          </div>
+          <div class="grid-item value">
+            ₹ {{ approveddeduction }}
+          </div>
         </div>
       </div>
       <v-data-table
@@ -108,27 +160,31 @@
         class="elevation-1 mb-6"
         hide-default-footer
       >
-        <template v-slot:item.actions="{ item }">
+        <template #item.actions="{ item }">
           <td>
-            <v-icon small @click="deletededuction(item)" class="cursor-pointer"
-              >mdi-delete</v-icon
+            <v-icon
+              small
+              class="cursor-pointer"
+              @click="deletededuction(item)"
             >
+              mdi-delete
+            </v-icon>
           </td>
         </template>
-        <template v-slot:item.fileId="{ item }">
+        <template #item.fileId="{ item }">
           <td>
             <v-btn
               icon
               :disabled="!item.fileId"
-              @click="downloadFile(item.fileId)"
               title="Download Proof Document"
+              @click="downloadFile(item.fileId)"
             >
               <v-icon>mdi-download</v-icon>
             </v-btn>
           </td>
         </template>
 
-        <template v-slot:item.status="{ item }">
+        <template #item.status="{ item }">
           <td>
             <div v-if="item.status === 'pending' && userRole === 'Admin'">
               <v-btn
@@ -139,7 +195,11 @@
               >
                 Accept
               </v-btn>
-              <v-btn small color="red" @click="rejectDeduction(item)">
+              <v-btn
+                small
+                color="red"
+                @click="rejectDeduction(item)"
+              >
                 Reject
               </v-btn>
             </div>
@@ -153,8 +213,14 @@
       </v-data-table>
 
       <!-- Buttons -->
-      <div class="action-buttons" v-if="userRole == 'Admin'">
-        <button class="add-investment-btn" @click="homeDeductionOpen">
+      <div
+        v-if="userRole == 'Admin'"
+        class="action-buttons"
+      >
+        <button
+          class="add-investment-btn"
+          @click="homeDeductionOpen"
+        >
           Add Investment <span class="info-icon">ⓘ</span>
         </button>
       </div>
@@ -162,7 +228,9 @@
 
     <!-- Section 80EEA Investments -->
     <div class="section">
-      <h3 class="subsection-title">Investments under Section 80EE</h3>
+      <h3 class="subsection-title">
+        Investments under Section 80EE
+      </h3>
 
       <div class="grid-wrapper">
         <!-- Left: Bullet Points -->
@@ -176,10 +244,18 @@
           <li>Loan taken for the house must be Rs 35 lakh or less.</li>
         </ul>
         <div class="amounts-table-grid">
-          <div class="grid-item label">Declared Amount</div>
-          <div class="grid-item value">₹ {{ declaredinvestment }}</div>
-          <div class="grid-item label">Approved Amount</div>
-          <div class="grid-item value">₹ {{ approvedinvestment }}</div>
+          <div class="grid-item label">
+            Declared Amount
+          </div>
+          <div class="grid-item value">
+            ₹ {{ declaredinvestment }}
+          </div>
+          <div class="grid-item label">
+            Approved Amount
+          </div>
+          <div class="grid-item value">
+            ₹ {{ approvedinvestment }}
+          </div>
         </div>
       </div>
       <v-data-table
@@ -188,26 +264,30 @@
         class="elevation-1 mb-6"
         hide-default-footer
       >
-        <template v-slot:item.fileId="{ item }">
+        <template #item.fileId="{ item }">
           <td>
             <v-btn
               icon
               :disabled="!item.fileId"
-              @click="downloadFile(item.fileId)"
               title="Download Proof Document"
+              @click="downloadFile(item.fileId)"
             >
               <v-icon>mdi-download</v-icon>
             </v-btn>
           </td>
         </template>
-        <template v-slot:item.actions="{ item }">
+        <template #item.actions="{ item }">
           <td>
-            <v-icon small @click="deleteinvestment(item)" class="cursor-pointer"
-              >mdi-delete</v-icon
+            <v-icon
+              small
+              class="cursor-pointer"
+              @click="deleteinvestment(item)"
             >
+              mdi-delete
+            </v-icon>
           </td>
         </template>
-        <template v-slot:item.status="{ item }">
+        <template #item.status="{ item }">
           <td>
             <div v-if="item.status === 'pending' && userRole === 'Admin'">
               <v-btn
@@ -218,7 +298,11 @@
               >
                 Accept
               </v-btn>
-              <v-btn small color="red" @click="rejectInvestment(item)">
+              <v-btn
+                small
+                color="red"
+                @click="rejectInvestment(item)"
+              >
                 Reject
               </v-btn>
             </div>
@@ -232,18 +316,30 @@
       </v-data-table>
 
       <!-- Buttons -->
-      <div class="action-buttons" v-if="userRole == 'Admin'">
-        <button class="add-investment-btn" @click="homeInvestmentOpen">
+      <div
+        v-if="userRole == 'Admin'"
+        class="action-buttons"
+      >
+        <button
+          class="add-investment-btn"
+          @click="homeInvestmentOpen"
+        >
           Add Investment <span class="info-icon">ⓘ</span>
         </button>
       </div>
 
-      <v-dialog v-model="showDeduction" max-width="700px">
+      <v-dialog
+        v-model="showDeduction"
+        max-width="700px"
+      >
         <v-card>
           <v-card-title>
             <span class="text-h5">New Home Loan Declaration</span>
-            <v-spacer></v-spacer>
-            <v-btn icon @click="closeDialog">
+            <v-spacer />
+            <v-btn
+              icon
+              @click="closeDialog"
+            >
               <v-icon>mdi-close</v-icon>
             </v-btn>
           </v-card-title>
@@ -251,7 +347,10 @@
           <v-card-text>
             <v-container>
               <v-row>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model.number="loanDeduction.amountPaid"
                     label="Amount Paid *"
@@ -261,7 +360,10 @@
                     :rules="[(v) => !!v || 'Amount Paid is required']"
                   />
                 </v-col>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model="loanDeduction.comments"
                     label="Comments"
@@ -274,43 +376,58 @@
               
                 <v-col cols="12">
                   <v-file-input
-                    @change="uploadFile"
                     label="Upload Proof Document"
                     variant="outlined"
                     color="black"
                     show-size
+                    @change="uploadFile"
                   />
                 </v-col>
-                 <v-col cols="12">
-            <v-card variant="outlined" class="pa-4 bg-grey-lighten-5">
-              <v-checkbox
-                v-model="loanDeduction.disclaimer"
-                color="black"
-                :rules="[(v) => !!v || 'You must accept the disclaimer']"
-              >
-                <template v-slot:label>
-                  <div>
-                    <strong>Disclaimer:</strong> I hereby declare that all the information provided and documents uploaded are true and correct to the best of my knowledge. I understand that any false statement may result in disciplinary action.
-                  </div>
-                </template>
-              </v-checkbox>
-            </v-card>
-          </v-col>
-           </v-row>   
+                <v-col cols="12">
+                  <v-card
+                    variant="outlined"
+                    class="pa-4 bg-grey-lighten-5"
+                  >
+                    <v-checkbox
+                      v-model="loanDeduction.disclaimer"
+                      color="black"
+                      :rules="[(v) => !!v || 'You must accept the disclaimer']"
+                    >
+                      <template #label>
+                        <div>
+                          <strong>Disclaimer:</strong> I hereby declare that all the information provided and documents uploaded are true and correct to the best of my knowledge. I understand that any false statement may result in disciplinary action.
+                        </div>
+                      </template>
+                    </v-checkbox>
+                  </v-card>
+                </v-col>
+              </v-row>   
             </v-container>
           </v-card-text>
 
           <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="grey darken-1" text @click="closeDialogDeduction"
-              >Cancel</v-btn
+            <v-spacer />
+            <v-btn
+              color="grey darken-1"
+              text
+              @click="closeDialogDeduction"
             >
-            <v-btn color="primary" @click="homeDeduction">Add Home Loan</v-btn>
+              Cancel
+            </v-btn>
+            <v-btn
+              color="primary"
+              @click="homeDeduction"
+            >
+              Add Home Loan
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
 
-      <v-dialog v-model="showInvestment" max-width="700px">
+      <v-dialog
+        v-model="showInvestment"
+        max-width="700px"
+      >
         <v-card>
           <v-card-title>
             <span class="text-h5">New Home Loan Declaration</span>
@@ -319,7 +436,10 @@
           <v-card-text>
             <v-container>
               <v-row>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model.number="loanDeduction.amountPaid"
                     label="Amount Paid *"
@@ -329,7 +449,10 @@
                     :rules="[(v) => !!v || 'Amount Paid is required']"
                   />
                 </v-col>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model="loanDeduction.comments"
                     label="Comments"
@@ -340,47 +463,65 @@
        
                 <v-col cols="12">
                   <v-file-input
-                    @change="uploadFile"
                     label="Upload Proof Document"
                     variant="outlined"
                     color="black"
                     show-size
+                    @change="uploadFile"
                   />
                 </v-col>
-                 <v-col cols="12">
-            <v-card variant="outlined" class="pa-4 bg-grey-lighten-5">
-              <v-checkbox
-                v-model="loanDeduction.disclaimer"
-                color="black"
-                :rules="[(v) => !!v || 'You must accept the disclaimer']"
-              >
-                <template v-slot:label>
-                  <div>
-                    <strong>Disclaimer:</strong> I hereby declare that all the information provided and documents uploaded are true and correct to the best of my knowledge. I understand that any false statement may result in disciplinary action.
-                  </div>
-                </template>
-              </v-checkbox>
-            </v-card>
-          </v-col>
+                <v-col cols="12">
+                  <v-card
+                    variant="outlined"
+                    class="pa-4 bg-grey-lighten-5"
+                  >
+                    <v-checkbox
+                      v-model="loanDeduction.disclaimer"
+                      color="black"
+                      :rules="[(v) => !!v || 'You must accept the disclaimer']"
+                    >
+                      <template #label>
+                        <div>
+                          <strong>Disclaimer:</strong> I hereby declare that all the information provided and documents uploaded are true and correct to the best of my knowledge. I understand that any false statement may result in disciplinary action.
+                        </div>
+                      </template>
+                    </v-checkbox>
+                  </v-card>
+                </v-col>
               </v-row>
             </v-container>
           </v-card-text>
 
           <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="grey darken-1" text @click="closeDialogDeduction"
-              >Cancel</v-btn
+            <v-spacer />
+            <v-btn
+              color="grey darken-1"
+              text
+              @click="closeDialogDeduction"
             >
-            <v-btn color="primary" @click="homeInvestment">Add Home Loan</v-btn>
+              Cancel
+            </v-btn>
+            <v-btn
+              color="primary"
+              @click="homeInvestment"
+            >
+              Add Home Loan
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
-      <v-dialog v-model="showDialog" max-width="600px">
+      <v-dialog
+        v-model="showDialog"
+        max-width="600px"
+      >
         <v-card>
           <v-card-title>
             <span class="text-h5">New Home Loan Declaration</span>
-            <v-spacer></v-spacer>
-            <v-btn icon @click="closeDialog">
+            <v-spacer />
+            <v-btn
+              icon
+              @click="closeDialog"
+            >
               <v-icon>mdi-close</v-icon>
             </v-btn>
           </v-card-title>
@@ -388,86 +529,116 @@
           <v-card-text>
             <v-container>
               <v-row>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model.number="loanForm.amountPaid"
                     label="Amount Paid *"
                     variant="outlined"
                     color="black"
                     :rules="[(v) => !!v || 'Monthly Rent is required']"
-                  ></v-text-field>
+                  />
                 </v-col>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model="loanForm.lenderName"
                     label="Lender Name *"
                     variant="outlined"
                     color="black"
                     :rules="[(v) => !!v || 'Monthly Rent is required']"
-                  ></v-text-field>
+                  />
                 </v-col>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model="loanForm.lenderPAN"
                     label="Lender PAN *"
                     variant="outlined"
                     color="black"
                     :rules="[(v) => !!v || 'Monthly Rent is required']"
-                  ></v-text-field>
+                  />
                 </v-col>
               
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model="loanForm.lenderAddress"
                     label="Lender Address *"
                     variant="outlined"
                     color="black"
                     :rules="[(v) => !!v || 'Monthly Rent is required']"
-                  ></v-text-field>
+                  />
                 </v-col>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model="loanForm.comments"
                     label="Comments"
                     variant="outlined"
                     color="black"
-                  ></v-text-field>
+                  />
                 </v-col>
             
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-file-input
-                    @change="uploadFile"
                     label="Upload Proof Document"
                     variant="outlined"
                     color="black"
                     show-size
+                    @change="uploadFile"
                   />
                 </v-col>
                 <v-col cols="12">
-            <v-card variant="outlined" class="pa-4 bg-grey-lighten-5">
-              <v-checkbox
-                v-model="loanForm.disclaimer"
-                color="black"
-                :rules="[(v) => !!v || 'You must accept the disclaimer']"
-              >
-                <template v-slot:label>
-                  <div>
-                    <strong>Disclaimer:</strong> I hereby declare that all the information provided and documents uploaded are true and correct to the best of my knowledge. I understand that any false statement may result in disciplinary action.
-                  </div>
-                </template>
-              </v-checkbox>
-            </v-card>
-          </v-col>
+                  <v-card
+                    variant="outlined"
+                    class="pa-4 bg-grey-lighten-5"
+                  >
+                    <v-checkbox
+                      v-model="loanForm.disclaimer"
+                      color="black"
+                      :rules="[(v) => !!v || 'You must accept the disclaimer']"
+                    >
+                      <template #label>
+                        <div>
+                          <strong>Disclaimer:</strong> I hereby declare that all the information provided and documents uploaded are true and correct to the best of my knowledge. I understand that any false statement may result in disciplinary action.
+                        </div>
+                      </template>
+                    </v-checkbox>
+                  </v-card>
+                </v-col>
               </v-row>
             </v-container>
           </v-card-text>
 
           <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="grey darken-1" text @click="closeDialog">
+            <v-spacer />
+            <v-btn
+              color="grey darken-1"
+              text
+              @click="closeDialog"
+            >
               Cancel
             </v-btn>
-            <v-btn color="primary" @click="addHomeLoan"> Add Home Loan</v-btn>
+            <v-btn
+              color="primary"
+              @click="addHomeLoan"
+            >
+              Add Home Loan
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>

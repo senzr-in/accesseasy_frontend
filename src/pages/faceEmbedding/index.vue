@@ -10,7 +10,9 @@
             Face Management
             <Users class="w-6 h-6 text-emerald-600 dark:text-emerald-500" />
           </h1>
-          <p class="text-slate-500 dark:text-slate-400 mt-1">Manage AI biometric face templates for secure identification.</p>
+          <p class="text-slate-500 dark:text-slate-400 mt-1">
+            Manage AI biometric face templates for secure identification.
+          </p>
         </div>
       </div>
       <div class="flex items-center gap-2 flex-wrap">
@@ -36,26 +38,36 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <!-- Total Enrolled -->
       <div class="rounded-xl border border-emerald-200 dark:border-emerald-500/20 bg-white dark:bg-slate-900 p-4 shadow-sm">
-        <p class="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider mb-1">Total Enrolled</p>
-        <p class="text-2xl font-black text-slate-900 dark:text-white">{{ embeddings.length }}</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider mb-1">
+          Total Enrolled
+        </p>
+        <p class="text-2xl font-black text-slate-900 dark:text-white">
+          {{ embeddings.length }}
+        </p>
       </div>
       <!-- High Quality -->
       <div class="rounded-xl border border-emerald-200 dark:border-emerald-500/20 bg-white dark:bg-slate-900 p-4 shadow-sm">
-        <p class="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider mb-1">High Quality</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider mb-1">
+          High Quality
+        </p>
         <p class="text-2xl font-black text-emerald-600 dark:text-emerald-500">
           {{ embeddings.filter(e => e.qualityScore > 0.9).length }}
         </p>
       </div>
       <!-- AI Generated -->
       <div class="rounded-xl border border-emerald-200 dark:border-emerald-500/20 bg-white dark:bg-slate-900 p-4 shadow-sm">
-        <p class="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider mb-1">AI Generated</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider mb-1">
+          AI Generated
+        </p>
         <p class="text-2xl font-black text-blue-600 dark:text-blue-500">
           {{ embeddings.filter(e => e.captureMethod === 'AI').length }}
         </p>
       </div>
       <!-- Mobile Enrolled -->
       <div class="rounded-xl border border-emerald-200 dark:border-emerald-500/20 bg-white dark:bg-slate-900 p-4 shadow-sm">
-        <p class="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider mb-1">Mobile Enrolled</p>
+        <p class="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider mb-1">
+          Mobile Enrolled
+        </p>
         <p class="text-2xl font-black text-amber-600 dark:text-amber-500">
           {{ embeddings.filter(e => e.captureMethod === 'MOBILE').length }}
         </p>
@@ -76,7 +88,7 @@
             type="text"
             placeholder="Search employees..."
             class="w-full h-10 pl-9 pr-4 rounded-md border border-emerald-100 dark:border-emerald-500/20 bg-slate-50 dark:bg-slate-950 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all text-slate-900 dark:text-white placeholder:text-slate-400"
-          />
+          >
         </div>
       </div>
 
@@ -84,22 +96,35 @@
         <table class="w-full text-left border-collapse whitespace-nowrap">
           <thead class="bg-slate-50 dark:bg-slate-950">
             <tr>
-              <th class="px-6 py-4 text-xs font-semibold text-slate-600 dark:text-slate-400">Employee</th>
-              <th class="px-6 py-4 text-xs font-semibold text-slate-600 dark:text-slate-400">Method</th>
-              <th class="px-6 py-4 text-xs font-semibold text-slate-600 dark:text-slate-400">Quality</th>
-              <th class="px-6 py-4 text-xs font-semibold text-slate-600 dark:text-slate-400">Created At</th>
-              <th class="px-6 py-4 text-xs font-semibold text-right text-slate-600 dark:text-slate-400">Actions</th>
+              <th class="px-6 py-4 text-xs font-semibold text-slate-600 dark:text-slate-400">
+                Employee
+              </th>
+              <th class="px-6 py-4 text-xs font-semibold text-slate-600 dark:text-slate-400">
+                Method
+              </th>
+              <th class="px-6 py-4 text-xs font-semibold text-slate-600 dark:text-slate-400">
+                Quality
+              </th>
+              <th class="px-6 py-4 text-xs font-semibold text-slate-600 dark:text-slate-400">
+                Created At
+              </th>
+              <th class="px-6 py-4 text-xs font-semibold text-right text-slate-600 dark:text-slate-400">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 dark:divide-slate-800/50">
             <tr v-if="filteredEmbeddings.length === 0">
-              <td colspan="5" class="px-6 py-12 text-center text-slate-500 dark:text-slate-400 italic text-sm">
+              <td
+                colspan="5"
+                class="px-6 py-12 text-center text-slate-500 dark:text-slate-400 italic text-sm"
+              >
                 No biometric templates found.
               </td>
             </tr>
             <tr 
-              v-else
-              v-for="emb in filteredEmbeddings" 
+              v-for="emb in filteredEmbeddings"
+              v-else 
               :key="emb.id" 
               class="hover:bg-emerald-50/50 dark:hover:bg-emerald-500/[0.02] transition-colors"
             >
@@ -112,7 +137,9 @@
                     <div class="font-bold text-sm text-slate-900 dark:text-white">
                       {{ emb.employee.firstName }} {{ emb.employee.lastName }}
                     </div>
-                    <div class="text-xs text-slate-500 dark:text-slate-400">ID: {{ emb.employee.employeeId }}</div>
+                    <div class="text-xs text-slate-500 dark:text-slate-400">
+                      ID: {{ emb.employee.employeeId }}
+                    </div>
                   </div>
                 </div>
               </td>
@@ -131,18 +158,18 @@
                       class="h-full rounded-full transition-all duration-1000"
                       :class="emb.qualityScore > 0.9 ? 'bg-emerald-500' : emb.qualityScore > 0.8 ? 'bg-amber-500' : 'bg-rose-500'"
                       :style="{ width: `${emb.qualityScore * 100}%` }"
-                    ></div>
+                    />
                   </div>
                   <span class="text-xs font-bold text-slate-700 dark:text-slate-300">{{ emb.qualityScore.toFixed(2) }}</span>
                 </div>
               </td>
               <td class="px-6 py-4 text-xs text-slate-500 dark:text-slate-400">
-                 {{ new Date(emb.createdAt).toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) }}
+                {{ new Date(emb.createdAt).toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) }}
               </td>
               <td class="px-6 py-4 text-right">
                 <button 
-                  @click="handleDelete(emb)"
                   class="h-8 w-8 inline-flex items-center justify-center rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
+                  @click="handleDelete(emb)"
                 >
                   <Trash2 class="w-4 h-4" />
                 </button>

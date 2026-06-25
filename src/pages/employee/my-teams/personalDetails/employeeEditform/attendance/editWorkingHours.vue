@@ -14,15 +14,18 @@
         Go to Shift details
       </v-btn>
     </div> -->
-    <v-card flat class="pa-4">
+    <v-card
+      flat
+      class="pa-4"
+    >
       <v-card-text class="scrollable">
         <!-- Using DataTable Component -->
         <DataTable
           :items="internalWeekDays"
           :columns="tableColumns"
-          :showSelection="false"
-          :rowClickable="true"
-          @rowClick="handleRowClick"
+          :show-selection="false"
+          :row-clickable="true"
+          @row-click="handleRowClick"
         >
           <!-- Expanded content slot for each day -->
           <template #expanded-content="{ item: day }">
@@ -37,10 +40,10 @@
                       v-model="day.isWorking"
                       color="#059367"
                       inset
-                      @change="updateWeekDays"
                       class="custom-switch ma-0 pa-0"
                       hide-details
-                    ></v-switch>
+                      @change="updateWeekDays"
+                    />
                     <span
                       :class="
                         day.isWorking
@@ -73,16 +76,19 @@
                       :loading="
                         loadingStates.shifts && selectedDay?.key === day.key
                       "
-                      @click:append-inner="openManageShifts(day)"
-                      @click="openManageShifts(day)"
                       hide-details
                       class="shift-select-field"
-                    ></v-text-field>
+                      @click:append-inner="openManageShifts(day)"
+                      @click="openManageShifts(day)"
+                    />
                     <span class="time-display ml-2">{{
                       getTimeDisplay(day)
                     }}</span>
                   </div>
-                  <div v-else class="text-grey">
+                  <div
+                    v-else
+                    class="text-grey"
+                  >
                     Day off - no shifts available
                   </div>
                 </div>
@@ -92,21 +98,26 @@
 
           <!-- Custom cell slots for each column -->
           <template #cell-day="{ item: day }">
-            <div class="day-cell">{{ day.name }}</div>
+            <div class="day-cell">
+              {{ day.name }}
+            </div>
           </template>
 
           <template #cell-status="{ item: day }">
-            <div class="status-cell" @click.stop>
+            <div
+              class="status-cell"
+              @click.stop
+            >
               <div class="d-flex align-center">
                 <v-switch
                   v-model="day.isWorking"
                   color="#059367"
                   inset
-                  @change="updateWeekDays"
-                  @click.stop
                   class="custom-switch ma-0 pa-0"
                   hide-details
-                ></v-switch>
+                  @change="updateWeekDays"
+                  @click.stop
+                />
                 <span
                   :class="
                     day.isWorking
@@ -134,12 +145,15 @@
                   : 'mdi-chevron-down'
               "
               :loading="loadingStates.shifts && selectedDay?.key === day.key"
-              @click:append-inner="openManageShifts(day)"
-              @click="openManageShifts(day)"
               hide-details
               class="shift-select-field clickable-field"
+              @click:append-inner="openManageShifts(day)"
+              @click="openManageShifts(day)"
             />
-            <span v-else class="text-grey">—</span>
+            <span
+              v-else
+              class="text-grey"
+            >—</span>
           </template>
 
           <template #cell-time="{ item: day }">
@@ -157,7 +171,11 @@
     </v-card>
 
     <!-- Manage Shifts Dialog -->
-    <v-dialog v-model="showManageShiftsDialog" width="700" persistent>
+    <v-dialog
+      v-model="showManageShiftsDialog"
+      width="700"
+      persistent
+    >
       <v-card>
         <v-card-title class="text-h5 pb-2">
           Manage Available Shifts - {{ selectedDay?.name }}
@@ -165,20 +183,34 @@
             icon
             variant="text"
             size="large"
-            @click="closeManageShiftsDialog"
             class="float-right"
+            @click="closeManageShiftsDialog"
           >
-            <v-icon size="24px">mdi-close</v-icon>
+            <v-icon size="24px">
+              mdi-close
+            </v-icon>
           </v-btn>
         </v-card-title>
-        <v-card-text class="pt-4" style="max-height: 60vh; overflow-y: auto">
-          <div v-if="loadingShifts" class="text-center pa-4">
-            <v-progress-circular indeterminate size="48"></v-progress-circular>
+        <v-card-text
+          class="pt-4"
+          style="max-height: 60vh; overflow-y: auto"
+        >
+          <div
+            v-if="loadingShifts"
+            class="text-center pa-4"
+          >
+            <v-progress-circular
+              indeterminate
+              size="48"
+            />
           </div>
           <div v-else>
             <!-- Selection Info -->
             <div class="selection-info mb-4">
-              <v-chip color="primary" variant="tonal">
+              <v-chip
+                color="primary"
+                variant="tonal"
+              >
                 {{ selectedDay?.shifts?.length || 0 }} shifts selected
               </v-chip>
             </div>
@@ -190,7 +222,7 @@
                 class="mb-3 shift-list-item"
                 :class="{ 'shift-selected': isShiftSelected(shift) }"
               >
-                <template v-slot:default>
+                <template #default>
                   <v-list-item-title
                     class="d-flex align-center justify-content-between py-2 flex-wrap"
                   >
@@ -209,7 +241,7 @@
                         <div
                           v-if="
                             shift.breakTypes &&
-                            formatBreakTypes(shift.breakTypes).length > 0
+                              formatBreakTypes(shift.breakTypes).length > 0
                           "
                           class="break-time ml-2"
                         >
@@ -225,7 +257,10 @@
                             </span>
                           </small> -->
                         </div>
-                        <div v-else class="break-time ml-2">
+                        <div
+                          v-else
+                          class="break-time ml-2"
+                        >
                           <small>No breaks</small>
                         </div>
                       </span>
@@ -268,8 +303,8 @@
                   color="grey"
                   variant="text"
                   size="large"
-                  @click="resetSelectedDay"
                   class="mr-2"
+                  @click="resetSelectedDay"
                 >
                   Reset
                 </v-btn>

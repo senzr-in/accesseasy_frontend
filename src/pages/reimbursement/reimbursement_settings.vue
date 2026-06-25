@@ -2,14 +2,14 @@
   <div class="transport-settings-page">
     <div class="page-header">
       <div class="header-content">
-        <div class="header-text"></div>
+        <div class="header-text" />
         <div class="header-actions">
           <BaseButton
             variant="primary"
             :left-icon="PlusIcon"
-            @click="openAddModal"
             text="Add Setting"
             :loading="externalLoading"
+            @click="openAddModal"
           />
         </div>
       </div>
@@ -34,7 +34,9 @@
           :row-clickable="false"
         >
           <!-- Rate per KM Cell -->
-          <template #cell-ratePerKm="{ value }"> {{ value }} /km </template>
+          <template #cell-ratePerKm="{ value }">
+            {{ value }} /km
+          </template>
 
           <!-- Actions Cell -->
           <template #cell-actions="{ item }">
@@ -56,7 +58,10 @@
         </DataTable>
 
         <!-- Pagination -->
-        <div class="pagination-wrapper" v-if="!loading">
+        <div
+          v-if="!loading"
+          class="pagination-wrapper"
+        >
           <CustomPagination
             v-model:page="currentPage"
             v-model:items-per-page="itemsPerPage"
@@ -68,7 +73,10 @@
     </div>
 
     <!-- Add/Edit Modal (kept inline to match original structure, but adapted) -->
-    <div v-if="showModal" class="modal">
+    <div
+      v-if="showModal"
+      class="modal"
+    >
       <div class="modal-content">
         <h3>
           {{
@@ -77,36 +85,49 @@
               : "Edit Transport Setting"
           }}
         </h3>
-        <div class="title"></div>
+        <div class="title" />
         <form
           @submit.prevent="modalMode === 'add' ? addSetting() : updateSetting()"
         >
           <div class="form-group">
             <label for="transportType">Transport Type</label>
             <select
-              v-model="currentSetting.transportName"
               id="transportType"
+              v-model="currentSetting.transportName"
               required
               class="form-select"
             >
-              <option value="" disabled>Select a transport type</option>
-              <option value="Bus">Bus</option>
-              <option value="Bike">Bike</option>
-              <option value="Car">Car</option>
-              <option value="Others">Others</option>
+              <option
+                value=""
+                disabled
+              >
+                Select a transport type
+              </option>
+              <option value="Bus">
+                Bus
+              </option>
+              <option value="Bike">
+                Bike
+              </option>
+              <option value="Car">
+                Car
+              </option>
+              <option value="Others">
+                Others
+              </option>
             </select>
           </div>
           <div class="form-group">
             <label for="rate">Rate per KM</label>
             <input
-              v-model.number="currentSetting.ratePerKm"
               id="rate"
+              v-model.number="currentSetting.ratePerKm"
               type="number"
               step="0.01"
               min="0"
               placeholder="e.g., 10.50"
               required
-            />
+            >
           </div>
           <div class="modal-buttons">
             <button
@@ -119,8 +140,8 @@
             <button
               type="button"
               class="cancel-button"
-              @click="closeModal"
               :disabled="modalLoading"
+              @click="closeModal"
             >
               Cancel
             </button>

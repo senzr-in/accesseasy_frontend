@@ -2,7 +2,11 @@
 <template>
   <Teleport to="body">
     <Transition name="modal">
-      <div v-if="show" class="modal-overlay" @click.self="$emit('close')">
+      <div
+        v-if="show"
+        class="modal-overlay"
+        @click.self="$emit('close')"
+      >
         <div class="modal-container">
           <div class="modal-content">
             <div class="modal-header">
@@ -18,8 +22,8 @@
               <BaseButton
                 variant="secondary"
                 text="Close"
-                @click="$emit('close')"
                 :disabled="loading"
+                @click="$emit('close')"
               />
               <BaseButton
                 variant="danger"

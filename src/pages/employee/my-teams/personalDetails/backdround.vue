@@ -2,10 +2,10 @@
   <div class="background-verification">
     <v-row>
       <v-col
-        cols="12"
-        md="6"
         v-for="doc in verificationFields"
         :key="doc.field"
+        cols="12"
+        md="6"
       >
         <v-card
           class="verification-card"
@@ -14,14 +14,21 @@
         >
           <v-card-text>
             <div class="d-flex justify-space-between align-center mb-2">
-              <div class="text-h6">{{ doc.title }}</div>
+              <div class="text-h6">
+                {{ doc.title }}
+              </div>
               <v-chip
                 v-if="isVerified(doc.field)"
                 color="success"
                 size="small"
                 class="verified-chip"
               >
-                <v-icon start size="small">mdi-check-circle</v-icon>
+                <v-icon
+                  start
+                  size="small"
+                >
+                  mdi-check-circle
+                </v-icon>
                 Verified
               </v-chip>
               <v-chip
@@ -38,7 +45,9 @@
               {{ doc.description }}
             </div>
             <div class="verification-field-container">
-              <div class="verification-field-label">{{ doc.title }}</div>
+              <div class="verification-field-label">
+                {{ doc.title }}
+              </div>
               <div class="verification-input-group">
                 <v-text-field
                   v-model="formData[doc.field]"
@@ -52,7 +61,7 @@
                   bg-color="white"
                   @input="clearError(doc.field)"
                 >
-                  <template v-slot:append>
+                  <template #append>
                     <v-icon
                       v-if="isVerified(doc.field)"
                       color="success"
@@ -66,8 +75,8 @@
                   v-if="!isVerified(doc.field)"
                   color="primary"
                   class="verify-btn"
-                  @click="verifyDocument(doc.field)"
                   :disabled="!isFieldValid(doc.field)"
+                  @click="verifyDocument(doc.field)"
                 >
                   VERIFY
                 </v-btn>
@@ -77,7 +86,11 @@
               v-if="isVerified(doc.field)"
               class="verification-success-message"
             >
-              <v-icon color="success" size="small" class="mr-1">
+              <v-icon
+                color="success"
+                size="small"
+                class="mr-1"
+              >
                 mdi-check-circle
               </v-icon>
               <span>Verification successful</span>

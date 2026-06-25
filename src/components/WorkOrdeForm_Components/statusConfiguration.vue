@@ -8,7 +8,9 @@
             <InfoIcon class="w-8 h-8" />
           </div>
           <div class="guide-text">
-            <h3 class="guide-title">Workflow Configuration</h3>
+            <h3 class="guide-title">
+              Workflow Configuration
+            </h3>
             <p class="guide-description">
               Define which roles can change work order status and configure
               additional features.
@@ -20,7 +22,9 @@
       <!-- ✅ Form Visibility -->
       <div class="status-item enhanced-status-item">
         <div class="status-header">
-          <h4 class="status-name">Role Based Form Visibility</h4>
+          <h4 class="status-name">
+            Role Based Form Visibility
+          </h4>
         </div>
 
         <div class="status-config-grid">
@@ -39,12 +43,12 @@
                         role.name,
                       )
                     "
+                    class="toggle-input"
                     @change="
                       toggleFormVisibility(role.name, $event.target.checked)
                     "
-                    class="toggle-input"
-                  />
-                  <span class="toggle-slider toggle-slider-small"></span>
+                  >
+                  <span class="toggle-slider toggle-slider-small" />
                 </label>
                 <span class="toggle-label">{{ role.name }}</span>
               </div>
@@ -56,7 +60,9 @@
       <!-- ✅ Additional Features (Booleans) -->
       <div class="status-item enhanced-status-item">
         <div class="status-header">
-          <h4 class="status-name">Additional Features To Enable</h4>
+          <h4 class="status-name">
+            Additional Features To Enable
+          </h4>
         </div>
 
         <div class="status-config-grid">
@@ -70,14 +76,14 @@
               >
                 <label class="toggle-switch">
                   <input
-                    type="checkbox"
                     v-model="
                       selectedForm.custom_FormTemplate.shared_properties
                         .booleans[key]
                     "
+                    type="checkbox"
                     class="toggle-input"
-                  />
-                  <span class="toggle-slider toggle-slider-small"></span>
+                  >
+                  <span class="toggle-slider toggle-slider-small" />
                 </label>
                 <span class="toggle-label">{{ formatLabel(key) }}</span>
               </div>
@@ -94,7 +100,9 @@
         class="status-item enhanced-status-item"
       >
         <div class="status-header">
-          <h4 class="status-name">{{ statusKey }}</h4>
+          <h4 class="status-name">
+            {{ statusKey }}
+          </h4>
         </div>
 
         <div class="status-config-grid">
@@ -104,24 +112,25 @@
               <div class="toggle-item">
                 <label class="toggle-switch">
                   <input
-                    type="checkbox"
                     v-model="transition.enabled"
+                    type="checkbox"
                     class="toggle-input"
-                  />
-                  <span class="toggle-slider toggle-slider-small"></span>
+                  >
+                  <span class="toggle-slider toggle-slider-small" />
                 </label>
                 <span class="toggle-label">Enable Auto-Closure</span>
               </div>
-              <div v-if="transition.enabled" class="form-group mt-4">
-                <label class="form-label"
-                  >Max Days Allowed After Due Date</label
-                >
+              <div
+                v-if="transition.enabled"
+                class="form-group mt-4"
+              >
+                <label class="form-label">Max Days Allowed After Due Date</label>
                 <input
-                  type="number"
                   v-model.number="transition.max_days_allowed"
+                  type="number"
                   min="1"
                   class="form-input form-select-sm"
-                />
+                >
                 <div class="field-help">
                   Form will automatically close if due date is exceeded by this
                   many days.
@@ -131,7 +140,10 @@
           </template>
 
           <!-- Role-Based Allowed Transitions -->
-          <div class="status-roles" v-else>
+          <div
+            v-else
+            class="status-roles"
+          >
             <label class="section-label">Allowed Roles</label>
             <div class="toggle-group">
               <div
@@ -145,6 +157,7 @@
                     :checked="
                       transition.can_set_by_roles?.includes(role.name) || false
                     "
+                    class="toggle-input"
                     @change="
                       toggleStatusRole(
                         statusKey,
@@ -152,9 +165,8 @@
                         $event.target.checked,
                       )
                     "
-                    class="toggle-input"
-                  />
-                  <span class="toggle-slider toggle-slider-small"></span>
+                  >
+                  <span class="toggle-slider toggle-slider-small" />
                 </label>
                 <span class="toggle-label">{{ role.name }}</span>
               </div>

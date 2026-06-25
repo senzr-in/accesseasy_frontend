@@ -2,27 +2,34 @@
 <template>
   <div class="skeleton-wrapper">
     <!-- Data Table Skeleton -->
-    <div v-if="variant === 'data-table'" class="data-table-skeleton">
+    <div
+      v-if="variant === 'data-table'"
+      class="data-table-skeleton"
+    >
       <!-- Table Header -->
       <div class="table-header-skeleton">
         <div class="header-row-skeleton">
-          <div class="skeleton-checkbox"></div>
+          <div class="skeleton-checkbox" />
           <div
             v-for="col in columns"
             :key="col"
             class="header-cell-skeleton"
             :style="{ flex: getColumnFlex(col) }"
           >
-            <div class="skeleton-shimmer header-text"></div>
-            <div class="skeleton-sort-icon"></div>
+            <div class="skeleton-shimmer header-text" />
+            <div class="skeleton-sort-icon" />
           </div>
         </div>
       </div>
 
       <!-- Table Body -->
       <div class="table-body-skeleton">
-        <div v-for="row in rows" :key="row" class="body-row-skeleton">
-          <div class="skeleton-checkbox"></div>
+        <div
+          v-for="row in rows"
+          :key="row"
+          class="body-row-skeleton"
+        >
+          <div class="skeleton-checkbox" />
           <div
             v-for="col in columns"
             :key="col"
@@ -33,11 +40,11 @@
               <div
                 class="skeleton-shimmer"
                 :class="getCellContentClass(col)"
-              ></div>
+              />
               <div
                 v-if="col === 1"
                 class="skeleton-shimmer secondary-text"
-              ></div>
+              />
             </div>
           </div>
         </div>
@@ -49,8 +56,12 @@
       v-else-if="variant === 'table-body-only'"
       class="table-body-only-skeleton"
     >
-      <div v-for="row in rows" :key="row" class="body-row-skeleton">
-        <div class="skeleton-checkbox"></div>
+      <div
+        v-for="row in rows"
+        :key="row"
+        class="body-row-skeleton"
+      >
+        <div class="skeleton-checkbox" />
         <div
           v-for="col in columns"
           :key="col"
@@ -61,20 +72,26 @@
             <div
               class="skeleton-shimmer"
               :class="getCellContentClass(col)"
-            ></div>
-            <div v-if="col === 1" class="skeleton-shimmer secondary-text"></div>
+            />
+            <div
+              v-if="col === 1"
+              class="skeleton-shimmer secondary-text"
+            />
           </div>
         </div>
       </div>
     </div>
 
     <!-- Filter Panel Skeleton -->
-    <div v-else-if="variant === 'filter-panel'" class="filter-panel-skeleton">
+    <div
+      v-else-if="variant === 'filter-panel'"
+      class="filter-panel-skeleton"
+    >
       <div class="filter-header-skeleton">
-        <div class="skeleton-shimmer filter-title"></div>
+        <div class="skeleton-shimmer filter-title" />
         <div class="filter-actions-skeleton">
-          <div class="skeleton-shimmer action-btn"></div>
-          <div class="skeleton-shimmer action-btn"></div>
+          <div class="skeleton-shimmer action-btn" />
+          <div class="skeleton-shimmer action-btn" />
         </div>
       </div>
 
@@ -85,108 +102,141 @@
           class="filter-section-skeleton"
         >
           <div class="section-header-skeleton">
-            <div class="skeleton-shimmer section-icon"></div>
-            <div class="skeleton-shimmer section-title"></div>
+            <div class="skeleton-shimmer section-icon" />
+            <div class="skeleton-shimmer section-title" />
           </div>
-          <div class="skeleton-shimmer filter-input"></div>
+          <div class="skeleton-shimmer filter-input" />
         </div>
       </div>
     </div>
 
     <!-- Toolbar Skeleton -->
-    <div v-else-if="variant === 'toolbar'" class="toolbar-skeleton">
+    <div
+      v-else-if="variant === 'toolbar'"
+      class="toolbar-skeleton"
+    >
       <div class="toolbar-left-skeleton">
-        <div class="skeleton-shimmer search-input"></div>
+        <div class="skeleton-shimmer search-input" />
       </div>
       <div class="toolbar-right-skeleton">
         <div
           v-for="btn in toolbarButtons"
           :key="btn"
           class="skeleton-shimmer toolbar-btn"
-        ></div>
+        />
       </div>
     </div>
 
     <!-- Pagination Skeleton -->
-    <div v-else-if="variant === 'pagination'" class="pagination-skeleton">
+    <div
+      v-else-if="variant === 'pagination'"
+      class="pagination-skeleton"
+    >
       <div class="pagination-nav-skeleton">
-        <div class="skeleton-shimmer nav-btn"></div>
+        <div class="skeleton-shimmer nav-btn" />
         <div class="page-numbers-skeleton">
           <div
             v-for="page in 5"
             :key="page"
             class="skeleton-shimmer page-number"
-          ></div>
+          />
         </div>
-        <div class="skeleton-shimmer nav-btn"></div>
+        <div class="skeleton-shimmer nav-btn" />
       </div>
       <div class="pagination-info-skeleton">
-        <div class="skeleton-shimmer page-select"></div>
+        <div class="skeleton-shimmer page-select" />
         <div class="pagination-text-skeleton">
-          <div class="skeleton-shimmer info-text"></div>
-          <div class="skeleton-shimmer info-text"></div>
+          <div class="skeleton-shimmer info-text" />
+          <div class="skeleton-shimmer info-text" />
         </div>
       </div>
     </div>
 
     <!-- Card Grid Skeleton -->
-    <div v-else-if="variant === 'card-grid'" class="card-grid-skeleton">
-      <div v-for="card in cards" :key="card" class="card-skeleton">
+    <div
+      v-else-if="variant === 'card-grid'"
+      class="card-grid-skeleton"
+    >
+      <div
+        v-for="card in cards"
+        :key="card"
+        class="card-skeleton"
+      >
         <div class="card-header-skeleton">
-          <div class="skeleton-shimmer card-title"></div>
-          <div class="skeleton-shimmer card-subtitle"></div>
+          <div class="skeleton-shimmer card-title" />
+          <div class="skeleton-shimmer card-subtitle" />
         </div>
         <div class="card-body-skeleton">
-          <div class="skeleton-shimmer card-content"></div>
-          <div class="skeleton-shimmer card-content short"></div>
-          <div class="skeleton-shimmer card-content medium"></div>
+          <div class="skeleton-shimmer card-content" />
+          <div class="skeleton-shimmer card-content short" />
+          <div class="skeleton-shimmer card-content medium" />
         </div>
         <div class="card-footer-skeleton">
-          <div class="skeleton-shimmer card-action"></div>
+          <div class="skeleton-shimmer card-action" />
         </div>
       </div>
     </div>
 
     <!-- List Items Skeleton -->
-    <div v-else-if="variant === 'list'" class="list-skeleton">
-      <div v-for="item in items" :key="item" class="list-item-skeleton">
-        <div class="skeleton-shimmer list-avatar"></div>
+    <div
+      v-else-if="variant === 'list'"
+      class="list-skeleton"
+    >
+      <div
+        v-for="item in items"
+        :key="item"
+        class="list-item-skeleton"
+      >
+        <div class="skeleton-shimmer list-avatar" />
         <div class="list-content-skeleton">
-          <div class="skeleton-shimmer list-title"></div>
-          <div class="skeleton-shimmer list-subtitle"></div>
+          <div class="skeleton-shimmer list-title" />
+          <div class="skeleton-shimmer list-subtitle" />
         </div>
         <div class="list-actions-skeleton">
-          <div class="skeleton-shimmer list-action"></div>
+          <div class="skeleton-shimmer list-action" />
         </div>
       </div>
     </div>
 
     <!-- Form Skeleton -->
-    <div v-else-if="variant === 'form'" class="form-skeleton">
-      <div v-for="field in formFields" :key="field" class="form-field-skeleton">
-        <div class="skeleton-shimmer field-label"></div>
-        <div class="skeleton-shimmer field-input"></div>
+    <div
+      v-else-if="variant === 'form'"
+      class="form-skeleton"
+    >
+      <div
+        v-for="field in formFields"
+        :key="field"
+        class="form-field-skeleton"
+      >
+        <div class="skeleton-shimmer field-label" />
+        <div class="skeleton-shimmer field-input" />
       </div>
       <div class="form-actions-skeleton">
-        <div class="skeleton-shimmer form-btn primary"></div>
-        <div class="skeleton-shimmer form-btn secondary"></div>
+        <div class="skeleton-shimmer form-btn primary" />
+        <div class="skeleton-shimmer form-btn secondary" />
       </div>
     </div>
 
     <!-- Text Block Skeleton -->
-    <div v-else-if="variant === 'text'" class="text-skeleton">
+    <div
+      v-else-if="variant === 'text'"
+      class="text-skeleton"
+    >
       <div
         v-for="line in textLines"
         :key="line"
         class="skeleton-shimmer text-line"
         :class="{ short: line === textLines }"
-      ></div>
+      />
     </div>
 
     <!-- Custom Content Skeleton -->
-    <div v-else-if="variant === 'custom'" class="custom-skeleton">
+    <div
+      v-else-if="variant === 'custom'"
+      class="custom-skeleton"
+    >
       <slot name="skeleton-content">
-        <div class="skeleton-shimmer default-content"></div>
+        <div class="skeleton-shimmer default-content" />
       </slot>
     </div>
   </div>

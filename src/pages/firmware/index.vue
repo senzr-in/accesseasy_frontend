@@ -3,8 +3,12 @@
     <!-- Header with Global Actions -->
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
       <div class="space-y-1">
-        <h1 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">Firmware Management</h1>
-        <p class="text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black opacity-80">System Update Distribution</p>
+        <h1 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+          Firmware Management
+        </h1>
+        <p class="text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black opacity-80">
+          System Update Distribution
+        </p>
       </div>
 
       <div class="flex items-center gap-4">
@@ -27,9 +31,24 @@
                   v-model="selectedProfileId"
                   class="w-full h-12 pl-4 pr-10 rounded-2xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-sm font-medium text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-900/20 dark:focus:ring-white/20 appearance-none transition-all shadow-sm"
                 >
-                  <option value="" disabled>Choose hardware profile...</option>
-                  <optgroup v-for="pt in productTypes" :key="pt.id" :label="pt.name" class="font-bold text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-900">
-                    <option v-for="hp in pt.hardwareProfiles" :key="hp.id" :value="hp.id" class="font-medium text-slate-700 dark:text-slate-300">
+                  <option
+                    value=""
+                    disabled
+                  >
+                    Choose hardware profile...
+                  </option>
+                  <optgroup
+                    v-for="pt in productTypes"
+                    :key="pt.id"
+                    :label="pt.name"
+                    class="font-bold text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-900"
+                  >
+                    <option
+                      v-for="hp in pt.hardwareProfiles"
+                      :key="hp.id"
+                      :value="hp.id"
+                      class="font-medium text-slate-700 dark:text-slate-300"
+                    >
                       {{ hp.profileCode }} ({{ hp.boardRevision }})
                     </option>
                   </optgroup>
@@ -46,27 +65,43 @@
 
       <div class="lg:col-span-2">
         <div class="border border-slate-200 dark:border-slate-800 rounded-3xl p-6 bg-white dark:bg-slate-900 h-full flex flex-col justify-center shadow-sm">
-           <div v-if="!selectedProfileId" class="text-center space-y-4 py-8">
-              <div class="w-16 h-16 bg-slate-50 dark:bg-slate-800/50 rounded-2xl mx-auto flex items-center justify-center border border-slate-100 dark:border-slate-700/50">
-                 <Package class="w-8 h-8 text-slate-300 dark:text-slate-600" />
+          <div
+            v-if="!selectedProfileId"
+            class="text-center space-y-4 py-8"
+          >
+            <div class="w-16 h-16 bg-slate-50 dark:bg-slate-800/50 rounded-2xl mx-auto flex items-center justify-center border border-slate-100 dark:border-slate-700/50">
+              <Package class="w-8 h-8 text-slate-300 dark:text-slate-600" />
+            </div>
+            <p class="text-xs font-black uppercase tracking-[0.2em] text-slate-400">
+              No Profile Selected
+            </p>
+          </div>
+          <div
+            v-else
+            class="flex flex-col sm:flex-row items-center justify-between gap-6 py-4"
+          >
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 rounded-2xl flex items-center justify-center shrink-0 shadow-sm">
+                <CheckCircle2 class="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
               </div>
-              <p class="text-xs font-black uppercase tracking-[0.2em] text-slate-400">No Profile Selected</p>
-           </div>
-           <div v-else class="flex flex-col sm:flex-row items-center justify-between gap-6 py-4">
-              <div class="flex items-start gap-4">
-                 <div class="w-12 h-12 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 rounded-2xl flex items-center justify-center shrink-0 shadow-sm">
-                    <CheckCircle2 class="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
-                 </div>
-                 <div>
-                    <h3 class="text-sm font-black text-slate-900 dark:text-white mb-1">Production Ready</h3>
-                    <p class="text-xs font-medium text-slate-500">Hardware Profile: <span class="font-bold text-slate-700 dark:text-slate-300">{{ selectedProfileId }}</span></p>
-                 </div>
+              <div>
+                <h3 class="text-sm font-black text-slate-900 dark:text-white mb-1">
+                  Production Ready
+                </h3>
+                <p class="text-xs font-medium text-slate-500">
+                  Hardware Profile: <span class="font-bold text-slate-700 dark:text-slate-300">{{ selectedProfileId }}</span>
+                </p>
               </div>
-              <div class="text-right border-l-2 border-slate-100 dark:border-slate-800 pl-6 space-y-1">
-                 <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Latest Build</p>
-                 <p class="text-xl font-black font-mono text-slate-900 dark:text-white tracking-tighter">{{ latest?.version || 'v1.4.2' }}</p>
-              </div>
-           </div>
+            </div>
+            <div class="text-right border-l-2 border-slate-100 dark:border-slate-800 pl-6 space-y-1">
+              <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                Latest Build
+              </p>
+              <p class="text-xl font-black font-mono text-slate-900 dark:text-white tracking-tighter">
+                {{ latest?.version || 'v1.4.2' }}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -79,17 +114,19 @@
             <Activity class="w-5 h-5 text-slate-800 dark:text-slate-200" />
             Global Release History
           </h2>
-          <p class="text-[10px] text-slate-400 uppercase font-black tracking-widest">Complete distribution log</p>
+          <p class="text-[10px] text-slate-400 uppercase font-black tracking-widest">
+            Complete distribution log
+          </p>
         </div>
 
         <div class="relative w-full sm:w-80">
           <Search class="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <input
+            v-model="search"
             type="text"
             placeholder="Filter by version or hardware..."
-            v-model="search"
             class="w-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 py-3 pl-11 pr-4 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-slate-900/20 dark:focus:ring-white/20 outline-none transition-all shadow-sm"
-          />
+          >
         </div>
       </div>
 
@@ -98,33 +135,53 @@
           <table class="w-full text-left border-collapse whitespace-nowrap">
             <thead class="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
               <tr>
-                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Version</th>
-                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Hardware Code</th>
-                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Payload Size</th>
-                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Release Date</th>
-                <th class="px-8 py-5 text-right text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Actions</th>
+                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+                  Version
+                </th>
+                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+                  Hardware Code
+                </th>
+                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+                  Payload Size
+                </th>
+                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+                  Release Date
+                </th>
+                <th class="px-8 py-5 text-right text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 dark:divide-slate-800/50">
               <tr v-if="loading && filteredFirmware.length === 0">
-                <td colspan="5" class="px-8 py-24 text-center">
+                <td
+                  colspan="5"
+                  class="px-8 py-24 text-center"
+                >
                   <div class="flex flex-col items-center gap-4">
                     <Activity class="h-10 w-10 animate-pulse text-slate-300 dark:text-slate-700" />
-                    <p class="text-sm font-black text-slate-500 uppercase tracking-widest">Scanning Registry...</p>
+                    <p class="text-sm font-black text-slate-500 uppercase tracking-widest">
+                      Scanning Registry...
+                    </p>
                   </div>
                 </td>
               </tr>
               <tr v-else-if="filteredFirmware.length === 0">
-                <td colspan="5" class="px-8 py-24 text-center">
+                <td
+                  colspan="5"
+                  class="px-8 py-24 text-center"
+                >
                   <div class="flex flex-col items-center gap-4">
                     <Package class="h-10 w-10 text-slate-200 dark:text-slate-800" />
-                    <p class="text-sm font-black text-slate-400 uppercase tracking-widest">No matching releases</p>
+                    <p class="text-sm font-black text-slate-400 uppercase tracking-widest">
+                      No matching releases
+                    </p>
                   </div>
                 </td>
               </tr>
               <tr 
-                v-else 
                 v-for="(fw, idx) in filteredFirmware" 
+                v-else 
                 :key="idx" 
                 class="group hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors border-l-4 border-l-transparent hover:border-l-slate-300 dark:hover:border-l-slate-700"
               >
@@ -134,9 +191,14 @@
                       v{{ fw.version.split('.')[0] }}
                     </div>
                     <div class="flex flex-col">
-                      <p class="text-sm font-black text-slate-900 dark:text-white tracking-tight">{{ fw.version }}</p>
-                      <span v-if="idx === 0 && !search" class="inline-flex rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 px-2 py-0.5 mt-1 w-fit text-[9px] font-black uppercase tracking-tighter">
-                         Baseline
+                      <p class="text-sm font-black text-slate-900 dark:text-white tracking-tight">
+                        {{ fw.version }}
+                      </p>
+                      <span
+                        v-if="idx === 0 && !search"
+                        class="inline-flex rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20 px-2 py-0.5 mt-1 w-fit text-[9px] font-black uppercase tracking-tighter"
+                      >
+                        Baseline
                       </span>
                     </div>
                   </div>
@@ -160,7 +222,10 @@
                     <button class="h-10 w-10 inline-flex items-center justify-center rounded-2xl text-slate-400 hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white transition-all active:scale-90">
                       <Download class="h-5 w-5" />
                     </button>
-                    <button @click="handleDelete(fw)" class="h-10 w-10 inline-flex items-center justify-center rounded-2xl text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-500/10 dark:hover:text-rose-400 transition-all active:scale-90">
+                    <button
+                      class="h-10 w-10 inline-flex items-center justify-center rounded-2xl text-slate-400 hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-500/10 dark:hover:text-rose-400 transition-all active:scale-90"
+                      @click="handleDelete(fw)"
+                    >
                       <Trash2 class="h-5 w-5" />
                     </button>
                   </div>

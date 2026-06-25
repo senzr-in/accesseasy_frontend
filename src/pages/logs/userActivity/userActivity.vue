@@ -1,6 +1,10 @@
 <template>
   <div class="user-activity-container">
-    <v-card class="activity-card" elevation="2" rounded="lg">
+    <v-card
+      class="activity-card"
+      elevation="2"
+      rounded="lg"
+    >
       <div class="header-gradient px-6 py-5">
         <div class="d-flex align-center">
           <div>
@@ -11,10 +15,13 @@
               Track user actions and system changes
             </p>
           </div>
-          <v-spacer></v-spacer>
+          <v-spacer />
           <div class="d-flex align-center">
-            <v-menu location="bottom end" transition="slide-y-transition">
-              <template v-slot:activator="{ props }">
+            <v-menu
+              location="bottom end"
+              transition="slide-y-transition"
+            >
+              <template #activator="{ props }">
                 <v-btn
                   color="white"
                   v-bind="props"
@@ -25,13 +32,21 @@
                   {{ selectedPeriod.label }}
                 </v-btn>
               </template>
-              <v-card min-width="220" elevation="8" rounded="lg" class="pa-2">
-                <v-list density="compact" nav rounded="lg">
+              <v-card
+                min-width="220"
+                elevation="8"
+                rounded="lg"
+                class="pa-2"
+              >
+                <v-list
+                  density="compact"
+                  nav
+                  rounded="lg"
+                >
                   <v-list-item
                     v-for="(period, index) in timePeriods"
                     :key="index"
                     :value="period.value"
-                    @click="changeTimePeriod(period)"
                     :active="selectedPeriod.value === period.value"
                     rounded="lg"
                     class="mb-1"
@@ -40,13 +55,14 @@
                         ? 'bg-primary-lighten-5'
                         : ''
                     "
+                    @click="changeTimePeriod(period)"
                   >
-                    <template v-slot:prepend>
+                    <template #prepend>
                       <v-icon
                         :icon="period.icon"
                         size="small"
                         class="me-2"
-                      ></v-icon>
+                      />
                     </template>
                     <v-list-item-title>{{ period.label }}</v-list-item-title>
                   </v-list-item>
@@ -57,8 +73,8 @@
               icon
               variant="text"
               color="white"
-              @click="refreshData"
               :disabled="loading"
+              @click="refreshData"
             >
               <v-icon>mdi-refresh</v-icon>
             </v-btn>
@@ -68,7 +84,9 @@
 
       <div class="filter-section px-6 py-4">
         <div class="d-flex align-center">
-          <div class="text-subtitle-1 font-weight-medium me-4">Filter by:</div>
+          <div class="text-subtitle-1 font-weight-medium me-4">
+            Filter by:
+          </div>
           <v-chip-group
             v-model="selectedAction"
             column
@@ -85,44 +103,56 @@
               class="action-chip"
               label
             >
-              <template v-slot:prepend>
-                <v-icon :icon="action.icon" size="small" class="me-1"></v-icon>
+              <template #prepend>
+                <v-icon
+                  :icon="action.icon"
+                  size="small"
+                  class="me-1"
+                />
               </template>
               {{ action.label }}
             </v-chip>
           </v-chip-group>
-          <v-spacer></v-spacer>
+          <v-spacer />
           <v-btn
             v-if="selectedAction.length > 0"
             variant="text"
             color="primary"
             size="small"
-            @click="selectedAction = []"
             prepend-icon="mdi-filter-off"
+            @click="selectedAction = []"
           >
             Clear
           </v-btn>
         </div>
       </div>
 
-      <v-divider></v-divider>
+      <v-divider />
 
-      <div v-if="loading" class="d-flex justify-center align-center pa-8">
+      <div
+        v-if="loading"
+        class="d-flex justify-center align-center pa-8"
+      >
         <v-progress-circular
           indeterminate
           color="primary"
           size="64"
-        ></v-progress-circular>
+        />
       </div>
 
-      <div v-else-if="filteredActivities.length === 0" class="empty-state pa-8">
+      <div
+        v-else-if="filteredActivities.length === 0"
+        class="empty-state pa-8"
+      >
         <div class="d-flex flex-column align-center">
           <v-icon
             icon="mdi-clipboard-text-off-outline"
             size="64"
             color="grey-lighten-1"
-          ></v-icon>
-          <h3 class="text-h6 mt-4 text-grey-darken-1">No Activity Found</h3>
+          />
+          <h3 class="text-h6 mt-4 text-grey-darken-1">
+            No Activity Found
+          </h3>
           <p class="text-body-2 text-grey mt-2 text-center">
             There are no activity logs matching your current filters.
           </p>
@@ -130,15 +160,18 @@
             color="primary"
             variant="tonal"
             class="mt-4"
-            @click="selectedAction = []"
             prepend-icon="mdi-filter-off"
+            @click="selectedAction = []"
           >
             Reset Filters
           </v-btn>
         </div>
       </div>
 
-      <div v-else class="activity-list-container">
+      <div
+        v-else
+        class="activity-list-container"
+      >
         <div class="activity-grid">
           <div
             v-for="(activity, index) in filteredActivities"
@@ -157,7 +190,7 @@
                     :icon="getActionIcon(activity.action)"
                     color="white"
                     size="18"
-                  ></v-icon>
+                  />
                 </v-avatar>
                 <div class="ms-3">
                   <div class="text-subtitle-2 font-weight-bold text-uppercase">
@@ -167,28 +200,31 @@
                     {{ formatCollection(activity.collection) }}
                   </div>
                 </div>
-                <v-spacer></v-spacer>
+                <v-spacer />
                 <div class="text-caption text-grey-darken-1">
                   {{ formatDate(activity.timestamp) }}
                 </div>
               </div>
             </div>
 
-            <v-divider class="my-2"></v-divider>
+            <v-divider class="my-2" />
 
             <div class="activity-card-content">
               <div class="d-flex align-center">
-                <v-avatar size="40" class="me-3">
+                <v-avatar
+                  size="40"
+                  class="me-3"
+                >
                   <v-img
                     v-if="activity.avatarImage"
                     :src="activity.avatarImage"
                     :alt="getUserName(activity.user)"
-                  ></v-img>
+                  />
                   <v-img
                     v-else
                     src="/images/person-Icon.png"
                     alt="Default Avatar"
-                  ></v-img>
+                  />
                 </v-avatar>
                 <div>
                   <div class="text-subtitle-1 font-weight-medium">
@@ -216,22 +252,28 @@
                   color="grey"
                   @click="showActivityDetails(activity)"
                 >
-                  <v-icon icon="mdi-dots-horizontal" size="small"></v-icon>
+                  <v-icon
+                    icon="mdi-dots-horizontal"
+                    size="small"
+                  />
                 </v-btn>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="text-center pa-6" v-if="hasMoreData">
+        <div
+          v-if="hasMoreData"
+          class="text-center pa-6"
+        >
           <v-btn
             color="primary"
             variant="elevated"
             rounded="pill"
             size="large"
-            @click="loadMore"
             :loading="loadingMore"
             class="load-more-btn px-8"
+            @click="loadMore"
           >
             <span class="text-subtitle-1">Load More</span>
           </v-btn>

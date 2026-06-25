@@ -1,12 +1,26 @@
 <template>
   <v-container>
-    <v-toolbar density="compact" color="grey-lighten-4">
-      <v-btn icon color="black" @click="handleClose">
+    <v-toolbar
+      density="compact"
+      color="grey-lighten-4"
+    >
+      <v-btn
+        icon
+        color="black"
+        @click="handleClose"
+      >
         <v-icon>mdi-arrow-left</v-icon>
       </v-btn>
-      <v-toolbar-title class="ml-4">Add TDSDetails</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-btn color="error" variant="text" class="mr-2" @click="handleClose">
+      <v-toolbar-title class="ml-4">
+        Add TDSDetails
+      </v-toolbar-title>
+      <v-spacer />
+      <v-btn
+        color="error"
+        variant="text"
+        class="mr-2"
+        @click="handleClose"
+      >
         CANCEL
       </v-btn>
     </v-toolbar>
@@ -49,26 +63,35 @@
         class="elevation-1 mb-6"
         hide-default-footer
       >
-        <template v-slot:item.fileId="{ item }">
+        <template #item.fileId="{ item }">
           <td>
             <v-btn
               icon
               :disabled="!item.fileId"
-              @click="downloadFile(item.fileId)"
               title="Download Proof Document"
+              @click="downloadFile(item.fileId)"
             >
               <v-icon>mdi-download</v-icon>
             </v-btn>
           </td>
         </template>
 
-        <template v-slot:item.status="{ item }">
+        <template #item.status="{ item }">
           <td>
             <div v-if="item.status === 'pending' && userRole === 'Admin'">
-              <v-btn small color="green" class="mr-2" @click="acceptItem(item)">
+              <v-btn
+                small
+                color="green"
+                class="mr-2"
+                @click="acceptItem(item)"
+              >
                 Accept
               </v-btn>
-              <v-btn small color="red" @click="rejectItem(item)">
+              <v-btn
+                small
+                color="red"
+                @click="rejectItem(item)"
+              >
                 Reject
               </v-btn>
             </div>
@@ -80,7 +103,7 @@
           </td>
         </template>
 
-        <template v-slot:item.documentVerified="{ item }">
+        <template #item.documentVerified="{ item }">
           <td>
             <div
               v-if="item.documentVerified === 'pending' && userRole === 'Admin'"
@@ -93,7 +116,11 @@
               >
                 Verify
               </v-btn>
-              <v-btn small color="red" @click="rejectItem(item, 'document')">
+              <v-btn
+                small
+                color="red"
+                @click="rejectItem(item, 'document')"
+              >
                 Reject
               </v-btn>
             </div>
@@ -114,35 +141,58 @@
           </td>
         </template>
 
-        <template v-slot:item.actions="{ item }">
+        <template #item.actions="{ item }">
           <td>
-            <v-icon small @click="deleteItem(item)" class="cursor-pointer">
+            <v-icon
+              small
+              class="cursor-pointer"
+              @click="deleteItem(item)"
+            >
               mdi-delete
             </v-icon>
           </td>
         </template>
       </v-data-table>
 
-      <v-card-actions class="px-4 pb-4" v-if="userRole !== 'Admin'">
-        <v-btn color="primary" variant="outlined" @click="openDialog">
+      <v-card-actions
+        v-if="userRole !== 'Admin'"
+        class="px-4 pb-4"
+      >
+        <v-btn
+          color="primary"
+          variant="outlined"
+          @click="openDialog"
+        >
           Add LTA Claim
         </v-btn>
       </v-card-actions>
     </v-card>
 
     <!-- LTA Form Dialog -->
-    <v-dialog v-model="dialog" max-width="600px">
+    <v-dialog
+      v-model="dialog"
+      max-width="600px"
+    >
       <v-card>
         <v-card-title class="d-flex justify-space-between align-center">
           <span>New LTA Declaration</span>
-          <v-btn icon @click="dialog = false">
+          <v-btn
+            icon
+            @click="dialog = false"
+          >
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-card-title>
         <v-card-text>
-          <v-form ref="form" v-model="isFormValid">
+          <v-form
+            ref="form"
+            v-model="isFormValid"
+          >
             <v-row>
-              <v-col cols="12" md="4">
+              <v-col
+                cols="12"
+                md="4"
+              >
                 <v-text-field
                   v-model.number="travelForm.amount"
                   label="Amount Paid"
@@ -152,9 +202,12 @@
                   :rules="[(v) => !!v || 'Amount is required']"
                   variant="outlined"
                   density="comfortable"
-                ></v-text-field>
+                />
               </v-col>
-              <v-col cols="12" md="4">
+              <v-col
+                cols="12"
+                md="4"
+              >
                 <v-text-field
                   v-model="travelForm.travelStartDate"
                   label="Travel Start Date"
@@ -163,9 +216,12 @@
                   :rules="[(v) => !!v || 'Start date is required']"
                   variant="outlined"
                   density="comfortable"
-                ></v-text-field>
+                />
               </v-col>
-              <v-col cols="12" md="4">
+              <v-col
+                cols="12"
+                md="4"
+              >
                 <v-text-field
                   v-model="travelForm.travelEndDate"
                   label="Travel End Date"
@@ -174,9 +230,12 @@
                   :rules="[(v) => !!v || 'End date is required']"
                   variant="outlined"
                   density="comfortable"
-                ></v-text-field>
+                />
               </v-col>
-              <v-col cols="12" md="6">
+              <v-col
+                cols="12"
+                md="6"
+              >
                 <v-text-field
                   v-model="travelForm.origin"
                   label="Origin"
@@ -184,9 +243,12 @@
                   :rules="[(v) => !!v || 'Origin is required']"
                   variant="outlined"
                   density="comfortable"
-                ></v-text-field>
+                />
               </v-col>
-              <v-col cols="12" md="6">
+              <v-col
+                cols="12"
+                md="6"
+              >
                 <v-text-field
                   v-model="travelForm.destination"
                   label="Destination"
@@ -194,7 +256,7 @@
                   :rules="[(v) => !!v || 'Destination is required']"
                   variant="outlined"
                   density="comfortable"
-                ></v-text-field>
+                />
               </v-col>
               <v-col cols="12">
                 <v-textarea
@@ -203,30 +265,34 @@
                   variant="outlined"
                   rows="2"
                   density="comfortable"
-                ></v-textarea>
+                />
               </v-col>
               <v-col cols="12">
                 <v-file-input
                   :loading="uploading"
-                  @change="(event) => uploadFile(event, travelForm)"
                   label="Upload Proof Document"
                   variant="outlined"
                   color="black"
+                  @change="(event) => uploadFile(event, travelForm)"
                 />
               </v-col>
             </v-row>
           </v-form>
         </v-card-text>
         <v-card-actions class="pa-4">
-          <v-spacer></v-spacer>
-          <v-btn color="grey-darken-1" variant="text" @click="closeDialog">
+          <v-spacer />
+          <v-btn
+            color="grey-darken-1"
+            variant="text"
+            @click="closeDialog"
+          >
             Cancel
           </v-btn>
           <v-btn
             color="primary"
             variant="text"
-            @click="save"
             :disabled="!isFormValid"
+            @click="save"
           >
             Add LTA
           </v-btn>
@@ -235,10 +301,18 @@
     </v-dialog>
 
     <!-- Snackbar for notifications -->
-    <v-snackbar v-model="snackbar" :color="snackbarColor">
+    <v-snackbar
+      v-model="snackbar"
+      :color="snackbarColor"
+    >
       {{ snackbarText }}
-      <template v-slot:actions>
-        <v-btn variant="text" @click="snackbar = false">Close</v-btn>
+      <template #actions>
+        <v-btn
+          variant="text"
+          @click="snackbar = false"
+        >
+          Close
+        </v-btn>
       </template>
     </v-snackbar>
   </v-container>

@@ -1,22 +1,31 @@
 <!-- scr/components/common/filters/filterpanel.vue -->
 <template>
   <transition name="slide">
-    <div v-if="show" class="filter-panel" :class="panelClass">
+    <div
+      v-if="show"
+      class="filter-panel"
+      :class="panelClass"
+    >
       <!-- Header -->
       <div class="filter-header">
         <div class="filter-header-content">
           <button
             v-if="showBackButton"
             class="filter-nav-btn"
-            @click="$emit('close')"
             aria-label="Back"
+            @click="$emit('close')"
           >
             <ArrowLeft :size="20" />
           </button>
 
-          <h3 class="filter-title">{{ title }}</h3>
+          <h3 class="filter-title">
+            {{ title }}
+          </h3>
 
-          <button class="filter-nav-btn" @click="$emit('close')">
+          <button
+            class="filter-nav-btn"
+            @click="$emit('close')"
+          >
             <X :size="20" />
           </button>
         </div>
@@ -28,16 +37,22 @@
       </div>
 
       <!-- Actions -->
-      <div v-if="showActions" class="filter-actions">
+      <div
+        v-if="showActions"
+        class="filter-actions"
+      >
         <BaseButton
           variant="secondary"
-          @click="$emit('clear')"
           :disabled="!hasFilters"
+          @click="$emit('clear')"
         >
           {{ clearText }}
         </BaseButton>
 
-        <BaseButton variant="primary" @click="$emit('apply')">
+        <BaseButton
+          variant="primary"
+          @click="$emit('apply')"
+        >
           {{ applyText }}
         </BaseButton>
       </div>

@@ -1,6 +1,5 @@
 <template>
   <div class="flex flex-col h-full p-6 gap-0 animate-in fade-in slide-in-from-bottom-4 duration-700">
-
     <!-- Data Table Card -->
     <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-sm overflow-hidden flex flex-col flex-1 min-h-0">
       <!-- Toolbar -->
@@ -8,12 +7,12 @@
         <div class="relative w-full sm:w-80">
           <Search class="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
           <input
+            v-model="searchQuery"
             type="search"
             placeholder="Search logs by employee or ID..."
-            v-model="searchQuery"
-            @input="debouncedSearch"
             class="w-full pl-9 h-10 rounded-lg text-sm bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-900 dark:text-white shadow-sm"
-          />
+            @input="debouncedSearch"
+          >
         </div>
       </div>
 
@@ -22,39 +21,66 @@
         <table class="w-full text-left border-collapse whitespace-nowrap relative">
           <thead class="bg-slate-50 dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-10 w-full">
             <tr>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest w-16">Profile</th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest">Employee</th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest">Date & Time</th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest">Action</th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest">Mode</th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest">Status</th>
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest w-16">
+                Profile
+              </th>
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest">
+                Employee
+              </th>
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest">
+                Date & Time
+              </th>
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest">
+                Action
+              </th>
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest">
+                Mode
+              </th>
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest">
+                Status
+              </th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-950">
             <tr v-if="loading">
-              <td colspan="6" class="h-64 text-center">
+              <td
+                colspan="6"
+                class="h-64 text-center"
+              >
                 <Loader2 class="w-8 h-8 animate-spin mx-auto text-blue-500" />
               </td>
             </tr>
             <tr v-else-if="items.length === 0">
-              <td colspan="6" class="h-64 text-center text-slate-500">
+              <td
+                colspan="6"
+                class="h-64 text-center text-slate-500"
+              >
                 <div class="flex flex-col items-center justify-center space-y-3">
                   <Activity class="w-12 h-12 text-slate-300 dark:text-slate-700" />
-                  <p class="text-sm font-medium">No system logs found.</p>
+                  <p class="text-sm font-medium">
+                    No system logs found.
+                  </p>
                 </div>
               </td>
             </tr>
             <tr 
-              v-else
-              v-for="log in items" 
+              v-for="log in items"
+              v-else 
               :key="log.id"
               class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
             >
               <td class="px-5 py-3">
-                 <div class="h-8 w-8 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden border border-slate-200 dark:border-slate-700 flex items-center justify-center font-bold text-xs text-slate-500 dark:text-slate-400">
-                   <img v-if="log.avatarImage" :src="log.avatarImage" class="h-full w-full object-cover" />
-                   <User v-else class="w-4 h-4" />
-                 </div>
+                <div class="h-8 w-8 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden border border-slate-200 dark:border-slate-700 flex items-center justify-center font-bold text-xs text-slate-500 dark:text-slate-400">
+                  <img
+                    v-if="log.avatarImage"
+                    :src="log.avatarImage"
+                    class="h-full w-full object-cover"
+                  >
+                  <User
+                    v-else
+                    class="w-4 h-4"
+                  />
+                </div>
               </td>
               <td class="px-5 py-3">
                 <div class="flex flex-col">
@@ -86,13 +112,22 @@
               </td>
               <td class="px-5 py-3">
                 <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-600 dark:text-slate-400 capitalize">
-                  <component :is="getModeIcon(log.mode)" class="w-3.5 h-3.5" />
+                  <component
+                    :is="getModeIcon(log.mode)"
+                    class="w-3.5 h-3.5"
+                  />
                   {{ log.mode || 'Unknown' }}
                 </div>
               </td>
               <td class="px-5 py-3">
-                <div class="flex items-center gap-1.5 px-2.5 py-1 rounded w-fit border text-[10px] font-black uppercase tracking-widest" :class="getValidLogsClass(log.ValidLogs)">
-                  <component :is="getValidLogsIcon(log.ValidLogs)" class="w-3 h-3" />
+                <div
+                  class="flex items-center gap-1.5 px-2.5 py-1 rounded w-fit border text-[10px] font-black uppercase tracking-widest"
+                  :class="getValidLogsClass(log.ValidLogs)"
+                >
+                  <component
+                    :is="getValidLogsIcon(log.ValidLogs)"
+                    class="w-3 h-3"
+                  />
                   {{ getValidLogsText(log.ValidLogs) }}
                 </div>
               </td>
@@ -105,8 +140,8 @@
       <div class="flex items-center justify-between p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 mt-auto">
         <button
           class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-white dark:hover:bg-slate-800 disabled:opacity-50 transition-colors bg-transparent text-slate-700 dark:text-slate-300 shadow-sm"
-          @click="page--"
           :disabled="page <= 1 || loading"
+          @click="page--"
         >
           Previous
         </button>
@@ -114,9 +149,9 @@
           Page {{ page }} of {{ totalPages || 1 }}
         </div>
         <button
-           class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-white dark:hover:bg-slate-800 disabled:opacity-50 transition-colors bg-transparent text-slate-700 dark:text-slate-300 shadow-sm"
-          @click="page++"
+          class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-white dark:hover:bg-slate-800 disabled:opacity-50 transition-colors bg-transparent text-slate-700 dark:text-slate-300 shadow-sm"
           :disabled="page >= totalPages || loading"
+          @click="page++"
         >
           Next
         </button>
@@ -143,8 +178,6 @@ const limit = 25;
 const totalItems = ref(0);
 
 const token = authService.getToken();
-const tenantId = currentUserTenant.getTenantId();
-const userRole = currentUserTenant.getRole();
 
 const totalPages = computed(() => Math.ceil(totalItems.value / limit));
 
@@ -162,6 +195,7 @@ watch(page, () => {
 });
 
 const aggregateCount = async () => {
+  const tenantId = await currentUserTenant.getTenantIdAsync();
   if (!token || !tenantId) return;
   try {
     const params = new URLSearchParams({
@@ -187,6 +221,7 @@ const aggregateCount = async () => {
 };
 
 const fetchLogs = async () => {
+  const tenantId = await currentUserTenant.getTenantIdAsync();
   if (!token || !tenantId) return;
   loading.value = true;
   await aggregateCount();

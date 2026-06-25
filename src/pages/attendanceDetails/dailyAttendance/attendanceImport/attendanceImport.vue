@@ -1,20 +1,32 @@
 <template>
-  <div class="modal-overlay" @click.self="$emit('close')">
+  <div
+    class="modal-overlay"
+    @click.self="$emit('close')"
+  >
     <div class="modal-content">
       <div class="modal-header">
         <h2>Import Attendance Data</h2>
-        <button class="close-btn" @click="$emit('close')">
+        <button
+          class="close-btn"
+          @click="$emit('close')"
+        >
           <X class="icon" />
         </button>
       </div>
 
       <div class="modal-body">
         <!-- Unknown Users Error Summary -->
-        <div v-if="unknownUsers.length > 0" class="error-summary">
+        <div
+          v-if="unknownUsers.length > 0"
+          class="error-summary"
+        >
           <div class="error-summary-header">
             <AlertTriangle class="error-icon" />
             <h3>Unknown Users Found</h3>
-            <button class="close-error-btn" @click="clearUnknownUsers">
+            <button
+              class="close-error-btn"
+              @click="clearUnknownUsers"
+            >
               <X class="icon-sm" />
             </button>
           </div>
@@ -22,7 +34,10 @@
             <p>
               {{ unknownUsers.length }} employee(s) not found in the database.
             </p>
-            <button class="download-unknown-btn" @click="downloadUnknownUsers">
+            <button
+              class="download-unknown-btn"
+              @click="downloadUnknownUsers"
+            >
               <Download class="icon-sm" />
               Download List
             </button>
@@ -39,7 +54,10 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(user, index) in unknownUsers" :key="index">
+                <tr
+                  v-for="(user, index) in unknownUsers"
+                  :key="index"
+                >
                   <td>{{ user.employeeCode }}</td>
                   <td>{{ user.employeeName }}</td>
                   <td>{{ user.department }}</td>
@@ -50,16 +68,25 @@
         </div>
 
         <!-- Other Errors -->
-        <div v-if="errors.length > 0" class="error-container">
+        <div
+          v-if="errors.length > 0"
+          class="error-container"
+        >
           <div class="error-header">
             <AlertCircle class="error-icon" />
             <h3>Errors Found</h3>
-            <button class="close-error-btn" @click="clearErrors">
+            <button
+              class="close-error-btn"
+              @click="clearErrors"
+            >
               <X class="icon-sm" />
             </button>
           </div>
           <ul class="error-list">
-            <li v-for="(error, index) in errors" :key="index">
+            <li
+              v-for="(error, index) in errors"
+              :key="index"
+            >
               {{ error.message }}
             </li>
           </ul>
@@ -69,50 +96,69 @@
           <h3>Upload Attendance File</h3>
           <div
             class="file-upload-container"
-            @click="triggerFileInput"
-            @drop.prevent="handleFileDrop"
-            @dragover.prevent
-            @dragenter.prevent="isDragging = true"
-            @dragleave.prevent="isDragging = false"
             :class="{
               'file-upload-error': fileError,
               'file-upload-dragging': isDragging,
               'file-upload-has-file': uploadedFile,
             }"
+            @click="triggerFileInput"
+            @drop.prevent="handleFileDrop"
+            @dragover.prevent
+            @dragenter.prevent="isDragging = true"
+            @dragleave.prevent="isDragging = false"
           >
             <input
-              type="file"
               ref="fileInput"
-              @change="handleFileChange"
+              type="file"
               accept=".csv, .xlsx"
               class="file-input"
-            />
+              @change="handleFileChange"
+            >
             <div class="file-upload-content">
-              <div v-if="!uploadedFile" class="upload-placeholder">
+              <div
+                v-if="!uploadedFile"
+                class="upload-placeholder"
+              >
                 <UploadCloud class="upload-icon" />
                 <p>
                   Drag and drop your attendance file here or click to browse
                 </p>
                 <span class="file-formats">Supported formats: CSV, XLSX</span>
               </div>
-              <div v-else class="file-preview">
+              <div
+                v-else
+                class="file-preview"
+              >
                 <FileText class="file-icon" />
                 <div class="file-info">
-                  <p class="file-name">{{ uploadedFile.filename_download }}</p>
+                  <p class="file-name">
+                    {{ uploadedFile.filename_download }}
+                  </p>
                   <p class="file-size">
                     {{ formatFileSize(uploadedFile.filesize) }}
                   </p>
                 </div>
-                <button class="remove-file-btn" @click.stop="removeFile">
+                <button
+                  class="remove-file-btn"
+                  @click.stop="removeFile"
+                >
                   <X class="icon-sm" />
                 </button>
               </div>
             </div>
           </div>
-          <p v-if="fileError" class="field-error">{{ fileError }}</p>
+          <p
+            v-if="fileError"
+            class="field-error"
+          >
+            {{ fileError }}
+          </p>
         </div>
 
-        <div v-if="previewData.length > 0" class="preview-section">
+        <div
+          v-if="previewData.length > 0"
+          class="preview-section"
+        >
           <h3>Data Preview</h3>
           <div class="preview-table-container">
             <table class="preview-table">
@@ -125,7 +171,10 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(item, index) in previewData" :key="index">
+                <tr
+                  v-for="(item, index) in previewData"
+                  :key="index"
+                >
                   <td>{{ item.employeeId }}</td>
                   <td>{{ item.employeeName }}</td>
                   <td>{{ item.date }}</td>
@@ -146,32 +195,46 @@
               AttendanceDate, Status
             </li>
           </ul>
-          <button class="download-template-btn" @click="openDownloadModal">
+          <button
+            class="download-template-btn"
+            @click="openDownloadModal"
+          >
             <Download class="icon-sm" />
             Download Template
           </button>
         </div>
       </div>
 
-      <div v-if="successMessage" class="success-message">
+      <div
+        v-if="successMessage"
+        class="success-message"
+      >
         <CheckCircle class="success-icon" />
         {{ successMessage }}
       </div>
 
       <div class="modal-footer">
-        <button class="cancel-btn" @click="$emit('close')">Cancel</button>
+        <button
+          class="cancel-btn"
+          @click="$emit('close')"
+        >
+          Cancel
+        </button>
         <button
           class="import-btn"
-          @click="importData"
           :disabled="
             !uploadedFile ||
-            isImporting ||
-            errors.length > 0 ||
-            isValidating ||
-            !dataValidated
+              isImporting ||
+              errors.length > 0 ||
+              isValidating ||
+              !dataValidated
           "
+          @click="importData"
         >
-          <Loader2 v-if="isImporting || isValidating" class="icon-sm spinner" />
+          <Loader2
+            v-if="isImporting || isValidating"
+            class="icon-sm spinner"
+          />
           <span v-if="isValidating">Validating...</span>
           <span v-else-if="isImporting">Importing...</span>
           <span v-else>Import</span>
@@ -182,7 +245,7 @@
     <!-- Download Attachment Modal -->
     <downloadAttachment
       v-if="showDownloadModal"
-      :fileId="templateFileId"
+      :file-id="templateFileId"
       @close="showDownloadModal = false"
     />
 
@@ -200,10 +263,16 @@
           <p>{{ confirmationMessage }}</p>
         </div>
         <div class="confirmation-footer">
-          <button class="cancel-btn" @click="cancelConfirmation">
+          <button
+            class="cancel-btn"
+            @click="cancelConfirmation"
+          >
             No, Cancel
           </button>
-          <button class="confirm-btn" @click="confirmAction">
+          <button
+            class="confirm-btn"
+            @click="confirmAction"
+          >
             Yes, Continue
           </button>
         </div>
@@ -227,15 +296,21 @@
             the import?
           </p>
           <p class="confirmation-note">
-            <strong>OK</strong>: Skip unknown users and import the rest<br />
+            <strong>OK</strong>: Skip unknown users and import the rest<br>
             <strong>Cancel</strong>: Cancel the import process
           </p>
         </div>
         <div class="confirmation-footer">
-          <button class="cancel-btn" @click="cancelUnknownUsersConfirmation">
+          <button
+            class="cancel-btn"
+            @click="cancelUnknownUsersConfirmation"
+          >
             Cancel
           </button>
-          <button class="confirm-btn" @click="confirmUnknownUsersAction">
+          <button
+            class="confirm-btn"
+            @click="confirmUnknownUsersAction"
+          >
             OK
           </button>
         </div>

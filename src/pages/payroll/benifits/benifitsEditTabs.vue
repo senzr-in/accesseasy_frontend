@@ -7,24 +7,35 @@
           v-if="!isDialog"
           icon
           variant="text"
-          @click="$router.push('/payroll/adhoc-payments')"
           class="back-button"
+          @click="$router.push('/payroll/adhoc-payments')"
         >
           <v-icon>mdi-arrow-left</v-icon>
         </v-btn>
         <div class="employee-name-container">
-          <v-icon left color="primary">mdi-account</v-icon>
+          <v-icon
+            left
+            color="primary"
+          >
+            mdi-account
+          </v-icon>
           <span class="employee-name">{{
             $route.query.employeeName || "New Employee"
           }}</span>
         </div>
-        <v-chip color="primary" text-color="white" class="ml-2">
+        <v-chip
+          color="primary"
+          text-color="white"
+          class="ml-2"
+        >
           selectedMonth:{{ $route.query.month || "No Month Selected" }}
         </v-chip>
       </div>
 
       <div class="header-center">
-        <h2 class="form-title">Add Adhoc Payments</h2>
+        <h2 class="form-title">
+          Add Adhoc Payments
+        </h2>
       </div>
 
       <div class="header-right">
@@ -49,17 +60,20 @@
           <v-list-item
             v-for="tab in tabs"
             :key="tab.id"
-            @click="activeTab = tab.id"
             :class="{ 'v-list-item--active': activeTab === tab.id }"
             :style="{
               minHeight: '54px !important',
               borderRight: '1px solid #e0e0e0',
             }"
+            @click="activeTab = tab.id"
           >
-            <template v-slot:prepend>
+            <template #prepend>
               <v-tooltip location="right">
-                <template v-slot:activator="{ props }">
-                  <v-icon v-bind="props" class="sidebar-icon">
+                <template #activator="{ props }">
+                  <v-icon
+                    v-bind="props"
+                    class="sidebar-icon"
+                  >
                     {{ tab.icon }}
                   </v-icon>
                 </template>

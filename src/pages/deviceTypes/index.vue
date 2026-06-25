@@ -2,8 +2,12 @@
   <div class="space-y-8 p-8 pb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div>
-        <h1 class="text-4xl font-black tracking-tighter text-slate-900 dark:text-white uppercase leading-none mb-2 mt-4 md:mt-0">Device Type Management</h1>
-        <p class="text-[10px] text-cyan-600 dark:text-cyan-500 font-black uppercase tracking-[0.3em] mb-4 md:mb-0">Device Architecture & Operational Parameters</p>
+        <h1 class="text-4xl font-black tracking-tighter text-slate-900 dark:text-white uppercase leading-none mb-2 mt-4 md:mt-0">
+          Device Type Management
+        </h1>
+        <p class="text-[10px] text-cyan-600 dark:text-cyan-500 font-black uppercase tracking-[0.3em] mb-4 md:mb-0">
+          Device Architecture & Operational Parameters
+        </p>
       </div>
       <button class="h-10 sm:h-12 px-6 sm:px-8 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-xs tracking-widest uppercase bg-slate-900 border border-slate-800 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 gap-2 shadow-xl shadow-slate-900/10 dark:shadow-white/5 active:scale-95 transition-all flex items-center justify-center whitespace-nowrap">
         <Plus class="w-4 h-4 sm:w-5 sm:h-5 mr-2 -ml-1" />
@@ -19,7 +23,7 @@
         class="group relative rounded-3xl border border-slate-200 dark:border-white/5 bg-white dark:bg-zinc-900/40 backdrop-blur-xl shadow-xl transition-all duration-500 hover:shadow-2xl hover:bg-slate-50 dark:hover:bg-zinc-900/60 overflow-hidden flex flex-col"
       >
         <!-- Scanning Effect -->
-        <div class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-[1500ms] ease-in-out"></div>
+        <div class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-[1500ms] ease-in-out" />
 
         <div class="p-6 pb-4 flex flex-row items-center justify-between">
           <div class="flex items-center gap-4">
@@ -27,8 +31,12 @@
               <Cpu class="w-6 h-6 text-cyan-600 dark:text-cyan-500 group-hover:scale-110 transition-transform" />
             </div>
             <div>
-              <h3 class="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight leading-none mb-1 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">{{ type.displayName }}</h3>
-              <p class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-zinc-500">{{ type.name }}</p>
+              <h3 class="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight leading-none mb-1 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
+                {{ type.displayName }}
+              </h3>
+              <p class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-zinc-500">
+                {{ type.name }}
+              </p>
             </div>
           </div>
           <div class="flex gap-1 opacity-10 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0">
@@ -74,16 +82,19 @@
       <div 
         class="group relative rounded-3xl border-2 border-dashed border-slate-200 dark:border-white/10 flex items-center justify-center p-8 bg-slate-50/30 dark:bg-white/[0.02] hover:bg-slate-50/80 dark:hover:bg-white/[0.05] hover:border-cyan-500/50 transition-all duration-500 cursor-pointer min-h-[280px] overflow-hidden"
       >
-        <div class="absolute inset-0 bg-cyan-500/[0.02] opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <div class="absolute inset-0 bg-cyan-500/[0.02] opacity-0 group-hover:opacity-100 transition-opacity" />
         <div class="text-center relative z-10 transition-transform duration-500 group-hover:scale-105">
           <div class="h-16 w-16 bg-white dark:bg-white/5 rounded-2xl flex items-center justify-center border border-slate-200 dark:border-white/10 mx-auto mb-6 shadow-xl group-hover:border-cyan-500/50 group-hover:shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all">
             <Plus class="w-8 h-8 text-slate-400 dark:text-zinc-400 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors" />
           </div>
-          <h3 class="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-[0.3em] mb-2">New Device Type</h3>
-          <p class="text-[9px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest max-w-[140px] mx-auto opacity-70">Initialize a new device architecture category</p>
+          <h3 class="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-[0.3em] mb-2">
+            New Device Type
+          </h3>
+          <p class="text-[9px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-widest max-w-[140px] mx-auto opacity-70">
+            Initialize a new device architecture category
+          </p>
         </div>
       </div>
-
     </div>
   </div>
 </template>

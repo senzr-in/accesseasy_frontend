@@ -7,13 +7,18 @@
           v-if="!isDialog"
           icon
           variant="text"
-          @click="cancelForm"
           class="back-button"
+          @click="cancelForm"
         >
           <v-icon>mdi-arrow-left</v-icon>
         </v-btn>
         <div class="employee-name-container">
-          <v-icon left color="primary">mdi-account</v-icon>
+          <v-icon
+            left
+            color="primary"
+          >
+            mdi-account
+          </v-icon>
           <span class="employee-name">{{
             employeeData.assignedUser?.first_name || "New Employee"
           }}</span>
@@ -27,7 +32,13 @@
       </div>
 
       <div class="header-right">
-        <v-btn color="error" variant="text" @click="cancelForm"> CANCEL </v-btn>
+        <v-btn
+          color="error"
+          variant="text"
+          @click="cancelForm"
+        >
+          CANCEL
+        </v-btn>
       </div>
     </div>
 
@@ -38,19 +49,24 @@
           <v-list-item
             v-for="tab in tabs"
             :key="tab.id"
-            @click="currentTab = tab"
             :class="{ 'v-list-item--active': currentTab.id === tab.id }"
             :style="{
               minHeight: '54px !important',
               borderRight: '1px solid #e0e0e0',
             }"
+            @click="currentTab = tab"
           >
-            <template v-slot:prepend>
+            <template #prepend>
               <v-tooltip location="right">
-                <template v-slot:activator="{ props }">
-                  <v-icon v-bind="props" class="sidebar-icon">{{
-                    tab.icon
-                  }}</v-icon>
+                <template #activator="{ props }">
+                  <v-icon
+                    v-bind="props"
+                    class="sidebar-icon"
+                  >
+                    {{
+                      tab.icon
+                    }}
+                  </v-icon>
                 </template>
                 <span>{{ tab.title }}</span>
               </v-tooltip>
@@ -64,7 +80,10 @@
       </div>
 
       <div class="form-content">
-        <component :is="currentTab.component" :id="id" />
+        <component
+          :is="currentTab.component"
+          :id="id"
+        />
       </div>
     </div>
   </div>

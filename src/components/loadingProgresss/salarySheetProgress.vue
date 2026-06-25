@@ -1,23 +1,31 @@
 <template>
   <v-dialog
     :model-value="show"
-    @update:model-value="$emit('update:show', $event)"
     persistent
     max-width="400"
     content-class="download-progress-dialog"
+    @update:model-value="$emit('update:show', $event)"
   >
     <v-card>
       <v-card-title class="headline d-flex align-center">
-        <v-icon color="primary" size="24" class="mr-2"
-          >mdi-file-download</v-icon
+        <v-icon
+          color="primary"
+          size="24"
+          class="mr-2"
         >
+          mdi-file-download
+        </v-icon>
         {{ title }}
       </v-card-title>
 
       <v-card-text>
         <div class="text-center mb-4">
-          <div class="progress-status">{{ statusText }}</div>
-          <div class="progress-percentage">{{ progress }}%</div>
+          <div class="progress-status">
+            {{ statusText }}
+          </div>
+          <div class="progress-percentage">
+            {{ progress }}%
+          </div>
         </div>
 
         <v-progress-linear
@@ -28,7 +36,7 @@
           striped
           :active="progress < 100"
           class="progress-bar"
-        ></v-progress-linear>
+        />
 
         <div class="d-flex justify-space-between mt-2">
           <span class="text-caption text-grey">{{ fileName }}</span>
@@ -37,8 +45,14 @@
       </v-card-text>
 
       <v-card-actions v-if="showCancel">
-        <v-spacer></v-spacer>
-        <v-btn color="grey" text @click="$emit('cancel')">Cancel</v-btn>
+        <v-spacer />
+        <v-btn
+          color="grey"
+          text
+          @click="$emit('cancel')"
+        >
+          Cancel
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

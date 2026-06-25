@@ -10,9 +10,9 @@
           icon="mdi-arrow-left"
           variant="text"
           color="black"
-          @click="goBack"
           class="mr-2"
-        ></v-btn>
+          @click="goBack"
+        />
         <h2 class="text-h5 font-weight-bold text-black mb-0">
           Create Payroll Policy
         </h2>
@@ -25,8 +25,9 @@
           class="me-2 text-none"
           :left-icon="XCircle"
           @click="goBack"
-          >Cancel</BaseButton
         >
+          Cancel
+        </BaseButton>
         <BaseButton
           variant="primary"
           size="sm"
@@ -35,7 +36,8 @@
           :left-icon="Check"
           :loading="saving"
           @click="save"
-          >Save
+        >
+          Save
         </BaseButton>
       </div>
     </div>
@@ -64,11 +66,17 @@
         indeterminate
         color="primary"
         size="64"
-      ></v-progress-circular>
-      <div class="loading-text mt-4">Loading data...</div>
+      />
+      <div class="loading-text mt-4">
+        Loading data...
+      </div>
     </div>
 
-    <div v-else class="clean-layout" style="height: 70vh; overflow-y: auto">
+    <div
+      v-else
+      class="clean-layout"
+      style="height: 70vh; overflow-y: auto"
+    >
       <!-- Earning Components -->
 
       <v-row
@@ -113,7 +121,10 @@
         </v-col>
 
         <!-- Column 4: Action -->
-        <v-col cols="3" class="text-left">
+        <v-col
+          cols="3"
+          class="text-left"
+        >
           <ActionButton
             v-if="!['Basic Pay'].includes(row.label)"
             :icon="Trash2"
@@ -127,15 +138,16 @@
 
       <div class="add-button-container mb-6">
         <v-menu>
-          <template v-slot:activator="{ props }">
+          <template #activator="{ props }">
             <BaseButton
               variant="primary"
               size="sm"
               color="black"
               :left-icon="Plus"
               v-bind="props"
-              >Add allowance</BaseButton
             >
+              Add allowance
+            </BaseButton>
           </template>
           <v-list style="max-height: 200px; overflow-y: auto">
             <v-list-item
@@ -151,13 +163,17 @@
 
       <!-- Employer Contribution -->
       <div class="section-header mb-4">
-        <div class="section-indicator employer-indicator"></div>
-        <h3 class="section-title">Employer Contribution</h3>
+        <div class="section-indicator employer-indicator" />
+        <h3 class="section-title">
+          Employer Contribution
+        </h3>
       </div>
 
       <!-- Employer PF -->
       <v-row class="align-center mb-4 pb-2 border-bottom">
-        <v-col cols="3"> Employer PF </v-col>
+        <v-col cols="3">
+          Employer PF
+        </v-col>
 
         <!-- <div v-if="!hasPFAccount" class="d-flex align-center">
             <v-icon color="red" class="mr-2">mdi-alert-circle</v-icon>
@@ -176,12 +192,12 @@
 
         <v-col cols="3">
           <v-select
+            v-model="form.employerPF.value"
             :items="[
               { title: '12% No limit', value: 12 },
               { title: '12% ₹1800 limit', value: 1800 },
               { title: 'NoValue', value: null },
             ]"
-            v-model="form.employerPF.value"
             label="Value"
             variant="outlined"
             density="compact"
@@ -193,8 +209,8 @@
 
         <v-col cols="3">
           <v-select
-            :items="componentOptions"
             v-model="form.employerPF.calculations"
+            :items="componentOptions"
             label="Component"
             variant="outlined"
             density="compact"
@@ -217,14 +233,16 @@
 
       <!-- Employer ESI -->
       <v-row class="align-center mb-4 pb-2 border-bottom">
-        <v-col cols="3"> Employer ESI </v-col>
+        <v-col cols="3">
+          Employer ESI
+        </v-col>
         <v-col cols="3">
           <v-select
+            v-model="form.employerESI.value"
             :items="[
               { title: '3.25%', value: 3.25 },
               { title: 'NoValue', value: null },
             ]"
-            v-model="form.employerESI.value"
             label="Value"
             variant="outlined"
             density="compact"
@@ -236,8 +254,8 @@
 
         <v-col cols="3">
           <v-select
-            :items="componentOptions"
             v-model="form.employerESI.calculations"
+            :items="componentOptions"
             label="Component"
             variant="outlined"
             density="compact"
@@ -260,7 +278,9 @@
 
       <!-- PF EDLI & Admin Charges -->
       <v-row class="align-center mb-4 pb-2 border-bottom">
-        <v-col cols="3"> PF EDLI & Admin Charges </v-col>
+        <v-col cols="3">
+          PF EDLI & Admin Charges
+        </v-col>
 
         <v-col cols="3">
           <v-switch
@@ -274,7 +294,10 @@
             "
           />
         </v-col>
-        <v-col cols="3" v-if="form.includeEdli">
+        <v-col
+          v-if="form.includeEdli"
+          cols="3"
+        >
           <v-text-field
             variant="outlined"
             density="compact"
@@ -288,12 +311,20 @@
 
       <!-- Labour Welfare Fund -->
       <v-row class="align-center mb-4 pb-2 border-bottom">
-        <v-col cols="3"> Labour Welfare Fund </v-col>
+        <v-col cols="3">
+          Labour Welfare Fund
+        </v-col>
 
-        <v-col cols="3" class="d-flex align-center">
-          <v-icon color="grey-darken-1" class="mr-2"
-            >mdi-information-outline</v-icon
+        <v-col
+          cols="3"
+          class="d-flex align-center"
+        >
+          <v-icon
+            color="grey-darken-1"
+            class="mr-2"
           >
+            mdi-information-outline
+          </v-icon>
           <span class="text-grey-darken-1">Value based on state rules</span>
         </v-col>
         <v-col cols="3">
@@ -311,22 +342,26 @@
 
       <!-- Deduction Components -->
       <div class="section-header mb-4">
-        <div class="section-indicator deduction-indicator"></div>
-        <h3 class="section-title">Deduction Components</h3>
+        <div class="section-indicator deduction-indicator" />
+        <h3 class="section-title">
+          Deduction Components
+        </h3>
       </div>
 
       <!-- Employee PF -->
       <v-row class="align-center mb-4 pb-2 border-bottom">
-        <v-col cols="3"> Employee PF </v-col>
+        <v-col cols="3">
+          Employee PF
+        </v-col>
 
         <v-col cols="3">
           <v-select
+            v-model="form.employeePF.value"
             :items="[
               { title: '12% No limit', value: 12 },
               { title: '12% ₹1800 limit', value: 1800 },
               { title: 'NoValue', value: null },
             ]"
-            v-model="form.employeePF.value"
             label="Value"
             variant="outlined"
             density="compact"
@@ -338,8 +373,8 @@
 
         <v-col cols="3">
           <v-select
-            :items="componentOptions"
             v-model="form.employeePF.calculations"
+            :items="componentOptions"
             label="Component"
             variant="outlined"
             density="compact"
@@ -353,15 +388,17 @@
 
       <!-- Employee ESI -->
       <v-row class="align-center mb-4 pb-2 border-bottom">
-        <v-col cols="3"> Employee ESI </v-col>
+        <v-col cols="3">
+          Employee ESI
+        </v-col>
 
         <v-col cols="3">
           <v-select
+            v-model="form.employeeESI.value"
             :items="[
               { title: '0.75%', value: 0.75 },
               { title: 'NoValue', value: null },
             ]"
-            v-model="form.employeeESI.value"
             label="Value"
             variant="outlined"
             density="compact"
@@ -373,8 +410,8 @@
 
         <v-col cols="3">
           <v-select
-            :items="componentOptions"
             v-model="form.employeeESI.calculations"
+            :items="componentOptions"
             label="Component"
             variant="outlined"
             density="compact"
@@ -388,12 +425,20 @@
 
       <!-- Labour Welfare Fund -->
       <v-row class="align-center mb-4 pb-2 border-bottom">
-        <v-col cols="3"> Labour Welfare Fund </v-col>
+        <v-col cols="3">
+          Labour Welfare Fund
+        </v-col>
 
-        <v-col cols="3" class="d-flex align-center">
-          <v-icon color="grey-darken-1" class="mr-2"
-            >mdi-information-outline</v-icon
+        <v-col
+          cols="3"
+          class="d-flex align-center"
+        >
+          <v-icon
+            color="grey-darken-1"
+            class="mr-2"
           >
+            mdi-information-outline
+          </v-icon>
           <span class="text-grey-darken-1">Value based on state rules</span>
         </v-col>
         <v-col cols="3">
@@ -411,12 +456,20 @@
 
       <!-- Professional Tax -->
       <v-row class="align-center mb-4 pb-2 border-bottom">
-        <v-col cols="3"> Professional Tax </v-col>
+        <v-col cols="3">
+          Professional Tax
+        </v-col>
 
-        <v-col cols="3" class="d-flex align-center">
-          <v-icon color="grey-darken-1" class="mr-2"
-            >mdi-information-outline</v-icon
+        <v-col
+          cols="3"
+          class="d-flex align-center"
+        >
+          <v-icon
+            color="grey-darken-1"
+            class="mr-2"
           >
+            mdi-information-outline
+          </v-icon>
           <span class="text-grey-darken-1">System Calculated</span>
         </v-col>
         <v-col cols="3">
@@ -441,7 +494,7 @@
         <v-col cols="3">
           <strong>{{ row.label }}</strong>
         </v-col>
-        <v-col cols="3"></v-col>
+        <v-col cols="3" />
         <v-col cols="3">
           <v-text-field
             v-model.number="row.value"
@@ -470,15 +523,16 @@
 
       <div class="add-button-container">
         <v-menu>
-          <template v-slot:activator="{ props }">
+          <template #activator="{ props }">
             <BaseButton
               variant="primary"
               size="sm"
               color="black"
               :left-icon="Plus"
               v-bind="props"
-              >Add deduction</BaseButton
             >
+              Add deduction
+            </BaseButton>
           </template>
           <v-list style="max-height: 200px; overflow-y: auto">
             <v-list-item
@@ -493,13 +547,19 @@
       </div>
     </div>
 
-    <v-dialog v-model="showAddDialog" max-width="500px">
+    <v-dialog
+      v-model="showAddDialog"
+      max-width="500px"
+    >
       <v-card>
-        <v-card-title class="text-h6 font-weight-bold"
-          >Add ESI Account</v-card-title
-        >
+        <v-card-title class="text-h6 font-weight-bold">
+          Add ESI Account
+        </v-card-title>
         <v-card-text>
-          <v-form ref="addAccountForm" v-model="formValid">
+          <v-form
+            ref="addAccountForm"
+            v-model="formValid"
+          >
             <v-text-field
               v-model="newAccount.number"
               label="ESI Number"
@@ -509,17 +569,31 @@
           </v-form>
         </v-card-text>
         <v-card-actions class="justify-end">
-          <v-btn variant="text" @click="showAddDialog = false">Cancel</v-btn>
-          <v-btn color="green" :disabled="!formValid" @click="saveAccount"
-            >Save</v-btn
+          <v-btn
+            variant="text"
+            @click="showAddDialog = false"
           >
+            Cancel
+          </v-btn>
+          <v-btn
+            color="green"
+            :disabled="!formValid"
+            @click="saveAccount"
+          >
+            Save
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-    <v-dialog v-model="showAddPfDialog" max-width="400">
+    <v-dialog
+      v-model="showAddPfDialog"
+      max-width="400"
+    >
       <v-card>
-        <v-card-title class="text-h6">Add PF Account</v-card-title>
+        <v-card-title class="text-h6">
+          Add PF Account
+        </v-card-title>
         <v-card-text>
           <v-text-field
             v-model="pfNumber"
@@ -530,8 +604,18 @@
           />
         </v-card-text>
         <v-card-actions class="justify-end">
-          <v-btn text @click="showAddDialog = false">Cancel</v-btn>
-          <v-btn color="primary" @click="saveAccount">Save</v-btn>
+          <v-btn
+            text
+            @click="showAddDialog = false"
+          >
+            Cancel
+          </v-btn>
+          <v-btn
+            color="primary"
+            @click="saveAccount"
+          >
+            Save
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -846,7 +930,7 @@ const saveAccount = async () => {
 
     await response.json();
     showAddDialog.value = false;
-    newAccount.number = "";
+    newAccount.value.number = "";
     showAddPfDialog.value = false;
     pfNumber.value = "";
     await fetchTenant();

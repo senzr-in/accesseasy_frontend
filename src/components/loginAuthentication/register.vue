@@ -1,19 +1,27 @@
 <template>
   <div class="flex min-h-screen w-full bg-[#f8fafc] dark:bg-[#020617] text-slate-900 dark:text-slate-100 flex-col lg:flex-row relative overflow-hidden font-sans">
-    
     <!-- Left Side: Marketing Content -->
     <div class="flex-1 flex flex-col justify-center px-6 py-8 lg:px-14 lg:py-6 bg-white/10 dark:bg-black/20 backdrop-blur-md border-r border-slate-200 dark:border-white/10 relative overflow-hidden border-b lg:border-b-0">
       <!-- Grid Background Pattern -->
       <div 
         class="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none"
         style="background-image: radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0); background-size: 24px 24px;"
-      ></div>
+      />
 
       <div class="max-w-xl relative z-10 animate-fade-in-left">
         <div class="flex items-center gap-3 mb-6">
           <div class="h-10 w-10 rounded-xl bg-blue-600/20 flex items-center justify-center border border-blue-600/20 shadow-xl shadow-blue-600/10">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-blue-600">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="w-6 h-6 text-blue-600"
+            >
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
             </svg>
           </div>
           <div class="flex flex-col">
@@ -23,7 +31,7 @@
         </div>
 
         <h1 class="text-3xl lg:text-4xl font-black tracking-tight leading-[1] mb-4 text-slate-900 dark:text-white">
-          Build your secure <br />
+          Build your secure <br>
           <span class="text-blue-600">Enterprise</span> Network.
         </h1>
 
@@ -32,22 +40,42 @@
         </p>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-5 mb-8">
-          <div class="flex items-center gap-3 group" v-for="(h, i) in highlights" :key="i">
+          <div
+            v-for="(h, i) in highlights"
+            :key="i"
+            class="flex items-center gap-3 group"
+          >
             <div class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-md group-hover:scale-110 group-hover:border-blue-500/50 transition-all duration-300">
-              <component :is="h.icon" class="h-4 w-4 text-blue-600" />
+              <component
+                :is="h.icon"
+                class="h-4 w-4 text-blue-600"
+              />
             </div>
             <div>
-              <h3 class="font-black text-[10px] tracking-[0.05em] uppercase text-slate-900 dark:text-white">{{ h.text }}</h3>
-              <p class="text-[9px] font-bold text-slate-500 leading-snug mt-0.5 uppercase tracking-widest">{{ h.sub }}</p>
+              <h3 class="font-black text-[10px] tracking-[0.05em] uppercase text-slate-900 dark:text-white">
+                {{ h.text }}
+              </h3>
+              <p class="text-[9px] font-bold text-slate-500 leading-snug mt-0.5 uppercase tracking-widest">
+                {{ h.sub }}
+              </p>
             </div>
           </div>
         </div>
 
         <div class="pt-6 border-t border-slate-200 dark:border-white/5">
-          <p class="text-[8px] font-black tracking-[0.3em] text-slate-400 dark:text-slate-600 mb-4 uppercase">Industry Standards</p>
+          <p class="text-[8px] font-black tracking-[0.3em] text-slate-400 dark:text-slate-600 mb-4 uppercase">
+            Industry Standards
+          </p>
           <div class="flex flex-wrap gap-x-6 gap-y-3">
-            <div class="flex items-center gap-2 opacity-50 hover:opacity-100 transition-all duration-300 cursor-default group" v-for="(ind, i) in industries" :key="i">
-              <component :is="ind.icon" class="h-4 w-4 group-hover:text-blue-600 transition-colors" />
+            <div
+              v-for="(ind, i) in industries"
+              :key="i"
+              class="flex items-center gap-2 opacity-50 hover:opacity-100 transition-all duration-300 cursor-default group"
+            >
+              <component
+                :is="ind.icon"
+                class="h-4 w-4 group-hover:text-blue-600 transition-colors"
+              />
               <span class="text-[9px] font-black tracking-widest uppercase">{{ ind.name }}</span>
             </div>
           </div>
@@ -58,20 +86,25 @@
     <!-- Right Side: Registration Form -->
     <div class="flex-1 flex items-center justify-center p-4 lg:p-10 relative overflow-hidden bg-slate-50/50 dark:bg-transparent">
       <!-- Glow effect -->
-      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-blue-600/5 rounded-full blur-[100px] pointer-events-none"></div>
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-blue-600/5 rounded-full blur-[100px] pointer-events-none" />
 
       <div class="w-full max-w-[480px] rounded-[2rem] bg-white/90 dark:bg-[#0a0e1a]/80 backdrop-blur-xl p-8 shadow-2xl border border-slate-200 dark:border-white/10 relative z-10 animate-fade-in-up">
-        
         <div class="text-center mb-8">
           <div class="mx-auto mb-4 h-12 w-12 flex items-center justify-center rounded-[1rem] bg-blue-600 text-white shadow-lg shadow-blue-600/30 border border-blue-500/20">
             <UserPlus class="h-5 w-5" />
           </div>
-          <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight uppercase mb-1">Create Account</h2>
-          <p class="text-[9px] text-blue-600 font-black tracking-[0.4em] uppercase text-center w-full">Join the next-gen security platform</p>
+          <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight uppercase mb-1">
+            Create Account
+          </h2>
+          <p class="text-[9px] text-blue-600 font-black tracking-[0.4em] uppercase text-center w-full">
+            Join the next-gen security platform
+          </p>
         </div>
 
-        <form @submit.prevent="handleRegistration" class="space-y-5">
-          
+        <form
+          class="space-y-5"
+          @submit.prevent="handleRegistration"
+        >
           <!-- Personal Info Grid -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="space-y-1.5">
@@ -83,7 +116,7 @@
                   required
                   placeholder="John Doe"
                   class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
-                />
+                >
                 <User class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
               </div>
             </div>
@@ -98,7 +131,7 @@
                   placeholder="10-digit number"
                   maxlength="10"
                   class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
-                />
+                >
                 <Phone class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
               </div>
             </div>
@@ -111,9 +144,9 @@
                   type="email"
                   required
                   placeholder="name@company.com"
-                  @input="email = email.toLowerCase()"
                   class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
-                />
+                  @input="email = email.toLowerCase()"
+                >
                 <Mail class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
               </div>
             </div>
@@ -127,7 +160,7 @@
                   required
                   placeholder="EMP-001"
                   class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
-                />
+                >
                 <IdCard class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
               </div>
             </div>
@@ -143,7 +176,7 @@
                 required
                 placeholder="Acme Corporation"
                 class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
-              />
+              >
               <Building2 class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
             </div>
           </div>
@@ -168,21 +201,42 @@
 
           <button
             type="button"
-            @click="signupWithGoogle"
             class="w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.1em] flex items-center justify-center gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 hover:border-blue-500/50 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-white shadow-sm transition-all group"
+            @click="signupWithGoogle"
           >
-            <svg class="w-4 h-4" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            <svg
+              class="w-4 h-4"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                fill="#4285F4"
+              />
+              <path
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                fill="#34A853"
+              />
+              <path
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                fill="#FBBC05"
+              />
+              <path
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                fill="#EA4335"
+              />
             </svg>
             Sign up with Google
           </button>
 
           <p class="text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider pt-2">
             Already have an account? 
-            <router-link to="/login" class="text-blue-600 hover:text-blue-700 underline underline-offset-4 cursor-pointer">Sign In</router-link>
+            <router-link
+              to="/login"
+              class="text-blue-600 hover:text-blue-700 underline underline-offset-4 cursor-pointer"
+            >
+              Sign In
+            </router-link>
           </p>
         </form>
 
@@ -201,22 +255,38 @@
           :key="toast.id"
           class="pointer-events-auto min-w-[320px] p-4 rounded-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200 dark:border-white/10 shadow-2xl flex items-start gap-3 animate-fade-in-up"
         >
-          <div :class="[
-            'mt-0.5 p-1 rounded-lg',
-            toast.type === 'success' ? 'bg-emerald-100 text-emerald-600' : 
-            toast.type === 'error' ? 'bg-rose-100 text-rose-600' : 'bg-blue-100 text-blue-600'
-          ]">
-            <CheckCircle v-if="toast.type === 'success'" class="w-4 h-4" />
-            <AlertCircle v-else-if="toast.type === 'error'" class="w-4 h-4" />
-            <Info v-else class="w-4 h-4" />
+          <div
+            :class="[
+              'mt-0.5 p-1 rounded-lg',
+              toast.type === 'success' ? 'bg-emerald-100 text-emerald-600' : 
+              toast.type === 'error' ? 'bg-rose-100 text-rose-600' : 'bg-blue-100 text-blue-600'
+            ]"
+          >
+            <CheckCircle
+              v-if="toast.type === 'success'"
+              class="w-4 h-4"
+            />
+            <AlertCircle
+              v-else-if="toast.type === 'error'"
+              class="w-4 h-4"
+            />
+            <Info
+              v-else
+              class="w-4 h-4"
+            />
           </div>
           <div class="flex-1">
             <p class="text-[11px] font-black uppercase tracking-wider text-slate-900 dark:text-white leading-tight">
               {{ toast.type === 'success' ? 'Success' : toast.type === 'error' ? 'Notice' : 'Information' }}
             </p>
-            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">{{ toast.message }}</p>
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">
+              {{ toast.message }}
+            </p>
           </div>
-          <button @click="removeToast(toast.id)" class="text-slate-400 hover:text-slate-600">
+          <button
+            class="text-slate-400 hover:text-slate-600"
+            @click="removeToast(toast.id)"
+          >
             <X class="w-4 h-4" />
           </button>
         </div>

@@ -1,7 +1,9 @@
 <template>
   <div class="verification-container">
     <div class="verification-header">
-      <h2 class="verification-title">Background Verification</h2>
+      <h2 class="verification-title">
+        Background Verification
+      </h2>
       <p class="verification-subtitle">
         Verify your identity documents securely
       </p>
@@ -12,7 +14,7 @@
         <div
           class="progress-bar"
           :style="{ width: `${verificationProgress}%` }"
-        ></div>
+        />
       </div>
       <div class="progress-text">
         {{ completedVerifications }} of
@@ -40,8 +42,12 @@
                 <component :is="getDocumentIcon(doc.field)" />
               </div>
               <div class="card-title-content">
-                <h3 class="card-title">{{ doc.title }}</h3>
-                <p class="card-description">{{ doc.description }}</p>
+                <h3 class="card-title">
+                  {{ doc.title }}
+                </h3>
+                <p class="card-description">
+                  {{ doc.description }}
+                </p>
               </div>
             </div>
             <div class="card-status">
@@ -66,7 +72,10 @@
                 <ClockIcon size="16" />
                 Pending
               </span>
-              <span v-else class="status-badge not-started">
+              <span
+                v-else
+                class="status-badge not-started"
+              >
                 <CircleIcon size="16" />
                 Not Started
               </span>
@@ -75,27 +84,31 @@
 
           <div class="card-content">
             <div v-if="doc.field === 'aadhaar'">
-              <div v-if="!isAadhaarSubmitted" class="aadhaar-verification-form">
+              <div
+                v-if="!isAadhaarSubmitted"
+                class="aadhaar-verification-form"
+              >
                 <div class="input-group">
-                  <label for="aadhaar-name" class="input-label"
-                    >AadhaarNumber</label
-                  >
+                  <label
+                    for="aadhaar-name"
+                    class="input-label"
+                  >AadhaarNumber</label>
                   <input
                     id="aadhaar-name"
                     v-model="aadhaarFormData.number"
                     type="text"
                     class="verification-input"
                     :disabled="isVerifyButtonDisabled(doc.field)"
-                  />
+                  >
                 </div>
 
                 <button
                   class="verify-button submit-button"
-                  @click="handleAadhaarVerification"
                   :disabled="isVerifyButtonDisabled(doc.field)"
                   :class="{
                     'button-disabled': isVerifyButtonDisabled(doc.field),
                   }"
+                  @click="handleAadhaarVerification"
                 >
                   {{
                     getButtonText(doc.field) === "Verify"
@@ -130,7 +143,12 @@
                   {{ aadhaarDetails.zip }}
                 </p>
 
-                <button class="ok-button" @click="handleAadhaarOk">OK</button>
+                <button
+                  class="ok-button"
+                  @click="handleAadhaarOk"
+                >
+                  OK
+                </button>
               </div>
 
               <!-- <div v-else class="verification-success-content">
@@ -182,8 +200,14 @@
               </div> -->
             </div>
 
-            <div v-else class="input-group">
-              <label :for="doc.field" class="input-label">{{
+            <div
+              v-else
+              class="input-group"
+            >
+              <label
+                :for="doc.field"
+                class="input-label"
+              >{{
                 doc.inputLabel || doc.title
               }}</label>
               <div class="input-with-button">
@@ -193,11 +217,11 @@
                   :type="doc.inputType || 'text'"
                   class="verification-input"
                   disabled
-                />
+                >
                 <button
                   class="verify-button"
-                  @click="handleVerification(doc)"
                   :disabled="isVerifyButtonDisabled(doc.field)"
+                  @click="handleVerification(doc)"
                 >
                   {{ getButtonText(doc.field) }}
                 </button>

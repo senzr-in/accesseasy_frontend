@@ -2,12 +2,12 @@
   <DataTable
     :items="fieldTrips"
     :columns="fieldTripColumns"
-    :selectedItems="selectedFieldTrips"
-    :showSelection="true"
+    :selected-items="selectedFieldTrips"
+    :show-selection="true"
     :expandable="false"
-    :sortBy="sortBy"
-    :sortDirection="sortDirection"
-    @update:selectedItems="handleSelectedChange"
+    :sort-by="sortBy"
+    :sort-direction="sortDirection"
+    @update:selected-items="handleSelectedChange"
     @sort="handleSort"
   >
     <!-- Custom Status Cell -->
@@ -66,15 +66,20 @@
           size="20"
           @click="emit('showRouteMap', item)"
         />
-        <span v-else class="na-text">N/A</span>
+        <span
+          v-else
+          class="na-text"
+        >N/A</span>
       </div>
     </template>
 
     <!-- Expanded Content for extra details -->
     <template #expanded-content="{ item }">
       <div class="expanded-section">
-        <h4 class="expanded-header">Field Trip Details</h4>
-        <FieldTripExpandedDetails :fieldTrip="item" />
+        <h4 class="expanded-header">
+          Field Trip Details
+        </h4>
+        <FieldTripExpandedDetails :field-trip="item" />
       </div>
     </template>
   </DataTable>

@@ -10,22 +10,28 @@
       }"
     >
       <DataTableWrapper
-        v-model:searchQuery="searchQuery"
-        @update:searchQuery="handleSearchUpdate"
+        v-model:search-query="searchQuery"
         :total-items="totalItems"
         height="calc(95vh - 190px)"
+        @update:search-query="handleSearchUpdate"
       >
         <!-- Toolbar Actions Slot -->
-        <template v-slot:toolbar-actions>
-          <div class="wo-counters" aria-label="Work Order Status Counters">
+        <template #toolbar-actions>
+          <div
+            class="wo-counters"
+            aria-label="Work Order Status Counters"
+          >
             <div
               class="wo-pill total"
               role="button"
               aria-live="polite"
-              @click="filterByStatus('')"
               :class="{ active: filters.status === '' }"
+              @click="filterByStatus('')"
             >
-              <ListChecks class="wo-icon" aria-hidden="true" />
+              <ListChecks
+                class="wo-icon"
+                aria-hidden="true"
+              />
               <span class="wo-label">Total</span>
               <span class="wo-count">{{ statusCounts?.total ?? 0 }}</span>
             </div>
@@ -33,10 +39,13 @@
               class="wo-pill pending"
               role="button"
               aria-live="polite"
-              @click="filterByStatus('pending')"
               :class="{ active: filters.status === 'pending' }"
+              @click="filterByStatus('pending')"
             >
-              <Clock class="wo-icon" aria-hidden="true" />
+              <Clock
+                class="wo-icon"
+                aria-hidden="true"
+              />
               <span class="wo-label">Pending</span>
               <span class="wo-count">{{ statusCounts?.pending ?? 0 }}</span>
             </div>
@@ -44,10 +53,13 @@
               class="wo-pill overDue"
               role="button"
               aria-live="polite"
-              @click="filterByStatus('overDue')"
               :class="{ active: filters.status === 'overDue' }"
+              @click="filterByStatus('overDue')"
             >
-              <AlertTriangle class="wo-icon" aria-hidden="true" />
+              <AlertTriangle
+                class="wo-icon"
+                aria-hidden="true"
+              />
               <span class="wo-label">Over Due</span>
               <span class="wo-count">{{ statusCounts?.overDue ?? 0 }}</span>
             </div>
@@ -55,10 +67,13 @@
               class="wo-pill cancelled"
               role="button"
               aria-live="polite"
-              @click="filterByStatus('cancelled')"
               :class="{ active: filters.status === 'cancelled' }"
+              @click="filterByStatus('cancelled')"
             >
-              <AlertTriangle class="wo-icon" aria-hidden="true" />
+              <AlertTriangle
+                class="wo-icon"
+                aria-hidden="true"
+              />
               <span class="wo-label">Cancelled</span>
               <span class="wo-count">{{ statusCounts?.cancelled ?? 0 }}</span>
             </div>
@@ -66,10 +81,13 @@
               class="wo-pill completed"
               role="button"
               aria-live="polite"
-              @click="filterByStatus('completed')"
               :class="{ active: filters.status === 'completed' }"
+              @click="filterByStatus('completed')"
             >
-              <CheckCircle class="wo-icon" aria-hidden="true" />
+              <CheckCircle
+                class="wo-icon"
+                aria-hidden="true"
+              />
               <span class="wo-label">Completed</span>
               <span class="wo-count">{{ statusCounts?.completed ?? 0 }}</span>
             </div>
@@ -77,7 +95,7 @@
           <BaseButton
             variant="secondary"
             text="Filters"
-            :leftIcon="Filter"
+            :left-icon="Filter"
             :badge="hasActiveFilters ? '!' : null"
             @click="toggleFilters"
           />
@@ -86,22 +104,22 @@
             variant="danger"
             :loading="externalLoading"
             :text="`Delete (${selectedTaskIds.length})`"
-            :leftIcon="Trash2"
+            :left-icon="Trash2"
             @click="openDeleteModal = true"
           />
           <BaseButton
             variant="primary"
             :text="`Create Job`"
-            :leftIcon="PlusIcon"
+            :left-icon="PlusIcon"
             :loading="externalLoading"
             @click="handleCreateWorkOrder"
           />
           <DropdownButton
             v-if="userRole === 'Admin'"
             text="Export"
-            :leftIcon="Download"
+            :left-icon="Download"
             :items="exportItems"
-            @itemClick="handleExport"
+            @item-click="handleExport"
           />
         </template>
 
@@ -124,24 +142,24 @@
           <EmptyState
             title="No Work Orders found"
             message="Try adjusting your filters or create a new work order"
-            :primaryAction="{ text: 'Create Work Order', icon: Plus }"
-            :secondaryAction="{ text: 'Clear Filters', icon: X }"
-            @primaryAction="openCreateWO = true"
-            @secondaryAction="clearAllFiltersAndReload"
+            :primary-action="{ text: 'Create Work Order', icon: Plus }"
+            :secondary-action="{ text: 'Clear Filters', icon: X }"
+            @primary-action="openCreateWO = true"
+            @secondary-action="clearAllFiltersAndReload"
           />
         </div>
         <div v-else>
           <TaskTable
             :tasks="tasks"
-            :selectedTaskIds="selectedTaskIds"
-            :expandedTaskId="expandedTaskId"
-            :sortBy="sortBy"
-            :sortDirection="sortDirection"
-            @toggleSelectAll="toggleSelectAll"
-            @toggleTaskSelection="toggleTaskSelection"
-            @requestSort="requestSort"
-            @toggleExpandedDetails="toggleExpandedDetails"
-            @openCompleteSidebar="handleOpenCompleteSidebar"
+            :selected-task-ids="selectedTaskIds"
+            :expanded-task-id="expandedTaskId"
+            :sort-by="sortBy"
+            :sort-direction="sortDirection"
+            @toggle-select-all="toggleSelectAll"
+            @toggle-task-selection="toggleTaskSelection"
+            @request-sort="requestSort"
+            @toggle-expanded-details="toggleExpandedDetails"
+            @open-complete-sidebar="handleOpenCompleteSidebar"
           />
         </div>
 
@@ -155,17 +173,17 @@
           v-model="openCompleteSidebar"
           :task="selectedTaskForCompletion"
           @complete="handleTaskComplete"
-          @saveDraft="handleTaskSaveDraft"
+          @save-draft="handleTaskSaveDraft"
         />
 
         <!-- Pagination Slot -->
-        <template v-slot:pagination>
+        <template #pagination>
           <CustomPagination
             v-model:page="currentPage"
-            v-model:itemsPerPage="itemsPerPage"
+            v-model:items-per-page="itemsPerPage"
             :total-items="totalItems"
             @update:page="handlePageChange"
-            @update:itemsPerPage="handleItemsPerPageChange"
+            @update:items-per-page="handleItemsPerPageChange"
           />
         </template>
       </DataTableWrapper>
@@ -175,12 +193,15 @@
     <FilterPanel
       :show="showFilters"
       title="Task Filters"
-      :hasFilters="hasActiveFilters"
+      :has-filters="hasActiveFilters"
       @close="showFilters = false"
       @clear="clearAllFiltersAndReload"
       @apply="applyFilters"
     >
-      <FilterSection title="Month" :icon="Calendar">
+      <FilterSection
+        title="Month"
+        :icon="Calendar"
+      >
         <FilterMonth
           v-model="filters.month"
           @change="applyFilters"
@@ -188,7 +209,10 @@
         />
       </FilterSection>
 
-      <FilterSection title="Task Type" :icon="Tag">
+      <FilterSection
+        title="Task Type"
+        :icon="Tag"
+      >
         <FilterSelect
           v-model="filters.assignFormId"
           :options="formTemplateOptions"
@@ -197,7 +221,10 @@
         />
       </FilterSection>
 
-      <FilterSection title="Status" :icon="ListChecks">
+      <FilterSection
+        title="Status"
+        :icon="ListChecks"
+      >
         <FilterSelect
           v-model="filters.status"
           :options="statusOptions"
@@ -208,7 +235,10 @@
       </FilterSection>
 
       <!-- Replace the FilterSelect components with SearchableSelect -->
-      <FilterSection title="Client" :icon="Building">
+      <FilterSection
+        title="Client"
+        :icon="Building"
+      >
         <SearchableSelect
           v-model="filters.orgId"
           placeholder="All Clients"
@@ -219,7 +249,10 @@
         />
       </FilterSection>
 
-      <FilterSection title="Employee" :icon="User">
+      <FilterSection
+        title="Employee"
+        :icon="User"
+      >
         <SearchableSelect
           v-model="filters.employeeUserId"
           placeholder="All Employees"
@@ -238,27 +271,27 @@
     >
       <BaseButton
         v-if="canRescheduleOrReassign"
-        :leftIcon="Plus"
+        :left-icon="Plus"
         variant="primary"
         text="Reassign"
         @click="openReassignModal = true"
       />
       <BaseButton
         v-if="canRescheduleOrReassign"
-        :leftIcon="CalendarClock"
+        :left-icon="CalendarClock"
         variant="primary"
         text="Reschedule"
         @click="openRescheduleModal = true"
       />
       <BaseButton
-        :leftIcon="Trash2"
+        :left-icon="Trash2"
         variant="danger"
         text="Delete"
         @click="openDeleteModal = true"
       />
       <BaseButton
         v-if="canCancel"
-        :leftIcon="XCircle"
+        :left-icon="XCircle"
         variant="danger"
         text="Cancel task"
         :loading="externalLoading"
@@ -270,9 +303,9 @@
     <ReassignModal
       v-if="openReassignModal"
       :show="openReassignModal"
-      :taskIds="selectedTaskIds"
+      :task-ids="selectedTaskIds"
       :users="users"
-      :currentEmployeeId="
+      :current-employee-id="
         selectedTasks.length === 1 ? selectedTasks[0].employeeId : null
       "
       @close="openReassignModal = false"
@@ -281,9 +314,9 @@
     <RescheduleModal
       v-if="openRescheduleModal"
       :show="openRescheduleModal"
-      :taskIds="selectedTaskIds"
-      :currentFrom="selectedTasks.length === 1 ? selectedTasks[0].from : null"
-      :currentDueTime="
+      :task-ids="selectedTaskIds"
+      :current-from="selectedTasks.length === 1 ? selectedTasks[0].from : null"
+      :current-due-time="
         selectedTasks.length === 1 ? selectedTasks[0].dueTime : null
       "
       @close="openRescheduleModal = false"
@@ -292,7 +325,7 @@
     <ConfirmCancelModal
       v-if="openCancelModal"
       :show="openCancelModal"
-      :taskIds="selectedTaskIds"
+      :task-ids="selectedTaskIds"
       :loading="externalLoading"
       @close="openCancelModal = false"
       @confirm="handleConfirmCancel"
@@ -300,11 +333,11 @@
     <ConfirmDeleteModal
       :show="openDeleteModal"
       title="Delete Tasks"
-      :itemLabel="'Task(s)'"
-      :itemName="`${selectedTaskIds.length} selected`"
+      :item-label="'Task(s)'"
+      :item-name="`${selectedTaskIds.length} selected`"
       :deleting="deleting"
-      confirmText="Delete"
-      cancelText="Cancel"
+      confirm-text="Delete"
+      cancel-text="Cancel"
       @close="openDeleteModal = false"
       @confirm="handleConfirmDelete"
     />

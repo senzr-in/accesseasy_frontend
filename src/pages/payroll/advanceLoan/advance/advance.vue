@@ -1,15 +1,21 @@
 <template>
-  <div class="employee-container" :class="{ 'drawer-open': viewDrawer }">
+  <div
+    class="employee-container"
+    :class="{ 'drawer-open': viewDrawer }"
+  >
     <!-- toast msg -->
     <ToastContainer ref="toastRef" />
 
     <!-- Filter Panel -->
-    <div class="filter-panel" v-if="showFilters && tenantId">
+    <div
+      v-if="showFilters && tenantId"
+      class="filter-panel"
+    >
       <div class="filter-content">
         <FilterComponent
-          :tenantId="tenantId"
-          :initialFilters="initialFilters"
-          :initiallyVisible="true"
+          :tenant-id="tenantId"
+          :initial-filters="initialFilters"
+          :initially-visible="true"
           :filter-schema="pageFilters"
           @apply-filters="handleApplyFilters"
           @filter-visibility-changed="onFilterVisibilityChanged"
@@ -19,26 +25,26 @@
 
     <!-- Main Content -->
     <div
-      class="main-content"
       v-if="tenantId"
+      class="main-content"
       :class="{ 'full-width': !showFilters }"
     >
       <DataTableWrapper
-        v-model:searchQuery="search"
-        :showSearch="true"
-        :searchPlaceholder="'Search Employee...'"
-        :isEmpty="items.length === 0 && !search"
-        :hasError="error"
-        @update:searchQuery="debouncedSearch"
+        v-model:search-query="search"
+        :show-search="true"
+        :search-placeholder="'Search Employee...'"
+        :is-empty="items.length === 0 && !search"
+        :has-error="error"
+        @update:search-query="debouncedSearch"
       >
         <template #before-search>
           <!-- Filter Toggle Button -->
           <button
             class="filter-toggle-static"
-            @click="toggleFilters"
             :class="{ active: hasActiveFilters }"
             :title="showFilters ? 'Hide filters' : 'Show filters'"
             aria-label="Toggle filters"
+            @click="toggleFilters"
           >
             <svg
               width="20"
@@ -50,7 +56,10 @@
             >
               <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46" />
             </svg>
-            <div v-if="hasActiveFilters" class="filter-indicator"></div>
+            <div
+              v-if="hasActiveFilters"
+              class="filter-indicator"
+            />
           </button>
         </template>
         <!-- Loading State -->
@@ -76,8 +85,8 @@
           <EmptyState
             title="No employee data found"
             message="Try adjusting your search criteria"
-            :primaryAction="{ text: 'Clear Filters', icon: 'X' }"
-            @primaryAction="clearFilters"
+            :primary-action="{ text: 'Clear Filters', icon: 'X' }"
+            @primary-action="clearFilters"
           />
         </div>
 
@@ -87,13 +96,13 @@
             v-model="selected"
             :items="paginatedItems"
             :columns="headers"
-            :sortBy="sortBy"
-            :sortDirection="sortDirection"
-            :showSelection="true"
+            :sort-by="sortBy"
+            :sort-direction="sortDirection"
+            :show-selection="true"
             :expandable="false"
-            :rowClickable="true"
+            :row-clickable="true"
             @sort="handleSort"
-            @rowClick="openViewDrawer($event, 'view')"
+            @row-click="openViewDrawer($event, 'view')"
           >
             <!-- Employee Name Column -->
             <template #cell-employee.assignedUser.first_name="{ item }">
@@ -123,11 +132,11 @@
                   variant="primary"
                   size="sm"
                   left-icon="mdi-plus"
+                  class="mr-2"
                   @click.stop="
                     openViewDrawer(item, 'add');
                     resetBenefitsForm();
                   "
-                  class="mr-2"
                 >
                   Add Advance
                 </BaseButton>
@@ -137,9 +146,9 @@
                     color="info"
                     variant="outlined"
                     size="small"
-                    @click.stop="openViewDrawer(item, 'view')"
                     class="view-chip"
                     clickable
+                    @click.stop="openViewDrawer(item, 'view')"
                   >
                     View Details
                   </v-chip>
@@ -150,13 +159,13 @@
         </div>
 
         <!-- Pagination Slot -->
-        <template v-slot:pagination>
+        <template #pagination>
           <CustomPagination
             v-model:page="page"
-            v-model:itemsPerPage="itemsPerPage"
+            v-model:items-per-page="itemsPerPage"
             :total-items="totalFilteredItems"
             @update:page="handlePageChange"
-            @update:itemsPerPage="handleItemsPerPageChange"
+            @update:items-per-page="handleItemsPerPageChange"
           />
         </template>
       </DataTableWrapper>
@@ -171,13 +180,20 @@
       no-overlay
       :style="{ position: 'absolute', zIndex: 1000 }"
     >
-      <v-card flat height="100%" class="d-flex flex-column">
+      <v-card
+        flat
+        height="100%"
+        class="d-flex flex-column"
+      >
         <v-card-title
           class="d-flex justify-space-between align-center primary"
           style="background-color: #f5f5f5; color: black"
         >
           <span>Employee Details</span>
-          <v-btn icon @click="viewDrawer = false">
+          <v-btn
+            icon
+            @click="viewDrawer = false"
+          >
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-card-title>
@@ -200,7 +216,9 @@
                     >
                       <div>
                         <strong>{{ deduction.reason }}</strong>
-                        <div class="text-caption">{{ deduction.month }} •</div>
+                        <div class="text-caption">
+                          {{ deduction.month }} •
+                        </div>
                       </div>
                       <div class="text-right">
                         <strong>₹{{ deduction.amount }}</strong>
@@ -228,12 +246,20 @@
                 </div>
               </div>
 
-              <div v-else class="text-center py-4">
+              <div
+                v-else
+                class="text-center py-4"
+              >
                 No advance records found
               </div>
               <div class="text-right mt-4">
-                <v-btn color="primary" @click="navigateToBenefits">
-                  <v-icon start>mdi-plus</v-icon>
+                <v-btn
+                  color="primary"
+                  @click="navigateToBenefits"
+                >
+                  <v-icon start>
+                    mdi-plus
+                  </v-icon>
                   Add Advance
                 </v-btn>
               </div>
@@ -243,7 +269,9 @@
               <v-card flat>
                 <v-card-text>
                   <div class="form-row mb-4">
-                    <div class="form-label">Reason</div>
+                    <div class="form-label">
+                      Reason
+                    </div>
                     <div class="form-field">
                       <v-text-field
                         v-model="editingBenefits.reason"
@@ -254,7 +282,9 @@
                     </div>
                   </div>
                   <div class="form-row mb-4">
-                    <div class="form-label">Amount</div>
+                    <div class="form-label">
+                      Amount
+                    </div>
                     <div class="form-field">
                       <v-text-field
                         v-model="editingBenefits.amount"
@@ -262,11 +292,13 @@
                         variant="outlined"
                         prefix="₹"
                         density="compact"
-                      ></v-text-field>
+                      />
                     </div>
                   </div>
                   <div class="form-row mb-4">
-                    <div class="form-label">Month</div>
+                    <div class="form-label">
+                      Month
+                    </div>
                     <div class="form-field">
                       <v-text-field
                         v-model="editingBenefits.month"
@@ -275,29 +307,35 @@
                         variant="outlined"
                         density="compact"
                         required
-                      ></v-text-field>
+                      />
                     </div>
                   </div>
                   <div class="form-row mb-4">
-                    <div class="form-label">Notes</div>
+                    <div class="form-label">
+                      Notes
+                    </div>
                     <div class="form-field">
                       <v-textarea
                         v-model="editingBenefits.notes"
                         variant="outlined"
                         density="compact"
                         rows="3"
-                      ></v-textarea>
+                      />
                     </div>
                   </div>
 
                   <div class="d-flex justify-end mt-4">
-                    <v-btn class="mr-2" variant="outlined" @click="cancelEdit">
+                    <v-btn
+                      class="mr-2"
+                      variant="outlined"
+                      @click="cancelEdit"
+                    >
                       Cancel
                     </v-btn>
                     <v-btn
                       color="primary"
-                      @click="updateBenefit"
                       :loading="updatingBenefits"
+                      @click="updateBenefit"
                     >
                       {{ editingBenefits.index !== null ? "Update" : "Save" }}
                       Advance

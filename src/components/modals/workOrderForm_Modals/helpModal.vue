@@ -1,6 +1,13 @@
 <template>
-  <div v-if="show" class="modal-overlay" @click="$emit('close')">
-    <div class="modal-content enhanced-modal modal-large" @click.stop>
+  <div
+    v-if="show"
+    class="modal-overlay"
+    @click="$emit('close')"
+  >
+    <div
+      class="modal-content enhanced-modal modal-large"
+      @click.stop
+    >
       <div class="modal-header">
         <div class="modal-title-section">
           <h3 class="modal-title">
@@ -11,7 +18,10 @@
             Learn how to create and configure work order forms
           </p>
         </div>
-        <button @click="$emit('close')" class="modal-close">
+        <button
+          class="modal-close"
+          @click="$emit('close')"
+        >
           <XIcon class="w-6 h-6" />
         </button>
       </div>
@@ -24,36 +34,52 @@
             </h4>
             <div class="help-steps">
               <div class="help-step">
-                <div class="step-number">1</div>
+                <div class="step-number">
+                  1
+                </div>
                 <div class="step-content">
-                  <div class="step-title">Create a New Form</div>
+                  <div class="step-title">
+                    Create a New Form
+                  </div>
                   <div class="step-description">
                     Click "Create New Form" and give it a descriptive name
                   </div>
                 </div>
               </div>
               <div class="help-step">
-                <div class="step-number">2</div>
+                <div class="step-number">
+                  2
+                </div>
                 <div class="step-content">
-                  <div class="step-title">Add Fields</div>
+                  <div class="step-title">
+                    Add Fields
+                  </div>
                   <div class="step-description">
                     Use "Add Field" to create input fields for your work orders
                   </div>
                 </div>
               </div>
               <div class="help-step">
-                <div class="step-number">3</div>
+                <div class="step-number">
+                  3
+                </div>
                 <div class="step-content">
-                  <div class="step-title">Configure Settings</div>
+                  <div class="step-title">
+                    Configure Settings
+                  </div>
                   <div class="step-description">
                     Set validation rules and role-based permissions
                   </div>
                 </div>
               </div>
               <div class="help-step">
-                <div class="step-number">4</div>
+                <div class="step-number">
+                  4
+                </div>
                 <div class="step-content">
-                  <div class="step-title">Save & Test</div>
+                  <div class="step-title">
+                    Save & Test
+                  </div>
                   <div class="step-description">
                     Save your configuration and test the form
                   </div>
@@ -77,8 +103,12 @@
                   class="field-help-icon"
                 />
                 <div>
-                  <div class="field-help-name">{{ fieldType.label }}</div>
-                  <div class="field-help-desc">{{ fieldType.description }}</div>
+                  <div class="field-help-name">
+                    {{ fieldType.label }}
+                  </div>
+                  <div class="field-help-desc">
+                    {{ fieldType.description }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -97,7 +127,12 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button @click="$emit('close')" class="btn btn-primary">Got it!</button>
+        <button
+          class="btn btn-primary"
+          @click="$emit('close')"
+        >
+          Got it!
+        </button>
       </div>
     </div>
   </div>

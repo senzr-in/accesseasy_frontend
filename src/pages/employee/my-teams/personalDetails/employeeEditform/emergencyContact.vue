@@ -2,11 +2,14 @@
   <div class="personal-details">
     <v-container v-if="loading">
       <v-row>
-        <v-col cols="12" class="text-center">
+        <v-col
+          cols="12"
+          class="text-center"
+        >
           <v-progress-circular
             indeterminate
             color="black"
-          ></v-progress-circular>
+          />
         </v-col>
       </v-row>
     </v-container>
@@ -24,15 +27,21 @@
         />
       </div>
       <v-row>
-        <v-col cols="12" md="6">
+        <v-col
+          cols="12"
+          md="6"
+        >
           <v-text-field
             v-model="employeeData.assignedUser.emergency_Contact_Name"
             label="Emergency Contact Name"
             variant="outlined"
             density="comfortable"
-          ></v-text-field>
+          />
         </v-col>
-        <v-col cols="12" md="6">
+        <v-col
+          cols="12"
+          md="6"
+        >
           <v-text-field
             v-model="employeeData.assignedUser.emergency_Contact_Mobile_Number"
             label="Emergency Contact Mobile Number"
@@ -41,32 +50,41 @@
             density="comfortable"
             :rules="[validateContactNumber]"
             maxlength="10"
-          ></v-text-field>
+          />
         </v-col>
-        <v-col cols="12" md="6">
+        <v-col
+          cols="12"
+          md="6"
+        >
           <v-text-field
             v-model="employeeData.assignedUser.emergency_Contact_Relationship"
             label="Emergency Contact Relationship"
             variant="outlined"
             density="comfortable"
-          ></v-text-field>
+          />
         </v-col>
-        <v-col cols="12" md="6">
+        <v-col
+          cols="12"
+          md="6"
+        >
           <v-text-field
             v-model="employeeData.assignedUser.guardians_Name"
             label="Guardian's Name"
             variant="outlined"
             density="comfortable"
-          ></v-text-field>
+          />
         </v-col>
-        <v-col cols="12" md="6">
+        <v-col
+          cols="12"
+          md="6"
+        >
           <v-textarea
             v-model="employeeData.assignedUser.emergency_Contact_Address"
             label="Emergency Contact Address"
             rows="3"
             variant="outlined"
             density="comfortable"
-          ></v-textarea>
+          />
         </v-col>
       </v-row>
     </v-container>
@@ -78,7 +96,9 @@
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-check-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-check-circle
+        </v-icon>
         {{ successMessage }}
       </div>
     </v-snackbar>
@@ -90,7 +110,9 @@
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-alert-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-alert-circle
+        </v-icon>
         {{ errorMessage }}
       </div>
     </v-snackbar>

@@ -11,20 +11,20 @@
         Generate QR Codes
       </BaseButton> -->
       <DataTableWrapper
-        v-model:searchQuery="search"
-        :showSearch="true"
-        :searchPlaceholder="'Search QR Codes'"
-        :isEmpty="false"
-        :hasError="error"
-        @update:searchQuery="debouncedSearch"
+        v-model:search-query="search"
+        :show-search="true"
+        :search-placeholder="'Search QR Codes'"
+        :is-empty="false"
+        :has-error="error"
+        @update:search-query="debouncedSearch"
       >
         <!-- Generate QR Button - Always visible -->
         <template #toolbar-actions>
           <BaseButton
             variant="primary"
-            @click="showGenerateDialog = true"
             prepend-icon="mdi-qrcode-plus"
             class="generate-btn"
+            @click="showGenerateDialog = true"
           >
             Generate QR Codes
           </BaseButton>
@@ -52,23 +52,31 @@
           <DataTable
             :items="filteredQRData"
             :columns="columns"
-            :selectedItems="selectedItems"
-            :showSelection="false"
-            :sortBy="sortBy[0]?.key || ''"
-            :sortDirection="sortBy[0]?.order || 'asc'"
-            :itemKey="'id'"
-            :rowClickable="true"
-            @update:selectedItems="selectedItems = $event"
-            @update:sortBy="updateSortBy"
-            @update:sortDirection="updateSortDirection"
-            @rowClick="handleRowClick"
+            :selected-items="selectedItems"
+            :show-selection="false"
+            :sort-by="sortBy[0]?.key || ''"
+            :sort-direction="sortBy[0]?.order || 'asc'"
+            :item-key="'id'"
+            :row-clickable="true"
+            @update:selected-items="selectedItems = $event"
+            @update:sort-by="updateSortBy"
+            @update:sort-direction="updateSortDirection"
+            @row-click="handleRowClick"
             @sort="handleSort"
           >
             <!-- QR Code Column -->
             <template #cell-qrcode="{ item }">
               <div class="qr-code-cell">
-                <div class="qr-preview" @click="showQRPreview(item)">
-                  <v-icon color="primary" size="24">mdi-qrcode</v-icon>
+                <div
+                  class="qr-preview"
+                  @click="showQRPreview(item)"
+                >
+                  <v-icon
+                    color="primary"
+                    size="24"
+                  >
+                    mdi-qrcode
+                  </v-icon>
                   <span class="qr-text">{{ truncateQRCode(item.qrcode) }}</span>
                 </div>
               </div>
@@ -135,9 +143,9 @@
                   variant="primary"
                   size="small"
                   prepend-icon="mdi-share-variant"
-                  @click.stop="shareQRCode(item)"
                   class="share-btn"
                   style="padding: 8px 16px"
+                  @click.stop="shareQRCode(item)"
                 >
                   Share
                 </BaseButton>
@@ -150,8 +158,8 @@
                 <EmptyState
                   title="No QR codes found"
                   message="Get started by generating your first QR codes"
-                  :primaryAction="{ text: 'Generate QR Codes' }"
-                  @primaryAction="showGenerateDialog = true"
+                  :primary-action="{ text: 'Generate QR Codes' }"
+                  @primary-action="showGenerateDialog = true"
                 />
               </div>
             </template>
@@ -159,30 +167,36 @@
         </div>
 
         <!-- Pagination Slot -->
-        <template v-slot:pagination>
+        <template #pagination>
           <CustomPagination
             v-model:page="page"
-            v-model:itemsPerPage="itemsPerPage"
+            v-model:items-per-page="itemsPerPage"
             :total-items="totalItems"
             @update:page="handlePageChange"
-            @update:itemsPerPage="handleItemsPerPageChange"
+            @update:items-per-page="handleItemsPerPageChange"
           />
         </template>
       </DataTableWrapper>
     </div>
 
     <!-- Generate QR Codes Dialog -->
-    <v-dialog v-model="showGenerateDialog" max-width="800px" persistent>
+    <v-dialog
+      v-model="showGenerateDialog"
+      max-width="800px"
+      persistent
+    >
       <v-card class="generate-dialog">
         <v-card-title class="d-flex align-center">
-          <v-icon class="mr-2">mdi-qrcode-plus</v-icon>
+          <v-icon class="mr-2">
+            mdi-qrcode-plus
+          </v-icon>
           Generate QR Codes in Bulk
-          <v-spacer></v-spacer>
+          <v-spacer />
           <BaseButton
             icon
-            @click="closeGenerateDialog"
             :disabled="isGenerating"
             variant="text"
+            @click="closeGenerateDialog"
           >
             <v-icon>mdi-close</v-icon>
           </BaseButton>
@@ -191,27 +205,54 @@
         <v-card-text class="pa-6">
           <!-- Generation Steps -->
           <div class="generate-steps">
-            <div class="step" :class="{ active: generateStep === 1 }">
-              <div class="step-number">1</div>
-              <div class="step-label">Configure</div>
+            <div
+              class="step"
+              :class="{ active: generateStep === 1 }"
+            >
+              <div class="step-number">
+                1
+              </div>
+              <div class="step-label">
+                Configure
+              </div>
             </div>
-            <div class="step" :class="{ active: generateStep === 2 }">
-              <div class="step-number">2</div>
-              <div class="step-label">Generate</div>
+            <div
+              class="step"
+              :class="{ active: generateStep === 2 }"
+            >
+              <div class="step-number">
+                2
+              </div>
+              <div class="step-label">
+                Generate
+              </div>
             </div>
-            <div class="step" :class="{ active: generateStep === 3 }">
-              <div class="step-number">3</div>
-              <div class="step-label">Download</div>
+            <div
+              class="step"
+              :class="{ active: generateStep === 3 }"
+            >
+              <div class="step-number">
+                3
+              </div>
+              <div class="step-label">
+                Download
+              </div>
             </div>
           </div>
 
           <!-- Step 1: Configuration -->
-          <div v-if="generateStep === 1" class="config-section">
+          <div
+            v-if="generateStep === 1"
+            class="config-section"
+          >
             <v-card variant="outlined">
               <v-card-title>Generation Settings</v-card-title>
               <v-card-text>
                 <v-row>
-                  <v-col cols="12" md="6">
+                  <v-col
+                    cols="12"
+                    md="6"
+                  >
                     <v-text-field
                       v-model.number="generationConfig.quantity"
                       label="Number of QR Codes"
@@ -220,9 +261,12 @@
                       :min="1"
                       :max="1000"
                       :rules="[rules.required, rules.min1, rules.max1000]"
-                    ></v-text-field>
+                    />
                   </v-col>
-                  <v-col cols="12" md="6">
+                  <v-col
+                    cols="12"
+                    md="6"
+                  >
                     <v-select
                       v-model="generationConfig.accessLevelsId"
                       :items="accessLevels"
@@ -236,7 +280,7 @@
                           ? 'Access level assigned to QR codes'
                           : 'No access level (default)'
                       "
-                    ></v-select>
+                    />
                   </v-col>
                 </v-row>
 
@@ -247,14 +291,20 @@
                       label="Enable QR Codes immediately"
                       color="primary"
                       hide-details
-                    ></v-checkbox>
+                    />
                   </v-col>
                 </v-row>
 
                 <v-row>
                   <v-col cols="12">
-                    <v-alert type="info" variant="tonal" class="mt-4">
-                      <template v-slot:title> QR Code Information </template>
+                    <v-alert
+                      type="info"
+                      variant="tonal"
+                      class="mt-4"
+                    >
+                      <template #title>
+                        QR Code Information
+                      </template>
                       <ul class="mt-2">
                         <li>Each QR code will contain a unique identifier</li>
                         <li>QR codes can be scanned for access control</li>
@@ -270,9 +320,9 @@
                 <div class="config-actions mt-6">
                   <BaseButton
                     color="primary"
-                    @click="validateAndProceed"
                     :disabled="!generationConfig.quantity"
                     prepend-icon="mdi-arrow-right"
+                    @click="validateAndProceed"
                   >
                     CONTINUE TO GENERATE
                   </BaseButton>
@@ -282,12 +332,17 @@
           </div>
 
           <!-- Step 2: Generation Progress -->
-          <div v-else-if="generateStep === 2" class="generation-section">
+          <div
+            v-else-if="generateStep === 2"
+            class="generation-section"
+          >
             <v-card variant="outlined">
               <v-card-title class="d-flex align-center">
-                <v-icon class="mr-2">mdi-progress-upload</v-icon>
+                <v-icon class="mr-2">
+                  mdi-progress-upload
+                </v-icon>
                 Generating QR Codes...
-                <v-spacer></v-spacer>
+                <v-spacer />
                 <span class="text-caption">
                   {{ generationProgress.current }}/{{
                     generationProgress.total
@@ -305,7 +360,7 @@
                     color="primary"
                     class="mb-2"
                   >
-                    <template v-slot:default="{ value }">
+                    <template #default="{ value }">
                       <strong>{{ Math.ceil(value) }}%</strong>
                     </template>
                   </v-progress-linear>
@@ -323,8 +378,12 @@
                       color="success"
                       class="text-center pa-3"
                     >
-                      <div class="text-h6">{{ generationResults.success }}</div>
-                      <div class="text-caption">Success</div>
+                      <div class="text-h6">
+                        {{ generationResults.success }}
+                      </div>
+                      <div class="text-caption">
+                        Success
+                      </div>
                     </v-card>
                   </v-col>
                   <v-col cols="4">
@@ -333,8 +392,12 @@
                       color="error"
                       class="text-center pa-3"
                     >
-                      <div class="text-h6">{{ generationResults.failed }}</div>
-                      <div class="text-caption">Failed</div>
+                      <div class="text-h6">
+                        {{ generationResults.failed }}
+                      </div>
+                      <div class="text-caption">
+                        Failed
+                      </div>
                     </v-card>
                   </v-col>
                   <v-col cols="4">
@@ -343,16 +406,25 @@
                       color="info"
                       class="text-center pa-3"
                     >
-                      <div class="text-h6">{{ generationResults.total }}</div>
-                      <div class="text-caption">Total</div>
+                      <div class="text-h6">
+                        {{ generationResults.total }}
+                      </div>
+                      <div class="text-caption">
+                        Total
+                      </div>
                     </v-card>
                   </v-col>
                 </v-row>
 
                 <!-- Generation Log -->
                 <div class="generation-log mt-6">
-                  <h4 class="mb-2">Generation Log</h4>
-                  <v-card variant="outlined" class="log-container">
+                  <h4 class="mb-2">
+                    Generation Log
+                  </h4>
+                  <v-card
+                    variant="outlined"
+                    class="log-container"
+                  >
                     <v-card-text class="pa-0">
                       <v-list density="compact">
                         <v-list-item
@@ -360,8 +432,11 @@
                           :key="index"
                           :class="getLogClass(log.type)"
                         >
-                          <template v-slot:prepend>
-                            <v-icon :color="getLogColor(log.type)" size="small">
+                          <template #prepend>
+                            <v-icon
+                              :color="getLogColor(log.type)"
+                              size="small"
+                            >
                               {{ getLogIcon(log.type) }}
                             </v-icon>
                           </template>
@@ -378,8 +453,8 @@
                   <BaseButton
                     v-if="generationProgress.completed"
                     color="primary"
-                    @click="proceedToDownload"
                     prepend-icon="mdi-arrow-right"
+                    @click="proceedToDownload"
                   >
                     PROCEED TO DOWNLOAD
                   </BaseButton>
@@ -387,9 +462,9 @@
                     v-else
                     color="error"
                     variant="outlined"
-                    @click="cancelGeneration"
                     :disabled="!isGenerating"
                     prepend-icon="mdi-cancel"
+                    @click="cancelGeneration"
                   >
                     CANCEL GENERATION
                   </BaseButton>
@@ -399,12 +474,17 @@
           </div>
 
           <!-- Step 3: Download -->
-          <div v-else-if="generateStep === 3" class="download-section">
+          <div
+            v-else-if="generateStep === 3"
+            class="download-section"
+          >
             <v-card variant="outlined">
               <v-card-title class="d-flex align-center">
-                <v-icon class="mr-2">mdi-download-circle</v-icon>
+                <v-icon class="mr-2">
+                  mdi-download-circle
+                </v-icon>
                 Download QR Codes
-                <v-spacer></v-spacer>
+                <v-spacer />
                 <span class="text-caption text-medium-emphasis">
                   {{ generationResults.success }} codes generated
                 </span>
@@ -412,10 +492,16 @@
 
               <v-card-text>
                 <div class="success-summary text-center mb-6">
-                  <v-icon color="success" size="64" class="mb-4">
+                  <v-icon
+                    color="success"
+                    size="64"
+                    class="mb-4"
+                  >
                     mdi-check-circle
                   </v-icon>
-                  <h3 class="mb-2">QR Codes Generated Successfully!</h3>
+                  <h3 class="mb-2">
+                    QR Codes Generated Successfully!
+                  </h3>
                   <p class="text-medium-emphasis">
                     Your QR codes have been generated and saved to the database.
                     You can now download them as images.
@@ -423,45 +509,63 @@
                 </div>
 
                 <v-row class="mb-6">
-                  <v-col cols="12" md="6">
+                  <v-col
+                    cols="12"
+                    md="6"
+                  >
                     <v-card
                       variant="flat"
                       class="text-center pa-4 download-option"
                     >
-                      <v-icon size="48" color="primary" class="mb-3">
+                      <v-icon
+                        size="48"
+                        color="primary"
+                        class="mb-3"
+                      >
                         mdi-zip-box
                       </v-icon>
-                      <h4 class="mb-2">Download All as ZIP</h4>
+                      <h4 class="mb-2">
+                        Download All as ZIP
+                      </h4>
                       <p class="text-caption text-medium-emphasis mb-4">
                         Download all generated QR codes as a ZIP file containing
                         PNG images
                       </p>
                       <BaseButton
                         color="primary"
-                        @click="downloadAllAsZip"
                         prepend-icon="mdi-download"
+                        @click="downloadAllAsZip"
                       >
                         DOWNLOAD ZIP
                       </BaseButton>
                     </v-card>
                   </v-col>
-                  <v-col cols="12" md="6">
+                  <v-col
+                    cols="12"
+                    md="6"
+                  >
                     <v-card
                       variant="flat"
                       class="text-center pa-4 download-option"
                     >
-                      <v-icon size="48" color="secondary" class="mb-3">
+                      <v-icon
+                        size="48"
+                        color="secondary"
+                        class="mb-3"
+                      >
                         mdi-file-excel
                       </v-icon>
-                      <h4 class="mb-2">Download CSV Report</h4>
+                      <h4 class="mb-2">
+                        Download CSV Report
+                      </h4>
                       <p class="text-caption text-medium-emphasis mb-4">
                         Download a CSV file with QR code details and URLs
                       </p>
                       <BaseButton
                         color="secondary"
                         variant="outlined"
-                        @click="downloadCSVReport"
                         prepend-icon="mdi-file-excel"
+                        @click="downloadCSVReport"
                       >
                         DOWNLOAD CSV
                       </BaseButton>
@@ -469,8 +573,13 @@
                   </v-col>
                 </v-row>
 
-                <v-alert type="info" variant="tonal">
-                  <template v-slot:title> QR Code Usage </template>
+                <v-alert
+                  type="info"
+                  variant="tonal"
+                >
+                  <template #title>
+                    QR Code Usage
+                  </template>
                   <ul class="mt-2">
                     <li>
                       QR codes can be scanned using any standard QR scanner
@@ -488,8 +597,8 @@
                 <div class="download-actions mt-6">
                   <BaseButton
                     variant="outlined"
-                    @click="finishGeneration"
                     prepend-icon="mdi-check"
+                    @click="finishGeneration"
                   >
                     FINISH
                   </BaseButton>
@@ -502,19 +611,31 @@
     </v-dialog>
 
     <!-- QR Code Preview Dialog -->
-    <v-dialog v-model="showQRPreviewDialog" max-width="500px">
+    <v-dialog
+      v-model="showQRPreviewDialog"
+      max-width="500px"
+    >
       <v-card>
         <v-card-title class="d-flex align-center">
-          <v-icon class="mr-2">mdi-qrcode-scan</v-icon>
+          <v-icon class="mr-2">
+            mdi-qrcode-scan
+          </v-icon>
           QR Code Preview
-          <v-spacer></v-spacer>
-          <BaseButton icon @click="showQRPreviewDialog = false" variant="text">
+          <v-spacer />
+          <BaseButton
+            icon
+            variant="text"
+            @click="showQRPreviewDialog = false"
+          >
             <v-icon>mdi-close</v-icon>
           </BaseButton>
         </v-card-title>
         <v-card-text class="text-center pa-6">
           <div class="qr-preview-container">
-            <canvas ref="qrCanvas" class="qr-canvas"></canvas>
+            <canvas
+              ref="qrCanvas"
+              class="qr-canvas"
+            />
           </div>
           <div class="qr-info mt-4">
             <p><strong>QR Code:</strong> {{ selectedQR?.qrcode }}</p>
@@ -530,9 +651,9 @@
           </div>
           <BaseButton
             color="primary"
-            @click="downloadSingleQR(selectedQR)"
             prepend-icon="mdi-download"
             class="mt-4"
+            @click="downloadSingleQR(selectedQR)"
           >
             Download QR Code
           </BaseButton>
@@ -548,7 +669,9 @@
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-check-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-check-circle
+        </v-icon>
         {{ successMessage }}
       </div>
     </v-snackbar>
@@ -560,18 +683,29 @@
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-alert-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-alert-circle
+        </v-icon>
         {{ errorMessage }}
       </div>
     </v-snackbar>
   </div>
-  <v-dialog v-model="showShareDialog" max-width="500px">
+  <v-dialog
+    v-model="showShareDialog"
+    max-width="500px"
+  >
     <v-card class="share-dialog">
       <v-card-title class="d-flex align-center">
-        <v-icon class="mr-2">mdi-share-variant</v-icon>
+        <v-icon class="mr-2">
+          mdi-share-variant
+        </v-icon>
         Share QR Code
-        <v-spacer></v-spacer>
-        <BaseButton icon @click="closeShareDialog" variant="text">
+        <v-spacer />
+        <BaseButton
+          icon
+          variant="text"
+          @click="closeShareDialog"
+        >
           <v-icon>mdi-close</v-icon>
         </BaseButton>
       </v-card-title>
@@ -579,7 +713,10 @@
       <v-card-text class="pa-6">
         <!-- QR Code Info -->
         <div class="share-info mb-6">
-          <v-card variant="outlined" class="pa-4 bg-light">
+          <v-card
+            variant="outlined"
+            class="pa-4 bg-light"
+          >
             <div class="text-caption text-medium-emphasis mb-2">
               QR Code Details:
             </div>
@@ -599,14 +736,16 @@
 
         <!-- Share Options -->
         <div class="share-options">
-          <h4 class="mb-4">Choose how to share:</h4>
+          <h4 class="mb-4">
+            Choose how to share:
+          </h4>
 
           <!-- WhatsApp Option -->
           <v-card
             variant="outlined"
             class="share-option mb-3 pa-4 cursor-pointer"
-            @click="shareViaWhatsApp(shareQRItem)"
             style="cursor: pointer; transition: all 0.3s ease"
+            @click="shareViaWhatsApp(shareQRItem)"
             @mouseenter="
               $event.target.closest('.share-option').style.boxShadow =
                 '0 4px 12px rgba(0,0,0,0.1)'
@@ -616,16 +755,24 @@
             "
           >
             <div class="d-flex align-center">
-              <v-icon size="40" color="#25D366" class="mr-4">
+              <v-icon
+                size="40"
+                color="#25D366"
+                class="mr-4"
+              >
                 mdi-whatsapp
               </v-icon>
               <div class="flex-grow-1">
-                <h5 class="mb-1">Share via WhatsApp</h5>
+                <h5 class="mb-1">
+                  Share via WhatsApp
+                </h5>
                 <p class="text-caption text-medium-emphasis mb-0">
                   Send to your WhatsApp contacts
                 </p>
               </div>
-              <v-icon color="primary">mdi-chevron-right</v-icon>
+              <v-icon color="primary">
+                mdi-chevron-right
+              </v-icon>
             </div>
           </v-card>
 
@@ -633,8 +780,8 @@
           <v-card
             variant="outlined"
             class="share-option mb-3 pa-4 cursor-pointer"
-            @click="shareViaEmail(shareQRItem)"
             style="cursor: pointer; transition: all 0.3s ease"
+            @click="shareViaEmail(shareQRItem)"
             @mouseenter="
               $event.target.closest('.share-option').style.boxShadow =
                 '0 4px 12px rgba(0,0,0,0.1)'
@@ -644,16 +791,24 @@
             "
           >
             <div class="d-flex align-center">
-              <v-icon size="40" color="#EA4335" class="mr-4">
+              <v-icon
+                size="40"
+                color="#EA4335"
+                class="mr-4"
+              >
                 mdi-email
               </v-icon>
               <div class="flex-grow-1">
-                <h5 class="mb-1">Share via Email</h5>
+                <h5 class="mb-1">
+                  Share via Email
+                </h5>
                 <p class="text-caption text-medium-emphasis mb-0">
                   Send via your email client
                 </p>
               </div>
-              <v-icon color="primary">mdi-chevron-right</v-icon>
+              <v-icon color="primary">
+                mdi-chevron-right
+              </v-icon>
             </div>
           </v-card>
 

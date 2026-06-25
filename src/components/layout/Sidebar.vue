@@ -3,8 +3,17 @@
     <!-- Branding -->
     <div class="flex items-center gap-3 px-6 h-20 border-b border-slate-200 dark:border-slate-800/60">
       <!-- Placeholder SVG for Logo to avoid external component dependency for now -->
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-8 h-8 text-blue-500">
-        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="w-8 h-8 text-blue-500"
+      >
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
       </svg>
       <div class="flex flex-col">
         <span class="text-sm font-black tracking-tight text-slate-900 dark:text-white leading-none">
@@ -16,18 +25,27 @@
 
     <!-- Navigation -->
     <div class="flex-1 px-4 py-8 space-y-1 overflow-y-auto">
-      <template v-for="item in navigationItems" :key="item.name">
+      <template
+        v-for="item in navigationItems"
+        :key="item.name"
+      >
         <!-- Render items with children as an accordion -->
-        <RbacGuard v-if="item.role" :requiredRole="item.role">
-          <div v-if="item.children" class="mb-1">
+        <RbacGuard
+          v-if="item.role"
+          :required-role="item.role"
+        >
+          <div
+            v-if="item.children"
+            class="mb-1"
+          >
             <button
-              @click="toggleMenu(item.name)"
               :class="[
                 'w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 group relative',
                 isChildActive(item)
                   ? 'bg-slate-100 dark:bg-slate-800/80 text-blue-600 dark:text-blue-400'
                   : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900/50 hover:text-slate-900 dark:hover:text-slate-100'
               ]"
+              @click="toggleMenu(item.name)"
             >
               <component
                 :is="item.icon"
@@ -42,25 +60,31 @@
                 :class="expandedMenus[item.name] ? 'rotate-180' : ''"
               />
             </button>
-            <div v-show="expandedMenus[item.name]" class="mt-1 ml-4 pl-4 border-l border-slate-200 dark:border-slate-800 space-y-1">
+            <div
+              v-show="expandedMenus[item.name]"
+              class="mt-1 ml-4 pl-4 border-l border-slate-200 dark:border-slate-800 space-y-1"
+            >
               <router-link
                 v-for="child in item.children"
                 :key="child.name"
-                :to="child.href"
                 v-slot="{ isActive }"
+                :to="child.href"
                 custom
               >
                 <a
                   :href="child.href"
-                  @click.prevent="$router.push(child.href)"
                   :class="[
                     'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200',
                     isActive
                       ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'
                       : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
                   ]"
+                  @click.prevent="$router.push(child.href)"
                 >
-                  <span class="w-1.5 h-1.5 rounded-full" :class="isActive ? 'bg-blue-500' : 'bg-slate-300 dark:bg-slate-600'"></span>
+                  <span
+                    class="w-1.5 h-1.5 rounded-full"
+                    :class="isActive ? 'bg-blue-500' : 'bg-slate-300 dark:bg-slate-600'"
+                  />
                   {{ child.name }}
                 </a>
               </router-link>
@@ -69,19 +93,19 @@
           <!-- Normal items without children -->
           <router-link
             v-else
-            :to="item.href"
             v-slot="{ isActive, isExactActive }"
+            :to="item.href"
             custom
           >
             <a
               :href="item.href"
-              @click.prevent="$router.push(item.href)"
               :class="[
                 'flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 group relative',
                 (item.href === '/dashboard' ? isExactActive : isActive)
                   ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
                   : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900/50 hover:text-slate-900 dark:hover:text-slate-100'
               ]"
+              @click.prevent="$router.push(item.href)"
             >
               <component 
                 :is="item.icon" 
@@ -91,22 +115,28 @@
                 ]" 
               />
               <span>{{ item.name }}</span>
-              <ChevronRight v-if="(item.href === '/dashboard' ? isExactActive : isActive)" class="ml-auto w-4 h-4 opacity-50" />
+              <ChevronRight
+                v-if="(item.href === '/dashboard' ? isExactActive : isActive)"
+                class="ml-auto w-4 h-4 opacity-50"
+              />
             </a>
           </router-link>
         </RbacGuard>
         <!-- Same block for items without Roles -->
         <template v-else>
           <!-- Items with children -->
-          <div v-if="item.children" class="mb-1">
+          <div
+            v-if="item.children"
+            class="mb-1"
+          >
             <button
-              @click="toggleMenu(item.name)"
               :class="[
                 'w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 group relative',
                 isChildActive(item)
                   ? 'bg-slate-100 dark:bg-slate-800/80 text-blue-600 dark:text-blue-400'
                   : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900/50 hover:text-slate-900 dark:hover:text-slate-100'
               ]"
+              @click="toggleMenu(item.name)"
             >
               <component
                 :is="item.icon"
@@ -121,25 +151,31 @@
                 :class="expandedMenus[item.name] ? 'rotate-180' : ''"
               />
             </button>
-            <div v-show="expandedMenus[item.name]" class="mt-1 ml-4 pl-4 border-l border-slate-200 dark:border-slate-800 space-y-1">
+            <div
+              v-show="expandedMenus[item.name]"
+              class="mt-1 ml-4 pl-4 border-l border-slate-200 dark:border-slate-800 space-y-1"
+            >
               <router-link
                 v-for="child in item.children"
                 :key="child.name"
-                :to="child.href"
                 v-slot="{ isActive }"
+                :to="child.href"
                 custom
               >
                 <a
                   :href="child.href"
-                  @click.prevent="$router.push(child.href)"
                   :class="[
                     'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200',
                     isActive
                       ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'
                       : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100'
                   ]"
+                  @click.prevent="$router.push(child.href)"
                 >
-                  <span class="w-1.5 h-1.5 rounded-full" :class="isActive ? 'bg-blue-500' : 'bg-slate-300 dark:bg-slate-600'"></span>
+                  <span
+                    class="w-1.5 h-1.5 rounded-full"
+                    :class="isActive ? 'bg-blue-500' : 'bg-slate-300 dark:bg-slate-600'"
+                  />
                   {{ child.name }}
                 </a>
               </router-link>
@@ -148,19 +184,19 @@
           <!-- Normal items without children -->
           <router-link
             v-else
-            :to="item.href"
             v-slot="{ isActive, isExactActive }"
+            :to="item.href"
             custom
           >
             <a
               :href="item.href"
-              @click.prevent="$router.push(item.href)"
               :class="[
                 'flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 group relative',
                 (item.href === '/dashboard' ? isExactActive : isActive)
                   ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
                   : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900/50 hover:text-slate-900 dark:hover:text-slate-100'
               ]"
+              @click.prevent="$router.push(item.href)"
             >
               <component 
                 :is="item.icon" 
@@ -170,7 +206,10 @@
                 ]" 
               />
               <span>{{ item.name }}</span>
-              <ChevronRight v-if="(item.href === '/dashboard' ? isExactActive : isActive)" class="ml-auto w-4 h-4 opacity-50" />
+              <ChevronRight
+                v-if="(item.href === '/dashboard' ? isExactActive : isActive)"
+                class="ml-auto w-4 h-4 opacity-50"
+              />
             </a>
           </router-link>
         </template>
@@ -181,15 +220,24 @@
     <div class="p-4 border-t border-slate-200 dark:border-slate-800/60 space-y-2">
       <!-- Theme Toggle -->
       <button
-        @click="toggleTheme"
         class="flex items-center gap-3 w-full px-3 py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-900/50 transition-colors group text-slate-500 dark:text-slate-400"
+        @click="toggleTheme"
       >
-        <Sun v-if="isDark" class="w-4 h-4" />
-        <Moon v-else class="w-4 h-4" />
+        <Sun
+          v-if="isDark"
+          class="w-4 h-4"
+        />
+        <Moon
+          v-else
+          class="w-4 h-4"
+        />
         <span class="text-xs font-bold">{{ isDark ? 'Light Mode' : 'Dark Mode' }}</span>
       </button>
       <!-- Sign Out -->
-      <button @click="handleSignOut" class="flex items-center gap-3 w-full p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-900/50 transition-colors group">
+      <button
+        class="flex items-center gap-3 w-full p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-900/50 transition-colors group"
+        @click="handleSignOut"
+      >
         <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white font-bold shadow-md shadow-blue-500/10">
           {{ userInitials }}
         </div>

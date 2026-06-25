@@ -1,17 +1,33 @@
 <template>
   <div class="deductions-container">
-    <v-toolbar density="compact" color="grey-lighten-4">
-      <v-btn icon color="black" @click="handleClose">
+    <v-toolbar
+      density="compact"
+      color="grey-lighten-4"
+    >
+      <v-btn
+        icon
+        color="black"
+        @click="handleClose"
+      >
         <v-icon>mdi-arrow-left</v-icon>
       </v-btn>
-      <v-toolbar-title class="ml-4">Add TDSDetails</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-btn color="error" variant="text" class="mr-2" @click="handleClose">
+      <v-toolbar-title class="ml-4">
+        Add TDSDetails
+      </v-toolbar-title>
+      <v-spacer />
+      <v-btn
+        color="error"
+        variant="text"
+        class="mr-2"
+        @click="handleClose"
+      >
         CANCEL
       </v-btn>
     </v-toolbar>
     <div class="section">
-      <h3 class="subsection-title">Investments under Section 80C</h3>
+      <h3 class="subsection-title">
+        Investments under Section 80C
+      </h3>
 
       <div class="grid-wrapper">
         <!-- Left: Bullet Points -->
@@ -24,11 +40,19 @@
           </li>
         </ul>
         <div class="amounts-table-grid">
-          <div class="grid-item label">Declared Amount</div>
-          <div class="grid-item value">₹ {{ declared80C }}</div>
+          <div class="grid-item label">
+            Declared Amount
+          </div>
+          <div class="grid-item value">
+            ₹ {{ declared80C }}
+          </div>
 
-          <div class="grid-item label">Approved Amount</div>
-          <div class="grid-item value">₹ {{ approved80C }}</div>
+          <div class="grid-item label">
+            Approved Amount
+          </div>
+          <div class="grid-item value">
+            ₹ {{ approved80C }}
+          </div>
         </div>
       </div>
       <v-data-table
@@ -37,19 +61,19 @@
         class="elevation-1 mb-6"
         hide-default-footer
       >
-        <template v-slot:item.fileId="{ item }">
+        <template #item.fileId="{ item }">
           <td>
             <v-btn
               icon
               :disabled="!item.fileId"
-              @click="downloadFile(item.fileId)"
               title="Download Proof Document"
+              @click="downloadFile(item.fileId)"
             >
               <v-icon>mdi-download</v-icon>
             </v-btn>
           </td>
         </template>
-        <template v-slot:item.status="{ item }">
+        <template #item.status="{ item }">
           <td>
             <div v-if="item.status === 'pending' && userRole === 'Admin'">
               <v-btn
@@ -60,7 +84,11 @@
               >
                 Accept
               </v-btn>
-              <v-btn small color="red" @click="rejectItem(item, '80C')">
+              <v-btn
+                small
+                color="red"
+                @click="rejectItem(item, '80C')"
+              >
                 Reject
               </v-btn>
             </div>
@@ -71,7 +99,7 @@
             </div>
           </td>
         </template>
-        <template v-slot:item.documentVerified="{ item }">
+        <template #item.documentVerified="{ item }">
           <td>
             <div
               v-if="item.documentVerified === 'pending' && userRole === 'Admin'"
@@ -109,21 +137,28 @@
           </td>
         </template>
 
-        <template v-slot:item.actions="{ item }">
+        <template #item.actions="{ item }">
           <td>
             <v-icon
               small
-              @click="deleteItem(item, '80C')"
               class="cursor-pointer"
-              >mdi-delete</v-icon
+              @click="deleteItem(item, '80C')"
             >
+              mdi-delete
+            </v-icon>
           </td>
         </template>
       </v-data-table>
 
       <!-- Buttons -->
-      <div class="action-buttons" v-if="userRole == 'Admin'">
-        <button class="add-investment-btn" @click="cDeductionOpen">
+      <div
+        v-if="userRole == 'Admin'"
+        class="action-buttons"
+      >
+        <button
+          class="add-investment-btn"
+          @click="cDeductionOpen"
+        >
           Add Investment80C <span class="info-icon">ⓘ</span>
         </button>
       </div>
@@ -131,7 +166,9 @@
 
     <!-- Section 80EEA Investments -->
     <div class="section">
-      <h3 class="subsection-title">Investments under Section 80CCD(1B)</h3>
+      <h3 class="subsection-title">
+        Investments under Section 80CCD(1B)
+      </h3>
 
       <div class="grid-wrapper">
         <!-- Left: Bullet Points -->
@@ -143,10 +180,18 @@
           </li>
         </ul>
         <div class="amounts-table-grid">
-          <div class="grid-item label">Declared Amount</div>
-          <div class="grid-item value">₹ {{ declared80CCD }}</div>
-          <div class="grid-item label">Approved Amount</div>
-          <div class="grid-item value">₹ {{ approved80CCD }}</div>
+          <div class="grid-item label">
+            Declared Amount
+          </div>
+          <div class="grid-item value">
+            ₹ {{ declared80CCD }}
+          </div>
+          <div class="grid-item label">
+            Approved Amount
+          </div>
+          <div class="grid-item value">
+            ₹ {{ approved80CCD }}
+          </div>
         </div>
       </div>
       <v-data-table
@@ -155,19 +200,19 @@
         class="elevation-1 mb-6"
         hide-default-footer
       >
-        <template v-slot:item.fileId="{ item }">
+        <template #item.fileId="{ item }">
           <td>
             <v-btn
               icon
               :disabled="!item.fileId"
-              @click="downloadFile(item.fileId)"
               title="Download Proof Document"
+              @click="downloadFile(item.fileId)"
             >
               <v-icon>mdi-download</v-icon>
             </v-btn>
           </td>
         </template>
-        <template v-slot:item.status="{ item }">
+        <template #item.status="{ item }">
           <td>
             <div v-if="item.status === 'pending' && userRole === 'Admin'">
               <v-btn
@@ -178,7 +223,11 @@
               >
                 Accept
               </v-btn>
-              <v-btn small color="red" @click="rejectItem(item, '80CCD')">
+              <v-btn
+                small
+                color="red"
+                @click="rejectItem(item, '80CCD')"
+              >
                 Reject
               </v-btn>
             </div>
@@ -189,7 +238,7 @@
             </div>
           </td>
         </template>
-        <template v-slot:item.documentVerified="{ item }">
+        <template #item.documentVerified="{ item }">
           <td>
             <div
               v-if="item.documentVerified === 'pending' && userRole === 'Admin'"
@@ -226,28 +275,37 @@
             </div>
           </td>
         </template>
-        <template v-slot:item.actions="{ item }">
+        <template #item.actions="{ item }">
           <td>
             <v-icon
               small
-              @click="deleteItem(item, '80CCD')"
               class="cursor-pointer"
-              >mdi-delete</v-icon
+              @click="deleteItem(item, '80CCD')"
             >
+              mdi-delete
+            </v-icon>
           </td>
         </template>
       </v-data-table>
 
       <!-- Buttons -->
-      <div class="action-buttons" v-if="userRole !== 'Admin'">
-        <button class="add-investment-btn" @click="ccdDeductionOpen">
+      <div
+        v-if="userRole !== 'Admin'"
+        class="action-buttons"
+      >
+        <button
+          class="add-investment-btn"
+          @click="ccdDeductionOpen"
+        >
           Add Investment <span class="info-icon">ⓘ</span>
         </button>
       </div>
     </div>
 
     <div class="section">
-      <h3 class="subsection-title">Investments under Section 80CCD(2)</h3>
+      <h3 class="subsection-title">
+        Investments under Section 80CCD(2)
+      </h3>
 
       <div class="grid-wrapper">
         <!-- Left: Bullet Points -->
@@ -258,10 +316,18 @@
           </li>
         </ul>
         <div class="amounts-table-grid">
-          <div class="grid-item label">Declared Amount</div>
-          <div class="grid-item value">₹ {{ declared80CCD2 }}</div>
-          <div class="grid-item label">Approved Amount</div>
-          <div class="grid-item value">₹ {{ approved80CCD2 }}</div>
+          <div class="grid-item label">
+            Declared Amount
+          </div>
+          <div class="grid-item value">
+            ₹ {{ declared80CCD2 }}
+          </div>
+          <div class="grid-item label">
+            Approved Amount
+          </div>
+          <div class="grid-item value">
+            ₹ {{ approved80CCD2 }}
+          </div>
         </div>
       </div>
 
@@ -271,20 +337,20 @@
         class="elevation-1 mb-6"
         hide-default-footer
       >
-        <template v-slot:item.fileId="{ item }">
+        <template #item.fileId="{ item }">
           <td>
             <v-btn
               icon
               :disabled="!item.fileId"
-              @click="downloadFile(item.fileId)"
               title="Download Proof Document"
+              @click="downloadFile(item.fileId)"
             >
               <v-icon>mdi-download</v-icon>
             </v-btn>
           </td>
         </template>
 
-        <template v-slot:item.status="{ item }">
+        <template #item.status="{ item }">
           <td>
             <div v-if="item.status === 'pending' && userRole === 'Admin'">
               <v-btn
@@ -295,7 +361,11 @@
               >
                 Accept
               </v-btn>
-              <v-btn small color="red" @click="rejectItem(item, '80CCD2')">
+              <v-btn
+                small
+                color="red"
+                @click="rejectItem(item, '80CCD2')"
+              >
                 Reject
               </v-btn>
             </div>
@@ -307,7 +377,7 @@
           </td>
         </template>
 
-        <template v-slot:item.documentVerified="{ item }">
+        <template #item.documentVerified="{ item }">
           <td>
             <div
               v-if="item.documentVerified === 'pending' && userRole === 'Admin'"
@@ -345,12 +415,12 @@
           </td>
         </template>
 
-        <template v-slot:item.actions="{ item }">
+        <template #item.actions="{ item }">
           <td>
             <v-icon
               small
-              @click="deleteItem(item, '80CCD2')"
               class="cursor-pointer"
+              @click="deleteItem(item, '80CCD2')"
             >
               mdi-delete
             </v-icon>
@@ -359,8 +429,14 @@
       </v-data-table>
 
       <!-- Buttons -->
-      <div class="action-buttons" v-if="userRole !== 'Admin'">
-        <button class="add-investment-btn" @click="ccd2DeductionOpen">
+      <div
+        v-if="userRole !== 'Admin'"
+        class="action-buttons"
+      >
+        <button
+          class="add-investment-btn"
+          @click="ccd2DeductionOpen"
+        >
           Add Investment <span class="info-icon">ⓘ</span>
         </button>
       </div>
@@ -368,7 +444,9 @@
 
     <!-- 3 -->
     <div class="section">
-      <h3 class="subsection-title">Investments under Section 80D</h3>
+      <h3 class="subsection-title">
+        Investments under Section 80D
+      </h3>
 
       <div class="grid-wrapper">
         <!-- Left: Bullet Points -->
@@ -379,10 +457,18 @@
           </li>
         </ul>
         <div class="amounts-table-grid">
-          <div class="grid-item label">Declared Amount</div>
-          <div class="grid-item value">₹ {{ declared80D }}</div>
-          <div class="grid-item label">Approved Amount</div>
-          <div class="grid-item value">₹ {{ approved80D }}</div>
+          <div class="grid-item label">
+            Declared Amount
+          </div>
+          <div class="grid-item value">
+            ₹ {{ declared80D }}
+          </div>
+          <div class="grid-item label">
+            Approved Amount
+          </div>
+          <div class="grid-item value">
+            ₹ {{ approved80D }}
+          </div>
         </div>
       </div>
       <v-data-table
@@ -391,19 +477,19 @@
         class="elevation-1 mb-6"
         hide-default-footer
       >
-        <template v-slot:item.fileId="{ item }">
+        <template #item.fileId="{ item }">
           <td>
             <v-btn
               icon
               :disabled="!item.fileId"
-              @click="downloadFile(item.fileId)"
               title="Download Proof Document"
+              @click="downloadFile(item.fileId)"
             >
               <v-icon>mdi-download</v-icon>
             </v-btn>
           </td>
         </template>
-        <template v-slot:item.status="{ item }">
+        <template #item.status="{ item }">
           <td>
             <div v-if="item.status === 'pending' && userRole === 'Admin'">
               <v-btn
@@ -414,7 +500,11 @@
               >
                 Accept
               </v-btn>
-              <v-btn small color="red" @click="rejectItem(item, '80D')">
+              <v-btn
+                small
+                color="red"
+                @click="rejectItem(item, '80D')"
+              >
                 Reject
               </v-btn>
             </div>
@@ -426,7 +516,7 @@
           </td>
         </template>
 
-        <template v-slot:item.documentVerified="{ item }">
+        <template #item.documentVerified="{ item }">
           <td>
             <div
               v-if="item.documentVerified === 'pending' && userRole === 'Admin'"
@@ -464,28 +554,37 @@
           </td>
         </template>
         
-        <template v-slot:item.actions="{ item }">
+        <template #item.actions="{ item }">
           <td>
             <v-icon
               small
-              @click="deleteItem(item, '80D')"
               class="cursor-pointer"
-              >mdi-delete</v-icon
+              @click="deleteItem(item, '80D')"
             >
+              mdi-delete
+            </v-icon>
           </td>
         </template>
       </v-data-table>
 
       <!-- Buttons -->
-      <div class="action-buttons" v-if="userRole !== 'Admin'">
-        <button class="add-investment-btn" @click="dDeductionOpen">
+      <div
+        v-if="userRole !== 'Admin'"
+        class="action-buttons"
+      >
+        <button
+          class="add-investment-btn"
+          @click="dDeductionOpen"
+        >
           Add Investment <span class="info-icon">ⓘ</span>
         </button>
       </div>
     </div>
     <!-- 4 -->
     <div class="section">
-      <h3 class="subsection-title">Investments under Section 80DD</h3>
+      <h3 class="subsection-title">
+        Investments under Section 80DD
+      </h3>
 
       <div class="grid-wrapper">
         <!-- Left: Bullet Points -->
@@ -497,10 +596,18 @@
           </li>
         </ul>
         <div class="amounts-table-grid">
-          <div class="grid-item label">Declared Amount</div>
-          <div class="grid-item value">₹ {{ declared80DD }}</div>
-          <div class="grid-item label">Approved Amount</div>
-          <div class="grid-item value">₹ {{ approved80DD }}</div>
+          <div class="grid-item label">
+            Declared Amount
+          </div>
+          <div class="grid-item value">
+            ₹ {{ declared80DD }}
+          </div>
+          <div class="grid-item label">
+            Approved Amount
+          </div>
+          <div class="grid-item value">
+            ₹ {{ approved80DD }}
+          </div>
         </div>
       </div>
       <v-data-table
@@ -509,7 +616,7 @@
         class="elevation-1 mb-6"
         hide-default-footer
       >
-        <template v-slot:item.status="{ item }">
+        <template #item.status="{ item }">
           <td>
             <div v-if="item.status === 'pending' && userRole === 'Admin'">
               <v-btn
@@ -520,7 +627,11 @@
               >
                 Accept
               </v-btn>
-              <v-btn small color="red" @click="rejectItem(item, '80DD')">
+              <v-btn
+                small
+                color="red"
+                @click="rejectItem(item, '80DD')"
+              >
                 Reject
               </v-btn>
             </div>
@@ -531,40 +642,49 @@
             </div>
           </td>
         </template>
-        <template v-slot:item.fileId="{ item }">
+        <template #item.fileId="{ item }">
           <td>
             <v-btn
               icon
               :disabled="!item.fileId"
-              @click="downloadFile(item.fileId)"
               title="Download Proof Document"
+              @click="downloadFile(item.fileId)"
             >
               <v-icon>mdi-download</v-icon>
             </v-btn>
           </td>
         </template>
-        <template v-slot:item.actions="{ item }">
+        <template #item.actions="{ item }">
           <td>
             <v-icon
               small
-              @click="deleteItem(item, '80DD')"
               class="cursor-pointer"
-              >mdi-delete</v-icon
+              @click="deleteItem(item, '80DD')"
             >
+              mdi-delete
+            </v-icon>
           </td>
         </template>
       </v-data-table>
 
       <!-- Buttons -->
-      <div class="action-buttons" v-if="userRole !== 'Admin'">
-        <button class="add-investment-btn" @click="ddDeductionOpen">
+      <div
+        v-if="userRole !== 'Admin'"
+        class="action-buttons"
+      >
+        <button
+          class="add-investment-btn"
+          @click="ddDeductionOpen"
+        >
           Add Investment <span class="info-icon">ⓘ</span>
         </button>
       </div>
     </div>
     <!-- 5 -->
     <div class="section">
-      <h3 class="subsection-title">Investments under Section 80E</h3>
+      <h3 class="subsection-title">
+        Investments under Section 80E
+      </h3>
 
       <div class="grid-wrapper">
         <!-- Left: Bullet Points -->
@@ -575,10 +695,18 @@
           </li>
         </ul>
         <div class="amounts-table-grid">
-          <div class="grid-item label">Declared Amount</div>
-          <div class="grid-item value">₹ {{ declared80E }}</div>
-          <div class="grid-item label">Approved Amount</div>
-          <div class="grid-item value">₹ {{ approved80E }}</div>
+          <div class="grid-item label">
+            Declared Amount
+          </div>
+          <div class="grid-item value">
+            ₹ {{ declared80E }}
+          </div>
+          <div class="grid-item label">
+            Approved Amount
+          </div>
+          <div class="grid-item value">
+            ₹ {{ approved80E }}
+          </div>
         </div>
       </div>
       <v-data-table
@@ -587,7 +715,7 @@
         class="elevation-1 mb-6"
         hide-default-footer
       >
-        <template v-slot:item.status="{ item }">
+        <template #item.status="{ item }">
           <td>
             <div v-if="item.status === 'pending' && userRole === 'Admin'">
               <v-btn
@@ -598,7 +726,11 @@
               >
                 Accept
               </v-btn>
-              <v-btn small color="red" @click="rejectItem(item, '80E')">
+              <v-btn
+                small
+                color="red"
+                @click="rejectItem(item, '80E')"
+              >
                 Reject
               </v-btn>
             </div>
@@ -609,7 +741,7 @@
             </div>
           </td>
         </template>
-         <template v-slot:item.documentVerified="{ item }">
+        <template #item.documentVerified="{ item }">
           <td>
             <div
               v-if="item.documentVerified === 'pending' && userRole === 'Admin'"
@@ -646,40 +778,49 @@
             </div>
           </td>
         </template>
-        <template v-slot:item.fileId="{ item }">
+        <template #item.fileId="{ item }">
           <td>
             <v-btn
               icon
               :disabled="!item.fileId"
-              @click="downloadFile(item.fileId)"
               title="Download Proof Document"
+              @click="downloadFile(item.fileId)"
             >
               <v-icon>mdi-download</v-icon>
             </v-btn>
           </td>
         </template>
-        <template v-slot:item.actions="{ item }">
+        <template #item.actions="{ item }">
           <td>
             <v-icon
               small
-              @click="deleteItem(item, '80E')"
               class="cursor-pointer"
-              >mdi-delete</v-icon
+              @click="deleteItem(item, '80E')"
             >
+              mdi-delete
+            </v-icon>
           </td>
         </template>
       </v-data-table>
 
       <!-- Buttons -->
-      <div class="action-buttons" v-if="userRole !== 'Admin'">
-        <button class="add-investment-btn" @click="eDeductionOpen">
+      <div
+        v-if="userRole !== 'Admin'"
+        class="action-buttons"
+      >
+        <button
+          class="add-investment-btn"
+          @click="eDeductionOpen"
+        >
           Add Investment <span class="info-icon">ⓘ</span>
         </button>
       </div>
     </div>
     <!-- 6 -->
     <div class="section">
-      <h3 class="subsection-title">Investments under Section 80EEB</h3>
+      <h3 class="subsection-title">
+        Investments under Section 80EEB
+      </h3>
 
       <div class="grid-wrapper">
         <!-- Left: Bullet Points -->
@@ -691,10 +832,18 @@
           </li>
         </ul>
         <div class="amounts-table-grid">
-          <div class="grid-item label">Declared Amount</div>
-          <div class="grid-item value">₹ {{ declared80EEB }}</div>
-          <div class="grid-item label">Approved Amount</div>
-          <div class="grid-item value">₹ {{ approved80EEB }}</div>
+          <div class="grid-item label">
+            Declared Amount
+          </div>
+          <div class="grid-item value">
+            ₹ {{ declared80EEB }}
+          </div>
+          <div class="grid-item label">
+            Approved Amount
+          </div>
+          <div class="grid-item value">
+            ₹ {{ approved80EEB }}
+          </div>
         </div>
       </div>
       <v-data-table
@@ -703,7 +852,7 @@
         class="elevation-1 mb-6"
         hide-default-footer
       >
-        <template v-slot:item.status="{ item }">
+        <template #item.status="{ item }">
           <td>
             <div v-if="item.status === 'pending' && userRole === 'Admin'">
               <v-btn
@@ -714,7 +863,11 @@
               >
                 Accept
               </v-btn>
-              <v-btn small color="red" @click="rejectItem(item, '80EEB')">
+              <v-btn
+                small
+                color="red"
+                @click="rejectItem(item, '80EEB')"
+              >
                 Reject
               </v-btn>
             </div>
@@ -725,7 +878,7 @@
             </div>
           </td>
         </template>
-         <template v-slot:item.documentVerified="{ item }">
+        <template #item.documentVerified="{ item }">
           <td>
             <div
               v-if="item.documentVerified === 'pending' && userRole === 'Admin'"
@@ -762,40 +915,49 @@
             </div>
           </td>
         </template>
-        <template v-slot:item.fileId="{ item }">
+        <template #item.fileId="{ item }">
           <td>
             <v-btn
               icon
               :disabled="!item.fileId"
-              @click="downloadFile(item.fileId)"
               title="Download Proof Document"
+              @click="downloadFile(item.fileId)"
             >
               <v-icon>mdi-download</v-icon>
             </v-btn>
           </td>
         </template>
-        <template v-slot:item.actions="{ item }">
+        <template #item.actions="{ item }">
           <td>
             <v-icon
               small
-              @click="deleteItem(item, '80EEB')"
               class="cursor-pointer"
-              >mdi-delete</v-icon
+              @click="deleteItem(item, '80EEB')"
             >
+              mdi-delete
+            </v-icon>
           </td>
         </template>
       </v-data-table>
 
       <!-- Buttons -->
-      <div class="action-buttons" v-if="userRole !== 'Admin'">
-        <button class="add-investment-btn" @click="eebDeductionOpen">
+      <div
+        v-if="userRole !== 'Admin'"
+        class="action-buttons"
+      >
+        <button
+          class="add-investment-btn"
+          @click="eebDeductionOpen"
+        >
           Add Investment <span class="info-icon">ⓘ</span>
         </button>
       </div>
     </div>
     <!-- 7 -->
     <div class="section">
-      <h3 class="subsection-title">Investments under Section 80G</h3>
+      <h3 class="subsection-title">
+        Investments under Section 80G
+      </h3>
 
       <div class="grid-wrapper">
         <!-- Left: Bullet Points -->
@@ -807,10 +969,18 @@
           </li>
         </ul>
         <div class="amounts-table-grid">
-          <div class="grid-item label">Declared Amount</div>
-          <div class="grid-item value">₹ {{ declared80G }}</div>
-          <div class="grid-item label">Approved Amount</div>
-          <div class="grid-item value">₹ {{ approved80G }}</div>
+          <div class="grid-item label">
+            Declared Amount
+          </div>
+          <div class="grid-item value">
+            ₹ {{ declared80G }}
+          </div>
+          <div class="grid-item label">
+            Approved Amount
+          </div>
+          <div class="grid-item value">
+            ₹ {{ approved80G }}
+          </div>
         </div>
       </div>
       <v-data-table
@@ -819,7 +989,7 @@
         class="elevation-1 mb-6"
         hide-default-footer
       >
-        <template v-slot:item.status="{ item }">
+        <template #item.status="{ item }">
           <td>
             <div v-if="item.status === 'pending' && userRole === 'Admin'">
               <v-btn
@@ -830,7 +1000,11 @@
               >
                 Accept
               </v-btn>
-              <v-btn small color="red" @click="rejectItem(item, '80G')">
+              <v-btn
+                small
+                color="red"
+                @click="rejectItem(item, '80G')"
+              >
                 Reject
               </v-btn>
             </div>
@@ -841,19 +1015,19 @@
             </div>
           </td>
         </template>
-        <template v-slot:item.fileId="{ item }">
+        <template #item.fileId="{ item }">
           <td>
             <v-btn
               icon
               :disabled="!item.fileId"
-              @click="downloadFile(item.fileId)"
               title="Download Proof Document"
+              @click="downloadFile(item.fileId)"
             >
               <v-icon>mdi-download</v-icon>
             </v-btn>
           </td>
         </template>
-         <template v-slot:item.documentVerified="{ item }">
+        <template #item.documentVerified="{ item }">
           <td>
             <div
               v-if="item.documentVerified === 'pending' && userRole === 'Admin'"
@@ -890,28 +1064,37 @@
             </div>
           </td>
         </template>
-        <template v-slot:item.actions="{ item }">
+        <template #item.actions="{ item }">
           <td>
             <v-icon
               small
-              @click="deleteItem(item, '80G')"
               class="cursor-pointer"
-              >mdi-delete</v-icon
+              @click="deleteItem(item, '80G')"
             >
+              mdi-delete
+            </v-icon>
           </td>
         </template>
       </v-data-table>
 
       <!-- Buttons -->
-      <div class="action-buttons" v-if="userRole !== 'Admin'">
-        <button class="add-investment-btn" @click="gDeductionOpen">
+      <div
+        v-if="userRole !== 'Admin'"
+        class="action-buttons"
+      >
+        <button
+          class="add-investment-btn"
+          @click="gDeductionOpen"
+        >
           Add Investment <span class="info-icon">ⓘ</span>
         </button>
       </div>
     </div>
     <!-- 8 -->
     <div class="section">
-      <h3 class="subsection-title">Investments under Section 80GG</h3>
+      <h3 class="subsection-title">
+        Investments under Section 80GG
+      </h3>
 
       <div class="grid-wrapper">
         <!-- Left: Bullet Points -->
@@ -922,10 +1105,18 @@
           </li>
         </ul>
         <div class="amounts-table-grid">
-          <div class="grid-item label">Declared Amount</div>
-          <div class="grid-item value">₹ {{ declared80GG }}</div>
-          <div class="grid-item label">Approved Amount</div>
-          <div class="grid-item value">₹ {{ approved80GG }}</div>
+          <div class="grid-item label">
+            Declared Amount
+          </div>
+          <div class="grid-item value">
+            ₹ {{ declared80GG }}
+          </div>
+          <div class="grid-item label">
+            Approved Amount
+          </div>
+          <div class="grid-item value">
+            ₹ {{ approved80GG }}
+          </div>
         </div>
       </div>
       <v-data-table
@@ -934,7 +1125,7 @@
         class="elevation-1 mb-6"
         hide-default-footer
       >
-        <template v-slot:item.status="{ item }">
+        <template #item.status="{ item }">
           <td>
             <div v-if="item.status === 'pending' && userRole === 'Admin'">
               <v-btn
@@ -945,7 +1136,11 @@
               >
                 Accept
               </v-btn>
-              <v-btn small color="red" @click="rejectItem(item, '80GG')">
+              <v-btn
+                small
+                color="red"
+                @click="rejectItem(item, '80GG')"
+              >
                 Reject
               </v-btn>
             </div>
@@ -956,7 +1151,7 @@
             </div>
           </td>
         </template>
-         <template v-slot:item.documentVerified="{ item }">
+        <template #item.documentVerified="{ item }">
           <td>
             <div
               v-if="item.documentVerified === 'pending' && userRole === 'Admin'"
@@ -993,40 +1188,49 @@
             </div>
           </td>
         </template>
-        <template v-slot:item.fileId="{ item }">
+        <template #item.fileId="{ item }">
           <td>
             <v-btn
               icon
               :disabled="!item.fileId"
-              @click="downloadFile(item.fileId)"
               title="Download Proof Document"
+              @click="downloadFile(item.fileId)"
             >
               <v-icon>mdi-download</v-icon>
             </v-btn>
           </td>
         </template>
-        <template v-slot:item.actions="{ item }">
+        <template #item.actions="{ item }">
           <td>
             <v-icon
               small
-              @click="deleteItem(item, '80GG')"
               class="cursor-pointer"
-              >mdi-delete</v-icon
+              @click="deleteItem(item, '80GG')"
             >
+              mdi-delete
+            </v-icon>
           </td>
         </template>
       </v-data-table>
 
       <!-- Buttons -->
-      <div class="action-buttons" v-if="userRole !== 'Admin'">
-        <button class="add-investment-btn" @click="ggDeductionOpen">
+      <div
+        v-if="userRole !== 'Admin'"
+        class="action-buttons"
+      >
+        <button
+          class="add-investment-btn"
+          @click="ggDeductionOpen"
+        >
           Add Investment <span class="info-icon">ⓘ</span>
         </button>
       </div>
     </div>
     <!-- 9 -->
     <div class="section">
-      <h3 class="subsection-title">Investments under Section 80GGA</h3>
+      <h3 class="subsection-title">
+        Investments under Section 80GGA
+      </h3>
 
       <div class="grid-wrapper">
         <!-- Left: Bullet Points -->
@@ -1037,10 +1241,18 @@
           </li>
         </ul>
         <div class="amounts-table-grid">
-          <div class="grid-item label">Declared Amount</div>
-          <div class="grid-item value">₹ {{ declared80GGA }}</div>
-          <div class="grid-item label">Approved Amount</div>
-          <div class="grid-item value">₹ {{ approved80GGA }}</div>
+          <div class="grid-item label">
+            Declared Amount
+          </div>
+          <div class="grid-item value">
+            ₹ {{ declared80GGA }}
+          </div>
+          <div class="grid-item label">
+            Approved Amount
+          </div>
+          <div class="grid-item value">
+            ₹ {{ approved80GGA }}
+          </div>
         </div>
       </div>
       <v-data-table
@@ -1049,7 +1261,7 @@
         class="elevation-1 mb-6"
         hide-default-footer
       >
-        <template v-slot:item.status="{ item }">
+        <template #item.status="{ item }">
           <td>
             <div v-if="item.status === 'pending' && userRole === 'Admin'">
               <v-btn
@@ -1060,7 +1272,11 @@
               >
                 Accept
               </v-btn>
-              <v-btn small color="red" @click="rejectItem(item, '80GGA')">
+              <v-btn
+                small
+                color="red"
+                @click="rejectItem(item, '80GGA')"
+              >
                 Reject
               </v-btn>
             </div>
@@ -1071,7 +1287,7 @@
             </div>
           </td>
         </template>
-         <template v-slot:item.documentVerified="{ item }">
+        <template #item.documentVerified="{ item }">
           <td>
             <div
               v-if="item.documentVerified === 'pending' && userRole === 'Admin'"
@@ -1108,40 +1324,49 @@
             </div>
           </td>
         </template>
-        <template v-slot:item.fileId="{ item }">
+        <template #item.fileId="{ item }">
           <td>
             <v-btn
               icon
               :disabled="!item.fileId"
-              @click="downloadFile(item.fileId)"
               title="Download Proof Document"
+              @click="downloadFile(item.fileId)"
             >
               <v-icon>mdi-download</v-icon>
             </v-btn>
           </td>
         </template>
-        <template v-slot:item.actions="{ item }">
+        <template #item.actions="{ item }">
           <td>
             <v-icon
               small
-              @click="deleteItem(item, '80GGA')"
               class="cursor-pointer"
-              >mdi-delete</v-icon
+              @click="deleteItem(item, '80GGA')"
             >
+              mdi-delete
+            </v-icon>
           </td>
         </template>
       </v-data-table>
 
       <!-- Buttons -->
-      <div class="action-buttons" v-if="userRole !== 'Admin'">
-        <button class="add-investment-btn" @click="ggaDeductionOpen">
+      <div
+        v-if="userRole !== 'Admin'"
+        class="action-buttons"
+      >
+        <button
+          class="add-investment-btn"
+          @click="ggaDeductionOpen"
+        >
           Add Investment <span class="info-icon">ⓘ</span>
         </button>
       </div>
     </div>
     <!-- 10 -->
     <div class="section">
-      <h3 class="subsection-title">Investments under Section 80GGC</h3>
+      <h3 class="subsection-title">
+        Investments under Section 80GGC
+      </h3>
 
       <div class="grid-wrapper">
         <!-- Left: Bullet Points -->
@@ -1152,10 +1377,18 @@
           </li>
         </ul>
         <div class="amounts-table-grid">
-          <div class="grid-item label">Declared Amount</div>
-          <div class="grid-item value">₹ {{ declared80GGC }}</div>
-          <div class="grid-item label">Approved Amount</div>
-          <div class="grid-item value">₹ {{ approved80GGC }}</div>
+          <div class="grid-item label">
+            Declared Amount
+          </div>
+          <div class="grid-item value">
+            ₹ {{ declared80GGC }}
+          </div>
+          <div class="grid-item label">
+            Approved Amount
+          </div>
+          <div class="grid-item value">
+            ₹ {{ approved80GGC }}
+          </div>
         </div>
       </div>
       <v-data-table
@@ -1164,7 +1397,7 @@
         class="elevation-1 mb-6"
         hide-default-footer
       >
-        <template v-slot:item.status="{ item }">
+        <template #item.status="{ item }">
           <td>
             <div v-if="item.status === 'pending' && userRole === 'Admin'">
               <v-btn
@@ -1175,7 +1408,11 @@
               >
                 Accept
               </v-btn>
-              <v-btn small color="red" @click="rejectItem(item, '80GGC')">
+              <v-btn
+                small
+                color="red"
+                @click="rejectItem(item, '80GGC')"
+              >
                 Reject
               </v-btn>
             </div>
@@ -1186,7 +1423,7 @@
             </div>
           </td>
         </template>
-         <template v-slot:item.documentVerified="{ item }">
+        <template #item.documentVerified="{ item }">
           <td>
             <div
               v-if="item.documentVerified === 'pending' && userRole === 'Admin'"
@@ -1223,33 +1460,40 @@
             </div>
           </td>
         </template>
-        <template v-slot:item.fileId="{ item }">
+        <template #item.fileId="{ item }">
           <td>
             <v-btn
               icon
               :disabled="!item.fileId"
-              @click="downloadFile(item.fileId)"
               title="Download Proof Document"
+              @click="downloadFile(item.fileId)"
             >
               <v-icon>mdi-download</v-icon>
             </v-btn>
           </td>
         </template>
-        <template v-slot:item.actions="{ item }">
+        <template #item.actions="{ item }">
           <td>
             <v-icon
               small
-              @click="deleteItem(item, '80GGC')"
               class="cursor-pointer"
-              >mdi-delete</v-icon
+              @click="deleteItem(item, '80GGC')"
             >
+              mdi-delete
+            </v-icon>
           </td>
         </template>
       </v-data-table>
 
       <!-- Buttons -->
-      <div class="action-buttons" v-if="userRole !== 'Admin'">
-        <button class="add-investment-btn" @click="ggcDeductionOpen">
+      <div
+        v-if="userRole !== 'Admin'"
+        class="action-buttons"
+      >
+        <button
+          class="add-investment-btn"
+          @click="ggcDeductionOpen"
+        >
           Add Investment <span class="info-icon">ⓘ</span>
         </button>
       </div>
@@ -1257,7 +1501,9 @@
 
     <!-- 12 -->
     <div class="section">
-      <h3 class="subsection-title">Investments under Section 80DDB</h3>
+      <h3 class="subsection-title">
+        Investments under Section 80DDB
+      </h3>
 
       <div class="grid-wrapper">
         <!-- Left: Bullet Points -->
@@ -1268,10 +1514,18 @@
           </li>
         </ul>
         <div class="amounts-table-grid">
-          <div class="grid-item label">Declared Amount</div>
-          <div class="grid-item value">₹ {{ declared80DDB }}</div>
-          <div class="grid-item label">Approved Amount</div>
-          <div class="grid-item value">₹ {{ approved80DDB }}</div>
+          <div class="grid-item label">
+            Declared Amount
+          </div>
+          <div class="grid-item value">
+            ₹ {{ declared80DDB }}
+          </div>
+          <div class="grid-item label">
+            Approved Amount
+          </div>
+          <div class="grid-item value">
+            ₹ {{ approved80DDB }}
+          </div>
         </div>
       </div>
       <v-data-table
@@ -1280,7 +1534,7 @@
         class="elevation-1 mb-6"
         hide-default-footer
       >
-        <template v-slot:item.status="{ item }">
+        <template #item.status="{ item }">
           <td>
             <div v-if="item.status === 'pending' && userRole === 'Admin'">
               <v-btn
@@ -1291,7 +1545,11 @@
               >
                 Accept
               </v-btn>
-              <v-btn small color="red" @click="rejectItem(item, '80DDB')">
+              <v-btn
+                small
+                color="red"
+                @click="rejectItem(item, '80DDB')"
+              >
                 Reject
               </v-btn>
             </div>
@@ -1302,7 +1560,7 @@
             </div>
           </td>
         </template>
-         <template v-slot:item.documentVerified="{ item }">
+        <template #item.documentVerified="{ item }">
           <td>
             <div
               v-if="item.documentVerified === 'pending' && userRole === 'Admin'"
@@ -1339,40 +1597,49 @@
             </div>
           </td>
         </template>
-        <template v-slot:item.fileId="{ item }">
+        <template #item.fileId="{ item }">
           <td>
             <v-btn
               icon
               :disabled="!item.fileId"
-              @click="downloadFile(item.fileId)"
               title="Download Proof Document"
+              @click="downloadFile(item.fileId)"
             >
               <v-icon>mdi-download</v-icon>
             </v-btn>
           </td>
         </template>
-        <template v-slot:item.actions="{ item }">
+        <template #item.actions="{ item }">
           <td>
             <v-icon
               small
-              @click="deleteItem(item, '80DDB')"
               class="cursor-pointer"
-              >mdi-delete</v-icon
+              @click="deleteItem(item, '80DDB')"
             >
+              mdi-delete
+            </v-icon>
           </td>
         </template>
       </v-data-table>
 
       <!-- Buttons -->
-      <div class="action-buttons" v-if="userRole !== 'Admin'">
-        <button class="add-investment-btn" @click="ddbDeductionOpen">
+      <div
+        v-if="userRole !== 'Admin'"
+        class="action-buttons"
+      >
+        <button
+          class="add-investment-btn"
+          @click="ddbDeductionOpen"
+        >
           Add Investment <span class="info-icon">ⓘ</span>
         </button>
       </div>
     </div>
     <!-- 13 -->
     <div class="section">
-      <h3 class="subsection-title">Investments under Section 80U</h3>
+      <h3 class="subsection-title">
+        Investments under Section 80U
+      </h3>
 
       <div class="grid-wrapper">
         <!-- Left: Bullet Points -->
@@ -1382,10 +1649,18 @@
           </li>
         </ul>
         <div class="amounts-table-grid">
-          <div class="grid-item label">Declared Amount</div>
-          <div class="grid-item value">₹ {{ declared80U }}</div>
-          <div class="grid-item label">Approved Amount</div>
-          <div class="grid-item value">₹ {{ approved80U }}</div>
+          <div class="grid-item label">
+            Declared Amount
+          </div>
+          <div class="grid-item value">
+            ₹ {{ declared80U }}
+          </div>
+          <div class="grid-item label">
+            Approved Amount
+          </div>
+          <div class="grid-item value">
+            ₹ {{ approved80U }}
+          </div>
         </div>
       </div>
       <v-data-table
@@ -1394,7 +1669,7 @@
         class="elevation-1 mb-6"
         hide-default-footer
       >
-        <template v-slot:item.status="{ item }">
+        <template #item.status="{ item }">
           <td>
             <div v-if="item.status === 'pending' && userRole === 'Admin'">
               <v-btn
@@ -1405,7 +1680,11 @@
               >
                 Accept
               </v-btn>
-              <v-btn small color="red" @click="rejectItem(item, '80U')">
+              <v-btn
+                small
+                color="red"
+                @click="rejectItem(item, '80U')"
+              >
                 Reject
               </v-btn>
             </div>
@@ -1417,7 +1696,7 @@
           </td>
         </template>
 
-         <template v-slot:item.documentVerified="{ item }">
+        <template #item.documentVerified="{ item }">
           <td>
             <div
               v-if="item.documentVerified === 'pending' && userRole === 'Admin'"
@@ -1454,38 +1733,48 @@
             </div>
           </td>
         </template>
-        <template v-slot:item.fileId="{ item }">
+        <template #item.fileId="{ item }">
           <td>
             <v-btn
               icon
               :disabled="!item.fileId"
-              @click="downloadFile(item.fileId)"
               title="Download Proof Document"
+              @click="downloadFile(item.fileId)"
             >
               <v-icon>mdi-download</v-icon>
             </v-btn>
           </td>
         </template>
-        <template v-slot:item.actions="{ item }">
+        <template #item.actions="{ item }">
           <td>
             <v-icon
               small
-              @click="deleteItem(item, '80U')"
               class="cursor-pointer"
-              >mdi-delete</v-icon
+              @click="deleteItem(item, '80U')"
             >
+              mdi-delete
+            </v-icon>
           </td>
         </template>
       </v-data-table>
 
       <!-- Buttons -->
-      <div class="action-buttons" v-if="userRole !== 'Admin'">
-        <button class="add-investment-btn" @click="uDeductionOpen">
+      <div
+        v-if="userRole !== 'Admin'"
+        class="action-buttons"
+      >
+        <button
+          class="add-investment-btn"
+          @click="uDeductionOpen"
+        >
           Add Investment <span class="info-icon">ⓘ</span>
         </button>
       </div>
 
-      <v-dialog v-model="showGDeduction" max-width="700px">
+      <v-dialog
+        v-model="showGDeduction"
+        max-width="700px"
+      >
         <v-card>
           <v-card-title>
             <span class="text-h5">New 80G Deduction Declaration</span>
@@ -1494,7 +1783,10 @@
           <v-card-text>
             <v-container>
               <v-row>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model.number="gDeduction.amountPaid"
                     label="Amount Paid *"
@@ -1504,7 +1796,10 @@
                     :rules="[(v) => !!v || 'Amount Paid is required']"
                   />
                 </v-col>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model="gDeduction.comments"
                     label="Comments"
@@ -1518,10 +1813,10 @@
                 <v-col cols="12">
                   <v-file-input
                     :loading="uploading"
-                    @change="(e) => uploadFile(e, gDeduction)"
                     label="Upload Proof Document"
                     variant="outlined"
                     color="black"
+                    @change="(e) => uploadFile(e, gDeduction)"
                   />
                 </v-col>
               </v-row>
@@ -1529,15 +1824,27 @@
           </v-card-text>
 
           <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="grey darken-1" text @click="closeDialogG"
-              >Cancel</v-btn
+            <v-spacer />
+            <v-btn
+              color="grey darken-1"
+              text
+              @click="closeDialogG"
             >
-            <v-btn color="primary" @click="gDeductionSave">Add 80G</v-btn>
+              Cancel
+            </v-btn>
+            <v-btn
+              color="primary"
+              @click="gDeductionSave"
+            >
+              Add 80G
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
-      <v-dialog v-model="showGgDeduction" max-width="700px">
+      <v-dialog
+        v-model="showGgDeduction"
+        max-width="700px"
+      >
         <v-card>
           <v-card-title>
             <span class="text-h5">New 80GG Deduction Declaration</span>
@@ -1546,7 +1853,10 @@
           <v-card-text>
             <v-container>
               <v-row>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model.number="ggDeduction.amountPaid"
                     label="Amount Paid *"
@@ -1556,7 +1866,10 @@
                     :rules="[(v) => !!v || 'Amount Paid is required']"
                   />
                 </v-col>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model="ggDeduction.comments"
                     label="Comments"
@@ -1570,10 +1883,10 @@
                 <v-col cols="12">
                   <v-file-input
                     :loading="uploading"
-                    @change="(e) => uploadFile(e, ggDeduction)"
                     label="Upload Proof Document"
                     variant="outlined"
                     color="black"
+                    @change="(e) => uploadFile(e, ggDeduction)"
                   />
                 </v-col>
               </v-row>
@@ -1581,15 +1894,27 @@
           </v-card-text>
 
           <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="grey darken-1" text @click="closeDialogGg"
-              >Cancel</v-btn
+            <v-spacer />
+            <v-btn
+              color="grey darken-1"
+              text
+              @click="closeDialogGg"
             >
-            <v-btn color="primary" @click="ggDeductionSave">Add 80GG</v-btn>
+              Cancel
+            </v-btn>
+            <v-btn
+              color="primary"
+              @click="ggDeductionSave"
+            >
+              Add 80GG
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
-      <v-dialog v-model="showGgaDeduction" max-width="700px">
+      <v-dialog
+        v-model="showGgaDeduction"
+        max-width="700px"
+      >
         <v-card>
           <v-card-title>
             <span class="text-h5">New 80GGA Deduction Declaration</span>
@@ -1598,7 +1923,10 @@
           <v-card-text>
             <v-container>
               <v-row>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model.number="ggaDeduction.amountPaid"
                     label="Amount Paid *"
@@ -1608,7 +1936,10 @@
                     :rules="[(v) => !!v || 'Amount Paid is required']"
                   />
                 </v-col>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model="ggaDeduction.comments"
                     label="Comments"
@@ -1622,10 +1953,10 @@
                 <v-col cols="12">
                   <v-file-input
                     :loading="uploading"
-                    @change="(e) => uploadFile(e, ggaDeduction)"
                     label="Upload Proof Document"
                     variant="outlined"
                     color="black"
+                    @change="(e) => uploadFile(e, ggaDeduction)"
                   />
                 </v-col>
               </v-row>
@@ -1633,15 +1964,27 @@
           </v-card-text>
 
           <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="grey darken-1" text @click="closeDialogGga"
-              >Cancel</v-btn
+            <v-spacer />
+            <v-btn
+              color="grey darken-1"
+              text
+              @click="closeDialogGga"
             >
-            <v-btn color="primary" @click="ggaDeductionSave">Add 80GGA</v-btn>
+              Cancel
+            </v-btn>
+            <v-btn
+              color="primary"
+              @click="ggaDeductionSave"
+            >
+              Add 80GGA
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
-      <v-dialog v-model="showGgcDeduction" max-width="700px">
+      <v-dialog
+        v-model="showGgcDeduction"
+        max-width="700px"
+      >
         <v-card>
           <v-card-title>
             <span class="text-h5">New 80GGC Deduction Declaration</span>
@@ -1650,7 +1993,10 @@
           <v-card-text>
             <v-container>
               <v-row>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model.number="ggcDeduction.amountPaid"
                     label="Amount Paid *"
@@ -1660,7 +2006,10 @@
                     :rules="[(v) => !!v || 'Amount Paid is required']"
                   />
                 </v-col>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model="ggcDeduction.comments"
                     label="Comments"
@@ -1674,10 +2023,10 @@
                 <v-col cols="12">
                   <v-file-input
                     :loading="uploading"
-                    @change="(e) => uploadFile(e, ggcDeduction)"
                     label="Upload Proof Document"
                     variant="outlined"
                     color="black"
+                    @change="(e) => uploadFile(e, ggcDeduction)"
                   />
                 </v-col>
               </v-row>
@@ -1685,15 +2034,27 @@
           </v-card-text>
 
           <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="grey darken-1" text @click="closeDialogGgc"
-              >Cancel</v-btn
+            <v-spacer />
+            <v-btn
+              color="grey darken-1"
+              text
+              @click="closeDialogGgc"
             >
-            <v-btn color="primary" @click="ggcDeductionSave">Add 80GGC</v-btn>
+              Cancel
+            </v-btn>
+            <v-btn
+              color="primary"
+              @click="ggcDeductionSave"
+            >
+              Add 80GGC
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
-      <v-dialog v-model="showDdbDeduction" max-width="700px">
+      <v-dialog
+        v-model="showDdbDeduction"
+        max-width="700px"
+      >
         <v-card>
           <v-card-title>
             <span class="text-h5">New 80DDB Deduction Declaration</span>
@@ -1702,7 +2063,10 @@
           <v-card-text>
             <v-container>
               <v-row>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model.number="ddbDeduction.amountPaid"
                     label="Amount Paid *"
@@ -1712,7 +2076,10 @@
                     :rules="[(v) => !!v || 'Amount Paid is required']"
                   />
                 </v-col>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model="ddbDeduction.comments"
                     label="Comments"
@@ -1726,10 +2093,10 @@
                 <v-col cols="12">
                   <v-file-input
                     :loading="uploading"
-                    @change="(e) => uploadFile(e, ddbDeduction)"
                     label="Upload Proof Document"
                     variant="outlined"
                     color="black"
+                    @change="(e) => uploadFile(e, ddbDeduction)"
                   />
                 </v-col>
               </v-row>
@@ -1737,16 +2104,28 @@
           </v-card-text>
 
           <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="grey darken-1" text @click="closeDialogDdb"
-              >Cancel</v-btn
+            <v-spacer />
+            <v-btn
+              color="grey darken-1"
+              text
+              @click="closeDialogDdb"
             >
-            <v-btn color="primary" @click="ddbDeductionSave">Add 80DDB</v-btn>
+              Cancel
+            </v-btn>
+            <v-btn
+              color="primary"
+              @click="ddbDeductionSave"
+            >
+              Add 80DDB
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
 
-      <v-dialog v-model="showCDeduction" max-width="700px">
+      <v-dialog
+        v-model="showCDeduction"
+        max-width="700px"
+      >
         <v-card>
           <v-card-title>
             <span class="text-h5">New Home Loan Declaration</span>
@@ -1755,7 +2134,10 @@
           <v-card-text>
             <v-container>
               <v-row>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model.number="cDeduction.amountPaid"
                     label="Amount Paid *"
@@ -1765,7 +2147,10 @@
                     :rules="[(v) => !!v || 'Amount Paid is required']"
                   />
                 </v-col>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model="cDeduction.comments"
                     label="Comments"
@@ -1779,10 +2164,10 @@
                 <v-col cols="12">
                   <v-file-input
                     :loading="uploading"
-                    @change="(e) => uploadFile(e, cDeduction)"
                     label="Upload Proof Document"
                     variant="outlined"
                     color="black"
+                    @change="(e) => uploadFile(e, cDeduction)"
                   />
                 </v-col>
               </v-row>
@@ -1790,15 +2175,27 @@
           </v-card-text>
 
           <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="grey darken-1" text @click="closeDialogC"
-              >Cancel</v-btn
+            <v-spacer />
+            <v-btn
+              color="grey darken-1"
+              text
+              @click="closeDialogC"
             >
-            <v-btn color="primary" @click="cDeductionSave">Add Home Loan</v-btn>
+              Cancel
+            </v-btn>
+            <v-btn
+              color="primary"
+              @click="cDeductionSave"
+            >
+              Add Home Loan
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
-      <v-dialog v-model="showccdDeduction" max-width="700px">
+      <v-dialog
+        v-model="showccdDeduction"
+        max-width="700px"
+      >
         <v-card>
           <v-card-title>
             <span class="text-h5">New Home Loan Declaration</span>
@@ -1807,7 +2204,10 @@
           <v-card-text>
             <v-container>
               <v-row>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model="ccdDeduction.amountPaid"
                     label="Amount Paid *"
@@ -1817,7 +2217,10 @@
                     :rules="[(v) => !!v || 'Amount Paid is required']"
                   />
                 </v-col>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model="ccdDeduction.comments"
                     label="Comments"
@@ -1831,10 +2234,10 @@
                 <v-col cols="12">
                   <v-file-input
                     :loading="uploading"
-                    @change="(e) => uploadFile(e, ccdDeduction)"
                     label="Upload Proof Document"
                     variant="outlined"
                     color="black"
+                    @change="(e) => uploadFile(e, ccdDeduction)"
                   />
                 </v-col>
               </v-row>
@@ -1842,17 +2245,27 @@
           </v-card-text>
 
           <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="grey darken-1" text @click="closeDialogccd"
-              >Cancel</v-btn
+            <v-spacer />
+            <v-btn
+              color="grey darken-1"
+              text
+              @click="closeDialogccd"
             >
-            <v-btn color="primary" @click="ccdDeductionSave"
-              >Add Home Loan</v-btn
+              Cancel
+            </v-btn>
+            <v-btn
+              color="primary"
+              @click="ccdDeductionSave"
             >
+              Add Home Loan
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
-      <v-dialog v-model="showccd2Deduction" max-width="700px">
+      <v-dialog
+        v-model="showccd2Deduction"
+        max-width="700px"
+      >
         <v-card>
           <v-card-title>
             <span class="text-h5">New 80CCD(2) Declaration</span>
@@ -1861,7 +2274,10 @@
           <v-card-text>
             <v-container>
               <v-row>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model="ccd2Deduction.amountPaid"
                     label="Amount Paid *"
@@ -1871,7 +2287,10 @@
                     :rules="[(v) => !!v || 'Amount Paid is required']"
                   />
                 </v-col>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model="ccd2Deduction.comments"
                     label="Comments"
@@ -1885,10 +2304,10 @@
                 <v-col cols="12">
                   <v-file-input
                     :loading="uploading"
-                    @change="(e) => uploadFile(e, ccd2Deduction)"
                     label="Upload Proof Document"
                     variant="outlined"
                     color="black"
+                    @change="(e) => uploadFile(e, ccd2Deduction)"
                   />
                 </v-col>
               </v-row>
@@ -1896,28 +2315,41 @@
           </v-card-text>
 
           <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="grey darken-1" text @click="closeDialogccd2">
+            <v-spacer />
+            <v-btn
+              color="grey darken-1"
+              text
+              @click="closeDialogccd2"
+            >
               Cancel
             </v-btn>
-            <v-btn color="primary" @click="ccd2DeductionSave">
+            <v-btn
+              color="primary"
+              @click="ccd2DeductionSave"
+            >
               Add 80CCD(2)
             </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
 
-      <v-dialog v-model="showdDeduction" max-width="700px">
+      <v-dialog
+        v-model="showdDeduction"
+        max-width="700px"
+      >
         <v-card>
           <v-card-title>
             <span class="text-h5">New Home Loan Declaration</span>
-            <v-spacer></v-spacer>
+            <v-spacer />
           </v-card-title>
 
           <v-card-text>
             <v-container>
               <v-row>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model="dDeduction.amountPaid"
                     label="Amount Paid *"
@@ -1927,7 +2359,10 @@
                     :rules="[(v) => !!v || 'Amount Paid is required']"
                   />
                 </v-col>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model="dDeduction.comments"
                     label="Comments"
@@ -1941,10 +2376,10 @@
                 <v-col cols="12">
                   <v-file-input
                     :loading="uploading"
-                    @change="(e) => uploadFile(e, dDeduction)"
                     label="Upload Proof Document"
                     variant="outlined"
                     color="black"
+                    @change="(e) => uploadFile(e, dDeduction)"
                   />
                 </v-col>
               </v-row>
@@ -1952,15 +2387,27 @@
           </v-card-text>
 
           <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="grey darken-1" text @click="closeDialogd"
-              >Cancel</v-btn
+            <v-spacer />
+            <v-btn
+              color="grey darken-1"
+              text
+              @click="closeDialogd"
             >
-            <v-btn color="primary" @click="dDeductionSave">Add Home Loan</v-btn>
+              Cancel
+            </v-btn>
+            <v-btn
+              color="primary"
+              @click="dDeductionSave"
+            >
+              Add Home Loan
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
-      <v-dialog v-model="showDdDeduction" max-width="700px">
+      <v-dialog
+        v-model="showDdDeduction"
+        max-width="700px"
+      >
         <v-card>
           <v-card-title>
             <span class="text-h5">New 80DD Deduction Declaration</span>
@@ -1969,7 +2416,10 @@
           <v-card-text>
             <v-container>
               <v-row>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model.number="ddDeduction.amountPaid"
                     label="Amount Paid *"
@@ -1979,7 +2429,10 @@
                     :rules="[(v) => !!v || 'Amount Paid is required']"
                   />
                 </v-col>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model="ddDeduction.comments"
                     label="Comments"
@@ -1993,10 +2446,10 @@
                 <v-col cols="12">
                   <v-file-input
                     :loading="uploading"
-                    @change="(e) => uploadFile(e, ddDeduction)"
                     label="Upload Proof Document"
                     variant="outlined"
                     color="black"
+                    @change="(e) => uploadFile(e, ddDeduction)"
                   />
                 </v-col>
               </v-row>
@@ -2004,15 +2457,27 @@
           </v-card-text>
 
           <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="grey darken-1" text @click="closeDialogDd"
-              >Cancel</v-btn
+            <v-spacer />
+            <v-btn
+              color="grey darken-1"
+              text
+              @click="closeDialogDd"
             >
-            <v-btn color="primary" @click="ddDeductionSave">Add 80DD</v-btn>
+              Cancel
+            </v-btn>
+            <v-btn
+              color="primary"
+              @click="ddDeductionSave"
+            >
+              Add 80DD
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
-      <v-dialog v-model="showEDeduction" max-width="700px">
+      <v-dialog
+        v-model="showEDeduction"
+        max-width="700px"
+      >
         <v-card>
           <v-card-title>
             <span class="text-h5">New 80E Deduction Declaration</span>
@@ -2021,7 +2486,10 @@
           <v-card-text>
             <v-container>
               <v-row>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model.number="eDeduction.amountPaid"
                     label="Amount Paid *"
@@ -2031,7 +2499,10 @@
                     :rules="[(v) => !!v || 'Amount Paid is required']"
                   />
                 </v-col>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model="eDeduction.comments"
                     label="Comments"
@@ -2045,10 +2516,10 @@
                 <v-col cols="12">
                   <v-file-input
                     :loading="uploading"
-                    @change="(e) => uploadFile(e, eDeduction)"
                     label="Upload Proof Document"
                     variant="outlined"
                     color="black"
+                    @change="(e) => uploadFile(e, eDeduction)"
                   />
                 </v-col>
               </v-row>
@@ -2056,15 +2527,27 @@
           </v-card-text>
 
           <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="grey darken-1" text @click="closeDialogE"
-              >Cancel</v-btn
+            <v-spacer />
+            <v-btn
+              color="grey darken-1"
+              text
+              @click="closeDialogE"
             >
-            <v-btn color="primary" @click="eDeductionSave">Add 80E</v-btn>
+              Cancel
+            </v-btn>
+            <v-btn
+              color="primary"
+              @click="eDeductionSave"
+            >
+              Add 80E
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
-      <v-dialog v-model="showEebDeduction" max-width="700px">
+      <v-dialog
+        v-model="showEebDeduction"
+        max-width="700px"
+      >
         <v-card>
           <v-card-title>
             <span class="text-h5">New 80EEB Deduction Declaration</span>
@@ -2073,7 +2556,10 @@
           <v-card-text>
             <v-container>
               <v-row>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model.number="eebDeduction.amountPaid"
                     label="Amount Paid *"
@@ -2083,7 +2569,10 @@
                     :rules="[(v) => !!v || 'Amount Paid is required']"
                   />
                 </v-col>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model="eebDeduction.comments"
                     label="Comments"
@@ -2097,10 +2586,10 @@
                 <v-col cols="12">
                   <v-file-input
                     :loading="uploading"
-                    @change="(e) => uploadFile(e, eebDeduction)"
                     label="Upload Proof Document"
                     variant="outlined"
                     color="black"
+                    @change="(e) => uploadFile(e, eebDeduction)"
                   />
                 </v-col>
               </v-row>
@@ -2108,15 +2597,27 @@
           </v-card-text>
 
           <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="grey darken-1" text @click="closeDialogEeb"
-              >Cancel</v-btn
+            <v-spacer />
+            <v-btn
+              color="grey darken-1"
+              text
+              @click="closeDialogEeb"
             >
-            <v-btn color="primary" @click="eebDeductionSave">Add 80EEB</v-btn>
+              Cancel
+            </v-btn>
+            <v-btn
+              color="primary"
+              @click="eebDeductionSave"
+            >
+              Add 80EEB
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
-      <v-dialog v-model="showUDeduction" max-width="700px">
+      <v-dialog
+        v-model="showUDeduction"
+        max-width="700px"
+      >
         <v-card>
           <v-card-title>
             <span class="text-h5">New 80U Deduction Declaration</span>
@@ -2125,7 +2626,10 @@
           <v-card-text>
             <v-container>
               <v-row>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model.number="uDeduction.amountPaid"
                     label="Amount Paid *"
@@ -2135,7 +2639,10 @@
                     :rules="[(v) => !!v || 'Amount Paid is required']"
                   />
                 </v-col>
-                <v-col cols="12" sm="6">
+                <v-col
+                  cols="12"
+                  sm="6"
+                >
                   <v-text-field
                     v-model="uDeduction.comments"
                     label="Comments"
@@ -2149,10 +2656,10 @@
                 <v-col cols="12">
                   <v-file-input
                     :loading="uploading"
-                    @change="(e) => uploadFile(e, uDeduction)"
                     label="Upload Proof Document"
                     variant="outlined"
                     color="black"
+                    @change="(e) => uploadFile(e, uDeduction)"
                   />
                 </v-col>
               </v-row>
@@ -2160,11 +2667,20 @@
           </v-card-text>
 
           <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="grey darken-1" text @click="closeDialogU"
-              >Cancel</v-btn
+            <v-spacer />
+            <v-btn
+              color="grey darken-1"
+              text
+              @click="closeDialogU"
             >
-            <v-btn color="primary" @click="uDeductionSave">Add 80U</v-btn>
+              Cancel
+            </v-btn>
+            <v-btn
+              color="primary"
+              @click="uDeductionSave"
+            >
+              Add 80U
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>

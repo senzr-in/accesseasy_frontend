@@ -2,11 +2,14 @@
   <div class="personal-details">
     <v-container v-if="loading">
       <v-row>
-        <v-col cols="12" class="text-center">
+        <v-col
+          cols="12"
+          class="text-center"
+        >
           <v-progress-circular
             indeterminate
             color="black"
-          ></v-progress-circular>
+          />
         </v-col>
       </v-row>
     </v-container>
@@ -18,13 +21,13 @@
         <h3>Employee Address</h3>
         <v-btn
           color="black"
-          @click="updatePersonalDetails"
           :disabled="!hasChanges"
+          @click="updatePersonalDetails"
         >
           Update
         </v-btn>
       </div>
-      <br />
+      <br>
       <v-row>
         <!-- Permanent Address -->
         <v-col cols="12">
@@ -34,7 +37,7 @@
             rows="3"
             variant="outlined"
             density="comfortable"
-          ></v-textarea>
+          />
         </v-col>
 
         <!-- Current Address -->
@@ -45,7 +48,7 @@
             rows="3"
             variant="outlined"
             density="comfortable"
-          ></v-textarea>
+          />
         </v-col>
       </v-row>
     </v-container>

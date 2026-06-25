@@ -6,34 +6,42 @@
         <!-- Title moved to global App Bar -->
       </div>
       <button
-        @click="handleCreate"
         class="bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 hover:opacity-90 rounded-xl px-4 py-2 font-black uppercase tracking-widest text-[10px] shadow-sm flex items-center transition-all"
+        @click="handleCreate"
       >
         <Plus class="w-3.5 h-3.5 mr-2" /> CREATE ZONE
       </button>
     </div>
 
     <!-- Loading State -->
-    <div v-if="isLoading" class="flex flex-col items-center justify-center p-20 text-slate-500 italic space-y-4">
+    <div
+      v-if="isLoading"
+      class="flex flex-col items-center justify-center p-20 text-slate-500 italic space-y-4"
+    >
       <Loader2 class="w-10 h-10 animate-spin text-emerald-500/20" />
       <p>Loading security zones...</p>
     </div>
 
     <!-- Empty State -->
-    <div v-else-if="zones.length === 0" class="border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-xl shadow-md">
+    <div
+      v-else-if="zones.length === 0"
+      class="border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-xl shadow-md"
+    >
       <div class="flex flex-col items-center justify-center p-12 text-center space-y-4">
         <div class="p-4 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800">
           <MapPin class="w-8 h-8 text-slate-400 dark:text-zinc-600" />
         </div>
         <div class="space-y-1">
-          <h3 class="text-[10px] sm:text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">No Zones Defined</h3>
+          <h3 class="text-[10px] sm:text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white">
+            No Zones Defined
+          </h3>
           <p class="text-[10px] font-medium text-slate-500 dark:text-zinc-400 max-w-xs mx-auto"> 
             Create your first security zone to start grouping doors and monitoring spatial occupancy.
           </p>
         </div>
         <button 
-          @click="handleCreate" 
-          class="border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-900 rounded-xl px-4 py-2 font-black uppercase tracking-widest text-[10px] shadow-sm transition-all"
+          class="border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-900 rounded-xl px-4 py-2 font-black uppercase tracking-widest text-[10px] shadow-sm transition-all" 
+          @click="handleCreate"
         >
           Create First Zone
         </button>
@@ -41,7 +49,10 @@
     </div>
 
     <!-- Grid List -->
-    <div v-else class="grid grid-cols-1 lg:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div
+      v-else
+      class="grid grid-cols-1 lg:grid-cols-2 lg:grid-cols-3 gap-6"
+    >
       <div 
         v-for="zone in zones" 
         :key="zone.id" 
@@ -58,14 +69,14 @@
           </div>
           <div class="flex items-center gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
             <button 
-              @click="handleEdit(zone)" 
-              class="h-8 w-8 flex items-center justify-center rounded-md text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-zinc-700 shadow-sm"
+              class="h-8 w-8 flex items-center justify-center rounded-md text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-zinc-700 shadow-sm" 
+              @click="handleEdit(zone)"
             >
               <Settings class="w-3.5 h-3.5" />
             </button>
             <button 
-              @click="handleDelete(zone.id)" 
-              class="h-8 w-8 flex items-center justify-center rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors border border-transparent hover:border-rose-200 dark:hover:border-rose-900/50 shadow-sm"
+              class="h-8 w-8 flex items-center justify-center rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors border border-transparent hover:border-rose-200 dark:hover:border-rose-900/50 shadow-sm" 
+              @click="handleDelete(zone.id)"
             >
               <Trash2 class="w-3.5 h-3.5" />
             </button>
@@ -75,22 +86,35 @@
         <div class="p-6">
           <div class="grid grid-cols-3 gap-4">
             <div class="space-y-1">
-              <p class="text-[10px] font-black uppercase text-slate-500 dark:text-zinc-400 tracking-widest">Linked Doors</p>
+              <p class="text-[10px] font-black uppercase text-slate-500 dark:text-zinc-400 tracking-widest">
+                Linked Doors
+              </p>
               <p class="text-lg font-bold text-slate-900 dark:text-white">
                 {{ (zone.entry_doors?.length || 0) + (zone.exit_doors?.length || 0) }}
               </p>
             </div>
             <div class="space-y-1 border-x border-slate-100 dark:border-zinc-800 px-4">
-              <p class="text-[10px] font-black uppercase text-slate-500 dark:text-zinc-400 tracking-widest">Occupancy</p>
-              <p class="text-lg font-bold text-slate-900 dark:text-white">0</p>
+              <p class="text-[10px] font-black uppercase text-slate-500 dark:text-zinc-400 tracking-widest">
+                Occupancy
+              </p>
+              <p class="text-lg font-bold text-slate-900 dark:text-white">
+                0
+              </p>
             </div>
             <div class="space-y-1 text-right">
-              <p class="text-[10px] font-black uppercase text-slate-500 dark:text-zinc-400 tracking-widest">Status</p>
-              <p class="text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-1">Active</p>
+              <p class="text-[10px] font-black uppercase text-slate-500 dark:text-zinc-400 tracking-widest">
+                Status
+              </p>
+              <p class="text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-1">
+                Active
+              </p>
             </div>
           </div>
           
-          <p v-if="zone.description" class="mt-4 text-[11px] font-medium text-slate-500 dark:text-zinc-400 line-clamp-1 italic">
+          <p
+            v-if="zone.description"
+            class="mt-4 text-[11px] font-medium text-slate-500 dark:text-zinc-400 line-clamp-1 italic"
+          >
             {{ zone.description }}
           </p>
           
@@ -113,7 +137,6 @@
         Logical zone nesting and inheritance tree visualization ready for terminal nodes.
       </div>
     </div>
-
   </div>
 </template>
 

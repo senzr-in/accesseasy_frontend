@@ -7,20 +7,24 @@
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-check-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-check-circle
+        </v-icon>
         {{ successMessage }}
       </div>
     </v-snackbar>
 
     <v-snackbar
-      class="errormessge"
       v-model="showErrorSnackbar"
+      class="errormessge"
       color="error"
       timeout="2000"
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-alert-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-alert-circle
+        </v-icon>
         {{ errorMessage }}
       </div>
     </v-snackbar>
@@ -32,17 +36,24 @@
         elevation="1"
         class="form-header"
       >
-        <v-btn class="back-btn" icon @click="$emit('closeAddPage')">
+        <v-btn
+          class="back-btn"
+          icon
+          @click="$emit('closeAddPage')"
+        >
           <v-icon>mdi-close</v-icon>
         </v-btn>
         <v-toolbar-title class="ml-4 form-title">
           Edit Regularization Request
         </v-toolbar-title>
-        <v-spacer></v-spacer>
+        <v-spacer />
       </v-toolbar>
 
       <div class="form-content">
-        <v-card class="form-card" elevation="0">
+        <v-card
+          class="form-card"
+          elevation="0"
+        >
           <v-card-text class="form-fields">
             <!-- Date Field -->
             <v-row class="mb-2">
@@ -127,7 +138,7 @@
         elevation="1"
         class="form-footer"
       >
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-btn
           class="cancel-btn"
           variant="outlined"
@@ -143,12 +154,12 @@
           :disabled="isSaving"
           @click="handleSave"
         >
-          <template v-slot:loader>
+          <template #loader>
             <v-progress-circular
               indeterminate
               size="20"
               width="2"
-            ></v-progress-circular>
+            />
             <span class="ml-2">Saving...</span>
           </template>
           UPDATE

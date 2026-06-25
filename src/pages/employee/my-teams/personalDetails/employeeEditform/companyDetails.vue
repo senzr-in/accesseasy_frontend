@@ -2,16 +2,22 @@
   <div class="company-details">
     <v-container v-if="loading">
       <v-row>
-        <v-col cols="12" class="text-center">
+        <v-col
+          cols="12"
+          class="text-center"
+        >
           <v-progress-circular
             indeterminate
             color="black"
-          ></v-progress-circular>
+          />
         </v-col>
       </v-row>
     </v-container>
 
-    <v-container class="scroll-container" v-else-if="localEmployeeData">
+    <v-container
+      v-else-if="localEmployeeData"
+      class="scroll-container"
+    >
       <div class="d-flex justify-space-between align-center mb-4">
         <h3>Company Details</h3>
         <BaseButton
@@ -26,7 +32,10 @@
       </div>
 
       <v-row>
-        <v-col cols="12" md="6">
+        <v-col
+          cols="12"
+          md="6"
+        >
           <v-select
             v-model="selectedDepartment"
             :items="departmentOptions"
@@ -36,9 +45,12 @@
             variant="outlined"
             density="comfortable"
             @update:model-value="handleDepartmentChange"
-          ></v-select>
+          />
         </v-col>
-        <v-col cols="12" md="6">
+        <v-col
+          cols="12"
+          md="6"
+        >
           <v-select
             v-model="selectedBranchLocation"
             :items="locationOptions"
@@ -48,18 +60,24 @@
             variant="outlined"
             density="comfortable"
             @update:model-value="handleBranchLocationChange"
-          ></v-select>
+          />
         </v-col>
-        <v-col cols="12" md="6">
+        <v-col
+          cols="12"
+          md="6"
+        >
           <v-text-field
             v-model="localEmployeeData.assignedUser.designation"
             label="Designation"
             variant="outlined"
             density="comfortable"
             @input="handleInputChange('assignedUser.designation')"
-          ></v-text-field>
+          />
         </v-col>
-        <v-col cols="12" md="6">
+        <v-col
+          cols="12"
+          md="6"
+        >
           <v-select
             v-model="selectedCycleType"
             :items="cycleTypeOptions"
@@ -70,9 +88,12 @@
             density="comfortable"
             @update:model-value="handleCycleTypeChange"
             @blur="markFieldAsTouched('cycleType')"
-          ></v-select>
+          />
         </v-col>
-        <v-col cols="12" md="6">
+        <v-col
+          cols="12"
+          md="6"
+        >
           <v-text-field
             v-model="localEmployeeData.assignedUser.dateOfJoining"
             label="Date of Joining"
@@ -80,9 +101,12 @@
             variant="outlined"
             density="comfortable"
             @input="handleInputChange('assignedUser.dateOfJoining')"
-          ></v-text-field>
+          />
         </v-col>
-        <v-col cols="12" md="6">
+        <v-col
+          cols="12"
+          md="6"
+        >
           <v-text-field
             v-model="localEmployeeData.assignedUser.dateOfLeaving"
             label="Date of Leaving"
@@ -90,7 +114,7 @@
             variant="outlined"
             density="comfortable"
             @input="handleInputChange('assignedUser.dateOfLeaving')"
-          ></v-text-field>
+          />
         </v-col>
 
         <v-select
@@ -104,7 +128,7 @@
           clearable
           @update:model-value="handleApproverChange"
         >
-          <template v-slot:prepend-item>
+          <template #prepend-item>
             <div class="d-flex align-center">
               <v-text-field
                 v-model="searchApprover"
@@ -115,13 +139,13 @@
                 hide-details
                 class="flex-grow-1 mr-2"
                 @input="debounceFilterApprover"
-              ></v-text-field>
+              />
               <v-btn
                 variant="text"
                 density="compact"
                 :icon="showApproverFilters ? 'mdi-chevron-up' : 'mdi-filter'"
                 @click.stop="showApproverFilters = !showApproverFilters"
-              ></v-btn>
+              />
             </div>
             <v-expand-transition>
               <v-card
@@ -142,12 +166,12 @@
                     density="compact"
                     variant="outlined"
                     hide-details
-                    @update:modelValue="filterApprovers"
-                  ></v-select>
+                    @update:model-value="filterApprovers"
+                  />
                 </v-card-text>
               </v-card>
             </v-expand-transition>
-            <v-divider class="mt-2"></v-divider>
+            <v-divider class="mt-2" />
           </template>
         </v-select>
       </v-row>
@@ -155,7 +179,10 @@
 
     <v-container v-else>
       <v-row>
-        <v-col cols="12" class="text-center">
+        <v-col
+          cols="12"
+          class="text-center"
+        >
           <p>No employee data found.</p>
         </v-col>
       </v-row>
@@ -168,20 +195,24 @@
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-check-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-check-circle
+        </v-icon>
         {{ successMessage }}
       </div>
     </v-snackbar>
 
     <v-snackbar
-      class="errormessge"
       v-model="showErrorSnackbar"
+      class="errormessge"
       color="error"
       timeout="2000"
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-alert-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-alert-circle
+        </v-icon>
         {{ errorMessage }}
       </div>
     </v-snackbar>

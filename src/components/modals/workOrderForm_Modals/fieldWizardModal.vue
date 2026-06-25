@@ -1,7 +1,14 @@
 <!-- /senzrGo/senzrfieldopsfrontend/src/components/modals/workOrderForm_Modals/fieldWizardModal.vue -->
 <template>
-  <div v-if="show" class="modal-overlay" @click="$emit('close')">
-    <div class="modal-content enhanced-modal modal-large" @click.stop>
+  <div
+    v-if="show"
+    class="modal-overlay"
+    @click="$emit('close')"
+  >
+    <div
+      class="modal-content enhanced-modal modal-large"
+      @click.stop
+    >
       <div class="modal-header">
         <div class="modal-title-section">
           <h3 class="modal-title">
@@ -13,7 +20,10 @@
             these later.
           </p>
         </div>
-        <button @click="$emit('close')" class="modal-close">
+        <button
+          class="modal-close"
+          @click="$emit('close')"
+        >
           <XIcon class="w-6 h-6" />
         </button>
       </div>
@@ -24,7 +34,10 @@
             <FileTextIcon class="label-icon" />
             Select Form
           </label>
-          <select v-model="selectedFormId" class="form-select">
+          <select
+            v-model="selectedFormId"
+            class="form-select"
+          >
             <option
               v-for="form in selectedForm.custom_FormTemplate?.forms || []"
               :key="form.form_id"
@@ -33,27 +46,55 @@
               {{ form.form_name }}
             </option>
           </select>
-          <div class="field-help">Choose the form to add this field to</div>
+          <div class="field-help">
+            Choose the form to add this field to
+          </div>
         </div>
 
         <div class="wizard-steps">
-          <div class="wizard-step" :class="{ active: wizardStep === 1 }">
-            <div class="step-number">1</div>
-            <div class="step-label">Basic Info</div>
+          <div
+            class="wizard-step"
+            :class="{ active: wizardStep === 1 }"
+          >
+            <div class="step-number">
+              1
+            </div>
+            <div class="step-label">
+              Basic Info
+            </div>
           </div>
-          <div class="wizard-step" :class="{ active: wizardStep === 2 }">
-            <div class="step-number">2</div>
-            <div class="step-label">Field Type</div>
+          <div
+            class="wizard-step"
+            :class="{ active: wizardStep === 2 }"
+          >
+            <div class="step-number">
+              2
+            </div>
+            <div class="step-label">
+              Field Type
+            </div>
           </div>
-          <div class="wizard-step" :class="{ active: wizardStep === 3 }">
-            <div class="step-number">3</div>
-            <div class="step-label">Settings</div>
+          <div
+            class="wizard-step"
+            :class="{ active: wizardStep === 3 }"
+          >
+            <div class="step-number">
+              3
+            </div>
+            <div class="step-label">
+              Settings
+            </div>
           </div>
         </div>
 
         <!-- Step 1: Basic Information -->
-        <div v-if="wizardStep === 1" class="wizard-content">
-          <h4 class="wizard-section-title">Basic Field Information</h4>
+        <div
+          v-if="wizardStep === 1"
+          class="wizard-content"
+        >
+          <h4 class="wizard-section-title">
+            Basic Field Information
+          </h4>
           <div class="form-group">
             <label class="form-label">
               <TagIcon class="label-icon" />
@@ -65,7 +106,7 @@
               class="form-input"
               placeholder="e.g., Equipment Type"
               @input="generateFieldKey"
-            />
+            >
             <div class="field-help">
               This is what users will see as the field name
             </div>
@@ -80,8 +121,10 @@
               type="text"
               class="form-input"
               placeholder="e.g., Select equipment type"
-            />
-            <div class="field-help">Hint text shown inside the field</div>
+            >
+            <div class="field-help">
+              Hint text shown inside the field
+            </div>
           </div>
           <div class="form-group">
             <label class="form-label">
@@ -93,27 +136,39 @@
               type="text"
               class="form-input form-input-disabled"
               disabled
-            />
-            <div class="field-help">Auto-generated unique identifier</div>
+            >
+            <div class="field-help">
+              Auto-generated unique identifier
+            </div>
           </div>
         </div>
 
         <!-- Step 2: Field Type Selection -->
-        <div v-if="wizardStep === 2" class="wizard-content">
-          <h4 class="wizard-section-title">Choose Field Type</h4>
+        <div
+          v-if="wizardStep === 2"
+          class="wizard-content"
+        >
+          <h4 class="wizard-section-title">
+            Choose Field Type
+          </h4>
           <div class="field-type-grid">
             <div
               v-for="fieldType in fieldTypeOptions"
               :key="fieldType.value"
-              @click="selectFieldType(fieldType)"
               class="field-type-option"
               :class="{ selected: isFieldTypeSelected(fieldType) }"
+              @click="selectFieldType(fieldType)"
             >
               <div class="field-type-icon">
-                <component :is="fieldType.icon" class="w-6 h-6" />
+                <component
+                  :is="fieldType.icon"
+                  class="w-6 h-6"
+                />
               </div>
               <div class="field-type-info">
-                <div class="field-type-name">{{ fieldType.label }}</div>
+                <div class="field-type-name">
+                  {{ fieldType.label }}
+                </div>
                 <div class="field-type-description">
                   {{ fieldType.description }}
                 </div>
@@ -123,16 +178,28 @@
         </div>
 
         <!-- Step 3: Field Settings -->
-        <div v-if="wizardStep === 3" class="wizard-content">
-          <h4 class="wizard-section-title">Field Settings</h4>
+        <div
+          v-if="wizardStep === 3"
+          class="wizard-content"
+        >
+          <h4 class="wizard-section-title">
+            Field Settings
+          </h4>
           <div class="form-group">
             <label class="form-label">
               <ClockIcon class="label-icon" />
               When to Show This Field
             </label>
-            <select v-model="wizardField.field_type" class="form-select">
-              <option value="creation">During Creation</option>
-              <option value="completion">During Completion</option>
+            <select
+              v-model="wizardField.field_type"
+              class="form-select"
+            >
+              <option value="creation">
+                During Creation
+              </option>
+              <option value="completion">
+                During Completion
+              </option>
               <option value="creation/completion">
                 Both Creation & Completion
               </option>
@@ -141,11 +208,11 @@
           <div class="toggle-item">
             <label class="toggle-switch">
               <input
-                type="checkbox"
                 v-model="wizardField.required"
+                type="checkbox"
                 class="toggle-input"
-              />
-              <span class="toggle-slider"></span>
+              >
+              <span class="toggle-slider" />
             </label>
             <span class="toggle-label">Make this field required</span>
           </div>
@@ -162,10 +229,8 @@
               </div>
               <div class="tip-item">
                 <CheckCircleIcon class="tip-icon" />
-                <span
-                  >You can add validation rules and role-based access after
-                  creation</span
-                >
+                <span>You can add validation rules and role-based access after
+                  creation</span>
               </div>
               <div class="tip-item">
                 <CheckCircleIcon class="tip-icon" />
@@ -178,29 +243,32 @@
       <div class="modal-footer">
         <button
           v-if="wizardStep > 1"
-          @click="wizardStep--"
           class="btn btn-secondary"
+          @click="wizardStep--"
         >
           <ChevronLeftIcon class="btn-icon" />
           Previous
         </button>
-        <button @click="$emit('close')" class="btn btn-secondary">
+        <button
+          class="btn btn-secondary"
+          @click="$emit('close')"
+        >
           Cancel
         </button>
         <button
           v-if="wizardStep < 3"
-          @click="wizardStep++"
           class="btn btn-primary"
           :disabled="!canProceedToNextStep()"
+          @click="wizardStep++"
         >
           Next
           <ChevronRightIcon class="btn-icon" />
         </button>
         <button
           v-if="wizardStep === 3"
-          @click="handleSaveField"
           class="btn btn-primary"
           :disabled="!wizardField.label?.trim() || !selectedFormId"
+          @click="handleSaveField"
         >
           <PlusIcon class="btn-icon" />
           Add Field

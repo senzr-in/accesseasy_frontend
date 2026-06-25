@@ -1,7 +1,7 @@
 <template>
   <div class="camera-list-container">
     <DataTableWrapper
-      :showSearch="true"
+      :show-search="true"
       :search-query="searchQuery"
       @update:search-query="searchQuery = $event"
     >
@@ -18,12 +18,12 @@
             hide-details
             clearable
             style="width: 200px; margin-right: 16px;"
-          ></v-select>
+          />
           <BaseButton
             variant="primary"
             size="md"
             text="Add Camera"
-            :leftIcon="Plus"
+            :left-icon="Plus"
             @click="openAddCameraDialog"
           />
         </div>
@@ -42,11 +42,11 @@
         <DataTable
           :items="paginatedCameras"
           :columns="headers"
-          :showSelection="false"
+          :show-selection="false"
           :expandable="false"
           show-header
           :row-clickable="true"
-          @rowClick="handleRowClick"
+          @row-click="handleRowClick"
         >
           <!-- Status Cell -->
           <template #cell-status="{ item }">
@@ -61,10 +61,18 @@
           <!-- Actions Cell -->
           <template #cell-actions="{ item }">
             <div class="action-buttons">
-              <v-icon size="small" class="me-2" @click.stop="editCamera(item)">
+              <v-icon
+                size="small"
+                class="me-2"
+                @click.stop="editCamera(item)"
+              >
                 mdi-pencil
               </v-icon>
-              <v-icon size="small" color="error" @click.stop="deleteCamera(item)">
+              <v-icon
+                size="small"
+                color="error"
+                @click.stop="deleteCamera(item)"
+              >
                 mdi-delete
               </v-icon>
             </div>
@@ -77,15 +85,18 @@
           :total-items="filteredCameras.length"
           :items-per-page="itemsPerPage"
           :current-page="currentPage"
+          class="mt-4"
           @page-change="handlePageChange"
           @items-per-page-change="handleItemsPerPageChange"
-          class="mt-4"
         />
       </div>
     </DataTableWrapper>
 
     <!-- Add/Edit Dialog -->
-    <v-dialog v-model="dialog" max-width="500px">
+    <v-dialog
+      v-model="dialog"
+      max-width="500px"
+    >
       <v-card>
         <v-card-title>
           <span class="text-h5">{{ formTitle }}</span>
@@ -94,10 +105,16 @@
           <v-container>
             <v-row>
               <v-col cols="12">
-                <v-text-field v-model="editedItem.name" label="Camera Name"></v-text-field>
+                <v-text-field
+                  v-model="editedItem.name"
+                  label="Camera Name"
+                />
               </v-col>
               <v-col cols="12">
-                <v-text-field v-model="editedItem.ip" label="IP Address"></v-text-field>
+                <v-text-field
+                  v-model="editedItem.ip"
+                  label="IP Address"
+                />
               </v-col>
               <v-col cols="12">
                 <v-select
@@ -107,15 +124,27 @@
                   item-value="id"
                   label="Location"
                   @update:model-value="updateLocationName"
-                ></v-select>
+                />
               </v-col>
             </v-row>
           </v-container>
         </v-card-text>
         <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="blue-darken-1" variant="text" @click="close">Cancel</v-btn>
-          <v-btn color="blue-darken-1" variant="text" @click="save">Save</v-btn>
+          <v-spacer />
+          <v-btn
+            color="blue-darken-1"
+            variant="text"
+            @click="close"
+          >
+            Cancel
+          </v-btn>
+          <v-btn
+            color="blue-darken-1"
+            variant="text"
+            @click="save"
+          >
+            Save
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

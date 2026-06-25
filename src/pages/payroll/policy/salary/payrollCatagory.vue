@@ -24,16 +24,19 @@
               icon="mdi-arrow-left"
               variant="text"
               size="small"
-              @click="closeSalaryConfig"
               class="back-btn"
-            ></v-btn>
+              @click="closeSalaryConfig"
+            />
 
             <h3 class="text-h6">
               {{
                 showSalaryConfig ? selectedCategory.name : "Payroll Category"
               }}
             </h3>
-            <div v-if="!showSalaryConfig" class="filters-container">
+            <div
+              v-if="!showSalaryConfig"
+              class="filters-container"
+            >
               <!-- Search Input -->
               <v-text-field
                 v-model="searchQuery"
@@ -43,7 +46,7 @@
                 hide-details
                 class="search-input"
                 prepend-inner-icon="mdi-magnify"
-              ></v-text-field>
+              />
 
               <!-- State Filter -->
               <v-select
@@ -57,34 +60,55 @@
                 hide-details
                 class="filter-select"
                 clearable
-              ></v-select>
+              />
             </div>
           </div>
         </div>
       </div>
 
       <!-- Scrollable Content Section -->
-      <div v-if="!showSalaryConfig" class="scrollable">
+      <div
+        v-if="!showSalaryConfig"
+        class="scrollable"
+      >
         <!-- Loading State -->
-        <div v-if="isLoading" class="loading-state">
+        <div
+          v-if="isLoading"
+          class="loading-state"
+        >
           <v-progress-circular
             indeterminate
             color="primary"
             size="64"
-          ></v-progress-circular>
+          />
           <span class="ml-2 text-grey-darken-1">Loading categories...</span>
         </div>
 
         <!-- No Data State -->
-        <div v-else-if="SalaryCategories.length === 0" class="no-data-found">
+        <div
+          v-else-if="SalaryCategories.length === 0"
+          class="no-data-found"
+        >
           <div class="category-grid">
-            <div class="category-card create-card" @click="openCreateDialog">
+            <div
+              class="category-card create-card"
+              @click="openCreateDialog"
+            >
               <div class="create-content">
                 <div class="create-icon">
-                  <v-icon size="24" color="#6366f1">mdi-plus</v-icon>
+                  <v-icon
+                    size="24"
+                    color="#6366f1"
+                  >
+                    mdi-plus
+                  </v-icon>
                 </div>
-                <h4 class="create-title">Create New</h4>
-                <p class="create-subtitle">Add a new salary category</p>
+                <h4 class="create-title">
+                  Create New
+                </h4>
+                <p class="create-subtitle">
+                  Add a new salary category
+                </p>
               </div>
             </div>
           </div>
@@ -94,13 +118,25 @@
         <div v-else>
           <div class="category-grid">
             <!-- Create New Card -->
-            <div class="category-card create-card" @click="openCreateDialog">
+            <div
+              class="category-card create-card"
+              @click="openCreateDialog"
+            >
               <div class="create-content">
                 <div class="create-icon">
-                  <v-icon size="24" color="#6366f1">mdi-plus</v-icon>
+                  <v-icon
+                    size="24"
+                    color="#6366f1"
+                  >
+                    mdi-plus
+                  </v-icon>
                 </div>
-                <h4 class="create-title">Create New</h4>
-                <p class="create-subtitle">Add a new salary category</p>
+                <h4 class="create-title">
+                  Create New
+                </h4>
+                <p class="create-subtitle">
+                  Add a new salary category
+                </p>
               </div>
             </div>
 
@@ -118,12 +154,19 @@
                   }}
                 </div>
                 <div class="card-icon">
-                  <v-icon size="20" color="primary">mdi-cash</v-icon>
+                  <v-icon
+                    size="20"
+                    color="primary"
+                  >
+                    mdi-cash
+                  </v-icon>
                 </div>
               </div>
 
               <div class="card-content">
-                <h4 class="category-title">{{ category.name }}</h4>
+                <h4 class="category-title">
+                  {{ category.name }}
+                </h4>
               </div>
 
               <!-- Action buttons -->
@@ -134,7 +177,7 @@
                   size="small"
                   color="primary"
                   @click.stop="editCategory(category)"
-                ></v-btn>
+                />
               </div>
             </div>
           </div>
@@ -149,14 +192,20 @@
       /> -->
 
       <!-- Create/Edit Category Dialog -->
-      <v-dialog v-model="categoryDialog" max-width="500px">
+      <v-dialog
+        v-model="categoryDialog"
+        max-width="500px"
+      >
         <v-card>
           <v-card-title class="dialog-title">
             {{ editingCategory ? "Edit" : "Create" }} Payroll Category
           </v-card-title>
           <v-card-text class="dialog-content">
             <v-row>
-              <v-col cols="12" md="6">
+              <v-col
+                cols="12"
+                md="6"
+              >
                 <v-select
                   v-model="selectedState"
                   :items="states"
@@ -165,28 +214,39 @@
                   label="Select State"
                   class="mb-4"
                   variant="outlined"
-                  @update:model-value="stateLimit"
                   :error-messages="limitMessage"
-                >
-                </v-select>
+                  @update:model-value="stateLimit"
+                />
               </v-col>
-              <v-col cols="12" md="6">
+              <v-col
+                cols="12"
+                md="6"
+              >
                 <v-text-field
-                  :disabled="!selectedState"
                   v-model="categoryName"
+                  :disabled="!selectedState"
                   label="Category Name"
                   variant="outlined"
                   required
-                ></v-text-field>
+                />
               </v-col>
             </v-row>
           </v-card-text>
           <v-card-actions class="dialog-actions">
-            <v-spacer></v-spacer>
-            <v-btn color="error" variant="text" @click="categoryDialog = false"
-              >Cancel</v-btn
+            <v-spacer />
+            <v-btn
+              color="error"
+              variant="text"
+              @click="categoryDialog = false"
             >
-            <v-btn color="black" @click="saveCategory">Save</v-btn>
+              Cancel
+            </v-btn>
+            <v-btn
+              color="black"
+              @click="saveCategory"
+            >
+              Save
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -265,6 +325,30 @@ export default {
     },
     apiUrl() {
       return import.meta.env.VITE_API_URL;
+    },
+  },
+  watch: {
+    searchQuery: {
+      handler() {
+        this.fetchAccessLevels();
+      },
+      debounce: 300,
+    },
+    selectedState(newValue) {
+      this.defaultCategoryName;
+      this.fetchBranches();
+    },
+    filterState() {
+      this.fetchAccessLevels();
+    },
+    filterBranch() {
+      this.fetchAccessLevels();
+    },
+    filterArea() {
+      this.fetchAccessLevels();
+    },
+    filterSkills() {
+      this.fetchAccessLevels();
     },
   },
   created() {
@@ -646,30 +730,6 @@ export default {
     closeSalaryConfig() {
       this.showSalaryConfig = false;
       this.$router.push("/payroll/policy/payroll-policy");
-    },
-  },
-  watch: {
-    searchQuery: {
-      handler() {
-        this.fetchAccessLevels();
-      },
-      debounce: 300,
-    },
-    selectedState(newValue) {
-      this.defaultCategoryName;
-      this.fetchBranches();
-    },
-    filterState() {
-      this.fetchAccessLevels();
-    },
-    filterBranch() {
-      this.fetchAccessLevels();
-    },
-    filterArea() {
-      this.fetchAccessLevels();
-    },
-    filterSkills() {
-      this.fetchAccessLevels();
     },
   },
 };

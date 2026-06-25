@@ -1,21 +1,33 @@
 <template>
   <div class="deductions-container">
-    <v-toolbar density="compact" color="grey-lighten-4">
-      <v-btn icon color="black" @click="handleClose">
+    <v-toolbar
+      density="compact"
+      color="grey-lighten-4"
+    >
+      <v-btn
+        icon
+        color="black"
+        @click="handleClose"
+      >
         <v-icon>mdi-arrow-left</v-icon>
       </v-btn>
-      <v-toolbar-title class="ml-4"
-        >Past TDS in current financial year</v-toolbar-title
+      <v-toolbar-title class="ml-4">
+        Past TDS in current financial year
+      </v-toolbar-title>
+      <v-spacer />
+      <v-btn
+        color="error"
+        variant="text"
+        class="mr-2"
+        @click="handleClose"
       >
-      <v-spacer></v-spacer>
-      <v-btn color="error" variant="text" class="mr-2" @click="handleClose">
         CANCEL
       </v-btn>
       <v-btn
         style="background-color: black"
         color="white"
-        @click="handleSave"
         :loading="isSaving"
+        @click="handleSave"
       >
         SAVE
       </v-btn>

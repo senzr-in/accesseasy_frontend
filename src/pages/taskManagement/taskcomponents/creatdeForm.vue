@@ -2,15 +2,26 @@
   <div class="form-config-container">
     <!-- Left Sidebar for Template Selection -->
     <aside class="template-sidebar">
-      <h2 class="sidebar-title">Form Templates</h2>
-      <div v-if="isLoadingTemplates" class="loading-state">
-        <div class="spinner"></div>
+      <h2 class="sidebar-title">
+        Form Templates
+      </h2>
+      <div
+        v-if="isLoadingTemplates"
+        class="loading-state"
+      >
+        <div class="spinner" />
         <span>Loading templates...</span>
       </div>
-      <div v-else-if="templateError" class="error-state">
+      <div
+        v-else-if="templateError"
+        class="error-state"
+      >
         <p>{{ templateError }}</p>
       </div>
-      <ul v-else class="template-list">
+      <ul
+        v-else
+        class="template-list"
+      >
         <li
           v-for="template in formTemplates"
           :key="template.id"
@@ -27,10 +38,16 @@
 
     <!-- Main Content Area for Configuration -->
     <main class="config-main">
-      <div v-if="!selectedTemplateId" class="empty-state">
+      <div
+        v-if="!selectedTemplateId"
+        class="empty-state"
+      >
         <p>Select a form template to configure.</p>
       </div>
-      <div v-else class="config-panel">
+      <div
+        v-else
+        class="config-panel"
+      >
         <div class="config-header">
           <h2 class="config-panel-title">
             {{
@@ -39,14 +56,24 @@
             Configuration
           </h2>
           <div class="header-actions">
-            <button v-if="!editMode" @click="startEditing" class="btn-primary">
+            <button
+              v-if="!editMode"
+              class="btn-primary"
+              @click="startEditing"
+            >
               <EditIcon class="w-4 h-4" /> Edit
             </button>
             <template v-else>
-              <button @click="cancelEditing" class="btn-secondary">
+              <button
+                class="btn-secondary"
+                @click="cancelEditing"
+              >
                 <XIcon class="w-4 h-4" /> Cancel
               </button>
-              <button @click="saveChanges" class="btn-primary">
+              <button
+                class="btn-primary"
+                @click="saveChanges"
+              >
                 <SaveIcon class="w-4 h-4" /> Save Changes
               </button>
             </template>
@@ -56,16 +83,18 @@
         <div class="config-content">
           <!-- General Info -->
           <section class="config-section">
-            <h3 class="section-title">General Information</h3>
+            <h3 class="section-title">
+              General Information
+            </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="form-group">
                 <label class="form-label">Form Name:</label>
                 <input
-                  type="text"
                   v-model="editableTemplate.formName"
+                  type="text"
                   :disabled="!editMode"
                   class="form-input"
-                />
+                >
               </div>
               <div class="form-group">
                 <label class="form-label">Tenant:</label>
@@ -74,7 +103,7 @@
                   :value="selectedTemplate?.tenant?.tenantName || 'N/A'"
                   disabled
                   class="form-input"
-                />
+                >
               </div>
               <div class="form-group">
                 <label class="form-label">Assigned Organization:</label>
@@ -85,19 +114,21 @@
                   "
                   disabled
                   class="form-input"
-                />
+                >
               </div>
             </div>
           </section>
 
           <!-- Fields Configuration -->
           <section class="config-section">
-            <h3 class="section-title">Fields Configuration</h3>
+            <h3 class="section-title">
+              Fields Configuration
+            </h3>
             <div class="field-list">
               <div
                 v-if="
                   !editableTemplate.fields ||
-                  editableTemplate.fields.length === 0
+                    editableTemplate.fields.length === 0
                 "
                 class="text-center text-gray-500 py-4"
               >
@@ -115,8 +146,8 @@
                   <div class="field-actions">
                     <button
                       v-if="editMode"
-                      @click="removeField(index)"
                       class="btn-icon text-red-500"
+                      @click="removeField(index)"
                     >
                       <Trash2Icon class="w-4 h-4" />
                     </button>
@@ -127,20 +158,20 @@
                     <div class="form-group">
                       <label class="form-label">Key:</label>
                       <input
-                        type="text"
                         v-model="field.key"
+                        type="text"
                         :disabled="!editMode"
                         class="form-input"
-                      />
+                      >
                     </div>
                     <div class="form-group">
                       <label class="form-label">Label:</label>
                       <input
-                        type="text"
                         v-model="field.label"
+                        type="text"
                         :disabled="!editMode"
                         class="form-input"
-                      />
+                      >
                     </div>
                     <div class="form-group">
                       <label class="form-label">Field Type:</label>
@@ -149,8 +180,12 @@
                         :disabled="!editMode"
                         class="form-input"
                       >
-                        <option value="creation">Creation</option>
-                        <option value="completion">Completion</option>
+                        <option value="creation">
+                          Creation
+                        </option>
+                        <option value="completion">
+                          Completion
+                        </option>
                         <option value="creation/completion">
                           Creation/Completion
                         </option>
@@ -159,50 +194,72 @@
                     <div class="form-group">
                       <label class="form-label">Input Type:</label>
                       <select
+                        v-if="typeof field.type === 'string'"
                         v-model="field.type"
                         :disabled="!editMode"
                         class="form-input"
-                        v-if="typeof field.type === 'string'"
                       >
-                        <option value="text">Text</option>
-                        <option value="number">Number</option>
-                        <option value="dropdown">Dropdown</option>
-                        <option value="clientSelector">Client Selector</option>
+                        <option value="text">
+                          Text
+                        </option>
+                        <option value="number">
+                          Number
+                        </option>
+                        <option value="dropdown">
+                          Dropdown
+                        </option>
+                        <option value="clientSelector">
+                          Client Selector
+                        </option>
                         <option value="gps-currentLocation">
                           GPS Current Location
                         </option>
-                        <option value="gps">GPS</option>
-                        <option value="bigtext">Big Text</option>
-                        <option value="image">Image</option>
-                        <option value="otp">OTP</option>
-                        <option value="happy-code">Happy Code</option>
-                        <option value="boolean">Boolean</option>
+                        <option value="gps">
+                          GPS
+                        </option>
+                        <option value="bigtext">
+                          Big Text
+                        </option>
+                        <option value="image">
+                          Image
+                        </option>
+                        <option value="otp">
+                          OTP
+                        </option>
+                        <option value="happy-code">
+                          Happy Code
+                        </option>
+                        <option value="boolean">
+                          Boolean
+                        </option>
                       </select>
                       <input
                         v-else
                         type="text"
                         :value="JSON.stringify(field.type)"
+                        :disabled="!editMode"
+                        class="form-input"
                         @input="
                           (event) =>
                             (field.type = parseFieldType(event.target.value))
                         "
-                        :disabled="!editMode"
-                        class="form-input"
-                      />
+                      >
                     </div>
                     <div class="form-group col-span-full">
                       <label class="form-label">Placeholder:</label>
                       <input
-                        type="text"
                         v-model="field.placeholder"
+                        type="text"
                         :disabled="!editMode"
                         class="form-input"
-                      />
+                      >
                     </div>
                   </div>
 
                   <div class="config-subsection">
-                    <h5 class="subsection-title">Role-Based Visibility</h5>
+                    <h5 class="subsection-title">
+                      Role-Based Visibility
+                    </h5>
                     <div class="grid grid-cols-2 gap-2">
                       <label
                         v-for="role in roleOptions"
@@ -210,19 +267,21 @@
                         class="flex items-center gap-2 text-sm text-gray-700"
                       >
                         <input
-                          type="checkbox"
                           :id="`vis-${field.key}-${role.id}`"
                           v-model="field.rolesVisibility[role.name]"
+                          type="checkbox"
                           :disabled="!editMode"
                           class="form-checkbox"
-                        />
+                        >
                         {{ role.name }}
                       </label>
                     </div>
                   </div>
 
                   <div class="config-subsection">
-                    <h5 class="subsection-title">Role-Based Required</h5>
+                    <h5 class="subsection-title">
+                      Role-Based Required
+                    </h5>
                     <div class="grid grid-cols-2 gap-2">
                       <label
                         v-for="role in roleOptions"
@@ -230,19 +289,21 @@
                         class="flex items-center gap-2 text-sm text-gray-700"
                       >
                         <input
-                          type="checkbox"
                           :id="`req-${field.key}-${role.id}`"
                           v-model="field.roleBasedRequired[role.name]"
+                          type="checkbox"
                           :disabled="!editMode"
                           class="form-checkbox"
-                        />
+                        >
                         {{ role.name }}
                       </label>
                     </div>
                   </div>
 
                   <div class="config-subsection">
-                    <h5 class="subsection-title">Role-Based Mandatory</h5>
+                    <h5 class="subsection-title">
+                      Role-Based Mandatory
+                    </h5>
                     <div class="grid grid-cols-2 gap-2">
                       <label
                         v-for="role in roleOptions"
@@ -250,98 +311,104 @@
                         class="flex items-center gap-2 text-sm text-gray-700"
                       >
                         <input
-                          type="checkbox"
                           :id="`man-${field.key}-${role.id}`"
                           v-model="field.roleBasedMandatory[role.name]"
+                          type="checkbox"
                           :disabled="!editMode"
                           class="form-checkbox"
-                        />
+                        >
                         {{ role.name }}
                       </label>
                     </div>
                   </div>
 
                   <div class="config-subsection">
-                    <h5 class="subsection-title">Input Modes</h5>
+                    <h5 class="subsection-title">
+                      Input Modes
+                    </h5>
                     <div class="grid grid-cols-2 gap-2">
                       <label
                         class="flex items-center gap-2 text-sm text-gray-700"
                       >
                         <input
-                          type="checkbox"
                           v-model="field.input_modes.dropdown"
+                          type="checkbox"
                           :disabled="!editMode"
                           class="form-checkbox"
-                        />
+                        >
                         Dropdown
                       </label>
                       <label
                         class="flex items-center gap-2 text-sm text-gray-700"
                       >
                         <input
-                          type="checkbox"
                           v-model="field.input_modes.qr"
+                          type="checkbox"
                           :disabled="!editMode"
                           class="form-checkbox"
-                        />
+                        >
                         QR
                       </label>
                       <label
                         class="flex items-center gap-2 text-sm text-gray-700"
                       >
                         <input
-                          type="checkbox"
                           v-model="field.input_modes.number"
+                          type="checkbox"
                           :disabled="!editMode"
                           class="form-checkbox"
-                        />
+                        >
                         Number
                       </label>
                       <label
                         class="flex items-center gap-2 text-sm text-gray-700"
                       >
                         <input
-                          type="checkbox"
                           v-model="field.input_modes.text"
+                          type="checkbox"
                           :disabled="!editMode"
                           class="form-checkbox"
-                        />
+                        >
                         Text
                       </label>
                       <label
                         class="flex items-center gap-2 text-sm text-gray-700"
                       >
                         <input
-                          type="checkbox"
                           v-model="field.input_modes['happy-code']"
+                          type="checkbox"
                           :disabled="!editMode"
                           class="form-checkbox"
-                        />
+                        >
                         Happy Code
                       </label>
                     </div>
                   </div>
 
                   <div
-                    class="config-subsection"
                     v-if="field.options !== undefined"
+                    class="config-subsection"
                   >
-                    <h5 class="subsection-title">Options (comma-separated)</h5>
+                    <h5 class="subsection-title">
+                      Options (comma-separated)
+                    </h5>
                     <textarea
                       v-model="field.optionsString"
-                      @input="updateFieldOptions(field)"
                       :disabled="!editMode"
                       class="form-textarea"
                       rows="3"
-                    ></textarea>
+                      @input="updateFieldOptions(field)"
+                    />
                   </div>
 
                   <div class="config-subsection">
-                    <h5 class="subsection-title">Validations</h5>
+                    <h5 class="subsection-title">
+                      Validations
+                    </h5>
                     <div
                       v-if="
                         !field.validations ||
-                        Object.keys(field.validations).length === 0
+                          Object.keys(field.validations).length === 0
                       "
                       class="text-gray-500 text-sm mb-2"
                     >
@@ -352,63 +419,61 @@
                       :key="key"
                       class="flex items-center gap-2 mb-2"
                     >
-                      <span class="font-medium text-sm text-gray-700"
-                        >{{ key }}:</span
-                      >
+                      <span class="font-medium text-sm text-gray-700">{{ key }}:</span>
                       <input
                         v-if="typeof val === 'boolean'"
-                        type="checkbox"
                         v-model="field.validations[key]"
+                        type="checkbox"
                         :disabled="!editMode"
                         class="form-checkbox"
-                      />
+                      >
                       <input
                         v-else-if="typeof val === 'number'"
-                        type="number"
                         v-model.number="field.validations[key]"
+                        type="number"
                         :disabled="!editMode"
                         class="form-input-sm"
-                      />
+                      >
                       <input
                         v-else-if="typeof val === 'string' && key !== 'message'"
-                        type="text"
                         v-model="field.validations[key]"
+                        type="text"
                         :disabled="!editMode"
                         class="form-input-sm"
-                      />
+                      >
                       <input
                         v-else-if="key === 'message'"
-                        type="text"
                         v-model="field.validations[key]"
+                        type="text"
                         :disabled="!editMode"
                         class="form-input-sm flex-grow"
-                      />
+                      >
                       <div v-else-if="Array.isArray(val)">
                         <input
                           type="text"
                           :value="val.join(', ')"
+                          :disabled="!editMode"
+                          class="form-input-sm"
                           @input="
                             (event) =>
                               (field.validations[key] = event.target.value
                                 .split(',')
                                 .map((s) => s.trim()))
                           "
-                          :disabled="!editMode"
-                          class="form-input-sm"
-                        />
+                        >
                       </div>
                       <button
                         v-if="editMode"
-                        @click="delete field.validations[key]"
                         class="btn-icon text-red-500"
+                        @click="delete field.validations[key]"
                       >
                         <XIcon class="w-4 h-4" />
                       </button>
                     </div>
                     <button
                       v-if="editMode"
-                      @click="addFieldValidation(field)"
                       class="btn-secondary-sm mt-2"
+                      @click="addFieldValidation(field)"
                     >
                       <PlusIcon class="w-3 h-3" /> Add Validation
                     </button>
@@ -417,8 +482,8 @@
               </div>
               <button
                 v-if="editMode"
-                @click="addNewField"
                 class="btn-secondary mt-4 w-full"
+                @click="addNewField"
               >
                 <PlusIcon class="w-4 h-4" /> Add New Field
               </button>
@@ -427,12 +492,14 @@
 
           <!-- Status Transitions Configuration -->
           <section class="config-section">
-            <h3 class="section-title">Status Transitions</h3>
+            <h3 class="section-title">
+              Status Transitions
+            </h3>
             <div class="status-transition-list">
               <div
                 v-if="
                   !editableTemplate.status_transitions ||
-                  Object.keys(editableTemplate.status_transitions).length === 0
+                    Object.keys(editableTemplate.status_transitions).length === 0
                 "
                 class="text-center text-gray-500 py-4"
               >
@@ -446,18 +513,22 @@
                 class="status-card"
               >
                 <div class="status-header">
-                  <h4 class="status-title">{{ statusKey }}</h4>
+                  <h4 class="status-title">
+                    {{ statusKey }}
+                  </h4>
                   <button
                     v-if="editMode"
-                    @click="removeStatusTransition(statusKey)"
                     class="btn-icon text-red-500"
+                    @click="removeStatusTransition(statusKey)"
                   >
                     <Trash2Icon class="w-4 h-4" />
                   </button>
                 </div>
                 <div class="status-body">
                   <div class="config-subsection">
-                    <h5 class="subsection-title">Can be set by roles:</h5>
+                    <h5 class="subsection-title">
+                      Can be set by roles:
+                    </h5>
                     <div class="flex flex-wrap gap-2">
                       <label
                         v-for="role in roleOptions"
@@ -468,8 +539,10 @@
                           type="checkbox"
                           :checked="
                             transition.can_set_by_roles &&
-                            transition.can_set_by_roles.includes(role.name)
+                              transition.can_set_by_roles.includes(role.name)
                           "
+                          :disabled="!editMode"
+                          class="form-checkbox"
                           @change="
                             toggleRoleInTransition(
                               transition,
@@ -477,9 +550,7 @@
                               $event.target.checked,
                             )
                           "
-                          :disabled="!editMode"
-                          class="form-checkbox"
-                        />
+                        >
                         {{ role.name }}
                       </label>
                     </div>
@@ -507,11 +578,13 @@
                             type="checkbox"
                             :checked="
                               transition.required_fields &&
-                              transition.required_fields[role.name] &&
-                              transition.required_fields[role.name].includes(
-                                field.key,
-                              )
+                                transition.required_fields[role.name] &&
+                                transition.required_fields[role.name].includes(
+                                  field.key,
+                                )
                             "
+                            :disabled="!editMode"
+                            class="form-checkbox"
                             @change="
                               toggleFieldInRequired(
                                 transition,
@@ -520,9 +593,7 @@
                                 $event.target.checked,
                               )
                             "
-                            :disabled="!editMode"
-                            class="form-checkbox"
-                          />
+                          >
                           {{ field.label || field.key }}
                         </label>
                       </div>
@@ -532,8 +603,8 @@
               </div>
               <button
                 v-if="editMode"
-                @click="addNewStatusTransition"
                 class="btn-secondary mt-4 w-full"
+                @click="addNewStatusTransition"
               >
                 <PlusIcon class="w-4 h-4" /> Add New Status Transition
               </button>

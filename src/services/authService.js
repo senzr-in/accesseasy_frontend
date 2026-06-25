@@ -134,13 +134,13 @@ class AuthService {
   setUserData(userData) {
     if (userData) {
       localStorage.setItem("userData", JSON.stringify(userData));
-      
-      const tid = userData?.tenant?.tenantId || userData?.tenant?.id; 
+
+      const tid = userData?.tenant?.tenantId || userData?.tenant?.id;
       const uid = userData?.id;
       const appName = userData?.userApp || "accesseasy";
-      
+
       if (tid && uid) {
-        this.ensureTenantUserApp(tid, uid, appName).catch(err => 
+        this.ensureTenantUserApp(tid, uid, appName).catch(err =>
           console.warn("[setUserData] Background userApp registration failed:", err.message)
         );
       }
@@ -153,7 +153,7 @@ class AuthService {
       if (userData.phone) {
         this.setPhone(userData.phone);
       }
-      
+
       // Also store tenant data if it exists in user data
       if (userData.tenant) {
         this.setTenantData(userData.tenant);
@@ -413,14 +413,14 @@ class AuthService {
 
       if (response?.data?.success && response.data.userData) {
         const userData = response.data.userData;
-        
+
         // Auto-attach to accesseasy if they exist but aren't on this app yet
         const currentAppStr = String(userData.userApp || "").toLowerCase();
         if (!currentAppStr.includes("accesseasy")) {
           console.log("[getUserByPhone] User found but not on accesseasy. Attaching...");
           const newAppStr = currentAppStr ? `${currentAppStr}, accesseasy` : "accesseasy";
-          
-          this.api.patch(`/users/${userData.id}`, { userApp: newAppStr }).catch(e => 
+
+          this.api.patch(`/users/${userData.id}`, { userApp: newAppStr }).catch(e =>
             console.warn("[getUserByPhone] User patch failed:", e.message)
           );
           userData.userApp = newAppStr;
@@ -454,7 +454,7 @@ class AuthService {
       const targetApp = "accesseasy";
       const envToken = import.meta.env.VITE_API_TOKEN;
       const getUrl = `${import.meta.env.VITE_API_URL}/items/tenant?filter[tenantId][_eq]=${tenantId}&fields[]=tenantId&fields[]=userApp&limit=1`;
-      
+
       const response = await fetch(getUrl, {
         headers: { Authorization: `Bearer ${envToken}` }
       });
@@ -474,7 +474,7 @@ class AuthService {
         } catch (e) { appsArray = []; }
       }
 
-      const alreadyExists = appsArray.some(entry => 
+      const alreadyExists = appsArray.some(entry =>
         String(entry.userApp || "").toLowerCase() === targetApp.toLowerCase()
       );
 
@@ -495,17 +495,17 @@ class AuthService {
         date: new Date().toISOString(),
         empi: empi,
       };
-      
+
       appsArray.push(newEntry);
 
       const patchRes = await fetch(`${import.meta.env.VITE_API_URL}/items/tenant/${tenantId}`, {
         method: "PATCH",
-        headers: { 
+        headers: {
           Authorization: `Bearer ${envToken}`,
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ 
-           userApp: JSON.stringify(appsArray) 
+        body: JSON.stringify({
+          userApp: JSON.stringify(appsArray)
         })
       });
 
@@ -552,14 +552,14 @@ class AuthService {
 
       if (response?.data?.success && response.data.userData) {
         const userData = response.data.userData;
-        
+
         // Auto-attach to accesseasy if they exist but aren't on this app yet
         const currentAppStr = String(userData.userApp || "").toLowerCase();
         if (!currentAppStr.includes("accesseasy")) {
           console.log("[getUserByEmail] User found but not on accesseasy. Attaching...");
           const newAppStr = currentAppStr ? `${currentAppStr}, accesseasy` : "accesseasy";
-          
-          this.api.patch(`/users/${userData.id}`, { userApp: newAppStr }).catch(e => 
+
+          this.api.patch(`/users/${userData.id}`, { userApp: newAppStr }).catch(e =>
             console.warn("[getUserByEmail] User patch failed:", e.message)
           );
           userData.userApp = newAppStr;
@@ -662,9 +662,9 @@ class AuthService {
 
   async forgotPin({ phone, email, userApp = "accesseasy" }) {
     try {
-      const payload = { 
+      const payload = {
         action: "update-pin",
-        userApp 
+        userApp
       };
 
       if (phone) {
@@ -683,9 +683,9 @@ class AuthService {
 
   async verifyForgotPinOtp({ phone, email, otp }) {
     try {
-      const payload = { 
+      const payload = {
         action: "verify-forgotpin-otp",
-        otp 
+        otp
       };
 
       if (phone) {
@@ -759,9 +759,9 @@ class AuthService {
 
   async verifyForgotPinOtp({ phone, email, otp }) {
     try {
-      const payload = { 
+      const payload = {
         action: "verify-forgotpin-otp",
-        otp 
+        otp
       };
 
       if (phone) {
@@ -855,47 +855,47 @@ class AuthService {
       const modalOverlay = document.createElement("div");
       modalOverlay.className = "session-timeout-modal-overlay";
       Object.assign(modalOverlay.style, {
-        position:        "fixed",
-        inset:           "0",
-        width:           "100%",
-        height:          "100%",
+        position: "fixed",
+        inset: "0",
+        width: "100%",
+        height: "100%",
         backgroundColor: "rgba(0,0,0,0.65)",
-        backdropFilter:  "blur(6px)",
+        backdropFilter: "blur(6px)",
         WebkitBackdropFilter: "blur(6px)",
-        display:         "flex",
-        alignItems:      "center",
-        justifyContent:  "center",
-        zIndex:          "9999",
-        padding:         "16px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: "9999",
+        padding: "16px",
       });
 
       // ── Card ─────────────────────────────────────────────────────────────
       const modalContent = document.createElement("div");
       Object.assign(modalContent.style, {
-        background:    "linear-gradient(145deg, #18181b, #09090b)",
-        border:        "1px solid rgba(63,63,70,0.8)",
-        borderRadius:  "20px",
-        padding:       "36px 32px",
-        width:         "100%",
-        maxWidth:      "400px",
-        textAlign:     "center",
-        boxShadow:     "0 25px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04) inset",
-        animation:     "session-modal-in 0.28s cubic-bezier(0.34,1.56,0.64,1) forwards",
+        background: "linear-gradient(145deg, #18181b, #09090b)",
+        border: "1px solid rgba(63,63,70,0.8)",
+        borderRadius: "20px",
+        padding: "36px 32px",
+        width: "100%",
+        maxWidth: "400px",
+        textAlign: "center",
+        boxShadow: "0 25px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04) inset",
+        animation: "session-modal-in 0.28s cubic-bezier(0.34,1.56,0.64,1) forwards",
       });
 
       // ── Icon ring ────────────────────────────────────────────────────────
       const iconRing = document.createElement("div");
       Object.assign(iconRing.style, {
-        width:           "72px",
-        height:          "72px",
-        borderRadius:    "50%",
-        background:      "linear-gradient(135deg, #ef4444, #b91c1c)",
-        display:         "flex",
-        alignItems:      "center",
-        justifyContent:  "center",
-        margin:          "0 auto 24px",
-        animation:       "session-pulse 2s infinite",
-        flexShrink:      "0",
+        width: "72px",
+        height: "72px",
+        borderRadius: "50%",
+        background: "linear-gradient(135deg, #ef4444, #b91c1c)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        margin: "0 auto 24px",
+        animation: "session-pulse 2s infinite",
+        flexShrink: "0",
       });
       iconRing.innerHTML = `
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
@@ -907,69 +907,69 @@ class AuthService {
       // ── Badge ────────────────────────────────────────────────────────────
       const badge = document.createElement("span");
       Object.assign(badge.style, {
-        display:       "inline-block",
-        padding:       "3px 10px",
-        borderRadius:  "999px",
-        fontSize:      "10px",
-        fontWeight:    "800",
+        display: "inline-block",
+        padding: "3px 10px",
+        borderRadius: "999px",
+        fontSize: "10px",
+        fontWeight: "800",
         letterSpacing: "0.1em",
         textTransform: "uppercase",
-        background:    "rgba(239,68,68,0.12)",
-        color:         "#f87171",
-        border:        "1px solid rgba(239,68,68,0.25)",
-        marginBottom:  "12px",
+        background: "rgba(239,68,68,0.12)",
+        color: "#f87171",
+        border: "1px solid rgba(239,68,68,0.25)",
+        marginBottom: "12px",
       });
       badge.textContent = "Session Expired";
 
       // ── Heading ──────────────────────────────────────────────────────────
       const heading = document.createElement("h3");
       Object.assign(heading.style, {
-        fontSize:     "22px",
-        fontWeight:   "900",
-        color:        "#fafafa",
+        fontSize: "22px",
+        fontWeight: "900",
+        color: "#fafafa",
         marginBottom: "8px",
         letterSpacing: "-0.02em",
-        lineHeight:   "1.2",
-        fontFamily:   "inherit",
+        lineHeight: "1.2",
+        fontFamily: "inherit",
       });
       heading.textContent = "You've been signed out";
 
       // ── Message ──────────────────────────────────────────────────────────
       const message = document.createElement("p");
       Object.assign(message.style, {
-        fontSize:     "14px",
-        color:        "#a1a1aa",
+        fontSize: "14px",
+        color: "#a1a1aa",
         marginBottom: "28px",
-        lineHeight:   "1.6",
-        fontFamily:   "inherit",
+        lineHeight: "1.6",
+        fontFamily: "inherit",
       });
       message.textContent = "Your session expired due to inactivity. Please log in again to continue.";
 
       // ── Button ───────────────────────────────────────────────────────────
       const okButton = document.createElement("button");
       Object.assign(okButton.style, {
-        display:        "flex",
-        alignItems:     "center",
+        display: "flex",
+        alignItems: "center",
         justifyContent: "center",
-        gap:            "8px",
-        width:          "100%",
-        padding:        "12px 24px",
-        background:     "linear-gradient(135deg, #ef4444, #b91c1c)",
-        color:          "white",
-        border:         "none",
-        borderRadius:   "12px",
-        fontSize:       "13px",
-        fontWeight:     "800",
-        letterSpacing:  "0.06em",
-        textTransform:  "uppercase",
-        cursor:         "pointer",
-        transition:     "opacity 0.2s, transform 0.15s",
-        boxShadow:      "0 4px 20px rgba(239,68,68,0.35)",
-        fontFamily:     "inherit",
+        gap: "8px",
+        width: "100%",
+        padding: "12px 24px",
+        background: "linear-gradient(135deg, #ef4444, #b91c1c)",
+        color: "white",
+        border: "none",
+        borderRadius: "12px",
+        fontSize: "13px",
+        fontWeight: "800",
+        letterSpacing: "0.06em",
+        textTransform: "uppercase",
+        cursor: "pointer",
+        transition: "opacity 0.2s, transform 0.15s",
+        boxShadow: "0 4px 20px rgba(239,68,68,0.35)",
+        fontFamily: "inherit",
       });
       okButton.textContent = "Sign In Again";
       okButton.onmouseenter = () => { okButton.style.opacity = "0.88"; okButton.style.transform = "scale(0.98)"; };
-      okButton.onmouseleave = () => { okButton.style.opacity = "1";    okButton.style.transform = "scale(1)"; };
+      okButton.onmouseleave = () => { okButton.style.opacity = "1"; okButton.style.transform = "scale(1)"; };
       okButton.onclick = () => {
         document.body.removeChild(modalOverlay);
         window.location.reload();

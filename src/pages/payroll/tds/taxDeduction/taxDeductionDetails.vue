@@ -18,33 +18,39 @@
         item-value="id"
         @click:row="(event, { item }) => handleRowClick(item)"
       >
-        <template v-slot:item.attendanceVerification="{ item }">
-          <v-icon :color="item.attendanceVerified ? 'success' : 'error'" small>
+        <template #item.attendanceVerification="{ item }">
+          <v-icon
+            :color="item.attendanceVerified ? 'success' : 'error'"
+            small
+          >
             {{
               item.attendanceVerified ? "mdi-check-circle" : "mdi-alert-circle"
             }}
           </v-icon>
           {{ item.attendanceVerified ? "Verified" : "Unverified" }}
         </template>
-        <template v-slot:item.salaryVerification="{ item }">
-          <v-icon :color="item.salaryVerified ? 'success' : 'error'" small>
+        <template #item.salaryVerification="{ item }">
+          <v-icon
+            :color="item.salaryVerified ? 'success' : 'error'"
+            small
+          >
             {{ item.salaryVerified ? "mdi-check-circle" : "mdi-alert-circle" }}
           </v-icon>
           {{ item.salaryVerified ? "Verified" : "Unverified" }}
         </template>
 
-        <template v-slot:item.ctc="{ item }">
+        <template #item.ctc="{ item }">
           {{ item.ctc || "-" }}
         </template>
-        <template v-slot:item.payableDays="{ item }">
+        <template #item.payableDays="{ item }">
           {{ item.payableDays || "-" }}
         </template>
-        <template v-slot:item.payableCTC="{ item }">
+        <template #item.payableCTC="{ item }">
           {{ item.payableCTC || "-" }}
         </template>
 
         <!-- search and filter -->
-        <template v-slot:top>
+        <template #top>
           <div class="d-flex align-center py-2 px-4">
             <v-text-field
               v-model="search"
@@ -55,23 +61,31 @@
               class="search-field"
               hide-details
               @input="debouncedSearch"
-            ></v-text-field>
-            <v-spacer></v-spacer>
-           <div class="position-relative">
+            />
+            <v-spacer />
+            <div class="position-relative">
               <v-chip
-  class="me-4 mb-2"
-  color="primary"
-  variant="outlined"
-  prepend-icon="mdi-calendar-range"
->
-  FY: {{ startDate }} to {{ endDate }}
-</v-chip>
-              <v-btn color="primary" @click="toggleFilters">
-                <v-icon start>mdi-filter</v-icon>
+                class="me-4 mb-2"
+                color="primary"
+                variant="outlined"
+                prepend-icon="mdi-calendar-range"
+              >
+                FY: {{ startDate }} to {{ endDate }}
+              </v-chip>
+              <v-btn
+                color="primary"
+                @click="toggleFilters"
+              >
+                <v-icon start>
+                  mdi-filter
+                </v-icon>
                 Filters
               </v-btn>
 
-              <span v-if="hasActiveFilters" class="filter-indicator"></span>
+              <span
+                v-if="hasActiveFilters"
+                class="filter-indicator"
+              />
             </div>
           </div>
         </template>
@@ -80,93 +94,109 @@
       <!-- pagination -->
       <CustomPagination
         v-model:page="page"
-        v-model:itemsPerPage="itemsPerPage"
+        v-model:items-per-page="itemsPerPage"
         :total-items="totalItems"
         :is-searching="!!search"
         @update:page="handlePageChange"
-        @update:itemsPerPage="handleItemsPerPageChange"
+        @update:items-per-page="handleItemsPerPageChange"
       />
     </div>
-  <v-dialog 
-    v-if="matchedPhase === 'reconcile'" 
-    v-model="dialog" 
-    max-width="480" 
-    persistent
-    transition="dialog-transition"
-  >
-    <v-card class="pa-0" elevation="12" rounded="lg">
-      
-      <v-card-title class="d-flex justify-space-between align-center pa-6 pb-4 bg-grey-lighten-5">
-        <div class="d-flex align-center">
-          <v-icon color="primary" size="24" class="mr-3">mdi-calculator-variant</v-icon>
-          <span class="text-h6 font-weight-bold text-grey-darken-3">Confirm Declared Amount</span>
-        </div>
-        <v-btn 
-          icon 
-          size="small" 
-          variant="text" 
-          @click="dialog = false" 
-          aria-label="Close dialog"
-          class="hover-close-btn"
-        >
-          <v-icon size="20">mdi-close</v-icon>
-        </v-btn>
-      </v-card-title>
+    <v-dialog 
+      v-if="matchedPhase === 'reconcile'" 
+      v-model="dialog" 
+      max-width="480" 
+      persistent
+      transition="dialog-transition"
+    >
+      <v-card
+        class="pa-0"
+        elevation="12"
+        rounded="lg"
+      >
+        <v-card-title class="d-flex justify-space-between align-center pa-6 pb-4 bg-grey-lighten-5">
+          <div class="d-flex align-center">
+            <v-icon
+              color="primary"
+              size="24"
+              class="mr-3"
+            >
+              mdi-calculator-variant
+            </v-icon>
+            <span class="text-h6 font-weight-bold text-grey-darken-3">Confirm Declared Amount</span>
+          </div>
+          <v-btn 
+            icon 
+            size="small" 
+            variant="text" 
+            aria-label="Close dialog" 
+            class="hover-close-btn"
+            @click="dialog = false"
+          >
+            <v-icon size="20">
+              mdi-close
+            </v-icon>
+          </v-btn>
+        </v-card-title>
 
   
 
       
-      <v-card-text class="pa-6">
-        
-        <v-alert
-          type="info"
-          variant="tonal"
-          class="mb-4"
+        <v-card-text class="pa-6">
+          <v-alert
+            type="info"
+            variant="tonal"
+            class="mb-4"
          
-          density="comfortable"
-        >
-          <template v-slot:prepend>
-            <v-icon>mdi-information</v-icon>
-          </template>
-          <div class="text-body-2">
-            <strong>Please confirm if the declared amount is correct or needs to be changed.</strong><br>
-            
-          </div>
-        </v-alert>
-
-      </v-card-text>
+            density="comfortable"
+          >
+            <template #prepend>
+              <v-icon>mdi-information</v-icon>
+            </template>
+            <div class="text-body-2">
+              <strong>Please confirm if the declared amount is correct or needs to be changed.</strong><br>
+            </div>
+          </v-alert>
+        </v-card-text>
 
       
-      <v-card-actions class="pa-6 pt-4">
-        <v-spacer></v-spacer>
+        <v-card-actions class="pa-6 pt-4">
+          <v-spacer />
         
-        <v-btn 
-          variant="flat" 
-          color="primary" 
-          class="text-none px-6 font-weight-medium"
-          @click="confirmAmount"
-          prepend-icon="mdi-check"
-          elevation="2"
-        >
-          Ok
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+          <v-btn 
+            variant="flat" 
+            color="primary" 
+            class="text-none px-6 font-weight-medium"
+            prepend-icon="mdi-check"
+            elevation="2"
+            @click="confirmAmount"
+          >
+            Ok
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
    
     <transition name="slide">
-      <div v-if="showFilters" class="filter-panel">
+      <div
+        v-if="showFilters"
+        class="filter-panel"
+      >
         <div class="filter-header">
           <div class="d-flex align-center justify-space-between px-4">
-            <h3 class="text-h6 font-weight-medium">Advanced Filters</h3>
-            <v-btn icon @click="toggleFilters">
+            <h3 class="text-h6 font-weight-medium">
+              Advanced Filters
+            </h3>
+            <v-btn
+              icon
+              @click="toggleFilters"
+            >
               <v-icon>mdi-close</v-icon>
             </v-btn>
           </div>
         </div>
 
         <div class="filter-content">
-           <v-select
+          <v-select
             v-model="filters.financialYear"
             :items="financialYearOptions"
             label="Financial Year"
@@ -183,10 +213,10 @@
             closable-chips
             variant="outlined"
             class="mb-4"
-            @update:model-value="handleFilterChange"
             persistent-placeholder
+            @update:model-value="handleFilterChange"
           >
-            <template v-slot:selection="{ item }">
+            <template #selection="{ item }">
               {{ item.title }}
             </template>
           </v-select>
@@ -200,19 +230,27 @@
             closable-chips
             variant="outlined"
             class="mb-4"
-            @update:model-value="handleFilterChange"
             persistent-placeholder
+            @update:model-value="handleFilterChange"
           >
-            <template v-slot:selection="{ item }">
+            <template #selection="{ item }">
               {{ item.title }}
             </template>
           </v-select>
 
           <div class="filter-actions">
-            <v-btn color="error" variant="text" @click="clearFilters">
+            <v-btn
+              color="error"
+              variant="text"
+              @click="clearFilters"
+            >
               Clear
             </v-btn>
-            <v-btn color="primary" @click="applyFilters" class="ms-2">
+            <v-btn
+              color="primary"
+              class="ms-2"
+              @click="applyFilters"
+            >
               Apply
             </v-btn>
           </div>

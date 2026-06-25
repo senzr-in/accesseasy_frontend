@@ -1,16 +1,19 @@
 <template>
-  <div v-if="!isSearching" class="pagination-container">
+  <div
+    v-if="!isSearching"
+    class="pagination-container"
+  >
     <!-- Mobile Layout -->
     <div class="mobile-layout">
       <!-- Top row: Page numbers and navigation -->
       <div class="mobile-nav-row">
         <!-- Previous page button -->
         <button
-          @click="handlePageChange(currentPage - 1)"
           :disabled="currentPage === 1"
           class="nav-button"
+          @click="handlePageChange(currentPage - 1)"
         >
-          <i class="fas fa-chevron-left"></i>
+          <i class="fas fa-chevron-left" />
         </button>
 
         <!-- Page numbers -->
@@ -18,33 +21,39 @@
           <!-- First page -->
           <button
             v-if="shouldShowFirstPage"
-            @click="handlePageChange(1)"
             :class="['page-number', { active: currentPage === 1 }]"
+            @click="handlePageChange(1)"
           >
             1
           </button>
 
           <!-- Left ellipsis -->
-          <span v-if="shouldShowLeftEllipsis" class="ellipsis">...</span>
+          <span
+            v-if="shouldShowLeftEllipsis"
+            class="ellipsis"
+          >...</span>
 
           <!-- Visible page numbers -->
           <button
             v-for="page in visiblePages"
             :key="page"
-            @click="handlePageChange(page)"
             :class="['page-number', { active: currentPage === page }]"
+            @click="handlePageChange(page)"
           >
             {{ page }}
           </button>
 
           <!-- Right ellipsis -->
-          <span v-if="shouldShowRightEllipsis" class="ellipsis">...</span>
+          <span
+            v-if="shouldShowRightEllipsis"
+            class="ellipsis"
+          >...</span>
 
           <!-- Last page -->
           <button
             v-if="shouldShowLastPage"
-            @click="handlePageChange(totalPages)"
             :class="['page-number', { active: currentPage === totalPages }]"
+            @click="handlePageChange(totalPages)"
           >
             {{ totalPages }}
           </button>
@@ -52,11 +61,11 @@
 
         <!-- Next page button -->
         <button
-          @click="handlePageChange(currentPage + 1)"
           :disabled="currentPage === totalPages"
           class="nav-button"
+          @click="handlePageChange(currentPage + 1)"
         >
-          <i class="fas fa-chevron-right"></i>
+          <i class="fas fa-chevron-right" />
         </button>
       </div>
 
@@ -67,14 +76,24 @@
           <span class="go-to-label">Go to page:</span>
           <select
             v-model="localItemsPerPage"
-            @change="updateItemsPerPage"
             class="page-select"
+            @change="updateItemsPerPage"
           >
-            <option :value="25">25 per page</option>
-            <option :value="50">50 per page</option>
-            <option :value="100">100 per page</option>
-            <option :value="500">500 per page</option>
-            <option :value="3000">3000 per page</option>
+            <option :value="25">
+              25 per page
+            </option>
+            <option :value="50">
+              50 per page
+            </option>
+            <option :value="100">
+              100 per page
+            </option>
+            <option :value="500">
+              500 per page
+            </option>
+            <option :value="3000">
+              3000 per page
+            </option>
           </select>
           <div class="info-section">
             <span class="total-count">Total: {{ totalItems }}</span>
@@ -88,11 +107,11 @@
     <div class="desktop-layout">
       <!-- Previous page button -->
       <button
-        @click="handlePageChange(currentPage - 1)"
         :disabled="currentPage === 1"
         class="nav-button"
+        @click="handlePageChange(currentPage - 1)"
       >
-        <i class="fas fa-chevron-left"></i>
+        <i class="fas fa-chevron-left" />
       </button>
 
       <!-- Page numbers -->
@@ -100,33 +119,39 @@
         <!-- First page -->
         <button
           v-if="shouldShowFirstPage"
-          @click="handlePageChange(1)"
           :class="['page-number', { active: currentPage === 1 }]"
+          @click="handlePageChange(1)"
         >
           1
         </button>
 
         <!-- Left ellipsis -->
-        <span v-if="shouldShowLeftEllipsis" class="ellipsis">...</span>
+        <span
+          v-if="shouldShowLeftEllipsis"
+          class="ellipsis"
+        >...</span>
 
         <!-- Visible page numbers -->
         <button
           v-for="page in visiblePages"
           :key="page"
-          @click="handlePageChange(page)"
           :class="['page-number', { active: currentPage === page }]"
+          @click="handlePageChange(page)"
         >
           {{ page }}
         </button>
 
         <!-- Right ellipsis -->
-        <span v-if="shouldShowRightEllipsis" class="ellipsis">...</span>
+        <span
+          v-if="shouldShowRightEllipsis"
+          class="ellipsis"
+        >...</span>
 
         <!-- Last page -->
         <button
           v-if="shouldShowLastPage"
-          @click="handlePageChange(totalPages)"
           :class="['page-number', { active: currentPage === totalPages }]"
+          @click="handlePageChange(totalPages)"
         >
           {{ totalPages }}
         </button>
@@ -134,11 +159,11 @@
 
       <!-- Next page button -->
       <button
-        @click="handlePageChange(currentPage + 1)"
         :disabled="currentPage === totalPages"
         class="nav-button"
+        @click="handlePageChange(currentPage + 1)"
       >
-        <i class="fas fa-chevron-right"></i>
+        <i class="fas fa-chevron-right" />
       </button>
 
       <!-- Go to page dropdown with total count and pages -->
@@ -146,11 +171,15 @@
         <span class="go-to-label">Go to page:</span>
         <select
           v-model="localItemsPerPage"
-          @change="updateItemsPerPage"
           class="page-select"
+          @change="updateItemsPerPage"
         >
-          <option :value="25">25 per page</option>
-          <option :value="50">50 per page</option>
+          <option :value="25">
+            25 per page
+          </option>
+          <option :value="50">
+            50 per page
+          </option>
           <!-- <option :value="100">100 per page</option>
           <option :value="500">500 per page</option>
           <option :value="3000">3000 per page</option> -->
@@ -165,12 +194,12 @@
     <!-- Hidden input for direct page navigation (keeping original functionality) -->
     <input
       v-model.number="currentPageInput"
-      @keyup.enter="handlePageInputChange"
       type="number"
       min="1"
       :max="totalPages"
       style="display: none"
-    />
+      @keyup.enter="handlePageInputChange"
+    >
   </div>
 </template>
 

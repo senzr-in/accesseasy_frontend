@@ -1,21 +1,37 @@
 <template>
-  <div class="modal-overlay" @click.self="$emit('close')">
+  <div
+    class="modal-overlay"
+    @click.self="$emit('close')"
+  >
     <div class="modal-content">
       <div class="modal-header">
         <h2>Download Template</h2>
-        <button class="close-btn" @click="$emit('close')">&times;</button>
+        <button
+          class="close-btn"
+          @click="$emit('close')"
+        >
+          &times;
+        </button>
       </div>
 
       <div class="modal-body">
-        <div v-if="error" class="error-container">
+        <div
+          v-if="error"
+          class="error-container"
+        >
           <div class="error-header">
             <AlertCircle class="error-icon" />
             <h3>Error</h3>
-            <button class="close-error-btn" @click="error = ''">
+            <button
+              class="close-error-btn"
+              @click="error = ''"
+            >
               &times;
             </button>
           </div>
-          <div class="error-message">{{ error }}</div>
+          <div class="error-message">
+            {{ error }}
+          </div>
         </div>
 
         <div class="file-details">
@@ -33,17 +49,26 @@
           <p>Click the button below to download the template file with headers only.</p>
           <button 
             class="download-btn" 
-            @click="downloadTemplate" 
-            :disabled="isDownloading"
+            :disabled="isDownloading" 
+            @click="downloadTemplate"
           >
-            <span v-if="isDownloading" class="loading-spinner"></span>
-            <Download v-else class="download-icon" />
+            <span
+              v-if="isDownloading"
+              class="loading-spinner"
+            />
+            <Download
+              v-else
+              class="download-icon"
+            />
             {{ isDownloading ? 'Downloading...' : 'Download Template' }}
           </button>
         </div>
       </div>
 
-      <div v-if="successMessage" class="success-message">
+      <div
+        v-if="successMessage"
+        class="success-message"
+      >
         <CheckCircle class="success-icon" />
         {{ successMessage }}
       </div>

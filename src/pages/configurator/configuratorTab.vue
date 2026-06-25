@@ -1,6 +1,10 @@
 <template>
   <v-app>
-    <v-container fluid class="pa-0 fill-height" style="width: 100%">
+    <v-container
+      fluid
+      class="pa-0 fill-height"
+      style="width: 100%"
+    >
       <div
         class="layout-container"
         style="
@@ -17,7 +21,10 @@
           style="flex: 0 0 auto; min-width: 250px; max-width: 300px"
         >
           <v-card flat>
-            <div class="sidebar-content" style="height: 90vh; overflow-y: auto">
+            <div
+              class="sidebar-content"
+              style="height: 90vh; overflow-y: auto"
+            >
               <div
                 v-for="config in configurators"
                 :key="config.id"
@@ -26,13 +33,16 @@
                 <div class="sidebar-header">
                   {{ config.label }}
                 </div>
-                <v-list density="compact" class="py-0">
+                <v-list
+                  density="compact"
+                  class="py-0"
+                >
                   <v-list-item
                     v-for="subsection in config.subsections"
                     :key="subsection.id"
-                    @click="switchTab(subsection.id)"
                     :class="{ 'active-tab': activeTab === subsection.id }"
                     class="mb-1 rounded"
+                    @click="switchTab(subsection.id)"
                   >
                     <v-list-item-title class="text-body-2">
                       {{ subsection.label }}
@@ -68,19 +78,38 @@
             "
           >
             <!-- Root clickable -->
-            <span class="cursor-pointer" @click="switchTab(activeTab)">
+            <span
+              class="cursor-pointer"
+              @click="switchTab(activeTab)"
+            >
               Configurators
             </span>
-            <v-icon small class="mx-2">mdi-chevron-right</v-icon>
+            <v-icon
+              small
+              class="mx-2"
+            >
+              mdi-chevron-right
+            </v-icon>
 
             <!-- Parent section clickable -->
-            <span class="cursor-pointer" @click="switchTab(activeTab)">
+            <span
+              class="cursor-pointer"
+              @click="switchTab(activeTab)"
+            >
               {{ breadcrumbs[1]?.title || "" }}
             </span>
-            <v-icon small class="mx-2">mdi-chevron-right</v-icon>
+            <v-icon
+              small
+              class="mx-2"
+            >
+              mdi-chevron-right
+            </v-icon>
 
             <!-- Active subsection -->
-            <span class="font-weight-medium" @click="switchTab(activeTab)">
+            <span
+              class="font-weight-medium"
+              @click="switchTab(activeTab)"
+            >
               {{ breadcrumbs[2]?.title || "" }}
             </span>
           </div>

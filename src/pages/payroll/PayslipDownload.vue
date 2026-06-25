@@ -1,19 +1,34 @@
 <template>
-  <v-dialog v-model="showPayslipPreview" max-width="800px">
+  <v-dialog
+    v-model="showPayslipPreview"
+    max-width="800px"
+  >
     <v-card>
       <v-card-title class="text-h5 bg-primary text-white">
         Payslip Preview
-        <v-spacer></v-spacer>
+        <v-spacer />
       </v-card-title>
       <v-card-text class="pa-0">
-        <div ref="payslipPreviewContent" class="payslip-preview-content">
-          <div v-if="currentPayslipData" class="payslip-container">
-            <div class="payslip-loading" v-if="generatingPdf">
-              <v-progress-circular indeterminate color="primary" />
+        <div
+          ref="payslipPreviewContent"
+          class="payslip-preview-content"
+        >
+          <div
+            v-if="currentPayslipData"
+            class="payslip-container"
+          >
+            <div
+              v-if="generatingPdf"
+              class="payslip-loading"
+            >
+              <v-progress-circular
+                indeterminate
+                color="primary"
+              />
               <span class="ml-2">Generating PDF...</span>
             </div>
             <div v-else>
-              <div class="payslip-header"></div>
+              <div class="payslip-header" />
               <div class="payslip-title">
                 <h3>
                   PAYSLIP FOR
@@ -82,18 +97,14 @@
                       class="salary-item"
                     >
                       <span class="item-name">{{ key }}</span>
-                      <span class="item-value"
-                        >₹ {{ formatAmount(value) }}</span
-                      >
+                      <span class="item-value">₹ {{ formatAmount(value) }}</span>
                     </div>
                     <div class="salary-item total">
                       <span class="item-name">Total Earnings</span>
-                      <span class="item-value"
-                        >₹
+                      <span class="item-value">₹
                         {{
                           formatAmount(currentPayslipData.totalEarnings)
-                        }}</span
-                      >
+                        }}</span>
                     </div>
                   </div>
                 </div>
@@ -106,24 +117,22 @@
                       class="salary-item"
                     >
                       <span class="item-name">{{ key }}</span>
-                      <span class="item-value"
-                        >₹ {{ formatAmount(value) }}</span
-                      >
+                      <span class="item-value">₹ {{ formatAmount(value) }}</span>
                     </div>
                     <div class="salary-item total">
                       <span class="item-name">Total Deductions</span>
-                      <span class="item-value"
-                        >₹
+                      <span class="item-value">₹
                         {{
                           formatAmount(currentPayslipData.totalDeductions)
-                        }}</span
-                      >
+                        }}</span>
                     </div>
                   </div>
                 </div>
               </div>
               <div class="net-salary">
-                <div class="net-salary-label">Net Salary</div>
+                <div class="net-salary-label">
+                  Net Salary
+                </div>
                 <div class="net-salary-value">
                   ₹ {{ formatAmount(currentPayslipData.netSalary) }}
                 </div>
@@ -163,15 +172,22 @@
         </div>
       </v-card-text>
       <v-card-actions class="pa-4">
-        <v-spacer></v-spacer>
-        <v-btn color="error" @click="showPayslipPreview = false">Close</v-btn>
+        <v-spacer />
+        <v-btn
+          color="error"
+          @click="showPayslipPreview = false"
+        >
+          Close
+        </v-btn>
         <v-btn
           color="primary"
-          @click="downloadCurrentPayslip"
           :loading="generatingPdf"
           :disabled="generatingPdf"
+          @click="downloadCurrentPayslip"
         >
-          <v-icon left>mdi-download</v-icon>
+          <v-icon left>
+            mdi-download
+          </v-icon>
           Download PDF
         </v-btn>
       </v-card-actions>

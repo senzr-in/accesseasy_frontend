@@ -8,20 +8,24 @@
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-check-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-check-circle
+        </v-icon>
         {{ successMessage }}
       </div>
     </v-snackbar>
 
     <v-snackbar
-      class="errormessge"
       v-model="showErrorSnackbar"
+      class="errormessge"
       color="error"
       timeout="2000"
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-alert-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-alert-circle
+        </v-icon>
         {{ errorMessage }}
       </div>
     </v-snackbar>
@@ -35,17 +39,27 @@
     >
       <div class="calendar-header">
         <div class="d-flex justify-space-between align-center px-4 py-2">
-          <v-chip class="ml-2 name-chip" color="primary" text-color="white">
+          <v-chip
+            class="ml-2 name-chip"
+            color="primary"
+            text-color="white"
+          >
             {{ props.attendanceData[0]["name"] }}
           </v-chip>
           <div class="d-flex align-center">
-            <v-btn icon @click="previousMonth">
+            <v-btn
+              icon
+              @click="previousMonth"
+            >
               <v-icon>mdi-chevron-left</v-icon>
             </v-btn>
             <h2 class="text-h5 font-weight-medium mx-4">
               {{ currentMonthYear }}
             </h2>
-            <v-btn icon @click="nextMonth">
+            <v-btn
+              icon
+              @click="nextMonth"
+            >
               <v-icon>mdi-chevron-right</v-icon>
             </v-btn>
           </div>
@@ -55,26 +69,26 @@
             <v-btn
               v-if="!isCurrentMonthDisplayed"
               text
-              @click="today"
               color="primary"
+              @click="today"
             >
               GO TO CURRENT MONTH
             </v-btn>
             <v-btn
               v-if="selectionMode === 'week'"
               text
-              @click="toggleSelectionMode"
               color="primary"
               class="ml-2"
+              @click="toggleSelectionMode"
             >
               SWITCH TO DAY MODE
             </v-btn>
             <v-btn
               v-else
               text
-              @click="toggleSelectionMode"
               color="primary"
               class="ml-2"
+              @click="toggleSelectionMode"
             >
               SWITCH TO WEEK MODE
             </v-btn>
@@ -85,7 +99,11 @@
       <div class="calendar-body">
         <div class="calendar-grid">
           <div class="calendar-days">
-            <div v-for="day in daysOfWeek" :key="day" class="day-header">
+            <div
+              v-for="day in daysOfWeek"
+              :key="day"
+              class="day-header"
+            >
               {{ day }}
             </div>
           </div>
@@ -106,7 +124,10 @@
               @click="selectDate(date)"
             >
               <span class="date-number">{{ date.day }}</span>
-              <div v-if="hasShifts(date)" class="event-dot"></div>
+              <div
+                v-if="hasShifts(date)"
+                class="event-dot"
+              />
             </div>
           </div>
         </div>
@@ -115,9 +136,14 @@
 
     <!-- Right Filter Panel -->
     <transition name="slide">
-      <div v-if="showFilters" class="filter-panel">
+      <div
+        v-if="showFilters"
+        class="filter-panel"
+      >
         <div class="filter-header">
-          <h3 class="text-h6">Filters</h3>
+          <h3 class="text-h6">
+            Filters
+          </h3>
         </div>
         <div class="filter-content">
           <v-text-field
@@ -126,49 +152,67 @@
             type="date"
             outlined
             dense
-          ></v-text-field>
+          />
           <v-text-field
             v-model="filters.dateTo"
             label="Date To"
             type="date"
             outlined
             dense
-          ></v-text-field>
+          />
           <v-select
             v-model="filters.branch"
             :items="branchOptions"
             label="Branch"
             outlined
             dense
-          ></v-select>
+          />
           <v-select
             v-model="filters.department"
             :items="departmentOptions"
             label="Department"
             outlined
             dense
-          ></v-select>
+          />
           <v-select
             v-model="filters.shift"
             :items="shiftOptions"
             label="Shift"
             outlined
             dense
-          ></v-select>
+          />
         </div>
         <div class="filter-actions">
-          <v-btn text @click="clearFilters">Clear</v-btn>
-          <v-btn color="primary" @click="applyFilters">Apply</v-btn>
+          <v-btn
+            text
+            @click="clearFilters"
+          >
+            Clear
+          </v-btn>
+          <v-btn
+            color="primary"
+            @click="applyFilters"
+          >
+            Apply
+          </v-btn>
         </div>
       </div>
     </transition>
 
     <!-- Right Shift Selection Drawer -->
     <transition name="slide">
-      <div v-if="showShiftDrawer" class="shift-drawer">
+      <div
+        v-if="showShiftDrawer"
+        class="shift-drawer"
+      >
         <div class="shift-drawer-header">
           <h3 class="text-h6">
-            <v-icon left color="primary">mdi-calendar-clock</v-icon>
+            <v-icon
+              left
+              color="primary"
+            >
+              mdi-calendar-clock
+            </v-icon>
             {{
               selectionMode === "day"
                 ? "Select Shifts for " + format(selectedDate, "MMMM d, yyyy")
@@ -178,7 +222,10 @@
                   format(selectedWeekEnd, "MMMM d, yyyy")
             }}
           </h3>
-          <v-btn icon @click="closeShiftDrawer">
+          <v-btn
+            icon
+            @click="closeShiftDrawer"
+          >
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </div>
@@ -187,13 +234,15 @@
             <v-list-item
               v-for="(shift, index) in shifts"
               :key="index"
-              @click="toggleShiftSelection(shift)"
               :class="{ 'selected-shift': isShiftSelected(shift) }"
+              @click="toggleShiftSelection(shift)"
             >
               <v-list-item-icon>
-                <v-icon :color="getShiftColor(shift)">{{
-                  getShiftIcon(shift)
-                }}</v-icon>
+                <v-icon :color="getShiftColor(shift)">
+                  {{
+                    getShiftIcon(shift)
+                  }}
+                </v-icon>
               </v-list-item-icon>
               <v-list-item-content>
                 <v-list-item-title>{{ shift.shift }}</v-list-item-title>
@@ -202,9 +251,12 @@
                 </v-list-item-subtitle>
               </v-list-item-content>
               <v-list-item-action>
-                <v-icon v-if="isShiftSelected(shift)" color="success"
-                  >mdi-check-circle</v-icon
+                <v-icon
+                  v-if="isShiftSelected(shift)"
+                  color="success"
                 >
+                  mdi-check-circle
+                </v-icon>
               </v-list-item-action>
             </v-list-item>
           </v-list>
@@ -212,13 +264,15 @@
             <v-list-item
               v-for="(shift, index) in availableShifts"
               :key="index"
-              @click="toggleShiftSelection(shift)"
               :class="{ 'selected-shift': isShiftSelected(shift) }"
+              @click="toggleShiftSelection(shift)"
             >
               <v-list-item-icon>
-                <v-icon :color="getShiftColor(shift)">{{
-                  getShiftIcon(shift)
-                }}</v-icon>
+                <v-icon :color="getShiftColor(shift)">
+                  {{
+                    getShiftIcon(shift)
+                  }}
+                </v-icon>
               </v-list-item-icon>
               <v-list-item-content>
                 <v-list-item-title>{{ shift.shift }}</v-list-item-title>
@@ -227,9 +281,12 @@
                 </v-list-item-subtitle>
               </v-list-item-content>
               <v-list-item-action>
-                <v-icon v-if="isShiftSelected(shift)" color="success"
-                  >mdi-check-circle</v-icon
+                <v-icon
+                  v-if="isShiftSelected(shift)"
+                  color="success"
                 >
+                  mdi-check-circle
+                </v-icon>
               </v-list-item-action>
             </v-list-item>
           </v-list>
@@ -237,13 +294,18 @@
         <div class="shift-drawer-actions">
           <v-btn
             color="primary"
-            @click="handleSave"
             :disabled="isSaving"
             class="mr-4"
+            @click="handleSave"
           >
             {{ isSaving ? "Saving..." : "Save" }}
           </v-btn>
-          <v-btn text @click="closeShiftDrawer">Cancel</v-btn>
+          <v-btn
+            text
+            @click="closeShiftDrawer"
+          >
+            Cancel
+          </v-btn>
         </div>
       </div>
     </transition>

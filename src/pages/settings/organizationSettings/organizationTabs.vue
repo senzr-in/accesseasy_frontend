@@ -15,13 +15,19 @@
             :to="{ name: tab.value }"
             class="custom-tab"
           >
-            <v-icon :icon="tab.icon" class="mr-2"></v-icon>
+            <v-icon
+              :icon="tab.icon"
+              class="mr-2"
+            />
             {{ tab.title }}
           </v-tab>
         </v-tabs>
 
         <!-- Route-specific content -->
-        <v-card class="tab-content-wrapper" elevation="0">
+        <v-card
+          class="tab-content-wrapper"
+          elevation="0"
+        >
           <router-view />
         </v-card>
       </v-container>

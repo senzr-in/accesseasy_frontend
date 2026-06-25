@@ -1,22 +1,31 @@
 <template>
   <v-app>
     <v-main class="profile-page">
-      <v-container fluid class="pa-0 fill-height">
+      <v-container
+        fluid
+        class="pa-0 fill-height"
+      >
         <div class="profile-content">
           <!-- Left Section -->
           <div class="profile-sidebar">
             <div class="profile-image-section">
               <div class="profile-image-container">
-                <v-avatar size="200" class="profile-avatar">
+                <v-avatar
+                  size="200"
+                  class="profile-avatar"
+                >
                   <v-img
                     :src="profileImage"
                     :alt="profileData.avatar?.title || 'Profile Image'"
                     @error="handleImageError"
                   >
-                    <template v-slot:placeholder>
-                      <v-icon size="200" color="grey lighten-1"
-                        >mdi-account-circle</v-icon
+                    <template #placeholder>
+                      <v-icon
+                        size="200"
+                        color="grey lighten-1"
                       >
+                        mdi-account-circle
+                      </v-icon>
                     </template>
                   </v-img>
                 </v-avatar>
@@ -30,8 +39,12 @@
                   <v-icon>mdi-camera</v-icon>
                 </v-btn> -->
               </div>
-              <h1 class="profile-name">{{ fullName }}</h1>
-              <div class="profile-role">{{ profileData.role?.name }}</div>
+              <h1 class="profile-name">
+                {{ fullName }}
+              </h1>
+              <div class="profile-role">
+                {{ profileData.role?.name }}
+              </div>
               <div class="profile-tenant">
                 {{ profileData.tenant?.tenantName }}
               </div>
@@ -39,7 +52,9 @@
 
             <div class="quick-info">
               <div class="info-item">
-                <v-icon color="primary">mdi-domain</v-icon>
+                <v-icon color="primary">
+                  mdi-domain
+                </v-icon>
                 <div class="info-details">
                   <span class="info-label">Department</span>
                   <span class="info-value">{{
@@ -48,7 +63,9 @@
                 </div>
               </div>
               <div class="info-item">
-                <v-icon color="primary">mdi-office-building</v-icon>
+                <v-icon color="primary">
+                  mdi-office-building
+                </v-icon>
                 <div class="info-details">
                   <span class="info-label">Branch</span>
                   <span class="info-value">{{
@@ -67,10 +84,15 @@
               color="primary"
               class="profile-tabs"
             >
-              <v-tab class="custom-tab">Profile Details</v-tab>
+              <v-tab class="custom-tab">
+                Profile Details
+              </v-tab>
             </v-tabs>
 
-            <v-tabs-items v-model="activeTab" class="profile-tabs-content">
+            <v-tabs-items
+              v-model="activeTab"
+              class="profile-tabs-content"
+            >
               <v-tab-item>
                 <div class="details-grid">
                   <div
@@ -78,7 +100,9 @@
                     :key="field.name"
                     class="detail-item"
                   >
-                    <div class="detail-label">{{ field.label }}</div>
+                    <div class="detail-label">
+                      {{ field.label }}
+                    </div>
                     <div class="detail-value">
                       {{ profileData[field.name] || "Not Set" }}
                     </div>
@@ -91,12 +115,12 @@
       </v-container>
     </v-main>
     <input
-      type="file"
       ref="imageInput"
-      @change="handleImageUpload"
+      type="file"
       accept="image/*"
       style="display: none"
-    />
+      @change="handleImageUpload"
+    >
   </v-app>
 </template>
 

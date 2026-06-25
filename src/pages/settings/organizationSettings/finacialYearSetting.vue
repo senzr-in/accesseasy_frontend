@@ -5,7 +5,7 @@
       style="max-height: 100vh; overflow-y: auto; padding-right: 20px"
     >
       <h3>Financial year Settings</h3>
-      <br />
+      <br>
       <p>Configure your financial year and attendance cycle</p>
 
       <div class="section">
@@ -15,10 +15,10 @@
             <label for="startMonth">Start Month</label>
             <input
               id="startMonth"
-              type="month"
               v-model="formData.startMonth"
+              type="month"
               :disabled="!isEditing"
-            />
+            >
           </div>
           <div class="form-group">
             <label for="endMonth">End Month</label>
@@ -27,19 +27,32 @@
               type="month"
               :value="formData.endMonth"
               readonly
-            />
+            >
           </div>
         </div>
       </div>
 
       <div class="buttons">
-        <button v-if="!isEditing" class="edit" @click="enableEditMode">
+        <button
+          v-if="!isEditing"
+          class="edit"
+          @click="enableEditMode"
+        >
           Edit
         </button>
-        <button v-else class="save" color="black" @click="saveSettings">
+        <button
+          v-else
+          class="save"
+          color="black"
+          @click="saveSettings"
+        >
           Save
         </button>
-        <button v-if="isEditing" class="cancel" @click="cancelSettings">
+        <button
+          v-if="isEditing"
+          class="cancel"
+          @click="cancelSettings"
+        >
           Cancel
         </button>
       </div>

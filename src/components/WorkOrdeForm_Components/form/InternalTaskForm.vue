@@ -1,19 +1,33 @@
 <!-- InternalTskForm.vue -->
 <template>
-  <v-card class="form-step-card" elevation="8">
+  <v-card
+    class="form-step-card"
+    elevation="8"
+  >
     <v-card-text class="form-step-content">
-      <v-form ref="formRef" v-model="formValid" @submit.prevent="handleSubmit">
+      <v-form
+        ref="formRef"
+        v-model="formValid"
+        @submit.prevent="handleSubmit"
+      >
         <v-row class="field-grid">
-          <v-col cols="12" class="field-column">
+          <v-col
+            cols="12"
+            class="field-column"
+          >
             <v-label class="field-label">
-              <v-icon size="18" color="primary" class="mr-2"
-                >mdi-format-title</v-icon
+              <v-icon
+                size="18"
+                color="primary"
+                class="mr-2"
               >
+                mdi-format-title
+              </v-icon>
               Job Name <span class="required-indicator">*</span>
             </v-label>
             <v-text-field
-              label="taskName"
               v-model="taskName"
+              label="taskName"
               variant="outlined"
               density="comfortable"
               hide-details="auto"
@@ -22,16 +36,23 @@
             />
           </v-col>
 
-          <v-col cols="12" class="field-column">
+          <v-col
+            cols="12"
+            class="field-column"
+          >
             <v-label class="field-label">
-              <v-icon size="18" color="primary" class="mr-2"
-                >mdi-text-box</v-icon
+              <v-icon
+                size="18"
+                color="primary"
+                class="mr-2"
               >
+                mdi-text-box
+              </v-icon>
               Job Description
             </v-label>
             <v-textarea
-              label="Job Description"
               v-model="taskDescription"
+              label="Job Description"
               variant="outlined"
               density="comfortable"
               auto-grow
@@ -40,16 +61,23 @@
             />
           </v-col>
 
-          <v-col cols="12" class="field-column">
+          <v-col
+            cols="12"
+            class="field-column"
+          >
             <v-label class="field-label">
-              <v-icon size="18" color="primary" class="mr-2"
-                >mdi-account-badge</v-icon
+              <v-icon
+                size="18"
+                color="primary"
+                class="mr-2"
               >
+                mdi-account-badge
+              </v-icon>
               Assign to (Employee)
             </v-label>
             <v-select
-              label="Employee"
               v-model="selectedUserId"
+              label="Employee"
               :items="getUserOptions()"
               item-title="label"
               item-value="id"
@@ -64,7 +92,7 @@
                 <v-list-item v-bind="itemProps">
                   <v-list-item-subtitle
                     v-if="item?.raw?.employeeId"
-                  ></v-list-item-subtitle>
+                  />
                   <template #append>
                     <v-chip
                       size="x-small"
@@ -81,16 +109,23 @@
           </v-col>
 
           <!-- From Date -->
-          <v-col cols="12" class="field-column">
+          <v-col
+            cols="12"
+            class="field-column"
+          >
             <v-label class="field-label">
-              <v-icon size="18" color="primary" class="mr-2"
-                >mdi-calendar-start</v-icon
+              <v-icon
+                size="18"
+                color="primary"
+                class="mr-2"
               >
+                mdi-calendar-start
+              </v-icon>
               From date & time
             </v-label>
             <v-text-field
-              label="fromDate"
               v-model="fromDate"
+              label="fromDate"
               type="datetime-local"
               variant="outlined"
               density="comfortable"
@@ -101,16 +136,23 @@
           </v-col>
 
           <!-- Due Date -->
-          <v-col cols="12" class="field-column">
+          <v-col
+            cols="12"
+            class="field-column"
+          >
             <v-label class="field-label">
-              <v-icon size="18" color="primary" class="mr-2"
-                >mdi-calendar-end</v-icon
+              <v-icon
+                size="18"
+                color="primary"
+                class="mr-2"
               >
+                mdi-calendar-end
+              </v-icon>
               Due date & time
             </v-label>
             <v-text-field
-              label="dueDate"
               v-model="dueDate"
+              label="dueDate"
               type="datetime-local"
               variant="outlined"
               density="comfortable"
@@ -121,14 +163,23 @@
             />
           </v-col>
 
-          <v-col cols="12" class="field-column">
+          <v-col
+            cols="12"
+            class="field-column"
+          >
             <v-label class="field-label">
-              <v-icon size="18" color="primary" class="mr-2">mdi-flag</v-icon>
+              <v-icon
+                size="18"
+                color="primary"
+                class="mr-2"
+              >
+                mdi-flag
+              </v-icon>
               Task priority
             </v-label>
             <v-select
-              label="priority"
               v-model="priority"
+              label="priority"
               :items="priorityItems"
               item-title="label"
               item-value="value"
@@ -141,7 +192,10 @@
               <template #item="{ props: itemProps, item }">
                 <v-list-item v-bind="itemProps">
                   <template #prepend>
-                    <v-icon :color="item.raw.color" class="mr-2">
+                    <v-icon
+                      :color="item.raw.color"
+                      class="mr-2"
+                    >
                       {{ item.raw.icon }}
                     </v-icon>
                   </template>
@@ -154,7 +208,10 @@
                   size="small"
                   class="ma-1"
                 >
-                  <v-icon :color="item.raw.color" class="mr-1">
+                  <v-icon
+                    :color="item.raw.color"
+                    class="mr-1"
+                  >
                     {{ item.raw.icon }}
                   </v-icon>
                   {{ item.raw.label }}
@@ -164,7 +221,10 @@
           </v-col>
 
           <!-- Reschedule toggle (only when same-day) -->
-          <v-col cols="12" class="field-column">
+          <v-col
+            cols="12"
+            class="field-column"
+          >
             <v-switch
               v-model="rescheduleEnabled"
               :disabled="!canEnableReschedule"
@@ -172,7 +232,10 @@
               :label="`Reschedule across multiple days`"
               hide-details="auto"
             />
-            <small v-if="!canEnableReschedule" class="text-muted">
+            <small
+              v-if="!canEnableReschedule"
+              class="text-muted"
+            >
               Enable only when From and Due date are the same.
             </small>
           </v-col>
@@ -180,11 +243,18 @@
           <!-- Reschedule controls -->
           <template v-if="rescheduleEnabled">
             <!-- Start date (disabled) -->
-            <v-col cols="12" class="field-column">
+            <v-col
+              cols="12"
+              class="field-column"
+            >
               <v-label class="field-label">
-                <v-icon size="18" color="primary" class="mr-2"
-                  >mdi-calendar</v-icon
+                <v-icon
+                  size="18"
+                  color="primary"
+                  class="mr-2"
                 >
+                  mdi-calendar
+                </v-icon>
                 Start date (fixed)
               </v-label>
               <v-text-field
@@ -199,16 +269,23 @@
             </v-col>
 
             <!-- End date (select) -->
-            <v-col cols="12" class="field-column">
+            <v-col
+              cols="12"
+              class="field-column"
+            >
               <v-label class="field-label">
-                <v-icon size="18" color="primary" class="mr-2"
-                  >mdi-calendar-range</v-icon
+                <v-icon
+                  size="18"
+                  color="primary"
+                  class="mr-2"
                 >
+                  mdi-calendar-range
+                </v-icon>
                 End date
               </v-label>
               <v-text-field
-                label="scheduleEndDate"
                 v-model="scheduleEndDate"
+                label="scheduleEndDate"
                 type="date"
                 variant="outlined"
                 density="comfortable"
@@ -219,11 +296,18 @@
             </v-col>
 
             <!-- Weekday selection -->
-            <v-col cols="12" class="field-column">
+            <v-col
+              cols="12"
+              class="field-column"
+            >
               <v-label class="field-label">
-                <v-icon size="18" color="primary" class="mr-2"
-                  >mdi-calendar-week</v-icon
+                <v-icon
+                  size="18"
+                  color="primary"
+                  class="mr-2"
                 >
+                  mdi-calendar-week
+                </v-icon>
                 Repeat on days
               </v-label>
               <div class="weekday-grid">
@@ -238,10 +322,8 @@
                   color="primary"
                 />
               </div>
-              <small class="text-muted"
-                >Tasks will be created for the selected weekdays between Start
-                and End date.</small
-              >
+              <small class="text-muted">Tasks will be created for the selected weekdays between Start
+                and End date.</small>
             </v-col>
           </template>
         </v-row>

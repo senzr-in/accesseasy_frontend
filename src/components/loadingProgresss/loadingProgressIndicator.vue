@@ -1,33 +1,47 @@
 <template>
-  <div class="loading-overlay" v-if="show">
+  <div
+    v-if="show"
+    class="loading-overlay"
+  >
     <div class="loading-container">
       <div class="loading-content">
-        <v-icon size="36" color="primary" class="loading-icon">{{
-          icon
-        }}</v-icon>
-        <h3 class="loading-title">{{ title }}</h3>
+        <v-icon
+          size="36"
+          color="primary"
+          class="loading-icon"
+        >
+          {{
+            icon
+          }}
+        </v-icon>
+        <h3 class="loading-title">
+          {{ title }}
+        </h3>
 
         <div class="progress-container">
           <div class="loading-counter">
-            <span v-if="totalUsers"
-              >Completed: {{ completedUsers }} / {{ totalUsers }} Users</span
-            >
+            <span v-if="totalUsers">Completed: {{ completedUsers }} / {{ totalUsers }} Users</span>
             <span v-else>{{ statusText }}</span>
           </div>
-
-         
         </div>
 
-        <div class="loading-message">{{ message || statusMessage }}</div>
+        <div class="loading-message">
+          {{ message || statusMessage }}
+        </div>
 
-        <div v-if="cycleDates" class="cycle-dates">
+        <div
+          v-if="cycleDates"
+          class="cycle-dates"
+        >
           <div class="date-range">
             <span class="date-label">Start:</span>
             {{ formatDate(cycleDates.start) }}
             <span class="date-label ml-4">End:</span>
             {{ formatDate(cycleDates.end) }}
           </div>
-          <div class="cycle-duration">{{ cycleDates.duration }} days</div>
+          <div class="cycle-duration">
+            {{ cycleDates.duration }} days
+          </div>
         </div>
       </div>
     </div>
@@ -99,6 +113,17 @@ export default {
     },
   },
 
+  watch: {
+    progress(newValue) {
+      if (newValue >= 100 && this.autoClose) {
+        setTimeout(() => {
+          this.$emit("update:show", false);
+          this.$emit("complete");
+        }, this.closeDelay);
+      }
+    },
+  },
+
   methods: {
     formatDate(dateString) {
       if (!dateString) return "";
@@ -108,17 +133,6 @@ export default {
         month: "short",
         year: "numeric",
       });
-    },
-  },
-
-  watch: {
-    progress(newValue) {
-      if (newValue >= 100 && this.autoClose) {
-        setTimeout(() => {
-          this.$emit("update:show", false);
-          this.$emit("complete");
-        }, this.closeDelay);
-      }
     },
   },
 };

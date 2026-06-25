@@ -1,11 +1,14 @@
 <template>
   <div class="attendance-container">
-    <div class="filter-panel" v-if="showFilters">
+    <div
+      v-if="showFilters"
+      class="filter-panel"
+    >
       <div class="filter-content">
         <FilterComponent
-          :tenantId="tenantId"
-          :initialFilters="initialFilters"
-          :initiallyVisible="true"
+          :tenant-id="tenantId"
+          :initial-filters="initialFilters"
+          :initially-visible="true"
           :filter-schema="pageFilters"
           @apply-filters="handleApplyFilters"
           @filter-visibility-changed="onFilterVisibilityChanged"
@@ -14,23 +17,26 @@
     </div>
 
     <!-- Main Content -->
-    <div class="main-content" :class="{ 'full-width': !showFilters }">
+    <div
+      class="main-content"
+      :class="{ 'full-width': !showFilters }"
+    >
       <DataTableWrapper
-        v-model:searchQuery="search"
-        :showSearch="true"
-        :searchPlaceholder="'Search Employees...'"
-        :isEmpty="filteredItems.length === 0 && hasActiveFilters && !loading"
-        :hasError="false"
-        @update:searchQuery="debounceSearchInput"
+        v-model:search-query="search"
+        :show-search="true"
+        :search-placeholder="'Search Employees...'"
+        :is-empty="filteredItems.length === 0 && hasActiveFilters && !loading"
+        :has-error="false"
+        @update:search-query="debounceSearchInput"
       >
         <!-- Toolbar Actions Slot -->
         <template #before-search>
           <button
             class="filter-toggle-static"
-            @click="toggleFilters"
             :class="{ active: hasActiveFilters }"
             :title="showFilters ? 'Hide filters' : 'Show filters'"
             aria-label="Toggle filters"
+            @click="toggleFilters"
           >
             <svg
               width="20"
@@ -42,7 +48,10 @@
             >
               <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46" />
             </svg>
-            <div v-if="hasActiveFilters" class="filter-indicator"></div>
+            <div
+              v-if="hasActiveFilters"
+              class="filter-indicator"
+            />
           </button>
         </template>
         <!-- Table content states -->
@@ -58,8 +67,8 @@
           <EmptyState
             title="No attendance records found"
             message="Try adjusting your filters or search terms"
-            :primaryAction="{ text: 'Clear Filters', icon: X }"
-            @primaryAction="clearAllFilters"
+            :primary-action="{ text: 'Clear Filters', icon: X }"
+            @primary-action="clearAllFilters"
           />
         </div>
 
@@ -67,16 +76,16 @@
           <DataTable
             :items="filteredItems"
             :columns="columns"
-            :selectedItems="selectedItems"
-            :showSelection="false"
-            :sortBy="sortBy[0]?.key || ''"
-            :sortDirection="sortBy[0]?.order || 'asc'"
-            :itemKey="'id'"
-            :rowClickable="true"
-            @update:selectedItems="selectedItems = $event"
-            @update:sortBy="updateSortBy"
-            @update:sortDirection="updateSortDirection"
-            @rowClick="handleRowClick"
+            :selected-items="selectedItems"
+            :show-selection="false"
+            :sort-by="sortBy[0]?.key || ''"
+            :sort-direction="sortBy[0]?.order || 'asc'"
+            :item-key="'id'"
+            :row-clickable="true"
+            @update:selected-items="selectedItems = $event"
+            @update:sort-by="updateSortBy"
+            @update:sort-direction="updateSortDirection"
+            @row-click="handleRowClick"
             @sort="handleSort"
           >
             <!-- Profile Column -->
@@ -87,8 +96,11 @@
                   :src="item.avatarImage"
                   :alt="item.assignedUser?.first_name"
                   class="avatar-image"
-                />
-                <div v-else class="avatar-placeholder">
+                >
+                <div
+                  v-else
+                  class="avatar-placeholder"
+                >
                   <svg
                     width="20"
                     height="20"
@@ -98,7 +110,11 @@
                     stroke-width="2"
                   >
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
+                    <circle
+                      cx="12"
+                      cy="7"
+                      r="4"
+                    />
                   </svg>
                 </div>
               </div>
@@ -133,19 +149,23 @@
             <!-- Days Column -->
             <template #cell-days="{ item }">
               <div class="days-checkboxes">
-                <label v-for="day in days" :key="day" class="day-checkbox">
+                <label
+                  v-for="day in days"
+                  :key="day"
+                  class="day-checkbox"
+                >
                   <input
                     type="checkbox"
                     :checked="
                       !getDayShifts(item, day).isWeekOff &&
-                      getDayShifts(item, day).shifts.length > 0
+                        getDayShifts(item, day).shifts.length > 0
                     "
                     :class="getDayCheckboxClass(item, day)"
                     disabled
                     @click.stop="
                       showShiftDetails(getDayShifts(item, day), item)
                     "
-                  />
+                  >
                   {{ day.charAt(0).toUpperCase() }}
                 </label>
               </div>
@@ -154,13 +174,13 @@
         </div>
 
         <!-- Pagination Slot -->
-        <template v-slot:pagination>
+        <template #pagination>
           <CustomPagination
             v-model:page="page"
-            v-model:itemsPerPage="itemsPerPage"
+            v-model:items-per-page="itemsPerPage"
             :total-items="totalItems"
             @update:page="handlePageChange"
-            @update:itemsPerPage="handleItemsPerPageChange"
+            @update:items-per-page="handleItemsPerPageChange"
           />
         </template>
       </DataTableWrapper>
@@ -171,7 +191,10 @@
         class="dialog-overlay"
         @click="showShiftDialog = false"
       >
-        <div class="dialog-content" @click.stop>
+        <div
+          class="dialog-content"
+          @click.stop
+        >
           <div class="dialog-header">
             <div class="dialog-title">
               <svg
@@ -182,12 +205,19 @@
                 stroke="currentColor"
                 stroke-width="2"
               >
-                <circle cx="12" cy="12" r="10" />
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="10"
+                />
                 <polyline points="12,6 12,12 16,14" />
               </svg>
               <h3>Shift Details</h3>
             </div>
-            <button class="dialog-close" @click="showShiftDialog = false">
+            <button
+              class="dialog-close"
+              @click="showShiftDialog = false"
+            >
               <svg
                 width="20"
                 height="20"
@@ -196,8 +226,18 @@
                 stroke="currentColor"
                 stroke-width="2"
               >
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
+                <line
+                  x1="18"
+                  y1="6"
+                  x2="6"
+                  y2="18"
+                />
+                <line
+                  x1="6"
+                  y1="6"
+                  x2="18"
+                  y2="18"
+                />
               </svg>
             </button>
           </div>
@@ -225,7 +265,11 @@
                       stroke="currentColor"
                       stroke-width="2"
                     >
-                      <circle cx="12" cy="12" r="10" />
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="10"
+                      />
                       <polyline points="12,6 12,12 16,14" />
                     </svg>
                     {{ shift.shifts_id?.shift || "Unknown Shift" }}
@@ -241,7 +285,11 @@
                       stroke="currentColor"
                       stroke-width="2"
                     >
-                      <circle cx="12" cy="12" r="10" />
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="10"
+                      />
                       <polyline points="12,6 12,12 16,14" />
                     </svg>
                     <span>
@@ -258,7 +306,11 @@
                       stroke="currentColor"
                       stroke-width="2"
                     >
-                      <circle cx="12" cy="12" r="10" />
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="10"
+                      />
                       <path d="M8 12h8" />
                     </svg>
                     <span>Break: {{ formatTime(shift.shifts_id?.break) }}</span>

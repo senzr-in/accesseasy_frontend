@@ -1,27 +1,46 @@
 <template>
   <div class="document-upload mb-4 pa-4 border rounded">
     <v-row>
-      <v-col cols="12" md="6">
+      <v-col
+        cols="12"
+        md="6"
+      >
         <div class="d-flex align-center mb-1">
-          <h3 class="text-subtitle-1 font-weight-medium">{{ title }}</h3>
-          <span v-if="required" class="text-caption text-error ml-2"
-            >*Required</span
-          >
-          <status-badge :status="currentStatus" class="ml-2"></status-badge>
+          <h3 class="text-subtitle-1 font-weight-medium">
+            {{ title }}
+          </h3>
+          <span
+            v-if="required"
+            class="text-caption text-error ml-2"
+          >*Required</span>
+          <status-badge
+            :status="currentStatus"
+            class="ml-2"
+          />
         </div>
-        <p class="text-body-2 text-grey">{{ description }}</p>
+        <p class="text-body-2 text-grey">
+          {{ description }}
+        </p>
       </v-col>
 
-      <v-col cols="12" md="6" class="d-flex align-center justify-end">
+      <v-col
+        cols="12"
+        md="6"
+        class="d-flex align-center justify-end"
+      >
         <!-- HR Action Status -->
         <template v-if="currentStatus === 'hr_action'">
-          <div v-if="!isHrView" class="d-flex align-center">
-            <span class="text-caption font-italic text-grey"
-              >HR will provide this document</span
-            >
+          <div
+            v-if="!isHrView"
+            class="d-flex align-center"
+          >
+            <span class="text-caption font-italic text-grey">HR will provide this document</span>
           </div>
 
-          <div v-else class="d-flex align-center">
+          <div
+            v-else
+            class="d-flex align-center"
+          >
             <v-btn
               color="primary"
               variant="outlined"
@@ -31,30 +50,47 @@
               Upload for Employee
             </v-btn>
             <input
-              type="file"
               ref="fileInput"
+              type="file"
               class="d-none"
-              @change="handleFileChange"
               accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-            />
+              @change="handleFileChange"
+            >
           </div>
         </template>
 
         <!-- HR Uploaded Status -->
         <template v-else-if="currentStatus === 'hr_uploaded'">
           <div class="d-flex align-center">
-            <v-chip class="mr-2" color="grey-lighten-3" size="small">
+            <v-chip
+              class="mr-2"
+              color="grey-lighten-3"
+              size="small"
+            >
               {{ file ? file.name : "document.pdf" }}
-              <span class="text-caption ml-1" v-if="file">
+              <span
+                v-if="file"
+                class="text-caption ml-1"
+              >
                 ({{ Math.round(file.size / 1024) }} KB)
               </span>
             </v-chip>
 
-            <v-btn icon variant="text" size="small" class="mr-1">
+            <v-btn
+              icon
+              variant="text"
+              size="small"
+              class="mr-1"
+            >
               <v-icon>mdi-eye</v-icon>
             </v-btn>
 
-            <v-btn icon variant="text" size="small" class="mr-1">
+            <v-btn
+              icon
+              variant="text"
+              size="small"
+              class="mr-1"
+            >
               <v-icon>mdi-download</v-icon>
             </v-btn>
 
@@ -78,9 +114,7 @@
         <!-- Optional Status -->
         <template v-else-if="currentStatus === 'not_required'">
           <div class="d-flex align-center">
-            <span class="text-caption font-italic text-grey mr-2"
-              >Optional</span
-            >
+            <span class="text-caption font-italic text-grey mr-2">Optional</span>
 
             <template v-if="!file">
               <v-btn
@@ -91,27 +125,41 @@
                 Upload if available
               </v-btn>
               <input
-                type="file"
                 ref="fileInput"
+                type="file"
                 class="d-none"
-                @change="handleFileChange"
                 accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-              />
+                @change="handleFileChange"
+              >
             </template>
 
             <template v-else>
-              <v-chip class="mr-2" color="grey-lighten-3" size="small">
+              <v-chip
+                class="mr-2"
+                color="grey-lighten-3"
+                size="small"
+              >
                 {{ file.name }}
                 <span class="text-caption ml-1">
                   ({{ Math.round(file.size / 1024) }} KB)
                 </span>
               </v-chip>
 
-              <v-btn icon variant="text" size="small" class="mr-1">
+              <v-btn
+                icon
+                variant="text"
+                size="small"
+                class="mr-1"
+              >
                 <v-icon>mdi-eye</v-icon>
               </v-btn>
 
-              <v-btn icon variant="text" size="small" @click="handleDelete">
+              <v-btn
+                icon
+                variant="text"
+                size="small"
+                @click="handleDelete"
+              >
                 <v-icon>mdi-delete</v-icon>
               </v-btn>
             </template>
@@ -121,18 +169,32 @@
         <!-- Default Status (pending, completed, etc.) -->
         <template v-else>
           <template v-if="file">
-            <v-chip class="mr-2" color="grey-lighten-3" size="small">
+            <v-chip
+              class="mr-2"
+              color="grey-lighten-3"
+              size="small"
+            >
               {{ file.name }}
               <span class="text-caption ml-1">
                 ({{ Math.round(file.size / 1024) }} KB)
               </span>
             </v-chip>
 
-            <v-btn icon variant="text" size="small" class="mr-1">
+            <v-btn
+              icon
+              variant="text"
+              size="small"
+              class="mr-1"
+            >
               <v-icon>mdi-eye</v-icon>
             </v-btn>
 
-            <v-btn icon variant="text" size="small" @click="handleDelete">
+            <v-btn
+              icon
+              variant="text"
+              size="small"
+              @click="handleDelete"
+            >
               <v-icon>mdi-delete</v-icon>
             </v-btn>
           </template>
@@ -146,12 +208,12 @@
               Upload
             </v-btn>
             <input
-              type="file"
               ref="fileInput"
+              type="file"
               class="d-none"
-              @change="handleFileChange"
               accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-            />
+              @change="handleFileChange"
+            >
           </template>
         </template>
       </v-col>

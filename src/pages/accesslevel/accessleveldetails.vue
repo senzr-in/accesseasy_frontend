@@ -15,9 +15,12 @@
     </div>
 
     <!-- Main Table -->
-    <div :class="showAddPanel ? 'w-2/3' : 'w-full'" class="p-2">
+    <div
+      :class="showAddPanel ? 'w-2/3' : 'w-full'"
+      class="p-2"
+    >
       <DataTableWrapper
-        :showSearch="true"
+        :show-search="true"
         :search-query="searchQuery"
         @update:search-query="searchQuery = $event"
       >
@@ -26,7 +29,7 @@
             variant="primary"
             size="md"
             text="Add New Access Level"
-            :leftIcon="Plus"
+            :left-icon="Plus"
             @click="openAddPanel"
           />
         </template>
@@ -44,11 +47,11 @@
           <DataTable
             :items="paginatedAccessLevels"
             :columns="headers"
-            :showSelection="false"
+            :show-selection="false"
             :expandable="false"
             show-header
             :row-clickable="true"
-            @rowClick="handleRowClick"
+            @row-click="handleRowClick"
           >
             <!-- Status Switch -->
             <template #cell-type="{ item }">
@@ -71,7 +74,11 @@
                   variant="tonal"
                   class="mr-1"
                 >
-                  <v-icon icon="mdi-clock-time-four" size="12" class="mr-1" />
+                  <v-icon
+                    icon="mdi-clock-time-four"
+                    size="12"
+                    class="mr-1"
+                  />
                   24 Hours Access
                 </v-chip>
                 <v-chip
@@ -81,7 +88,11 @@
                   variant="tonal"
                   class="mr-1"
                 >
-                  <v-icon icon="mdi-clock-outline" size="12" class="mr-1" />
+                  <v-icon
+                    icon="mdi-clock-outline"
+                    size="12"
+                    class="mr-1"
+                  />
                   {{ item.accessTimingDisplay }}
                 </v-chip>
                 <v-chip
@@ -93,7 +104,11 @@
                   variant="tonal"
                   class="mr-1"
                 >
-                  <v-icon icon="mdi-timer-outline" size="12" class="mr-1" />
+                  <v-icon
+                    icon="mdi-timer-outline"
+                    size="12"
+                    class="mr-1"
+                  />
                   {{ item.accessTimingDisplay }}
                 </v-chip>
                 <v-chip
@@ -103,7 +118,11 @@
                   variant="tonal"
                   class="mr-1"
                 >
-                  <v-icon icon="mdi-calendar-star" size="12" class="mr-1" />
+                  <v-icon
+                    icon="mdi-calendar-star"
+                    size="12"
+                    class="mr-1"
+                  />
                   Holiday Access
                 </v-chip>
                 <v-chip
@@ -129,7 +148,7 @@
                 <v-chip
                   v-if="
                     !item.assignDoorsGroupNames ||
-                    item.assignDoorsGroupNames.length === 0
+                      item.assignDoorsGroupNames.length === 0
                   "
                   size="small"
                   color="grey"
@@ -148,7 +167,11 @@
                     variant="tonal"
                     class="mr-1 mb-1"
                   >
-                    <v-icon icon="mdi-door" size="12" class="mr-1" />
+                    <v-icon
+                      icon="mdi-door"
+                      size="12"
+                      class="mr-1"
+                    />
                     {{ item.assignDoorsGroupNames[0] }}
                   </v-chip>
 
@@ -184,30 +207,33 @@
             :total-items="filteredAccessLevels.length"
             :items-per-page="itemsPerPage"
             :current-page="currentPage"
+            class="mt-4"
             @page-change="handlePageChange"
             @items-per-page-change="handleItemsPerPageChange"
-            class="mt-4"
           />
         </div>
       </DataTableWrapper>
 
       <!-- Dialog: Show All Doors -->
-      <v-dialog v-model="showDoorViewDialog" max-width="400px">
+      <v-dialog
+        v-model="showDoorViewDialog"
+        max-width="400px"
+      >
         <v-card>
           <v-card-title class="pa-6 pb-4 dialog-header">
             <div class="d-flex align-center justify-space-between w-100">
               <h3 class="text-h6 font-weight-bold dialog-title">
                 Assigned Doors ({{
                   selectedAccessLevelForView?.assignDoorsGroupNames?.length ||
-                  0
+                    0
                 }})
               </h3>
               <v-btn
                 icon="mdi-close"
-                @click="showDoorViewDialog = false"
                 variant="text"
                 size="small"
                 class="rounded-lg dialog-close-btn"
+                @click="showDoorViewDialog = false"
               />
             </div>
           </v-card-title>
@@ -220,7 +246,11 @@
                 :key="index"
               >
                 <v-list-item-title>
-                  <v-icon icon="mdi-door" size="16" class="mr-2" />
+                  <v-icon
+                    icon="mdi-door"
+                    size="16"
+                    class="mr-2"
+                  />
                   {{ door }}
                 </v-list-item-title>
               </v-list-item>
@@ -233,8 +263,8 @@
               variant="danger"
               color="grey-darken-1"
               size="md"
-              @click="showDoorViewDialog = false"
               class="footer-btn"
+              @click="showDoorViewDialog = false"
             />
           </v-card-actions>
         </v-card>

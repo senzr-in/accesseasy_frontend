@@ -2,18 +2,25 @@
   <div class="attendance-settings">
     <v-container v-if="isLoading">
       <v-row>
-        <v-col cols="12" class="text-center">
+        <v-col
+          cols="12"
+          class="text-center"
+        >
           <v-progress-circular
             indeterminate
             color="#059367"
-          ></v-progress-circular>
+          />
           <p>Loading attendance settings...</p>
         </v-col>
       </v-row>
     </v-container>
-    <v-container v-else fluid class="attendance-settings-editor-container pa-0">
+    <v-container
+      v-else
+      fluid
+      class="attendance-settings-editor-container pa-0"
+    >
       <div class="d-flex justify-space-between align-center mb-4">
-        <h3 class="text-h6 font-weight-bold d-flex align-center"></h3>
+        <h3 class="text-h6 font-weight-bold d-flex align-center" />
         <BaseButton
           variant="primary"
           text="Update"
@@ -22,7 +29,10 @@
         />
       </div>
 
-      <v-card flat class="attendance-card">
+      <v-card
+        flat
+        class="attendance-card"
+      >
         <v-card-text>
           <WorkingHoursForm
             v-model="internalWorkingHoursData"
@@ -47,20 +57,24 @@
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-check-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-check-circle
+        </v-icon>
         {{ successMessage }}
       </div>
     </v-snackbar>
 
     <v-snackbar
-      class="errormessge"
       v-model="showErrorSnackbar"
+      class="errormessge"
       color="error"
       timeout="2000"
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-alert-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-alert-circle
+        </v-icon>
         {{ errorMessage }}
       </div>
     </v-snackbar>

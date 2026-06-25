@@ -11,43 +11,58 @@
       />
     </div>
 
-    <div v-if="!hasBankDetails" class="text-center empty-state">
+    <div
+      v-if="!hasBankDetails"
+      class="text-center empty-state"
+    >
       <img
         src="/images/bank.png"
         alt="Bank icon"
         style="width: 300px; height: 300px; margin: 0 auto"
-      />
+      >
       <p class="mt-4 empty-state-text">
         No bank details added yet. Click the button above to add details.
       </p>
     </div>
 
-    <v-card v-else class="bank-details-card">
+    <v-card
+      v-else
+      class="bank-details-card"
+    >
       <v-card-text>
         <v-row>
-          <v-col cols="12" md="6">
+          <v-col
+            cols="12"
+            md="6"
+          >
             <v-text-field
               v-model="formData.bankName"
               label="Bank Name"
               readonly
               variant="outlined"
               density="comfortable"
-            ></v-text-field>
+            />
           </v-col>
-          <v-col cols="12" md="6">
+          <v-col
+            cols="12"
+            md="6"
+          >
             <v-text-field
               v-model="formData.accountNumber"
               label="Account Number"
               readonly
               variant="outlined"
               density="comfortable"
-            ></v-text-field>
+            />
           </v-col>
-          <v-col cols="12" md="6">
+          <v-col
+            cols="12"
+            md="6"
+          >
             <div class="d-flex align-center gap-2">
               <SensitiveDataInput
-                class="w-100"
                 v-model="formData.IFSC"
+                class="w-100"
                 label="IFSC Code"
                 readonly
                 variant="outlined"
@@ -73,7 +88,10 @@
               </div>
             </div>
           </v-col>
-          <v-col cols="12" md="6">
+          <v-col
+            cols="12"
+            md="6"
+          >
             <div class="d-flex align-center gap-2">
               <div
                 class="upi-input-group d-flex align-center gap-2 flex-grow-1"
@@ -84,7 +102,7 @@
                   readonly
                   variant="outlined"
                   density="comfortable"
-                ></v-text-field>
+                />
                 <v-select
                   v-model="formData.UPISuffix"
                   :items="upiOptions"
@@ -93,7 +111,7 @@
                   variant="outlined"
                   density="comfortable"
                   style="min-width: 140px"
-                ></v-select>
+                />
               </div>
               <div class="verification-status">
                 <v-chip
@@ -126,7 +144,10 @@
     </v-card>
 
     <!-- Add/Edit Details Dialog -->
-    <v-dialog v-model="detailsDialog" max-width="600px">
+    <v-dialog
+      v-model="detailsDialog"
+      max-width="600px"
+    >
       <v-card>
         <v-card-title class="text-h5 pa-4">
           {{ isEditing ? "Edit" : "Add" }} Bank Details
@@ -144,7 +165,7 @@
               required
               variant="outlined"
               density="comfortable"
-            ></v-text-field>
+            />
             <v-text-field
               v-model="tempFormData.accountNumber"
               label="Account Number *"
@@ -152,7 +173,7 @@
               required
               variant="outlined"
               density="comfortable"
-            ></v-text-field>
+            />
             <v-text-field
               v-model="tempFormData.IFSC"
               label="IFSC Code *"
@@ -160,7 +181,7 @@
               required
               variant="outlined"
               density="comfortable"
-            ></v-text-field>
+            />
             <div class="d-flex align-center gap-2">
               <v-text-field
                 v-model="tempFormData.UPIPrefix"
@@ -168,7 +189,7 @@
                 variant="outlined"
                 density="comfortable"
                 class="flex-grow-1"
-              ></v-text-field>
+              />
               <v-select
                 v-model="tempFormData.UPISuffix"
                 :items="upiOptions"
@@ -176,12 +197,12 @@
                 variant="outlined"
                 density="comfortable"
                 style="min-width: 140px"
-              ></v-select>
+              />
             </div>
           </v-form>
         </v-card-text>
         <v-card-actions class="pa-4">
-          <v-spacer></v-spacer>
+          <v-spacer />
           <BaseButton
             variant="secondary"
             text="Cancel"
@@ -190,15 +211,18 @@
           <BaseButton
             variant="primary"
             text="Save"
-            @click="saveDetails"
             :disabled="!isFormValid"
+            @click="saveDetails"
           />
         </v-card-actions>
       </v-card>
     </v-dialog>
 
     <!-- Verify Dialog -->
-    <v-dialog v-model="verifyDialog" max-width="400px">
+    <v-dialog
+      v-model="verifyDialog"
+      max-width="400px"
+    >
       <v-card>
         <v-card-title class="text-h6 pa-4">
           Verify {{ verifyingField }}
@@ -208,7 +232,7 @@
           <p>Click Verify to confirm this {{ verifyingField }} code.</p>
         </v-card-text>
         <v-card-actions class="pa-4">
-          <v-spacer></v-spacer>
+          <v-spacer />
           <BaseButton
             variant="secondary"
             text="Cancel"

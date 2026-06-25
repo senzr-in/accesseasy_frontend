@@ -1,9 +1,18 @@
 <template>
-  <v-card flat class="additional-salary px-0">
+  <v-card
+    flat
+    class="additional-salary px-0"
+  >
     <v-card-text class="px-0">
       <div class="d-flex justify-space-between align-center mb-6">
-        <h3 class="text-h5">Additional Salary Conditions</h3>
-        <v-btn color="black" @click="saveTemplate" :loading="saving">
+        <h3 class="text-h5">
+          Additional Salary Conditions
+        </h3>
+        <v-btn
+          color="black"
+          :loading="saving"
+          @click="saveTemplate"
+        >
           Save Template
         </v-btn>
       </div>
@@ -11,7 +20,12 @@
       <!-- ESI Calculation -->
       <div class="mb-8">
         <div class="d-flex align-center mb-4">
-          <v-icon color="primary" class="mr-2">mdi-currency-usd</v-icon>
+          <v-icon
+            color="primary"
+            class="mr-2"
+          >
+            mdi-currency-usd
+          </v-icon>
           <span class="text-h6">ESI Calculation</span>
         </div>
         <div class="d-flex align-center">
@@ -25,68 +39,108 @@
             class="ml-2"
             style="max-width: 100px"
             hide-details
-          ></v-text-field>
+          />
         </div>
       </div>
 
       <!-- Bonus Calculation -->
       <div class="mb-8">
         <div class="d-flex align-center mb-4">
-          <v-icon color="success" class="mr-2">mdi-percent</v-icon>
+          <v-icon
+            color="success"
+            class="mr-2"
+          >
+            mdi-percent
+          </v-icon>
           <span class="text-h6">Bonus Calculation</span>
         </div>
         <v-row class="ma-0">
-          <v-col cols="12" sm="4" md="4" class="pa-2">
-      <div class="d-flex align-center mb-4">
-        <v-icon color="success" class="mr-2">mdi-calendar-clock</v-icon>
-        <span class="text-h6">Bonus Period</span>
-      </div>
-      <v-select
-        v-model="formData.bonusPeriod"
-        label="Bonus Period"
-        :items="periods"
-        variant="outlined"
-        density="comfortable"
-        hide-details
-      ></v-select>
-    </v-col>
+          <v-col
+            cols="12"
+            sm="4"
+            md="4"
+            class="pa-2"
+          >
+            <div class="d-flex align-center mb-4">
+              <v-icon
+                color="success"
+                class="mr-2"
+              >
+                mdi-calendar-clock
+              </v-icon>
+              <span class="text-h6">Bonus Period</span>
+            </div>
+            <v-select
+              v-model="formData.bonusPeriod"
+              label="Bonus Period"
+              :items="periods"
+              variant="outlined"
+              density="comfortable"
+              hide-details
+            />
+          </v-col>
 
-    <v-col cols="12" sm="4" md="4" class="pa-2">
-      <div class="d-flex align-center mb-4">
-        <v-icon color="success" class="mr-2">mdi-percent</v-icon>
-        <span class="text-h6">Bonus Percentage</span>
-      </div>
-      <v-text-field
-        v-model="formData.bonusPercentage"
-        label="Bonus Percentage"
-        type="number"
-        variant="outlined"
-        density="comfortable"
-        hide-details
-      ></v-text-field>
-    </v-col>
+          <v-col
+            cols="12"
+            sm="4"
+            md="4"
+            class="pa-2"
+          >
+            <div class="d-flex align-center mb-4">
+              <v-icon
+                color="success"
+                class="mr-2"
+              >
+                mdi-percent
+              </v-icon>
+              <span class="text-h6">Bonus Percentage</span>
+            </div>
+            <v-text-field
+              v-model="formData.bonusPercentage"
+              label="Bonus Percentage"
+              type="number"
+              variant="outlined"
+              density="comfortable"
+              hide-details
+            />
+          </v-col>
 
-    <v-col cols="12" sm="4" md="4" class="pa-2">
-      <div class="d-flex align-center mb-4">
-        <v-icon color="info" class="mr-2">mdi-calendar</v-icon>
-        <span class="text-h6">Bonus Date</span>
-      </div>
-      <v-text-field
-        v-model="formData.bonusDate"
-        label="Bonus Date"
-        type="date"
-        variant="outlined"
-        density="comfortable"
-        hide-details
-      ></v-text-field>
-    </v-col>
+          <v-col
+            cols="12"
+            sm="4"
+            md="4"
+            class="pa-2"
+          >
+            <div class="d-flex align-center mb-4">
+              <v-icon
+                color="info"
+                class="mr-2"
+              >
+                mdi-calendar
+              </v-icon>
+              <span class="text-h6">Bonus Date</span>
+            </div>
+            <v-text-field
+              v-model="formData.bonusDate"
+              label="Bonus Date"
+              type="date"
+              variant="outlined"
+              density="comfortable"
+              hide-details
+            />
+          </v-col>
         </v-row>
       </div>
 
       <!-- Gratuity Condition -->
       <div>
         <div class="d-flex align-center mb-4">
-          <v-icon color="purple" class="mr-2">mdi-clock-outline</v-icon>
+          <v-icon
+            color="purple"
+            class="mr-2"
+          >
+            mdi-clock-outline
+          </v-icon>
           <span class="text-h6">Gratuity Condition</span>
         </div>
         <div class="d-flex align-center">
@@ -100,7 +154,7 @@
             class="mx-2"
             style="max-width: 80px"
             hide-details
-          ></v-text-field>
+          />
           <span class="text-body-1 grey--text text--darken-1">
             years in the company
           </span>
@@ -109,7 +163,12 @@
     </v-card-text>
 
     <!-- Success Snackbar -->
-    <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="2000" location="top">
+    <v-snackbar
+      v-model="snackbar"
+      :color="snackbarColor"
+      timeout="2000"
+      location="top"
+    >
       {{ snackbarText }}
     </v-snackbar>
   </v-card>

@@ -1,37 +1,64 @@
 <template>
   <div class="tds-container">
     <!-- Main Toolbar -->
-    <v-toolbar density="compact" color="grey-lighten-4" v-if="!showForm">
-      <v-btn icon color="black" @click="handleClose">
+    <v-toolbar
+      v-if="!showForm"
+      density="compact"
+      color="grey-lighten-4"
+    >
+      <v-btn
+        icon
+        color="black"
+        @click="handleClose"
+      >
         <v-icon>mdi-arrow-left</v-icon>
       </v-btn>
-      <v-toolbar-title class="ml-4">Add TDSDetails</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-btn color="error" variant="text" class="mr-2" @click="handleClose">
+      <v-toolbar-title class="ml-4">
+        Add TDSDetails
+      </v-toolbar-title>
+      <v-spacer />
+      <v-btn
+        color="error"
+        variant="text"
+        class="mr-2"
+        @click="handleClose"
+      >
         CANCEL
       </v-btn>
       <v-btn
         style="background-color: black"
         color="white"
-        @click="handleSave"
         :loading="isSaving"
+        @click="handleSave"
       >
         SAVE
       </v-btn>
     </v-toolbar>
-    <router-view></router-view>
+    <router-view />
 
-    <div class="content-wrapper" v-if="!showForm">
-      <div class="summary-card" v-if="userRole === 'Admin'">
+    <div
+      v-if="!showForm"
+      class="content-wrapper"
+    >
+      <div
+        v-if="userRole === 'Admin'"
+        class="summary-card"
+      >
         <div class="header">
           <span class="icon">📋</span>
           <h2>TDS Calculations Summary</h2>
         </div>
 
         <div class="table-row header-row">
-          <div class="col description">Description</div>
-          <div class="col regime">New Regime</div>
-          <div class="col regime">Old Regime</div>
+          <div class="col description">
+            Description
+          </div>
+          <div class="col regime">
+            New Regime
+          </div>
+          <div class="col regime">
+            Old Regime
+          </div>
         </div>
 
         <div
@@ -39,13 +66,18 @@
           :key="index"
           class="table-row"
         >
-          <div class="col description">{{ item.description }}</div>
+          <div class="col description">
+            {{ item.description }}
+          </div>
 
           <div class="col regime">
             <span v-if="item.description !== 'Tax Liability'">
               {{ formatCurrency(item.newRegime) }}
             </span>
-            <div v-else class="relative">
+            <div
+              v-else
+              class="relative"
+            >
               <button @click="toggleDropdown('new')">
                 {{ formatCurrency(item.newRegime) }} ▼
               </button>
@@ -54,7 +86,9 @@
                 class="bg-white rounded-lg shadow-md border border-slate-200 w-full max-w-md"
               >
                 <div class="px-4 py-3 border-b">
-                  <p class="font-bold text-lg">New Regime Breakdown</p>
+                  <p class="font-bold text-lg">
+                    New Regime Breakdown
+                  </p>
                 </div>
                 <div class="p-4">
                   <div class="space-y-3">
@@ -67,7 +101,7 @@
                         <span
                           class="bg-green-50 text-green-700 border border-green-200 h-6 w-6 rounded-full flex items-center justify-center"
                         >
-                          <div class="h-3 w-3 rounded-full bg-green-500"></div>
+                          <div class="h-3 w-3 rounded-full bg-green-500" />
                         </span>
                         <span class="font-medium">{{ slab.range }}</span>
                         <span class="text-slate-500">—</span>
@@ -96,9 +130,7 @@
                           />
                         </svg>
                         <span class="text-slate-600">Tax:</span>
-                        <span class="ml-1.5 font-semibold"
-                          >₹{{ slab.tax.toLocaleString() }}</span
-                        >
+                        <span class="ml-1.5 font-semibold">₹{{ slab.tax.toLocaleString() }}</span>
                       </div>
                     </div>
                   </div>
@@ -124,7 +156,10 @@
             <span v-if="item.description !== 'Tax Liability'">
               {{ formatCurrency(item.oldRegime) }}
             </span>
-            <div v-else class="relative">
+            <div
+              v-else
+              class="relative"
+            >
               <button @click="toggleDropdown('old')">
                 {{ formatCurrency(item.oldRegime) }} ▼
               </button>
@@ -133,7 +168,9 @@
                 class="bg-white rounded-lg shadow-md border border-slate-200 w-full max-w-md"
               >
                 <div class="px-4 py-3 border-b">
-                  <p class="font-bold text-lg">Old Regime Breakdown</p>
+                  <p class="font-bold text-lg">
+                    Old Regime Breakdown
+                  </p>
                 </div>
                 <div class="p-4">
                   <div class="space-y-3">
@@ -146,7 +183,7 @@
                         <span
                           class="bg-yellow-50 text-yellow-700 border border-yellow-200 h-6 w-6 rounded-full flex items-center justify-center"
                         >
-                          <div class="h-3 w-3 rounded-full bg-yellow-500"></div>
+                          <div class="h-3 w-3 rounded-full bg-yellow-500" />
                         </span>
                         <span class="font-medium">{{ slab.range }}</span>
                         <span class="text-slate-500">—</span>
@@ -175,9 +212,7 @@
                           />
                         </svg>
                         <span class="text-slate-600">Tax:</span>
-                        <span class="ml-1.5 font-semibold"
-                          >₹{{ slab.tax.toLocaleString() }}</span
-                        >
+                        <span class="ml-1.5 font-semibold">₹{{ slab.tax.toLocaleString() }}</span>
                       </div>
                     </div>
                   </div>
@@ -200,17 +235,31 @@
           </div>
         </div>
       </div>
-      <v-row v-for="item in taxSettings" :key="item.id">
+      <v-row
+        v-for="item in taxSettings"
+        :key="item.id"
+      >
         <v-col cols="12">
           <v-card>
             <v-card-title>
-              <v-chip :color="item.isDeclarationOpen ? 'green' : 'red'" dark>
+              <v-chip
+                :color="item.isDeclarationOpen ? 'green' : 'red'"
+                dark
+              >
                 {{ item.declarationStatusLabel }}
               </v-chip>
-              <v-chip v-if="item.isReconcileOpen" color="blue" dark>
+              <v-chip
+                v-if="item.isReconcileOpen"
+                color="blue"
+                dark
+              >
                 {{ item.reconcileStatusLabel }}
               </v-chip>
-              <v-chip v-if="item.isProofOpen" color="orange" dark>
+              <v-chip
+                v-if="item.isProofOpen"
+                color="orange"
+                dark
+              >
                 {{ item.proofStatusLabel }}
               </v-chip>
             </v-card-title>
@@ -221,14 +270,20 @@
       <!-- Info Cards Grid -->
       <div class="info-cards-container">
         <!-- Past TDS Card -->
-        <div class="info-card"  v-if="userRole === 'Admin'">
+        <div
+          v-if="userRole === 'Admin'"
+          class="info-card"
+        >
           <div class="info-header">
             <div class="info-title">
-              <span class="icon"><i class="fas fa-receipt"></i></span>
+              <span class="icon"><i class="fas fa-receipt" /></span>
               <h3>Past TDS in FY</h3>
             </div>
-            <button class="edit-button" @click="pastTds">
-              <span class="edit-icon"><i class="fas fa-pen"></i></span>
+            <button
+              class="edit-button"
+              @click="pastTds"
+            >
+              <span class="edit-icon"><i class="fas fa-pen" /></span>
             </button>
           </div>
 
@@ -259,18 +314,26 @@
         </div>
 
         <!-- Tax Regime Card -->
-        <div class="info-card"  v-if="userRole === 'Admin'">
+        <div
+          v-if="userRole === 'Admin'"
+          class="info-card"
+        >
           <div class="info-header">
             <div class="info-title">
-              <span class="icon"><i class="fas fa-receipt"></i></span>
+              <span class="icon"><i class="fas fa-receipt" /></span>
               <h3>Tax Regime</h3>
             </div>
-            <button class="edit-button" @click="regime">
-              <span class="edit-icon"><i class="fas fa-pen"></i></span>
+            <button
+              class="edit-button"
+              @click="regime"
+            >
+              <span class="edit-icon"><i class="fas fa-pen" /></span>
             </button>
           </div>
           <div class="info-content">
-            <p class="regime-text">Your current chosen regime is</p>
+            <p class="regime-text">
+              Your current chosen regime is
+            </p>
             <button class="regime-button">
               {{ currentRegime }}
             </button>
@@ -285,8 +348,11 @@
               <h3>Home Rent</h3>
             </div>
            
-            <button class="edit-button" @click="hraRent">
-              <span class="edit-icon"><i class="fas fa-pen"></i></span>
+            <button
+              class="edit-button"
+              @click="hraRent"
+            >
+              <span class="edit-icon"><i class="fas fa-pen" /></span>
             </button>
           </div>
           <div
@@ -352,8 +418,11 @@
                 "
               ></i>
             </span> -->
-            <button class="edit-button" @click="hraLoan">
-              <span class="edit-icon"><i class="fas fa-pen"></i></span>
+            <button
+              class="edit-button"
+              @click="hraLoan"
+            >
+              <span class="edit-icon"><i class="fas fa-pen" /></span>
             </button>
           </div>
           <div
@@ -370,12 +439,8 @@
               "
             >
               <span style="grid-column: 1">Description</span>
-              <span style="grid-column: 2; text-align: center"
-                >Declared Amount</span
-              >
-              <span style="grid-column: 3; text-align: center"
-                >Approved Amount</span
-              >
+              <span style="grid-column: 2; text-align: center">Declared Amount</span>
+              <span style="grid-column: 3; text-align: center">Approved Amount</span>
             </div>
 
             <!-- Table Data Section -->
@@ -388,12 +453,8 @@
               "
             >
               <span style="grid-column: 1">Annual interest payable</span>
-              <span style="grid-column: 2; text-align: center"
-                >₹{{ declaredHomeLoan }}</span
-              >
-              <span style="grid-column: 3; text-align: center"
-                >₹{{ approvedHomeLoan }}</span
-              >
+              <span style="grid-column: 2; text-align: center">₹{{ declaredHomeLoan }}</span>
+              <span style="grid-column: 3; text-align: center">₹{{ approvedHomeLoan }}</span>
             </div>
 
             <div
@@ -404,15 +465,9 @@
                 border-bottom: 1px solid #eee;
               "
             >
-              <span style="grid-column: 1"
-                >Additional benefit under Section 80EE</span
-              >
-              <span style="grid-column: 2; text-align: center"
-                >₹{{ declaredHomeLoanInvestment }}</span
-              >
-              <span style="grid-column: 3; text-align: center"
-                >₹{{ approvedHomeLoanInvestment }}</span
-              >
+              <span style="grid-column: 1">Additional benefit under Section 80EE</span>
+              <span style="grid-column: 2; text-align: center">₹{{ declaredHomeLoanInvestment }}</span>
+              <span style="grid-column: 3; text-align: center">₹{{ approvedHomeLoanInvestment }}</span>
             </div>
 
             <div
@@ -424,12 +479,8 @@
               "
             >
               <span style="grid-column: 1">Section 80EEA</span>
-              <span style="grid-column: 2; text-align: center"
-                >₹{{ declaredHomeLoanDeduction }}</span
-              >
-              <span style="grid-column: 3; text-align: center"
-                >₹{{ approvedHomeLoanDeduction }}</span
-              >
+              <span style="grid-column: 2; text-align: center">₹{{ declaredHomeLoanDeduction }}</span>
+              <span style="grid-column: 3; text-align: center">₹{{ approvedHomeLoanDeduction }}</span>
             </div>
           </div>
         </div>
@@ -452,8 +503,11 @@
                 "
               ></i>
             </span> -->
-            <button class="edit-button" @click="leaveTravel">
-              <span class="edit-icon"><i class="fas fa-pen"></i></span>
+            <button
+              class="edit-button"
+              @click="leaveTravel"
+            >
+              <span class="edit-icon"><i class="fas fa-pen" /></span>
             </button>
           </div>
           <div
@@ -470,12 +524,8 @@
               "
             >
               <span style="grid-column: 1">Description</span>
-              <span style="grid-column: 2; text-align: center"
-                >Declared Amount</span
-              >
-              <span style="grid-column: 3; text-align: center"
-                >Approved Amount</span
-              >
+              <span style="grid-column: 2; text-align: center">Declared Amount</span>
+              <span style="grid-column: 3; text-align: center">Approved Amount</span>
             </div>
 
             <!-- Table Data Section -->
@@ -488,12 +538,8 @@
               "
             >
               <span style="grid-column: 1">LTA Amount</span>
-              <span style="grid-column: 2; text-align: center"
-                >₹{{ leaveDeclared }}</span
-              >
-              <span style="grid-column: 3; text-align: center"
-                >₹{{ leaveApproved }}</span
-              >
+              <span style="grid-column: 2; text-align: center">₹{{ leaveDeclared }}</span>
+              <span style="grid-column: 3; text-align: center">₹{{ leaveApproved }}</span>
             </div>
           </div>
         </div>
@@ -521,17 +567,26 @@
             ></i>
           </span> -->
           <div class="header-actions">
-            <button class="edit-button" @click="deduction">
-              <span class="edit-icon"><i class="fas fa-pen"></i></span>
+            <button
+              class="edit-button"
+              @click="deduction"
+            >
+              <span class="edit-icon"><i class="fas fa-pen" /></span>
             </button>
           </div>
         </div>
 
         <div class="deductions-table">
           <div class="table-header">
-            <div class="col section-col">Section</div>
-            <div class="col amount-col">Declared Amount</div>
-            <div class="col amount-col">Approved Amount</div>
+            <div class="col section-col">
+              Section
+            </div>
+            <div class="col amount-col">
+              Declared Amount
+            </div>
+            <div class="col amount-col">
+              Approved Amount
+            </div>
           </div>
 
           <div class="table-content">
@@ -540,16 +595,25 @@
               :key="index"
               class="table-row"
             >
-              <div class="col section-col">{{ item.section }}</div>
-              <div class="col amount-col">{{ item.declared }}</div>
-              <div class="col amount-col">{{ item.approved }}</div>
+              <div class="col section-col">
+                {{ item.section }}
+              </div>
+              <div class="col amount-col">
+                {{ item.declared }}
+              </div>
+              <div class="col amount-col">
+                {{ item.approved }}
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <v-dialog v-model="dialog" max-width="400">
+    <v-dialog
+      v-model="dialog"
+      max-width="400"
+    >
       <v-card>
         <v-card-title>Select Tax Regime</v-card-title>
         <v-card-text>
@@ -558,12 +622,22 @@
             :items="regimes"
             label="Choose a regime"
             variant="outlined"
-          ></v-select>
+          />
         </v-card-text>
         <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn text @click="dialog = false">Cancel</v-btn>
-          <v-btn color="primary" @click="saveRegime">Save</v-btn>
+          <v-spacer />
+          <v-btn
+            text
+            @click="dialog = false"
+          >
+            Cancel
+          </v-btn>
+          <v-btn
+            color="primary"
+            @click="saveRegime"
+          >
+            Save
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

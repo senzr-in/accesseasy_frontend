@@ -3,14 +3,14 @@
     <v-card>
       <v-card-title>
         {{ isAssigned ? "Assigned Employees" : "Unassigned Employees" }}
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-text-field
           v-model="search"
           append-icon="mdi-magnify"
           label="Search"
           single-line
           hide-details
-        ></v-text-field>
+        />
       </v-card-title>
 
       <v-data-table
@@ -24,21 +24,21 @@
         }"
         class="elevation-1"
       >
-        <template v-slot:item.assignedUser.first_name="{ item }">
+        <template #item.assignedUser.first_name="{ item }">
           {{ item.assignedUser.first_name || "N/A" }}
         </template>
-        <template v-slot:item.assignedDepartment="{ item }">
+        <template #item.assignedDepartment="{ item }">
           {{ getDepartmentName(item) }}
         </template>
-        <template v-slot:item.actions="{ item }">
+        <template #item.actions="{ item }">
           <v-switch
             color="success"
             hide-details
             inset
             :model-value="isAssigned"
-            @update:model-value="toggleAccess(item)"
             :label="isAssigned ? 'Assigned' : 'Unassigned'"
-          ></v-switch>
+            @update:model-value="toggleAccess(item)"
+          />
         </template>
       </v-data-table>
     </v-card>

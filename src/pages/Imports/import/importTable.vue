@@ -1,12 +1,15 @@
 <template>
   <div class="employee-container">
     <!-- Filter Panel -->
-    <div class="filter-panel" v-if="showFilters && tenantId">
+    <div
+      v-if="showFilters && tenantId"
+      class="filter-panel"
+    >
       <div class="filter-content">
         <FilterComponent
-          :tenantId="tenantId"
-          :initialFilters="initialFilters"
-          :initiallyVisible="true"
+          :tenant-id="tenantId"
+          :initial-filters="initialFilters"
+          :initially-visible="true"
           :filter-schema="pageFilters"
           @apply-filters="handleApplyFilters"
           @filter-visibility-changed="onFilterVisibilityChanged"
@@ -14,22 +17,25 @@
       </div>
     </div>
 
-    <div class="main-content" :class="{ 'full-width': !showFilters }">
+    <div
+      class="main-content"
+      :class="{ 'full-width': !showFilters }"
+    >
       <!-- DataTableWrapper Implementation -->
       <DataTableWrapper
         :search-query="search"
-        @update:searchQuery="onSearchChange($event)"
         :has-error="showError"
         wrapper-class="custom-table-wrapper"
+        @update:search-query="onSearchChange($event)"
       >
         <template #before-search>
           <button
             v-if="tenantId"
             class="filter-toggle-static"
-            @click="toggleFilters"
             :class="{ active: hasActiveFilters }"
             :title="showFilters ? 'Hide filters' : 'Show filters'"
             aria-label="Toggle filters"
+            @click="toggleFilters"
           >
             <svg
               width="20"
@@ -41,7 +47,10 @@
             >
               <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46" />
             </svg>
-            <div v-if="hasActiveFilters" class="filter-indicator"></div>
+            <div
+              v-if="hasActiveFilters"
+              class="filter-indicator"
+            />
           </button>
         </template>
         <!-- Error State -->
@@ -59,7 +68,7 @@
             title="No imports found"
             message="Start by creating your first import"
             :primary-action="{ text: 'Clear filters', icon: 'mdi-filters' }"
-            @primaryAction="clearFilters"
+            @primary-action="clearFilters"
           />
         </template>
 
@@ -74,10 +83,10 @@
             :sort-direction="currentSortDirection"
             :expandable="false"
             :row-clickable="true"
-            @update:selectedItems="selectedItems = $event"
-            @update:sortBy="currentSortBy = $event"
-            @update:sortDirection="currentSortDirection = $event"
-            @rowClick="editItem"
+            @update:selected-items="selectedItems = $event"
+            @update:sort-by="currentSortBy = $event"
+            @update:sort-direction="currentSortDirection = $event"
+            @row-click="editItem"
             @sort="handleSort"
           >
             <!-- Custom cell content for file -->
@@ -91,7 +100,10 @@
               >
                 {{ item.generatedFile.title }}
               </v-chip>
-              <span v-else class="text-grey-500">No file</span>
+              <span
+                v-else
+                class="text-grey-500"
+              >No file</span>
             </template>
 
             <!-- Custom cell content for status -->
@@ -139,7 +151,7 @@
             :items-per-page="itemsPerPage"
             :total-items="totalItems"
             @update:page="onPageChange"
-            @update:itemsPerPage="onItemsPerPageChange"
+            @update:items-per-page="onItemsPerPageChange"
           />
         </template>
       </DataTableWrapper>

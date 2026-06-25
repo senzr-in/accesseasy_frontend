@@ -1,9 +1,17 @@
 <template>
-  <div class="modal-overlay" @click.self="$emit('close')">
+  <div
+    class="modal-overlay"
+    @click.self="$emit('close')"
+  >
     <div class="modal-content">
       <div class="modal-header">
         <h2>Import Instructions</h2>
-        <button class="close-btn" @click="$emit('close')">&times;</button>
+        <button
+          class="close-btn"
+          @click="$emit('close')"
+        >
+          &times;
+        </button>
       </div>
 
       <div class="modal-body">
@@ -291,7 +299,7 @@
                     <td>Engineering</td>
                     <td>500000</td>
                     <td>15/01/2023</td>
-                    <td></td>
+                    <td />
                     <td>123456789012</td>
                     <td>987654321012</td>
                     <td>ABC1234567</td>
@@ -327,7 +335,7 @@
                     <td>Marketing</td>
                     <td>750000</td>
                     <td>2022-11-01</td>
-                    <td></td>
+                    <td />
                     <td>234567890123</td>
                     <td>876543210123</td>
                     <td>DEF2345678</td>
@@ -363,7 +371,7 @@
                     <td>IT</td>
                     <td>600000</td>
                     <td>Mar 05, 2023</td>
-                    <td></td>
+                    <td />
                     <td>345678901234</td>
                     <td>765432101234</td>
                     <td>GHI3456789</td>
@@ -378,14 +386,22 @@
 
         <div class="confirmation-checkbox">
           <label>
-            <input type="checkbox" v-model="hasReadInstructions" />
+            <input
+              v-model="hasReadInstructions"
+              type="checkbox"
+            >
             I have read and understood the import instructions
           </label>
         </div>
       </div>
 
       <div class="modal-footer">
-        <button class="cancel-btn" @click="$emit('close')">Cancel</button>
+        <button
+          class="cancel-btn"
+          @click="$emit('close')"
+        >
+          Cancel
+        </button>
         <button
           class="continue-btn"
           :disabled="!hasReadInstructions"

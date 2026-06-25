@@ -23,7 +23,11 @@ const isIconString = computed(() => typeof props.icon === "string");
     @click="emit('click', $event)"
   >
     <!-- If icon is passed as component -->
-    <component :is="icon" v-if="!isIconString" class="action-btn__icon" />
+    <component
+      :is="icon"
+      v-if="!isIconString"
+      class="action-btn__icon"
+    />
     <!-- If icon is a simple string / emoji -->
     <span v-else>{{ icon }}</span>
   </button>

@@ -2,12 +2,15 @@
 <template>
   <div class="logs-container">
     <!-- Filter Panel -->
-    <div class="filter-panel" v-if="showFilters && tenantId">
+    <div
+      v-if="showFilters && tenantId"
+      class="filter-panel"
+    >
       <div class="filter-content">
         <FilterComponent
-          :tenantId="tenantId"
-          :initialFilters="initialFilters"
-          :initiallyVisible="true"
+          :tenant-id="tenantId"
+          :initial-filters="initialFilters"
+          :initially-visible="true"
           :filter-schema="pageFilters"
           @apply-filters="handleApplyFilters"
           @filter-visibility-changed="onFilterVisibilityChanged"
@@ -16,10 +19,13 @@
     </div>
 
     <!-- Main Content -->
-    <div class="main-content" :class="{ 'full-width': !showFilters }">
+    <div
+      class="main-content"
+      :class="{ 'full-width': !showFilters }"
+    >
       <!-- Export Dropdown -->
       <data-table-wrapper
-        v-model:searchQuery="search"
+        v-model:search-query="search"
         :search-placeholder="'Search ...'"
         :show-search="true"
         :has-error="showError"
@@ -29,10 +35,10 @@
           <button
             v-if="tenantId"
             class="filter-toggle-static"
-            @click="toggleFilters"
             :class="{ active: hasActiveFilters }"
             :title="showFilters ? 'Hide filters' : 'Show filters'"
             aria-label="Toggle filters"
+            @click="toggleFilters"
           >
             <svg
               width="20"
@@ -44,7 +50,10 @@
             >
               <polygon points="22,3 2,3 10,12.46 10,19 14,21 14,12.46" />
             </svg>
-            <div v-if="hasActiveFilters" class="filter-indicator"></div>
+            <div
+              v-if="hasActiveFilters"
+              class="filter-indicator"
+            />
           </button>
         </template>
         <template #toolbar-actions>
@@ -53,7 +62,7 @@
               text="Export"
               :items="exportItems"
               placement="bottom-right"
-              @itemClick="handleExportClick"
+              @item-click="handleExportClick"
             />
           </div>
         </template>
@@ -81,7 +90,7 @@
             title="No attendance data found"
             message="Try adjusting your filters or check back later"
             :primary-action="{ text: 'Clear Filters', icon: 'X' }"
-            @primaryAction="clearFilters"
+            @primary-action="clearFilters"
           />
         </template>
 
@@ -94,7 +103,7 @@
             :sort-direction="sortBy.order"
             :row-clickable="true"
             @sort="handleSort"
-            @rowClick="handleRowClick"
+            @row-click="handleRowClick"
           >
             <!-- Custom Cell for Employee ID -->
             <template #cell-employeeId="{ item }">
@@ -148,13 +157,13 @@
         </template>
 
         <!-- Pagination Slot -->
-        <template v-slot:pagination>
+        <template #pagination>
           <CustomPagination
             v-model:page="page"
-            v-model:itemsPerPage="itemsPerPage"
+            v-model:items-per-page="itemsPerPage"
             :total-items="totalItems"
             @update:page="handlePageChange"
-            @update:itemsPerPage="handleItemsPerPageChange"
+            @update:items-per-page="handleItemsPerPageChange"
           />
         </template>
       </data-table-wrapper>

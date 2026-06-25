@@ -3,14 +3,14 @@
   <DataTable
     :items="tasks"
     :columns="taskColumns"
-    :selectedItems="selectedTasks"
-    :showSelection="true"
+    :selected-items="selectedTasks"
+    :show-selection="true"
     :expandable="false"
-    :sortBy="sortBy"
-    :sortDirection="sortDirection"
-    @update:selectedItems="handleSelectedChange"
+    :sort-by="sortBy"
+    :sort-direction="sortDirection"
+    @update:selected-items="handleSelectedChange"
     @sort="handleSort"
-    @rowClick="handleRowClick"
+    @row-click="handleRowClick"
   >
     <!-- Employee ID -->
     <template #cell-employeeId="{ item }">
@@ -52,7 +52,9 @@
     <!-- Expanded Content -->
     <template #expanded-content="{ item }">
       <div class="expanded-section">
-        <h4 class="expanded-header">Other Details</h4>
+        <h4 class="expanded-header">
+          Other Details
+        </h4>
         <TaskExpandedDetails :task="item" />
       </div>
     </template>

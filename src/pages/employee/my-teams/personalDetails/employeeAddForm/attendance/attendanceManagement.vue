@@ -1,6 +1,12 @@
 <template>
-  <v-container fluid class="attendance-settings-editor-container pa-0">
-    <v-card flat class="attendance-card">
+  <v-container
+    fluid
+    class="attendance-settings-editor-container pa-0"
+  >
+    <v-card
+      flat
+      class="attendance-card"
+    >
       <v-card-title class="text-h6 font-weight-bold d-flex align-center">
         <!-- <v-icon class="mr-2" color="black">mdi-list-box-outline</v-icon>
         Select Attendance Policy -->
@@ -80,7 +86,7 @@
         </v-alert>
       </v-card-text> -->
 
-      <v-divider class="my-6"></v-divider>
+      <v-divider class="my-6" />
 
       <!-- <v-card-title class="text-h6 font-weight-bold mb-4 d-flex align-center">
         <v-icon class="mr-2" color="black">mdi-calendar-clock</v-icon>
@@ -100,7 +106,10 @@
         Employee Holiday Settings
       </v-card-title> -->
       <v-card-text>
-        <HolidaySettings v-model="internalHolidayIds" :tenant-id="tenantId" />
+        <HolidaySettings
+          v-model="internalHolidayIds"
+          :tenant-id="tenantId"
+        />
       </v-card-text>
     </v-card>
   </v-container>

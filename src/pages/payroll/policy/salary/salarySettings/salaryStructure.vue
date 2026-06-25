@@ -1,9 +1,14 @@
 <template>
-  <v-card flat class="earnings-manager">
+  <v-card
+    flat
+    class="earnings-manager"
+  >
     <div class="sticky-header">
       <v-card-text>
         <div class="d-flex justify-space-between align-center mb-4">
-          <h3 class="text-h6">Earnings</h3>
+          <h3 class="text-h6">
+            Earnings
+          </h3>
           <!-- <div class="d-flex">
             <v-btn v-if="!isEditing" color="black" @click="startEdit">
               Edit
@@ -18,11 +23,14 @@
     </div>
     <v-container v-if="loading">
       <v-row>
-        <v-col cols="12" class="text-center">
+        <v-col
+          cols="12"
+          class="text-center"
+        >
           <v-progress-circular
             indeterminate
             color="black"
-          ></v-progress-circular>
+          />
         </v-col>
       </v-row>
     </v-container>
@@ -30,7 +38,11 @@
       <div class="scroll-content">
         <v-card-text>
           <div class="fields-container">
-            <v-row v-for="(field, index) in fields" :key="index" class="mb-4">
+            <v-row
+              v-for="(field, index) in fields"
+              :key="index"
+              class="mb-4"
+            >
               <v-col cols="4">
                 <div
                   :style="{
@@ -59,8 +71,8 @@
                   density="comfortable"
                   hide-details
                   :disabled="!isEditing"
-                  @update:modelValue="handleTypeChange(index, $event)"
-                ></v-select>
+                  @update:model-value="handleTypeChange(index, $event)"
+                />
               </v-col>
               <v-col cols="4">
                 <v-text-field
@@ -72,18 +84,21 @@
                   :prefix="getPrefix(field.type)"
                   :placeholder="getPlaceholder(field.type)"
                   :disabled="!isEditing"
-                ></v-text-field>
+                />
               </v-col>
-              <v-col cols="1" class="d-flex align-center justify-end">
+              <v-col
+                cols="1"
+                class="d-flex align-center justify-end"
+              >
                 <v-btn
                   v-if="isEditing"
                   icon="mdi-delete"
                   variant="text"
                   size="small"
                   :color="field.name === 'Basic Pay' ? 'grey' : 'black'"
-                  @click="deleteField(index)"
                   :disabled="field.name === 'Basic Pay'"
-                ></v-btn>
+                  @click="deleteField(index)"
+                />
               </v-col>
             </v-row>
           </div>
@@ -125,8 +140,12 @@
       location="top"
     >
       {{ snackbarText }}
-      <template v-slot:actions>
-        <v-btn color="white" variant="text" @click="snackbar = false">
+      <template #actions>
+        <v-btn
+          color="white"
+          variant="text"
+          @click="snackbar = false"
+        >
           Close
         </v-btn>
       </template>

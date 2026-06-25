@@ -14,8 +14,12 @@
           hide-details
           clearable
           style="width: 200px; margin-right: 16px;"
-        ></v-select>
-        <v-btn color="primary" prepend-icon="mdi-refresh" @click="refreshLogs">
+        />
+        <v-btn
+          color="primary"
+          prepend-icon="mdi-refresh"
+          @click="refreshLogs"
+        >
           Refresh
         </v-btn>
       </div>
@@ -28,11 +32,11 @@
         :loading="loading"
         class="elevation-1"
       >
-        <template v-slot:item.timestamp="{ item }">
+        <template #item.timestamp="{ item }">
           {{ formatTimestamp(item.timestamp) }}
         </template>
         
-        <template v-slot:item.severity="{ item }">
+        <template #item.severity="{ item }">
           <v-chip
             :color="getSeverityColor(item.severity)"
             size="small"
@@ -41,17 +45,17 @@
           </v-chip>
         </template>
 
-        <template v-slot:item.snapshot="{ item }">
+        <template #item.snapshot="{ item }">
           <v-img
             :src="item.snapshotUrl"
             width="80"
             height="45"
             cover
             class="rounded bg-grey-lighten-2"
-          ></v-img>
+          />
         </template>
         
-        <template v-slot:item.actions="{ item }">
+        <template #item.actions="{ item }">
           <v-btn
             size="small"
             color="primary"
@@ -66,11 +70,18 @@
     </v-card>
 
     <!-- Video Player Dialog Placeholder -->
-    <v-dialog v-model="videoDialog" max-width="800px">
+    <v-dialog
+      v-model="videoDialog"
+      max-width="800px"
+    >
       <v-card>
         <v-card-title class="d-flex justify-space-between align-center">
           <span>Event Playback</span>
-          <v-btn icon="mdi-close" variant="text" @click="videoDialog = false"></v-btn>
+          <v-btn
+            icon="mdi-close"
+            variant="text"
+            @click="videoDialog = false"
+          />
         </v-card-title>
         <v-card-text class="pa-0">
           <div style="height: 450px;">

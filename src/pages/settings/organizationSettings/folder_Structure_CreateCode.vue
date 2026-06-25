@@ -1,52 +1,68 @@
 <template>
   <div class="organization-settings">
     <h3>Organization Settings</h3>
-    <br />
+    <br>
     <v-container>
-      <v-form ref="form" v-model="isFormValid">
+      <v-form
+        ref="form"
+        v-model="isFormValid"
+      >
         <v-row>
           <!-- Tenant Name (Read-only) -->
-          <v-col cols="12" sm="6">
+          <v-col
+            cols="12"
+            sm="6"
+          >
             <v-text-field
-              label="Tenant Name"
               v-model="form.tenantName"
+              label="Tenant Name"
               readonly
               variant="outlined"
               density="compact"
-            ></v-text-field>
+            />
           </v-col>
 
           <!-- Shop Account -->
-          <v-col cols="12" sm="6">
+          <v-col
+            cols="12"
+            sm="6"
+          >
             <v-text-field
-              label="Shop Account"
               v-model="form.shopAccount"
+              label="Shop Account"
               :readonly="!isEditMode"
               variant="outlined"
               density="compact"
               required
-            ></v-text-field>
+            />
           </v-col>
 
           <!-- PF Account -->
-          <v-col cols="12" sm="6">
+          <v-col
+            cols="12"
+            sm="6"
+          >
             <v-text-field
-              label="PF Account"
               v-model="form.pfAccount"
+              label="PF Account"
               :readonly="!isEditMode"
               variant="outlined"
               density="compact"
               required
-            ></v-text-field>
+            />
           </v-col>
 
           <!-- Create Folder Structure Button -->
-          <v-col cols="12" sm="6" class="d-flex align-center">
+          <v-col
+            cols="12"
+            sm="6"
+            class="d-flex align-center"
+          >
             <v-btn
               color="primary"
-              @click="createFolderStructure"
               :loading="isCreatingFolders"
               :disabled="isCreatingFolders"
+              @click="createFolderStructure"
             >
               Create Folder Structure
             </v-btn>
@@ -55,10 +71,13 @@
 
         <!-- ESI Account Input & Select -->
         <v-row>
-          <v-col cols="12" sm="4">
+          <v-col
+            cols="12"
+            sm="4"
+          >
             <v-text-field
-              label="ESI Account"
               v-model="newEsiAccount"
+              label="ESI Account"
               variant="outlined"
               density="compact"
               required
@@ -66,10 +85,13 @@
             />
           </v-col>
 
-          <v-col cols="12" sm="4">
+          <v-col
+            cols="12"
+            sm="4"
+          >
             <v-select
-              label="select State"
               v-model="newEsiType"
+              label="select State"
               :items="availableStates"
               variant="outlined"
               density="compact"
@@ -78,11 +100,14 @@
             />
           </v-col>
 
-          <v-col cols="12" sm="4">
+          <v-col
+            cols="12"
+            sm="4"
+          >
             <v-btn
               :readonly="!isEditMode"
-              @click="addEsiAccount"
               color="primary"
+              @click="addEsiAccount"
             >
               Add ESI Account
             </v-btn>
@@ -99,11 +124,21 @@
             md="4"
             class="d-flex flex-wrap align-center gap-2"
           >
-            <v-chip class="ma-2" label color="primary" text-color="white">
+            <v-chip
+              class="ma-2"
+              label
+              color="primary"
+              text-color="white"
+            >
               {{ esi.account }}
             </v-chip>
 
-            <v-chip class="ma-2" label color="secondary" text-color="white">
+            <v-chip
+              class="ma-2"
+              label
+              color="secondary"
+              text-color="white"
+            >
               {{ esi.type }}
             </v-chip>
 
@@ -112,10 +147,12 @@
               color="black"
               size="small"
               :readonly="!isEditMode"
-              @click="removeEsiAccount(index)"
               class="ml-2"
+              @click="removeEsiAccount(index)"
             >
-              <v-icon size="16">mdi-close</v-icon>
+              <v-icon size="16">
+                mdi-close
+              </v-icon>
             </v-btn>
           </v-col>
         </v-row>
@@ -124,7 +161,11 @@
         <v-row>
           <v-col cols="12">
             <!-- Edit Button -->
-            <v-btn v-if="!isEditMode" color="black" @click="toggleEditMode">
+            <v-btn
+              v-if="!isEditMode"
+              color="black"
+              @click="toggleEditMode"
+            >
               Edit
             </v-btn>
 
@@ -132,13 +173,17 @@
             <v-btn
               v-if="isEditMode"
               color="black"
-              @click="saveChanges"
               :disabled="!isFormValid"
               style="margin-right: 10px"
+              @click="saveChanges"
             >
               Save
             </v-btn>
-            <v-btn v-if="isEditMode" color="error" @click="cancelEdit">
+            <v-btn
+              v-if="isEditMode"
+              color="error"
+              @click="cancelEdit"
+            >
               Cancel
             </v-btn>
           </v-col>
@@ -147,7 +192,10 @@
     </v-container>
 
     <!-- Folder Structure Creation Dialog -->
-    <v-dialog v-model="folderDialog" max-width="500px">
+    <v-dialog
+      v-model="folderDialog"
+      max-width="500px"
+    >
       <v-card>
         <v-card-title>Create Folder Structure</v-card-title>
         <v-card-text>
@@ -159,7 +207,7 @@
             label="Select Tenant"
             variant="outlined"
             density="compact"
-          ></v-select>
+          />
 
           <v-alert
             v-if="folderCreationStatus"
@@ -173,22 +221,22 @@
             v-if="isCreatingFolders && !folderCreationStatus"
             indeterminate
             color="primary"
-          ></v-progress-linear>
+          />
         </v-card-text>
         <v-card-actions>
-          <v-spacer></v-spacer>
+          <v-spacer />
           <v-btn
             color="primary"
-            @click="confirmCreateFolderStructure"
             :disabled="isCreatingFolders || !selectedTenantId"
             :loading="isCreatingFolders"
+            @click="confirmCreateFolderStructure"
           >
             Create
           </v-btn>
           <v-btn
             color="error"
-            @click="folderDialog = false"
             :disabled="isCreatingFolders"
+            @click="folderDialog = false"
           >
             Close
           </v-btn>
@@ -204,7 +252,9 @@
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-check-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-check-circle
+        </v-icon>
         {{ successMessage }}
       </div>
     </v-snackbar>
@@ -216,7 +266,9 @@
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-alert-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-alert-circle
+        </v-icon>
         {{ errorMessage }}
       </div>
     </v-snackbar>
@@ -266,6 +318,9 @@ export default {
       const selected = this.esiAccounts.map((e) => e.type);
       return this.esiStates.filter((state) => !selected.includes(state));
     },
+  },
+  mounted() {
+    this.fetchData();
   },
   methods: {
     addEsiAccount() {
@@ -663,9 +718,6 @@ export default {
       this.folderCreationStatus += " Cleanup completed.";
       this.createdFolders = [];
     },
-  },
-  mounted() {
-    this.fetchData();
   },
 };
 </script>

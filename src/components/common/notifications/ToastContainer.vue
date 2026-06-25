@@ -1,7 +1,11 @@
 <!-- /src/components/common/notifications/ToastContainer.vue -->
 <template>
   <div class="toast-container">
-    <TransitionGroup name="toast" tag="div" class="toast-list">
+    <TransitionGroup
+      name="toast"
+      tag="div"
+      class="toast-list"
+    >
       <ToastNotification
         v-for="toast in toasts"
         :key="toast.id"

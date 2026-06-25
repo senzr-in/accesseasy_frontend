@@ -1,9 +1,9 @@
 <template>
   <button 
     class="expand-button"
-    @click="$emit('toggle')"
     :aria-expanded="isExpanded"
     title="Toggle Details"
+    @click="$emit('toggle')"
   >
     <ChevronDown 
       :size="16"

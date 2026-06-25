@@ -3,14 +3,19 @@
   <div class="filter-select-wrapper">
     <select
       :value="modelValue"
+      class="filter-select"
+      :disabled="disabled"
       @change="
         $emit('update:modelValue', $event.target.value);
         $emit('change', $event.target.value);
       "
-      class="filter-select"
-      :disabled="disabled"
     >
-      <option v-if="placeholder" value="">{{ placeholder }}</option>
+      <option
+        v-if="placeholder"
+        value=""
+      >
+        {{ placeholder }}
+      </option>
       <option
         v-for="option in options"
         :key="getOptionValue(option)"
@@ -21,7 +26,10 @@
       </option>
     </select>
 
-    <ChevronDown :size="20" class="select-icon" />
+    <ChevronDown
+      :size="20"
+      class="select-icon"
+    />
   </div>
 </template>
 

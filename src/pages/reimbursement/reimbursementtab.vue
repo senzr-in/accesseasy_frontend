@@ -14,14 +14,21 @@
         class="custom-tab"
         @click="navigateTo(tab)"
       >
-        <v-icon v-if="tab.icon" :icon="tab.icon" class="mr-2"></v-icon>
+        <v-icon
+          v-if="tab.icon"
+          :icon="tab.icon"
+          class="mr-2"
+        />
         {{ tab.label }}
       </v-tab>
     </v-tabs>
 
     <!-- Routed Content -->
-    <v-card class="tab-content-wrapper" elevation="0">
-      <router-view></router-view>
+    <v-card
+      class="tab-content-wrapper"
+      elevation="0"
+    >
+      <router-view />
     </v-card>
   </v-container>
 </template>

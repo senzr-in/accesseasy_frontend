@@ -1,27 +1,36 @@
 <template>
   <v-app>
-    <v-container class="app-wrapper" fluid>
-      <div v-if="loading" class="d-flex justify-center align-center pa-6">
+    <v-container
+      class="app-wrapper"
+      fluid
+    >
+      <div
+        v-if="loading"
+        class="d-flex justify-center align-center pa-6"
+      >
         <v-progress-circular
           indeterminate
           color="#68ade1"
           size="48"
           width="5"
-        ></v-progress-circular>
+        />
       </div>
       <div v-else>
         <!-- Device Report Table -->
-        <DataTableWrapper title="Device Reports" :showSearch="true">
+        <DataTableWrapper
+          title="Device Reports"
+          :show-search="true"
+        >
           <template #toolbar-actions>
             <BaseButton
               variant="primary"
               size="md"
               text="Generate All Devices Report"
-              :leftIcon="Download"
-              @click="generateAllDevicesReport"
+              :left-icon="Download"
               :loading="isGeneratingAll"
               :disabled="isGenerating || devices.length === 0"
               class="mr-2"
+              @click="generateAllDevicesReport"
             />
             <!-- <BaseButton
               variant="primary"
@@ -42,7 +51,10 @@
           />
 
           <!-- Error State -->
-          <div v-else-if="devicesError" class="text-center p-8 text-red-500">
+          <div
+            v-else-if="devicesError"
+            class="text-center p-8 text-red-500"
+          >
             Failed to load devices: {{ devicesError }}
             <div class="mt-4">
               <BaseButton
@@ -59,7 +71,7 @@
             v-else
             :items="formattedDevices"
             :columns="deviceHeaders"
-            :showSelection="false"
+            :show-selection="false"
             :expandable="false"
             show-header
             :row-clickable="false"
@@ -70,7 +82,7 @@
                 variant="primary"
                 size="sm"
                 text="Generate Report"
-                :leftIcon="Wrench"
+                :left-icon="Wrench"
                 :loading="isGenerating && selectedDevice === item.id"
                 :disabled="isGenerating || isGeneratingAll"
                 @click="() => generateDeviceReport(item.rawData)"
@@ -79,10 +91,16 @@
 
             <template #no-data>
               <div class="text-center py-8">
-                <v-icon size="64" color="grey" class="mb-4"
-                  >mdi-devices-off</v-icon
+                <v-icon
+                  size="64"
+                  color="grey"
+                  class="mb-4"
                 >
-                <p class="text-grey mb-4">No devices found</p>
+                  mdi-devices-off
+                </v-icon>
+                <p class="text-grey mb-4">
+                  No devices found
+                </p>
                 <BaseButton
                   text="Refresh"
                   variant="primary"
@@ -95,30 +113,56 @@
         </DataTableWrapper>
 
         <!-- Error Snackbar -->
-        <v-snackbar v-model="showError" color="error" :timeout="5000">
+        <v-snackbar
+          v-model="showError"
+          color="error"
+          :timeout="5000"
+        >
           {{ errorMessage }}
-          <template v-slot:action="{ attrs }">
-            <v-btn text v-bind="attrs" @click="showError = false">Close</v-btn>
+          <template #action="{ attrs }">
+            <v-btn
+              text
+              v-bind="attrs"
+              @click="showError = false"
+            >
+              Close
+            </v-btn>
           </template>
         </v-snackbar>
 
         <!-- Success Snackbar -->
-        <v-snackbar v-model="showSuccess" color="success" :timeout="3000">
+        <v-snackbar
+          v-model="showSuccess"
+          color="success"
+          :timeout="3000"
+        >
           {{ successMessage }}
-          <template v-slot:action="{ attrs }">
-            <v-btn text v-bind="attrs" @click="showSuccess = false"
-              >Close</v-btn
+          <template #action="{ attrs }">
+            <v-btn
+              text
+              v-bind="attrs"
+              @click="showSuccess = false"
             >
+              Close
+            </v-btn>
           </template>
         </v-snackbar>
 
         <!-- Warning Snackbar (Yellow) -->
-        <v-snackbar v-model="showWarning" color="warning" :timeout="4000">
+        <v-snackbar
+          v-model="showWarning"
+          color="warning"
+          :timeout="4000"
+        >
           {{ warningMessage }}
-          <template v-slot:action="{ attrs }">
-            <v-btn text v-bind="attrs" @click="showWarning = false"
-              >Close</v-btn
+          <template #action="{ attrs }">
+            <v-btn
+              text
+              v-bind="attrs"
+              @click="showWarning = false"
             >
+              Close
+            </v-btn>
           </template>
         </v-snackbar>
       </div>

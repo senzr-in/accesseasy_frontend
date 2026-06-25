@@ -1,6 +1,9 @@
 <template>
   <v-container fluid>
-    <v-row class="mb-4" align="center">
+    <v-row
+      class="mb-4"
+      align="center"
+    >
       <v-col cols="6">
         <h2 class="text-h5 font-weight-bold">
           {{ props.editingDevice ? "Edit Device" : "Create Device" }}
@@ -10,15 +13,15 @@
         <BaseButton
           variant="ghost"
           text="Cancel"
-          @click="handleCancel"
           class="mr-2"
-        ></BaseButton>
+          @click="handleCancel"
+        />
         <BaseButton
           variant="primary"
           :text="props.editingDevice ? 'Update' : 'Save'"
           :loading="isSaving"
           @click="handleSave"
-        ></BaseButton>
+        />
       </v-col>
     </v-row>
 
@@ -26,7 +29,10 @@
     <v-card class="mb-8">
       <v-card-title>Device Details</v-card-title>
       <v-card-text>
-        <v-form ref="formRef" @submit.prevent="handleSave">
+        <v-form
+          ref="formRef"
+          @submit.prevent="handleSave"
+        >
           <v-row>
             <v-col cols="6">
               <v-select
@@ -39,7 +45,7 @@
                 :rules="[(v) => !!v || 'Device type is required']"
                 required
                 @update:model-value="handleDeviceTypeChange"
-              ></v-select>
+              />
             </v-col>
 
             <v-col cols="6">
@@ -49,7 +55,7 @@
                 variant="outlined"
                 :rules="[(v) => !!v || 'Device name is required']"
                 required
-              ></v-text-field>
+              />
             </v-col>
 
             <v-col cols="6">
@@ -59,7 +65,7 @@
                 required
                 variant="outlined"
                 :rules="[(v) => !!v || 'Serial number is required']"
-              ></v-text-field>
+              />
             </v-col>
 
             <v-col cols="6">
@@ -71,7 +77,7 @@
                 item-value="id"
                 variant="outlined"
                 :loading="loadingBranches"
-              ></v-select>
+              />
             </v-col>
           </v-row>
         </v-form>
@@ -82,8 +88,15 @@
     <v-card>
       <v-card-title>Door Configuration</v-card-title>
       <v-card-text>
-        <div v-if="!form.controllerName" class="text-center text-grey py-8">
-          <v-icon size="64" color="grey lighten-1" class="mb-4">
+        <div
+          v-if="!form.controllerName"
+          class="text-center text-grey py-8"
+        >
+          <v-icon
+            size="64"
+            color="grey lighten-1"
+            class="mb-4"
+          >
             mdi-devices
           </v-icon>
           <div>Please select a device type first</div>
@@ -100,7 +113,11 @@
               cols="12"
               class="mb-4"
             >
-              <v-card outlined class="door-card h-100" elevation="0">
+              <v-card
+                outlined
+                class="door-card h-100"
+                elevation="0"
+              >
                 <v-card-title class="bg-grey-lighten-3 pa-4">
                   {{ doorTab.label.toLowerCase() }} Configuration
                 </v-card-title>
@@ -109,7 +126,11 @@
                     <!-- First Row -->
                     <v-row>
                       <v-col cols="4">
-                        <v-card outlined elevation="0" class="h-100">
+                        <v-card
+                          outlined
+                          elevation="0"
+                          class="h-100"
+                        >
                           <v-card-text>
                             <div class="mb-2 font-weight-medium">
                               Select Door
@@ -125,13 +146,17 @@
                               @update:model-value="
                                 onDoorSelectionChange(doorTab.value)
                               "
-                            ></v-select>
+                            />
                           </v-card-text>
                         </v-card>
                       </v-col>
 
                       <v-col cols="4">
-                        <v-card outlined elevation="0" class="h-100">
+                        <v-card
+                          outlined
+                          elevation="0"
+                          class="h-100"
+                        >
                           <v-card-text class="pa-4">
                             <div
                               class="mb-2 font-weight-medium d-flex align-center"
@@ -139,7 +164,7 @@
                               Door open duration
                               <v-tooltip location="top">
                                 <template
-                                  v-slot:activator="{ props: tooltipProps }"
+                                  #activator="{ props: tooltipProps }"
                                 >
                                   <v-icon
                                     v-bind="tooltipProps"
@@ -150,10 +175,8 @@
                                     mdi-information
                                   </v-icon>
                                 </template>
-                                <span class="custom-tooltip"
-                                  >The number of seconds the door should remain
-                                  open.</span
-                                >
+                                <span class="custom-tooltip">The number of seconds the door should remain
+                                  open.</span>
                               </v-tooltip>
                             </div>
                             <v-text-field
@@ -171,13 +194,17 @@
                                   'dotlDuration'
                                 )
                               "
-                            ></v-text-field>
+                            />
                           </v-card-text>
                         </v-card>
                       </v-col>
 
                       <v-col cols="4">
-                        <v-card outlined elevation="0" class="h-100">
+                        <v-card
+                          outlined
+                          elevation="0"
+                          class="h-100"
+                        >
                           <v-card-text class="pa-4">
                             <div
                               class="mb-2 font-weight-medium d-flex align-center"
@@ -185,7 +212,7 @@
                               DOTL Alarm Delay
                               <v-tooltip location="top">
                                 <template
-                                  v-slot:activator="{ props: tooltipProps }"
+                                  #activator="{ props: tooltipProps }"
                                 >
                                   <v-icon
                                     v-bind="tooltipProps"
@@ -196,10 +223,8 @@
                                     mdi-information
                                   </v-icon>
                                 </template>
-                                <span class="custom-tooltip"
-                                  >The delay (in seconds) after the door open
-                                  duration ends before the alarm sounds.</span
-                                >
+                                <span class="custom-tooltip">The delay (in seconds) after the door open
+                                  duration ends before the alarm sounds.</span>
                               </v-tooltip>
                             </div>
                             <v-row align="center">
@@ -222,9 +247,12 @@
                                       'dotlDelay'
                                     )
                                   "
-                                ></v-text-field>
+                                />
                               </v-col>
-                              <v-col cols="5" class="text-right">
+                              <v-col
+                                cols="5"
+                                class="text-right"
+                              >
                                 <v-switch
                                   v-model="
                                     form.doors[doorTab.value].alarmEnabled
@@ -236,7 +264,7 @@
                                   @update:model-value="
                                     onAlarmToggle(doorTab.value)
                                   "
-                                ></v-switch>
+                                />
                               </v-col>
                             </v-row>
                           </v-card-text>
@@ -272,21 +300,28 @@
 
                       <!-- Updated auto door open schedule -->
                       <v-col cols="8">
-                        <v-card outlined elevation="0" class="h-100">
+                        <v-card
+                          outlined
+                          elevation="0"
+                          class="h-100"
+                        >
                           <v-card-text class="pa-4">
                             <v-row
                               align="center"
                               class="flex-nowrap"
                               no-gutters
                             >
-                              <v-col cols="5" class="d-flex align-center">
+                              <v-col
+                                cols="5"
+                                class="d-flex align-center"
+                              >
                                 <span
                                   class="font-weight-medium d-flex align-center"
                                 >
                                   Auto door open schedule (passive Mode)
                                   <v-tooltip location="top">
                                     <template
-                                      v-slot:activator="{ props: tooltipProps }"
+                                      #activator="{ props: tooltipProps }"
                                     >
                                       <v-icon
                                         v-bind="tooltipProps"
@@ -297,16 +332,17 @@
                                         mdi-information
                                       </v-icon>
                                     </template>
-                                    <span class="custom-tooltip"
-                                      >When enabled, the door stays open 24
+                                    <span class="custom-tooltip">When enabled, the door stays open 24
                                       hours or as per the selected time zone
-                                      schedule.</span
-                                    >
+                                      schedule.</span>
                                   </v-tooltip>
                                 </span>
                               </v-col>
 
-                              <v-col cols="2" class="text-right">
+                              <v-col
+                                cols="2"
+                                class="text-right"
+                              >
                                 <v-switch
                                   v-model="
                                     form.doors[doorTab.value].passageStatus
@@ -317,7 +353,7 @@
                                   @update:model-value="
                                     onPassageStatusChange(doorTab.value)
                                   "
-                                ></v-switch>
+                                />
                               </v-col>
 
                               <v-col
@@ -338,14 +374,14 @@
                                   clearable
                                   hide-details
                                   class="timezone-select"
-                                ></v-select>
+                                />
 
                                 <BaseButton
                                   variant="primary"
                                   text="Create Time Zone"
-                                  @click="createTimeZone"
                                   size="small"
-                                ></BaseButton>
+                                  @click="createTimeZone"
+                                />
                               </v-col>
                             </v-row>
                           </v-card-text>
@@ -361,7 +397,11 @@
       </v-card-text>
     </v-card>
 
-    <v-snackbar v-model="snackbar.show" :color="snackbar.type" timeout="3000">
+    <v-snackbar
+      v-model="snackbar.show"
+      :color="snackbar.type"
+      timeout="3000"
+    >
       {{ snackbar.message }}
     </v-snackbar>
   </v-container>

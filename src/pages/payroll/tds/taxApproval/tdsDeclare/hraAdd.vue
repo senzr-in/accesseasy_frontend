@@ -1,12 +1,29 @@
 <template>
-  <v-container fluid class="pa-4">
-    <v-toolbar density="compact" color="grey-lighten-4">
-      <v-btn icon color="black" @click="handleClose">
+  <v-container
+    fluid
+    class="pa-4"
+  >
+    <v-toolbar
+      density="compact"
+      color="grey-lighten-4"
+    >
+      <v-btn
+        icon
+        color="black"
+        @click="handleClose"
+      >
         <v-icon>mdi-arrow-left</v-icon>
       </v-btn>
-      <v-toolbar-title class="ml-4">HRA Exemptions</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <v-btn color="error" variant="text" class="mr-2" @click="handleClose">
+      <v-toolbar-title class="ml-4">
+        HRA Exemptions
+      </v-toolbar-title>
+      <v-spacer />
+      <v-btn
+        color="error"
+        variant="text"
+        class="mr-2"
+        @click="handleClose"
+      >
         CANCEL
       </v-btn>
     </v-toolbar>
@@ -18,8 +35,12 @@
           criteria:
         </p>
         <ul class="pl-5 text-body-1 text-grey-darken-1">
-          <li class="mb-1">You must be living in a rented accommodation</li>
-          <li class="mb-1">You must be paying rent to the landlord</li>
+          <li class="mb-1">
+            You must be living in a rented accommodation
+          </li>
+          <li class="mb-1">
+            You must be paying rent to the landlord
+          </li>
           <li class="mb-1">
             You must be able to provide the rent receipts and/or rent agreement
             as proof
@@ -57,80 +78,109 @@
       :items="rentEntries"
       class="elevation-1 mb-6"
       hide-default-footer
-      ><template v-slot:item.fileId="{ item }">
+    >
+      <template #item.fileId="{ item }">
         <td v-if="item.fileId">
           <v-btn
             
-            @click="downloadFile(item.fileId)"
             title="Download Proof Document"
+            @click="downloadFile(item.fileId)"
           >
             <v-icon>mdi-download</v-icon>
           </v-btn>
         </td>
         <td v-else>
-  <v-chip color="orange lighten-4" dark>Not Uploaded</v-chip>
-</td>
+          <v-chip
+            color="orange lighten-4"
+            dark
+          >
+            Not Uploaded
+          </v-chip>
+        </td>
       </template>
 
-   <template v-slot:item.actions="{ item }">
+      <template #item.actions="{ item }">
         <td>
-          <v-icon small @click="editItem(item)" class="mr-2 cursor-pointer" :disabled="!['declaration', 'reconcile', 'proofVerification'].includes(matchedPhase)">mdi-pencil</v-icon>
-          <v-icon small @click="deleteItem(item)" class="cursor-pointer" :disabled="matchedPhase !== 'declaration'"
-            >mdi-delete</v-icon
+          <v-icon
+            small
+            class="mr-2 cursor-pointer"
+            :disabled="!['declaration', 'reconcile', 'proofVerification'].includes(matchedPhase)"
+            @click="editItem(item)"
           >
+            mdi-pencil
+          </v-icon>
+          <v-icon
+            small
+            class="cursor-pointer"
+            :disabled="matchedPhase !== 'declaration'"
+            @click="deleteItem(item)"
+          >
+            mdi-delete
+          </v-icon>
         </td>
       </template>  
       
- <template v-slot:item.documentVerified="{ item }">
-          <td>
-            <div
-              v-if="item.documentVerified === 'pending' && userRole === 'Admin'"
+      <template #item.documentVerified="{ item }">
+        <td>
+          <div
+            v-if="item.documentVerified === 'pending' && userRole === 'Admin'"
+          >
+            <v-btn
+              small
+              color="green"
+              class="mr-2"
+              @click="acceptItem(item, 'document')"
             >
-              <v-btn
-                small
-                color="green"
-                class="mr-2"
-                @click="acceptItem(item, 'document')"
-              >
-                Verify
-              </v-btn>
-              <v-btn
-                small
-                color="red"
-                @click="rejectItem(item, 'document')"
-              >
-                Reject
-              </v-btn>
-            </div>
-            <div v-else>
-              <v-chip
-                :color="
-                  item.documentVerified === 'verified'
-                    ? 'green lighten-4'
-                    : item.documentVerified === 'rejected'
-                      ? 'red lighten-4'
-                       : item.documentVerified === 'draft'
-          ? 'orange lighten-4'
-          : 'grey lighten-4'
-                "
-                dark
-              >
-                 {{
-    item.documentVerified === 'draft'
-      ? 'pending'
-      : item.documentVerified
-  }}
-              </v-chip>
-            </div>
-          </td>
-        </template>
-      <template v-slot:item.status="{ item }">
+              Verify
+            </v-btn>
+            <v-btn
+              small
+              color="red"
+              @click="rejectItem(item, 'document')"
+            >
+              Reject
+            </v-btn>
+          </div>
+          <div v-else>
+            <v-chip
+              :color="
+                item.documentVerified === 'verified'
+                  ? 'green lighten-4'
+                  : item.documentVerified === 'rejected'
+                    ? 'red lighten-4'
+                    : item.documentVerified === 'draft'
+                      ? 'orange lighten-4'
+                      : 'grey lighten-4'
+              "
+              dark
+            >
+              {{
+                item.documentVerified === 'draft'
+                  ? 'pending'
+                  : item.documentVerified
+              }}
+            </v-chip>
+          </div>
+        </td>
+      </template>
+      <template #item.status="{ item }">
         <td>
           <div v-if="item.status === 'pending' && userRole === 'Admin'">
-            <v-btn small color="green" class="mr-2" @click="acceptItem(item)"
-              >Accept</v-btn
+            <v-btn
+              small
+              color="green"
+              class="mr-2"
+              @click="acceptItem(item)"
             >
-            <v-btn small color="red" @click="rejectItem(item)">Reject</v-btn>
+              Accept
+            </v-btn>
+            <v-btn
+              small
+              color="red"
+              @click="rejectItem(item)"
+            >
+              Reject
+            </v-btn>
           </div>
           <div v-else>
             <v-chip color="pink lighten-4">
@@ -140,13 +190,25 @@
         </td>
       </template>
     </v-data-table>
-    <div class="action-buttons" v-if="userRole == 'Admin'">
-      <v-btn color="primary"  :disabled="matchedPhase !== 'declaration'" outlined class="mb-6" @click="openAddRentDialog">
+    <div
+      v-if="userRole == 'Admin'"
+      class="action-buttons"
+    >
+      <v-btn
+        color="primary"
+        :disabled="matchedPhase !== 'declaration'"
+        outlined
+        class="mb-6"
+        @click="openAddRentDialog"
+      >
         ADD HOUSE RENT
       </v-btn>
     </div>
 
-    <v-dialog v-model="dialog" max-width="800px">
+    <v-dialog
+      v-model="dialog"
+      max-width="800px"
+    >
       <v-card>
         <v-card-title>
           <span class="text-h5">{{ formTitle }}</span>
@@ -155,7 +217,10 @@
         <v-card-text>
           <v-container>
             <v-row>
-              <v-col cols="12" sm="6">
+              <v-col
+                cols="12"
+                sm="6"
+              >
                 <v-text-field
                   v-model.number="editedItem.monthlyRent"
                   label="Monthly Rent"
@@ -164,11 +229,14 @@
                   variant="outlined"
                   color="black"
                   :rules="[(v) => !!v || 'Monthly Rent is required']"
-                   :disabled="matchedPhase === 'proofVerification'"
+                  :disabled="matchedPhase === 'proofVerification'"
                 />
               </v-col>
 
-              <v-col cols="12" sm="6">
+              <v-col
+                cols="12"
+                sm="6"
+              >
                 <v-text-field
                   v-model="editedItem.fromMonth"
                   label="From Month"
@@ -180,7 +248,10 @@
                 />
               </v-col>
 
-              <v-col cols="12" sm="6">
+              <v-col
+                cols="12"
+                sm="6"
+              >
                 <v-text-field
                   v-model="editedItem.toMonth"
                   label="To Month"
@@ -192,7 +263,10 @@
                 />
               </v-col>
 
-              <v-col cols="12" sm="6">
+              <v-col
+                cols="12"
+                sm="6"
+              >
                 <v-select
                   v-model="editedItem.city"
                   :items="cities"
@@ -204,7 +278,10 @@
                 />
               </v-col>
 
-              <v-col cols="12" sm="6">
+              <v-col
+                cols="12"
+                sm="6"
+              >
                 <v-text-field
                   v-model="editedItem.landlordName"
                   label="Landlord Name"
@@ -215,7 +292,10 @@
                 />
               </v-col>
 
-              <v-col cols="12" sm="6">
+              <v-col
+                cols="12"
+                sm="6"
+              >
                 <v-text-field
                   v-model="editedItem.landlordPAN"
                   label="Landlord PAN"
@@ -226,7 +306,10 @@
                 />
               </v-col>
 
-              <v-col cols="12" sm="6">
+              <v-col
+                cols="12"
+                sm="6"
+              >
                 <v-text-field
                   v-model="editedItem.landlordAddress"
                   label="Landlord Address"
@@ -236,42 +319,58 @@
                   :disabled="matchedPhase === 'proofVerification'"
                 />
               </v-col>
-              <v-col cols="12" sm="6">
+              <v-col
+                cols="12"
+                sm="6"
+              >
                 <v-file-input
-                v-model="editedFile"
+                  v-model="editedFile"
                   :loading="uploading"
-                  @change="uploadFile"
-                  @click:clear="deleteFile"
                   label="Upload Proof Document"
                   variant="outlined"
                   color="black"
+                  @change="uploadFile"
+                  @click:clear="deleteFile"
                 />
               </v-col>
               <v-col cols="12">
-            <v-card variant="outlined" class="pa-4 bg-grey-lighten-5">
-              <v-checkbox
-                v-model="editedItem.disclaimer"
-                color="black"
-                :rules="[(v) => !!v || 'You must accept the disclaimer']"
-              >
-                <template v-slot:label>
-                  <div>
-                    <strong>Disclaimer:</strong> I hereby declare that all the information provided and documents uploaded are true and correct to the best of my knowledge. I understand that any false statement may result in disciplinary action.
-                  </div>
-                </template>
-              </v-checkbox>
-            </v-card>
-          </v-col>
+                <v-card
+                  variant="outlined"
+                  class="pa-4 bg-grey-lighten-5"
+                >
+                  <v-checkbox
+                    v-model="editedItem.disclaimer"
+                    color="black"
+                    :rules="[(v) => !!v || 'You must accept the disclaimer']"
+                  >
+                    <template #label>
+                      <div>
+                        <strong>Disclaimer:</strong> I hereby declare that all the information provided and documents uploaded are true and correct to the best of my knowledge. I understand that any false statement may result in disciplinary action.
+                      </div>
+                    </template>
+                  </v-checkbox>
+                </v-card>
+              </v-col>
             </v-row>
           </v-container>
         </v-card-text>
 
         <v-card-actions>
           <v-spacer />
-          <v-btn color="blue-darken-1" variant="text" @click="close"
-            >Cancel</v-btn
+          <v-btn
+            color="blue-darken-1"
+            variant="text"
+            @click="close"
           >
-          <v-btn color="blue-darken-1" variant="text" @click="save">Save</v-btn>
+            Cancel
+          </v-btn>
+          <v-btn
+            color="blue-darken-1"
+            variant="text"
+            @click="save"
+          >
+            Save
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

@@ -2,7 +2,6 @@
   <div class="sensitive-input-wrapper">
     <v-text-field
       :model-value="displayValue"
-      @update:model-value="handleInput"
       :label="label"
       :type="inputType"
       variant="outlined"
@@ -11,29 +10,36 @@
       :disabled="loading || !showDecrypted"
       :readonly="false"
       class="sensitive-text-field"
+      @update:model-value="handleInput"
     >
-      <template v-slot:append>
-        <div v-if="loading" class="d-flex align-center">
+      <template #append>
+        <div
+          v-if="loading"
+          class="d-flex align-center"
+        >
           <v-progress-circular
             indeterminate
             size="20"
             width="2"
             color="primary"
-          ></v-progress-circular>
+          />
         </div>
       </template>
     </v-text-field>
 
     <!-- Separate eye icon positioned absolutely -->
-    <div class="eye-icon-container" v-if="!loading">
+    <div
+      v-if="!loading"
+      class="eye-icon-container"
+    >
       <v-btn
         icon
         variant="text"
         size="small"
         color="primary"
-        @click="toggleVisibility"
         class="eye-toggle-btn"
         :disabled="false"
+        @click="toggleVisibility"
       >
         <v-icon size="20">
           {{ showDecrypted ? "mdi-eye-off" : "mdi-eye" }}

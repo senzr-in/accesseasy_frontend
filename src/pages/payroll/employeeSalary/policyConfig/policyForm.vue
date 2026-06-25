@@ -1,8 +1,16 @@
 <template>
-  <v-container fluid class="attendance-settings-editor-container pa-0">
+  <v-container
+    fluid
+    class="attendance-settings-editor-container pa-0"
+  >
     <div class="d-flex justify-space-between align-center mb-4">
       <h3 class="text-h6 font-weight-bold d-flex align-center">
-        <v-icon class="mr-2" color="black">mdi-list-box-outline</v-icon>
+        <v-icon
+          class="mr-2"
+          color="black"
+        >
+          mdi-list-box-outline
+        </v-icon>
         Policies Configuration
       </h3>
       <BaseButton
@@ -13,10 +21,16 @@
       />
     </div>
 
-    <v-card flat class="attendance-card">
+    <v-card
+      flat
+      class="attendance-card"
+    >
       <v-card-text>
         <v-row align="center">
-          <v-col cols="12" md="6">
+          <v-col
+            cols="12"
+            md="6"
+          >
             <v-select
               v-model="internalSelectedPolicyId"
               :items="attendancePolicies"
@@ -28,9 +42,12 @@
               placeholder="Select an attendance policy"
               clearable
               class="mb-6"
-            ></v-select>
+            />
           </v-col>
-          <v-col cols="12" md="6">
+          <v-col
+            cols="12"
+            md="6"
+          >
             <v-select
               v-model="selectedCycleType"
               :items="cycleTypeOptions"
@@ -41,11 +58,14 @@
               density="comfortable"
               @update:model-value="handleCycleTypeChange"
               @blur="markFieldAsTouched('cycleType')"
-            ></v-select>
+            />
           </v-col>
         </v-row>
         <v-row>
-          <v-col cols="12" md="6">
+          <v-col
+            cols="12"
+            md="6"
+          >
             <v-text-field
               v-model="formData.assignedUser.ESIAccountNumber"
               type="string"
@@ -53,9 +73,12 @@
               variant="outlined"
               density="comfortable"
               @input="handleInputChange('assignedUser.ESIAccountNumber')"
-            ></v-text-field>
+            />
           </v-col>
-          <v-col cols="12" md="6">
+          <v-col
+            cols="12"
+            md="6"
+          >
             <v-text-field
               v-model="formData.assignedUser.PFAccountNumber"
               type="string"
@@ -63,8 +86,9 @@
               variant="outlined"
               density="comfortable"
               @input="handleInputChange('assignedUser.PFAccountNumber')"
-            ></v-text-field> </v-col
-        ></v-row>
+            />
+          </v-col>
+        </v-row>
         <!-- <v-col cols="12" md="6">
             <div
               style="
@@ -122,7 +146,7 @@
         </v-alert>
       </v-card-text>
 
-      <v-divider class="my-6"></v-divider>
+      <v-divider class="my-6" />
 
       <!-- <v-divider class="my-6"></v-divider> -->
 
@@ -145,20 +169,24 @@
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-check-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-check-circle
+        </v-icon>
         {{ successMessage }}
       </div>
     </v-snackbar>
 
     <v-snackbar
-      class="errormessge"
       v-model="showErrorSnackbar"
+      class="errormessge"
       color="error"
       timeout="2000"
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-alert-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-alert-circle
+        </v-icon>
         {{ errorMessage }}
       </div>
     </v-snackbar>

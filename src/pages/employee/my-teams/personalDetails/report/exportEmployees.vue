@@ -1,14 +1,15 @@
 <template>
-  <div class="modal-overlay" @click.self="$emit('close')">
+  <div
+    class="modal-overlay"
+    @click.self="$emit('close')"
+  >
     <div class="modal-content">
       <div class="modal-header">
         <h3>Export Employee Data</h3>
       </div>
       <div class="modal-body">
         <div class="export-options mb-4">
-          <label class="block text-sm font-medium text-gray-700 mb-2"
-            >Export Format:</label
-          >
+          <label class="block text-sm font-medium text-gray-700 mb-2">Export Format:</label>
           <v-select
             v-model="selectedExportFormat"
             :items="exportFormats"
@@ -16,14 +17,14 @@
             variant="outlined"
             density="compact"
             hide-details
-          ></v-select>
+          />
         </div>
 
         <input
-          type="checkbox"
           v-model="selectAll"
+          type="checkbox"
           @change="toggleAllSelection"
-        />
+        >
         <span>Select All</span>
 
         <!-- Collapsible Sections -->
@@ -33,26 +34,35 @@
             :key="index"
             class="section"
           >
-            <div class="section-header" @click="toggleSection(section.title)">
+            <div
+              class="section-header"
+              @click="toggleSection(section.title)"
+            >
               <input
                 type="checkbox"
                 :checked="isSectionSelected(section.title)"
                 @change="toggleSectionSelection(section.title)"
                 @click.stop
-              />
+              >
               <span>{{ section.title }}</span>
               <ChevronDown
                 :class="{ rotate: openSections[section.title] }"
                 class="chevron"
               />
             </div>
-            <div v-show="openSections[section.title]" class="section-content">
+            <div
+              v-show="openSections[section.title]"
+              class="section-content"
+            >
               <div
                 v-for="field in section.fields"
                 :key="field.key"
                 class="field"
               >
-                <input type="checkbox" v-model="selectedFields[field.key]" />
+                <input
+                  v-model="selectedFields[field.key]"
+                  type="checkbox"
+                >
                 <span>{{ field.label }}</span>
               </div>
             </div>
@@ -83,7 +93,7 @@
               variant="outlined"
               density="compact"
               hide-details
-            ></v-select>
+            />
           </div>
           <div class="filter-row">
             <v-select
@@ -94,7 +104,7 @@
               variant="outlined"
               density="compact"
               hide-details
-            ></v-select>
+            />
             <v-select
               v-model="selectedGender"
               :items="genderOptions"
@@ -103,12 +113,16 @@
               variant="outlined"
               density="compact"
               hide-details
-            ></v-select>
+            />
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="export-btn" @click="exportData" :disabled="isExporting">
+        <button
+          class="export-btn"
+          :disabled="isExporting"
+          @click="exportData"
+        >
           {{ isExporting ? "Exporting..." : "Export Data" }}
         </button>
       </div>

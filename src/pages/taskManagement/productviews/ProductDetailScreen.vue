@@ -4,37 +4,58 @@
     <header class="header">
       <div class="header-container">
         <div class="header-left">
-          <button class="back-btn" @click="goBack">
-            <i class="fas fa-arrow-left"></i>
+          <button
+            class="back-btn"
+            @click="goBack"
+          >
+            <i class="fas fa-arrow-left" />
           </button>
-          <h1 class="header-title">Asset Type Details</h1>
+          <h1 class="header-title">
+            Asset Type Details
+          </h1>
         </div>
         <div class="header-actions">
-          <button class="action-btn edit-btn" @click="navigateToEdit" title="Edit Asset Type">
-            <i class="fas fa-edit"></i>
+          <button
+            class="action-btn edit-btn"
+            title="Edit Asset Type"
+            @click="navigateToEdit"
+          >
+            <i class="fas fa-edit" />
           </button>
-          <button class="action-btn share-btn" @click="shareProductDetails" title="Share">
-            <i class="fas fa-share-alt"></i>
+          <button
+            class="action-btn share-btn"
+            title="Share"
+            @click="shareProductDetails"
+          >
+            <i class="fas fa-share-alt" />
           </button>
         </div>
       </div>
     </header>
 
     <!-- Loading State -->
-    <div v-if="isLoading" class="loading-state">
+    <div
+      v-if="isLoading"
+      class="loading-state"
+    >
       <div class="loading-animation">
-        <div class="loading-spinner"></div>
+        <div class="loading-spinner" />
         <div class="loading-dots">
-          <span></span>
-          <span></span>
-          <span></span>
+          <span />
+          <span />
+          <span />
         </div>
       </div>
-      <p class="loading-text">{{ loadingMessage || 'Loading Asset type details...' }}</p>
+      <p class="loading-text">
+        {{ loadingMessage || 'Loading Asset type details...' }}
+      </p>
     </div>
 
     <!-- Main Layout -->
-    <div v-else class="main-layout">
+    <div
+      v-else
+      class="main-layout"
+    >
       <!-- Sidebar Navigation -->
       <div class="sidebar">
         <nav class="sidebar-nav">
@@ -44,7 +65,7 @@
             :class="['sidebar-item', { 'active': activeTab === tabValues[index] }]"
             @click="setActiveTab(tabValues[index])"
           >
-            <i :class="getTabIcon(tabValues[index])"></i>
+            <i :class="getTabIcon(tabValues[index])" />
             <span>{{ tab }}</span>
           </button>
         </nav>
@@ -59,16 +80,21 @@
               v-if="product.imageUrl && !imageError"
               :src="`${product.imageUrl}?access_token=${token}`"
               :alt="product.productName"
-              @error="handleImageError"
               class="asset-image"
-            />
-            <div v-else class="asset-placeholder">
+              @error="handleImageError"
+            >
+            <div
+              v-else
+              class="asset-placeholder"
+            >
               <span class="placeholder-letter">{{ product.productName?.charAt(0).toUpperCase() }}</span>
             </div>
           </div>
           
           <div class="asset-info">
-            <h2 class="asset-name">{{ product.productName }}</h2>
+            <h2 class="asset-name">
+              {{ product.productName }}
+            </h2>
             <div class="asset-model">
               <span class="model-hash">#</span>
               <span class="model-text">Model: {{ product.productId || 'Assets-01' }}</span>
@@ -82,36 +108,51 @@
         <!-- Tab Content -->
         <div class="content-area">
           <!-- Info Tab -->
-          <div v-if="activeTab === 'details'" class="tab-content active">
+          <div
+            v-if="activeTab === 'details'"
+            class="tab-content active"
+          >
             <!-- Asset Information -->
             <div class="info-card">
               <div class="card-header">
-                <h3 class="card-title">Asset Type Information</h3>
+                <h3 class="card-title">
+                  Asset Type Information
+                </h3>
               </div>
               <div class="info-grid">
                 <div class="info-field">
                   <label class="field-label">Asset Type Name</label>
-                  <div class="field-value">{{ product.productName }}</div>
+                  <div class="field-value">
+                    {{ product.productName }}
+                  </div>
                 </div>
                 
                 <div class="info-field">
                   <label class="field-label">Model Number</label>
-                  <div class="field-value">{{ product.productId || 'Assets-01' }}</div>
+                  <div class="field-value">
+                    {{ product.productId || 'Assets-01' }}
+                  </div>
                 </div>
                 
                 <div class="info-field">
                   <label class="field-label">Category</label>
-                  <div class="field-value">{{ category?.categoryName || 'ndj' }}</div>
+                  <div class="field-value">
+                    {{ category?.categoryName || 'ndj' }}
+                  </div>
                 </div>
                 
                 <div class="info-field">
                   <label class="field-label">Created Date</label>
-                  <div class="field-value">{{ getRandomDate() }}</div>
+                  <div class="field-value">
+                    {{ getRandomDate() }}
+                  </div>
                 </div>
                 
                 <div class="info-field">
                   <label class="field-label">Last Updated</label>
-                  <div class="field-value">{{ getRandomDate() }}</div>
+                  <div class="field-value">
+                    {{ getRandomDate() }}
+                  </div>
                 </div>
                 
                 <div class="info-field">
@@ -211,36 +252,57 @@
           </div>
 
           <!-- Documents Tab -->
-          <div v-if="activeTab === 'documents'" class="tab-content active">
+          <div
+            v-if="activeTab === 'documents'"
+            class="tab-content active"
+          >
             <div class="documents-card">
               <div class="card-header">
-                <h3 class="card-title">Documents</h3>
+                <h3 class="card-title">
+                  Documents
+                </h3>
               </div>
               
-              <div v-if="!hasDocuments" class="empty-state">
+              <div
+                v-if="!hasDocuments"
+                class="empty-state"
+              >
                 <div class="empty-icon">
-                  <i class="fas fa-file-alt"></i>
+                  <i class="fas fa-file-alt" />
                 </div>
                 <h3>No Documents Available</h3>
                 <p>There are no documents associated with this product.</p>
                 <button class="add-document-btn">
-                  <i class="fas fa-plus"></i>
+                  <i class="fas fa-plus" />
                   Add Document
                 </button>
               </div>
               
-              <div v-else class="documents-grid">
-                <div v-if="product.manual" class="document-card" @click="downloadDocument(product.manual, 'manual.pdf')">
+              <div
+                v-else
+                class="documents-grid"
+              >
+                <div
+                  v-if="product.manual"
+                  class="document-card"
+                  @click="downloadDocument(product.manual, 'manual.pdf')"
+                >
                   <div class="document-header">
                     <div class="document-icon">
-                      <i class="fas fa-book"></i>
+                      <i class="fas fa-book" />
                     </div>
                     <div class="document-actions">
-                      <button class="doc-action-btn" title="Download">
-                        <i class="fas fa-download"></i>
+                      <button
+                        class="doc-action-btn"
+                        title="Download"
+                      >
+                        <i class="fas fa-download" />
                       </button>
-                      <button class="doc-action-btn" title="Preview">
-                        <i class="fas fa-eye"></i>
+                      <button
+                        class="doc-action-btn"
+                        title="Preview"
+                      >
+                        <i class="fas fa-eye" />
                       </button>
                     </div>
                   </div>
@@ -258,43 +320,72 @@
           </div>
 
           <!-- QR Code Tab -->
-          <div v-if="activeTab === 'qrcode'" class="tab-content active">
+          <div
+            v-if="activeTab === 'qrcode'"
+            class="tab-content active"
+          >
             <div class="qrcode-card">
               <div class="card-header">
-                <h3 class="card-title">QR Code</h3>
+                <h3 class="card-title">
+                  QR Code
+                </h3>
               </div>
               
-              <div v-if="qrCodeUrl" class="qr-display">
+              <div
+                v-if="qrCodeUrl"
+                class="qr-display"
+              >
                 <div class="qr-code-container">
-                  <qrcode-vue :value="qrCodeUrl" :size="qrCodeSize" level="H" render-as="svg" />
+                  <qrcode-vue
+                    :value="qrCodeUrl"
+                    :size="qrCodeSize"
+                    level="H"
+                    render-as="svg"
+                  />
                 </div>
                 <h3>Product QR Code</h3>
                 <p>Scan this QR code to quickly access product information.</p>
                 <div class="qr-actions">
-                  <button class="qr-action-btn" @click="downloadQRCode">
-                    <i class="fas fa-download"></i>
+                  <button
+                    class="qr-action-btn"
+                    @click="downloadQRCode"
+                  >
+                    <i class="fas fa-download" />
                     Download
                   </button>
-                  <button class="qr-action-btn" @click="printQRCode">
-                    <i class="fas fa-print"></i>
+                  <button
+                    class="qr-action-btn"
+                    @click="printQRCode"
+                  >
+                    <i class="fas fa-print" />
                     Print
                   </button>
                 </div>
               </div>
               
-              <div v-else class="qr-generator">
+              <div
+                v-else
+                class="qr-generator"
+              >
                 <div class="qr-placeholder">
-                  <i class="fas fa-qrcode"></i>
+                  <i class="fas fa-qrcode" />
                 </div>
                 <h3>Product QR Code</h3>
                 <p>Scan this QR code to quickly access product information.</p>
                 <div class="qr-actions">
-                  <button class="qr-action-btn" @click="generateQRCode" :disabled="isGeneratingQR">
-                    <i class="fas fa-download"></i>
+                  <button
+                    class="qr-action-btn"
+                    :disabled="isGeneratingQR"
+                    @click="generateQRCode"
+                  >
+                    <i class="fas fa-download" />
                     {{ isGeneratingQR ? 'Generating...' : 'Download' }}
                   </button>
-                  <button class="qr-action-btn" @click="printQRCode">
-                    <i class="fas fa-print"></i>
+                  <button
+                    class="qr-action-btn"
+                    @click="printQRCode"
+                  >
+                    <i class="fas fa-print" />
                     Print
                   </button>
                 </div>
@@ -306,49 +397,72 @@
     </div>
 
     <!-- Floating Action Button -->
-    <div class="fab-container" :class="{ 'hidden': !showFab }">
-      <button class="fab-main" @click="showAddProductOptions" title="Add Devices">
-        <i class="fas fa-plus"></i>
+    <div
+      class="fab-container"
+      :class="{ 'hidden': !showFab }"
+    >
+      <button
+        class="fab-main"
+        title="Add Devices"
+        @click="showAddProductOptions"
+      >
+        <i class="fas fa-plus" />
       </button>
     </div>
 
     <!-- Add Options Modal -->
-    <div v-if="showAddOptions" class="modal-overlay" @click="closeAddOptions">
-      <div class="modal-container add-options-modal" @click.stop>
+    <div
+      v-if="showAddOptions"
+      class="modal-overlay"
+      @click="closeAddOptions"
+    >
+      <div
+        class="modal-container add-options-modal"
+        @click.stop
+      >
         <div class="modal-header">
           <div class="modal-title">
-            <i class="fas fa-plus-circle"></i>
+            <i class="fas fa-plus-circle" />
             <h3>Add New Assets</h3>
           </div>
-          <button class="modal-close" @click="closeAddOptions">
-            <i class="fas fa-times"></i>
+          <button
+            class="modal-close"
+            @click="closeAddOptions"
+          >
+            <i class="fas fa-times" />
           </button>
         </div>
         
         <div class="modal-content">
-          <div class="add-option" @click="navigateToManualEntry">
+          <div
+            class="add-option"
+            @click="navigateToManualEntry"
+          >
             <div class="option-icon manual-icon">
-              <i class="fas fa-edit"></i>
+              <i class="fas fa-edit" />
             </div>
             <div class="option-content">
               <h4>Manual Entry</h4>
               <p>Add Assets one by one with detailed information</p>
             </div>
             <div class="option-arrow">
-              <i class="fas fa-chevron-right"></i>
+              <i class="fas fa-chevron-right" />
             </div>
           </div>
           
-          <div class="add-option" @click="navigateToBulkUpload">
+          <div
+            class="add-option"
+            @click="navigateToBulkUpload"
+          >
             <div class="option-icon bulk-icon">
-              <i class="fas fa-upload"></i>
+              <i class="fas fa-upload" />
             </div>
             <div class="option-content">
               <h4>Bulk Upload</h4>
               <p>Import multiple Assets from CSV or Excel file</p>
             </div>
             <div class="option-arrow">
-              <i class="fas fa-chevron-right"></i>
+              <i class="fas fa-chevron-right" />
             </div>
           </div>
         </div>
@@ -356,21 +470,31 @@
     </div>
 
     <!-- Success Toast -->
-    <div v-if="showSuccessToast" class="success-toast" :class="{ 'show': showSuccessToast }">
+    <div
+      v-if="showSuccessToast"
+      class="success-toast"
+      :class="{ 'show': showSuccessToast }"
+    >
       <div class="toast-content">
-        <i class="fas fa-check-circle"></i>
+        <i class="fas fa-check-circle" />
         <span>{{ successMessage }}</span>
       </div>
     </div>
 
     <!-- Error Alert -->
-    <div v-if="errorMessage" class="error-alert">
+    <div
+      v-if="errorMessage"
+      class="error-alert"
+    >
       <div class="alert-content">
-        <i class="fas fa-exclamation-circle"></i>
+        <i class="fas fa-exclamation-circle" />
         <span>{{ errorMessage }}</span>
       </div>
-      <button class="alert-close" @click="errorMessage = null">
-        <i class="fas fa-times"></i>
+      <button
+        class="alert-close"
+        @click="errorMessage = null"
+      >
+        <i class="fas fa-times" />
       </button>
     </div>
   </div>

@@ -6,16 +6,29 @@
         <v-btn
           icon
           variant="text"
-          @click="$router.push('/employee-details')"
           class="back-button"
+          @click="$router.push('/employee-details')"
         >
           <v-icon>mdi-arrow-left</v-icon>
         </v-btn>
-        <h2 class="text-h6">Add Employee</h2>
+        <h2 class="text-h6">
+          Add Employee
+        </h2>
       </div>
       <div class="action-buttons">
-        <v-btn color="error" variant="text" @click="cancelForm">CANCEL</v-btn>
-        <v-btn color="primary" @click="saveEmployee">SAVE</v-btn>
+        <v-btn
+          color="error"
+          variant="text"
+          @click="cancelForm"
+        >
+          CANCEL
+        </v-btn>
+        <v-btn
+          color="primary"
+          @click="saveEmployee"
+        >
+          SAVE
+        </v-btn>
       </div>
     </div>
 
@@ -30,7 +43,7 @@
             :to="getTabRoute(tab.path)"
             :class="{ 'has-error': tabHasError(tab.id) }"
           >
-            <template v-slot:prepend>
+            <template #prepend>
               <v-icon :color="tabHasError(tab.id) ? 'error' : 'default'">
                 {{ tab.icon }}
               </v-icon>
@@ -57,7 +70,7 @@
           :is="currentTabComponent"
           :employee-data="employeeData"
           @update:employee-data="updateEmployeeData"
-        ></component>
+        />
       </div>
     </div>
   </div>

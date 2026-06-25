@@ -1,5 +1,5 @@
 <template>
-  <slot v-if="hasAccess"></slot>
+  <slot v-if="hasAccess" />
 </template>
 
 <script setup>

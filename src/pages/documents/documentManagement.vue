@@ -1,9 +1,14 @@
 <template>
   <div class="document-management">
-    <v-container fluid class="pa-4">
+    <v-container
+      fluid
+      class="pa-4"
+    >
       <div class="d-flex align-center mb-3">
         <div class="title-bar">
-          <h1 class="text-h5 font-weight-bold">Employee Document Management</h1>
+          <h1 class="text-h5 font-weight-bold">
+            Employee Document Management
+          </h1>
           <p class="text-body-2 text-grey mb-0">
             Streamline your employee onboarding and offboarding document
             collection process
@@ -12,11 +17,27 @@
       </div>
 
       <v-row>
-        <v-col cols="12" md="6" class="pa-2">
-          <v-card class="doc-card onboarding-card" elevation="3">
+        <v-col
+          cols="12"
+          md="6"
+          class="pa-2"
+        >
+          <v-card
+            class="doc-card onboarding-card"
+            elevation="3"
+          >
             <div class="card-header">
-              <v-avatar color="primary" size="42" class="header-icon">
-                <v-icon color="white" size="24">mdi-account-plus</v-icon>
+              <v-avatar
+                color="primary"
+                size="42"
+                class="header-icon"
+              >
+                <v-icon
+                  color="white"
+                  size="24"
+                >
+                  mdi-account-plus
+                </v-icon>
               </v-avatar>
               <h2 class="text-h6 font-weight-bold white--text">
                 Onboarding Documents
@@ -34,10 +55,17 @@
                     v-bind="props"
                     :class="{ 'doc-item-hover': isHovering }"
                   >
-                    <v-avatar color="primary-lighten-5" size="36" class="mr-3">
-                      <v-icon color="primary" size="18"
-                        >mdi-card-account-details</v-icon
+                    <v-avatar
+                      color="primary-lighten-5"
+                      size="36"
+                      class="mr-3"
+                    >
+                      <v-icon
+                        color="primary"
+                        size="18"
                       >
+                        mdi-card-account-details
+                      </v-icon>
                     </v-avatar>
                     <div>
                       <div class="text-subtitle-2 font-weight-medium">
@@ -56,8 +84,17 @@
                     v-bind="props"
                     :class="{ 'doc-item-hover': isHovering }"
                   >
-                    <v-avatar color="indigo-lighten-5" size="36" class="mr-3">
-                      <v-icon color="indigo" size="18">mdi-school</v-icon>
+                    <v-avatar
+                      color="indigo-lighten-5"
+                      size="36"
+                      class="mr-3"
+                    >
+                      <v-icon
+                        color="indigo"
+                        size="18"
+                      >
+                        mdi-school
+                      </v-icon>
                     </v-avatar>
                     <div>
                       <div class="text-subtitle-2 font-weight-medium">
@@ -76,8 +113,17 @@
                     v-bind="props"
                     :class="{ 'doc-item-hover': isHovering }"
                   >
-                    <v-avatar color="green-lighten-5" size="36" class="mr-3">
-                      <v-icon color="green" size="18">mdi-bank</v-icon>
+                    <v-avatar
+                      color="green-lighten-5"
+                      size="36"
+                      class="mr-3"
+                    >
+                      <v-icon
+                        color="green"
+                        size="18"
+                      >
+                        mdi-bank
+                      </v-icon>
                     </v-avatar>
                     <div>
                       <div class="text-subtitle-2 font-weight-medium">
@@ -96,10 +142,17 @@
                     v-bind="props"
                     :class="{ 'doc-item-hover': isHovering }"
                   >
-                    <v-avatar color="amber-lighten-5" size="36" class="mr-3">
-                      <v-icon color="amber-darken-2" size="18"
-                        >mdi-file-document</v-icon
+                    <v-avatar
+                      color="amber-lighten-5"
+                      size="36"
+                      class="mr-3"
+                    >
+                      <v-icon
+                        color="amber-darken-2"
+                        size="18"
                       >
+                        mdi-file-document
+                      </v-icon>
                     </v-avatar>
                     <div>
                       <div class="text-subtitle-2 font-weight-medium">
@@ -121,17 +174,35 @@
                 elevation="2"
               >
                 MANAGE ONBOARDING DOCUMENTS
-                <v-icon class="ml-2">mdi-arrow-right</v-icon>
+                <v-icon class="ml-2">
+                  mdi-arrow-right
+                </v-icon>
               </v-btn>
             </v-card-text>
           </v-card>
         </v-col>
 
-        <v-col cols="12" md="6" class="pa-2">
-          <v-card class="doc-card offboarding-card" elevation="3">
+        <v-col
+          cols="12"
+          md="6"
+          class="pa-2"
+        >
+          <v-card
+            class="doc-card offboarding-card"
+            elevation="3"
+          >
             <div class="card-header">
-              <v-avatar color="error" size="42" class="header-icon">
-                <v-icon color="white" size="24">mdi-account-minus</v-icon>
+              <v-avatar
+                color="error"
+                size="42"
+                class="header-icon"
+              >
+                <v-icon
+                  color="white"
+                  size="24"
+                >
+                  mdi-account-minus
+                </v-icon>
               </v-avatar>
               <h2 class="text-h6 font-weight-bold white--text">
                 Offboarding Documents
@@ -149,8 +220,17 @@
                     v-bind="props"
                     :class="{ 'doc-item-hover': isHovering }"
                   >
-                    <v-avatar color="pink-lighten-5" size="36" class="mr-3">
-                      <v-icon color="pink" size="18">mdi-file-sign</v-icon>
+                    <v-avatar
+                      color="pink-lighten-5"
+                      size="36"
+                      class="mr-3"
+                    >
+                      <v-icon
+                        color="pink"
+                        size="18"
+                      >
+                        mdi-file-sign
+                      </v-icon>
                     </v-avatar>
                     <div>
                       <div class="text-subtitle-2 font-weight-medium">
@@ -169,8 +249,17 @@
                     v-bind="props"
                     :class="{ 'doc-item-hover': isHovering }"
                   >
-                    <v-avatar color="purple-lighten-5" size="36" class="mr-3">
-                      <v-icon color="purple" size="18">mdi-gavel</v-icon>
+                    <v-avatar
+                      color="purple-lighten-5"
+                      size="36"
+                      class="mr-3"
+                    >
+                      <v-icon
+                        color="purple"
+                        size="18"
+                      >
+                        mdi-gavel
+                      </v-icon>
                     </v-avatar>
                     <div>
                       <div class="text-subtitle-2 font-weight-medium">
@@ -189,8 +278,17 @@
                     v-bind="props"
                     :class="{ 'doc-item-hover': isHovering }"
                   >
-                    <v-avatar color="teal-lighten-5" size="36" class="mr-3">
-                      <v-icon color="teal" size="18">mdi-laptop</v-icon>
+                    <v-avatar
+                      color="teal-lighten-5"
+                      size="36"
+                      class="mr-3"
+                    >
+                      <v-icon
+                        color="teal"
+                        size="18"
+                      >
+                        mdi-laptop
+                      </v-icon>
                     </v-avatar>
                     <div>
                       <div class="text-subtitle-2 font-weight-medium">
@@ -214,9 +312,12 @@
                       size="36"
                       class="mr-3"
                     >
-                      <v-icon color="blue-grey" size="18"
-                        >mdi-file-certificate</v-icon
+                      <v-icon
+                        color="blue-grey"
+                        size="18"
                       >
+                        mdi-file-certificate
+                      </v-icon>
                     </v-avatar>
                     <div>
                       <div class="text-subtitle-2 font-weight-medium">
@@ -238,7 +339,9 @@
                 elevation="2"
               >
                 MANAGE OFFBOARDING DOCUMENTS
-                <v-icon class="ml-2">mdi-arrow-right</v-icon>
+                <v-icon class="ml-2">
+                  mdi-arrow-right
+                </v-icon>
               </v-btn>
             </v-card-text>
           </v-card>

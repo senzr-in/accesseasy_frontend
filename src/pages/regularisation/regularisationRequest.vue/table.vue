@@ -1,7 +1,10 @@
 <template>
   <div class="employee-container">
     <!-- Main Content with Table -->
-    <div class="main-content" :class="{ 'with-drawer': showAddForm }">
+    <div
+      class="main-content"
+      :class="{ 'with-drawer': showAddForm }"
+    >
       <v-alert
         v-if="noAttendanceData"
         type="info"
@@ -9,16 +12,15 @@
         class="mb-4"
         title="No Attendance Data Available"
         text="No regularization requests found for the selected period. Please contact your administrator."
-      >
-      </v-alert>
+      />
 
       <DataTableWrapper
-        :searchQuery="search"
-        @update:searchQuery="handleSearchUpdate"
-        :showSearch="false"
-        :isEmpty="items.length === 0"
-        :hasError="showError"
-        wrapperClass="employee-table-wrapper"
+        :search-query="search"
+        :show-search="false"
+        :is-empty="items.length === 0"
+        :has-error="showError"
+        wrapper-class="employee-table-wrapper"
+        @update:search-query="handleSearchUpdate"
       >
         <!-- Toolbar Actions Slot -->
         <template #toolbar-actions>
@@ -64,23 +66,27 @@
                 :icon="EditIcon"
                 variant="edit"
                 size="sm"
-                @click="toggleAddForm(item)"
                 class="action-btn edit-btn"
+                @click="toggleAddForm(item)"
               />
               <ActionButton
                 v-if="item.status === 'pending'"
                 variant="danger"
                 size="sm"
                 text="Cancel"
-                @click.stop="cancelRequest(item.id)"
                 class="action-btn cancel-btn"
+                @click.stop="cancelRequest(item.id)"
               />
             </template>
             <template #empty>
               <div class="d-flex flex-column align-center pa-4">
-                <v-icon size="large" color="grey" class="mb-2"
-                  >mdi-calendar-blank</v-icon
+                <v-icon
+                  size="large"
+                  color="grey"
+                  class="mb-2"
                 >
+                  mdi-calendar-blank
+                </v-icon>
                 <div class="text-subtitle-1 text-medium-emphasis">
                   No regularization requests found
                 </div>
@@ -100,11 +106,11 @@
         <template #pagination>
           <CustomPagination
             v-model:page="page"
-            v-model:itemsPerPage="itemsPerPage"
+            v-model:items-per-page="itemsPerPage"
             :total-items="totalItems"
             :is-searching="!!search"
             @update:page="handlePageChange"
-            @update:itemsPerPage="handleItemsPerPageChange"
+            @update:items-per-page="handleItemsPerPageChange"
           />
         </template>
       </DataTableWrapper>
@@ -120,8 +126,8 @@
         <add-form
           v-if="showAddForm"
           :selected-item="selectedItem"
-          @closeAddPage="toggleAddForm"
-          @regularizationApplied="handleRegularizationApplied"
+          @close-add-page="toggleAddForm"
+          @regularization-applied="handleRegularizationApplied"
         />
       </v-navigation-drawer>
     </div>

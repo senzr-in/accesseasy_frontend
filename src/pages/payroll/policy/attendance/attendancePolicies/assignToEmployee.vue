@@ -1,12 +1,19 @@
 <template>
-  <v-container fluid class="pa-4">
+  <v-container
+    fluid
+    class="pa-4"
+  >
     <v-card class="elevation-3 rounded-lg">
       <v-card-title class="d-flex flex-wrap align-center py-4 px-6 bg-white">
-        <v-icon size="29" color="primary" class="mr-3"
-          >mdi-account-group</v-icon
+        <v-icon
+          size="29"
+          color="primary"
+          class="mr-3"
         >
+          mdi-account-group
+        </v-icon>
         <span class="text-h5 font-weight-bold">Employee Details</span>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-text-field
           v-model="search"
           prepend-inner-icon="mdi-magnify"
@@ -21,7 +28,7 @@
           class="mt-3 mt-sm-0 mx-sm-2"
           style="max-width: 300px"
           @input="debouncedFetchEmployees"
-        ></v-text-field>
+        />
 
         <v-select
           v-model="selectedDepartment"
@@ -37,8 +44,8 @@
           dense
           style="max-width: 200px"
           class="mt-3 mt-sm-0"
-          @update:modelValue="fetchEmployees"
-        ></v-select>
+          @update:model-value="fetchEmployees"
+        />
 
         <v-select
           v-model="selectedOrganization"
@@ -54,17 +61,26 @@
           dense
           style="max-width: 200px"
           class="mt-3 mt-sm-0 ml-sm-2"
-          @update:modelValue="fetchEmployees"
-        ></v-select>
+          @update:model-value="fetchEmployees"
+        />
       </v-card-title>
 
-      <v-tabs v-model="activeTab" @update:modelValue="fetchEmployees">
-        <v-tab value="unassigned" style="text-transform: none"
-          >Unassigned Employees</v-tab
+      <v-tabs
+        v-model="activeTab"
+        @update:model-value="fetchEmployees"
+      >
+        <v-tab
+          value="unassigned"
+          style="text-transform: none"
         >
-        <v-tab value="assigned" style="text-transform: none"
-          >Assigned Employees</v-tab
+          Unassigned Employees
+        </v-tab>
+        <v-tab
+          value="assigned"
+          style="text-transform: none"
         >
+          Assigned Employees
+        </v-tab>
       </v-tabs>
 
       <v-data-table
@@ -77,13 +93,17 @@
         show-select
         :header-props="{ style: 'background-color: #f5f5f5' }"
       >
-        <template v-slot:item.employeeId="{ item }">
+        <template #item.employeeId="{ item }">
           {{ item.employeeId || "N/A" }}
         </template>
 
-        <template v-slot:item.name="{ item }">
+        <template #item.name="{ item }">
           <div class="d-flex align-center">
-            <v-avatar size="32" color="primary" class="mr-2">
+            <v-avatar
+              size="32"
+              color="primary"
+              class="mr-2"
+            >
               <span class="white--text text-subtitle-2">{{
                 item.first_name?.charAt(0) || ""
               }}</span>
@@ -92,7 +112,7 @@
           </div>
         </template>
 
-        <template v-slot:item.departmentName="{ item }">
+        <template #item.departmentName="{ item }">
           <v-chip
             v-if="item.departmentName"
             :color="getRandomColor(item.departmentName)"
@@ -104,7 +124,7 @@
           <span v-else>Not Assigned</span>
         </template>
 
-        <template v-slot:item.orgName="{ item }">
+        <template #item.orgName="{ item }">
           <v-chip
             v-if="item.orgName"
             :color="getRandomColor(item.orgName)"
@@ -116,15 +136,15 @@
           <span v-else>N/A</span>
         </template>
 
-        <template v-slot:item.assign="{ item }">
+        <template #item.assign="{ item }">
           <v-switch
             v-model="item.isAssigned"
             color="success"
             hide-details
             inset
-            @change="updateAssignment(item)"
             :loading="item.updating"
-          ></v-switch>
+            @change="updateAssignment(item)"
+          />
         </template>
       </v-data-table>
 

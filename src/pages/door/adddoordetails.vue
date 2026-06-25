@@ -10,12 +10,21 @@
       <v-row dense>
         <!-- Full width content area -->
         <v-col cols="12">
-          <v-card variant="flat" class="mt-2">
+          <v-card
+            variant="flat"
+            class="mt-2"
+          >
             <v-card-text>
-              <v-form ref="formRef" @submit.prevent="handleSave">
+              <v-form
+                ref="formRef"
+                @submit.prevent="handleSave"
+              >
                 <!-- Row 1: Door Name, Door Type, and Location -->
                 <v-row dense>
-                  <v-col cols="12" sm="4">
+                  <v-col
+                    cols="12"
+                    sm="4"
+                  >
                     <v-text-field
                       v-model="formData.doorName"
                       label="Door Name *"
@@ -30,9 +39,12 @@
                           'Door name must be 50 characters or less',
                       ]"
                       required
-                    ></v-text-field>
+                    />
                   </v-col>
-                  <v-col cols="12" sm="4">
+                  <v-col
+                    cols="12"
+                    sm="4"
+                  >
                     <v-select
                       v-model="formData.doorType"
                       label="Door Type *"
@@ -43,9 +55,12 @@
                       class="small-select"
                       :rules="[(v) => !!v || 'Door type is required']"
                       required
-                    ></v-select>
+                    />
                   </v-col>
-                  <v-col cols="12" sm="4">
+                  <v-col
+                    cols="12"
+                    sm="4"
+                  >
                     <v-text-field
                       v-model="formData.location"
                       label="Location"
@@ -53,13 +68,16 @@
                       variant="outlined"
                       density="comfortable"
                       class="small-field"
-                    ></v-text-field>
+                    />
                   </v-col>
                 </v-row>
 
                 <!-- Row 2: Branch and Departments -->
                 <v-row dense>
-                  <v-col cols="12" sm="6">
+                  <v-col
+                    cols="12"
+                    sm="6"
+                  >
                     <v-select
                       v-model="formData.branchLocation"
                       label="Branch"
@@ -70,9 +88,12 @@
                       variant="outlined"
                       density="comfortable"
                       class="small-select"
-                    ></v-select>
+                    />
                   </v-col>
-                  <v-col cols="12" sm="6">
+                  <v-col
+                    cols="12"
+                    sm="6"
+                  >
                     <v-select
                       v-model="formData.assignedDepts"
                       label="Departments"
@@ -88,7 +109,7 @@
                       closable-chips
                       :menu-props="{ maxHeight: 200 }"
                     >
-                      <template v-slot:prepend-item>
+                      <template #prepend-item>
                         <v-list-item>
                           <v-list-item-title>
                             <span class="text-caption">
@@ -100,22 +121,22 @@
                               }}
                             </span>
                           </v-list-item-title>
-                          <template v-slot:append>
+                          <template #append>
                             <v-btn
                               v-if="
                                 formData.assignedDepts &&
-                                formData.assignedDepts.length > 0
+                                  formData.assignedDepts.length > 0
                               "
                               variant="text"
                               size="small"
-                              @click.stop="clearAllDepts"
                               class="text-caption"
+                              @click.stop="clearAllDepts"
                             >
                               Clear All
                             </v-btn>
                           </template>
                         </v-list-item>
-                        <v-divider class="mt-2"></v-divider>
+                        <v-divider class="mt-2" />
                       </template>
                     </v-select>
                   </v-col>
@@ -128,22 +149,26 @@
     </v-card-text>
 
     <v-card-actions>
-      <v-spacer></v-spacer>
+      <v-spacer />
       <BaseButton
         variant="ghost"
         text="Cancel"
         @click="handleCancel"
-      ></BaseButton>
+      />
       <BaseButton
         variant="primary"
         :text="isEditing ? 'Update' : 'Save'"
         :loading="isSaving"
         @click="handleSave"
-      ></BaseButton>
+      />
     </v-card-actions>
 
     <!-- Snackbar for Toasts -->
-    <v-snackbar v-model="snackbar.show" :color="snackbar.type" timeout="3000">
+    <v-snackbar
+      v-model="snackbar.show"
+      :color="snackbar.type"
+      timeout="3000"
+    >
       {{ snackbar.message }}
     </v-snackbar>
   </v-card>

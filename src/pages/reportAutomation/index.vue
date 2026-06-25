@@ -1,6 +1,5 @@
 <template>
   <div class="min-h-screen bg-slate-50 dark:bg-slate-950 p-6">
-
     <!-- ── PAGE HEADER ── -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
       <div class="flex items-center gap-4">
@@ -8,15 +7,17 @@
           <CalendarClock class="w-6 h-6 text-white" />
         </div>
         <div>
-          <h1 class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Scheduled Reports</h1>
+          <h1 class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
+            Scheduled Reports
+          </h1>
           <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
             Automate attendance, access &amp; visitor summaries to your inbox.
           </p>
         </div>
       </div>
       <button
-        @click="showHistoryDialog = true"
         class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:border-blue-400 hover:text-blue-600 transition-all duration-200 shadow-sm"
+        @click="showHistoryDialog = true"
       >
         <History class="w-4 h-4" />
         Delivery Logs
@@ -33,12 +34,18 @@
     </div>
 
     <!-- ── LOADING ── -->
-    <div v-if="loading" class="flex items-center justify-center py-24">
-      <div class="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+    <div
+      v-if="loading"
+      class="flex items-center justify-center py-24"
+    >
+      <div class="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
     </div>
 
     <!-- ── REPORTS GRID ── -->
-    <div v-else class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+    <div
+      v-else
+      class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4"
+    >
       <div
         v-for="report in reports"
         :key="report.internalId"
@@ -53,17 +60,25 @@
             class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
             :style="{ background: report.color + '18' }"
           >
-            <component :is="report.icon" class="w-5 h-5" :style="{ color: report.color }" />
+            <component
+              :is="report.icon"
+              class="w-5 h-5"
+              :style="{ color: report.color }"
+            />
           </div>
           <div class="flex-1 min-w-0">
-            <p class="font-bold text-slate-900 dark:text-white text-sm">{{ report.name }}</p>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">{{ report.description }}</p>
+            <p class="font-bold text-slate-900 dark:text-white text-sm">
+              {{ report.name }}
+            </p>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+              {{ report.description }}
+            </p>
           </div>
           <!-- Toggle -->
           <button
-            @click="toggleReport(report)"
             class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none"
             :class="report.enabled ? 'bg-blue-600' : 'bg-slate-200 dark:bg-slate-700'"
+            @click="toggleReport(report)"
           >
             <span
               class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition-transform duration-200"
@@ -73,8 +88,10 @@
         </div>
 
         <!-- Config Panel -->
-        <div v-if="report.enabled" class="border-t border-slate-100 dark:border-slate-800 p-5 space-y-4 bg-slate-50/50 dark:bg-slate-950/20 rounded-b-2xl">
-
+        <div
+          v-if="report.enabled"
+          class="border-t border-slate-100 dark:border-slate-800 p-5 space-y-4 bg-slate-50/50 dark:bg-slate-950/20 rounded-b-2xl"
+        >
           <!-- Frequency -->
           <div>
             <label class="cfg-label">
@@ -84,28 +101,48 @@
               <button
                 v-for="opt in ['daily','weekly','monthly']"
                 :key="opt"
-                @click="report.reportConfig.schedule = opt"
                 class="py-2 rounded-lg text-xs font-bold border transition-all duration-150 capitalize"
                 :class="report.reportConfig.schedule === opt
                   ? 'bg-blue-600 border-blue-600 text-white shadow-sm'
                   : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-blue-400 hover:text-blue-600'"
-              >{{ opt }}</button>
+                @click="report.reportConfig.schedule = opt"
+              >
+                {{ opt }}
+              </button>
             </div>
           </div>
 
           <!-- Weekly: day picker -->
           <div v-if="report.reportConfig.schedule === 'weekly'">
             <label class="cfg-label"><CalendarDays class="w-3 h-3" /> Delivery Day</label>
-            <select v-model="report.reportConfig.weekDay" class="field-input">
-              <option v-for="d in weekDays" :key="d.value" :value="d.value">{{ d.title }}</option>
+            <select
+              v-model="report.reportConfig.weekDay"
+              class="field-input"
+            >
+              <option
+                v-for="d in weekDays"
+                :key="d.value"
+                :value="d.value"
+              >
+                {{ d.title }}
+              </option>
             </select>
           </div>
 
           <!-- Monthly: day of month -->
           <div v-if="report.reportConfig.schedule === 'monthly'">
             <label class="cfg-label"><CalendarRange class="w-3 h-3" /> Day of Month</label>
-            <select v-model="report.reportConfig.monthDay" class="field-input">
-              <option v-for="d in monthDays" :key="d.value" :value="d.value">{{ d.title }}</option>
+            <select
+              v-model="report.reportConfig.monthDay"
+              class="field-input"
+            >
+              <option
+                v-for="d in monthDays"
+                :key="d.value"
+                :value="d.value"
+              >
+                {{ d.title }}
+              </option>
             </select>
           </div>
 
@@ -113,12 +150,25 @@
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="cfg-label"><Clock class="w-3 h-3" /> Delivery Time</label>
-              <input v-model="report.reportConfig.scheduleValue" type="time" class="field-input" />
+              <input
+                v-model="report.reportConfig.scheduleValue"
+                type="time"
+                class="field-input"
+              >
             </div>
             <div>
               <label class="cfg-label"><Globe class="w-3 h-3" /> Timezone</label>
-              <select v-model="report.reportConfig.timezone" class="field-input">
-                <option v-for="tz in timezones" :key="tz.value" :value="tz.value">{{ tz.title }}</option>
+              <select
+                v-model="report.reportConfig.timezone"
+                class="field-input"
+              >
+                <option
+                  v-for="tz in timezones"
+                  :key="tz.value"
+                  :value="tz.value"
+                >
+                  {{ tz.title }}
+                </option>
               </select>
             </div>
           </div>
@@ -126,21 +176,46 @@
           <!-- Sender Email -->
           <div>
             <label class="cfg-label"><Mail class="w-3 h-3" /> Sender Account</label>
-            <select v-model="report.reportConfig.fromEmail" class="field-input">
-              <option value="">— Select sender —</option>
-              <option v-for="acc in emailAccounts" :key="acc.account_id" :value="acc.account_id">
+            <select
+              v-model="report.reportConfig.fromEmail"
+              class="field-input"
+            >
+              <option value="">
+                — Select sender —
+              </option>
+              <option
+                v-for="acc in emailAccounts"
+                :key="acc.account_id"
+                :value="acc.account_id"
+              >
                 {{ acc.credentials?.accountName || acc.credentials?.user_email || acc.account_id }}
               </option>
             </select>
             <button
-              @click="initiateGoogleLogin"
               class="mt-2 w-full flex items-center justify-center gap-2 py-2 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:border-blue-400 hover:text-blue-600 transition-all duration-150"
+              @click="initiateGoogleLogin"
             >
-              <svg width="14" height="14" viewBox="0 0 48 48">
-                <path fill="#4285F4" d="M44.5 20H24v8.5h11.7C34.2 33.9 29.6 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21c10.5 0 20-7.6 20-21 0-1.3-.2-2.7-.5-4z"/>
-                <path fill="#34A853" d="M6.3 14.7l7 5.1C15 16.1 19.1 13 24 13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3c-7.7 0-14.3 4.6-17.7 11.7z"/>
-                <path fill="#FBBC05" d="M24 45c5.4 0 10.3-1.9 14.1-5l-6.5-5.3C29.5 36.3 26.9 37 24 37c-5.6 0-10.2-3.1-11.7-7.5l-7 5.4C8.7 41.9 15.8 45 24 45z"/>
-                <path fill="#EA4335" d="M44.5 20H24v8.5h11.7c-.8 2.6-2.6 4.7-5 5.9l6.5 5.3C41.7 36.2 45 30.5 45 24c0-1.3-.2-2.7-.5-4z"/>
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 48 48"
+              >
+                <path
+                  fill="#4285F4"
+                  d="M44.5 20H24v8.5h11.7C34.2 33.9 29.6 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21c10.5 0 20-7.6 20-21 0-1.3-.2-2.7-.5-4z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M6.3 14.7l7 5.1C15 16.1 19.1 13 24 13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3c-7.7 0-14.3 4.6-17.7 11.7z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M24 45c5.4 0 10.3-1.9 14.1-5l-6.5-5.3C29.5 36.3 26.9 37 24 37c-5.6 0-10.2-3.1-11.7-7.5l-7 5.4C8.7 41.9 15.8 45 24 45z"
+                />
+                <path
+                  fill="#EA4335"
+                  d="M44.5 20H24v8.5h11.7c-.8 2.6-2.6 4.7-5 5.9l6.5 5.3C41.7 36.2 45 30.5 45 24c0-1.3-.2-2.7-.5-4z"
+                />
               </svg>
               {{ emailAccounts.length === 0 ? 'Sign in with Google' : 'Add another account' }}
             </button>
@@ -161,10 +236,16 @@
                     class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-300 text-xs font-semibold"
                   >
                     {{ getMemberName(id) }}
-                    <button @click.stop="removeRecipient(report, id)" class="text-blue-400 hover:text-blue-700 ml-0.5">×</button>
+                    <button
+                      class="text-blue-400 hover:text-blue-700 ml-0.5"
+                      @click.stop="removeRecipient(report, id)"
+                    >×</button>
                   </span>
                 </template>
-                <span v-else class="text-slate-400 dark:text-slate-500 text-xs self-center">Select recipients...</span>
+                <span
+                  v-else
+                  class="text-slate-400 dark:text-slate-500 text-xs self-center"
+                >Select recipients...</span>
               </div>
               <!-- Dropdown -->
               <div
@@ -178,20 +259,24 @@
                     placeholder="Search team members..."
                     class="w-full px-3 py-1.5 text-xs rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
                     @click.stop
-                  />
+                  >
                 </div>
                 <div
                   v-for="member in filteredMembers(report)"
                   :key="member.value"
-                  @click.stop="toggleRecipient(report, member.value)"
                   class="flex items-center gap-3 px-3 py-2.5 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer transition-colors"
+                  @click.stop="toggleRecipient(report, member.value)"
                 >
                   <div class="w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
                     <span class="text-xs font-bold text-blue-600 dark:text-blue-400">{{ member.fullName[0] }}</span>
                   </div>
                   <div class="flex-1 min-w-0">
-                    <p class="text-xs font-semibold text-slate-900 dark:text-white truncate">{{ member.fullName }}</p>
-                    <p class="text-xs text-slate-400 truncate">{{ member.email }}</p>
+                    <p class="text-xs font-semibold text-slate-900 dark:text-white truncate">
+                      {{ member.fullName }}
+                    </p>
+                    <p class="text-xs text-slate-400 truncate">
+                      {{ member.email }}
+                    </p>
                   </div>
                   <div
                     class="w-4 h-4 rounded border-2 flex items-center justify-center shrink-0"
@@ -199,10 +284,18 @@
                       ? 'bg-blue-600 border-blue-600'
                       : 'border-slate-300 dark:border-slate-600'"
                   >
-                    <Check v-if="report.reportConfig.recipientIds?.includes(member.value)" class="w-2.5 h-2.5 text-white" />
+                    <Check
+                      v-if="report.reportConfig.recipientIds?.includes(member.value)"
+                      class="w-2.5 h-2.5 text-white"
+                    />
                   </div>
                 </div>
-                <p v-if="teamMembers.length === 0" class="text-center text-xs text-slate-400 py-4">No team members found.</p>
+                <p
+                  v-if="teamMembers.length === 0"
+                  class="text-center text-xs text-slate-400 py-4"
+                >
+                  No team members found.
+                </p>
               </div>
             </div>
           </div>
@@ -211,22 +304,34 @@
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="cfg-label"><MailPlus class="w-3 h-3" /> CC</label>
-              <EmailTagInput v-model="report.reportConfig.cc" placeholder="Add CC email..." />
+              <EmailTagInput
+                v-model="report.reportConfig.cc"
+                placeholder="Add CC email..."
+              />
             </div>
             <div>
               <label class="cfg-label"><MailMinus class="w-3 h-3" /> BCC</label>
-              <EmailTagInput v-model="report.reportConfig.bcc" placeholder="Add BCC email..." />
+              <EmailTagInput
+                v-model="report.reportConfig.bcc"
+                placeholder="Add BCC email..."
+              />
             </div>
           </div>
 
           <!-- Save Button -->
           <button
-            @click="onSave(report)"
             :disabled="report.saving"
             class="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-bold transition-all duration-150 shadow-sm shadow-blue-500/20"
+            @click="onSave(report)"
           >
-            <div v-if="report.saving" class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
-            <Save v-else class="w-4 h-4" />
+            <div
+              v-if="report.saving"
+              class="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"
+            />
+            <Save
+              v-else
+              class="w-4 h-4"
+            />
             {{ report.saving ? 'Saving…' : 'Save Schedule' }}
           </button>
         </div>
@@ -240,7 +345,10 @@
         class="fixed inset-0 z-50 flex items-center justify-center p-4"
         @click.self="showHistoryDialog = false"
       >
-        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" @click="showHistoryDialog = false" />
+        <div
+          class="absolute inset-0 bg-black/40 backdrop-blur-sm"
+          @click="showHistoryDialog = false"
+        />
         <div class="relative w-full max-w-3xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden">
           <!-- Dialog Header -->
           <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800">
@@ -250,34 +358,64 @@
               </div>
               <span class="font-bold text-slate-900 dark:text-white">Delivery Logs</span>
             </div>
-            <button @click="showHistoryDialog = false" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-colors">
+            <button
+              class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 transition-colors"
+              @click="showHistoryDialog = false"
+            >
               <X class="w-4 h-4" />
             </button>
           </div>
           <!-- Loading -->
-          <div v-if="logsLoading" class="flex justify-center py-16">
-            <div class="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          <div
+            v-if="logsLoading"
+            class="flex justify-center py-16"
+          >
+            <div class="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
           </div>
           <!-- Empty -->
-          <div v-else-if="deliveryLogs.length === 0" class="flex flex-col items-center justify-center py-16 text-slate-400">
+          <div
+            v-else-if="deliveryLogs.length === 0"
+            class="flex flex-col items-center justify-center py-16 text-slate-400"
+          >
             <MailX class="w-12 h-12 mb-3 text-slate-300" />
-            <p class="text-sm font-semibold">No delivery logs yet</p>
-            <p class="text-xs mt-1">Reports will appear here after the scheduler runs.</p>
+            <p class="text-sm font-semibold">
+              No delivery logs yet
+            </p>
+            <p class="text-xs mt-1">
+              Reports will appear here after the scheduler runs.
+            </p>
           </div>
           <!-- Table -->
-          <div v-else class="overflow-x-auto max-h-[480px] overflow-y-auto">
+          <div
+            v-else
+            class="overflow-x-auto max-h-[480px] overflow-y-auto"
+          >
             <table class="w-full text-sm">
               <thead class="sticky top-0 bg-slate-50 dark:bg-slate-800">
                 <tr>
-                  <th class="text-left px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Module</th>
-                  <th class="text-left px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Recipients</th>
-                  <th class="text-left px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Status</th>
-                  <th class="text-left px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Sent At</th>
+                  <th class="text-left px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    Module
+                  </th>
+                  <th class="text-left px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    Recipients
+                  </th>
+                  <th class="text-left px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th class="text-left px-6 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                    Sent At
+                  </th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                <tr v-for="log in deliveryLogs" :key="log.id" class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                  <td class="px-6 py-3 font-semibold text-slate-800 dark:text-slate-200">{{ log.module || 'accesseasy' }}</td>
+                <tr
+                  v-for="log in deliveryLogs"
+                  :key="log.id"
+                  class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                >
+                  <td class="px-6 py-3 font-semibold text-slate-800 dark:text-slate-200">
+                    {{ log.module || 'accesseasy' }}
+                  </td>
                   <td class="px-6 py-3">
                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-300 text-xs font-semibold">
                       <Users class="w-3 h-3" /> {{ log.recipientCount || 0 }}
@@ -290,12 +428,20 @@
                         ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-700'
                         : 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-700'"
                     >
-                      <CheckCircle v-if="log.status === 'success'" class="w-3 h-3" />
-                      <AlertCircle v-else class="w-3 h-3" />
+                      <CheckCircle
+                        v-if="log.status === 'success'"
+                        class="w-3 h-3"
+                      />
+                      <AlertCircle
+                        v-else
+                        class="w-3 h-3"
+                      />
                       {{ log.status }}
                     </span>
                   </td>
-                  <td class="px-6 py-3 text-xs text-slate-500 dark:text-slate-400">{{ formatDate(log.sentAt) }}</td>
+                  <td class="px-6 py-3 text-xs text-slate-500 dark:text-slate-400">
+                    {{ formatDate(log.sentAt) }}
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -319,8 +465,14 @@
             ? 'bg-white dark:bg-slate-900 border-emerald-200 dark:border-emerald-700 text-slate-800 dark:text-white'
             : 'bg-white dark:bg-slate-900 border-red-200 dark:border-red-700 text-slate-800 dark:text-white'"
         >
-          <CheckCircle v-if="toast.type === 'success'" class="w-4 h-4 text-emerald-500 shrink-0" />
-          <AlertCircle v-else class="w-4 h-4 text-red-500 shrink-0" />
+          <CheckCircle
+            v-if="toast.type === 'success'"
+            class="w-4 h-4 text-emerald-500 shrink-0"
+          />
+          <AlertCircle
+            v-else
+            class="w-4 h-4 text-red-500 shrink-0"
+          />
           {{ toast.message }}
         </div>
       </Transition>

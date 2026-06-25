@@ -3,23 +3,27 @@
     <!-- Blurred Background Content -->
     <div class="blurred-content">
       <div class="mock-header">
-        <div class="mock-title-bar"></div>
+        <div class="mock-title-bar" />
         <div class="mock-stats">
-          <div class="mock-stat-card"></div>
-          <div class="mock-stat-card"></div>
-          <div class="mock-stat-card"></div>
+          <div class="mock-stat-card" />
+          <div class="mock-stat-card" />
+          <div class="mock-stat-card" />
         </div>
       </div>
 
       <div class="mock-tabs">
-        <div class="mock-tab active"></div>
-        <div class="mock-tab"></div>
-        <div class="mock-tab"></div>
+        <div class="mock-tab active" />
+        <div class="mock-tab" />
+        <div class="mock-tab" />
       </div>
 
       <div class="mock-content">
         <div class="mock-form-fields">
-          <div class="mock-field" v-for="i in 6" :key="i"></div>
+          <div
+            v-for="i in 6"
+            :key="i"
+            class="mock-field"
+          />
         </div>
       </div>
     </div>
@@ -30,7 +34,9 @@
         <Crown class="crown-icon" />
       </div>
 
-      <h2 class="premium-title">Premium Feature</h2>
+      <h2 class="premium-title">
+        Premium Feature
+      </h2>
       <p class="premium-description">
         This feature is exclusive to Premium subscribers. Your current plan does
         not include access to advanced work order configuration. Upgrade to
@@ -58,7 +64,10 @@
       </div>
 
       <div class="premium-actions">
-        <button class="upgrade-btn primary" @click="$emit('upgrade')">
+        <button
+          class="upgrade-btn primary"
+          @click="$emit('upgrade')"
+        >
           <Zap class="btn-icon" />
           Upgrade to Premium
         </button>

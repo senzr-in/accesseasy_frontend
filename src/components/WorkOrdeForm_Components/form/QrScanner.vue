@@ -1,15 +1,27 @@
 <template>
-  <v-dialog :model-value="show" max-width="500px" persistent>
-    <v-card class="qr-scanner-card" elevation="12">
+  <v-dialog
+    :model-value="show"
+    max-width="500px"
+    persistent
+  >
+    <v-card
+      class="qr-scanner-card"
+      elevation="12"
+    >
       <v-card-title class="qr-scanner-header">
-        <v-icon class="header-icon mr-3" size="28">mdi-qrcode-scan</v-icon>
+        <v-icon
+          class="header-icon mr-3"
+          size="28"
+        >
+          mdi-qrcode-scan
+        </v-icon>
         <span class="header-title">QR Code Scanner</span>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-btn 
           icon 
           variant="text" 
-          @click="$emit('close')"
           class="close-btn"
+          @click="$emit('close')"
         >
           <v-icon>mdi-close</v-icon>
         </v-btn>
@@ -30,7 +42,6 @@
         <div class="upload-section">
           <v-file-input
             :model-value="qrImageFile"
-            @update:model-value="$emit('update:qr-image-file', $event)"
             label="Upload QR Code Image"
             accept="image/*"
             prepend-icon="mdi-camera"
@@ -38,7 +49,8 @@
             density="comfortable"
             show-size-counter
             class="upload-input"
-          ></v-file-input>
+            @update:model-value="$emit('update:qr-image-file', $event)"
+          />
         </div>
 
         <v-text-field
@@ -50,30 +62,33 @@
           readonly
           class="mt-4 decoded-content"
           prepend-inner-icon="mdi-check-circle"
-        ></v-text-field>
+        />
 
-        <canvas ref="qrCanvas" style="display: none"></canvas>
+        <canvas
+          ref="qrCanvas"
+          style="display: none"
+        />
       </v-card-text>
 
       <v-card-actions class="qr-scanner-actions">
         <v-btn
           color="grey-darken-1"
           variant="outlined"
-          @click="$emit('close')"
           size="large"
           class="action-btn"
+          @click="$emit('close')"
         >
           Cancel
         </v-btn>
-        <v-spacer></v-spacer>
+        <v-spacer />
         <v-btn
           color="primary"
           variant="flat"
-          @click="$emit('apply')"
           :disabled="!decodedContent"
           size="large"
           class="action-btn apply-btn"
           append-icon="mdi-check"
+          @click="$emit('apply')"
         >
           Apply
         </v-btn>

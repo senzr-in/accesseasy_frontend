@@ -1,5 +1,8 @@
 <template>
-  <v-container fluid class="pa-4 pa-md-6 h-100">
+  <v-container
+    fluid
+    class="pa-4 pa-md-6 h-100"
+  >
     <v-row>
       <!-- Toast Container -->
       <ToastContainer ref="toastContainer" />
@@ -7,7 +10,10 @@
 
     <v-row>
       <!-- Main Content - Holiday Table -->
-      <v-col cols="12" class="h-100">
+      <v-col
+        cols="12"
+        class="h-100"
+      >
         <!-- All Holidays Table View - Main Content -->
         <DataTableWrapper
           :show-search="false"
@@ -35,7 +41,10 @@
                       "
                     >
                       <span>{{ selectedYear.toString() }}</span>
-                      <v-icon icon="mdi-chevron-down" class="ml-2"></v-icon>
+                      <v-icon
+                        icon="mdi-chevron-down"
+                        class="ml-2"
+                      />
                     </div>
                   </template>
                   <v-list>
@@ -64,8 +73,8 @@
                   }"
                   variant="primary"
                   size="md"
-                  @click="handleAddHolidayClick"
                   class="text-none rounded-lg"
+                  @click="handleAddHolidayClick"
                 />
               </div>
             </div>
@@ -78,8 +87,8 @@
               :columns="holidayColumns"
               :sort-by="sortBy"
               :sort-direction="sortDirection"
-              @update:sortBy="sortBy = $event"
-              @update:sortDirection="sortDirection = $event"
+              @update:sort-by="sortBy = $event"
+              @update:sort-direction="sortDirection = $event"
               @sort="handleHolidaySort"
               @delete="showDeleteConfirm"
             >
@@ -87,8 +96,12 @@
               <template #cell-date="{ item }">
                 <div class="date-cell">
                   <div class="date-badge">
-                    <div class="date-month">{{ getMonthShort(item.date) }}</div>
-                    <div class="date-day">{{ getDayFromDate(item.date) }}</div>
+                    <div class="date-month">
+                      {{ getMonthShort(item.date) }}
+                    </div>
+                    <div class="date-day">
+                      {{ getDayFromDate(item.date) }}
+                    </div>
                   </div>
                 </div>
               </template>
@@ -116,7 +129,7 @@
                           icon="mdi-map-marker"
                           size="12"
                           class="mr-1"
-                        ></v-icon>
+                        />
                         All Branches
                       </v-chip>
                     </template>
@@ -131,7 +144,7 @@
                           icon="mdi-map-marker"
                           size="12"
                           class="mr-1"
-                        ></v-icon>
+                        />
                         {{
                           item.branches[0].locationName || "Unknown Location"
                         }}
@@ -168,16 +181,16 @@
                     :icon="EditIcon"
                     variant="edit"
                     size="sm"
-                    @click="handleEditHolidayClick(item)"
                     class="action-btn edit-btn"
+                    @click="handleEditHolidayClick(item)"
                   />
                   <ActionButton
                     text="Delete"
                     :icon="TrashIcon"
                     variant="delete"
                     size="sm"
-                    @click="showDeleteConfirm(item)"
                     class="action-btn delete-btn"
+                    @click="showDeleteConfirm(item)"
                   />
                 </div>
               </template>
@@ -217,8 +230,10 @@
             size="64"
             color="grey-lighten-2"
             class="mb-3"
-          ></v-icon>
-          <div class="text-h6 text-medium-emphasis mb-2">No holidays yet</div>
+          />
+          <div class="text-h6 text-medium-emphasis mb-2">
+            No holidays yet
+          </div>
           <div class="text-body-2 text-medium-emphasis">
             Add holidays for {{ selectedYear }} to get started
           </div>
@@ -227,7 +242,11 @@
     </v-row>
 
     <!-- Holiday Add/Edit Dialog -->
-    <v-dialog v-model="showHolidayFormDialog" max-width="600px" persistent>
+    <v-dialog
+      v-model="showHolidayFormDialog"
+      max-width="600px"
+      persistent
+    >
       <v-card class="dialog-card">
         <v-card-title class="pa-6 pb-4 dialog-header">
           <div class="d-flex align-center justify-space-between w-100">
@@ -236,15 +255,18 @@
             </h3>
             <v-btn
               icon="mdi-close"
-              @click="cancelAction"
               variant="text"
               size="small"
               class="rounded-lg dialog-close-btn"
-            ></v-btn>
+              @click="cancelAction"
+            />
           </div>
         </v-card-title>
         <v-card-text class="pa-6 pt-0 dialog-content">
-          <v-form ref="holidayForm" v-model="formValid">
+          <v-form
+            ref="holidayForm"
+            v-model="formValid"
+          >
             <v-text-field
               v-model="holidayNameModel"
               :label="isAddingHoliday ? 'Holiday Name' : 'Edit Holiday Name'"
@@ -301,7 +323,7 @@
                         label="All Branches"
                         hide-details
                         density="compact"
-                        @update:modelValue="toggleAllBranches"
+                        @update:model-value="toggleAllBranches"
                       />
                     </v-list-item>
                     <v-divider />
@@ -316,7 +338,7 @@
                         :value="branch.id"
                         hide-details
                         density="compact"
-                        @update:modelValue="updateSelectAll"
+                        @update:model-value="updateSelectAll"
                       />
                     </v-list-item>
                   </v-list>
@@ -331,7 +353,7 @@
               class="mb-4"
             >
               <template #prepend>
-                <v-icon icon="mdi-information"></v-icon>
+                <v-icon icon="mdi-information" />
               </template>
               Please select at least one branch for this holiday
             </v-alert>
@@ -343,8 +365,8 @@
             variant="danger"
             color="grey-darken-1"
             size="md"
-            @click="cancelAction"
             class="footer-btn mr-3"
+            @click="cancelAction"
           />
           <BaseButton
             :text="isAddingHoliday ? 'Save Holiday' : 'Update Holiday'"
@@ -353,22 +375,25 @@
             }"
             color="primary"
             size="md"
-            @click="isAddingHoliday ? addHoliday() : updateHoliday()"
             :disabled="
               !formValid ||
-              !holidayNameModel ||
-              !selectedBranches.length ||
-              !selectedDate
+                !holidayNameModel ||
+                !selectedBranches.length ||
+                !selectedDate
             "
             class="footer-btn primary-btn"
             variant="primary"
+            @click="isAddingHoliday ? addHoliday() : updateHoliday()"
           />
         </v-card-actions>
       </v-card>
     </v-dialog>
 
     <!-- View Assigned Branches Dialog -->
-    <v-dialog v-model="showViewDialog" max-width="400px">
+    <v-dialog
+      v-model="showViewDialog"
+      max-width="400px"
+    >
       <v-card>
         <v-card-title class="pa-6 pb-4 dialog-header">
           <div class="d-flex align-center justify-space-between w-100">
@@ -377,11 +402,11 @@
             </h3>
             <v-btn
               icon="mdi-close"
-              @click="showViewDialog = false"
               variant="text"
               size="small"
               class="rounded-lg dialog-close-btn"
-            ></v-btn>
+              @click="showViewDialog = false"
+            />
           </div>
         </v-card-title>
         <v-card-text>
@@ -390,21 +415,23 @@
               v-for="branch in selectedHolidayForView?.branches"
               :key="branch.id"
             >
-              <v-list-item-title>{{
-                branch.locationName || "Unknown Location"
-              }}</v-list-item-title>
+              <v-list-item-title>
+                {{
+                  branch.locationName || "Unknown Location"
+                }}
+              </v-list-item-title>
             </v-list-item>
           </v-list>
         </v-card-text>
         <v-card-actions class="pa-6 pt-4 dialog-footer">
-          <v-spacer></v-spacer>
+          <v-spacer />
           <BaseButton
             text="Close"
             variant="danger"
             color="grey-darken-1"
             size="md"
-            @click="showViewDialog = false"
             class="footer-btn"
+            @click="showViewDialog = false"
           />
         </v-card-actions>
       </v-card>
@@ -414,13 +441,13 @@
     <ConfirmDeleteModal
       :show="showDeleteDialog"
       title="Delete Holiday"
-      confirmMessage="Are you sure you want to delete this holiday?"
-      :itemLabel="'Holiday'"
-      :itemName="holidayToDelete ? holidayToDelete.event : ''"
+      confirm-message="Are you sure you want to delete this holiday?"
+      :item-label="'Holiday'"
+      :item-name="holidayToDelete ? holidayToDelete.event : ''"
       description="This action cannot be undone and will remove the holiday from all associated organizations."
-      cancelText="Cancel"
-      confirmText="Delete"
-      deletingText="Deleting..."
+      cancel-text="Cancel"
+      confirm-text="Delete"
+      deleting-text="Deleting..."
       :deleting="isDeleting"
       @close="closeDeleteDialog"
       @confirm="confirmDelete"

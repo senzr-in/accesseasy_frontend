@@ -1,12 +1,27 @@
 <template>
   <v-app>
-    <v-container fluid class="pa-6">
+    <v-container
+      fluid
+      class="pa-6"
+    >
       <!-- Header -->
-      <v-tabs v-model="tab" background-color="transparent" color="primary">
-        <v-tab value="employee-kpis">Employee KPIs</v-tab>
+      <v-tabs
+        v-model="tab"
+        background-color="transparent"
+        color="primary"
+      >
+        <v-tab value="employee-kpis">
+          Employee KPIs
+        </v-tab>
         <v-tab value="overview">
           Overview
-          <v-chip color="warning" size="x-small" class="ml-2">Premium</v-chip>
+          <v-chip
+            color="warning"
+            size="x-small"
+            class="ml-2"
+          >
+            Premium
+          </v-chip>
         </v-tab>
       </v-tabs>
 
@@ -14,9 +29,18 @@
         <v-window-item value="overview">
           <v-row class="mt-4">
             <v-col cols="12">
-              <v-alert type="info" prominent>
+              <v-alert
+                type="info"
+                prominent
+              >
                 The Overview tab is a premium feature. Please upgrade to a premium plan to unlock this feature.
-                <v-btn color="primary" class="mt-2" @click="redirectToPremium">Upgrade Now</v-btn>
+                <v-btn
+                  color="primary"
+                  class="mt-2"
+                  @click="redirectToPremium"
+                >
+                  Upgrade Now
+                </v-btn>
               </v-alert>
             </v-col>
           </v-row>
@@ -26,26 +50,35 @@
           <!-- Employee-Specific KPI Panel (Unchanged) -->
           <v-row class="mt-8">
             <v-col cols="12">
-              <v-card class="pa-6" elevation="2" rounded="lg">
+              <v-card
+                class="pa-6"
+                elevation="2"
+                rounded="lg"
+              >
                 <v-row align="center">
-                  <v-col cols="12" md="8">
-                    <h2 class="text-h5 font-weight-bold">Employee KPIs</h2>
+                  <v-col
+                    cols="12"
+                    md="8"
+                  >
+                    <h2 class="text-h5 font-weight-bold">
+                      Employee KPIs
+                    </h2>
                     <div class="d-flex align-center mt-4 flex-wrap">
                       <v-autocomplete
-  v-model="selectedEmployee"
-  :items="employees"
-  item-title="name"
-  item-value="id"
-  label="Search Employee"
-  variant="outlined"
-  dense
-  clearable
-  return-object
-  :search-input.sync="searchQuery"
-  no-data-text="No employees found"
-  class="mr-4"
-  style="max-width: 300px;"
-></v-autocomplete>
+                        v-model="selectedEmployee"
+                        v-model:search-input="searchQuery"
+                        :items="employees"
+                        item-title="name"
+                        item-value="id"
+                        label="Search Employee"
+                        variant="outlined"
+                        dense
+                        clearable
+                        return-object
+                        no-data-text="No employees found"
+                        class="mr-4"
+                        style="max-width: 300px;"
+                      />
                       <v-select
                         v-model="selectedMonth"
                         :items="months"
@@ -56,7 +89,7 @@
                         dense
                         class="mr-4"
                         style="max-width: 150px;"
-                      ></v-select>
+                      />
                       <v-select
                         v-model="selectedYear"
                         :items="years"
@@ -65,8 +98,13 @@
                         dense
                         class="mr-4"
                         style="max-width: 150px;"
-                      ></v-select>
-                      <v-chip v-if="selectedEmployee && selectedEmployeeOrg" color="blue" class="ml-2 mr-4" small>
+                      />
+                      <v-chip
+                        v-if="selectedEmployee && selectedEmployeeOrg"
+                        color="blue"
+                        class="ml-2 mr-4"
+                        small
+                      >
                         {{ selectedEmployeeOrg }}
                       </v-chip>
                       <v-btn
@@ -76,7 +114,9 @@
                         :disabled="!selectedEmployee"
                         @click="downloadCSV"
                       >
-                        <v-icon left>mdi-download</v-icon> CSV
+                        <v-icon left>
+                          mdi-download
+                        </v-icon> CSV
                       </v-btn>
                       <v-btn
                         color="primary"
@@ -84,7 +124,9 @@
                         :disabled="!selectedEmployee"
                         @click="openPDFDialog"
                       >
-                        <v-icon left>mdi-download</v-icon> PDF
+                        <v-icon left>
+                          mdi-download
+                        </v-icon> PDF
                       </v-btn>
                     </div>
                   </v-col>
@@ -93,27 +135,66 @@
                 <v-expand-transition>
                   <div v-if="selectedEmployee">
                     <v-row class="mt-6">
-                      <v-col cols="12" md="3">
-                        <v-card flat class="pa-4">
+                      <v-col
+                        cols="12"
+                        md="3"
+                      >
+                        <v-card
+                          flat
+                          class="pa-4"
+                        >
                           <div class="d-flex align-center">
-                            <v-avatar size="48" color="blue lighten-4" class="mr-3">
-                              <v-img v-if="avatarImage" :src="avatarImage" alt="Employee Avatar"></v-img>
-                              <span v-else class="text-h6">{{ employeeData.name[0] }}</span>
+                            <v-avatar
+                              size="48"
+                              color="blue lighten-4"
+                              class="mr-3"
+                            >
+                              <v-img
+                                v-if="avatarImage"
+                                :src="avatarImage"
+                                alt="Employee Avatar"
+                              />
+                              <span
+                                v-else
+                                class="text-h6"
+                              >{{ employeeData.name[0] }}</span>
                             </v-avatar>
                             <div>
-                              <div class="text-h6 font-weight-bold">{{ employeeData.name }}</div>
-                              <div class="text-caption text-grey">{{ employeeData.employeeId }}</div>
+                              <div class="text-h6 font-weight-bold">
+                                {{ employeeData.name }}
+                              </div>
+                              <div class="text-caption text-grey">
+                                {{ employeeData.employeeId }}
+                              </div>
                             </div>
                           </div>
                         </v-card>
                       </v-col>
-                      <v-col cols="12" md="9">
+                      <v-col
+                        cols="12"
+                        md="9"
+                      >
                         <v-row>
-                          <v-col v-for="kpi in employeeData.kpis" :key="kpi.title" cols="12" sm="6" md="4">
-                            <v-card flat class="pa-4">
-                              <div class="text-subtitle-2 font-weight-medium">{{ kpi.title }}</div>
+                          <v-col
+                            v-for="kpi in employeeData.kpis"
+                            :key="kpi.title"
+                            cols="12"
+                            sm="6"
+                            md="4"
+                          >
+                            <v-card
+                              flat
+                              class="pa-4"
+                            >
+                              <div class="text-subtitle-2 font-weight-medium">
+                                {{ kpi.title }}
+                              </div>
                               <div class="mt-2">
-                                <div v-for="metric in kpi.metrics" :key="metric.label" class="d-flex justify-space-between">
+                                <div
+                                  v-for="metric in kpi.metrics"
+                                  :key="metric.label"
+                                  class="d-flex justify-space-between"
+                                >
                                   <span class="text-caption text-grey">{{ metric.label }}</span>
                                   <span class="text-body-2 font-weight-bold">{{ metric.value }}</span>
                                 </div>
@@ -124,7 +205,7 @@
                                   height="4"
                                   rounded
                                   class="mt-2"
-                                ></v-progress-linear>
+                                />
                               </div>
                             </v-card>
                           </v-col>
@@ -140,8 +221,14 @@
       </v-window>
 
       <!-- PDF Dialog for Print (Unchanged) -->
-      <v-dialog v-model="pdfDialog" max-width="800">
-        <v-card class="pa-6" id="pdf-content">
+      <v-dialog
+        v-model="pdfDialog"
+        max-width="800"
+      >
+        <v-card
+          id="pdf-content"
+          class="pa-6"
+        >
           <v-card-title class="text-h5 font-weight-bold">
             Employee KPI Report: {{ employeeData.name }}
           </v-card-title>
@@ -153,11 +240,25 @@
           </v-card-subtitle>
           <v-card-text>
             <v-row>
-              <v-col v-for="kpi in employeeData.kpis" :key="kpi.title" cols="12" sm="6">
-                <v-card flat class="pa-4">
-                  <div class="text-subtitle-1 font-weight-medium">{{ kpi.title }}</div>
+              <v-col
+                v-for="kpi in employeeData.kpis"
+                :key="kpi.title"
+                cols="12"
+                sm="6"
+              >
+                <v-card
+                  flat
+                  class="pa-4"
+                >
+                  <div class="text-subtitle-1 font-weight-medium">
+                    {{ kpi.title }}
+                  </div>
                   <div class="mt-2">
-                    <div v-for="metric in kpi.metrics" :key="metric.label" class="d-flex justify-space-between">
+                    <div
+                      v-for="metric in kpi.metrics"
+                      :key="metric.label"
+                      class="d-flex justify-space-between"
+                    >
                       <span class="text-caption">{{ metric.label }}</span>
                       <span class="text-body-2 font-weight-bold">{{ metric.value }}</span>
                     </div>
@@ -168,16 +269,26 @@
                       height="4"
                       rounded
                       class="mt-2"
-                    ></v-progress-linear>
+                    />
                   </div>
                 </v-card>
               </v-col>
             </v-row>
           </v-card-text>
           <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn color="primary" @click="printPDF">Print/Save as PDF</v-btn>
-            <v-btn text @click="pdfDialog = false">Close</v-btn>
+            <v-spacer />
+            <v-btn
+              color="primary"
+              @click="printPDF"
+            >
+              Print/Save as PDF
+            </v-btn>
+            <v-btn
+              text
+              @click="pdfDialog = false"
+            >
+              Close
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -190,7 +301,7 @@ import { authService } from '@/services/authService';
 import { currentUserTenant } from '@/utils/currentUserTenant';
 
 export default {
-  name: 'kpi',
+  name: 'Kpi',
   data() {
     return {
       tab: 'employee-kpis',

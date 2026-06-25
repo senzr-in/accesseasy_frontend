@@ -3,12 +3,25 @@
     <v-container fluid>
       <!-- Header with back button -->
       <v-row class="mb-4">
-        <v-col cols="12" class="d-flex align-center">
-          <v-btn icon variant="text" :to="'/documents'" class="mr-2">
+        <v-col
+          cols="12"
+          class="d-flex align-center"
+        >
+          <v-btn
+            icon
+            variant="text"
+            :to="'/documents'"
+            class="mr-2"
+          >
             <v-icon>mdi-arrow-left</v-icon>
           </v-btn>
           <h1 class="text-h4 font-weight-bold d-flex align-center">
-            <v-icon color="primary" class="mr-2">mdi-account-cog</v-icon>
+            <v-icon
+              color="primary"
+              class="mr-2"
+            >
+              mdi-account-cog
+            </v-icon>
             HR Document Management
           </h1>
         </v-col>
@@ -16,7 +29,10 @@
 
       <!-- Search and Filter -->
       <v-row class="mb-4">
-        <v-col cols="12" md="6">
+        <v-col
+          cols="12"
+          md="6"
+        >
           <v-text-field
             v-model="search"
             prepend-inner-icon="mdi-magnify"
@@ -24,14 +40,25 @@
             variant="outlined"
             density="comfortable"
             hide-details
-          ></v-text-field>
+          />
         </v-col>
-        <v-col cols="12" md="6" class="d-flex justify-end">
-          <v-btn variant="outlined" class="mr-2">
-            <v-icon class="mr-1">mdi-filter</v-icon>
+        <v-col
+          cols="12"
+          md="6"
+          class="d-flex justify-end"
+        >
+          <v-btn
+            variant="outlined"
+            class="mr-2"
+          >
+            <v-icon class="mr-1">
+              mdi-filter
+            </v-icon>
             Filter
           </v-btn>
-          <v-btn color="primary">View All Employees</v-btn>
+          <v-btn color="primary">
+            View All Employees
+          </v-btn>
         </v-col>
       </v-row>
 
@@ -39,12 +66,20 @@
       <v-row>
         <v-col cols="12">
           <v-card>
-            <v-tabs v-model="activeTab" bg-color="transparent" color="primary">
-              <v-tab value="onboarding">Onboarding Documents</v-tab>
-              <v-tab value="offboarding">Offboarding Documents</v-tab>
+            <v-tabs
+              v-model="activeTab"
+              bg-color="transparent"
+              color="primary"
+            >
+              <v-tab value="onboarding">
+                Onboarding Documents
+              </v-tab>
+              <v-tab value="offboarding">
+                Offboarding Documents
+              </v-tab>
             </v-tabs>
 
-            <v-divider></v-divider>
+            <v-divider />
 
             <v-window v-model="activeTab">
               <!-- Onboarding Documents -->
@@ -55,15 +90,13 @@
                       class="d-flex justify-space-between align-center"
                     >
                       <div>
-                        <span class="text-h6 font-weight-bold"
-                          >Employee: John Doe</span
-                        >
+                        <span class="text-h6 font-weight-bold">Employee: John Doe</span>
                       </div>
                     </v-card-title>
-                    <v-card-subtitle
-                      >Software Engineer • Joining: June 1,
-                      2025</v-card-subtitle
-                    >
+                    <v-card-subtitle>
+                      Software Engineer • Joining: June 1,
+                      2025
+                    </v-card-subtitle>
                     <v-card-text>
                       <h3 class="text-h6 font-weight-medium mb-4">
                         HR-Provided Documents
@@ -75,7 +108,7 @@
                         :status="'hr_action'"
                         :required="true"
                         :is-hr-view="true"
-                      ></document-upload>
+                      />
 
                       <h3 class="text-h6 font-weight-medium mt-8 mb-4">
                         Employee-Uploaded Documents Requiring Verification
@@ -87,7 +120,7 @@
                         :status="'completed'"
                         :required="true"
                         :is-hr-view="true"
-                      ></document-upload>
+                      />
 
                       <document-upload
                         title="PAN Card"
@@ -95,7 +128,7 @@
                         :status="'completed'"
                         :required="true"
                         :is-hr-view="true"
-                      ></document-upload>
+                      />
 
                       <document-upload
                         title="Educational Certificates"
@@ -103,7 +136,7 @@
                         :status="'completed'"
                         :required="true"
                         :is-hr-view="true"
-                      ></document-upload>
+                      />
                     </v-card-text>
                   </v-card>
                 </v-card-text>
@@ -117,15 +150,13 @@
                       class="d-flex justify-space-between align-center"
                     >
                       <div>
-                        <span class="text-h6 font-weight-bold"
-                          >Employee: Jane Smith</span
-                        >
+                        <span class="text-h6 font-weight-bold">Employee: Jane Smith</span>
                       </div>
                     </v-card-title>
-                    <v-card-subtitle
-                      >Product Manager • Last Working Day: July 15,
-                      2025</v-card-subtitle
-                    >
+                    <v-card-subtitle>
+                      Product Manager • Last Working Day: July 15,
+                      2025
+                    </v-card-subtitle>
                     <v-card-text>
                       <h3 class="text-h6 font-weight-medium mb-4">
                         HR-Provided Documents
@@ -137,7 +168,7 @@
                         :status="'hr_action'"
                         :required="true"
                         :is-hr-view="true"
-                      ></document-upload>
+                      />
 
                       <document-upload
                         title="Experience Certificate"
@@ -145,7 +176,7 @@
                         :status="'hr_action'"
                         :required="true"
                         :is-hr-view="true"
-                      ></document-upload>
+                      />
 
                       <document-upload
                         title="Relieving Letter"
@@ -153,7 +184,7 @@
                         :status="'hr_action'"
                         :required="true"
                         :is-hr-view="true"
-                      ></document-upload>
+                      />
 
                       <document-upload
                         title="Form 16"
@@ -161,7 +192,7 @@
                         :status="'hr_action'"
                         :required="true"
                         :is-hr-view="true"
-                      ></document-upload>
+                      />
 
                       <h3 class="text-h6 font-weight-medium mt-8 mb-4">
                         Employee-Uploaded Documents Requiring Verification
@@ -173,7 +204,7 @@
                         :status="'completed'"
                         :required="true"
                         :is-hr-view="true"
-                      ></document-upload>
+                      />
 
                       <document-upload
                         title="Knowledge Transfer Document"
@@ -181,7 +212,7 @@
                         :status="'completed'"
                         :required="true"
                         :is-hr-view="true"
-                      ></document-upload>
+                      />
                     </v-card-text>
                   </v-card>
                 </v-card-text>

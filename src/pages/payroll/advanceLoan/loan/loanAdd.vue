@@ -7,10 +7,18 @@
     no-overlay
     :style="{ position: 'absolute', zIndex: 1000 }"
   >
-    <v-card flat height="100%" class="loan-card">
+    <v-card
+      flat
+      height="100%"
+      class="loan-card"
+    >
       <v-card-title class="loan-header">
         <span class="loan-header-title"> {{ "Employee" }} </span>
-        <v-btn icon class="loan-close-btn" @click="closeDrawer">
+        <v-btn
+          icon
+          class="loan-close-btn"
+          @click="closeDrawer"
+        >
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </v-card-title>
@@ -18,9 +26,7 @@
       <v-card-text class="loan-content">
         <div class="loan-outstanding">
           <span class="loan-outstanding-label">Loan Outstanding:</span>
-          <span class="loan-outstanding-amount"
-            >₹{{ calculateLoanOutstanding() }}</span
-          >
+          <span class="loan-outstanding-amount">₹{{ calculateLoanOutstanding() }}</span>
         </div>
 
         <div class="loan-main-section">
@@ -69,7 +75,7 @@
                   variant="primary"
                   size="md"
                   text="Add Loan"
-                  :leftIcon="Plus"
+                  :left-icon="Plus"
                   :loading="updatingBenefits"
                   :disabled="!tempAmount || !tempDate"
                   @click="addLoan"
@@ -79,7 +85,7 @@
                   variant="danger"
                   size="md"
                   text="Deduct Loan"
-                  :leftIcon="Minus"
+                  :left-icon="Minus"
                   :loading="updatingBenefits"
                   :disabled="!tempAmount || !tempDate"
                   @click="deductLoan"
@@ -98,10 +104,15 @@
             <div class="loan-history-section">
               <div class="loan-history-header">
                 <span class="loan-history-title">History</span>
-                <v-icon class="loan-history-icon">mdi-clock-outline</v-icon>
+                <v-icon class="loan-history-icon">
+                  mdi-clock-outline
+                </v-icon>
               </div>
 
-              <div v-if="advanceManual?.length" class="loan-history-list">
+              <div
+                v-if="advanceManual?.length"
+                class="loan-history-list"
+              >
                 <div
                   v-for="(deduction, index) in advanceManual"
                   :key="index"
@@ -122,9 +133,7 @@
                       }}</span>
                     </div>
                     <div class="loan-history-item-right">
-                      <span class="loan-history-amount"
-                        >₹ {{ deduction.amount }}</span
-                      >
+                      <span class="loan-history-amount">₹ {{ deduction.amount }}</span>
                       <div class="loan-history-actions">
                         <v-btn
                           v-if="props.mode !== 'view'"
@@ -133,7 +142,9 @@
                           class="loan-action-btn"
                           @click="editSpecificBenefit(index)"
                         >
-                          <v-icon size="16">mdi-pencil</v-icon>
+                          <v-icon size="16">
+                            mdi-pencil
+                          </v-icon>
                         </v-btn>
                         <v-btn
                           v-if="props.mode !== 'view'"
@@ -142,14 +153,21 @@
                           class="loan-action-btn loan-delete-btn"
                           @click="deleteSpecificBenefit(index)"
                         >
-                          <v-icon size="16">mdi-close</v-icon>
+                          <v-icon size="16">
+                            mdi-close
+                          </v-icon>
                         </v-btn>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-              <div v-else class="loan-no-records">No loan records found</div>
+              <div
+                v-else
+                class="loan-no-records"
+              >
+                No loan records found
+              </div>
             </div>
           </div>
 
@@ -157,7 +175,9 @@
             <v-card flat>
               <v-card-text>
                 <div class="loan-form-row">
-                  <div class="loan-form-label">Reason</div>
+                  <div class="loan-form-label">
+                    Reason
+                  </div>
                   <v-text-field
                     v-model="editingBenefits.reason"
                     variant="outlined"
@@ -166,7 +186,9 @@
                   />
                 </div>
                 <div class="loan-form-row">
-                  <div class="loan-form-label">Amount</div>
+                  <div class="loan-form-label">
+                    Amount
+                  </div>
                   <v-text-field
                     v-model="editingBenefits.amount"
                     type="number"
@@ -176,7 +198,9 @@
                   />
                 </div>
                 <div class="loan-form-row">
-                  <div class="loan-form-label">Month</div>
+                  <div class="loan-form-label">
+                    Month
+                  </div>
                   <v-text-field
                     v-model="editingBenefits.month"
                     type="month"
@@ -186,7 +210,9 @@
                   />
                 </div>
                 <div class="loan-form-row">
-                  <div class="loan-form-label">Notes</div>
+                  <div class="loan-form-label">
+                    Notes
+                  </div>
                   <v-textarea
                     v-model="editingBenefits.notes"
                     variant="outlined"

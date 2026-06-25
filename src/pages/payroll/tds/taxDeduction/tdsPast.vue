@@ -1,10 +1,18 @@
 // TDSForm.vue
 <template>
   <v-container class="pa-4">
-    <v-card class="mb-4" variant="outlined">
+    <v-card
+      class="mb-4"
+      variant="outlined"
+    >
       <v-card-text>
         <div class="d-flex align-center mb-2">
-          <v-icon size="small" class="me-2">mdi-file-document</v-icon>
+          <v-icon
+            size="small"
+            class="me-2"
+          >
+            mdi-file-document
+          </v-icon>
           <span class="text-h6 font-weight-medium">Past TDS in current financial year</span>
         </div>
         <p class="text-body-1 text-medium-emphasis">
@@ -15,7 +23,9 @@
     </v-card>
 
     <div class="mb-6">
-      <p class="text-subtitle-1 font-weight-medium mb-2">Taxable Salary</p>
+      <p class="text-subtitle-1 font-weight-medium mb-2">
+        Taxable Salary
+      </p>
       <v-text-field
         v-model="taxableSalary"
         density="comfortable"
@@ -23,11 +33,13 @@
         hide-details
         prefix="₹"
         type="number"
-      ></v-text-field>
+      />
     </div>
 
     <div>
-      <p class="text-subtitle-1 font-weight-medium mb-2">TDS deducted/paid</p>
+      <p class="text-subtitle-1 font-weight-medium mb-2">
+        TDS deducted/paid
+      </p>
       <v-text-field
         v-model="tdsDeducted"
         density="comfortable"
@@ -35,7 +47,7 @@
         hide-details
         prefix="₹"
         type="number"
-      ></v-text-field>
+      />
     </div>
   </v-container>
 </template>

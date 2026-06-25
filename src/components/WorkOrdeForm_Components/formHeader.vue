@@ -6,7 +6,9 @@
           <Settings class="w-6 h-6" />
         </div>
         <div>
-          <h3 class="header-title">Work Order Form Builder</h3>
+          <h3 class="header-title">
+            Work Order Form Builder
+          </h3>
           <p class="header-subtitle">
             Create and configure work order forms easily
           </p>
@@ -25,21 +27,27 @@
         </div>
         <!-- Help Button -->
         <button
-          @click="$emit('showHelp')"
           class="btn btn-help"
           title="Get Help"
+          @click="$emit('showHelp')"
         >
           <HelpCircleIcon class="btn-icon" />
           Help
         </button>
         <button
-          @click="$emit('saveConfiguration')"
           :disabled="!selectedForm || saving"
           class="btn btn-primary"
           :class="{ 'btn-loading': saving }"
+          @click="$emit('saveConfiguration')"
         >
-          <Save class="btn-icon" v-if="!saving" />
-          <div v-if="saving" class="loading-spinner-small"></div>
+          <Save
+            v-if="!saving"
+            class="btn-icon"
+          />
+          <div
+            v-if="saving"
+            class="loading-spinner-small"
+          />
           {{ saving ? "Saving..." : "Save Configuration" }}
         </button>
       </div>

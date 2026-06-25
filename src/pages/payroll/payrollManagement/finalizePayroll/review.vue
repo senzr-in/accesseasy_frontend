@@ -2,12 +2,20 @@
   <div class="payroll-dashboard">
     <div class="header-banner">
       <div class="header-content">
-        <button class="back-button" @click="goBack">
+        <button
+          class="back-button"
+          @click="goBack"
+        >
           <v-icon>mdi-arrow-left</v-icon>
         </button>
         <div class="title-section">
           <h1 class="main-title">
-            <v-icon size="32" class="title-icon">mdi-account-cash</v-icon>
+            <v-icon
+              size="32"
+              class="title-icon"
+            >
+              mdi-account-cash
+            </v-icon>
             Payroll Summary
           </h1>
           <div class="subtitle-wrapper">
@@ -32,24 +40,30 @@
           <div class="step-icon">
             <v-icon>mdi-check-circle</v-icon>
           </div>
-          <div class="step-label">Attendance Verification</div>
+          <div class="step-label">
+            Attendance Verification
+          </div>
         </div>
 
-        <div class="step-connector completed"></div>
+        <div class="step-connector completed" />
 
         <div class="step completed">
           <div class="step-icon">
             <span>2</span>
           </div>
-          <div class="step-label">Salary Calculation</div>
+          <div class="step-label">
+            Salary Calculation
+          </div>
         </div>
-        <div class="step-connector"></div>
+        <div class="step-connector" />
 
         <div class="step active">
           <div class="step-icon">
             <span>3</span>
           </div>
-          <div class="step-label">Review</div>
+          <div class="step-label">
+            Review
+          </div>
         </div>
       </div>
     </div>
@@ -57,21 +71,28 @@
       v-if="isLoading"
       title="Fetching Data..."
       message="Please wait while we load your records."
-      :showProgress="true"
+      :show-progress="true"
       :progress="60"
     />
     <!-- Main Content -->
-    <div v-else class="main-content">
+    <div
+      v-else
+      class="main-content"
+    >
       <div class="content-wrapper">
         <div class="content-grid">
           <!-- Left Side - Summary -->
           <div class="content-section">
-            <h3 class="section-title">Payroll Review</h3>
+            <h3 class="section-title">
+              Payroll Review
+            </h3>
 
             <!-- Total Earnings -->
             <div class="deduction-item">
               <div class="deduction-info">
-                <h4 class="deduction-name">Total Earnings</h4>
+                <h4 class="deduction-name">
+                  Total Earnings
+                </h4>
               </div>
               <div class="deduction-amount positive">
                 ₹{{ totalspaymentTotal?.totalEarnings }}
@@ -81,7 +102,9 @@
             <!-- Total Deductions -->
             <div class="deduction-item">
               <div class="deduction-info">
-                <h4 class="deduction-name">Total Deductions</h4>
+                <h4 class="deduction-name">
+                  Total Deductions
+                </h4>
               </div>
               <div class="deduction-amount deduction">
                 ₹{{ totalspaymentTotal?.totalDeductions }}
@@ -89,7 +112,9 @@
             </div>
             <div class="deduction-item">
               <div class="deduction-info">
-                <h4 class="deduction-name">Total Benifits</h4>
+                <h4 class="deduction-name">
+                  Total Benifits
+                </h4>
               </div>
               <div class="deduction-amount deduction">
                 ₹ {{ totalspaymentTotal?.totalBenefits }}
@@ -97,7 +122,9 @@
             </div>
             <div class="deduction-item">
               <div class="deduction-info">
-                <h4 class="deduction-name">Total penalities</h4>
+                <h4 class="deduction-name">
+                  Total penalities
+                </h4>
               </div>
               <div class="deduction-amount deduction">
                 ₹ {{ totalspaymentTotal?.totalPenalties }}
@@ -105,7 +132,9 @@
             </div>
             <div class="deduction-item">
               <div class="deduction-info">
-                <h4 class="deduction-name">Total TDS</h4>
+                <h4 class="deduction-name">
+                  Total TDS
+                </h4>
               </div>
               <div class="deduction-amount deduction">
                 ₹ {{ totalspaymentTotal?.totalTDS }}
@@ -113,7 +142,9 @@
             </div>
             <!-- Net Salary -->
             <div class="total-row net-salary">
-              <div class="total-label">Total Net Salary Paid</div>
+              <div class="total-label">
+                Total Net Salary Paid
+              </div>
               <div class="total-amount positive">
                 ₹ {{ totalspaymentTotal?.totalNetSalary }}
               </div>
@@ -122,23 +153,32 @@
 
           <!-- Right Side - Reports (unchanged) -->
           <div class="content-section">
-            <h3 class="section-title">Reports</h3>
+            <h3 class="section-title">
+              Reports
+            </h3>
 
             <div class="report-list">
-              <div class="report-item" @click="downloadReport('payslips')">
+              <div
+                class="report-item"
+                @click="downloadReport('payslips')"
+              >
                 <div class="report-icon">
-                  <v-icon color="primary">mdi-file-document-multiple</v-icon>
+                  <v-icon color="primary">
+                    mdi-file-document-multiple
+                  </v-icon>
                 </div>
                 <div class="report-info">
-                  <div class="report-name">Payslips</div>
+                  <div class="report-name">
+                    Payslips
+                  </div>
                 </div>
                 <ActionButton
                   text="Download"
                   :icon="DownloadIcon"
                   variant="edit"
                   size="sm"
-                  @click="handleDownload"
                   class="action-btn edit-btn"
+                  @click="handleDownload"
                 />
               </div>
 
@@ -160,38 +200,52 @@
               </div> -->
 
               <!-- PF Report -->
-              <div class="report-item" @click="downloadReport('pf')">
+              <div
+                class="report-item"
+                @click="downloadReport('pf')"
+              >
                 <div class="report-icon">
-                  <v-icon color="teal">mdi-clipboard-text</v-icon>
+                  <v-icon color="teal">
+                    mdi-clipboard-text
+                  </v-icon>
                 </div>
                 <div class="report-info">
-                  <div class="report-name">PF Report</div>
+                  <div class="report-name">
+                    PF Report
+                  </div>
                 </div>
                 <ActionButton
                   text="Download"
                   :icon="DownloadIcon"
                   variant="edit"
                   size="sm"
-                  @click="handleDownloadPF"
                   class="action-btn edit-btn"
+                  @click="handleDownloadPF"
                 />
               </div>
 
               <!-- ESI Report -->
-              <div class="report-item" @click="downloadReport('esi')">
+              <div
+                class="report-item"
+                @click="downloadReport('esi')"
+              >
                 <div class="report-icon">
-                  <v-icon color="deep-orange">mdi-file-document</v-icon>
+                  <v-icon color="deep-orange">
+                    mdi-file-document
+                  </v-icon>
                 </div>
                 <div class="report-info">
-                  <div class="report-name">ESI Report</div>
+                  <div class="report-name">
+                    ESI Report
+                  </div>
                 </div>
                 <ActionButton
                   text="Download"
                   :icon="DownloadIcon"
                   variant="edit"
                   size="sm"
-                  @click="handleDownloadESI"
                   class="action-btn edit-btn"
+                  @click="handleDownloadESI"
                 />
               </div>
             </div>
@@ -206,8 +260,8 @@
         varient="grey"
         size="md"
         :left-icon="SidebarClose"
-        @click="goBack"
         class="ms-2"
+        @click="goBack"
       >
         back
       </BaseButton>
@@ -216,18 +270,28 @@
         variant="primary"
         size="md"
         :left-icon="XCircle"
-        @click="handleNext"
         class="ms-2"
+        @click="handleNext"
       >
         Close
       </BaseButton>
     </div>
 
     <!-- Snackbar -->
-    <v-snackbar v-model="showSnackbar" :color="snackbarColor" :timeout="3000">
+    <v-snackbar
+      v-model="showSnackbar"
+      :color="snackbarColor"
+      :timeout="3000"
+    >
       {{ snackbarMessage }}
-      <template v-slot:action="{ attrs }">
-        <v-btn text v-bind="attrs" @click="showSnackbar = false">Close</v-btn>
+      <template #action="{ attrs }">
+        <v-btn
+          text
+          v-bind="attrs"
+          @click="showSnackbar = false"
+        >
+          Close
+        </v-btn>
       </template>
     </v-snackbar>
   </div>

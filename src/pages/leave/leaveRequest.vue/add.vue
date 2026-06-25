@@ -8,20 +8,24 @@
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-check-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-check-circle
+        </v-icon>
         {{ successMessage }}
       </div>
     </v-snackbar>
 
     <v-snackbar
-      class="errormessge"
       v-model="showErrorSnackbar"
+      class="errormessge"
       color="error"
       timeout="2000"
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-alert-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-alert-circle
+        </v-icon>
         {{ errorMessage }}
       </div>
     </v-snackbar>
@@ -33,7 +37,7 @@
         show-arrows
         background-color="transparent"
         class="custom-tabs"
-        @update:modelValue="handleTabChange"
+        @update:model-value="handleTabChange"
       >
         <v-tab
           v-for="tab in tabs"
@@ -41,15 +45,25 @@
           :value="tab.value"
           class="custom-tab"
         >
-          <v-icon :icon="tab.icon" class="mr-2"></v-icon>
+          <v-icon
+            :icon="tab.icon"
+            class="mr-2"
+          />
           {{ tab.title }}
         </v-tab>
       </v-tabs>
 
       <!-- Dynamic Content -->
       <v-window v-model="activeTab">
-        <v-window-item v-for="tab in tabs" :key="tab.value" :value="tab.value">
-          <v-card flat class="tab-content-wrapper">
+        <v-window-item
+          v-for="tab in tabs"
+          :key="tab.value"
+          :value="tab.value"
+        >
+          <v-card
+            flat
+            class="tab-content-wrapper"
+          >
             <v-card-text>
               <!-- Request Tab Content -->
               <template v-if="tab.value === 'request'">
@@ -60,17 +74,24 @@
                     elevation="1"
                     class="form-header"
                   >
-                    <v-btn class="back-btn" icon @click="$emit('closeAddPage')">
+                    <v-btn
+                      class="back-btn"
+                      icon
+                      @click="$emit('closeAddPage')"
+                    >
                       <v-icon>mdi-close</v-icon>
                     </v-btn>
-                    <v-toolbar-title class="ml-4 form-title"
-                      >Add Request</v-toolbar-title
-                    >
-                    <v-spacer></v-spacer>
+                    <v-toolbar-title class="ml-4 form-title">
+                      Add Request
+                    </v-toolbar-title>
+                    <v-spacer />
                   </v-toolbar>
 
                   <div class="form-content">
-                    <v-card class="form-card" elevation="0">
+                    <v-card
+                      class="form-card"
+                      elevation="0"
+                    >
                       <v-card-text class="form-fields">
                         <!-- Start Date Field -->
                         <v-row class="mb-2">
@@ -132,11 +153,11 @@
                                 ]"
                                 required
                                 class="custom-field"
-                                @update:modelValue="resetHalfDayAndTimeFields"
+                                @update:model-value="resetHalfDayAndTimeFields"
                               >
-                                <template v-slot:item="{ item, props }">
+                                <template #item="{ item, props }">
                                   <v-list-item v-bind="props">
-                                    <template v-slot:title>
+                                    <template #title>
                                       {{ item.raw.text }}
                                     </template>
                                   </v-list-item>
@@ -158,22 +179,22 @@
                                 inset
                                 :disabled="
                                   dateDifference > 1 ||
-                                  formData.leaveType === 'workFromHome'
+                                    formData.leaveType === 'workFromHome'
                                 "
                                 class="custom-switch"
                               >
-                                <template v-slot:label>
+                                <template #label>
                                   <span class="switch-label">{{
                                     formData.halfDay ? "Yes" : "No"
                                   }}</span>
                                   <v-tooltip
                                     v-if="
                                       dateDifference > 1 ||
-                                      formData.leaveType === 'workFromHome'
+                                        formData.leaveType === 'workFromHome'
                                     "
                                     location="top"
                                   >
-                                    <template v-slot:activator="{ props }">
+                                    <template #activator="{ props }">
                                       <v-icon
                                         v-bind="props"
                                         color="grey"
@@ -198,7 +219,10 @@
                         </v-row>
 
                         <!-- Time From and Time To Fields (Conditional) -->
-                        <v-row v-if="formData.halfDay" class="mb-2">
+                        <v-row
+                          v-if="formData.halfDay"
+                          class="mb-2"
+                        >
                           <v-col cols="6">
                             <div class="field-wrapper">
                               <label class="field-label">Time From *</label>
@@ -267,9 +291,7 @@
                         <v-row class="mb-2">
                           <v-col cols="12">
                             <div class="field-wrapper attachment-wrapper">
-                              <label class="field-label"
-                                >Attachments (Optional)</label
-                              >
+                              <label class="field-label">Attachments (Optional)</label>
                               <v-file-input
                                 v-model="formData.attachments"
                                 variant="outlined"
@@ -281,8 +303,8 @@
                                 hint="Upload supporting documents (PDF, images, Word docs, or CSV)"
                                 persistent-hint
                                 :loading="uploadingFiles"
-                                @change="handleFileChange"
                                 class="custom-field attachment-field"
+                                @change="handleFileChange"
                               />
                             </div>
                           </v-col>
@@ -297,7 +319,7 @@
                     elevation="1"
                     class="form-footer"
                   >
-                    <v-spacer></v-spacer>
+                    <v-spacer />
                     <v-btn
                       class="cancel-btn"
                       variant="outlined"
@@ -313,12 +335,12 @@
                       :disabled="isSaving"
                       @click="handleSave"
                     >
-                      <template v-slot:loader>
+                      <template #loader>
                         <v-progress-circular
                           indeterminate
                           size="20"
                           width="2"
-                        ></v-progress-circular>
+                        />
                         <span class="ml-2">Saving...</span>
                       </template>
                       SAVE
@@ -336,25 +358,30 @@
                     elevation="1"
                     class="form-header"
                   >
-                    <v-btn class="back-btn" icon @click="$emit('closeAddPage')">
+                    <v-btn
+                      class="back-btn"
+                      icon
+                      @click="$emit('closeAddPage')"
+                    >
                       <v-icon>mdi-close</v-icon>
                     </v-btn>
-                    <v-toolbar-title class="ml-4 form-title"
-                      >Add Out Request</v-toolbar-title
-                    >
-                    <v-spacer></v-spacer>
+                    <v-toolbar-title class="ml-4 form-title">
+                      Add Out Request
+                    </v-toolbar-title>
+                    <v-spacer />
                   </v-toolbar>
 
                   <div class="form-content">
-                    <v-card class="form-card" elevation="0">
+                    <v-card
+                      class="form-card"
+                      elevation="0"
+                    >
                       <v-card-text class="form-fields">
                         <!-- Dropdown for Attendance Records -->
                         <v-row class="mb-2">
                           <v-col cols="12">
                             <div class="field-wrapper">
-                              <label class="field-label"
-                                >Select In Record *</label
-                              >
+                              <label class="field-label">Select In Record *</label>
                               <v-select
                                 v-model="outFormData.selectedAttendance"
                                 :items="attendanceOptions"
@@ -457,7 +484,7 @@
                     elevation="1"
                     class="form-footer"
                   >
-                    <v-spacer></v-spacer>
+                    <v-spacer />
                     <v-btn
                       class="cancel-btn"
                       variant="outlined"
@@ -473,12 +500,12 @@
                       :disabled="isSaving || !outFormData.selectedAttendance"
                       @click="handleOutSave"
                     >
-                      <template v-slot:loader>
+                      <template #loader>
                         <v-progress-circular
                           indeterminate
                           size="20"
                           width="2"
-                        ></v-progress-circular>
+                        />
                         <span class="ml-2">Saving...</span>
                       </template>
                       SAVE

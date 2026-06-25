@@ -8,7 +8,9 @@
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-check-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-check-circle
+        </v-icon>
         {{ successMessage }}
       </div>
     </v-snackbar>
@@ -20,14 +22,27 @@
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">mdi-alert-circle</v-icon>
+        <v-icon class="me-2">
+          mdi-alert-circle
+        </v-icon>
         {{ errorMessage }}
       </div>
     </v-snackbar>
 
-    <v-form ref="form" @submit.prevent="handleSave">
-      <v-toolbar density="compact" color="white" flat>
-        <v-btn icon @click="$emit('closeAddPage')" class="mr-2">
+    <v-form
+      ref="form"
+      @submit.prevent="handleSave"
+    >
+      <v-toolbar
+        density="compact"
+        color="white"
+        flat
+      >
+        <v-btn
+          icon
+          class="mr-2"
+          @click="$emit('closeAddPage')"
+        >
           <v-icon>mdi-close</v-icon>
         </v-btn>
         <v-toolbar-title>Add Work Preference</v-toolbar-title>
@@ -37,7 +52,10 @@
         <v-card flat>
           <!-- Date Fields with Spacing -->
           <v-row class="date-row">
-            <v-col cols="12" class="date-col">
+            <v-col
+              cols="12"
+              class="date-col"
+            >
               <v-text-field
                 v-model="formData.from"
                 label="Start Date *"
@@ -51,7 +69,10 @@
                 persistent-hint
               />
             </v-col>
-            <v-col cols="12" class="date-col">
+            <v-col
+              cols="12"
+              class="date-col"
+            >
               <v-text-field
                 v-model="formData.to"
                 label="End Date *"
@@ -67,25 +88,25 @@
 
           <v-row>
             <v-col cols="12">
-              <v-label class="text-subtitle-1 font-weight-medium mb-2"
-                >Work Preference *</v-label
-              >
+              <v-label class="text-subtitle-1 font-weight-medium mb-2">
+                Work Preference *
+              </v-label>
               <v-radio-group
                 v-model="formData.workPreference"
                 :rules="[(v) => !!v || 'Work preference is required']"
-                @update:model-value="onWorkPreferenceChange"
                 inline
+                @update:model-value="onWorkPreferenceChange"
               >
                 <v-radio
                   label="Work From Home"
                   value="workFromHome"
                   color="primary"
-                ></v-radio>
+                />
                 <v-radio
                   label="On Duty"
                   value="onDuty"
                   color="primary"
-                ></v-radio>
+                />
               </v-radio-group>
             </v-col>
           </v-row>
@@ -105,12 +126,15 @@
           </v-row>
 
           <v-row class="mt-4">
-            <v-col cols="12" class="d-flex justify-end gap-3">
+            <v-col
+              cols="12"
+              class="d-flex justify-end gap-3"
+            >
               <BaseButton
                 variant="danger"
                 text="Cancel"
-                @click="$emit('closeAddPage')"
                 class="mr-2"
+                @click="$emit('closeAddPage')"
               />
               <BaseButton
                 variant="primary"

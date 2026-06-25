@@ -1,16 +1,21 @@
 <!-- senzrfieldopsfrontend/src/pages/taskManagement/taskcomponents/formTemplate/submitTaskForm/CompleteWorkOrder.vue -->
 <template>
   <Transition name="slide-fade">
-    <div v-if="modelValue" class="cwo-overlay">
+    <div
+      v-if="modelValue"
+      class="cwo-overlay"
+    >
       <!-- Sidebar drawer that slides in from right -->
       <div class="cwo-sidebar">
         <div class="cwo-header">
           <div class="header-content">
-            <h3 class="title">Job Details</h3>
+            <h3 class="title">
+              Job Details
+            </h3>
             <button
               class="close-btn"
-              @click="$emit('update:modelValue', false)"
               aria-label="Close sidebar"
+              @click="$emit('update:modelValue', false)"
             >
               <svg
                 width="24"
@@ -20,8 +25,18 @@
                 stroke="currentColor"
                 stroke-width="2"
               >
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
+                <line
+                  x1="18"
+                  y1="6"
+                  x2="6"
+                  y2="18"
+                />
+                <line
+                  x1="6"
+                  y1="6"
+                  x2="18"
+                  y2="18"
+                />
               </svg>
             </button>
           </div>
@@ -32,21 +47,21 @@
           <section class="drawer-body">
             <InternalTaskCompletionSidebar
               v-if="isInternalTask"
-              :modelValue="modelValue"
+              :model-value="modelValue"
               :task="task"
-              @update:modelValue="$emit('update:modelValue', $event)"
+              @update:model-value="$emit('update:modelValue', $event)"
               @complete="$emit('complete', $event)"
-              @saveDraft="$emit('saveDraft', $event)"
+              @save-draft="$emit('saveDraft', $event)"
             />
 
             <WorkOrderTaskCompletionSidebar
               v-else
-              :modelValue="modelValue"
-              :taskId="task?.id"
-              :assignFormId="task?.assignFormId"
-              @update:modelValue="$emit('update:modelValue', $event)"
+              :model-value="modelValue"
+              :task-id="task?.id"
+              :assign-form-id="task?.assignFormId"
+              @update:model-value="$emit('update:modelValue', $event)"
               @complete="$emit('complete', $event)"
-              @saveDraft="$emit('saveDraft', $event)"
+              @save-draft="$emit('saveDraft', $event)"
             />
           </section>
 

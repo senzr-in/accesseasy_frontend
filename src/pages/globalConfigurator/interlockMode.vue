@@ -1,169 +1,179 @@
 <template>
   <div>
     <v-window v-model="activeTab">
-            <!-- Antipassback Mode Tab -->
-            <v-window-item value="antipassback">
-              <!-- Your existing antipassback code -->
-            </v-window-item>
+      <!-- Antipassback Mode Tab -->
+      <v-window-item value="antipassback">
+        <!-- Your existing antipassback code -->
+      </v-window-item>
 
-            <!-- Interlock Mode Tab -->
-            <v-window-item value="interlock">
-              <!-- Interlock Configuration Form -->
-              <div v-if="showInterlockForm">
-                <div class="d-flex align-center mb-4">
-                  <v-btn
-                    icon
-                    variant="text"
-                    size="small"
-                    class="mr-2"
-                    @click="closeInterlockForm"
-                  >
-                    <v-icon>mdi-arrow-left</v-icon>
-                  </v-btn>
-                  <v-card-title class="text-h6 font-weight-bold pa-0">
-                    {{
-                      isEditingInterlock
-                        ? "Edit Interlock Rule"
-                        : "Add New Interlock Rule"
-                    }}
-                  </v-card-title>
+      <!-- Interlock Mode Tab -->
+      <v-window-item value="interlock">
+        <!-- Interlock Configuration Form -->
+        <div v-if="showInterlockForm">
+          <div class="d-flex align-center mb-4">
+            <v-btn
+              icon
+              variant="text"
+              size="small"
+              class="mr-2"
+              @click="closeInterlockForm"
+            >
+              <v-icon>mdi-arrow-left</v-icon>
+            </v-btn>
+            <v-card-title class="text-h6 font-weight-bold pa-0">
+              {{
+                isEditingInterlock
+                  ? "Edit Interlock Rule"
+                  : "Add New Interlock Rule"
+              }}
+            </v-card-title>
+          </div>
+
+          <v-card-text>
+            <v-row>
+              <v-col cols="12">
+                <div class="text-subtitle-1 font-weight-medium mb-2">
+                  Select up to 4 doors for interlock control (excludes
+                  doors from antipassback)
                 </div>
 
-                <v-card-text>
-                  <v-row>
-                    <v-col cols="12">
-                      <div class="text-subtitle-1 font-weight-medium mb-2">
-                        Select up to 4 doors for interlock control (excludes
-                        doors from antipassback)
+                <!-- Doors Selection -->
+                <v-card class="mb-4">
+                  <v-card-text>
+                    <div class="mb-3">
+                      <div class="text-caption text-medium-emphasis mb-2">
+                        Select interlock doors
                       </div>
+                      <v-select
+                        v-model="interlockForm.selectedDoors"
+                        label="Select Doors"
+                        :items="doorOptions"
+                        multiple
+                        variant="outlined"
+                        density="compact"
+                        :rules="doorSelectionRules"
+                        :error="hasDoorSelectionError"
+                        :error-messages="doorSelectionErrorMessages"
+                      />
+                    </div>
 
-                      <!-- Doors Selection -->
-                      <v-card class="mb-4">
-                        <v-card-text>
-                          <div class="mb-3">
-                            <div class="text-caption text-medium-emphasis mb-2">
-                              Select interlock doors
-                            </div>
-                            <v-select
-                              label="Select Doors"
-                              :items="doorOptions"
-                              multiple
-                              variant="outlined"
-                              density="compact"
-                              v-model="interlockForm.selectedDoors"
-                              :rules="doorSelectionRules"
-                              :error="hasDoorSelectionError"
-                              :error-messages="doorSelectionErrorMessages"
-                            ></v-select>
-                          </div>
-
-                          <!-- Validation Message -->
-                          <div v-if="hasDoorSelectionError" class="mt-2">
-                            <div class="text-caption text-error">
-                              {{ doorSelectionErrorMessages }}
-                            </div>
-                          </div>
-                        </v-card-text>
-                      </v-card>
-                    </v-col>
-
-                    <v-col cols="12">
-                      <div
-                        class="d-flex align-center justify-end gap-2"
-                        style="max-width: 100%"
-                      >
-                        <BaseButton
-                          variant="ghost"
-                          size="md"
-                          text="Cancel"
-                          @click="closeInterlockForm"
-                        />
-                        <BaseButton
-                          variant="primary"
-                          size="md"
-                          text="Save Configuration"
-                          @click="saveInterlockRule"
-                          :disabled="!isFormValid"
-                        />
+                    <!-- Validation Message -->
+                    <div
+                      v-if="hasDoorSelectionError"
+                      class="mt-2"
+                    >
+                      <div class="text-caption text-error">
+                        {{ doorSelectionErrorMessages }}
                       </div>
-                    </v-col>
-                  </v-row>
-                </v-card-text>
-              </div>
+                    </div>
+                  </v-card-text>
+                </v-card>
+              </v-col>
 
-              <!-- Interlock Rules List -->
-              <div v-else>
-                <div class="d-flex align-center justify-space-between">
-                  <v-card-title class="text-h6 font-weight-bold pa-0">
-                    Interlock Configuration
-                    <v-chip size="small" color="primary" class="ml-3">
-                      {{ interlockRules.length }} Rules
-                    </v-chip>
-                  </v-card-title>
+              <v-col cols="12">
+                <div
+                  class="d-flex align-center justify-end gap-2"
+                  style="max-width: 100%"
+                >
+                  <BaseButton
+                    variant="ghost"
+                    size="md"
+                    text="Cancel"
+                    @click="closeInterlockForm"
+                  />
                   <BaseButton
                     variant="primary"
                     size="md"
-                    text="Add New Rule"
-                    :leftIcon="Plus"
-                    @click="openAddInterlockPanel"
+                    text="Save Configuration"
+                    :disabled="!isFormValid"
+                    @click="saveInterlockRule"
                   />
                 </div>
+              </v-col>
+            </v-row>
+          </v-card-text>
+        </div>
 
-                <div>
-                  <!-- Loading State -->
-                  <SkeletonLoader
-                    v-if="interlockLoading"
-                    variant="data-table"
-                    :rows="5"
-                    :columns="4"
+        <!-- Interlock Rules List -->
+        <div v-else>
+          <div class="d-flex align-center justify-space-between">
+            <v-card-title class="text-h6 font-weight-bold pa-0">
+              Interlock Configuration
+              <v-chip
+                size="small"
+                color="primary"
+                class="ml-3"
+              >
+                {{ interlockRules.length }} Rules
+              </v-chip>
+            </v-card-title>
+            <BaseButton
+              variant="primary"
+              size="md"
+              text="Add New Rule"
+              :left-icon="Plus"
+              @click="openAddInterlockPanel"
+            />
+          </div>
+
+          <div>
+            <!-- Loading State -->
+            <SkeletonLoader
+              v-if="interlockLoading"
+              variant="data-table"
+              :rows="5"
+              :columns="4"
+            />
+
+            <!-- Interlock Table -->
+            <DataTableWrapper
+              v-else
+              :show-search="false"
+            >
+              <DataTable
+                :items="interlockRules"
+                :columns="[
+                  {
+                    label: 'Doors Involved',
+                    key: 'doorsInvolved',
+                    sortable: true,
+                    width: '250px',
+                  },
+                ]"
+                :show-selection="false"
+                :expandable="false"
+                show-header
+                :row-clickable="true"
+              >
+                <template #status="{ item }">
+                  <v-chip
+                    :color="item.status === 'Active' ? 'success' : 'grey'"
+                    size="small"
+                  >
+                    {{ item.status }}
+                  </v-chip>
+                </template>
+
+                <template #actions="{ item }">
+                  <BaseButton
+                    variant="ghost"
+                    size="sm"
+                    text="Edit"
+                    @click="handleEditInterlock(item)"
                   />
-
-                  <!-- Interlock Table -->
-                  <DataTableWrapper v-else :showSearch="false">
-                    <DataTable
-                      :items="interlockRules"
-                      :columns="[
-                        {
-                          label: 'Doors Involved',
-                          key: 'doorsInvolved',
-                          sortable: true,
-                          width: '250px',
-                        },
-                      ]"
-                      :showSelection="false"
-                      :expandable="false"
-                      show-header
-                      :row-clickable="true"
-                    >
-                      <template #status="{ item }">
-                        <v-chip
-                          :color="item.status === 'Active' ? 'success' : 'grey'"
-                          size="small"
-                        >
-                          {{ item.status }}
-                        </v-chip>
-                      </template>
-
-                      <template #actions="{ item }">
-                        <BaseButton
-                          variant="ghost"
-                          size="sm"
-                          text="Edit"
-                          @click="handleEditInterlock(item)"
-                        />
-                        <BaseButton
-                          variant="ghost"
-                          size="sm"
-                          text="Delete"
-                          :leftIcon="Trash"
-                          @click="deleteInterlockRule(item)"
-                        />
-                      </template>
-                    </DataTable>
-                  </DataTableWrapper>
-                </div>
-              </div>
-            </v-window-item>
+                  <BaseButton
+                    variant="ghost"
+                    size="sm"
+                    text="Delete"
+                    :left-icon="Trash"
+                    @click="deleteInterlockRule(item)"
+                  />
+                </template>
+              </DataTable>
+            </DataTableWrapper>
+          </div>
+        </div>
+      </v-window-item>
     </v-window>
   </div>
 </template>

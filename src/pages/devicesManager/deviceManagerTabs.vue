@@ -13,6 +13,7 @@
           Mobile Pass Setup
         </button>
         <button
+          @click="showNetworkScanForm"
           class="flex items-center gap-2 rounded-xl px-4 py-2 shadow-sm border border-slate-200 dark:border-zinc-800 font-black uppercase tracking-widest text-[10px] bg-white dark:bg-zinc-950 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors"
         >
           <Network class="h-3.5 w-3.5" />
@@ -159,6 +160,7 @@
                   <button 
                     v-if="device.status !== 'approved'"
                     title="Approve Node"
+                    @click="approveDevice(device)"
                     class="flex items-center justify-center p-0 h-7 w-7 rounded-md bg-transparent text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 transition-colors shadow-sm border border-emerald-200 dark:border-emerald-500/20 dark:hover:bg-emerald-500/10"
                   >
                     <ShieldCheck class="w-3.5 h-3.5" />
@@ -172,6 +174,7 @@
                   </button>
                   <button 
                     title="Decommission Node"
+                    @click="deleteDevice(device)"
                     class="flex items-center justify-center p-0 h-7 w-7 rounded-md bg-transparent text-rose-600 hover:text-rose-700 hover:bg-rose-50 transition-colors border border-rose-200 dark:border-rose-900/50 dark:hover:bg-rose-900/20 shadow-sm"
                   >
                     <Trash2 class="w-3.5 h-3.5" />
@@ -204,7 +207,12 @@
         </button>
       </div>
     <!-- Registration Dialog -->
-    <DeviceRegistrationDialog v-model="showDialog" :device="selectedDevice" @success="fetchDeviceData" />
+    <DeviceRegistrationDialog
+      v-model="showDialog"
+      :device="selectedDevice"
+      :start-with-scanner="startWithScanner"
+      @success="fetchDeviceData"
+    />
     </div>
   </div>
 </template>
@@ -327,14 +335,69 @@ const fetchDeviceData = async () => {
   }
 };
 
+const startWithScanner = ref(false);
+
 const showAddDeviceForm = () => {
   selectedDevice.value = null;
+  startWithScanner.value = false;
+  showDialog.value = true;
+};
+
+const showNetworkScanForm = () => {
+  selectedDevice.value = null;
+  startWithScanner.value = true;
   showDialog.value = true;
 };
 
 const editItem = (item) => {
   selectedDevice.value = item;
+  startWithScanner.value = false;
   showDialog.value = true;
+};
+
+const approveDevice = async (device) => {
+  if (!token) return;
+  try {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/controllers/${device.id}`, {
+      method: "PATCH",
+      headers: { 
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}` 
+      },
+      body: JSON.stringify({ status: "approved" })
+    });
+    if (res.ok) {
+      await fetchDeviceData();
+    } else {
+      console.error("Failed to approve device");
+    }
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+const deleteDevice = async (device) => {
+  if (!token) return;
+  const confirmed = window.confirm(`Are you sure you want to decommission the device: ${device.controllerName || device.sn}?`);
+  if (!confirmed) return;
+  
+  try {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/controllers/${device.id}`, {
+      method: "DELETE",
+      headers: { 
+        Authorization: `Bearer ${token}` 
+      }
+    });
+    if (res.ok) {
+      await fetchDeviceData();
+    } else {
+      console.error("Failed to delete device");
+      alert("Failed to delete device. It may be locked or linked to active doors.");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Error communicating with server.");
+  }
 };
 
 onMounted(() => {

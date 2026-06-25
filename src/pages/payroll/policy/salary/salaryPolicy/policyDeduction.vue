@@ -8,8 +8,12 @@
       location="top"
     >
       {{ snackbarText }}
-      <template v-slot:actions>
-        <v-btn color="white" variant="text" @click="snackbar = false">
+      <template #actions>
+        <v-btn
+          color="white"
+          variant="text"
+          @click="snackbar = false"
+        >
           Close
         </v-btn>
       </template>
@@ -17,7 +21,9 @@
     <div class="sticky-header">
       <v-card-text>
         <div class="d-flex justify-space-between align-center mb-4">
-          <h3 class="text-h6">Deduction</h3>
+          <h3 class="text-h6">
+            Deduction
+          </h3>
           <div class="d-flex">
             <!-- <v-btn v-if="!isEditing" color="black" @click="startEdit">
               Edit
@@ -34,15 +40,18 @@
     <div class="scroll-content">
       <v-card-text>
         <div class="fields-container">
-          <div v-if="earningsFields.length === 0" class="text-center pa-4">
+          <div
+            v-if="earningsFields.length === 0"
+            class="text-center pa-4"
+          >
             <p class="text-body-1 text-grey-darken-1">
               No data available. You can choose deductions from the Add Field
               button.
             </p>
           </div>
           <div
-            v-else
             v-for="(field, index) in earningsFields"
+            v-else
             :key="index"
             class="field-row mb-4"
           >
@@ -72,7 +81,7 @@
                   hide-details
                   class="ml-4"
                   :disabled="!isEditing"
-                ></v-select>
+                />
               </v-col>
 
               <!-- <v-col cols="4" v-if="isEditing" class="d-flex justify-end">
@@ -114,7 +123,10 @@
     </div>
 
     <!-- Add Field Dialog -->
-    <v-dialog v-model="dialog" max-width="500px">
+    <v-dialog
+      v-model="dialog"
+      max-width="500px"
+    >
       <v-card>
         <v-card-title>Add New Field</v-card-title>
         <v-card-text>
@@ -123,23 +135,23 @@
             label="Field Name"
             variant="outlined"
             density="comfortable"
-          ></v-text-field>
+          />
           <v-select
             v-model="newField.type"
             :items="earningsTypes"
             label="Type"
             variant="outlined"
             density="comfortable"
-          ></v-select>
+          />
         </v-card-text>
         <v-card-actions>
-          <v-spacer></v-spacer>
+          <v-spacer />
           <v-btn
             style="background-color: black"
             color="white"
             variant="contained"
-            @click="saveNewField"
             class="white--text"
+            @click="saveNewField"
           >
             Save
           </v-btn>

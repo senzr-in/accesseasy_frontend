@@ -1,7 +1,8 @@
 <template>
   <v-app>
     <v-main>
-      <v-container v-if="!selectedComponent"
+      <v-container
+        v-if="!selectedComponent"
         fluid
         class="pa-6"
         style="
@@ -12,7 +13,12 @@
         "
       >
         <v-row>
-          <v-col v-for="card in exemptions" :key="card.key" cols="12" lg="6">
+          <v-col
+            v-for="card in exemptions"
+            :key="card.key"
+            cols="12"
+            lg="6"
+          >
             <v-card
               :elevation="2"
               class="mb-4"
@@ -29,14 +35,23 @@
                     class="mr-3"
                     style="box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1)"
                   >
-                    <v-icon :color="card.iconColor">{{ card.icon }}</v-icon>
+                    <v-icon :color="card.iconColor">
+                      {{ card.icon }}
+                    </v-icon>
                   </v-avatar>
                   <span class="text-h6 font-weight-medium text-grey-darken-2">{{
                     card.title
                   }}</span>
                 </div>
-                <v-btn icon variant="text" @click="openEditDialog(card.key)" size="small">
-                  <v-icon color="grey">mdi-pencil</v-icon>
+                <v-btn
+                  icon
+                  variant="text"
+                  size="small"
+                  @click="openEditDialog(card.key)"
+                >
+                  <v-icon color="grey">
+                    mdi-pencil
+                  </v-icon>
                 </v-btn>
               </v-card-title>
 
@@ -67,22 +82,26 @@
                       :key="index"
                       class="hover-row"
                     >
-                      <td class="pa-4 font-weight-medium">{{ row.label }}</td>
-                      <td class="text-center pa-4">
-                        <v-chip
-                          size="small"
-                          
-                          text-color="grey-darken-2"
-                          >{{ row.declared }}</v-chip
-                        >
+                      <td class="pa-4 font-weight-medium">
+                        {{ row.label }}
                       </td>
                       <td class="text-center pa-4">
                         <v-chip
                           size="small"
                           
                           text-color="grey-darken-2"
-                          >{{ row.approved }}</v-chip
                         >
+                          {{ row.declared }}
+                        </v-chip>
+                      </td>
+                      <td class="text-center pa-4">
+                        <v-chip
+                          size="small"
+                          
+                          text-color="grey-darken-2"
+                        >
+                          {{ row.approved }}
+                        </v-chip>
                       </td>
                     </tr>
                   </tbody>
@@ -95,7 +114,10 @@
         
         <v-row>
           <v-col cols="12">
-            <v-card elevation="2" style="border-top: 4px solid #8b5cf6">
+            <v-card
+              elevation="2"
+              style="border-top: 4px solid #8b5cf6"
+            >
               <v-card-title
                 class="d-flex align-center justify-space-between pa-4"
                 style="background-color: #f5f3ff"
@@ -107,15 +129,23 @@
                     class="mr-3"
                     style="box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1)"
                   >
-                    <v-icon color="purple">mdi-file-document</v-icon>
+                    <v-icon color="purple">
+                      mdi-file-document
+                    </v-icon>
                   </v-avatar>
                   <span class="text-h6 font-weight-medium text-grey-darken-2">
                     Section 80 Deductions (investments, education loans, medical
                     insurance etc.)
                   </span>
                 </div>
-                <v-btn icon variant="text" size="small">
-                  <v-icon color="grey">mdi-pencil</v-icon>
+                <v-btn
+                  icon
+                  variant="text"
+                  size="small"
+                >
+                  <v-icon color="grey">
+                    mdi-pencil
+                  </v-icon>
                 </v-btn>
               </v-card-title>
 
@@ -154,16 +184,18 @@
                           size="small"
                           
                           text-color="grey-darken-2"
-                          >{{ section.declared }}</v-chip
                         >
+                          {{ section.declared }}
+                        </v-chip>
                       </td>
                       <td class="text-center pa-4">
                         <v-chip
                           size="small"
                           
                           text-color="grey-darken-2"
-                          >{{ section.approved }}</v-chip
                         >
+                          {{ section.approved }}
+                        </v-chip>
                       </td>
                     </tr>
                   </tbody>
@@ -173,7 +205,10 @@
           </v-col>
         </v-row>
       </v-container>
-      <component v-if="selectedComponent" :is="selectedComponent" />
+      <component
+        :is="selectedComponent"
+        v-if="selectedComponent"
+      />
     </v-main>
   </v-app>
 </template>

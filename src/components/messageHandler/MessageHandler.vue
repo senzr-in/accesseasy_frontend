@@ -23,7 +23,7 @@
             :color="
               messageType === 'error' ? 'red-darken-1' : 'light-green-darken-1'
             "
-          ></v-icon>
+          />
           <div>
             <div class="text-h6 mb-1">
               {{ messageType === "error" ? "Error" : "Success" }}
@@ -32,7 +32,7 @@
           </div>
         </v-card-text>
         <v-card-actions>
-          <v-spacer></v-spacer>
+          <v-spacer />
           <v-btn
             :color="
               messageType === 'error' ? 'red-darken-1' : 'light-green-darken-1'

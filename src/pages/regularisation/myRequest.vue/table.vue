@@ -3,12 +3,12 @@
     <!-- Main Content with Table -->
     <div class="main-content">
       <DataTableWrapper
-        :searchQuery="search"
-        @update:searchQuery="handleSearchUpdate"
-        :showSearch="false"
-        :isEmpty="items.length === 0"
-        :hasError="showError"
-        wrapperClass="regularization-table-wrapper"
+        :search-query="search"
+        :show-search="false"
+        :is-empty="items.length === 0"
+        :has-error="showError"
+        wrapper-class="regularization-table-wrapper"
+        @update:search-query="handleSearchUpdate"
       >
         <!-- Table Content -->
         <template #default>
@@ -34,7 +34,10 @@
             </template>
             <template #cell-status="{ item }">
               <div class="d-flex align-center">
-                <span class="status-chip" :class="getStatusClass(item.status)">
+                <span
+                  class="status-chip"
+                  :class="getStatusClass(item.status)"
+                >
                   <v-icon
                     size="small"
                     class="me-1"
@@ -55,9 +58,13 @@
             </template>
             <template #empty>
               <div class="d-flex flex-column align-center pa-4">
-                <v-icon size="large" color="grey" class="mb-2"
-                  >mdi-calendar-blank</v-icon
+                <v-icon
+                  size="large"
+                  color="grey"
+                  class="mb-2"
                 >
+                  mdi-calendar-blank
+                </v-icon>
                 <div class="text-subtitle-1 text-medium-emphasis">
                   No regularization requests found
                 </div>
@@ -70,11 +77,11 @@
         <template #pagination>
           <CustomPagination
             v-model:page="page"
-            v-model:itemsPerPage="itemsPerPage"
+            v-model:items-per-page="itemsPerPage"
             :total-items="totalItems"
             :is-searching="!!search"
             @update:page="handlePageChange"
-            @update:itemsPerPage="handleItemsPerPageChange"
+            @update:items-per-page="handleItemsPerPageChange"
           />
         </template>
       </DataTableWrapper>
@@ -89,8 +96,8 @@
       >
         <add-form
           v-if="showAddForm"
-          @closeAddPage="toggleAddForm"
-          @requestApplied="handleRequestApplied"
+          @close-add-page="toggleAddForm"
+          @request-applied="handleRequestApplied"
         />
       </v-navigation-drawer>
     </div>

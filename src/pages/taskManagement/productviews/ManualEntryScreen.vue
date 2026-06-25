@@ -7,46 +7,57 @@
           <button
             type="button"
             class="back-btn"
-            @click="handleBack()"
             title="Back to Product Management"
+            @click="handleBack()"
           >
-            <i class="ri-arrow-left-line"></i>
+            <i class="ri-arrow-left-line" />
           </button>
-          <h1 class="form-title">Add New Product</h1>
+          <h1 class="form-title">
+            Add New Product
+          </h1>
         </div>
 
-        <form @submit.prevent="submitProduct" class="product-form">
+        <form
+          class="product-form"
+          @submit.prevent="submitProduct"
+        >
           <!-- Basic Information -->
           <div class="form-grid">
             <div class="form-group">
-              <label for="productNam" class="form-label">Product Name</label>
+              <label
+                for="productNam"
+                class="form-label"
+              >Product Name</label>
               <div class="input-wrapper">
                 <input
-                  type="text"
                   id="productName"
                   v-model="productName"
+                  type="text"
                   class="form-input"
                   placeholder="Enter product name"
                   required
                 >
                 <div class="input-icon">
-                  <i class="ri-shopping-bag-line"></i>
+                  <i class="ri-shopping-bag-line" />
                 </div>
               </div>
             </div>
 
             <div class="form-group">
-              <label for="modelNumber" class="form-label">Model Number</label>
+              <label
+                for="modelNumber"
+                class="form-label"
+              >Model Number</label>
               <div class="input-wrapper">
                 <input
-                  type="text"
                   id="productId"
                   v-model="productId"
+                  type="text"
                   class="form-input"
                   placeholder="Enter model number"
                 >
                 <div class="input-icon">
-                  <i class="ri-price-tag-3-line"></i>
+                  <i class="ri-price-tag-3-line" />
                 </div>
               </div>
             </div>
@@ -54,7 +65,9 @@
 
           <!-- Product Image -->
           <div class="section">
-            <h2 class="section-title">Product Image</h2>
+            <h2 class="section-title">
+              Product Image
+            </h2>
             <div
               class="image-upload-area"
               :class="{ 'drag-over': isDragOver }"
@@ -64,36 +77,56 @@
               @dragleave="handleDragLeave"
               @drop="handleImageDrop"
             >
-              <div v-if="!imagePreviewUrl" class="upload-placeholder">
+              <div
+                v-if="!imagePreviewUrl"
+                class="upload-placeholder"
+              >
                 <div class="upload-icon">
-                  <i class="ri-image-add-line"></i>
+                  <i class="ri-image-add-line" />
                 </div>
-                <p class="upload-text">Drag & drop product image here</p>
-                <p class="upload-subtext">or click to browse files</p>
+                <p class="upload-text">
+                  Drag & drop product image here
+                </p>
+                <p class="upload-subtext">
+                  or click to browse files
+                </p>
                 <button
                   type="button"
                   class="browse-btn"
                   @click.stop="triggerImageUpload()"
                 >
-                  <i class="ri-upload-2-line"></i>
+                  <i class="ri-upload-2-line" />
                   <span>Browse Files</span>
                 </button>
-                <p class="file-info">Supported formats: JPEG, PNG, WebP. Max size: 5MB</p>
+                <p class="file-info">
+                  Supported formats: JPEG, PNG, WebP. Max size: 5MB
+                </p>
               </div>
-              <div v-else class="image-preview" :class="{ 'show': imagePreviewUrl }">
+              <div
+                v-else
+                class="image-preview"
+                :class="{ 'show': imagePreviewUrl }"
+              >
                 <div class="preview-container">
-                  <img :src="imagePreviewUrl" alt="Product preview" class="preview-image">
+                  <img
+                    :src="imagePreviewUrl"
+                    alt="Product preview"
+                    class="preview-image"
+                  >
                   <button
                     type="button"
                     class="remove-image-btn"
                     @click.stop="removeImage()"
                   >
-                    <i class="ri-close-line"></i>
+                    <i class="ri-close-line" />
                   </button>
                 </div>
               </div>
               <div class="progress-container">
-                <div class="progress-bar" :style="{ width: imageUploadProgress + '%' }"></div>
+                <div
+                  class="progress-bar"
+                  :style="{ width: imageUploadProgress + '%' }"
+                />
               </div>
             </div>
             <input
@@ -103,27 +136,38 @@
               class="hidden-input"
               @change="handleImageSelect"
             >
-            <p v-if="imageError" class="error-message">{{ imageError }}</p>
+            <p
+              v-if="imageError"
+              class="error-message"
+            >
+              {{ imageError }}
+            </p>
           </div>
 
           <!-- Product Documents -->
           <div class="section">
-            <h2 class="section-title">Product Documents</h2>
+            <h2 class="section-title">
+              Product Documents
+            </h2>
             <div class="documents-grid">
               <!-- User Manual -->
               <div class="document-card">
                 <div class="document-upload">
                   <div class="document-icon document-icon-blue">
-                    <i class="ri-file-text-line"></i>
+                    <i class="ri-file-text-line" />
                   </div>
-                  <p class="document-title">User Manual</p>
-                  <p class="document-subtitle">Upload PDF, DOC, or DOCX</p>
+                  <p class="document-title">
+                    User Manual
+                  </p>
+                  <p class="document-subtitle">
+                    Upload PDF, DOC, or DOCX
+                  </p>
                   <button
                     type="button"
                     class="upload-doc-btn"
                     @click="triggerDocumentUpload('manual')"
                   >
-                    <i class="ri-upload-2-line"></i>
+                    <i class="ri-upload-2-line" />
                     <span>Upload</span>
                   </button>
                   <input
@@ -134,15 +178,28 @@
                     @change="handleDocumentSelect('manual', $event)"
                   >
                 </div>
-                <div v-if="manualFileName" class="document-files">
-                  <div class="file-item" :class="{ 'show': manualFileName }">
+                <div
+                  v-if="manualFileName"
+                  class="document-files"
+                >
+                  <div
+                    class="file-item"
+                    :class="{ 'show': manualFileName }"
+                  >
                     <div class="file-info">
                       <div class="file-icon">
-                        <i :class="getFileIcon(manualFileName)" :style="{ color: getFileColor(manualFileName) }"></i>
+                        <i
+                          :class="getFileIcon(manualFileName)"
+                          :style="{ color: getFileColor(manualFileName) }"
+                        />
                       </div>
                       <div class="file-details">
-                        <p class="file-name">{{ manualFileName }}</p>
-                        <p class="file-size">{{ getFileSize(manualFile) }}</p>
+                        <p class="file-name">
+                          {{ manualFileName }}
+                        </p>
+                        <p class="file-size">
+                          {{ getFileSize(manualFile) }}
+                        </p>
                       </div>
                     </div>
                     <button
@@ -150,7 +207,7 @@
                       class="remove-file-btn"
                       @click="removeDocument('manual')"
                     >
-                      <i class="ri-delete-bin-line"></i>
+                      <i class="ri-delete-bin-line" />
                     </button>
                   </div>
                 </div>
@@ -160,16 +217,20 @@
               <div class="document-card">
                 <div class="document-upload">
                   <div class="document-icon document-icon-green">
-                    <i class="ri-file-list-3-line"></i>
+                    <i class="ri-file-list-3-line" />
                   </div>
-                  <p class="document-title">Specification Sheet</p>
-                  <p class="document-subtitle">Upload PDF, XLS, or XLSX</p>
+                  <p class="document-title">
+                    Specification Sheet
+                  </p>
+                  <p class="document-subtitle">
+                    Upload PDF, XLS, or XLSX
+                  </p>
                   <button
                     type="button"
                     class="upload-doc-btn"
                     @click="triggerDocumentUpload('warranty')"
                   >
-                    <i class="ri-upload-2-line"></i>
+                    <i class="ri-upload-2-line" />
                     <span>Upload</span>
                   </button>
                   <input
@@ -180,15 +241,28 @@
                     @change="handleDocumentSelect('warranty', $event)"
                   >
                 </div>
-                <div v-if="warrantyFileName" class="document-files">
-                  <div class="file-item" :class="{ 'show': warrantyFileName }">
+                <div
+                  v-if="warrantyFileName"
+                  class="document-files"
+                >
+                  <div
+                    class="file-item"
+                    :class="{ 'show': warrantyFileName }"
+                  >
                     <div class="file-info">
                       <div class="file-icon">
-                        <i :class="getFileIcon(warrantyFileName)" :style="{ color: getFileColor(warrantyFileName) }"></i>
+                        <i
+                          :class="getFileIcon(warrantyFileName)"
+                          :style="{ color: getFileColor(warrantyFileName) }"
+                        />
                       </div>
                       <div class="file-details">
-                        <p class="file-name">{{ warrantyFileName }}</p>
-                        <p class="file-size">{{ getFileSize(warrantyFile) }}</p>
+                        <p class="file-name">
+                          {{ warrantyFileName }}
+                        </p>
+                        <p class="file-size">
+                          {{ getFileSize(warrantyFile) }}
+                        </p>
                       </div>
                     </div>
                     <button
@@ -196,7 +270,7 @@
                       class="remove-file-btn"
                       @click="removeDocument('warranty')"
                     >
-                      <i class="ri-delete-bin-line"></i>
+                      <i class="ri-delete-bin-line" />
                     </button>
                   </div>
                 </div>
@@ -206,16 +280,20 @@
               <div class="document-card">
                 <div class="document-upload">
                   <div class="document-icon document-icon-purple">
-                    <i class="ri-file-paper-2-line"></i>
+                    <i class="ri-file-paper-2-line" />
                   </div>
-                  <p class="document-title">Warranty Certificate</p>
-                  <p class="document-subtitle">Upload PDF or JPG</p>
+                  <p class="document-title">
+                    Warranty Certificate
+                  </p>
+                  <p class="document-subtitle">
+                    Upload PDF or JPG
+                  </p>
                   <button
                     type="button"
                     class="upload-doc-btn"
                     @click="triggerDocumentUpload('technical')"
                   >
-                    <i class="ri-upload-2-line"></i>
+                    <i class="ri-upload-2-line" />
                     <span>Upload</span>
                   </button>
                   <input
@@ -226,15 +304,28 @@
                     @change="handleDocumentSelect('technical', $event)"
                   >
                 </div>
-                <div v-if="technicalFileName" class="document-files">
-                  <div class="file-item" :class="{ 'show': technicalFileName }">
+                <div
+                  v-if="technicalFileName"
+                  class="document-files"
+                >
+                  <div
+                    class="file-item"
+                    :class="{ 'show': technicalFileName }"
+                  >
                     <div class="file-info">
                       <div class="file-icon">
-                        <i :class="getFileIcon(technicalFileName)" :style="{ color: getFileColor(technicalFileName) }"></i>
+                        <i
+                          :class="getFileIcon(technicalFileName)"
+                          :style="{ color: getFileColor(technicalFileName) }"
+                        />
                       </div>
                       <div class="file-details">
-                        <p class="file-name">{{ technicalFileName }}</p>
-                        <p class="file-size">{{ getFileSize(technicalFile) }}</p>
+                        <p class="file-name">
+                          {{ technicalFileName }}
+                        </p>
+                        <p class="file-size">
+                          {{ getFileSize(technicalFile) }}
+                        </p>
                       </div>
                     </div>
                     <button
@@ -242,13 +333,18 @@
                       class="remove-file-btn"
                       @click="removeDocument('technical')"
                     >
-                      <i class="ri-delete-bin-line"></i>
+                      <i class="ri-delete-bin-line" />
                     </button>
                   </div>
                 </div>
               </div>
             </div>
-            <p v-if="documentError" class="error-message">{{ documentError }}</p>
+            <p
+              v-if="documentError"
+              class="error-message"
+            >
+              {{ documentError }}
+            </p>
           </div>
 
           <!-- Form Actions -->
@@ -266,29 +362,51 @@
               :disabled="isSubmitting "
               :class="{ 'loading': isSubmitting }"
             >
-              <i v-if="isSubmitting" class="ri-loader-4-line animate-spin"></i>
-              <i v-else class="ri-save-line"></i>
+              <i
+                v-if="isSubmitting"
+                class="ri-loader-4-line animate-spin"
+              />
+              <i
+                v-else
+                class="ri-save-line"
+              />
               <span>{{ isSubmitting ? 'Saving...' : 'Save Product' }}</span>
             </button>
           </div>
         </form>
 
         <!-- Error Message -->
-        <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+        <p
+          v-if="errorMessage"
+          class="error-message"
+        >
+          {{ errorMessage }}
+        </p>
       </div>
     </main>
 
     <!-- Success Notification -->
-    <div v-if="showSuccessMessage" class="success-notification" :class="{ 'show': showSuccessMessage }">
+    <div
+      v-if="showSuccessMessage"
+      class="success-notification"
+      :class="{ 'show': showSuccessMessage }"
+    >
       <div class="success-icon">
-        <i class="ri-check-line"></i>
+        <i class="ri-check-line" />
       </div>
       <div class="success-content">
-        <h3 class="success-title">Success!</h3>
-        <p class="success-text">Product has been successfully added to the inventory.</p>
+        <h3 class="success-title">
+          Success!
+        </h3>
+        <p class="success-text">
+          Product has been successfully added to the inventory.
+        </p>
       </div>
-      <button class="success-close" @click="hideSuccessMessage()">
-        <i class="ri-close-line"></i>
+      <button
+        class="success-close"
+        @click="hideSuccessMessage()"
+      >
+        <i class="ri-close-line" />
       </button>
     </div>
   </div>

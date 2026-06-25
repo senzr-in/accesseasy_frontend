@@ -12,7 +12,10 @@
         <div class="d-flex align-center justify-space-between w-100">
           <div class="d-flex align-center gap-2">
             <!-- Employee Avatar -->
-            <v-avatar size="40" class="profile-avatar">
+            <v-avatar
+              size="40"
+              class="profile-avatar"
+            >
               <v-img
                 v-if="employeeAvatar"
                 :src="employeeAvatar"
@@ -20,8 +23,16 @@
                 alt="Employee Profile"
                 class="avatar-image"
               />
-              <div v-else class="avatar-placeholder">
-                <v-icon size="40" color="white">mdi-account-circle</v-icon>
+              <div
+                v-else
+                class="avatar-placeholder"
+              >
+                <v-icon
+                  size="40"
+                  color="white"
+                >
+                  mdi-account-circle
+                </v-icon>
                 <!-- Fallback SVG placeholder like in employeeDetails.vue -->
                 <!-- <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
@@ -31,10 +42,13 @@
             </v-avatar>
             <!-- Employee Name and ID -->
             <div>
-              <div class="text-body-4" v-if="selectedEmployee">
+              <div
+                v-if="selectedEmployee"
+                class="text-body-4"
+              >
                 {{
                   selectedEmployee.assignedUser?.first_name ||
-                  "Unknown Employee"
+                    "Unknown Employee"
                 }}
                 ({{ selectedEmployee.employeeId || "N/A" }}) -
                 {{ currentDate }}
@@ -43,27 +57,27 @@
           </div>
           <div class="d-flex align-center gap-2">
             <v-btn
-              @click="refreshData"
               :loading="refreshing"
               icon="mdi-refresh"
               variant="text"
               color="white"
               size="small"
+              @click="refreshData"
             />
             <v-btn
-              @click="exportToExcel"
               :loading="exporting"
               icon="mdi-microsoft-excel"
               variant="text"
               color="white"
               size="small"
+              @click="exportToExcel"
             />
             <v-btn
-              @click="closeDialog"
               icon="mdi-close"
               variant="text"
               color="white"
               size="small"
+              @click="closeDialog"
             />
           </div>
         </div>
@@ -75,41 +89,62 @@
           <!-- Legend aligned to colors -->
           <div class="d-flex align-center gap-4">
             <div class="d-flex align-center gap-2">
-              <v-icon :style="{ color: COLORS.start }" size="16"
-                >mdi-map-marker</v-icon
+              <v-icon
+                :style="{ color: COLORS.start }"
+                size="16"
               >
+                mdi-map-marker
+              </v-icon>
               <span class="text-body-2">Start</span>
             </div>
             <div class="d-flex align-center gap-2">
-              <v-icon :style="{ color: COLORS.branch }" size="16"
-                >mdi-map-marker</v-icon
+              <v-icon
+                :style="{ color: COLORS.branch }"
+                size="16"
               >
+                mdi-map-marker
+              </v-icon>
               <span class="text-body-2">Branch Location</span>
             </div>
             <div class="d-flex align-center gap-2">
-              <v-icon :style="{ color: COLORS.end }" size="16"
-                >mdi-map-marker</v-icon
+              <v-icon
+                :style="{ color: COLORS.end }"
+                size="16"
               >
+                mdi-map-marker
+              </v-icon>
               <span class="text-body-2">End</span>
             </div>
             <div class="d-flex align-center gap-2">
-              <v-icon :style="{ color: '#00A884' }" size="16"
-                >mdi-road-variant</v-icon
+              <v-icon
+                :style="{ color: '#00A884' }"
+                size="16"
               >
+                mdi-road-variant
+              </v-icon>
               <span class="text-body-2">Travel</span>
             </div>
             <div class="d-flex align-center gap-2">
-              <v-icon :style="{ color: COLORS.idle }" size="16"
-                >mdi-pause</v-icon
+              <v-icon
+                :style="{ color: COLORS.idle }"
+                size="16"
               >
+                mdi-pause
+              </v-icon>
               <span class="text-body-2">Idle</span>
             </div>
           </div>
 
           <!-- Summary chips: clearer/eye-visible -->
           <div class="d-flex align-center gap-2 flex-wrap">
-            <div color="success" variant="elevated" size="small">
-              <v-icon start>mdi-timer</v-icon>
+            <div
+              color="success"
+              variant="elevated"
+              size="small"
+            >
+              <v-icon start>
+                mdi-timer
+              </v-icon>
               {{ summaryStats.totalWorkingHours }}
             </div>
             <div
@@ -118,7 +153,9 @@
               variant="flat"
               size="small"
             >
-              <v-icon start>mdi-pause</v-icon>
+              <v-icon start>
+                mdi-pause
+              </v-icon>
               {{ routeStats.totalStops }} Stops
             </div>
             <div
@@ -127,15 +164,29 @@
               variant="flat"
               size="small"
             >
-              <v-icon start>mdi-map-marker-distance</v-icon>
+              <v-icon start>
+                mdi-map-marker-distance
+              </v-icon>
               {{ routeStats.totalDistance.toFixed(2) }} km Total
             </div>
-            <div color="success" variant="flat" size="small">
-              <v-icon start>mdi-car</v-icon>
+            <div
+              color="success"
+              variant="flat"
+              size="small"
+            >
+              <v-icon start>
+                mdi-car
+              </v-icon>
               {{ routeStats.totalTravel }} km Travel
             </div>
-            <div color="error" variant="flat" size="small">
-              <v-icon start>mdi-stop</v-icon>
+            <div
+              color="error"
+              variant="flat"
+              size="small"
+            >
+              <v-icon start>
+                mdi-stop
+              </v-icon>
               {{ routeStats.totalIdle }} m Idle
             </div>
           </div>
@@ -144,15 +195,23 @@
 
       <!-- Content -->
       <v-card-text class="pa-0">
-        <v-row no-gutters class="fill-height">
+        <v-row
+          no-gutters
+          class="fill-height"
+        >
           <!-- Timeline Section (Left) -->
-          <v-col cols="12" md="5" lg="4" class="logs-section">
+          <v-col
+            cols="12"
+            md="5"
+            lg="4"
+            class="logs-section"
+          >
             <div class="logs-header pa-4 bg-grey-lighten-5 border-b">
-              <h3 class="text-h6 text-primary">Timeline</h3>
+              <h3 class="text-h6 text-primary">
+                Timeline
+              </h3>
               <div class="text-caption mt-1 d-flex align-center gap-2">
-                <span
-                  >{{ currentDate }} | {{ summaryStats.totalDistance }} km</span
-                >
+                <span>{{ currentDate }} | {{ summaryStats.totalDistance }} km</span>
               </div>
             </div>
 
@@ -168,24 +227,35 @@
                 v-if="processedLogs.length === 0 && !loading"
                 class="empty-state text-center pa-8"
               >
-                <v-icon size="64" color="grey-lighten-2"
-                  >mdi-map-marker-off</v-icon
+                <v-icon
+                  size="64"
+                  color="grey-lighten-2"
                 >
-                <h4 class="text-h6 mt-4 mb-2 text-grey">No Location Data</h4>
+                  mdi-map-marker-off
+                </v-icon>
+                <h4 class="text-h6 mt-4 mb-2 text-grey">
+                  No Location Data
+                </h4>
                 <p class="text-body-2 text-grey">
                   No tracking logs found for this employee on the selected date.
                 </p>
               </div>
 
               <!-- Timeline Items -->
-              <div v-else class="timeline-container">
+              <div
+                v-else
+                class="timeline-container"
+              >
                 <div
                   v-for="(item, index) in processedLogs"
                   :key="item.id || index"
                   class="timeline-item mb-4"
                 >
                   <!-- Regular Log Entry (Start/Stop/Break) -->
-                  <div v-if="item.type !== 'stop'" class="log-entry">
+                  <div
+                    v-if="item.type !== 'stop'"
+                    class="log-entry"
+                  >
                     <div class="d-flex align-center mb-2">
                       <div class="time-badge">
                         {{ formatTime(item.timeStamp) }}
@@ -214,14 +284,24 @@
                         size="x-small"
                         variant="elevated"
                       >
-                        <v-icon start size="14">mdi-timer-outline</v-icon>
+                        <v-icon
+                          start
+                          size="14"
+                        >
+                          mdi-timer-outline
+                        </v-icon>
                         {{ getSessionDurationForOut(item) }}
                       </v-chip>
                     </div>
 
                     <div class="location-details ml-16">
                       <div class="text-body-2 text-grey mb-1">
-                        <v-icon size="16" class="mr-1">mdi-map-marker</v-icon>
+                        <v-icon
+                          size="16"
+                          class="mr-1"
+                        >
+                          mdi-map-marker
+                        </v-icon>
                         {{ formatCoordinates(item.lat, item.lng) }}
                       </div>
                     </div>
@@ -232,7 +312,10 @@
                       class="stats-details ml-16 mt-2 text-body-2"
                     >
                       <span style="font-weight: bold; margin-right: 12px">
-                        <v-icon start size="14">mdi-map-marker-distance</v-icon>
+                        <v-icon
+                          start
+                          size="14"
+                        >mdi-map-marker-distance</v-icon>
                         Travel: {{ getLogStats(item.id).travel }} km
                       </span>
 
@@ -243,20 +326,30 @@
                           color: #d32f2f;
                         "
                       >
-                        <v-icon start size="14">mdi-stop</v-icon>
+                        <v-icon
+                          start
+                          size="14"
+                        >mdi-stop</v-icon>
                         Idle: {{ formatIdleDuration(item) }}
                       </span>
                     </div>
-                    <br />
+                    <br>
                   </div>
 
                   <!-- Stop Entry (detected) -->
-                  <div v-else class="stop-entry">
+                  <div
+                    v-else
+                    class="stop-entry"
+                  >
                     <div class="d-flex align-center mb-2">
                       <div class="time-badge">
                         {{ formatTime(item.startTime) }}
                       </div>
-                      <v-icon color="warning" class="mx-2" size="20">
+                      <v-icon
+                        color="warning"
+                        class="mx-2"
+                        size="20"
+                      >
                         mdi-pause
                       </v-icon>
                       <span class="action-text">
@@ -277,9 +370,9 @@
                       <div
                         v-if="
                           item.lat &&
-                          item.lng &&
-                          item.lat !== 0 &&
-                          item.lng !== 0
+                            item.lng &&
+                            item.lat !== 0 &&
+                            item.lng !== 0
                         "
                         class="text-body-2 text-grey mb-1"
                       >
@@ -288,13 +381,24 @@
                         <span class="ml-4 font-weight-medium">Longitude:</span>
                         {{ parseFloat(item.lng).toFixed(6) }}
                       </div>
-                      <div v-else class="text-body-2 text-grey-darken-1 mb-1">
-                        <v-icon size="16" class="mr-1"
-                          >mdi-map-marker-off</v-icon
+                      <div
+                        v-else
+                        class="text-body-2 text-grey-darken-1 mb-1"
+                      >
+                        <v-icon
+                          size="16"
+                          class="mr-1"
                         >
+                          mdi-map-marker-off
+                        </v-icon>
                       </div>
                       <div class="d-flex align-center text-body-2 text-grey">
-                        <v-icon size="16" class="mr-1">mdi-play</v-icon>
+                        <v-icon
+                          size="16"
+                          class="mr-1"
+                        >
+                          mdi-play
+                        </v-icon>
                         Tracking started ({{ formatTime(item.endTime) }})
                       </div>
                     </div>
@@ -305,24 +409,41 @@
           </v-col>
 
           <!-- Map Section (Right) -->
-          <v-col cols="12" md="7" lg="8" class="map-section">
+          <v-col
+            cols="12"
+            md="7"
+            lg="8"
+            class="map-section"
+          >
             <div class="map-header pa-4 bg-grey-lighten-5 border-b">
               <div class="d-flex align-center justify-space-between flex-wrap">
-                <h3 class="text-h6 text-primary">Route Tracking</h3>
+                <h3 class="text-h6 text-primary">
+                  Route Tracking
+                </h3>
 
                 <!-- Branch info visible in header -->
                 <div
-                  class="d-flex gap-2 align-center flex-wrap"
                   v-if="branchInfo"
+                  class="d-flex gap-2 align-center flex-wrap"
                 >
-                  <div color="grey" size="small" variant="elevated">
-                    <v-icon start>mdi-office-building-marker</v-icon>
+                  <div
+                    color="grey"
+                    size="small"
+                    variant="elevated"
+                  >
+                    <v-icon start>
+                      mdi-office-building-marker
+                    </v-icon>
                     {{ branchInfo.orgName }}
                   </div>
                 </div>
               </div>
             </div>
-            <div id="google-map" ref="mapContainer" class="google-map" />
+            <div
+              id="google-map"
+              ref="mapContainer"
+              class="google-map"
+            />
           </v-col>
         </v-row>
       </v-card-text>
@@ -331,15 +452,21 @@
       <v-card-actions class="pa-4 bg-grey-lighten-5 border-t">
         <v-spacer />
         <v-btn
-          @click="exportToExcel"
           :loading="exporting"
           color=" #059367"
           variant="elevated"
           prepend-icon="mdi-microsoft-excel"
+          @click="exportToExcel"
         >
           Export to Excel
         </v-btn>
-        <v-btn @click="closeDialog" color="grey" variant="text"> Close </v-btn>
+        <v-btn
+          color="grey"
+          variant="text"
+          @click="closeDialog"
+        >
+          Close
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

@@ -2,12 +2,12 @@
   <div class="mobile-face-embedding-container">
     <div class="main-content">
       <DataTableWrapper
-        v-model:searchQuery="search"
-        :showSearch="true"
-        :searchPlaceholder="'Search by Employee ID or Name'"
-        :isEmpty="items.length === 0 && !search"
-        :hasError="error"
-        @update:searchQuery="debouncedSearch"
+        v-model:search-query="search"
+        :show-search="true"
+        :search-placeholder="'Search by Employee ID or Name'"
+        :is-empty="items.length === 0 && !search"
+        :has-error="error"
+        @update:search-query="debouncedSearch"
       >
         <!-- Delete Button -->
         <template #before-search>
@@ -16,10 +16,10 @@
             color="error"
             variant="tonal"
             prepend-icon="mdi-delete"
-            @click="deleteSelectedItems"
             :disabled="deleting"
             :loading="deleting"
             class="delete-btn"
+            @click="deleteSelectedItems"
           >
             Delete Selected ({{ selected.length }})
           </v-btn>
@@ -54,8 +54,8 @@
                 ? 'Try adjusting your search term'
                 : 'No face embedding data available'
             "
-            :primaryAction="{ text: 'Clear Search' }"
-            @primaryAction="clearSearch"
+            :primary-action="{ text: 'Clear Search' }"
+            @primary-action="clearSearch"
           />
         </div>
 
@@ -63,15 +63,15 @@
           <DataTable
             :items="items"
             :columns="columns"
-            :selectedItems="selected"
-            :showSelection="true"
-            :sortBy="sortBy[0]?.key || ''"
-            :sortDirection="sortBy[0]?.order || 'asc'"
-            :itemKey="'id'"
-            :rowClickable="false"
-            @update:selectedItems="selected = $event"
-            @update:sortBy="updateSortBy"
-            @update:sortDirection="updateSortDirection"
+            :selected-items="selected"
+            :show-selection="true"
+            :sort-by="sortBy[0]?.key || ''"
+            :sort-direction="sortBy[0]?.order || 'asc'"
+            :item-key="'id'"
+            :row-clickable="false"
+            @update:selected-items="selected = $event"
+            @update:sort-by="updateSortBy"
+            @update:sort-direction="updateSortDirection"
             @sort="handleSort"
           >
             <!-- Employee Column -->
@@ -90,14 +90,17 @@
             <template #cell-faceEmbedding="{ item }">
               <div class="face-embedding-data">
                 <v-chip
+                  v-if="item.faceEmbedding"
                   size="small"
                   color="secondary"
                   variant="tonal"
-                  v-if="item.faceEmbedding"
                 >
                   {{ truncateText(item.faceEmbedding, 30) }}
                 </v-chip>
-                <span v-else class="null-value-small">No Data</span>
+                <span
+                  v-else
+                  class="null-value-small"
+                >No Data</span>
               </div>
             </template>
 
@@ -133,38 +136,51 @@
         <template #pagination>
           <CustomPagination
             v-model:page="page"
-            v-model:itemsPerPage="itemsPerPage"
+            v-model:items-per-page="itemsPerPage"
             :total-items="totalItems"
             :is-searching="!!search"
             @update:page="handlePageChange"
-            @update:itemsPerPage="handleItemsPerPageChange"
+            @update:items-per-page="handleItemsPerPageChange"
           />
         </template>
       </DataTableWrapper>
     </div>
 
     <!-- Delete Confirmation Dialog -->
-    <v-dialog v-model="deleteDialog" max-width="500px" persistent>
+    <v-dialog
+      v-model="deleteDialog"
+      max-width="500px"
+      persistent
+    >
       <v-card>
         <v-card-title class="text-h5">
-          <v-icon color="error" class="mr-2">mdi-delete-alert</v-icon>
+          <v-icon
+            color="error"
+            class="mr-2"
+          >
+            mdi-delete-alert
+          </v-icon>
           Confirm Delete
         </v-card-title>
         <v-card-text>
           Are you sure you want to delete {{ selected.length }} selected mobile
-          face embedding record(s)? <br /><br />
+          face embedding record(s)? <br><br>
           <strong>This action cannot be undone.</strong>
         </v-card-text>
         <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="grey" variant="text" @click="deleteDialog = false">
+          <v-spacer />
+          <v-btn
+            color="grey"
+            variant="text"
+            @click="deleteDialog = false"
+          >
             Cancel
           </v-btn>
           <v-btn
             color="error"
             variant="tonal"
-            @click="confirmDelete"
             :loading="deleting"
+            @click="confirmDelete"
           >
             Delete
           </v-btn>
@@ -180,7 +196,9 @@
       location="top"
     >
       <div class="d-flex align-center">
-        <v-icon class="me-2">{{ snackbar.icon }}</v-icon>
+        <v-icon class="me-2">
+          {{ snackbar.icon }}
+        </v-icon>
         {{ snackbar.message }}
       </div>
     </v-snackbar>

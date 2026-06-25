@@ -1,7 +1,13 @@
 <template>
-  <div v-if="modelValue" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-300 p-4 w-full">
-    <div class="relative w-full max-w-3xl max-h-[90vh] flex flex-col bg-white dark:bg-zinc-950 rounded-[24px] shadow-2xl shadow-amber-500/10 border border-white/20 dark:border-zinc-800/80 overflow-hidden transform transition-all animate-in zoom-in-95 duration-300">
-      
+  <div
+    v-if="modelValue"
+    class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-300 p-4 w-full"
+  >
+    <!-- Main Form Container -->
+    <div 
+      v-if="!showNetworkScanner" 
+      class="relative w-full max-w-3xl max-h-[90vh] flex flex-col bg-white dark:bg-zinc-950 rounded-[24px] shadow-2xl shadow-amber-500/10 border border-white/20 dark:border-zinc-800/80 overflow-hidden transform transition-all animate-in zoom-in-95 duration-300"
+    >
       <!-- Premium Glass Header -->
       <div class="relative px-8 py-6 flex justify-between items-start bg-gradient-to-b from-slate-50 to-white dark:from-zinc-900 dark:to-zinc-950 border-b border-zinc-100 dark:border-zinc-800/80 z-10 shrink-0">
         <div class="absolute inset-0 bg-white/40 dark:bg-zinc-950/40 backdrop-blur-xl"></div>
@@ -18,7 +24,10 @@
             {{ device ? 'Update device network configuration and parameters' : 'Register a new controller or edge computing device to the network' }}
           </p>
         </div>
-        <button @click="close" class="relative z-10 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-zinc-700 transition-all duration-200">
+        <button 
+          @click="close" 
+          class="relative z-10 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-zinc-700 transition-all duration-200"
+        >
           <X class="w-4 h-4" />
         </button>
       </div>
@@ -38,8 +47,17 @@
                 <input v-model="formData.controllerName" type="text" required class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground" />
               </div>
               <div class="space-y-1.5">
-                <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Serial Number <span class="text-red-500">*</span></label>
-                <input v-model="formData.sn" type="text" required class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground" />
+                <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest flex items-center justify-between">
+                  <span>Serial Number <span class="text-red-500">*</span></span>
+                  <button
+                    type="button"
+                    class="text-amber-500 hover:text-amber-600 flex items-center gap-1 text-[10px] bg-amber-500/10 px-2 py-0.5 rounded transition-colors"
+                    @click="openNetworkScanner"
+                  >
+                    <Wifi class="w-3 h-3" /> Scan Network
+                  </button>
+                </label>
+                <input v-model="formData.sn" type="text" required placeholder="Device UUID / MAC" class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground" />
               </div>
               <div class="space-y-1.5 col-span-2">
                 <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Device Type <span class="text-red-500">*</span></label>
@@ -95,23 +113,95 @@
         </button>
       </div>
     </div>
+
+    <!-- Network Scanner Panel -->
+    <div 
+      v-else 
+      class="relative w-full max-w-md max-h-[80vh] flex flex-col bg-white dark:bg-zinc-950 rounded-[24px] shadow-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden transform transition-all animate-in zoom-in-95 duration-300"
+    >
+      <!-- Scanner Header -->
+      <div class="px-6 py-4 flex justify-between items-center border-b border-zinc-100 dark:border-zinc-800 shrink-0 bg-slate-50 dark:bg-zinc-900">
+        <h3 class="font-black text-lg text-slate-900 dark:text-white flex items-center gap-2">
+          <Wifi class="w-5 h-5 text-amber-500" />
+          Network Scanner
+        </h3>
+        <button 
+          @click="closeNetworkScanner" 
+          class="w-7 h-7 flex items-center justify-center rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors"
+        >
+          <X class="w-4 h-4" />
+        </button>
+      </div>
+
+      <!-- Scanner Body -->
+      <div class="p-6 overflow-y-auto flex-1 bg-zinc-50/50 dark:bg-zinc-950/80 custom-scrollbar">
+        <div v-if="scanningNetwork" class="flex flex-col items-center justify-center py-12 text-zinc-500">
+          <div class="relative w-16 h-16 mb-4">
+            <div class="absolute inset-0 border-4 border-amber-500/20 rounded-full"></div>
+            <div class="absolute inset-0 border-4 border-amber-500 rounded-full border-t-transparent animate-spin"></div>
+          </div>
+          <p class="text-sm font-medium animate-pulse">Scanning local subnet via MQTT...</p>
+        </div>
+
+        <div v-else-if="discoveredDevices.length === 0" class="text-center py-8 text-zinc-500 text-sm">
+          No recently connected devices found on the network.
+          <button class="mt-4 block mx-auto text-amber-500 hover:underline font-bold" @click="fetchDiscoveredDevices">
+            Scan Again
+          </button>
+        </div>
+
+        <div v-else class="space-y-3">
+          <div 
+            v-for="dev in discoveredDevices" 
+            :key="dev.id"
+            class="group cursor-pointer p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 hover:border-amber-500 dark:hover:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-all"
+            @click="selectDiscoveredDevice(dev)"
+          >
+            <div class="flex justify-between items-start mb-2">
+              <span class="font-bold text-sm text-slate-800 dark:text-zinc-200 group-hover:text-amber-600 dark:group-hover:text-amber-400">
+                {{ dev.controllerName || 'Unknown Controller' }}
+              </span>
+              <span
+                class="text-[10px] font-mono px-2 py-0.5 rounded-full" 
+                :class="dev.controllerStatus === 'online' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' : 'bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400'"
+              >
+                {{ dev.controllerStatus || 'Offline' }}
+              </span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 text-xs text-zinc-500 dark:text-zinc-400 font-mono">
+              <div>SN: <span class="text-slate-700 dark:text-zinc-300">{{ dev.sn }}</span></div>
+              <div>IP: <span class="text-slate-700 dark:text-zinc-300">{{ dev.serverIp || 'N/A' }}</span></div>
+              <div>MAC: <span class="text-slate-700 dark:text-zinc-300">{{ dev.macAddress || 'N/A' }}</span></div>
+              <div>Model: <span class="text-slate-700 dark:text-zinc-300">{{ dev.controllerType === 1 ? 'Face' : 'Controller' }}</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, watch } from 'vue';
-import { X, Loader2, Network } from 'lucide-vue-next';
+import { X, Loader2, Network, Cpu, Wifi } from 'lucide-vue-next';
 import { authService } from '@/services/authService';
 import { currentUserTenant } from '@/utils/currentUserTenant';
 
 const props = defineProps({
   modelValue: Boolean,
-  device: { type: Object, default: null }
+  device: { type: Object, default: null },
+  startWithScanner: { type: Boolean, default: false }
 });
 
 const emit = defineEmits(['update:modelValue', 'success']);
 
 const loading = ref(false);
+
+// Network Scanner state
+const showNetworkScanner = ref(false);
+const scanningNetwork = ref(false);
+const discoveredDevices = ref([]);
+const discoveredDeviceId = ref(null);
 
 const formData = ref({
   controllerName: '',
@@ -124,6 +214,13 @@ const formData = ref({
 
 watch(() => props.modelValue, (isOpen) => {
   if (isOpen) {
+    if (props.startWithScanner) {
+      showNetworkScanner.value = true;
+      fetchDiscoveredDevices();
+    } else {
+      showNetworkScanner.value = false;
+    }
+    
     if (props.device) {
       formData.value = {
         controllerName: props.device.controllerName || '',
@@ -143,6 +240,7 @@ watch(() => props.modelValue, (isOpen) => {
         macAddress: '',
       };
     }
+    discoveredDeviceId.value = null;
   }
 });
 
@@ -150,37 +248,89 @@ const close = () => {
   emit('update:modelValue', false);
 };
 
+// Network Scanner methods
+const openNetworkScanner = () => {
+  showNetworkScanner.value = true;
+  fetchDiscoveredDevices();
+};
+
+const closeNetworkScanner = () => {
+  showNetworkScanner.value = false;
+};
+
+const fetchDiscoveredDevices = async () => {
+  scanningNetwork.value = true;
+  try {
+    const token = authService.getToken();
+    // Fetch newly connected devices from mqtt_devices collection
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/mqtt_devices?sort=-date_created&limit=10`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      discoveredDevices.value = data.data || [];
+    }
+  } catch (err) {
+    console.error("Failed to scan network for devices:", err);
+  } finally {
+    scanningNetwork.value = false;
+  }
+};
+
+const selectDiscoveredDevice = (dev) => {
+  discoveredDeviceId.value = dev.id;
+  formData.value.sn = dev.sn;
+  
+  if (dev.serverIp) {
+    formData.value.useIpProtocol = true;
+    formData.value.serverIp = dev.serverIp;
+  }
+  if (dev.macAddress) {
+    formData.value.macAddress = dev.macAddress;
+  }
+  if (dev.controllerName && !formData.value.controllerName) {
+    formData.value.controllerName = dev.controllerName;
+  }
+  if (dev.controllerType) {
+    formData.value.controllerType = dev.controllerType;
+  }
+  
+  closeNetworkScanner();
+};
+
 const handleSubmit = async () => {
   loading.value = true;
   try {
-    // Always resolve async — sync getter is null before initialization
     const token = authService.getToken();
     const tenantId = await currentUserTenant.getTenantIdAsync();
 
     const isEdit = !!props.device;
+    const isDiscovered = !!discoveredDeviceId.value;
+
     const url = isEdit 
       ? `${import.meta.env.VITE_API_URL}/items/controllers/${props.device.id}`
       : `${import.meta.env.VITE_API_URL}/items/controllers`;
 
-    // Build explicit clean payload — never spread formData directly
+    const method = isEdit ? 'PATCH' : 'POST';
+
+    // Build explicit clean payload
     const payload = {
       controllerName: formData.value.controllerName,
       sn: formData.value.sn,
       controllerType: formData.value.controllerType,
       tenant: tenantId,
-      status: isEdit ? (props.device.status || 'unApproved') : 'unApproved',
-      controllerStatus: isEdit ? (props.device.controllerStatus || 'offline') : 'offline',
+      status: isEdit ? (props.device.status || 'unApproved') : 'approved',
+      controllerStatus: isEdit ? (props.device.controllerStatus || 'offline') : 'online',
       serverIp: formData.value.useIpProtocol ? (formData.value.serverIp || null) : null,
       macAddress: formData.value.useIpProtocol ? (formData.value.macAddress || null) : null,
     };
 
-    // The controllers collection has a Directus validation rule requiring id on create
     if (!isEdit) {
       payload.id = crypto.randomUUID();
     }
 
     const res = await fetch(url, {
-      method: isEdit ? 'PATCH' : 'POST',
+      method: method,
       headers: { 
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`
@@ -189,6 +339,35 @@ const handleSubmit = async () => {
     });
 
     if (res.ok) {
+      // Remove from discovery queue
+      if (isDiscovered) {
+        try {
+          await fetch(`${import.meta.env.VITE_API_URL}/items/mqtt_devices/${discoveredDeviceId.value}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` }
+          });
+        } catch (delErr) {
+          console.error("Failed to clean up discovered device:", delErr);
+        }
+      }
+
+      // First add initialization for Knative
+      if (!isEdit && formData.value.sn) {
+        try {
+          await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-router`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "clearPermission",
+              uuid: formData.value.sn
+            })
+          });
+          console.log("Sent initial clearPermission to Knative for new device.");
+        } catch (knErr) {
+          console.error("Failed to send first add command to Knative:", knErr);
+        }
+      }
+
       emit('success');
       close();
     } else {

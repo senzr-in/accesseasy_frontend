@@ -2,60 +2,93 @@
   <div class="dealer-container">
     <!-- Summary Cards -->
     <div class="summary-cards">
-      <v-card class="summary-card" elevation="1">
+      <v-card
+        class="summary-card"
+        elevation="1"
+      >
         <div class="card-content">
           <div class="card-icon blue">
             <v-icon>mdi-account-group</v-icon>
           </div>
           <div class="card-info">
-            <div class="card-label">Total Dealers</div>
-            <div class="card-value">{{ totalDealersCount }}</div>
+            <div class="card-label">
+              Total Dealers
+            </div>
+            <div class="card-value">
+              {{ totalDealersCount }}
+            </div>
           </div>
         </div>
       </v-card>
 
-      <v-card class="summary-card" elevation="1">
+      <v-card
+        class="summary-card"
+        elevation="1"
+      >
         <div class="card-content">
           <div class="card-icon green">
             <v-icon>mdi-check-circle</v-icon>
           </div>
           <div class="card-info">
-            <div class="card-label">Approved Dealers</div>
-            <div class="card-value">{{ approvedDealersCount }}</div>
+            <div class="card-label">
+              Approved Dealers
+            </div>
+            <div class="card-value">
+              {{ approvedDealersCount }}
+            </div>
           </div>
         </div>
       </v-card>
 
-      <v-card class="summary-card" elevation="1">
+      <v-card
+        class="summary-card"
+        elevation="1"
+      >
         <div class="card-content">
           <div class="card-icon orange">
             <v-icon>mdi-clock-outline</v-icon>
           </div>
           <div class="card-info">
-            <div class="card-label">Pending Requests</div>
-            <div class="card-value">{{ pendingDealersCount }}</div>
+            <div class="card-label">
+              Pending Requests
+            </div>
+            <div class="card-value">
+              {{ pendingDealersCount }}
+            </div>
           </div>
         </div>
       </v-card>
 
-      <v-card class="summary-card" elevation="1">
+      <v-card
+        class="summary-card"
+        elevation="1"
+      >
         <div class="card-content">
           <div class="card-icon red">
             <v-icon>mdi-close-circle</v-icon>
           </div>
           <div class="card-info">
-            <div class="card-label">Rejected Dealers</div>
-            <div class="card-value">{{ rejectedDealersCount }}</div>
+            <div class="card-label">
+              Rejected Dealers
+            </div>
+            <div class="card-value">
+              {{ rejectedDealersCount }}
+            </div>
           </div>
         </div>
       </v-card>
     </div>
 
     <!-- Dealer Details Section -->
-    <v-card class="dealer-details-card" elevation="1">
+    <v-card
+      class="dealer-details-card"
+      elevation="1"
+    >
       <div class="card-header">
         <div class="header-left">
-          <h2 class="header-title">Dealer Details</h2>
+          <h2 class="header-title">
+            Dealer Details
+          </h2>
           <!-- Search moved to same line as header -->
           <v-text-field
             v-model="search"
@@ -65,7 +98,7 @@
             variant="outlined"
             hide-details
             class="search-field-inline"
-          ></v-text-field>
+          />
         </div>
         <div class="header-actions">
           <v-btn
@@ -100,8 +133,8 @@
             color="primary"
             variant="outlined"
             prepend-icon="mdi-refresh"
-            @click="refreshData"
             :loading="loading"
+            @click="refreshData"
           >
             Refresh
           </v-btn>
@@ -117,9 +150,14 @@
           class="dealer-table"
           hide-default-footer
         >
-          <template v-slot:item.tenantInfo="{ item }">
+          <template #item.tenantInfo="{ item }">
             <div class="tenant-info">
-              <v-icon class="tenant-icon" color="primary">mdi-domain</v-icon>
+              <v-icon
+                class="tenant-icon"
+                color="primary"
+              >
+                mdi-domain
+              </v-icon>
               <div>
                 <div class="tenant-name">
                   {{
@@ -135,11 +173,11 @@
             </div>
           </template>
 
-          <template v-slot:item.contactPerson="{ item }">
+          <template #item.contactPerson="{ item }">
             <div>{{ item.requestedBy?.assignedUser?.first_name || "N/A" }}</div>
           </template>
 
-          <template v-slot:item.status="{ item }">
+          <template #item.status="{ item }">
             <div class="status-container">
               <v-chip
                 size="small"
@@ -159,31 +197,41 @@
                 class="cancel-chip ms-2"
                 @click="cancelDealerRequest(item)"
               >
-                <v-icon start size="small">mdi-cancel</v-icon>
+                <v-icon
+                  start
+                  size="small"
+                >
+                  mdi-cancel
+                </v-icon>
                 Cancel
               </v-chip>
             </div>
           </template>
 
-          <template v-slot:item.email="{ item }">
+          <template #item.email="{ item }">
             {{ item.requestedBy?.assignedUser?.email || "N/A" }}
           </template>
 
-          <template v-slot:item.phone="{ item }">
+          <template #item.phone="{ item }">
             {{ item.requestedBy?.assignedUser?.phone || "N/A" }}
           </template>
 
-          <template v-slot:item.role="{ item }">
-            <v-chip size="small" color="secondary" variant="tonal" label>
+          <template #item.role="{ item }">
+            <v-chip
+              size="small"
+              color="secondary"
+              variant="tonal"
+              label
+            >
               {{ item.requestedBy?.assignedUser?.role?.name || "N/A" }}
             </v-chip>
           </template>
 
-          <template v-slot:item.created="{ item }">
+          <template #item.created="{ item }">
             {{ formatDate(item.date_created) }}
           </template>
 
-          <template v-slot:item.actions="{ item }">
+          <template #item.actions="{ item }">
             <div class="actions-cell">
               <v-btn
                 icon
@@ -199,7 +247,7 @@
               <v-btn
                 v-if="
                   currentUserRole === 'esslAdmin' &&
-                  item.dealerAccess === 'requested'
+                    item.dealerAccess === 'requested'
                 "
                 icon
                 size="small"
@@ -213,7 +261,7 @@
               <v-btn
                 v-if="
                   currentUserRole === 'esslAdmin' &&
-                  item.dealerAccess === 'requested'
+                    item.dealerAccess === 'requested'
                 "
                 icon
                 size="small"
@@ -224,7 +272,12 @@
                 <v-icon>mdi-close</v-icon>
               </v-btn>
 
-              <v-btn icon size="small" color="secondary" variant="text">
+              <v-btn
+                icon
+                size="small"
+                color="secondary"
+                variant="text"
+              >
                 <v-icon>mdi-cog</v-icon>
               </v-btn>
             </div>
@@ -236,11 +289,11 @@
       <div class="pagination-wrapper">
         <CustomPagination
           v-model:page="page"
-          v-model:itemsPerPage="itemsPerPage"
+          v-model:items-per-page="itemsPerPage"
           :total-items="totalItems"
           :is-searching="!!search"
           @update:page="handlePageChange"
-          @update:itemsPerPage="handleItemsPerPageChange"
+          @update:items-per-page="handleItemsPerPageChange"
         />
       </div>
     </v-card>
@@ -253,8 +306,13 @@
       >
         <div class="filter-header">
           <div class="d-flex align-center justify-space-between px-4">
-            <h3 class="text-h6 font-weight-medium">Advanced Filters</h3>
-            <v-btn icon @click="toggleFilters">
+            <h3 class="text-h6 font-weight-medium">
+              Advanced Filters
+            </h3>
+            <v-btn
+              icon
+              @click="toggleFilters"
+            >
               <v-icon>mdi-close</v-icon>
             </v-btn>
           </div>
@@ -271,7 +329,7 @@
             variant="outlined"
             class="mb-4"
             @update:model-value="handleFilterChange"
-          ></v-select>
+          />
 
           <v-select
             v-model="filters.role"
@@ -283,7 +341,7 @@
             variant="outlined"
             class="mb-4"
             @update:model-value="handleFilterChange"
-          ></v-select>
+          />
 
           <v-select
             v-model="filters.tenant"
@@ -295,13 +353,21 @@
             variant="outlined"
             class="mb-4"
             @update:model-value="handleFilterChange"
-          ></v-select>
+          />
 
           <div class="filter-actions">
-            <v-btn color="error" variant="text" @click="clearFilters">
+            <v-btn
+              color="error"
+              variant="text"
+              @click="clearFilters"
+            >
               Clear
             </v-btn>
-            <v-btn color="primary" @click="applyFilters" class="ms-2">
+            <v-btn
+              color="primary"
+              class="ms-2"
+              @click="applyFilters"
+            >
               Apply
             </v-btn>
           </div>
@@ -310,23 +376,36 @@
     </transition>
 
     <!-- New Registration Dialog with Icons and Light Colors -->
-    <v-dialog v-model="showRegistrationDialog" max-width="700px" persistent>
+    <v-dialog
+      v-model="showRegistrationDialog"
+      max-width="700px"
+      persistent
+    >
       <v-card class="registration-card">
         <v-card-title class="registration-header">
           <div class="header-content">
             <div class="header-icon">
-              <v-icon size="32" color="primary"
-                >mdi-office-building-plus</v-icon
+              <v-icon
+                size="32"
+                color="primary"
               >
+                mdi-office-building-plus
+              </v-icon>
             </div>
             <div>
-              <h2 class="header-title">Register New Tenant</h2>
+              <h2 class="header-title">
+                Register New Tenant
+              </h2>
               <p class="header-subtitle">
                 Create a new tenant account with ease
               </p>
             </div>
           </div>
-          <v-btn icon variant="text" @click="closeRegistrationDialog">
+          <v-btn
+            icon
+            variant="text"
+            @click="closeRegistrationDialog"
+          >
             <v-icon>mdi-close</v-icon>
           </v-btn>
         </v-card-title>
@@ -347,7 +426,12 @@
                 ]"
               >
                 <div class="step-circle">
-                  <v-icon v-if="currentStep > step" size="16">mdi-check</v-icon>
+                  <v-icon
+                    v-if="currentStep > step"
+                    size="16"
+                  >
+                    mdi-check
+                  </v-icon>
                   <span v-else>{{ step }}</span>
                 </div>
                 <span class="step-label">
@@ -362,9 +446,17 @@
           <!-- Step Content -->
           <div class="step-content">
             <!-- Step 1: Company Details -->
-            <div v-if="currentStep === 1" class="step-panel">
+            <div
+              v-if="currentStep === 1"
+              class="step-panel"
+            >
               <div class="step-header">
-                <v-icon color="primary" class="me-3">mdi-domain</v-icon>
+                <v-icon
+                  color="primary"
+                  class="me-3"
+                >
+                  mdi-domain
+                </v-icon>
                 <div>
                   <h3>Company Information</h3>
                   <p class="text-caption text-medium-emphasis">
@@ -382,7 +474,7 @@
                     prepend-inner-icon="mdi-office-building"
                     required
                     :rules="[(v) => !!v || 'Company name is required']"
-                  ></v-text-field>
+                  />
                 </v-col>
                 <v-col cols="12">
                   <v-text-field
@@ -397,15 +489,23 @@
                       (v) =>
                         v.length === 15 || 'GST number must be 15 characters',
                     ]"
-                  ></v-text-field>
+                  />
                 </v-col>
               </v-row>
             </div>
 
             <!-- Step 2: Dealer Access -->
-            <div v-if="currentStep === 2" class="step-panel">
+            <div
+              v-if="currentStep === 2"
+              class="step-panel"
+            >
               <div class="step-header">
-                <v-icon color="primary" class="me-3">mdi-handshake</v-icon>
+                <v-icon
+                  color="primary"
+                  class="me-3"
+                >
+                  mdi-handshake
+                </v-icon>
                 <div>
                   <h3>Dealer Access</h3>
                   <p class="text-caption text-medium-emphasis">
@@ -415,14 +515,17 @@
               </div>
 
               <div class="access-option">
-                <v-card variant="outlined" class="access-card">
+                <v-card
+                  variant="outlined"
+                  class="access-card"
+                >
                   <v-card-text>
                     <div class="d-flex align-center">
                       <v-checkbox
                         v-model="registrationForm.enableDealerAccess"
                         color="primary"
                         hide-details
-                      ></v-checkbox>
+                      />
                       <div class="ms-3">
                         <h4>Enable Dealer Access</h4>
                         <p class="text-caption text-medium-emphasis mb-0">
@@ -448,9 +551,17 @@
             </div>
 
             <!-- Step 3: Employee Details -->
-            <div v-if="currentStep === 3" class="step-panel">
+            <div
+              v-if="currentStep === 3"
+              class="step-panel"
+            >
               <div class="step-header">
-                <v-icon color="primary" class="me-3">mdi-account-plus</v-icon>
+                <v-icon
+                  color="primary"
+                  class="me-3"
+                >
+                  mdi-account-plus
+                </v-icon>
                 <div>
                   <h3>Employee Details</h3>
                   <p class="text-caption text-medium-emphasis">
@@ -460,7 +571,10 @@
               </div>
 
               <v-row class="mt-4">
-                <v-col cols="12" md="6">
+                <v-col
+                  cols="12"
+                  md="6"
+                >
                   <v-text-field
                     v-model="registrationForm.fullName"
                     label="Full Name"
@@ -468,9 +582,12 @@
                     prepend-inner-icon="mdi-account"
                     required
                     :rules="[(v) => !!v || 'Full name is required']"
-                  ></v-text-field>
+                  />
                 </v-col>
-                <v-col cols="12" md="6">
+                <v-col
+                  cols="12"
+                  md="6"
+                >
                   <v-text-field
                     v-model="registrationForm.email"
                     label="Email Address"
@@ -482,9 +599,12 @@
                       (v) => !!v || 'Email is required',
                       (v) => /.+@.+\..+/.test(v) || 'Email must be valid',
                     ]"
-                  ></v-text-field>
+                  />
                 </v-col>
-                <v-col cols="12" md="6">
+                <v-col
+                  cols="12"
+                  md="6"
+                >
                   <v-text-field
                     v-model="registrationForm.phone"
                     label="Phone Number"
@@ -493,9 +613,12 @@
                     prepend-inner-icon="mdi-phone"
                     required
                     :rules="[(v) => !!v || 'Phone number is required']"
-                  ></v-text-field>
+                  />
                 </v-col>
-                <v-col cols="12" md="6">
+                <v-col
+                  cols="12"
+                  md="6"
+                >
                   <v-text-field
                     v-model="registrationForm.employeeId"
                     label="Employee ID"
@@ -503,7 +626,7 @@
                     prepend-inner-icon="mdi-badge-account"
                     required
                     :rules="[(v) => !!v || 'Employee ID is required']"
-                  ></v-text-field>
+                  />
                 </v-col>
               </v-row>
             </div>
@@ -535,31 +658,35 @@
           <v-btn
             v-if="currentStep > 1"
             variant="outlined"
-            @click="prevStep"
             prepend-icon="mdi-arrow-left"
+            @click="prevStep"
           >
             Back
           </v-btn>
-          <v-spacer></v-spacer>
-          <v-btn variant="text" @click="closeRegistrationDialog" color="error">
+          <v-spacer />
+          <v-btn
+            variant="text"
+            color="error"
+            @click="closeRegistrationDialog"
+          >
             Cancel
           </v-btn>
           <v-btn
             v-if="currentStep < 3"
             color="primary"
-            @click="nextStep"
             :disabled="!isStepValid"
             append-icon="mdi-arrow-right"
+            @click="nextStep"
           >
             Continue
           </v-btn>
           <v-btn
             v-else
             color="primary"
-            @click="submitRegistration"
             :loading="registering"
             :disabled="!isStepValid"
             prepend-icon="mdi-check"
+            @click="submitRegistration"
           >
             Create Tenant
           </v-btn>
@@ -575,8 +702,14 @@
       location="top right"
     >
       {{ toast.message }}
-      <template v-slot:actions>
-        <v-btn color="white" variant="text" @click="hideToast"> Close </v-btn>
+      <template #actions>
+        <v-btn
+          color="white"
+          variant="text"
+          @click="hideToast"
+        >
+          Close
+        </v-btn>
       </template>
     </v-snackbar>
   </div>

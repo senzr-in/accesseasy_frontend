@@ -15,15 +15,21 @@
         :disabled="loading"
         @click="navigateTo(tab.name)"
       >
-        <v-icon :icon="tab.icon" class="mr-2"></v-icon>
+        <v-icon
+          :icon="tab.icon"
+          class="mr-2"
+        />
         {{ tab.label }}
       </v-tab>
     </v-tabs>
 
     <!-- Tab Content -->
-    <v-card flat class="tab-content-wrapper">
+    <v-card
+      flat
+      class="tab-content-wrapper"
+    >
       <v-card-text>
-        <router-view v-if="!loading && activeTab"></router-view>
+        <router-view v-if="!loading && activeTab" />
       </v-card-text>
     </v-card>
   </v-container>

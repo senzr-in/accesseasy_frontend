@@ -7,8 +7,8 @@
           v-model="currentTab"
           show-arrows
           background-color="transparent"
-          @update:modelValue="navigateTo"
           class="custom-tabs"
+          @update:model-value="navigateTo"
         >
           <v-tab
             v-for="tab in tabs"
@@ -22,8 +22,11 @@
         </v-tabs>
 
         <!-- Tab Content -->
-        <v-card class="tab-content-wrapper" elevation="0">
-          <router-view></router-view>
+        <v-card
+          class="tab-content-wrapper"
+          elevation="0"
+        >
+          <router-view />
         </v-card>
       </v-container>
     </v-main>

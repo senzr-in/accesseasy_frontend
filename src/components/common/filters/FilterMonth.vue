@@ -1,7 +1,13 @@
 <template>
   <div class="filter-month">
-    <select v-model="selectedMonth" @change="handleChange" class="month-select">
-      <option value="">All Months</option>
+    <select
+      v-model="selectedMonth"
+      class="month-select"
+      @change="handleChange"
+    >
+      <option value="">
+        All Months
+      </option>
       <option
         v-for="month in monthOptions"
         :key="month.value"

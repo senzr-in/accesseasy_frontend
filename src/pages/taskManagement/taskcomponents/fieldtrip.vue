@@ -1,23 +1,32 @@
 <template>
   <div class="field-trips-container">
-    <div class="main-content" :class="{ 'with-filter': showFilters }">
+    <div
+      class="main-content"
+      :class="{ 'with-filter': showFilters }"
+    >
       <!-- Main Content with Common Components -->
       <DataTableWrapper
-        v-model:searchQuery="searchQuery"
-        @update:searchQuery="handleSearchUpdate"
+        v-model:search-query="searchQuery"
         :total-items="totalItems"
+        @update:search-query="handleSearchUpdate"
       >
         <!-- Toolbar Actions Slot -->
-        <template v-slot:toolbar-actions>
-          <div class="wo-counters" aria-label="Work Order Status Counters">
+        <template #toolbar-actions>
+          <div
+            class="wo-counters"
+            aria-label="Work Order Status Counters"
+          >
             <div
               class="wo-pill total"
               role="button"
               aria-live="polite"
-              @click="handleFilterByStatus('')"
               :class="{ active: filters.status === '' }"
+              @click="handleFilterByStatus('')"
             >
-              <ListChecks class="wo-icon" aria-hidden="true" />
+              <ListChecks
+                class="wo-icon"
+                aria-hidden="true"
+              />
               <span class="wo-label">Total</span>
               <span class="wo-count">{{ fieldTripCounts.total }}</span>
             </div>
@@ -25,10 +34,13 @@
               class="wo-pill pending"
               role="button"
               aria-live="polite"
-              @click="handleFilterByStatus('pending')"
               :class="{ active: filters.status === 'pending' }"
+              @click="handleFilterByStatus('pending')"
             >
-              <Clock class="wo-icon" aria-hidden="true" />
+              <Clock
+                class="wo-icon"
+                aria-hidden="true"
+              />
               <span class="wo-label">Pending</span>
               <span class="wo-count">{{ fieldTripCounts.pending }}</span>
             </div>
@@ -36,10 +48,13 @@
               class="wo-pill overdue"
               role="button"
               aria-live="polite"
-              @click="handleFilterByStatus('overdue')"
               :class="{ active: filters.status === 'overdue' }"
+              @click="handleFilterByStatus('overdue')"
             >
-              <AlertTriangle class="wo-icon" aria-hidden="true" />
+              <AlertTriangle
+                class="wo-icon"
+                aria-hidden="true"
+              />
               <span class="wo-label">Overdue</span>
               <span class="wo-count">{{ fieldTripCounts.overdue }}</span>
             </div>
@@ -47,10 +62,13 @@
               class="wo-pill completed"
               role="button"
               aria-live="polite"
-              @click="handleFilterByStatus('completed')"
               :class="{ active: filters.status === 'completed' }"
+              @click="handleFilterByStatus('completed')"
             >
-              <CheckCircle class="wo-icon" aria-hidden="true" />
+              <CheckCircle
+                class="wo-icon"
+                aria-hidden="true"
+              />
               <span class="wo-label">Completed</span>
               <span class="wo-count">{{ fieldTripCounts.completed }}</span>
             </div>
@@ -58,7 +76,7 @@
           <BaseButton
             variant="secondary"
             text="Filters"
-            :leftIcon="Filter"
+            :left-icon="Filter"
             :badge="hasActiveFilters ? '!' : null"
             @click="showFilters = !showFilters"
           />
@@ -66,7 +84,7 @@
             v-if="selectedFieldTripIds.length > 0"
             variant="danger"
             :text="`Delete (${selectedFieldTripIds.length})`"
-            :leftIcon="Trash2"
+            :left-icon="Trash2"
             @click="deleteSelectedFieldTrips"
           />
           <!-- <BaseButton
@@ -77,9 +95,9 @@
           /> -->
           <DropdownButton
             text="Export"
-            :leftIcon="Download"
+            :left-icon="Download"
             :items="exportItems"
-            @itemClick="handleExport"
+            @item-click="handleExport"
           />
         </template>
 
@@ -96,27 +114,27 @@
             v-show="!loading && !error && fieldTrips.length === 0"
             title="No Field Trips found"
             message="Try adjusting your filters or create a new field trip"
-            :primaryAction="{ text: 'Create Field Trip', icon: Plus }"
-            :secondaryAction="
+            :primary-action="{ text: 'Create Field Trip', icon: Plus }"
+            :secondary-action="
               hasActiveFilters ? { text: 'Clear Filters', icon: X } : null
             "
-            @primaryAction="navigateToAddFieldTrip"
-            @secondaryAction="clearAllFilters"
+            @primary-action="navigateToAddFieldTrip"
+            @secondary-action="clearAllFilters"
           />
 
           <FieldTripTable
             v-show="!loading && !error && fieldTrips.length > 0"
-            :fieldTrips="fieldTrips"
-            :selectedFieldTripIds="selectedFieldTripIds"
-            :expandedFieldTripId="expandedFieldTripId"
-            :sortBy="sortBy"
-            :sortDirection="sortDirection"
-            @toggleSelectAll="toggleSelectAll"
-            @toggleFieldTripSelection="toggleFieldTripSelection"
-            @requestSort="requestSort"
-            @viewFieldTripDetails="viewFieldTripDetails"
-            @toggleExpandedDetails="toggleExpandedDetails"
-            @showRouteMap="handleShowRouteMap"
+            :field-trips="fieldTrips"
+            :selected-field-trip-ids="selectedFieldTripIds"
+            :expanded-field-trip-id="expandedFieldTripId"
+            :sort-by="sortBy"
+            :sort-direction="sortDirection"
+            @toggle-select-all="toggleSelectAll"
+            @toggle-field-trip-selection="toggleFieldTripSelection"
+            @request-sort="requestSort"
+            @view-field-trip-details="viewFieldTripDetails"
+            @toggle-expanded-details="toggleExpandedDetails"
+            @show-route-map="handleShowRouteMap"
           />
 
           <ErrorState
@@ -128,13 +146,13 @@
         </div>
 
         <!-- Pagination Slot -->
-        <template v-slot:pagination>
+        <template #pagination>
           <CustomPagination
             v-model:page="currentPage"
-            v-model:itemsPerPage="itemsPerPage"
+            v-model:items-per-page="itemsPerPage"
             :total-items="totalItems"
             @update:page="handlePageChange"
-            @update:itemsPerPage="handleItemsPerPageChange"
+            @update:items-per-page="handleItemsPerPageChange"
           />
         </template>
       </DataTableWrapper>
@@ -144,13 +162,16 @@
     <FilterPanel
       :show="showFilters"
       title="Field Trip Filters"
-      :hasFilters="hasActiveFilters"
+      :has-filters="hasActiveFilters"
       @close="showFilters = false"
       @clear="clearAllFilters"
       @apply="applyFilters"
     >
       <!-- Field trip specific filters -->
-      <FilterSection title="Month" :icon="Calendar">
+      <FilterSection
+        title="Month"
+        :icon="Calendar"
+      >
         <FilterMonth
           v-model="filters.month"
           @change="applyFilters"
@@ -158,7 +179,10 @@
         />
       </FilterSection>
 
-      <FilterSection title="Trip Type" :icon="MapPin">
+      <FilterSection
+        title="Trip Type"
+        :icon="MapPin"
+      >
         <FilterSelect
           v-model="filters.tripType"
           :options="tripTypeOptions"
@@ -167,7 +191,10 @@
         />
       </FilterSection>
 
-      <FilterSection title="Status" :icon="Tag">
+      <FilterSection
+        title="Status"
+        :icon="Tag"
+      >
         <FilterSelect
           v-model="filters.status"
           :options="statusOptions"
@@ -179,19 +206,25 @@
 
     <!-- Map Modal -->
     <Teleport to="body">
-      <div v-if="showMapModal" class="map-modal">
+      <div
+        v-if="showMapModal"
+        class="map-modal"
+      >
         <div class="map-modal-content">
           <div class="modal-header">
             <h3>Route Map for {{ selectedFieldTrip?.title }}</h3>
             <BaseButton
               variant="ghost"
-              :iconOnly="true"
+              :icon-only="true"
               @click="showMapModal = false"
             >
               <X size="24" />
             </BaseButton>
           </div>
-          <div id="map-container" style="height: 600px; width: 100%"></div>
+          <div
+            id="map-container"
+            style="height: 600px; width: 100%"
+          />
         </div>
       </div>
     </Teleport>

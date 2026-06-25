@@ -1,6 +1,9 @@
 <template>
   <!-- Single Generate QR Popup -->
-  <div v-if="showSingleGeneratePopup" class="popup-overlay">
+  <div
+    v-if="showSingleGeneratePopup"
+    class="popup-overlay"
+  >
     <div class="popup-content">
       <div class="popup-header">
         <h2>Generate Single Visitor QR</h2>
@@ -16,7 +19,7 @@
                   type="text"
                   required
                   placeholder="Enter visitor name"
-                />
+                >
               </div>
 
               <div class="form-group">
@@ -26,7 +29,7 @@
                   type="tel"
                   required
                   placeholder="Enter mobile number"
-                />
+                >
               </div>
 
               <div class="form-group">
@@ -36,7 +39,7 @@
                   type="email"
                   required
                   placeholder="Enter email"
-                />
+                >
               </div>
 
               <div class="form-group">
@@ -46,7 +49,7 @@
                   type="date"
                   required
                   :min="new Date().toISOString().split('T')[0]"
-                />
+                >
               </div>
 
               <div class="form-group">
@@ -56,25 +59,36 @@
                   type="date"
                   required
                   :min="singleVisitor.startDate"
-                />
+                >
               </div>
 
               <div class="form-group">
                 <label>Start Time<span class="required">*</span></label>
-                <input v-model="singleVisitor.startTime" type="time" required />
+                <input
+                  v-model="singleVisitor.startTime"
+                  type="time"
+                  required
+                >
               </div>
 
               <div class="form-group">
                 <label>End Time<span class="required">*</span></label>
-                <input v-model="singleVisitor.endTime" type="time" required />
+                <input
+                  v-model="singleVisitor.endTime"
+                  type="time"
+                  required
+                >
               </div>
 
               <div class="form-group">
-                <label
-                  >Assigned Access Level<span class="required">*</span></label
+                <label>Assigned Access Level<span class="required">*</span></label>
+                <select
+                  v-model="singleVisitor.assignedAccessLevel"
+                  required
                 >
-                <select v-model="singleVisitor.assignedAccessLevel" required>
-                  <option value="">Select access level</option>
+                  <option value="">
+                    Select access level
+                  </option>
                   <option
                     v-for="level in accessLevelOptions"
                     :key="level.id"
@@ -89,21 +103,30 @@
 
           <!-- Right side - QR Display -->
           <div class="qr-section">
-            <div v-if="!singleVisitor.generatedQR" class="qr-placeholder">
-              <i class="fas fa-qrcode"></i>
+            <div
+              v-if="!singleVisitor.generatedQR"
+              class="qr-placeholder"
+            >
+              <i class="fas fa-qrcode" />
               <p>QR code will appear here</p>
             </div>
-            <div v-else class="qr-display">
+            <div
+              v-else
+              class="qr-display"
+            >
               <div class="download-section">
-                <button class="download-btn" @click="downloadPDF">
-                  <i class="fas fa-download"></i>
+                <button
+                  class="download-btn"
+                  @click="downloadPDF"
+                >
+                  <i class="fas fa-download" />
                 </button>
               </div>
               <img
                 :src="singleVisitor.generatedQR"
                 alt="QR Code"
                 class="qr-image"
-              />
+              >
               <p class="validity-info">
                 Valid from:
                 {{
@@ -130,16 +153,19 @@
             class="btn btn-generate"
             :disabled="singleVisitor.generated_Qr"
           >
-            <i class="fas fa-qrcode"></i>
+            <i class="fas fa-qrcode" />
             Generate QR
           </button>
           <button
             type="button"
             class="btn btn-save"
-            @click="saveVisitorData(true)"
             :disabled="!singleVisitor.generated_Qr || isSaving"
+            @click="saveVisitorData(true)"
           >
-            <span v-if="isSaving" class="loading-spinner"></span>
+            <span
+              v-if="isSaving"
+              class="loading-spinner"
+            />
             {{ isSaving ? "Saving..." : "Save" }}
           </button>
           <button
@@ -158,7 +184,10 @@
   </div>
 
   <!-- Multi Generate QR Popup -->
-  <div v-if="showMultiGeneratePopup" class="popup-overlay">
+  <div
+    v-if="showMultiGeneratePopup"
+    class="popup-overlay"
+  >
     <div class="popup-content">
       <div class="popup-header">
         <h2>Generate Multiple Visitor QRs</h2>
@@ -174,7 +203,7 @@
                   type="date"
                   required
                   :min="new Date().toISOString().split('T')[0]"
-                />
+                >
               </div>
 
               <div class="form-group">
@@ -184,25 +213,36 @@
                   type="date"
                   required
                   :min="multiVisitor.startDate"
-                />
+                >
               </div>
 
               <div class="form-group">
                 <label>Start Time<span class="required">*</span></label>
-                <input v-model="multiVisitor.startTime" type="time" required />
+                <input
+                  v-model="multiVisitor.startTime"
+                  type="time"
+                  required
+                >
               </div>
 
               <div class="form-group">
                 <label>End Time<span class="required">*</span></label>
-                <input v-model="multiVisitor.endTime" type="time" required />
+                <input
+                  v-model="multiVisitor.endTime"
+                  type="time"
+                  required
+                >
               </div>
 
               <div class="form-group">
-                <label
-                  >Assigned Access Level<span class="required">*</span></label
+                <label>Assigned Access Level<span class="required">*</span></label>
+                <select
+                  v-model="multiVisitor.assignedAccessLevel"
+                  required
                 >
-                <select v-model="multiVisitor.assignedAccessLevel" required>
-                  <option value="">Select access level</option>
+                  <option value="">
+                    Select access level
+                  </option>
                   <option
                     v-for="level in accessLevelOptions"
                     :key="level.id"
@@ -222,7 +262,7 @@
                   max="50"
                   required
                   placeholder="Enter number of QR codes (max 50)"
-                />
+                >
               </div>
             </div>
           </div>
@@ -233,13 +273,19 @@
               v-if="multiVisitor.generatedQRs.length === 0"
               class="qr-placeholder"
             >
-              <i class="fas fa-qrcode"></i>
+              <i class="fas fa-qrcode" />
               <p>QR codes will appear here</p>
             </div>
-            <div v-else class="qr-scroll-container">
+            <div
+              v-else
+              class="qr-scroll-container"
+            >
               <div class="download-section">
-                <button class="download-btn" @click="downloadPDF">
-                  <i class="fas fa-download"></i>
+                <button
+                  class="download-btn"
+                  @click="downloadPDF"
+                >
+                  <i class="fas fa-download" />
                 </button>
               </div>
               <div class="qr-grid">
@@ -248,12 +294,14 @@
                   :key="index"
                   class="qr-card"
                 >
-                  <div class="qr-number">QR Code #{{ index + 1 }}</div>
+                  <div class="qr-number">
+                    QR Code #{{ index + 1 }}
+                  </div>
                   <img
                     :src="qr.qrCode"
                     :alt="`QR Code ${index + 1}`"
                     class="qr-image"
-                  />
+                  >
                   <p class="validity-info">
                     Valid from: {{ formatDate(qr.validFrom) }}
                   </p>
@@ -272,16 +320,19 @@
             class="btn btn-generate"
             :disabled="multiVisitor.generatedQRs.length > 0"
           >
-            <i class="fas fa-qrcode"></i>
+            <i class="fas fa-qrcode" />
             Generate QRs
           </button>
           <button
             type="button"
             class="btn btn-save"
-            @click="saveVisitorData(false)"
             :disabled="multiVisitor.generatedQRs.length === 0 || isSaving"
+            @click="saveVisitorData(false)"
           >
-            <span v-if="isSaving" class="loading-spinner"></span>
+            <span
+              v-if="isSaving"
+              class="loading-spinner"
+            />
             {{ isSaving ? "Saving..." : "Save" }}
           </button>
           <button
@@ -300,35 +351,44 @@
   </div>
 
   <div class="visitor-flow">
-    <div v-if="successMessage" class="success-message">
-      <i class="fas fa-check-circle"></i>
+    <div
+      v-if="successMessage"
+      class="success-message"
+    >
+      <i class="fas fa-check-circle" />
       {{ successMessage }}
     </div>
 
     <div class="tabs-container">
       <div class="left-tabs">
         <button
-          @click="activeLeftTab = 'activity'"
           :class="{ active: activeLeftTab === 'activity' }"
+          @click="activeLeftTab = 'activity'"
         >
-          <i class="fas fa-clock"></i>
+          <i class="fas fa-clock" />
           Recent Activity
         </button>
         <button
-          @click="activeLeftTab = 'history'"
           :class="{ active: activeLeftTab === 'history' }"
+          @click="activeLeftTab = 'history'"
         >
-          <i class="fas fa-history"></i>
+          <i class="fas fa-history" />
           History
         </button>
       </div>
       <div class="right-tabs">
-        <button @click="showSingleGeneratePopup = true" class="action-button">
-          <i class="fas fa-qrcode"></i>
+        <button
+          class="action-button"
+          @click="showSingleGeneratePopup = true"
+        >
+          <i class="fas fa-qrcode" />
           Single Generate QR
         </button>
-        <button @click="showMultiGeneratePopup = true" class="action-button">
-          <i class="fas fa-qrcode"></i>
+        <button
+          class="action-button"
+          @click="showMultiGeneratePopup = true"
+        >
+          <i class="fas fa-qrcode" />
           Multi Generate QR
         </button>
       </div>
@@ -352,7 +412,10 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="visitor in activeVisitors" :key="visitor.id">
+          <tr
+            v-for="visitor in activeVisitors"
+            :key="visitor.id"
+          >
             <td>{{ visitor.personName }}</td>
             <td>{{ visitor.email }}</td>
             <td>{{ visitor.mobileNumber }}</td>
@@ -368,7 +431,7 @@
             <td>{{ visitor.quantity }}</td>
             <td>
               <span class="status-badge active">
-                <i class="fas fa-check-circle"></i>
+                <i class="fas fa-check-circle" />
                 Active
               </span>
             </td>
@@ -392,7 +455,10 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="visitor in visitorData" :key="visitor.id">
+          <tr
+            v-for="visitor in visitorData"
+            :key="visitor.id"
+          >
             <td>{{ visitor.personName }}</td>
             <td>{{ visitor.email }}</td>
             <td>{{ visitor.mobileNumber }}</td>
@@ -426,10 +492,10 @@
                         ? 'fa-clock'
                         : 'fa-times-circle',
                   ]"
-                ></i>
+                />
                 {{
                   visitor.status.charAt(0).toUpperCase() +
-                  visitor.status.slice(1)
+                    visitor.status.slice(1)
                 }}
               </span>
             </td>
@@ -437,8 +503,11 @@
         </tbody>
       </table>
 
-      <div v-else class="no-data-message">
-        <i class="fas fa-inbox"></i>
+      <div
+        v-else
+        class="no-data-message"
+      >
+        <i class="fas fa-inbox" />
         <p>No visitor data to display</p>
       </div>
     </div>
@@ -516,6 +585,18 @@ export default {
       },
       deep: true,
     },
+  },
+  async mounted() {
+    console.log("Component mounted");
+    await this.fetchAccessLevels();
+    await this.fetchDropdownData();
+    await this.fetchVisitorData();
+    this.startStatusChecks();
+  },
+  beforeUnmount() {
+    if (this.statusInterval) {
+      clearInterval(this.statusInterval);
+    }
   },
   methods: {
     formatDate(dateString) {
@@ -1163,18 +1244,6 @@ export default {
         doc.save("Multiple_QR_Codes.pdf");
       }
     },
-  },
-  async mounted() {
-    console.log("Component mounted");
-    await this.fetchAccessLevels();
-    await this.fetchDropdownData();
-    await this.fetchVisitorData();
-    this.startStatusChecks();
-  },
-  beforeDestroy() {
-    if (this.statusInterval) {
-      clearInterval(this.statusInterval);
-    }
   },
 };
 </script>

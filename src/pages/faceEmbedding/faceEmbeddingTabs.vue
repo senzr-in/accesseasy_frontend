@@ -7,12 +7,22 @@
         background-color="transparent"
         class="custom-tabs"
       >
-        <v-tab value="ai" class="custom-tab">
-          <v-icon start>mdi-robot</v-icon>
+        <v-tab
+          value="ai"
+          class="custom-tab"
+        >
+          <v-icon start>
+            mdi-robot
+          </v-icon>
           AI Face Embedding
         </v-tab>
-        <v-tab value="mobile" class="custom-tab">
-          <v-icon start>mdi-cellphone</v-icon>
+        <v-tab
+          value="mobile"
+          class="custom-tab"
+        >
+          <v-icon start>
+            mdi-cellphone
+          </v-icon>
           Mobile Face Embedding
         </v-tab>
       </v-tabs>

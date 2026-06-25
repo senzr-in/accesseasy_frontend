@@ -1,30 +1,55 @@
 <template>
-  <div class="data-table-wrapper" :class="wrapperClass">
+  <div
+    class="data-table-wrapper"
+    :class="wrapperClass"
+  >
     <!-- Title Only Row (when in loading/empty/error state) -->
-    <div v-if="shouldShowTitleOnly" class="table-title-only-row">
-      <h2 v-if="title" class="table-title">{{ title }}</h2>
+    <div
+      v-if="shouldShowTitleOnly"
+      class="table-title-only-row"
+    >
+      <h2
+        v-if="title"
+        class="table-title"
+      >
+        {{ title }}
+      </h2>
     </div>
 
     <!-- Full Header Row (when showing data) -->
-    <div v-else class="table-header-row">
+    <div
+      v-else
+      class="table-header-row"
+    >
       <!-- Left Side: Title and Search -->
       <div class="header-left">
-        <h2 v-if="title" class="table-title">{{ title }}</h2>
-        <slot name="before-search"></slot>
+        <h2
+          v-if="title"
+          class="table-title"
+        >
+          {{ title }}
+        </h2>
+        <slot name="before-search" />
         <!-- Search Bar -->
-        <div v-if="showSearch" class="search-input-wrapper">
-          <Search :size="16" class="search-icon" />
+        <div
+          v-if="showSearch"
+          class="search-input-wrapper"
+        >
+          <Search
+            :size="16"
+            class="search-icon"
+          />
           <input
             type="text"
             :value="searchQuery"
-            @input="$emit('update:searchQuery', $event.target.value)"
             :placeholder="searchPlaceholder"
             class="search-input"
-          />
+            @input="$emit('update:searchQuery', $event.target.value)"
+          >
           <button
             v-if="searchQuery"
-            @click="$emit('update:searchQuery', '')"
             class="search-clear"
+            @click="$emit('update:searchQuery', '')"
           >
             <X :size="14" />
           </button>
@@ -42,7 +67,9 @@
       v-if="description && !shouldShowTitleOnly"
       class="table-description-row"
     >
-      <p class="table-description">{{ description }}</p>
+      <p class="table-description">
+        {{ description }}
+      </p>
     </div>
     <!-- Table Content -->
     <slot name="below-search" />

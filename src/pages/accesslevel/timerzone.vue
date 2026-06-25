@@ -5,15 +5,15 @@
       <div class="relative flex-1 max-w-sm">
         <Search class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
         <input
+          v-model="searchQuery"
           type="search"
           placeholder="Search timer zones..."
-          v-model="searchQuery"
           class="w-full pl-9 pr-4 h-10 text-sm bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm text-slate-900 dark:text-white placeholder:text-slate-400"
-        />
+        >
       </div>
       <button
-        @click="openAddDialog"
         class="flex items-center gap-2 h-10 px-4 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all shadow-sm shrink-0"
+        @click="openAddDialog"
       >
         <Plus class="w-4 h-4" /> Add Timer Zone
       </button>
@@ -25,47 +25,77 @@
         <table class="w-full text-left border-collapse relative">
           <thead class="bg-slate-50 dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-10">
             <tr>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">Name</th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">Start Time</th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">End Time</th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">Status</th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest text-right whitespace-nowrap">Actions</th>
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">
+                Name
+              </th>
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">
+                Start Time
+              </th>
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">
+                End Time
+              </th>
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">
+                Status
+              </th>
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest text-right whitespace-nowrap">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 dark:divide-zinc-800 bg-white dark:bg-zinc-950">
             <!-- Loading -->
             <tr v-if="loading">
-              <td colspan="5" class="px-5 py-24 text-center">
+              <td
+                colspan="5"
+                class="px-5 py-24 text-center"
+              >
                 <Loader2 class="w-8 h-8 animate-spin text-blue-500 mx-auto" />
               </td>
             </tr>
 
             <!-- Error -->
             <tr v-else-if="error">
-              <td colspan="5" class="px-5 py-24 text-center">
+              <td
+                colspan="5"
+                class="px-5 py-24 text-center"
+              >
                 <div class="flex flex-col items-center justify-center space-y-3">
                   <AlertCircle class="w-10 h-10 text-rose-300 dark:text-rose-700" />
-                  <p class="text-[10px] font-black uppercase tracking-widest text-rose-500">{{ error }}</p>
-                  <button @click="fetchTimerZones" class="text-xs font-bold text-blue-500 hover:underline">Try Again</button>
+                  <p class="text-[10px] font-black uppercase tracking-widest text-rose-500">
+                    {{ error }}
+                  </p>
+                  <button
+                    class="text-xs font-bold text-blue-500 hover:underline"
+                    @click="fetchTimerZones"
+                  >
+                    Try Again
+                  </button>
                 </div>
               </td>
             </tr>
 
             <!-- Empty -->
             <tr v-else-if="filteredTimerZones.length === 0">
-              <td colspan="5" class="px-5 py-24 text-center">
+              <td
+                colspan="5"
+                class="px-5 py-24 text-center"
+              >
                 <div class="flex flex-col items-center justify-center space-y-3">
                   <Clock class="w-10 h-10 text-slate-300 dark:text-zinc-700" />
-                  <p class="text-[10px] font-black uppercase tracking-widest text-slate-500">No timer zones found.</p>
+                  <p class="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                    No timer zones found.
+                  </p>
                   <button
                     v-if="searchQuery"
-                    @click="searchQuery = ''"
                     class="text-xs font-bold text-blue-500 hover:underline"
-                  >Clear search</button>
+                    @click="searchQuery = ''"
+                  >
+                    Clear search
+                  </button>
                   <button
                     v-else
-                    @click="openAddDialog"
                     class="h-9 px-4 rounded-lg bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-black uppercase tracking-widest hover:opacity-90 transition-opacity"
+                    @click="openAddDialog"
                   >
                     <Plus class="w-4 h-4 inline mr-1" /> Add First Timer Zone
                   </button>
@@ -75,8 +105,8 @@
 
             <!-- Rows -->
             <tr
-              v-else
               v-for="item in filteredTimerZones"
+              v-else
               :key="item.id"
               class="group/row hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors duration-200 cursor-pointer"
               @click="editZone(item)"
@@ -100,22 +130,24 @@
                 </span>
               </td>
               <td class="px-5 py-3">
-                <span :class="[
-                  'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold border',
-                  item.status === 'active' || item.status === 'published'
-                    ? 'bg-green-500/10 text-green-700 border-green-500/20 dark:text-green-400'
-                    : 'bg-gray-500/10 text-gray-600 border-gray-500/20'
-                ]">
-                  <span :class="['w-1.5 h-1.5 rounded-full', item.status === 'active' || item.status === 'published' ? 'bg-green-500' : 'bg-gray-400']"></span>
+                <span
+                  :class="[
+                    'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold border',
+                    item.status === 'active' || item.status === 'published'
+                      ? 'bg-green-500/10 text-green-700 border-green-500/20 dark:text-green-400'
+                      : 'bg-gray-500/10 text-gray-600 border-gray-500/20'
+                  ]"
+                >
+                  <span :class="['w-1.5 h-1.5 rounded-full', item.status === 'active' || item.status === 'published' ? 'bg-green-500' : 'bg-gray-400']" />
                   {{ item.status || 'unknown' }}
                 </span>
               </td>
               <td class="px-5 py-3 text-right">
                 <div class="flex justify-end pr-2 opacity-0 group-hover/row:opacity-100 transition-opacity">
                   <button
-                    @click.stop="deleteZone(item)"
                     title="Delete Zone"
                     class="h-7 w-7 p-0 flex items-center justify-center rounded-md border border-rose-200 dark:border-rose-900/50 bg-transparent text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors shadow-sm"
+                    @click.stop="deleteZone(item)"
                   >
                     <Trash2 class="h-3.5 w-3.5" />
                   </button>
@@ -133,15 +165,23 @@
     </div>
 
     <!-- Modals Overlay -->
-    <div v-if="showDialog || showDeleteDialog" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-      
+    <div
+      v-if="showDialog || showDeleteDialog"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm"
+    >
       <!-- Add/Edit Modal -->
-      <div v-if="showDialog" class="w-full max-w-md bg-white dark:bg-zinc-950 rounded-2xl shadow-xl overflow-hidden border border-slate-200 dark:border-zinc-800 flex flex-col animate-in zoom-in-95 duration-200">
+      <div
+        v-if="showDialog"
+        class="w-full max-w-md bg-white dark:bg-zinc-950 rounded-2xl shadow-xl overflow-hidden border border-slate-200 dark:border-zinc-800 flex flex-col animate-in zoom-in-95 duration-200"
+      >
         <div class="flex items-center justify-between p-5 border-b border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900">
           <h3 class="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white">
             {{ isEditing ? "Edit Timer Zone" : "Add Timer Zone" }}
           </h3>
-          <button @click="closeDialog" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+          <button
+            class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+            @click="closeDialog"
+          >
             <X class="w-4 h-4" />
           </button>
         </div>
@@ -154,7 +194,7 @@
               type="text"
               placeholder="e.g., Work Hours"
               class="w-full h-10 px-3 text-sm bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors shadow-sm text-slate-900 dark:text-white"
-            />
+            >
           </div>
           <div class="flex gap-4">
             <div class="flex-1">
@@ -163,7 +203,7 @@
                 v-model="formData.entryTime"
                 type="time"
                 class="w-full h-10 px-3 text-sm bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors shadow-sm text-slate-900 dark:text-white [color-scheme:light] dark:[color-scheme:dark]"
-              />
+              >
             </div>
             <div class="flex-1">
               <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">End Time *</label>
@@ -171,67 +211,84 @@
                 v-model="formData.exitTime"
                 type="time"
                 class="w-full h-10 px-3 text-sm bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors shadow-sm text-slate-900 dark:text-white [color-scheme:light] dark:[color-scheme:dark]"
-              />
+              >
             </div>
           </div>
         </div>
 
         <div class="flex items-center justify-end gap-3 p-5 border-t border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900">
           <button
-            @click="closeDialog"
             class="h-9 px-4 text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+            @click="closeDialog"
           >
             Cancel
           </button>
           <button
-            @click="saveZone"
             :disabled="!isFormValid || saving"
             class="flex items-center gap-2 h-9 px-4 rounded-lg bg-blue-600 text-white text-xs font-black uppercase tracking-widest hover:bg-blue-700 disabled:opacity-50 transition-all shadow-sm"
+            @click="saveZone"
           >
-            <Loader2 v-if="saving" class="w-3.5 h-3.5 animate-spin" />
+            <Loader2
+              v-if="saving"
+              class="w-3.5 h-3.5 animate-spin"
+            />
             {{ isEditing ? 'Update' : 'Save' }}
           </button>
         </div>
       </div>
 
       <!-- Delete Model -->
-      <div v-if="showDeleteDialog" class="w-full max-w-sm bg-white dark:bg-zinc-950 rounded-2xl shadow-xl overflow-hidden border border-rose-100 dark:border-rose-900/30 flex flex-col animate-in zoom-in-95 duration-200">
+      <div
+        v-if="showDeleteDialog"
+        class="w-full max-w-sm bg-white dark:bg-zinc-950 rounded-2xl shadow-xl overflow-hidden border border-rose-100 dark:border-rose-900/30 flex flex-col animate-in zoom-in-95 duration-200"
+      >
         <div class="p-6 flex flex-col items-center text-center">
           <div class="w-12 h-12 rounded-full bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center mb-4">
             <AlertCircle class="w-6 h-6 text-rose-500" />
           </div>
-          <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Delete Timer Zone</h3>
+          <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">
+            Delete Timer Zone
+          </h3>
           <p class="text-sm text-slate-500 dark:text-slate-400">
             Are you sure you want to delete <span class="font-bold text-slate-700 dark:text-slate-300">"{{ zoneToDelete?.timeZoneName }}"</span>? This action cannot be undone.
           </p>
         </div>
         <div class="flex items-center gap-2 p-4 border-t border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900">
           <button
-            @click="showDeleteDialog = false"
             :disabled="deleting"
             class="flex-1 h-10 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50"
+            @click="showDeleteDialog = false"
           >
             Cancel
           </button>
           <button
-            @click="confirmDelete"
             :disabled="deleting"
             class="flex-1 flex items-center justify-center gap-2 h-10 rounded-xl bg-rose-500 text-white text-sm font-bold hover:bg-rose-600 transition-colors shadow-sm disabled:opacity-50 shadow-rose-500/20"
+            @click="confirmDelete"
           >
-            <Loader2 v-if="deleting" class="w-4 h-4 animate-spin" />
+            <Loader2
+              v-if="deleting"
+              class="w-4 h-4 animate-spin"
+            />
             Delete
           </button>
         </div>
       </div>
-
     </div>
 
     <!-- Snackbar for notifications -->
-    <div v-if="snackbar.show" class="fixed bottom-4 right-4 z-50 flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg border animate-in slide-in-from-bottom-5"
+    <div
+      v-if="snackbar.show"
+      class="fixed bottom-4 right-4 z-50 flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg border animate-in slide-in-from-bottom-5"
       :class="snackbar.color === 'success' ? 'bg-green-50 dark:bg-green-900 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300' : 'bg-rose-50 dark:bg-rose-900 border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-300'"
     >
       <span class="text-sm font-semibold">{{ snackbar.message }}</span>
-      <button @click="snackbar.show = false" class="opacity-50 hover:opacity-100 transition-opacity"><X class="w-4 h-4"/></button>
+      <button
+        class="opacity-50 hover:opacity-100 transition-opacity"
+        @click="snackbar.show = false"
+      >
+        <X class="w-4 h-4" />
+      </button>
     </div>
   </div>
 </template>

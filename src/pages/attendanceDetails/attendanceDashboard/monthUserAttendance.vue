@@ -9,14 +9,18 @@
               v-if="showCalendarView"
               icon
               variant="text"
-              @click="backToMonthlyView"
               class="calendar-nav-btn"
+              @click="backToMonthlyView"
             >
               <v-icon>mdi-arrow-left</v-icon>
             </v-btn>
-            <h1 class="main-title">{{ userData?.name }}'s Monthly Attendan</h1>
+            <h1 class="main-title">
+              {{ userData?.name }}'s Monthly Attendan
+            </h1>
           </div>
-          <p class="subtitle">{{ selectedYear }} Annual Timeline</p>
+          <p class="subtitle">
+            {{ selectedYear }} Annual Timeline
+          </p>
         </div>
       </div>
       <div class="d-flex align-center gap-2">
@@ -32,17 +36,22 @@
         <BaseButton
           size="md"
           variant="primary"
-          :leftIcon="Download"
-          @click="downloadExcel"
+          :left-icon="Download"
           :loading="loading"
           :text="'EXPORT'"
+          @click="downloadExcel"
         />
       </div>
     </div>
 
     <!-- Monthly Timeline Section -->
-    <div v-if="!showCalendarView" class="timeline-section">
-      <h2 class="section-title">Monthly Timeline</h2>
+    <div
+      v-if="!showCalendarView"
+      class="timeline-section"
+    >
+      <h2 class="section-title">
+        Monthly Timeline
+      </h2>
 
       <div class="timeline-container">
         <v-btn
@@ -54,7 +63,10 @@
           <v-icon>mdi-chevron-left</v-icon>
         </v-btn>
 
-        <div class="timeline-scroll" ref="timelineScroll">
+        <div
+          ref="timelineScroll"
+          class="timeline-scroll"
+        >
           <div class="timeline-wrapper">
             <div
               v-for="(month, index) in userMonthlyData"
@@ -63,7 +75,7 @@
               :class="{ selected: selectedMonths.includes(month.monthName) }"
               @click="selectMonth(month)"
             >
-              <div class="month-arrow"></div>
+              <div class="month-arrow" />
               <div class="month-square">
                 <div class="month-abbr">
                   {{ getMonthAbbr(month.monthName) }}
@@ -101,21 +113,21 @@
           <BaseButton
             size="md"
             variant="primary"
-            @click="showMonthCalendar(selectedMonthData)"
             :text="'VIEW CALENDAR DETAILS'"
             :left-icon="ViewIcon"
+            @click="showMonthCalendar(selectedMonthData)"
           />
         </div>
-        <span class="working-days"
-          >{{ getTotalWorkingDays(selectedMonthData) }} working days</span
-        >
+        <span class="working-days">{{ getTotalWorkingDays(selectedMonthData) }} working days</span>
       </div>
 
       <div class="stats-grid">
         <div class="stats-column">
           <!-- Presence Section -->
           <div class="stats-section">
-            <h3 class="stats-title">Presence</h3>
+            <h3 class="stats-title">
+              Presence
+            </h3>
             <div class="stats-chips">
               <v-chip
                 class="stat-chip presence-chip"
@@ -146,7 +158,9 @@
 
           <!-- Absence Section -->
           <div class="stats-section">
-            <h3 class="stats-title">Absence</h3>
+            <h3 class="stats-title">
+              Absence
+            </h3>
             <div class="stats-chips">
               <v-chip
                 class="stat-chip absence-chip"
@@ -179,7 +193,9 @@
         <div class="stats-column">
           <!-- Leaves Section -->
           <div class="stats-section">
-            <h3 class="stats-title">Leaves</h3>
+            <h3 class="stats-title">
+              Leaves
+            </h3>
             <div class="stats-chips">
               <v-chip
                 class="stat-chip leave-chip paid-leave"
@@ -210,7 +226,9 @@
 
           <!-- Overtime Section -->
           <div class="stats-section">
-            <h3 class="stats-title">Overtime</h3>
+            <h3 class="stats-title">
+              Overtime
+            </h3>
             <div class="stats-chips">
               <v-chip
                 class="stat-chip overtime-chip"
@@ -247,7 +265,7 @@
       v-if="showCalendarView"
       :month="selectedCalendarMonth"
       :year="selectedCalendarYear"
-      :attendanceData="selectedMonthAttendanceData"
+      :attendance-data="selectedMonthAttendanceData"
       :employee="userData"
     />
   </div>
