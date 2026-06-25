@@ -24,7 +24,7 @@
           class="flex items-center gap-2 rounded-xl bg-slate-900 dark:bg-white px-4 py-2 text-[10px] font-black text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors shadow-sm uppercase tracking-widest"
         >
           <Plus class="h-3.5 w-3.5" />
-          Add Manually
+          Add Manuallyy
         </button>
       </div>
     </div>
