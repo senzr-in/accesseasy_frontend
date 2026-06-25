@@ -696,8 +696,10 @@
             >
               <v-text-field
                 v-model="formData.ESIAccountNumber"
-                type="number"
+                type="text"
+                inputmode="numeric"
                 label="ESI Account Number"
+                @update:model-value="val => formData.ESIAccountNumber = (val || '').replace(/\D/g, '')"
                 variant="outlined"
                 density="comfortable"
               />

@@ -382,10 +382,30 @@ const editPortal   = () => router.push(`/dashboard/visitor-portals/builder/${por
 const openPortal   = () => window.open(portalUrl.value, '_blank');
 
 const copyUrl = async () => {
-  await navigator.clipboard.writeText(portalUrl.value);
-  copied.value = true;
-  messageHandler.showSuccess('Link copied to clipboard!');
-  setTimeout(() => { copied.value = false; }, 2000);
+  const textToCopy = portalUrl.value;
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(textToCopy);
+    } else {
+      const textArea = document.createElement("textarea");
+      textArea.value = textToCopy;
+      textArea.style.top = "0";
+      textArea.style.left = "0";
+      textArea.style.position = "fixed";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      const successful = document.execCommand("copy");
+      document.body.removeChild(textArea);
+      if (!successful) throw new Error("execCommand copy failed");
+    }
+    copied.value = true;
+    messageHandler.showSuccess('Link copied to clipboard!');
+    setTimeout(() => { copied.value = false; }, 2000);
+  } catch (err) {
+    console.error('Failed to copy link:', err);
+    messageHandler.showError('Failed to copy link to clipboard.');
+  }
 };
 
 const shareWhatsApp = () => {

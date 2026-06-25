@@ -177,7 +177,9 @@ const page = ref(1);
 const limit = 25;
 const totalItems = ref(0);
 
-const token = authService.getToken();
+let token = authService.getToken();
+let tenantId = currentUserTenant.getTenantId();
+let userRole = currentUserTenant.getRole();
 
 const totalPages = computed(() => Math.ceil(totalItems.value / limit));
 
@@ -346,7 +348,11 @@ const getValidLogsText = (valid) => {
    return "Unknown";
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await currentUserTenant.initialize();
+  token = authService.getToken();
+  tenantId = currentUserTenant.getTenantId();
+  userRole = currentUserTenant.getRole();
   fetchLogs();
 });
 </script>

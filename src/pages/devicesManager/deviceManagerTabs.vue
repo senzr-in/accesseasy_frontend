@@ -173,8 +173,8 @@
                     <Settings2 class="w-3.5 h-3.5" />
                   </button>
                   <button 
-                    title="Decommission Node"
                     @click="deleteDevice(device)"
+                    title="Decommission Node"
                     class="flex items-center justify-center p-0 h-7 w-7 rounded-md bg-transparent text-rose-600 hover:text-rose-700 hover:bg-rose-50 transition-colors border border-rose-200 dark:border-rose-900/50 dark:hover:bg-rose-900/20 shadow-sm"
                   >
                     <Trash2 class="w-3.5 h-3.5" />
@@ -213,6 +213,22 @@
       :start-with-scanner="startWithScanner"
       @success="fetchDeviceData"
     />
+
+    <!-- Delete Confirmation Dialog -->
+    <ConfirmDeleteModal
+      :show="showDeleteDialog"
+      title="Delete Device"
+      confirmMessage="Are you sure you want to delete this device?"
+      itemLabel="Device Name"
+      :itemName="deviceToDelete?.controllerName || 'Unnamed Device'"
+      description="This action cannot be undone."
+      cancelText="Cancel"
+      confirmText="Delete"
+      deletingText="Deleting..."
+      :deleting="deleting"
+      @close="closeDeleteDialog"
+      @confirm="confirmDeleteDevice"
+    />
     </div>
   </div>
 </template>
@@ -223,6 +239,7 @@ import { Zap, Network, Plus, Search, Loader2, Cpu, CheckCircle2, Clock, ShieldCh
 import { authService } from "@/services/authService";
 import { currentUserTenant } from "@/utils/currentUserTenant";
 import DeviceRegistrationDialog from "./deviceRegistrationDialog.vue";
+import ConfirmDeleteModal from "@/components/common/modals/ConfirmDeleteModal.vue";
 
 // Accessors
 const token = authService.getToken();
@@ -376,20 +393,34 @@ const approveDevice = async (device) => {
   }
 };
 
-const deleteDevice = async (device) => {
-  if (!token) return;
-  const confirmed = window.confirm(`Are you sure you want to decommission the device: ${device.controllerName || device.sn}?`);
-  if (!confirmed) return;
-  
+// Delete Device flow
+const showDeleteDialog = ref(false);
+const deviceToDelete = ref(null);
+const deleting = ref(false);
+
+const deleteDevice = (device) => {
+  deviceToDelete.value = device;
+  showDeleteDialog.value = true;
+};
+
+const closeDeleteDialog = () => {
+  showDeleteDialog.value = false;
+  deviceToDelete.value = null;
+};
+
+const confirmDeleteDevice = async () => {
+  if (!deviceToDelete.value) return;
+  deleting.value = true;
   try {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/controllers/${device.id}`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/controllers/${deviceToDelete.value.id}`, {
       method: "DELETE",
-      headers: { 
-        Authorization: `Bearer ${token}` 
+      headers: {
+        Authorization: `Bearer ${token}`
       }
     });
     if (res.ok) {
       await fetchDeviceData();
+      closeDeleteDialog();
     } else {
       console.error("Failed to delete device");
       alert("Failed to delete device. It may be locked or linked to active doors.");
@@ -397,6 +428,8 @@ const deleteDevice = async (device) => {
   } catch (err) {
     console.error(err);
     alert("Error communicating with server.");
+  } finally {
+    deleting.value = false;
   }
 };
 

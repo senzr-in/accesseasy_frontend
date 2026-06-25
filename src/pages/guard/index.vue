@@ -247,12 +247,7 @@
             <div class="grid grid-cols-2 gap-4">
               <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-slate-500 dark:text-zinc-400 uppercase tracking-widest">Phone</label>
-                <input
-                  v-model="form.phone"
-                  type="tel"
-                  placeholder="+1 (555) 000-0000"
-                  class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all text-foreground shadow-sm focus:border-indigo-500"
-                >
+                <input v-model="form.phone" @input="form.phone = $event.target.value.replace(/\D/g, '')" type="text" inputmode="numeric" maxlength="10" placeholder="10-digit phone number" class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all text-foreground shadow-sm focus:border-indigo-500" />
               </div>
 
               <div class="space-y-1.5">
@@ -389,7 +384,7 @@ const editGuard = async (guard) => {
     first_name: guard.first_name || '',
     last_name: guard.last_name || '',
     email: guard.email || '',
-    phone: guard.phone || '',
+    phone: (guard.phone || '').replace(/^\+91/, ''),
     password: '',
     assigned_door: null,
   };
@@ -427,20 +422,32 @@ const fetchGuards = async () => {
       await fetchGuardRoleId();
     }
 
-    let filterString = `filter[_and][0][userApp][_eq]=accesseasy&filter[_and][1][tenant][tenantId][_eq]=${tenantId}`;
+    let filterString = `filter[_and][0][tenant][tenantId][_eq]=${tenantId}`;
     if (guardRoleId.value) {
-      filterString += `&filter[_and][2][roleConfig][_eq]=${guardRoleId.value}`;
+      filterString += `&filter[_and][1][accesseasyRole][_eq]=${guardRoleId.value}`;
     } else {
-      filterString += `&filter[_and][2][roleConfig][roleName][_contains]=guard`;
+      filterString += `&filter[_and][1][accesseasyRole][roleName][_contains]=guard`;
     }
 
     const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/users?${filterString}&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=email&fields[]=phone&fields[]=status&fields[]=title&fields[]=roleConfig.*`,
+      `${import.meta.env.VITE_API_URL}/users?${filterString}&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=email&fields[]=phone&fields[]=status&fields[]=title&fields[]=accesseasyRole.*&fields[]=tenant.userApp`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     if (res.ok) {
       const data = await res.json();
-      items.value = data.data || [];
+      const allUsers = data.data || [];
+      items.value = allUsers.filter(u => {
+        if (!u.tenant) return false;
+        let userApps = u.tenant.userApp || [];
+        if (typeof userApps === "string") {
+          try {
+            userApps = JSON.parse(userApps);
+          } catch (e) {
+            userApps = [];
+          }
+        }
+        return Array.isArray(userApps) && userApps.some(app => app.userApp === "accesseasy");
+      });
     }
   } catch (err) {
     console.error('Failed to fetch guards:', err);
@@ -475,6 +482,10 @@ const handleSubmit = async () => {
     dialogError.value = 'Email is required.';
     return;
   }
+  if (form.value.phone && !/^\d{10}$/.test(form.value.phone)) {
+    dialogError.value = 'Phone number must be exactly 10 digits.';
+    return;
+  }
   if (!editingGuard.value && !form.value.password.trim()) {
     dialogError.value = 'Password is required for new guards.';
     return;
@@ -498,9 +509,9 @@ const handleSubmit = async () => {
       first_name: form.value.first_name,
       last_name: form.value.last_name,
       email: form.value.email,
-      phone: form.value.phone || null,
+      phone: form.value.phone ? `+91${form.value.phone}` : null,
       userApp: 'accesseasy',
-      roleConfig: guardRoleId.value || null,
+      accesseasyRole: guardRoleId.value || null,
       tenant: tenantId,
     };
 
@@ -540,7 +551,7 @@ const handleSubmit = async () => {
           firstName: form.value.first_name,
           lastName: form.value.last_name || '-',
           personalEmail: form.value.email,
-          personalPhone: form.value.phone || null,
+          personalPhone: form.value.phone ? `+91${form.value.phone}` : null,
           designation: 'Guard',
           status: 'true',
           accessOn: true,
@@ -570,7 +581,7 @@ const handleSubmit = async () => {
             firstName: form.value.first_name,
             lastName: form.value.last_name || '-',
             personalEmail: form.value.email,
-            personalPhone: form.value.phone || null,
+            personalPhone: form.value.phone ? `+91${form.value.phone}` : null,
             assigned_door: form.value.assigned_door
         };
         await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule/${editingGuard.value.personalModuleId}`, {

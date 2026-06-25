@@ -4,6 +4,8 @@ import Cookies from "js-cookie";
 
 class AuthService {
   constructor() {
+    this.logoutListeners = [];
+
     this.api = axios.create({
       baseURL: import.meta.env.VITE_API_URL,
       headers: {
@@ -74,7 +76,189 @@ class AuthService {
       },
     );
 
+    if (typeof window !== "undefined") {
+      this.authChannel = new BroadcastChannel("accesseasy_auth_channel");
+      this.authChannel.onmessage = (event) => {
+        if (event.data?.type === "NEW_LOGIN") {
+          const currentUserId = this.getUserId();
+          if (currentUserId && event.data.userId === currentUserId) {
+            console.warn("[AuthService] Concurrent login detected on another tab. Invalidating session.");
+            this.handleConcurrentLogin();
+          }
+        }
+      };
+    }
+
     this.initInactivityTracking();
+  }
+
+  onSuccessfulLogin(userId) {
+    if (this.authChannel && userId) {
+      this.authChannel.postMessage({
+        type: "NEW_LOGIN",
+        userId: userId,
+      });
+    }
+  }
+
+  handleConcurrentLogin() {
+    this.softLogout();
+
+    if (typeof window !== "undefined") {
+      // ── Inject keyframe animation once ──────────────────────────────────
+      if (!document.getElementById("session-modal-styles")) {
+        const styleEl = document.createElement("style");
+        styleEl.id = "session-modal-styles";
+        styleEl.textContent = `
+          @keyframes session-modal-in {
+            from { opacity: 0; transform: scale(0.92) translateY(12px); }
+            to   { opacity: 1; transform: scale(1)   translateY(0); }
+          }
+          @keyframes session-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.45); }
+            50%       { box-shadow: 0 0 0 14px rgba(239,68,68,0); }
+          }
+        `;
+        document.head.appendChild(styleEl);
+      }
+
+      // Remove any existing concurrent/timeout overlays
+      const existingOverlays = document.querySelectorAll(".session-concurrent-modal-overlay, .session-timeout-modal-overlay");
+      existingOverlays.forEach(el => el.remove());
+
+      // ── Overlay ──────────────────────────────────────────────────────────
+      const modalOverlay = document.createElement("div");
+      modalOverlay.className = "session-concurrent-modal-overlay";
+      Object.assign(modalOverlay.style, {
+        position:        "fixed",
+        inset:           "0",
+        width:           "100%",
+        height:          "100%",
+        backgroundColor: "rgba(0,0,0,0.65)",
+        backdropFilter:  "blur(6px)",
+        WebkitBackdropFilter: "blur(6px)",
+        display:         "flex",
+        alignItems:      "center",
+        justifyContent:  "center",
+        zIndex:          "9999",
+        padding:         "16px",
+      });
+
+      // ── Card ─────────────────────────────────────────────────────────────
+      const modalContent = document.createElement("div");
+      Object.assign(modalContent.style, {
+        background:    "linear-gradient(145deg, #18181b, #09090b)",
+        border:        "1px solid rgba(63,63,70,0.8)",
+        borderRadius:  "20px",
+        padding:       "36px 32px",
+        width:         "100%",
+        maxWidth:      "400px",
+        textAlign:     "center",
+        boxShadow:     "0 25px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04) inset",
+        animation:     "session-modal-in 0.28s cubic-bezier(0.34,1.56,0.64,1) forwards",
+      });
+
+      // ── Icon ring ────────────────────────────────────────────────────────
+      const iconRing = document.createElement("div");
+      Object.assign(iconRing.style, {
+        width:           "72px",
+        height:          "72px",
+        borderRadius:    "50%",
+        background:      "linear-gradient(135deg, #ef4444, #b91c1c)",
+        display:         "flex",
+        alignItems:      "center",
+        justifyContent:  "center",
+        margin:          "0 auto 24px",
+        animation:       "session-pulse 2s infinite",
+        flexShrink:      "0",
+      });
+      iconRing.innerHTML = `
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
+             stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>`;
+
+      // ── Badge ────────────────────────────────────────────────────────────
+      const badge = document.createElement("span");
+      Object.assign(badge.style, {
+        display:       "inline-block",
+        padding:       "3px 10px",
+        borderRadius:  "999px",
+        fontSize:      "10px",
+        fontWeight:    "800",
+        letterSpacing: "0.1em",
+        textTransform: "uppercase",
+        background:    "rgba(239,68,68,0.12)",
+        color:         "#f87171",
+        border:        "1px solid rgba(239,68,68,0.25)",
+        marginBottom:  "12px",
+      });
+      badge.textContent = "Concurrent Login";
+
+      // ── Heading ──────────────────────────────────────────────────────────
+      const heading = document.createElement("h3");
+      Object.assign(heading.style, {
+        fontSize:     "22px",
+        fontWeight:   "900",
+        color:        "#fafafa",
+        marginBottom: "8px",
+        letterSpacing: "-0.02em",
+        lineHeight:   "1.2",
+        fontFamily:   "inherit",
+      });
+      heading.textContent = "Session Invalidated";
+
+      // ── Message ──────────────────────────────────────────────────────────
+      const message = document.createElement("p");
+      Object.assign(message.style, {
+        fontSize:     "14px",
+        color:        "#a1a1aa",
+        marginBottom: "28px",
+        lineHeight:   "1.6",
+        fontFamily:   "inherit",
+      });
+      message.textContent = "You have been logged out because a new login was detected in another tab.";
+
+      // ── Button ───────────────────────────────────────────────────────────
+      const okButton = document.createElement("button");
+      Object.assign(okButton.style, {
+        display:        "flex",
+        alignItems:     "center",
+        justifyContent: "center",
+        gap:            "8px",
+        width:          "100%",
+        padding:        "12px 24px",
+        background:     "linear-gradient(135deg, #ef4444, #b91c1c)",
+        color:          "white",
+        border:         "none",
+        borderRadius:   "12px",
+        fontSize:       "13px",
+        fontWeight:     "800",
+        letterSpacing:  "0.06em",
+        textTransform:  "uppercase",
+        cursor:         "pointer",
+        transition:     "opacity 0.2s, transform 0.15s",
+        boxShadow:      "0 4px 20px rgba(239,68,68,0.35)",
+        fontFamily:     "inherit",
+      });
+      okButton.textContent = "Sign In Again";
+      okButton.onmouseenter = () => { okButton.style.opacity = "0.88"; okButton.style.transform = "scale(0.98)"; };
+      okButton.onmouseleave = () => { okButton.style.opacity = "1";    okButton.style.transform = "scale(1)"; };
+      okButton.onclick = () => {
+        document.body.removeChild(modalOverlay);
+        window.location.href = "/login";
+      };
+
+      // ── Assemble ─────────────────────────────────────────────────────────
+      modalContent.appendChild(iconRing);
+      modalContent.appendChild(badge);
+      modalContent.appendChild(heading);
+      modalContent.appendChild(message);
+      modalContent.appendChild(okButton);
+      modalOverlay.appendChild(modalContent);
+      document.body.appendChild(modalOverlay);
+    }
   }
 
   setToken(token) {
@@ -134,7 +318,6 @@ class AuthService {
   setUserData(userData) {
     if (userData) {
       localStorage.setItem("userData", JSON.stringify(userData));
-
       const tid = userData?.tenant?.tenantId || userData?.tenant?.id;
       const uid = userData?.id;
       const appName = userData?.userApp || "accesseasy";
@@ -168,17 +351,42 @@ class AuthService {
 
   getUserRole() {
     const userData = this.getUserData();
-    let role = userData?.role?.name || "";
-    // Dynamically identify Guard sub-role via roleConfig roleName (or title for backwards compatibility)
+    // Check accesseasyRole first (Directus field), then roleConfig (Knative auth-service response field)
+    const roleConfigName = userData?.accesseasyRole?.roleName || userData?.roleConfig?.roleName || "";
+    let role = "";
+
+    if (roleConfigName) {
+      const lowercaseName = roleConfigName.toLowerCase();
+      if (lowercaseName.includes("admin")) {
+        role = "Admin";
+      } else if (lowercaseName.includes("guard") || lowercaseName.includes("security")) {
+        role = "Guard";
+      } else if (lowercaseName.includes("employee")) {
+        role = "Employee";
+      } else if (lowercaseName.includes("manager")) {
+        role = "Manager";
+      } else {
+        // Fallback to capitalizing the role name if it doesn't match standard keywords
+        role = roleConfigName.charAt(0).toUpperCase() + roleConfigName.slice(1);
+      }
+    }
+
+    // Fallback to userData.role.name if no role config name is set or mapped
+    if (!role) {
+      role = userData?.role?.name || "";
+    }
+
+    // Additional backward compatibility checks for Title if role is "Employee"
     if (role === 'Employee') {
-      const isGuardRoleConfig = userData?.roleConfig?.roleName?.toLowerCase().includes('guard');
       const isGuardTitle = userData?.title?.toLowerCase() === 'guard' || userData?.title?.toLowerCase() === 'security';
-      if (isGuardRoleConfig || isGuardTitle) {
+      if (isGuardTitle) {
         role = 'Guard';
       }
     }
+
     return role;
   }
+
 
   getUserId() {
     const userData = this.getUserData();
@@ -194,27 +402,59 @@ class AuthService {
     return !!(this.getToken() && (this.getPhone() || this.getEmail()));
   }
 
+  registerLogoutListener(cb) {
+    if (typeof cb === "function") {
+      this.logoutListeners.push(cb);
+    }
+  }
+
+  triggerLogoutListeners() {
+    this.logoutListeners.forEach((cb) => {
+      try {
+        cb();
+      } catch (e) {
+        console.error("Error in logout listener:", e);
+      }
+    });
+  }
+
   logout() {
     Cookies.remove("userToken");
-    localStorage.removeItem("userToken");
-    localStorage.removeItem("userPhone");
-    localStorage.removeItem("email");
-    localStorage.removeItem("sessionUuid");
-    localStorage.removeItem("pinVerifiedInSession");
-    localStorage.removeItem("userData");
-    localStorage.removeItem("tenantData");
+    
+    // Clear all localStorage keys except the theme preference
+    const theme = localStorage.getItem("ae_theme");
+    localStorage.clear();
+    if (theme) {
+      localStorage.setItem("ae_theme", theme);
+    }
+
+    // Clear sessionStorage
+    sessionStorage.clear();
+
     delete this.protectedApi.defaults.headers.common["Authorization"];
+    
+    this.triggerLogoutListeners();
+
     window.location.href = "/login";
   }
 
   // Clears auth state without redirecting (used by router guard before it redirects)
   softLogout() {
     Cookies.remove("userToken");
-    localStorage.removeItem("userToken");
-    localStorage.removeItem("pinVerifiedInSession");
-    localStorage.removeItem("userData");
-    localStorage.removeItem("tenantData");
+    
+    // Clear all localStorage keys except the theme preference
+    const theme = localStorage.getItem("ae_theme");
+    localStorage.clear();
+    if (theme) {
+      localStorage.setItem("ae_theme", theme);
+    }
+
+    // Clear sessionStorage
+    sessionStorage.clear();
+
     delete this.protectedApi.defaults.headers.common["Authorization"];
+    
+    this.triggerLogoutListeners();
   }
 
   // Validates token against the server — returns true if valid, false if expired/invalid
@@ -224,6 +464,7 @@ class AuthService {
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/users/me?fields=id`, {
         headers: { Authorization: `Bearer ${token}` },
+        credentials: "omit",
       });
       if (res.status === 401 || res.status === 403) {
         return false;
@@ -374,12 +615,14 @@ class AuthService {
 
       const { token, userData } = response.data;
       if (token) {
+        this.softLogout();
         this.setToken(token);
         this.setPhone(phone);
         localStorage.removeItem("sessionUuid");
         this.clearOtpMeta();
         if (userData) {
           this.setUserData(userData);
+          this.onSuccessfulLogin(userData.id);
         }
       }
       return response.data;
@@ -432,7 +675,6 @@ class AuthService {
             );
           }
         }
-
         this.setUserData(userData);
         return userData;
       }
@@ -571,7 +813,6 @@ class AuthService {
             );
           }
         }
-
         this.setUserData(userData);
         return userData;
       }
@@ -600,18 +841,26 @@ class AuthService {
         throw new Error("Authentication failed: No token returned from flow");
       }
 
+      this.softLogout();
       this.setToken(response.data.token);
       this.setEmail(email);
 
+      let uData = null;
       if (response.data.userData) {
-        this.setUserData(response.data.userData);
+        uData = response.data.userData;
+        this.setUserData(uData);
       } else {
         try {
           const userData = await this.getUserByEmail(email);
           this.setUserData(userData);
+          uData = userData;
         } catch (e) {
           console.warn("Could not fetch full user data after session login:", e);
         }
+      }
+
+      if (uData) {
+        this.onSuccessfulLogin(uData.id);
       }
 
       return response.data;
@@ -645,12 +894,14 @@ class AuthService {
 
       const { token, userData } = response.data;
       if (token) {
+        this.softLogout();
         this.setToken(token);
         this.setEmail(email);
         localStorage.removeItem("emailSessionUuid");
         this.clearOtpMeta();
         if (userData) {
           this.setUserData(userData);
+          this.onSuccessfulLogin(userData.id);
         }
       }
       return response.data;

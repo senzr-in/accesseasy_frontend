@@ -23,6 +23,9 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 5173,
       host: "0.0.0.0", // Required for Docker/Cloud Run
+      watch: {
+        usePolling: true,
+      },
     },
     preview: {
       port: 8080,

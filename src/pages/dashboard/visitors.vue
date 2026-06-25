@@ -11,6 +11,43 @@
         </p>
       </div>
       <div class="flex gap-3">
+        <!-- Export Dropdown -->
+        <div class="relative group">
+          <button
+            class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-slate-200 text-sm font-bold shadow-sm transition-all hover:bg-slate-50 dark:hover:bg-zinc-800 active:scale-95"
+          >
+            <FileDown class="w-4 h-4" />
+            Export Data
+          </button>
+          <div class="absolute right-0 mt-2 w-48 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl shadow-lg py-1 z-50 hidden group-hover:block">
+            <button
+              class="w-full text-left px-4 py-2 text-xs font-bold text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors"
+              @click="exportVisitorsExcel"
+            >
+              Export Visitors (Excel)
+            </button>
+            <button
+              class="w-full text-left px-4 py-2 text-xs font-bold text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors"
+              @click="exportVisitorsCSV"
+            >
+              Export Visitors (CSV)
+            </button>
+            <div class="border-t border-slate-100 dark:border-zinc-900 my-1" />
+            <button
+              class="w-full text-left px-4 py-2 text-xs font-bold text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors"
+              @click="exportLogsExcel"
+            >
+              Export Logs (Excel)
+            </button>
+            <button
+              class="w-full text-left px-4 py-2 text-xs font-bold text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors"
+              @click="exportLogsCSV"
+            >
+              Export Logs (CSV)
+            </button>
+          </div>
+        </div>
+
         <button
           class="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold shadow-lg shadow-indigo-500/20 transition-all active:scale-95"
           @click="$router.push('/dashboard/visitor-portals')"
@@ -265,8 +302,9 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { Layout, Users, ShieldCheck, Activity, Clock } from 'lucide-vue-next';
+import { Layout, Users, ShieldCheck, Activity, Clock, FileDown } from 'lucide-vue-next';
 import { format } from 'date-fns';
+import ExcelJS from 'exceljs';
 import { authService } from '@/services/authService';
 import { currentUserTenant } from '@/utils/currentUserTenant';
 
@@ -309,6 +347,180 @@ const fetchData = async () => {
   } finally {
     loading.value = false;
   }
+};
+
+const fetchAllVisitorsForExport = async () => {
+  const tenantId = currentUserTenant.getTenantId();
+  const token = authService.getToken();
+  if (!tenantId || !token) return [];
+
+  try {
+    const filter = { "filter[tenant][tenantId][_eq]": tenantId };
+    const params = new URLSearchParams({
+      limit: '-1',
+      sort: '-date_created',
+      fields: 'personName,email,mobileNumber,startDate,endDate,startTime,endTime,status,quantity,assignedAccessLevels.accessLevelName,date_created',
+      ...filter
+    });
+
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/visitor?${params.toString()}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (res.ok) {
+      const result = await res.json();
+      return result.data || [];
+    }
+  } catch (error) {
+    console.error("Failed to fetch visitors for export", error);
+  }
+  return [];
+};
+
+const exportVisitorsExcel = async () => {
+  const exportItems = await fetchAllVisitorsForExport();
+  if (exportItems.length === 0) {
+    alert("No visitor data to export");
+    return;
+  }
+
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("Visitors");
+
+  worksheet.columns = [
+    { header: "Name", key: "personName", width: 25 },
+    { header: "Email", key: "email", width: 25 },
+    { header: "Mobile Number", key: "mobileNumber", width: 15 },
+    { header: "Start Date", key: "startDate", width: 12 },
+    { header: "End Date", key: "endDate", width: 12 },
+    { header: "Start Time", key: "startTime", width: 10 },
+    { header: "End Time", key: "endTime", width: 10 },
+    { header: "Access Level", key: "accessLevelName", width: 25 },
+    { header: "Quantity", key: "quantity", width: 10 },
+    { header: "Status", key: "status", width: 12 }
+  ];
+
+  exportItems.forEach(item => {
+    worksheet.addRow({
+      personName: item.personName,
+      email: item.email || "",
+      mobileNumber: item.mobileNumber || "",
+      startDate: item.startDate,
+      endDate: item.endDate,
+      startTime: item.startTime,
+      endTime: item.endTime,
+      accessLevelName: item.assignedAccessLevels?.accessLevelName || "N/A",
+      quantity: item.quantity,
+      status: item.status
+    });
+  });
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `Visitors_${new Date().toISOString().split('T')[0]}.xlsx`;
+  link.click();
+};
+
+const exportVisitorsCSV = async () => {
+  const exportItems = await fetchAllVisitorsForExport();
+  if (exportItems.length === 0) {
+    alert("No visitor data to export");
+    return;
+  }
+
+  const headers = ["Name", "Email", "Mobile Number", "Start Date", "End Date", "Start Time", "End Time", "Access Level", "Quantity", "Status"];
+  const rows = exportItems.map(item => [
+    `"${(item.personName || '').replace(/"/g, '""')}"`,
+    `"${(item.email || '').replace(/"/g, '""')}"`,
+    `"${(item.mobileNumber || '').replace(/"/g, '""')}"`,
+    item.startDate,
+    item.endDate,
+    item.startTime,
+    item.endTime,
+    `"${(item.assignedAccessLevels?.accessLevelName || 'N/A').replace(/"/g, '""')}"`,
+    item.quantity,
+    item.status
+  ]);
+
+  const csvContent = [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `Visitors_${new Date().toISOString().split('T')[0]}.csv`;
+  link.click();
+};
+
+const exportLogsExcel = async () => {
+  if (recentLogs.value.length === 0) {
+    alert("No log data to export");
+    return;
+  }
+
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("Visitor Logs");
+
+  worksheet.columns = [
+    { header: "Visitor", key: "name", width: 25 },
+    { header: "Mode", key: "mode", width: 15 },
+    { header: "Door", key: "door", width: 20 },
+    { header: "Authorized By", key: "authorizedBy", width: 25 },
+    { header: "Time", key: "time", width: 20 },
+    { header: "Status", key: "status", width: 12 }
+  ];
+
+  recentLogs.value.forEach(log => {
+    const authBy = log.user_created ? `${log.user_created.first_name} ${log.user_created.last_name || ''}` : "System / Auto";
+    const status = (log.ValidLogs === 'authorized' || log.ValidLogs === true) ? "Authorized" : "Denied";
+    const timeFormatted = log.date_created ? format(new Date(log.date_created), 'yyyy-MM-dd hh:mm a') : "—";
+    
+    worksheet.addRow({
+      name: log.name || "Unknown Visitor",
+      mode: log.mode === 'throughApp' ? 'App Scan' : (log.mode || 'Portal Scan'),
+      door: log.door?.doorName || log.door?.doorNumber || '-',
+      authorizedBy: authBy,
+      time: timeFormatted,
+      status: status
+    });
+  });
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `Visitor_Logs_${new Date().toISOString().split('T')[0]}.xlsx`;
+  link.click();
+};
+
+const exportLogsCSV = async () => {
+  if (recentLogs.value.length === 0) {
+    alert("No log data to export");
+    return;
+  }
+
+  const headers = ["Visitor", "Mode", "Door", "Authorized By", "Time", "Status"];
+  const rows = recentLogs.value.map(log => {
+    const authBy = log.user_created ? `${log.user_created.first_name} ${log.user_created.last_name || ''}` : "System / Auto";
+    const status = (log.ValidLogs === 'authorized' || log.ValidLogs === true) ? "Authorized" : "Denied";
+    const timeFormatted = log.date_created ? format(new Date(log.date_created), 'yyyy-MM-dd hh:mm a') : "—";
+
+    return [
+      `"${(log.name || 'Unknown Visitor').replace(/"/g, '""')}"`,
+      `"${(log.mode === 'throughApp' ? 'App Scan' : (log.mode || 'Portal Scan')).replace(/"/g, '""')}"`,
+      `"${(log.door?.doorName || log.door?.doorNumber || '-').replace(/"/g, '""')}"`,
+      `"${authBy.replace(/"/g, '""')}"`,
+      `"${timeFormatted}"`,
+      status
+    ];
+  });
+
+  const csvContent = [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `Visitor_Logs_${new Date().toISOString().split('T')[0]}.csv`;
+  link.click();
 };
 
 onMounted(() => {

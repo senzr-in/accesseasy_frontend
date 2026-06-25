@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-slate-50 dark:bg-slate-950 p-6">
+  <div class="h-full overflow-y-auto custom-scrollbar bg-slate-50 dark:bg-slate-950 p-6">
     <!-- ── PAGE HEADER ── -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
       <div class="flex items-center gap-4">
@@ -220,7 +220,6 @@
               {{ emailAccounts.length === 0 ? 'Sign in with Google' : 'Add another account' }}
             </button>
           </div>
-
           <!-- Recipients -->
           <div>
             <label class="cfg-label"><Users class="w-3 h-3" /> Recipients</label>
@@ -511,7 +510,7 @@ const EmailTagInput = defineComponent({
     const onKey = (e) => { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTag(); } };
     return () => h('div', { class: 'space-y-1' }, [
       props.modelValue.length > 0 && h('div', { class: 'flex flex-wrap gap-1' },
-        props.modelValue.map(t => h('span', { key: t, class: 'inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold' }, [
+        props.modelValue.map(t => h('span', { key: t, class: 'inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 text-blue-700 dark:text-blue-300 text-xs font-semibold' }, [
           t,
           h('button', { onClick: () => removeTag(t), class: 'text-blue-400 hover:text-blue-700 leading-none ml-1' }, '×'),
         ]))
@@ -840,7 +839,7 @@ onUnmounted(() => {
 :global(.dark) .cfg-label {
   color: #94a3b8;
 }
-.field-input {
+:global(.field-input) {
   width: 100%;
   padding: 8px 12px;
   font-size: 0.875rem;
@@ -851,11 +850,11 @@ onUnmounted(() => {
   outline: none;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
-.field-input:focus {
+:global(.field-input:focus) {
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
 }
-:global(.dark) .field-input {
+:global(.dark .field-input) {
   border-color: #334155;
   background: #0f172a;
   color: #f1f5f9;

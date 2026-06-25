@@ -126,7 +126,9 @@
               <div class="relative group">
                 <input
                   v-model="mobileNumber"
-                  type="tel"
+                  @input="mobileNumber = $event.target.value.replace(/\D/g, '')"
+                  type="text"
+                  inputmode="numeric"
                   required
                   placeholder="10-digit number"
                   maxlength="10"

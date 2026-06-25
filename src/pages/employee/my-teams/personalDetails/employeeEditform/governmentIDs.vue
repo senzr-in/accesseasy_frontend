@@ -521,12 +521,18 @@
                   <v-text-field
                     v-model="employeeData.assignedUser.accountNumber"
                     label="Bank Account Number"
+                    type="text"
+                    inputmode="numeric"
                     variant="outlined"
                     density="comfortable"
                     placeholder="Enter bank account number"
                     class="flex-grow-1 mr-2"
                     @update:model-value="
-                      (val) => handleInputChange('accountNumber', val)
+                      (val) => {
+                        const clean = (val || '').replace(/\D/g, '');
+                        employeeData.assignedUser.accountNumber = clean;
+                        handleInputChange('accountNumber', clean);
+                      }
                     "
                   />
                   <v-text-field
@@ -658,13 +664,19 @@
                       v-model="employeeData.assignedUser.ESIAccountNumber"
                       label="ESIC Number"
                       type="text"
+                      inputmode="numeric"
+                      maxlength="17"
                       :rules="[rules.esicFormat]"
                       variant="outlined"
                       density="comfortable"
                       placeholder="Enter ESIC number"
                       class="flex-grow-1"
                       @update:model-value="
-                        (val) => handleInputChange('ESIAccountNumber', val)
+                        (val) => {
+                          const clean = (val || '').replace(/\D/g, '');
+                          employeeData.assignedUser.ESIAccountNumber = clean;
+                          handleInputChange('ESIAccountNumber', clean);
+                        }
                       "
                     />
                     <v-btn
@@ -1564,6 +1576,7 @@ const rules = {
     /^[A-Z]{5}[0-9]{4}[A-Z]$/.test(v.trim().toUpperCase()) ||
     "Invalid PAN format",
   aadharFormat: (v) => !v || /^\d{12}$/.test(v) || "Invalid Aadhar format",
+  esicFormat: (v) => !v || /^\d{17}$/.test(v) || "ESIC number must be 17 digits",
 };
 
 const digilockerURL = ref("");

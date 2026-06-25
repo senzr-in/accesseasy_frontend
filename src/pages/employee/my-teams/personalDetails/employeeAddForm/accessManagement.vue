@@ -338,7 +338,7 @@
                 v-model="cardInput"
                 label="Swipe card to enter"
                 variant="outlined"
-                type="number"
+                type="text"
                 density="comfortable"
                 maxlength="10"
                 minlength="10"
@@ -580,8 +580,11 @@ const forceToggleUpdate = () => {
 };
 
 const handleCardInput = (event) => {
-  if (cardInput.value.length > 10) {
-    cardInput.value = cardInput.value.slice(0, 10);
+  if (cardInput.value) {
+    cardInput.value = cardInput.value.toString().replace(/\D/g, "");
+    if (cardInput.value.length > 10) {
+      cardInput.value = cardInput.value.slice(0, 10);
+    }
   }
 };
 
@@ -637,6 +640,12 @@ const checkCardExistsInDatabase = async (cardNumber) => {
 
 const addNewCard = async () => {
   if (!cardInput.value || !formData.value.accessOn) return;
+
+  // Check RFID Card format
+  if (!/^\d{10}$/.test(cardInput.value)) {
+    showError("RFID Card number must be exactly 10 digits.");
+    return;
+  }
 
   // Check if card already exists in database
   const cardExists = await checkCardExistsInDatabase(cardInput.value);

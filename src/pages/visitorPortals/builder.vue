@@ -511,8 +511,27 @@ const copyToClipboard = (text) => {
     messageHandler.showError('Save the portal first to generate a shareable link.');
     return;
   }
-  navigator.clipboard.writeText(text);
-  messageHandler.showSuccess('URL copied to clipboard!');
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text);
+    } else {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      textArea.style.top = "0";
+      textArea.style.left = "0";
+      textArea.style.position = "fixed";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      const successful = document.execCommand("copy");
+      document.body.removeChild(textArea);
+      if (!successful) throw new Error("execCommand copy failed");
+    }
+    messageHandler.showSuccess('URL copied to clipboard!');
+  } catch (err) {
+    console.error('Failed to copy link:', err);
+    messageHandler.showError('Failed to copy link to clipboard.');
+  }
 };
 
 const shareWhatsApp = (url) => {

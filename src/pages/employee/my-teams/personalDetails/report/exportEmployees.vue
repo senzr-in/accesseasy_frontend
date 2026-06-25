@@ -1010,13 +1010,19 @@ const exportData = async () => {
   z-index: 1000;
 }
 .modal-content {
-  background: white;
+  background: white !important;
+  color: #1e293b !important;
   border-radius: 4px;
   width: 670px;
   max-height: 80vh;
   display: flex;
   flex-direction: column;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+.modal-content span,
+.modal-content label,
+.modal-content h3 {
+  color: #1e293b !important;
 }
 .modal-header {
   padding: 16px;
@@ -1071,7 +1077,7 @@ const exportData = async () => {
 .section-content {
   padding: 8px 12px;
   border-top: 1px solid #eee;
-  background: #f9f9f9;
+  background: #f8fafc !important;
 }
 .field {
   padding: 4px 0;

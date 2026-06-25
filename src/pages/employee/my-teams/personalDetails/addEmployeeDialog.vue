@@ -173,9 +173,12 @@
                 <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Personal Phone</label>
                 <input
                   v-model="formData.personalPhone"
-                  type="tel"
-                  placeholder="+1 234 567 890"
+                  type="text"
+                  inputmode="numeric"
+                  maxlength="10"
+                  placeholder="Enter 10-digit phone number"
                   class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground"
+                  @input="formData.personalPhone = formData.personalPhone.replace(/\D/g, '')"
                 >
               </div>
             </div>
@@ -261,6 +264,13 @@
                   <option value="suspended">
                     Suspended
                   </option>
+                </select>
+              </div>
+              <div class="space-y-1.5">
+                <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Role <span class="text-red-500">*</span></label>
+                <select v-model="formData.roleConfigId" required class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground">
+                  <option value="" disabled>Select Role</option>
+                  <option v-for="rc in roleConfigurators" :key="rc.id" :value="rc.id">{{ rc.roleName }}</option>
                 </select>
               </div>
             </div>
@@ -350,8 +360,10 @@
                 <input
                   v-model="formData.rfidCard"
                   type="text"
+                  maxlength="10"
                   placeholder="Enter RFID Card number..."
                   class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground"
+                  @input="formData.rfidCard = formData.rfidCard.replace(/\D/g, '')"
                 >
               </div>
               <div class="space-y-1.5 flex flex-col justify-end">
@@ -486,8 +498,8 @@ const emit = defineEmits(['update:modelValue', 'success']);
 
 const loading = ref(false);
 const errorMessage = ref('');
-const token = authService.getToken();
-const tenantId = currentUserTenant.getTenantId();
+let token = authService.getToken();
+let tenantId = currentUserTenant.getTenantId();
 
 const departments = ref([]);
 const branches = ref([]);
@@ -537,6 +549,7 @@ const formData = ref({
   branchId: '',
   groupId: '',
   status: 'active',
+  roleConfigId: '',
   rfidCard: '',
   accessOn: true,
   face: false,
@@ -547,7 +560,7 @@ const formData = ref({
 });
 
 // Load dropdowns when opened
-watch(() => props.modelValue, (isOpen) => {
+watch(() => props.modelValue, async (isOpen) => {
   if (isOpen) {
     errorMessage.value = '';
     if (props.employee) {
@@ -564,7 +577,7 @@ watch(() => props.modelValue, (isOpen) => {
         permanentAddress: props.employee.permanentAddress || '',
         communicationAddress: props.employee.communicationAddress || '',
         personalEmail: props.employee.personalEmail || '',
-        personalPhone: props.employee.personalPhone || props.employee.assignedUser?.phone || '',
+        personalPhone: (props.employee.personalPhone || props.employee.assignedUser?.phone || '').replace(/^\+91/, ''),
         employeeId: props.employee.employeeId || '',
         designation: props.employee.designation || '',
         dateOfJoining: props.employee.dateOfJoining ? props.employee.dateOfJoining.split('T')[0] : '',
@@ -572,6 +585,7 @@ watch(() => props.modelValue, (isOpen) => {
         branchId: props.employee.branch?.id || props.employee.branch || '',
         groupId: props.employee.assignedAccessLevel?.id || props.employee.assignedAccessLevel || props.employee.group?.id || props.employee.group || '',
         status: props.employee.status || 'active',
+        roleConfigId: props.employee.assignedUser?.accesseasyRole?.id || props.employee.assignedUser?.accesseasyRole || '',
         rfidCard: '',
         accessOn: props.employee.accessOn !== false,
         face: props.employee.face === true,
@@ -605,6 +619,7 @@ watch(() => props.modelValue, (isOpen) => {
         branchId: '',
         groupId: '',
         status: 'active',
+        roleConfigId: '',
         rfidCard: '',
         accessOn: true,
         face: false,
@@ -617,9 +632,14 @@ watch(() => props.modelValue, (isOpen) => {
       originalCardNumber.value = '';
     }
     
+    await currentUserTenant.initialize();
+    token = authService.getToken();
+    tenantId = currentUserTenant.getTenantId();
+    
     fetchDepartments();
     fetchBranches();
     fetchGroups();
+    fetchRoleConfigurators();
   }
 });
 
@@ -657,6 +677,19 @@ const fetchGroups = async () => {
   } catch (err) {}
 };
 
+const roleConfigurators = ref([]);
+const fetchRoleConfigurators = async () => {
+  try {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/roleConfigurator?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][_and][1][accessType][_eq]=accessEasy`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json();
+    roleConfigurators.value = data.data || [];
+  } catch (err) {
+    console.error("Error fetching role configurators:", err);
+  }
+};
+
 // Handle Employee Creation mapping strictly to test-web-1 action schema
 const handleSubmit = async () => {
   loading.value = true;
@@ -664,15 +697,25 @@ const handleSubmit = async () => {
     const isEdit = !!props.employee;
     let newUserId = null;
 
-    // Validate RFID Card uniqueness if entered
-    if (formData.value.rfidCard && formData.value.rfidCard !== originalCardNumber.value) {
-      const cardCheckRes = await fetch(`${import.meta.env.VITE_API_URL}/items/cardManagement?filter[rfidCard][_eq]=${formData.value.rfidCard}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (cardCheckRes.ok) {
-        const cardCheckData = await cardCheckRes.json();
-        if (cardCheckData.data?.length > 0) {
-          throw new Error(`RFID Card Number ${formData.value.rfidCard} is already assigned to another employee.`);
+    // Validate phone number format
+    if (formData.value.personalPhone && !/^\d{10}$/.test(formData.value.personalPhone)) {
+      throw new Error("Phone number must be exactly 10 digits.");
+    }
+
+    // Validate RFID Card format and uniqueness if entered
+    if (formData.value.rfidCard) {
+      if (!/^\d{10}$/.test(formData.value.rfidCard)) {
+        throw new Error("RFID Card number must be exactly 10 digits.");
+      }
+      if (formData.value.rfidCard !== originalCardNumber.value) {
+        const cardCheckRes = await fetch(`${import.meta.env.VITE_API_URL}/items/cardManagement?filter[rfidCard][_eq]=${formData.value.rfidCard}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (cardCheckRes.ok) {
+          const cardCheckData = await cardCheckRes.json();
+          if (cardCheckData.data?.length > 0) {
+            throw new Error(`RFID Card Number ${formData.value.rfidCard} is already assigned to another employee.`);
+          }
         }
       }
     }
@@ -696,7 +739,8 @@ const handleSubmit = async () => {
         tenant: tenantId,
         phone: formData.value.personalPhone ? `+91${formData.value.personalPhone}` : formData.value.personalEmail,
         userApp: "accesseasy",
-        appAccess: true
+        appAccess: true,
+        accesseasyRole: formData.value.roleConfigId || null
       };
 
       const userRes = await fetch(`${import.meta.env.VITE_API_URL}/users`, {
@@ -722,7 +766,8 @@ const handleSubmit = async () => {
                 first_name: formData.value.firstName,
                 last_name: formData.value.lastName || '-',
                 phone: formData.value.personalPhone ? `+91${formData.value.personalPhone}` : null,
-                email: formData.value.email
+                email: formData.value.email,
+                accesseasyRole: formData.value.roleConfigId || null
              };
              const patchRes = await fetch(`${import.meta.env.VITE_API_URL}/users/${props.employee.assignedUser.id}`, {
                 method: 'PATCH',
