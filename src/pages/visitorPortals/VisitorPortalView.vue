@@ -1,13 +1,5 @@
 <template>
-<<<<<<< HEAD
-  <div
-    class="vp-root"
-    :style="cssVars"
-  >
-=======
   <div class="vp-root" :class="themeClass" :style="cssVars">
-
->>>>>>> 93bea48b930ded0358b88cd4b15bd38dedad09b5
     <!-- ── Loading ── -->
     <div
       v-if="loading"
