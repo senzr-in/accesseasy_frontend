@@ -14,6 +14,22 @@
         >
       </div>
 
+      <!-- Export Dropdown -->
+      <div class="relative group">
+        <button
+          class="flex items-center gap-2 h-10 px-4 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-slate-200 text-[11px] font-black uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-zinc-800 transition-all active:scale-95 shadow-sm shrink-0"
+        >
+          <FileDown class="w-4 h-4" /> Export
+        </button>
+        <div class="absolute right-0 mt-2 w-40 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl shadow-lg py-1 z-50 hidden group-hover:block">
+          <button @click="exportVisitorsExcel" class="w-full text-left px-4 py-2 text-xs font-bold text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors">
+            Export Excel
+          </button>
+          <button @click="exportVisitorsCSV" class="w-full text-left px-4 py-2 text-xs font-bold text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors">
+            Export CSV
+          </button>
+        </div>
+      </div>
       <!-- Hide Pre-Register Visitor Action (commented out for future use if needed) -->
       <!--
       <button
@@ -207,12 +223,7 @@
           <div class="grid grid-cols-2 gap-4">
             <div class="space-y-1.5">
               <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Mobile Number <span class="text-rose-500">*</span></label>
-              <input
-                v-model="form.mobileNumber"
-                type="tel"
-                placeholder="+12345678"
-                class="w-full h-10 px-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:border-indigo-500 transition-all text-slate-900 dark:text-white"
-              >
+              <input v-model="form.mobileNumber" @input="form.mobileNumber = $event.target.value.replace(/\D/g, '')" type="text" inputmode="numeric" maxlength="10" placeholder="10-digit number" class="w-full h-10 px-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:border-indigo-500 transition-all text-slate-900 dark:text-white" />
             </div>
             <div class="space-y-1.5">
               <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Email</label>
@@ -315,8 +326,9 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
 import { 
-  Users, Search, UserPlus, Loader2, Briefcase, UserCheck, X 
+  Users, Search, UserPlus, Loader2, Briefcase, UserCheck, X, FileDown 
 } from 'lucide-vue-next';
+import ExcelJS from 'exceljs';
 import { authService } from '@/services/authService';
 import { currentUserTenant } from '@/utils/currentUserTenant';
 
@@ -415,10 +427,124 @@ const loadVisitors = async () => {
   }
 };
 
+const fetchAllVisitorsForExport = async () => {
+  const tenantId = await currentUserTenant.getTenantIdAsync();
+  if (!tenantId || !token) return [];
+
+  try {
+    const filter = { "filter[tenant][tenantId][_eq]": tenantId };
+    if (searchQuery.value) {
+      filter["filter[_or][0][personName][_icontains]"] = searchQuery.value;
+      filter["filter[_or][1][email][_icontains]"] = searchQuery.value;
+      filter["filter[_or][2][mobileNumber][_icontains]"] = searchQuery.value;
+    }
+
+    const params = new URLSearchParams({
+      limit: '-1',
+      sort: '-date_created',
+      fields: 'personName,email,mobileNumber,startDate,endDate,startTime,endTime,status,quantity,assignedAccessLevels.accessLevelName,date_created',
+      ...filter
+    });
+
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/visitor?${params.toString()}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (res.ok) {
+      const result = await res.json();
+      return result.data || [];
+    }
+  } catch (error) {
+    console.error("Failed to fetch visitors for export", error);
+  }
+  return [];
+};
+
+const exportVisitorsExcel = async () => {
+  const exportItems = await fetchAllVisitorsForExport();
+  if (exportItems.length === 0) {
+    alert("No data to export");
+    return;
+  }
+
+  const workbook = new ExcelJS.Workbook();
+  const worksheet = workbook.addWorksheet("Visitors");
+
+  worksheet.columns = [
+    { header: "Name", key: "personName", width: 25 },
+    { header: "Email", key: "email", width: 25 },
+    { header: "Mobile Number", key: "mobileNumber", width: 15 },
+    { header: "Start Date", key: "startDate", width: 12 },
+    { header: "End Date", key: "endDate", width: 12 },
+    { header: "Start Time", key: "startTime", width: 10 },
+    { header: "End Time", key: "endTime", width: 10 },
+    { header: "Access Level", key: "accessLevelName", width: 25 },
+    { header: "Quantity", key: "quantity", width: 10 },
+    { header: "Status", key: "status", width: 12 }
+  ];
+
+  exportItems.forEach(item => {
+    worksheet.addRow({
+      personName: item.personName,
+      email: item.email || "",
+      mobileNumber: item.mobileNumber || "",
+      startDate: item.startDate,
+      endDate: item.endDate,
+      startTime: item.startTime,
+      endTime: item.endTime,
+      accessLevelName: item.assignedAccessLevels?.accessLevelName || "N/A",
+      quantity: item.quantity,
+      status: item.status
+    });
+  });
+
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `Visitors_${new Date().toISOString().split('T')[0]}.xlsx`;
+  link.click();
+};
+
+const exportVisitorsCSV = async () => {
+  const exportItems = await fetchAllVisitorsForExport();
+  if (exportItems.length === 0) {
+    alert("No data to export");
+    return;
+  }
+
+  const headers = ["Name", "Email", "Mobile Number", "Start Date", "End Date", "Start Time", "End Time", "Access Level", "Quantity", "Status"];
+  const rows = exportItems.map(item => [
+    `"${(item.personName || '').replace(/"/g, '""')}"`,
+    `"${(item.email || '').replace(/"/g, '""')}"`,
+    `"${(item.mobileNumber || '').replace(/"/g, '""')}"`,
+    item.startDate,
+    item.endDate,
+    item.startTime,
+    item.endTime,
+    `"${(item.assignedAccessLevels?.accessLevelName || 'N/A').replace(/"/g, '""')}"`,
+    item.quantity,
+    item.status
+  ]);
+
+  const csvContent = [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `Visitors_${new Date().toISOString().split('T')[0]}.csv`;
+  link.click();
+};
+
 const submitVisitor = async () => {
   const userTenant = await currentUserTenant.fetchLoginUserDetails();
   const tenantData = userTenant?.tenant;
   if (!tenantData || !token || !form.value.personName) return;
+
+  if (form.value.mobileNumber && !/^\d{10}$/.test(form.value.mobileNumber)) {
+    alert("Mobile number must be exactly 10 digits.");
+    saving.value = false;
+    return;
+  }
 
   saving.value = true;
   try {

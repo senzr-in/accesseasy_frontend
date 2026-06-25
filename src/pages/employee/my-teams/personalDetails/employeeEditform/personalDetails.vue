@@ -199,7 +199,8 @@
                     <v-text-field
                       v-model="displayPhone"
                       :label="'Phone'"
-                      type="tel"
+                      type="text"
+                      inputmode="numeric"
                       :error-messages="phoneErrorMessage"
                       variant="outlined"
                       density="comfortable"
@@ -703,15 +704,16 @@ const displayPhone = computed({
     return props.employeeData.assignedUser.phone.replace(/^\+91/, "");
   },
   set: (value) => {
+    const sanitizedValue = (value || "").replace(/\D/g, "").slice(0, 10);
     const updatedData = {
       ...props.employeeData,
       assignedUser: {
         ...props.employeeData.assignedUser,
-        phone: value,
+        phone: sanitizedValue,
       },
     };
     emit("update:employeeData", updatedData);
-    if (value && !/^\d{10}$/.test(value)) {
+    if (sanitizedValue && !/^\d{10}$/.test(sanitizedValue)) {
       phoneErrorMessage.value = "Phone number must be 10 digits";
     } else {
       phoneErrorMessage.value = "";
@@ -994,6 +996,8 @@ const fetchEmployeeData = async () => {
       "assignedUser.officeEmail",
       "assignedUser.role.id",
       "assignedUser.role.name",
+      "assignedUser.accesseasyRole.id",
+      "assignedUser.accesseasyRole.roleName",
       "assignedUser.appAccess",
       "assignedUser.designation",
       "workingRange",
@@ -1061,7 +1065,7 @@ const fetchEmployeeData = async () => {
         faceImageBase64.value = data.data.registeredFace;
         faceImagePreview.value = data.data.registeredFace; // This will show the image preview
       }
-      selectedRole.value = data.data.assignedUser?.role?.id || null;
+      selectedRole.value = data.data.assignedUser?.accesseasyRole?.id || data.data.assignedUser?.accesseasyRole || null;
 
       // Set company details selected values
       selectedDepartment.value = data.data.department?.id || null;
@@ -1536,8 +1540,9 @@ const fetchVerifiedGovernmentData = async () => {
 
 const fetchRoles = async () => {
   try {
+    const tenantIdVal = await currentUserTenant.getTenantId();
     const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/roles?filter[_and][0][name][_neq]=Administrator&filter[_and][1][name][_neq]=esslAdmin&&filter[_and][2][name][_neq]=Dealer`,
+      `${import.meta.env.VITE_API_URL}/items/roleConfigurator?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantIdVal}&filter[_and][0][_and][1][accessType][_eq]=accessEasy`,
       {
         headers: {
           Authorization: `Bearer ${authService.getToken()}`,
@@ -1545,12 +1550,12 @@ const fetchRoles = async () => {
       }
     );
     const data = await response.json();
-    roleOptions.value = data.data.map((role) => ({
-      id: role.id,
-      name: role.name || "Unnamed Role",
+    roleOptions.value = (data.data || []).map((rc) => ({
+      id: rc.id,
+      name: rc.roleName || "Unnamed Role",
     }));
   } catch (error) {
-    console.error("Error fetching roles:", error);
+    console.error("Error fetching role configurators:", error);
     roleOptions.value = [];
   }
 };
@@ -1958,11 +1963,10 @@ const fetchAndSetAvatar = async () => {
 };
 
 const handleRoleChange = (newValue) => {
-  if (newValue !== originalEmployeeData.value.assignedUser?.role?.id) {
-    props.employeeData.assignedUser.role = { id: newValue };
-    validateField("role");
-    // Refetch reporting to options based on new role
-    fetchReportingTo();
+  const originalRoleConfigId = originalEmployeeData.value.assignedUser?.accesseasyRole?.id || originalEmployeeData.value.assignedUser?.accesseasyRole;
+  if (newValue !== originalRoleConfigId) {
+    props.employeeData.assignedUser.accesseasyRole = newValue;
+    // Keep standard Directus role unchanged
   }
 };
 
@@ -2067,10 +2071,10 @@ const updatePersonalDetails = async () => {
     // Normalize empty string to null for comparison and payload
     const normalizedCurrentWorkingRange =
       currentWorkingRange === "" ? null : currentWorkingRange;
-    const normalizedOriginalWorkingRange =
+    const normalizedOriginalOriginalWorkingRange =
       originalWorkingRange === "" ? null : originalWorkingRange;
 
-    if (normalizedCurrentWorkingRange !== normalizedOriginalWorkingRange) {
+    if (normalizedCurrentWorkingRange !== normalizedOriginalOriginalWorkingRange) {
       personalModuleFieldsToUpdate.workingRange = normalizedCurrentWorkingRange;
     }
 
@@ -2084,21 +2088,21 @@ const updatePersonalDetails = async () => {
     // Handle company details changes
     if (changedFields.value.branchLocation) {
       personalModuleFieldsToUpdate.branchLocation =
-        changedFields.value.branchLocation;
+          changedFields.value.branchLocation;
     }
     if (changedFields.value.department) {
       personalModuleFieldsToUpdate.department = changedFields.value.department;
     }
     if (changedFields.value.reportingTo) {
       personalModuleFieldsToUpdate.reportingTo =
-        changedFields.value.reportingTo;
+          changedFields.value.reportingTo;
     }
     if (changedFields.value.cycleType) {
       personalModuleFieldsToUpdate.cycleType = changedFields.value.cycleType;
     }
 
     for (const [key, value] of Object.entries(
-      props.employeeData.assignedUser
+        props.employeeData.assignedUser
     )) {
       const originalValue = originalEmployeeData.value.assignedUser[key];
       const hasChanged = value !== originalValue;
@@ -2106,6 +2110,12 @@ const updatePersonalDetails = async () => {
       if (key === "appAccess") {
         if (value !== originalEmployeeData.value.assignedUser[key]) {
           assignedUserFieldsToUpdate[key] = value;
+        }
+      } else if (key === "accesseasyRole") {
+        const currentValId = value?.id || value || null;
+        const originalValId = originalValue?.id || originalValue || null;
+        if (currentValId !== originalValId) {
+          assignedUserFieldsToUpdate[key] = currentValId;
         }
       } else if (hasChanged) {
         if (key === "avatar" && value?.id) {
@@ -2119,7 +2129,7 @@ const updatePersonalDetails = async () => {
         } else if (key === "role") {
           const roleId =
             value?.id ||
-            selectedRole.value ||
+            originalEmployeeData.value.assignedUser?.role?.id ||
             "f667b169-c66c-4ec1-bef9-1831c1647c0d";
           assignedUserFieldsToUpdate[key] = roleId;
         } else if (key === "email") {
@@ -2137,7 +2147,7 @@ const updatePersonalDetails = async () => {
     // Handle role if not already processed and is empty/null
     if (
       !assignedUserFieldsToUpdate.role &&
-      (!props.employeeData.assignedUser.role?.id || !selectedRole.value)
+      !props.employeeData.assignedUser.role?.id
     ) {
       assignedUserFieldsToUpdate.role = "f667b169-c66c-4ec1-bef9-1831c1647c0d";
     }

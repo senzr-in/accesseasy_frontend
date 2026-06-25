@@ -249,10 +249,10 @@ const fetchEmployees = async () => {
 
   if (search.value) {
     params.append(
-      "filter[_or][0][assignedUser][first_name][_contains]",
+      "filter[_or][0][assignedUser][first_name][_icontains]",
       search.value,
     );
-    params.append("filter[_or][1][employeeId][_contains]", search.value);
+    params.append("filter[_or][1][employeeId][_icontains]", search.value);
   }
 
   if (selectedBranch.value) {

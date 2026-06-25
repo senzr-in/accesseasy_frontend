@@ -12,6 +12,9 @@ class CurrentUserTenant {
     this.isLoading = false;
     this.initialized = false;
     this.initPromise = null;
+
+    // Register callback with authService to clear in-memory state on logout
+    authService.registerLogoutListener(() => this.clearUserData());
   }
 
   async initialize() {
@@ -54,42 +57,35 @@ class CurrentUserTenant {
         throw new Error("User not authenticated");
       }
 
-      const phone = authService.getPhone();
-      const email = authService.getEmail();
-      if (!phone && !email) {
-        throw new Error("Phone or email not found");
+      // Use the userData returned by Knative authService, fallback to fetching from Knative profile endpoint if not in cache
+      let userData = authService.getUserData();
+      if (!userData) {
+        userData = await authService.getCurrentUser();
       }
 
-      // Prefer phone; fallback to email
-      const formattedPhone =
-        phone && !phone.startsWith("+91") ? `+91${phone}` : phone;
+      if (userData) {
+        // Verify that the user's tenant has access to accesseasy
+        let hasAccess = false;
+        if (!userData.tenant) {
+          hasAccess = true; // Allow if no tenant is attached (e.g. system admin)
+        } else {
+          let userApps = userData.tenant?.userApp || [];
+          if (typeof userApps === "string") {
+            try {
+              userApps = JSON.parse(userApps);
+            } catch (e) {
+              userApps = [];
+            }
+          }
+          hasAccess = Array.isArray(userApps) && userApps.some(app => app.userApp === "accesseasy");
+        }
 
-      const params = {
-        fields:
-          "id,tenant.tenantId,tenant.tenantName,role.name,phone,first_name,last_name,email,tenant.plan,tenant.accountSettings,title,roleConfig.roleName",
-      };
+        if (!hasAccess) {
+          throw new Error("User tenant does not have access to accesseasy");
+        }
 
-      if (formattedPhone) {
-        params["filter[_and][0][phone][_eq]"] = formattedPhone;
-        params["filter[_and][1][userApp][_eq]"] = "accesseasy";
-      } else if (email) {
-        params["filter[_and][0][email][_eq]"] = email;
-        params["filter[_and][1][userApp][_eq]"] = "accesseasy";
-      }
-
-      // Use the user's token instead of env token
-      const userResponse = await authService.protectedApi.get("/users", {
-        params,
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (userResponse.data.data?.length) {
-        const userData = userResponse.data.data[0];
-
-        this.tenantId = userData.tenant?.tenantId || userData.tenant;
-        this.tenantName = userData.tenant?.tenantName || null;
+        this.tenantId = userData.tenant?.tenantId || userData.tenant?.id || (typeof userData.tenant === "string" ? userData.tenant : null) || authService.getTenantId() || null;
+        this.tenantName = userData.tenant?.tenantName || userData.tenant?.name || (typeof userData.tenant === "string" ? null : userData.tenant) || null;
 
         this.tenantPlan = userData.tenant?.plan || null;
         if (typeof this.tenantPlan === "string") {
@@ -109,11 +105,10 @@ class CurrentUserTenant {
           }
         }
 
-        this.role = userData.role.name;
-        this.userId = userData.id;
-
-        // ✅ Save user & tenant details into authService for reuse
+        // Save/set details in authService for local storage sync and update roles
         authService.setUserData(userData);
+        this.role = authService.getUserRole();
+        this.userId = userData.id;
         return userData;
       } else {
         throw new Error("User not found");
@@ -124,9 +119,9 @@ class CurrentUserTenant {
       // ── Graceful fallback: read from localStorage (covers dev bypass + token refresh edge cases)
       const localUserData = authService.getUserData();
       if (localUserData) {
-        this.tenantId = localUserData.tenant?.tenantId || null;
-        this.tenantName = localUserData.tenant?.tenantName || null;
-        this.role = localUserData.role?.name || null;
+        this.tenantId = localUserData.tenant?.tenantId || localUserData.tenant?.id || (typeof localUserData.tenant === 'string' ? localUserData.tenant : null) || authService.getTenantId() || null;
+        this.tenantName = localUserData.tenant?.tenantName || localUserData.tenant?.name || (typeof localUserData.tenant === 'string' ? null : localUserData.tenant) || null;
+        this.role = authService.getUserRole();
         this.userId = localUserData.id || null;
         this.tenantPlan = localUserData.tenant?.plan || null;
         this.accountSettings = localUserData.tenant?.accountSettings || null;

@@ -1416,7 +1416,7 @@ export default {
       printWindow.print();
     },
 
-    shareQRCode() {
+    async shareQRCode() {
       if (navigator.share) {
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
@@ -1450,9 +1450,27 @@ export default {
         };
         img.src = "data:image/svg+xml;base64," + btoa(svgData);
       } else {
-        navigator.clipboard.writeText(this.qrCodeData).then(() => {
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(this.qrCodeData);
+          } else {
+            const textArea = document.createElement("textarea");
+            textArea.value = this.qrCodeData;
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            const successful = document.execCommand("copy");
+            document.body.removeChild(textArea);
+            if (!successful) throw new Error("execCommand copy failed");
+          }
           alert("QR code data copied to clipboard!");
-        });
+        } catch (err) {
+          console.error("Failed to copy:", err);
+          alert("Failed to copy QR code data to clipboard.");
+        }
       }
     },
 

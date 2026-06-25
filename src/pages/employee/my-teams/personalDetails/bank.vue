@@ -187,7 +187,9 @@
               v-model="tempFormData.accountNumber"
               label="Account Number"
               required
-              type="number"
+              type="text"
+              inputmode="numeric"
+              @update:model-value="val => tempFormData.accountNumber = (val || '').replace(/\D/g, '')"
               variant="outlined"
               density="comfortable"
             />

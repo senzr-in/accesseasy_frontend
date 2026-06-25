@@ -43,10 +43,13 @@
               </p>
             </div>
 
-            <div
-              v-else-if="activeQrUrl"
-              class="flex flex-col items-center w-full animate-in zoom-in-95 duration-500"
-            >
+            <div v-else-if="activeQrUrl" class="flex flex-col items-center w-full animate-in zoom-in-95 duration-500">
+              <!-- ENTRY / EXIT Badge -->
+              <span :class="activeQrType === 'EXIT'
+                ? 'px-3 py-1 mb-3 rounded-full text-[10px] font-black uppercase tracking-widest bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-600 dark:text-amber-400'
+                : 'px-3 py-1 mb-3 rounded-full text-[10px] font-black uppercase tracking-widest bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400'">
+                {{ activeQrType === 'EXIT' ? '↑ Exit Key' : '↓ Entry Key' }}
+              </span>
               <div class="bg-white p-3 rounded-xl shadow-inner border border-slate-100 flex items-center justify-center">
                 <img
                   :src="activeQrUrl"
@@ -54,17 +57,11 @@
                   class="w-44 h-44 block rendering-pixelated"
                 >
               </div>
+              <p class="text-[10px] text-slate-400 mt-2 font-medium">Valid for 2 hours · Single use</p>
               
               <div class="mt-4 flex flex-col sm:flex-row gap-3 w-full px-4 justify-center items-center">
-                <button
-                  :disabled="generatingQr"
-                  class="w-full sm:w-auto px-4 h-9 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-zinc-300 hover:bg-slate-100 transition-colors flex items-center justify-center disabled:opacity-50"
-                  @click="generateNewQr"
-                >
-                  <RefreshCw
-                    class="w-3.5 h-3.5 mr-2"
-                    :class="{ 'animate-spin': generatingQr }"
-                  />
+                <button @click="handleGenerateQr" :disabled="generatingQr" class="w-full sm:w-auto px-4 h-9 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-zinc-300 hover:bg-slate-100 transition-colors flex items-center justify-center disabled:opacity-50">
+                  <RefreshCw class="w-3.5 h-3.5 mr-2" :class="{ 'animate-spin': generatingQr }" />
                   Regenerate
                 </button>
                 <button
@@ -74,44 +71,36 @@
                   <Download class="w-3.5 h-3.5 mr-2" />
                   Download
                 </button>
-                <button
-                  class="w-full sm:w-auto px-4 h-9 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-[10px] font-black uppercase tracking-widest text-rose-600 hover:bg-rose-50 transition-colors flex items-center justify-center"
-                  @click="activeQrUrl = null"
-                >
+                <button @click="activeQrUrl = null; activeQrType = ''" class="w-full sm:w-auto px-4 h-9 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-[10px] font-black uppercase tracking-widest text-rose-600 hover:bg-rose-50 transition-colors flex items-center justify-center">
                   <X class="w-3.5 h-3.5 mr-2" />
                   Revoke
                 </button>
               </div>
             </div>
 
-            <div
-              v-else
-              class="flex flex-col items-center w-full py-4"
-            >
-              <div class="w-20 h-20 bg-indigo-50 dark:bg-indigo-500/10 rounded-full flex items-center justify-center mb-4">
-                <QrCode class="w-8 h-8 text-indigo-500" />
+            <div v-else class="flex flex-col items-center w-full py-4">
+              <div :class="nextQrType === 'EXIT'
+                ? 'w-20 h-20 bg-amber-50 dark:bg-amber-500/10 rounded-full flex items-center justify-center mb-4'
+                : 'w-20 h-20 bg-indigo-50 dark:bg-indigo-500/10 rounded-full flex items-center justify-center mb-4'">
+                <LogOut v-if="nextQrType === 'EXIT'" class="w-8 h-8 text-amber-500" />
+                <LogIn v-else class="w-8 h-8 text-indigo-500" />
               </div>
               <h3 class="text-base font-black text-slate-900 dark:text-white mb-1">
-                Request Mobile Key
+                {{ nextQrType === 'EXIT' ? 'Exit Key' : 'Entry Key' }}
               </h3>
               <p class="text-xs text-slate-500 text-center max-w-xs mb-6">
-                Generate a secure cryptographic QR token to access authorized doors using your mobile phone.
+                {{ nextQrType === 'EXIT'
+                  ? 'Generate a secure exit token to check out. Valid for 2 hours, single use.'
+                  : 'Generate a secure entry token to access your door. Valid for 2 hours, single use.' }}
               </p>
-              
-              <button
-                :disabled="generatingQr"
-                class="w-full max-w-xs flex items-center justify-center h-11 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold tracking-wide shadow-lg shadow-indigo-500/25 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-75"
-                @click="generateNewQr"
-              >
-                <Loader2
-                  v-if="generatingQr"
-                  class="w-4 h-4 mr-2 animate-spin"
-                />
-                <QrCode
-                  v-else
-                  class="w-4 h-4 mr-2"
-                />
-                {{ generatingQr ? 'Generating...' : 'Generate New Key' }}
+              <button @click="handleGenerateQr" :disabled="generatingQr || loadingNextType"
+                :class="nextQrType === 'EXIT'
+                  ? 'w-full max-w-xs flex items-center justify-center h-11 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold tracking-wide shadow-lg shadow-amber-500/25 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-75'
+                  : 'w-full max-w-xs flex items-center justify-center h-11 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold tracking-wide shadow-lg shadow-indigo-500/25 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-75'">
+                <Loader2 v-if="generatingQr || loadingNextType" class="w-4 h-4 mr-2 animate-spin" />
+                <LogOut v-else-if="nextQrType === 'EXIT'" class="w-4 h-4 mr-2" />
+                <LogIn v-else class="w-4 h-4 mr-2" />
+                {{ generatingQr ? 'Generating...' : (nextQrType === 'EXIT' ? 'Generate Exit Key' : 'Generate Entry Key') }}
               </button>
             </div>
           </div>
@@ -254,7 +243,7 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { QrCode, CreditCard, ShieldCheck, Plus, Loader2, AlertCircle, RefreshCw, X, Download } from "lucide-vue-next";
+import { QrCode, CreditCard, ShieldCheck, Plus, Loader2, AlertCircle, RefreshCw, X, Download, LogIn, LogOut } from "lucide-vue-next";
 import { authService } from "@/services/authService";
 import { currentUserTenant } from "@/utils/currentUserTenant";
 import QRCodeLib from "qrcode";
@@ -270,6 +259,9 @@ const employee = ref(null);
 const generatingQr = ref(false);
 const activeQrUrl = ref(null);
 const activeQrToken = ref("");
+const activeQrType = ref('');        // 'ENTRY' or 'EXIT' — shown as badge
+const nextQrType   = ref('ENTRY');  // what the button will generate
+const loadingNextType = ref(false); // spinner while checking last log
 
 const newRfidCard = ref("");
 const isAssigningCard = ref(false);
@@ -309,83 +301,137 @@ const loadEmployeeData = async () => {
   }
 };
 
+const fetchNextQrType = async () => {
+  if (!employee.value) return;
+  loadingNextType.value = true;
+  try {
+    const empId = employee.value.personalModuleId || employee.value.id;
+    const today = new Date().toISOString().split('T')[0];
+    const url = `${import.meta.env.VITE_API_URL}/items/logs`
+      + `?filter[_and][0][employeeId][_eq]=${empId}`
+      + `&filter[_and][1][date][_eq]=${today}`
+      + `&filter[_and][2][ValidLogs][_eq]=authorized`
+      + `&sort=-timeStamp`
+      + `&limit=1`
+      + `&fields=action`;
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+    if (res.ok) {
+      const data = await res.json();
+      const lastLog = data?.data?.[0];
+      // Last action 'in' → next should be EXIT; otherwise ENTRY
+      nextQrType.value = (lastLog?.action === 'in') ? 'EXIT' : 'ENTRY';
+    }
+  } catch (e) {
+    console.warn('Could not fetch last log, defaulting to ENTRY', e);
+    nextQrType.value = 'ENTRY';
+  } finally {
+    loadingNextType.value = false;
+  }
+};
+
+// Check if employee already has an unscanned, unexpired QR in DB.
+// Active = qraccess:true AND expires_at > now
+const checkActiveQr = async () => {
+  try {
+    const empId = employee.value?.personalModuleId || employee.value?.id;
+    const now = new Date().toISOString();
+    const url = `${import.meta.env.VITE_API_URL}/items/qrgenerate`
+      + `?filter[_and][0][employeeId][_eq]=${empId}`
+      + `&filter[_and][1][qraccess][_eq]=true`
+      + `&filter[_and][2][expires_at][_gt]=${encodeURIComponent(now)}`
+      + `&sort=-date_created&limit=1&fields=id,qr_type,expires_at`;
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+    if (res.ok) {
+      const data = await res.json();
+      return data?.data?.[0] ?? null;
+    }
+  } catch (e) {
+    console.warn('checkActiveQr failed', e);
+  }
+  return null;
+};
+
+// Wrapper called by both buttons:
+// 1. Check for existing active QR  2. Refresh type from logs  3. Generate
+const handleGenerateQr = async () => {
+  const activeQr = await checkActiveQr();
+  if (activeQr) {
+    // TODO: replace with your toast/snackbar component
+    alert(`You already have an active ${activeQr.qr_type} QR. Ask the guard to scan it first.`);
+    return;
+  }
+  await fetchNextQrType();
+  await generateNewQr();
+};
+
 const generateNewQr = async () => {
   generatingQr.value = true;
   try {
-    let accessLevelId = employee.value?.access_level?.id; 
+    let accessLevelId = employee.value?.access_level?.id;
 
-    // If access level is unknown (e.g., due to 403 permissions on employee read),
-    // fetch the first available access level from the tenant per the API reference log.
     if (!accessLevelId) {
       try {
         const alRes = await fetch(`${import.meta.env.VITE_API_URL}/items/accesslevels?filter[tenant][tenantId][_eq]=${tenantId}&limit=1&fields[]=id`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         const alData = await alRes.json();
-        if (alData?.data?.length > 0) {
-          accessLevelId = alData.data[0].id;
-        } else {
-          accessLevelId = 1;
-        }
+        accessLevelId = alData?.data?.length > 0 ? alData.data[0].id : 1;
       } catch (e) {
         accessLevelId = 1;
       }
     }
 
-    // 1. Generate local secure token using AES-256 + Timestamp
+    const qrType = nextQrType.value; // 'ENTRY' or 'EXIT'
+
+    // 1. Generate AES-256 encrypted token with timestamp
     const authId = employee.value?.id || rawUser.id || 'unassigned';
     const rawToken = generateEncryptedQrToken(authId, accessLevelId);
-    console.log("Generated local Encrypted token:", rawToken);
+    console.log("Generated Encrypted token:", rawToken, "| Type:", qrType);
 
-    // 2. Post to Directus
-    // IN-06: Set expiry to 24 hours from now
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    // 2. Post to Directus — 2-hour expiry, tagged with qr_type
+    const expiresAt = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
     const payload = {
       tenant: tenantId,
       accessLevelsId: accessLevelId,
       qrcode: rawToken,
       qraccess: true,
-      expires_at: expiresAt
+      expires_at: expiresAt,
+      qr_type: qrType,
     };
-    
-    // Only attach employeeId if we successfully fetched it; otherwise rely on Directus hooks
-    // Use personalModule ID because the qrgenerate table expects the personalModule foreign key
+
     if (employee.value?.personalModuleId) {
-       payload.employeeId = employee.value.personalModuleId;
+      payload.employeeId = employee.value.personalModuleId;
     } else if (employee.value?.id) {
-       // fallback
-       payload.employeeId = employee.value.id;
+      payload.employeeId = employee.value.id;
     }
 
     const res = await fetch(`${import.meta.env.VITE_API_URL}/items/qrgenerate`, {
-       method: "POST",
-       headers: { 
-         "Authorization": `Bearer ${token}`,
-         "Content-Type": "application/json"
-       },
-       body: JSON.stringify(payload)
+      method: "POST",
+      headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
     });
 
-    if (!res.ok) {
-       console.error("Failed to save QR to backend");
-    }
+    if (!res.ok) console.error("Failed to save QR to backend");
 
+    // 3. Build visual QR payload — includes qr_type for guard app
     const qrPayloadObj = JSON.stringify({
       type: "EMPLOYEE",
+      qr_type: qrType,
       token: rawToken,
       name: rawUser?.first_name || "Employee",
       empId: employee.value?.employeeId || ""
     });
 
-    // 3. Render Visual QR Code from the payload
+    // 4. Render QR image
     const qrDataUrl = await QRCodeLib.toDataURL(qrPayloadObj, {
       width: 400,
       margin: 1,
       color: { dark: '#000000', light: '#ffffff' }
     });
-    
+
     activeQrUrl.value = qrDataUrl;
     activeQrToken.value = rawToken;
+    activeQrType.value = qrType;
 
   } catch (err) {
     console.error("Error creating QR code", err);
@@ -457,7 +503,8 @@ const removeRfidCard = async () => {
   }
 };
 
-onMounted(() => {
-  loadEmployeeData();
+onMounted(async () => {
+  await loadEmployeeData();
+  await fetchNextQrType();
 });
 </script>

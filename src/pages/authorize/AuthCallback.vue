@@ -138,6 +138,10 @@ onMounted(async () => {
             localStorage.setItem("fromEmailOtp", "true");
             authService.setPinVerified(true);
 
+            if (loginResult.userData) {
+              authService.onSuccessfulLogin(loginResult.userData.id);
+            }
+
             statusMessage.value = "Login successful! Redirecting...";
             clearSessionAndRedirect();
             return;
@@ -159,6 +163,10 @@ onMounted(async () => {
         
         localStorage.setItem("fromEmailOtp", "true");
         authService.setPinVerified(true);
+
+        if (currentUserData) {
+          authService.onSuccessfulLogin(currentUserData.id);
+        }
 
         statusMessage.value = "Login successful! Redirecting...";
         clearSessionAndRedirect();

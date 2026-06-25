@@ -376,6 +376,8 @@
                     append-inner-icon="mdi-credit-card-scan"
                     :disabled="!accessOn"
                     @focus="handleCardFocus"
+                    @input="handleCardInput"
+                    maxlength="10"
                   />
                   <v-btn
                     color="#2563EB"
@@ -1572,6 +1574,12 @@ const updateAccessCatagory = async () => {
 const addNewCard = async () => {
   if (!cardInput.value) return;
 
+  // Check RFID Card format
+  if (!/^\d{10}$/.test(cardInput.value)) {
+    showErrorMessage("RFID Card number must be exactly 10 digits.");
+    return;
+  }
+
   try {
     const response = await fetch(
       `${import.meta.env.VITE_API_URL}/items/cardManagement?filter[rfidCard][_eq]=${cardInput.value}`,
@@ -1626,8 +1634,11 @@ const handleCardFocus = () => {
 };
 
 const handleCardInput = (event) => {
-  if (cardInput.value.length > 10) {
-    cardInput.value = cardInput.value.slice(0, 10);
+  if (cardInput.value) {
+    cardInput.value = cardInput.value.toString().replace(/\D/g, "");
+    if (cardInput.value.length > 10) {
+      cardInput.value = cardInput.value.slice(0, 10);
+    }
   }
 };
 

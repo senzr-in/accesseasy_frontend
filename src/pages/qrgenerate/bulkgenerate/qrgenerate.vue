@@ -1072,7 +1072,21 @@ const copyQRCodeToClipboard = (item) => {
   }
 
   try {
-    navigator.clipboard.writeText(item.qrcode);
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(item.qrcode);
+    } else {
+      const textArea = document.createElement("textarea");
+      textArea.value = item.qrcode;
+      textArea.style.top = "0";
+      textArea.style.left = "0";
+      textArea.style.position = "fixed";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      const successful = document.execCommand("copy");
+      document.body.removeChild(textArea);
+      if (!successful) throw new Error("execCommand copy failed");
+    }
     showSuccessMessage("QR Code copied to clipboard!");
     closeShareDialog();
   } catch (err) {

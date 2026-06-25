@@ -367,11 +367,29 @@ export function useFormConfiguration(
     }
   };
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(
-      JSON.stringify(selectedForm.value.custom_FormTemplate, null, 2),
-    );
-    showNotification("JSON copied to clipboard!", "success");
+  const copyToClipboard = async () => {
+    const textToCopy = JSON.stringify(selectedForm.value.custom_FormTemplate, null, 2);
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(textToCopy);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = textToCopy;
+        textArea.style.top = "0";
+        textArea.style.left = "0";
+        textArea.style.position = "fixed";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        const successful = document.execCommand("copy");
+        document.body.removeChild(textArea);
+        if (!successful) throw new Error("execCommand copy failed");
+      }
+      showNotification("JSON copied to clipboard!", "success");
+    } catch (err) {
+      console.error("Failed to copy:", err);
+      showNotification("Failed to copy JSON to clipboard.", "error");
+    }
   };
 
   const closeAddFormModal = () => {

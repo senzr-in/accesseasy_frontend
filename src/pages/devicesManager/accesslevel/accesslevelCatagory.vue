@@ -238,7 +238,7 @@ const fetchData = async () => {
     fields.forEach(f => params.append("fields[]", f));
 
     if (searchQuery.value) {
-      params.append("filter[accessLevelName][_contains]", searchQuery.value);
+      params.append("filter[accessLevelName][_icontains]", searchQuery.value);
     }
 
     const response = await fetch(`${import.meta.env.VITE_API_URL}/items/accesslevels?${params.toString()}`, {

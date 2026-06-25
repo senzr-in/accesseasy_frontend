@@ -375,29 +375,10 @@
                 </p>
               </div>
 
-              <!-- Mobile Number -->
-              <div
-                v-if="resolvedFields.mobile.visible"
-                class="vp-field"
-              >
-                <label class="vp-label">{{ resolvedFields.mobile.label }} <span
-                  v-if="resolvedFields.mobile.required"
-                  class="vp-required"
-                >*</span></label>
-                <input
-                  v-model="visitorData.mobile"
-                  type="tel"
-                  :placeholder="resolvedFields.mobile.placeholder"
-                  class="vp-input"
-                  :class="{ 'vp-input-error': errors.mobile }"
-                  @blur="validateField('mobile')"
-                >
-                <p
-                  v-if="errors.mobile"
-                  class="vp-err-msg"
-                >
-                  {{ errors.mobile }}
-                </p>
+              <div v-if="resolvedFields.mobile.visible" class="vp-field">
+                <label class="vp-label">{{ resolvedFields.mobile.label }} <span v-if="resolvedFields.mobile.required" class="vp-required">*</span></label>
+                <input v-model="visitorData.mobile" @input="visitorData.mobile = $event.target.value.replace(/\D/g, '')" type="text" inputmode="numeric" maxlength="10" :placeholder="resolvedFields.mobile.placeholder" class="vp-input" :class="{ 'vp-input-error': errors.mobile }" @blur="validateField('mobile')" />
+                <p v-if="errors.mobile" class="vp-err-msg">{{ errors.mobile }}</p>
               </div>
 
               <!-- Email Address -->
@@ -989,8 +970,11 @@ const validateField = (f) => {
       errors.value.name = `${resolvedFields.value.name.label} is required`;
     }
   } else if (f === 'mobile') {
-    if (!visitorData.value.mobile.trim()) {
+    const val = visitorData.value.mobile.trim();
+    if (!val) {
       errors.value.mobile = `${resolvedFields.value.mobile.label} is required`;
+    } else if (!/^\d{10}$/.test(val)) {
+      errors.value.mobile = 'Mobile number must be 10 digits';
     }
   } else if (f === 'email') {
     const val = visitorData.value.email.trim();

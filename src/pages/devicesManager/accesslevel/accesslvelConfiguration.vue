@@ -715,7 +715,7 @@ const handleSave = async () => {
     const userResponse = await fetch(
       `${
         import.meta.env.VITE_API_URL
-      }/items/personalModule?filter[_and][0][assignedUser][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][assignedAccessLevels][accesslevels_id][accessLevelName][_contains]=${props.category.name}`,
+      }/items/personalModule?filter[_and][0][assignedUser][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][assignedAccessLevels][accesslevels_id][accessLevelName][_icontains]=${props.category.name}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
