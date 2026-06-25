@@ -21,7 +21,7 @@ export default defineConfig(({ mode }) => {
       VITE_API_URL: JSON.stringify(env.VITE_API_URL),
     },
     server: {
-      port: 8080,
+      port: 5173,
       host: "0.0.0.0", // Required for Docker/Cloud Run
     },
     preview: {

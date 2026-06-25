@@ -116,6 +116,22 @@
               <td class="px-5 py-3 text-right">
                 <div class="flex justify-end gap-2 pr-2 opacity-0 group-hover/row:opacity-100 transition-opacity">
                   <button
+                    v-if="door.deviceUuid"
+                    @click="openDoor(door)"
+                    title="Open Door"
+                    class="h-7 px-3 text-[10px] font-black uppercase tracking-widest bg-transparent border border-emerald-200 dark:border-emerald-800 rounded-md hover:bg-emerald-50 dark:hover:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 transition-colors shadow-sm"
+                  >
+                    Open
+                  </button>
+                  <button
+                    v-if="door.deviceUuid"
+                    @click="lockDoor(door)"
+                    title="Lock Door"
+                    class="h-7 px-3 text-[10px] font-black uppercase tracking-widest bg-transparent border border-rose-200 dark:border-rose-800 rounded-md hover:bg-rose-50 dark:hover:bg-rose-950/20 text-rose-600 dark:text-rose-400 transition-colors shadow-sm"
+                  >
+                    Lock
+                  </button>
+                  <button
                     @click="editItem(door)"
                     class="h-7 px-3 text-[10px] font-black uppercase tracking-widest bg-transparent border border-slate-200 dark:border-zinc-700 rounded-md hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 transition-colors shadow-sm"
                   >
@@ -207,7 +223,7 @@ const fetchDoorData = async () => {
 
   try {
     const filterParams = {
-      "filter[tenant][_eq]": tenantId,
+      "filter[tenant][tenantId][_eq]": tenantId,
       "filter[status][_neq]": "archived",
     };
     if (searchQuery.value) {
@@ -226,7 +242,7 @@ const fetchDoorData = async () => {
     // Only request fields that exist and have read permissions (matching reference codebase)
     const fields = [
       "id", "doorNumber", "doorName", "status",
-      "departmentIds", "location",
+      "departmentIds", "location", "uniqueId", "deviceUuid"
     ].map(f => `fields[]=${encodeURIComponent(f)}`).join('&');
 
     const response = await fetch(`${import.meta.env.VITE_API_URL}/items/doors?${queryParams.toString()}&${fields}`, {
@@ -255,6 +271,75 @@ const showAddDoorForm = () => {
 const editItem = (item) => {
   selectedDoor.value = item;
   showDialog.value = true;
+};
+
+const openDoor = async (door) => {
+  try {
+    const deviceUuid = door.deviceUuid || door.uniqueId || "UNKNOWN-DEVICE";
+    const doorNum = parseInt(door.doorNumber || 1, 10);
+    const doorBitmask = 1 << (doorNum - 1);
+    const doorIndex = doorBitmask.toString(16).padStart(2, '0');
+
+    const response = await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-router`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "remoteControl",
+        uuid: deviceUuid,
+        data: {
+          command: 1, // 1 = Remote door opening
+          index: doorIndex
+        }
+      })
+    });
+
+    const result = await response.json();
+    if (result.success || response.ok) {
+      alert("Door open command sent successfully!");
+    } else {
+      console.error("Failed to open door:", result.error);
+      alert("Failed to open door");
+    }
+  } catch (err) {
+    console.error("Network error communicating with Knative bridge:", err);
+    alert("Network error communicating with Knative bridge");
+  }
+};
+
+const lockDoor = async (door) => {
+  try {
+    const deviceUuid = door.deviceUuid || door.uniqueId || "UNKNOWN-DEVICE";
+    const doorNum = parseInt(door.doorNumber || 1, 10);
+    const doorBitmask = 1 << (doorNum - 1);
+    const doorIndex = doorBitmask.toString(16).padStart(2, '0');
+
+    const response = await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-router`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "remoteControl",
+        uuid: deviceUuid,
+        data: {
+          command: 6, // 6 = Unified control
+          index: doorIndex,
+          extra: {
+            action: 0 // 0 = Lock
+          }
+        }
+      })
+    });
+
+    const result = await response.json();
+    if (result.success || response.ok) {
+      alert("Door lock command sent successfully!");
+    } else {
+      console.error("Failed to lock door:", result.error);
+      alert("Failed to lock door");
+    }
+  } catch (err) {
+    console.error("Network error communicating with Knative bridge:", err);
+    alert("Network error communicating with Knative bridge");
+  }
 };
 
 const deleteItem = async (door) => {
