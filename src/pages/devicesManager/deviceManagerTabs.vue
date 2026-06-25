@@ -101,9 +101,9 @@
             >
               <td class="px-4 py-3">
                 <div class="flex items-center gap-3">
-                  <!-- Avatar fallback -->
                   <div class="h-8 w-8 shrink-0 rounded-md overflow-hidden bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center border border-zinc-200 dark:border-zinc-700">
                     <img v-if="device.controllerImage?.url" :src="device.controllerImage.url" class="h-full w-full object-cover" />
+                    <Video v-else-if="device.controllerType === 'frigate_nvr'" class="h-4 w-4 text-emerald-500" />
                     <Cpu v-else class="h-4 w-4 text-zinc-400" />
                   </div>
                   <div class="flex flex-col">
@@ -117,7 +117,10 @@
                 </div>
               </td>
               <td class="px-4 py-3">
-                <span class="text-[13px] text-muted-foreground">
+                <span class="text-[13px] text-muted-foreground font-medium" v-if="device.controllerType === 'frigate_nvr'">
+                  Frigate AI NVR
+                </span>
+                <span class="text-[13px] text-muted-foreground" v-else>
                   Type {{ device.controllerType || '?' }}
                 </span>
               </td>
@@ -164,6 +167,14 @@
                     class="flex items-center justify-center p-0 h-7 w-7 rounded-md bg-transparent text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 transition-colors shadow-sm border border-emerald-200 dark:border-emerald-500/20 dark:hover:bg-emerald-500/10"
                   >
                     <ShieldCheck class="w-3.5 h-3.5" />
+                  </button>
+                  <button 
+                    v-if="device.controllerType === 'frigate_nvr'"
+                    @click="viewEvents(device)"
+                    title="View AI Events"
+                    class="h-7 w-7 rounded-md flex items-center justify-center border border-slate-200 dark:border-zinc-700 text-blue-600 dark:text-blue-400 bg-transparent hover:bg-blue-50 dark:hover:bg-blue-900/20 shadow-sm transition-colors mr-1"
+                  >
+                    <Activity class="w-3.5 h-3.5" />
                   </button>
                   <button 
                     @click="editItem(device)"
@@ -214,6 +225,14 @@
       @success="fetchDeviceData"
     />
 
+    <!-- Frigate Events Viewer Placeholder -->
+    <!-- We will build this dialog next to view AI events -->
+    <FrigateEventsDialog
+      v-if="showFrigateEvents"
+      v-model="showFrigateEvents"
+      :device="selectedDevice"
+    />
+
     <!-- Delete Confirmation Dialog -->
     <ConfirmDeleteModal
       :show="showDeleteDialog"
@@ -235,10 +254,11 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from "vue";
-import { Zap, Network, Plus, Search, Loader2, Cpu, CheckCircle2, Clock, ShieldCheck, Settings2, DoorOpen, Trash2 } from "lucide-vue-next";
+import { Zap, Network, Plus, Search, Loader2, Cpu, CheckCircle2, Clock, ShieldCheck, Settings2, DoorOpen, Trash2, Video, Activity } from "lucide-vue-next";
 import { authService } from "@/services/authService";
 import { currentUserTenant } from "@/utils/currentUserTenant";
 import DeviceRegistrationDialog from "./deviceRegistrationDialog.vue";
+import FrigateEventsDialog from "./frigateEventsDialog.vue";
 import ConfirmDeleteModal from "@/components/common/modals/ConfirmDeleteModal.vue";
 
 // Accessors
@@ -253,6 +273,7 @@ const itemsPerPage = 10;
 const totalItems = ref(0);
 const activeStatusTab = ref("all");
 const showDialog = ref(false);
+const showFrigateEvents = ref(false);
 const selectedDevice = ref(null);
 
 const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage));
@@ -370,6 +391,11 @@ const editItem = (item) => {
   selectedDevice.value = item;
   startWithScanner.value = false;
   showDialog.value = true;
+};
+
+const viewEvents = (item) => {
+  selectedDevice.value = item;
+  showFrigateEvents.value = true;
 };
 
 const approveDevice = async (device) => {
