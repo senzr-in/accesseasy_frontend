@@ -180,6 +180,12 @@ const routes = [
         meta: { roles: ["Admin"] }
       },
       {
+        path: "settings/ai-events",
+        name: "SettingsAiEvents",
+        component: () => import("@/pages/settings/aiEvents.vue"),
+        meta: { roles: ["Admin", "Manager", "Guard"] }
+      },
+      {
         path: "settings/logs",
         name: "SettingsLogs",
         component: Logs,

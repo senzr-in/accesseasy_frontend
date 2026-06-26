@@ -322,6 +322,7 @@ const navigationItems = computed(() => {
       role: "Admin",
       children: [
         { name: "Devices", href: "/dashboard/settings/devices" },
+        { name: "AI Cam Events", href: "/dashboard/settings/ai-events" },
         { name: "Event Logs", href: "/dashboard/settings/logs" }
       ]
     },

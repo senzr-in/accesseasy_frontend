@@ -242,7 +242,7 @@ const fetchDoorData = async () => {
     // Only request fields that exist and have read permissions (matching reference codebase)
     const fields = [
       "id", "doorNumber", "doorName", "status",
-      "departmentIds", "location", "uniqueId", "deviceUuid"
+      "departmentIds", "location", "uniqueId"
     ].map(f => `fields[]=${encodeURIComponent(f)}`).join('&');
 
     const response = await fetch(`${import.meta.env.VITE_API_URL}/items/doors?${queryParams.toString()}&${fields}`, {

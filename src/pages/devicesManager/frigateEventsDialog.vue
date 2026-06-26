@@ -135,7 +135,7 @@ const fetchEvents = async () => {
   if (!token) return;
   loading.value = true;
   try {
-    const url = new URL(`${import.meta.env.VITE_API_URL}/items/frigate_events`);
+    const url = new URL(`${import.meta.env.VITE_API_URL}/items/frigateEvents`);
     url.searchParams.append('sort', '-start_time');
     url.searchParams.append('limit', '20');
     // If we want to filter by a specific camera mapped to this controller:
