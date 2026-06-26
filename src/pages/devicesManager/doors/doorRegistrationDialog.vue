@@ -71,7 +71,7 @@
                   type="text"
                   placeholder="Floor 1, Building A"
                   class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground placeholder:text-zinc-500"
-                >
+                />
               </div>
               
               <!-- Controller Dropdown -->
@@ -199,8 +199,8 @@ const formData = ref({
   doorNumber: 1,
   doorName: '',
   location: '',
-  assignedDepts: [],
-  deviceUuid: ''
+  deviceUuid: '',
+  assignedDepts: []
 });
 
 watch(() => props.modelValue, (isOpen) => {
@@ -242,7 +242,7 @@ const fetchDepartments = async () => {
     const tenantId = await currentUserTenant.getTenantIdAsync();
     
     const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/items/department?filter[tenant][tenantId][_eq]=${tenantId}&fields[]=id&fields[]=departmentName`,
+      `${import.meta.env.VITE_API_URL}/items/department?filter[tenant][_eq]=${tenantId}&fields[]=id&fields[]=departmentName`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     if (res.ok) {
@@ -275,7 +275,7 @@ const fetchControllers = async () => {
 const generateDoorNumber = async (token, tenantId) => {
   try {
     const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/items/doors?filter[tenant][tenantId][_eq]=${tenantId}&fields=doorNumber`,
+      `${import.meta.env.VITE_API_URL}/items/doors?filter[tenant][_eq]=${tenantId}&fields=doorNumber`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     const data = await res.json();

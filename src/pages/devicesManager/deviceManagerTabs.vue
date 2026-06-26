@@ -345,7 +345,7 @@ const fetchDeviceData = async () => {
     const fields = [
       "controllerName", "id", "selectedDoors", "deviceName", "sn",
       "tenant", "tenant.tenantId", "status", "controllerStatus", "branchDetails",
-      "serverIp", "controllerType", "controllerImage.id"
+      "serverIp", "controllerType", "controllerImage.id", "linkedCamera"
     ].map(f => `fields[]=${encodeURIComponent(f)}`).join('&');
 
     const response = await fetch(`${import.meta.env.VITE_API_URL}/items/controllers?${queryParams.toString()}&${fields}`, {

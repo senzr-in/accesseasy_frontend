@@ -223,7 +223,7 @@ const fetchDoorData = async () => {
 
   try {
     const filterParams = {
-      "filter[tenant][tenantId][_eq]": tenantId,
+      "filter[tenant][_eq]": tenantId,
       "filter[status][_neq]": "archived",
     };
     if (searchQuery.value) {
@@ -242,7 +242,7 @@ const fetchDoorData = async () => {
     // Only request fields that exist and have read permissions (matching reference codebase)
     const fields = [
       "id", "doorNumber", "doorName", "status",
-      "departmentIds", "location", "uniqueId"
+      "departmentIds", "location", "uniqueId", "deviceUuid"
     ].map(f => `fields[]=${encodeURIComponent(f)}`).join('&');
 
     const response = await fetch(`${import.meta.env.VITE_API_URL}/items/doors?${queryParams.toString()}&${fields}`, {

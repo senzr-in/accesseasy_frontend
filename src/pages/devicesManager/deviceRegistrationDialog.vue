@@ -70,6 +70,22 @@
                 </select>
               </div>
 
+              <!-- Camera Selection Dropdown (Only show for doors controllers, not NVRs themselves) -->
+              <div class="space-y-1.5 col-span-2" v-if="formData.controllerType && formData.controllerType !== 'frigate_nvr'">
+                <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                  Linked AI Camera
+                </label>
+                <select
+                  v-model="formData.linkedCamera"
+                  class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground"
+                >
+                  <option value="">No Camera Linked</option>
+                  <option v-for="cam in cameras" :key="cam" :value="cam">
+                    {{ cam }}
+                  </option>
+                </select>
+              </div>
+
               <!-- Network Switch -->
               <div class="col-span-2 bg-white dark:bg-zinc-950 p-5 rounded-[16px] border border-zinc-200 dark:border-zinc-800 flex items-center justify-between shadow-sm relative overflow-hidden group hover:border-amber-500/50 transition-colors">
                 <div class="absolute left-0 top-0 bottom-0 w-1 bg-zinc-200 dark:bg-zinc-800 group-hover:bg-amber-500 transition-colors"></div>
@@ -196,6 +212,7 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'success']);
 
 const loading = ref(false);
+const cameras = ref([]);
 
 // Network Scanner state
 const showNetworkScanner = ref(false);
@@ -210,6 +227,7 @@ const formData = ref({
   useIpProtocol: false,
   serverIp: '',
   macAddress: '',
+  linkedCamera: ''
 });
 
 watch(() => props.modelValue, (isOpen) => {
@@ -221,6 +239,8 @@ watch(() => props.modelValue, (isOpen) => {
       showNetworkScanner.value = false;
     }
     
+    fetchCameras();
+    
     if (props.device) {
       formData.value = {
         controllerName: props.device.controllerName || '',
@@ -229,6 +249,7 @@ watch(() => props.modelValue, (isOpen) => {
         useIpProtocol: !!props.device.serverIp,
         serverIp: props.device.serverIp || '',
         macAddress: props.device.macAddress || '',
+        linkedCamera: props.device.linkedCamera || ''
       };
     } else {
       formData.value = {
@@ -238,6 +259,7 @@ watch(() => props.modelValue, (isOpen) => {
         useIpProtocol: false,
         serverIp: '',
         macAddress: '',
+        linkedCamera: ''
       };
     }
     discoveredDeviceId.value = null;
@@ -246,6 +268,22 @@ watch(() => props.modelValue, (isOpen) => {
 
 const close = () => {
   emit('update:modelValue', false);
+};
+
+const fetchCameras = async () => {
+  try {
+    const token = authService.getToken();
+    const eventRes = await fetch(
+      `${import.meta.env.VITE_API_URL}/items/frigateEvents?aggregate[count]=id&groupBy[]=camera`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (eventRes.ok) {
+      const evData = await eventRes.json();
+      cameras.value = (evData.data || []).map(e => e.camera).filter(Boolean);
+    }
+  } catch (err) {
+    console.error("Failed to fetch cameras:", err);
+  }
 };
 
 // Network Scanner methods
@@ -323,6 +361,7 @@ const handleSubmit = async () => {
       controllerStatus: isEdit ? (props.device.controllerStatus || 'offline') : 'online',
       serverIp: formData.value.useIpProtocol ? (formData.value.serverIp || null) : null,
       macAddress: formData.value.useIpProtocol ? (formData.value.macAddress || null) : null,
+      linkedCamera: formData.value.linkedCamera || null
     };
 
     if (!isEdit) {

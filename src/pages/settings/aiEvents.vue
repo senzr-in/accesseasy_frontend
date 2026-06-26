@@ -14,8 +14,17 @@
         </p>
       </div>
       
-      <!-- Stats Summary -->
+      <!-- Stats Summary & Actions -->
       <div class="flex gap-4">
+        <button 
+          @click="fetchEvents"
+          class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl px-4 py-3 shadow-sm flex items-center gap-2 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors"
+          :disabled="loading"
+        >
+          <RefreshCcw class="h-4 w-4 text-blue-600 dark:text-blue-400" :class="{ 'animate-spin': loading }" />
+          <span class="text-xs font-black text-slate-700 dark:text-zinc-300 uppercase tracking-wider">Refresh</span>
+        </button>
+
         <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl px-5 py-3 shadow-sm flex items-center gap-3">
           <div class="h-8 w-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
             <Activity class="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
@@ -48,6 +57,26 @@
         </div>
 
         <!-- Camera Filter -->
+        <!-- Device Selection -->
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5 flex items-center gap-1.5">
+            <Cpu class="h-3.5 w-3.5" />
+            Linked Device
+          </label>
+          <div class="relative">
+            <select 
+              v-model="selectedDeviceFilter"
+              @change="handleDeviceSelection"
+              class="w-full h-10 px-3 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl text-sm font-semibold text-slate-700 dark:text-slate-200 focus:outline-none focus:border-blue-500 appearance-none transition-colors"
+            >
+              <option value="">All Devices</option>
+              <option v-for="d in linkedControllers" :key="d.id" :value="d.id">
+                {{ d.controllerName || `Device ${d.sn}` }}
+              </option>
+            </select>
+          </div>
+        </div>
+
         <div>
           <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5 flex items-center gap-1.5">
             <Search class="h-3.5 w-3.5" />
@@ -217,7 +246,7 @@
 import { ref, onMounted } from 'vue';
 import { 
   ScanFace, Loader2, VideoOff, Camera, Clock, 
-  User, Car, Box, X, Search, Video, SlidersHorizontal, Activity, Dog, Cat 
+  User, Car, Box, X, Search, Video, SlidersHorizontal, Activity, Dog, Cat, RefreshCcw, Cpu
 } from 'lucide-vue-next';
 import { authService } from "@/services/authService";
 
@@ -227,9 +256,11 @@ const systemToken = import.meta.env.VITE_API_TOKEN || 'p2pJHhZAjca6jQea0RbPVwNWR
 
 const events = ref([]);
 const nvrs = ref([]);
+const linkedControllers = ref([]);
 const loading = ref(false);
 
 const selectedNvr = ref('');
+const selectedDeviceFilter = ref('');
 const cameraSearch = ref('');
 const selectedLabel = ref('all');
 const selectedEvent = ref(null);
@@ -248,9 +279,26 @@ const debounceFetch = () => {
   }, 400);
 };
 
+const handleDeviceSelection = () => {
+  if (selectedDeviceFilter.value) {
+    const dev = linkedControllers.value.find(d => d.id === selectedDeviceFilter.value);
+    if (dev && dev.linkedCamera) {
+      cameraSearch.value = dev.linkedCamera;
+    } else {
+      cameraSearch.value = 'NO_CAMERA_LINKED';
+    }
+  } else {
+    cameraSearch.value = '';
+  }
+  fetchEvents();
+};
+
 const formatDate = (dateString) => {
   if (!dateString) return 'Unknown Time';
-  const date = new Date(dateString);
+  // Directus datetime fields often drop the 'Z' (UTC specifier).
+  // We append it so the browser converts it correctly to your local time.
+  const isoString = dateString.endsWith('Z') ? dateString : dateString + 'Z';
+  const date = new Date(isoString);
   return new Intl.DateTimeFormat('en-US', {
     month: 'short', day: 'numeric',
     hour: 'numeric', minute: '2-digit', second: '2-digit'
@@ -278,13 +326,28 @@ const fetchNvrs = async () => {
   }
 };
 
+const fetchLinkedControllers = async () => {
+  if (!token) return;
+  try {
+    const res = await fetch(`${apiUrl}/items/controllers?fields[]=id&fields[]=controllerName&fields[]=sn&fields[]=linkedCamera&filter[linkedCamera][_nnull]=true`, {
+      headers: { Authorization: `Bearer ${systemToken}` }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      linkedControllers.value = data.data || [];
+    }
+  } catch (err) {
+    console.error('Error fetching controllers:', err);
+  }
+};
+
 const fetchEvents = async () => {
   if (!token) return;
   loading.value = true;
   try {
     const url = new URL(`${apiUrl}/items/frigateEvents`);
     url.searchParams.append('sort', '-start_time');
-    url.searchParams.append('limit', '40');
+    url.searchParams.append('limit', '2000');
 
     // Add filter logic
     if (selectedLabel.value !== 'all') {
@@ -315,6 +378,7 @@ const fetchEvents = async () => {
 
 onMounted(() => {
   fetchNvrs();
+  fetchLinkedControllers();
   fetchEvents();
 });
 </script>
