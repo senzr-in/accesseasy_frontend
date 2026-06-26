@@ -154,7 +154,7 @@
                 </td>
                 <td class="px-5 py-3">
                   <span class="inline-flex px-2 py-0.5 bg-slate-50 dark:bg-zinc-900 text-slate-600 dark:text-zinc-400 rounded-md text-[9px] font-black uppercase tracking-widest border border-slate-200 dark:border-zinc-800">
-                    {{ emp.assignedUser?.role?.name || "Unassigned" }}
+                    {{ emp.assignedUser?.accesseasyRole?.roleName || emp.assignedUser?.role?.name || "Unassigned" }}
                   </span>
                 </td>
                 <td class="px-5 py-3">
@@ -532,6 +532,7 @@ const fetchEmployeeData = async () => {
         "id", "employeeId", "status", "registeredFace",
         "assignedUser.id", "assignedUser.first_name", "assignedUser.last_name", "assignedUser.role.name", 
         "assignedUser.phone", "assignedUser.email",
+        "assignedUser.accesseasyRole.id", "assignedUser.accesseasyRole.roleName",
         "department.id", "department.departmentName",
         "branch.id", "assignedAccessLevel.id",
         "accessOn", "face", "finger", "rfid", "QrAttendance", "GeoAttendance",
