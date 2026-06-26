@@ -57,9 +57,13 @@ class CurrentUserTenant {
         throw new Error("User not authenticated");
       }
 
-      // Use the userData returned by Knative authService, fallback to fetching from Knative profile endpoint if not in cache
+      // Use cached userData only if it has complete tenant and role config, otherwise fetch fresh from the profile endpoint
       let userData = authService.getUserData();
-      if (!userData) {
+      const hasCompleteData = userData && 
+        (!userData.tenant || userData.tenant.userApp) && 
+        (userData.roleConfig || userData.accesseasyRole || userData.role || userData.title);
+
+      if (!hasCompleteData) {
         userData = await authService.getCurrentUser();
       }
 
