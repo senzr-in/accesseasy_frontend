@@ -393,7 +393,7 @@ const handleSubmit = async () => {
       // First add initialization for Knative
       if (!isEdit && formData.value.sn) {
         try {
-          await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-router`, {
+          await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-mqtt`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({

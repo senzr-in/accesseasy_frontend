@@ -280,7 +280,7 @@ const openDoor = async (door) => {
     const doorBitmask = 1 << (doorNum - 1);
     const doorIndex = doorBitmask.toString(16).padStart(2, '0');
 
-    const response = await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-router`, {
+    const response = await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-mqtt`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -313,7 +313,7 @@ const lockDoor = async (door) => {
     const doorBitmask = 1 << (doorNum - 1);
     const doorIndex = doorBitmask.toString(16).padStart(2, '0');
 
-    const response = await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-router`, {
+    const response = await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-mqtt`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({

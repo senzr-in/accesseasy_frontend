@@ -1326,7 +1326,7 @@ const syncCredentialToDevice = async (deviceUuid, credentialCode, credentialType
       ]
     };
 
-    await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-router`, {
+    await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-mqtt`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
@@ -1345,7 +1345,7 @@ const deleteCredentialFromDevice = async (deviceUuid, credentialId) => {
       data: [String(credentialId)]
     };
 
-    await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-router`, {
+    await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-mqtt`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
