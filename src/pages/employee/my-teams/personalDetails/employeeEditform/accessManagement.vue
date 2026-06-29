@@ -911,8 +911,8 @@ const generateQRCode = async () => {
     // Sync QR to device via Knative
     const deviceDoorMasks = {};
     (accessLevelDetails.value?.assignedDoors || []).forEach(d => {
-       if (d.doors_id && d.doors_id.deviceUuid) {
-           const uuid = d.doors_id.deviceUuid;
+       if (d.doors_id && (d.doors_id.deviceUuid || d.doors_id.uniqueId)) {
+           const uuid = d.doors_id.deviceUuid || d.doors_id.uniqueId;
            const doorNum = parseInt(d.doors_id.doorNumber || 1, 10);
            const doorBitmask = 1 << (doorNum - 1);
            if (!deviceDoorMasks[uuid]) deviceDoorMasks[uuid] = 0;
@@ -1275,7 +1275,7 @@ const handleAccessLevelChange = async (value) => {
     if (data.data.assignDoorsGroup && data.data.assignDoorsGroup.length > 0) {
       const doorIds = data.data.assignDoorsGroup.join(",");
       const doorsResponse = await fetch(
-        `${import.meta.env.VITE_API_URL}/items/doors?filter[id][_in]=${doorIds}&fields=id,doorNumber,doorName,doorType,deviceUuid,doorsConfigure,tenant.tenantName`,
+        `${import.meta.env.VITE_API_URL}/items/doors?filter[id][_in]=${doorIds}&fields=id,doorNumber,doorName,doorType,deviceUuid,uniqueId,doorsConfigure,tenant.tenantName`,
         {
           headers: {
             Authorization: `Bearer ${authService.getToken()}`,
@@ -1304,6 +1304,7 @@ const handleAccessLevelChange = async (value) => {
           doorType: door.doorType,
           doorsConfigure: door.doorsConfigure,
           deviceUuid: door.deviceUuid,
+          uniqueId: door.uniqueId,
           tenant: door.tenant,
         },
       })),
@@ -1381,8 +1382,8 @@ const updateAccessCatagory = async () => {
     // 1. Get the current/new devices map of UUID -> Door Bitmask
     const deviceDoorMasks = {};
     (accessLevelDetails.value?.assignedDoors || []).forEach(d => {
-       if (d.doors_id && d.doors_id.deviceUuid) {
-           const uuid = d.doors_id.deviceUuid;
+       if (d.doors_id && (d.doors_id.deviceUuid || d.doors_id.uniqueId)) {
+           const uuid = d.doors_id.deviceUuid || d.doors_id.uniqueId;
            const doorNum = parseInt(d.doors_id.doorNumber || 1, 10);
            const doorBitmask = 1 << (doorNum - 1);
            if (!deviceDoorMasks[uuid]) deviceDoorMasks[uuid] = 0;
