@@ -920,7 +920,7 @@ const generateQRCode = async () => {
        }
     });
     for (const [uuid, bitmask] of Object.entries(deviceDoorMasks)) {
-      const hexIndex = bitmask.toString(16).padStart(2, '0');
+      const hexIndex = bitmask.toString(16).padStart(2, '0').toUpperCase();
       await syncCredentialToDevice(uuid, hexIndex, qrCodeValue, 101, `${props.id}1`);
     }
 
@@ -1514,7 +1514,7 @@ const updateAccessCatagory = async () => {
         // Sync card to device via Knative if access is active
         if (accessOn.value && cardAccess) {
           for (const [uuid, bitmask] of Object.entries(deviceDoorMasks)) {
-            const hexIndex = bitmask.toString(16).padStart(2, '0');
+            const hexIndex = bitmask.toString(16).padStart(2, '0').toUpperCase();
             await syncCredentialToDevice(uuid, hexIndex, card.rfidCard, 200, `${card.rfidCard}`);
           }
         }
@@ -1535,7 +1535,7 @@ const updateAccessCatagory = async () => {
         // we must re-sync this remaining active card to the devices
         if (shouldWipeNewDevices && cardAccess) {
           for (const [uuid, bitmask] of Object.entries(deviceDoorMasks)) {
-            const hexIndex = bitmask.toString(16).padStart(2, '0');
+            const hexIndex = bitmask.toString(16).padStart(2, '0').toUpperCase();
             await syncCredentialToDevice(uuid, hexIndex, card.rfidCard, 200, `${card.rfidCard}`);
           }
         }
@@ -1558,7 +1558,7 @@ const updateAccessCatagory = async () => {
     // Sync Face Data if access is active (either new or re-synced after delete-wipe / access level change)
     if (faceEmbedData.value?.base64Data && accessOn.value) {
       for (const [uuid, bitmask] of Object.entries(deviceDoorMasks)) {
-        const hexIndex = bitmask.toString(16).padStart(2, '0');
+        const hexIndex = bitmask.toString(16).padStart(2, '0').toUpperCase();
         await syncCredentialToDevice(uuid, hexIndex, faceEmbedData.value.base64Data, 300, `${props.id}2`);
       }
     }
@@ -1566,7 +1566,7 @@ const updateAccessCatagory = async () => {
     // Sync Fingerprint Data if access is active (either new or re-synced after delete-wipe / access level change)
     if (fingerData.value?.base64_UserFingers && accessOn.value) {
       for (const [uuid, bitmask] of Object.entries(deviceDoorMasks)) {
-        const hexIndex = bitmask.toString(16).padStart(2, '0');
+        const hexIndex = bitmask.toString(16).padStart(2, '0').toUpperCase();
         await syncCredentialToDevice(uuid, hexIndex, fingerData.value.base64_UserFingers, 500, `${props.id}3`);
       }
     }
