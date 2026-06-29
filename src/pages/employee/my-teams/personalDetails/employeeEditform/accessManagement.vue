@@ -910,18 +910,42 @@ const generateQRCode = async () => {
 
     // Sync QR to device via Knative
     const deviceDoorMasks = {};
+    const deviceDoorLists = {};
     (accessLevelDetails.value?.assignedDoors || []).forEach(d => {
        if (d.doors_id && (d.doors_id.deviceUuid || d.doors_id.uniqueId)) {
            const uuid = d.doors_id.deviceUuid || d.doors_id.uniqueId;
            const doorNum = parseInt(d.doors_id.doorNumber || 1, 10);
            const doorBitmask = 1 << (doorNum - 1);
+           
            if (!deviceDoorMasks[uuid]) deviceDoorMasks[uuid] = 0;
            deviceDoorMasks[uuid] |= doorBitmask;
+           
+           if (!deviceDoorLists[uuid]) deviceDoorLists[uuid] = [];
+           const doorIndexStr = doorNum.toString().padStart(2, '0');
+           if (!deviceDoorLists[uuid].includes(doorIndexStr)) {
+               deviceDoorLists[uuid].push(doorIndexStr);
+           }
        }
     });
+
+    const uuids = Object.keys(deviceDoorMasks);
+    let controllerTypes = {};
+    if (uuids.length > 0) {
+      try {
+        const ctrlRes = await fetch(`${import.meta.env.VITE_API_URL}/items/controllers?filter[sn][_in]=${uuids.join(',')}&fields=sn,controllerType`, {
+          headers: { Authorization: `Bearer ${authService.getToken()}` }
+        });
+        if (ctrlRes.ok) {
+          const ctrlData = await ctrlRes.json();
+          (ctrlData.data || []).forEach(c => { controllerTypes[c.sn] = c.controllerType; });
+        }
+      } catch(e) { console.error(e); }
+    }
+
     for (const [uuid, bitmask] of Object.entries(deviceDoorMasks)) {
-      const hexIndex = bitmask.toString(16).padStart(2, '0').toUpperCase();
-      await syncCredentialToDevice(uuid, hexIndex, qrCodeValue, 101, `${props.id}1`);
+      const type = controllerTypes[uuid] || 1;
+      const indexData = type !== 1 ? deviceDoorLists[uuid] : bitmask.toString(16).padStart(2, '0').toUpperCase();
+      await syncCredentialToDevice(uuid, indexData, qrCodeValue, 101, `${props.id}1`);
     }
 
     // Fetch the updated QR code data
@@ -1316,23 +1340,37 @@ const handleAccessLevelChange = async (value) => {
   }
 };
 
-const syncCredentialToDevice = async (deviceUuid, doorIndexHex, credentialCode, credentialType, credentialId) => {
+const syncCredentialToDevice = async (deviceUuid, doorIndexOrArray, credentialCode, credentialType, credentialId) => {
   try {
     const numericId = String(credentialId || "UnknownUser").replace(/\D/g, "");
     if (!numericId) return;
 
-    const payload = {
-      action: "insertPermission",
-      uuid: deviceUuid,
-      data: [
+    // Handle both bitmask (string) and discrete list (array of strings) for CC104
+    let payloadData = [];
+    if (Array.isArray(doorIndexOrArray)) {
+      payloadData = doorIndexOrArray.map(idx => ({
+        id: numericId,
+        type: credentialType,
+        code: String(credentialCode),
+        index: idx,
+        time: { type: 0 }
+      }));
+    } else {
+      payloadData = [
         {
           id: numericId,
           type: credentialType,
           code: String(credentialCode),
-          index: doorIndexHex,
+          index: doorIndexOrArray,
           time: { type: 0 }
         }
-      ]
+      ];
+    }
+
+    const payload = {
+      action: "insertPermission",
+      uuid: deviceUuid,
+      data: payloadData
     };
 
     await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-mqtt`, {
@@ -1392,16 +1430,38 @@ const updateAccessCatagory = async () => {
     
     // 1. Get the current/new devices map of UUID -> Door Bitmask
     const deviceDoorMasks = {};
+    const deviceDoorLists = {};
     (accessLevelDetails.value?.assignedDoors || []).forEach(d => {
        if (d.doors_id && (d.doors_id.deviceUuid || d.doors_id.uniqueId)) {
            const uuid = d.doors_id.deviceUuid || d.doors_id.uniqueId;
            const doorNum = parseInt(d.doors_id.doorNumber || 1, 10);
            const doorBitmask = 1 << (doorNum - 1);
+           
            if (!deviceDoorMasks[uuid]) deviceDoorMasks[uuid] = 0;
            deviceDoorMasks[uuid] |= doorBitmask;
+           
+           if (!deviceDoorLists[uuid]) deviceDoorLists[uuid] = [];
+           const doorIndexStr = doorNum.toString().padStart(2, '0');
+           if (!deviceDoorLists[uuid].includes(doorIndexStr)) {
+               deviceDoorLists[uuid].push(doorIndexStr);
+           }
        }
     });
     const uuids = new Set(Object.keys(deviceDoorMasks));
+
+    let controllerTypes = {};
+    if (uuids.size > 0) {
+      try {
+        const uuidsQuery = Array.from(uuids).join(',');
+        const ctrlRes = await fetch(`${import.meta.env.VITE_API_URL}/items/controllers?filter[sn][_in]=${uuidsQuery}&fields=sn,controllerType`, {
+          headers: { Authorization: `Bearer ${authService.getToken()}` }
+        });
+        if (ctrlRes.ok) {
+          const ctrlData = await ctrlRes.json();
+          (ctrlData.data || []).forEach(c => { controllerTypes[c.sn] = c.controllerType; });
+        }
+      } catch(e) { console.error(e); }
+    }
     
     // Function to get all possible IDs for a user to wipe them completely
     const getAllUserCredentialIds = () => {
@@ -1514,8 +1574,9 @@ const updateAccessCatagory = async () => {
         // Sync card to device via Knative if access is active
         if (accessOn.value && cardAccess) {
           for (const [uuid, bitmask] of Object.entries(deviceDoorMasks)) {
-            const hexIndex = bitmask.toString(16).padStart(2, '0').toUpperCase();
-            await syncCredentialToDevice(uuid, hexIndex, card.rfidCard, 200, `${card.rfidCard}`);
+            const type = controllerTypes[uuid] || 1;
+            const indexData = type !== 1 ? deviceDoorLists[uuid] : bitmask.toString(16).padStart(2, '0').toUpperCase();
+            await syncCredentialToDevice(uuid, indexData, card.rfidCard, 200, `${card.rfidCard}`);
           }
         }
       } else {
@@ -1535,8 +1596,9 @@ const updateAccessCatagory = async () => {
         // we must re-sync this remaining active card to the devices
         if (shouldWipeNewDevices && cardAccess) {
           for (const [uuid, bitmask] of Object.entries(deviceDoorMasks)) {
-            const hexIndex = bitmask.toString(16).padStart(2, '0').toUpperCase();
-            await syncCredentialToDevice(uuid, hexIndex, card.rfidCard, 200, `${card.rfidCard}`);
+            const type = controllerTypes[uuid] || 1;
+            const indexData = type !== 1 ? deviceDoorLists[uuid] : bitmask.toString(16).padStart(2, '0').toUpperCase();
+            await syncCredentialToDevice(uuid, indexData, card.rfidCard, 200, `${card.rfidCard}`);
           }
         }
       }
@@ -1558,16 +1620,18 @@ const updateAccessCatagory = async () => {
     // Sync Face Data if access is active (either new or re-synced after delete-wipe / access level change)
     if (faceEmbedData.value?.base64Data && accessOn.value) {
       for (const [uuid, bitmask] of Object.entries(deviceDoorMasks)) {
-        const hexIndex = bitmask.toString(16).padStart(2, '0').toUpperCase();
-        await syncCredentialToDevice(uuid, hexIndex, faceEmbedData.value.base64Data, 300, `${props.id}2`);
+        const type = controllerTypes[uuid] || 1;
+        const indexData = type !== 1 ? deviceDoorLists[uuid] : bitmask.toString(16).padStart(2, '0').toUpperCase();
+        await syncCredentialToDevice(uuid, indexData, faceEmbedData.value.base64Data, 300, `${props.id}2`);
       }
     }
 
     // Sync Fingerprint Data if access is active (either new or re-synced after delete-wipe / access level change)
     if (fingerData.value?.base64_UserFingers && accessOn.value) {
       for (const [uuid, bitmask] of Object.entries(deviceDoorMasks)) {
-        const hexIndex = bitmask.toString(16).padStart(2, '0').toUpperCase();
-        await syncCredentialToDevice(uuid, hexIndex, fingerData.value.base64_UserFingers, 500, `${props.id}3`);
+        const type = controllerTypes[uuid] || 1;
+        const indexData = type !== 1 ? deviceDoorLists[uuid] : bitmask.toString(16).padStart(2, '0').toUpperCase();
+        await syncCredentialToDevice(uuid, indexData, fingerData.value.base64_UserFingers, 500, `${props.id}3`);
       }
     }
 
