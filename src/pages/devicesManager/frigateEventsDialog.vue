@@ -147,8 +147,7 @@ const fetchEvents = async () => {
     const url = new URL(`${import.meta.env.VITE_API_URL}/items/frigateEvents`);
     url.searchParams.append('sort', '-start_time');
     url.searchParams.append('limit', '20');
-    url.searchParams.append('filter[start_time][_nnull]', 'true');
-    url.searchParams.append('filter[score][_gt]', '0');
+    url.searchParams.append('filter[snapshot_file][_nnull]', 'true');
     // If we want to filter by a specific camera mapped to this controller:
     // url.searchParams.append('filter[controller_id][_eq]', props.device.id);
 

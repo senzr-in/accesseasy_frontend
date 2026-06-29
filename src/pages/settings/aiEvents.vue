@@ -348,8 +348,7 @@ const fetchEvents = async () => {
     const url = new URL(`${apiUrl}/items/frigateEvents`);
     url.searchParams.append('sort', '-start_time');
     url.searchParams.append('limit', '2000');
-    url.searchParams.append('filter[start_time][_nnull]', 'true');
-    url.searchParams.append('filter[score][_gt]', '0');
+    url.searchParams.append('filter[snapshot_file][_nnull]', 'true');
 
     // Add filter logic
     if (selectedLabel.value !== 'all') {
