@@ -245,7 +245,7 @@ const resolveSnapshotUrl = (snapshotFile) => {
   if (!snapshotFile) return '';
   if (snapshotFile.endsWith('.jpg') || snapshotFile.includes('.')) {
     const knUrl = import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn';
-    return `${knUrl}/frigate-mqtt/snapshot?file=${encodeURIComponent(snapshotFile)}`;
+    return `${knUrl}/frigate-mqtt?file=${encodeURIComponent(snapshotFile)}`;
   }
   return `${apiUrl}/assets/${snapshotFile}?access_token=${systemToken}`;
 };
