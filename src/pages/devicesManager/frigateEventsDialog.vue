@@ -53,7 +53,7 @@
               />
               <Camera v-else class="h-8 w-8 text-slate-300 dark:text-zinc-800" />
               <!-- Score Badge -->
-              <div class="absolute top-2 right-2 bg-black/70 backdrop-blur-md rounded-md px-2 py-1 flex items-center gap-1 border border-white/10 shadow-sm">
+              <div v-if="event.score > 0" class="absolute top-2 right-2 bg-black/70 backdrop-blur-md rounded-md px-2 py-1 flex items-center gap-1 border border-white/10 shadow-sm">
                 <Focus class="h-3 w-3 text-emerald-400" />
                 <span class="text-[10px] font-black text-white">{{ Math.round(event.score * 100) }}%</span>
               </div>

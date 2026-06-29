@@ -187,10 +187,10 @@
 
         <!-- Action / Score & Button -->
         <div class="flex items-center gap-6 shrink-0 pl-4">
-          <div class="text-right hidden sm:block">
+          <div v-if="event.score > 0" class="text-right hidden sm:block">
             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Confidence</p>
             <p class="text-sm font-black text-blue-600 dark:text-blue-400 mt-0.5">
-              {{ Math.round((event.score||0)*100) }}%
+              {{ Math.round(event.score * 100) }}%
             </p>
           </div>
 
