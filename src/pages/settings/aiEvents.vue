@@ -134,108 +134,94 @@
       <p class="text-xs text-slate-500 mt-1">Wait for the camera NVRs to report object detection events.</p>
     </div>
 
-    <div v-else class="flex flex-col lg:flex-row gap-6">
-      <!-- List View (Left Side) -->
-      <div class="lg:w-1/3 flex flex-col gap-3 max-h-[75vh] overflow-y-auto pr-2 custom-scrollbar">
-        <div 
-          v-for="event in events" 
-          :key="event.event_id" 
-          @click="selectEvent(event)"
-          :class="[
-            'flex items-center gap-4 p-3 rounded-2xl border transition-all cursor-pointer',
-            selectedEvent?.id === event.id 
-              ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 shadow-sm' 
-              : 'bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 hover:border-blue-300 dark:hover:border-blue-800/50'
-          ]"
-        >
-          <!-- Thumbnail -->
-          <div class="h-16 w-16 shrink-0 rounded-xl overflow-hidden bg-slate-100 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 relative">
-            <img 
-              v-if="event.snapshot_file" 
-              :src="`${apiUrl}/assets/${event.snapshot_file}?access_token=${systemToken}&fit=cover&width=100&height=100`" 
-              class="w-full h-full object-cover" 
-              alt="Thumbnail"
-            />
-            <Camera v-else class="h-6 w-6 m-auto mt-5 text-slate-300 dark:text-zinc-800" />
+    <div v-else class="w-full flex flex-col gap-3 max-h-[75vh] overflow-y-auto pr-2 custom-scrollbar">
+      <div 
+        v-for="event in events" 
+        :key="event.event_id" 
+        @click="openEventImage(event)"
+        class="flex items-center justify-between p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 hover:border-blue-400 dark:hover:border-blue-800 hover:shadow-md transition-all cursor-pointer"
+      >
+        <div class="flex items-center gap-4 flex-1 min-w-0">
+          <!-- Class Icon Indicator (no image thumbnail) -->
+          <div class="h-11 w-11 shrink-0 rounded-xl flex items-center justify-center border shadow-sm animate-in fade-in duration-200"
+               :class="[
+                 event.label === 'person' ? 'bg-blue-50 dark:bg-blue-950/40 border-blue-100 dark:border-blue-900/55 text-blue-600 dark:text-blue-400' :
+                 event.label === 'car' ? 'bg-orange-50 dark:bg-orange-950/40 border-orange-100 dark:border-orange-900/55 text-orange-600 dark:text-orange-400' :
+                 event.label === 'dog' ? 'bg-yellow-50 dark:bg-yellow-950/40 border-yellow-100 dark:border-yellow-900/55 text-yellow-600 dark:text-yellow-400' :
+                 event.label === 'cat' ? 'bg-purple-50 dark:bg-purple-950/40 border-purple-100 dark:border-purple-900/55 text-purple-600 dark:text-purple-400' :
+                 'bg-slate-50 dark:bg-zinc-800/40 border-slate-100 dark:border-zinc-700 text-slate-500'
+               ]"
+          >
+            <User v-if="event.label === 'person'" class="h-5 w-5" />
+            <Car v-else-if="event.label === 'car'" class="h-5 w-5" />
+            <Dog v-else-if="event.label === 'dog'" class="h-5 w-5" />
+            <Cat v-else-if="event.label === 'cat'" class="h-5 w-5" />
+            <Box v-else class="h-5 w-5" />
           </div>
-          
-          <!-- Event Info -->
-          <div class="flex-1 min-w-0">
-             <div class="flex items-center justify-between">
-                <h3 class="text-sm font-black text-slate-900 dark:text-white capitalize truncate flex items-center gap-1.5">
-                  <User v-if="event.label === 'person'" class="h-3.5 w-3.5 text-blue-500" />
-                  <Car v-else-if="event.label === 'car'" class="h-3.5 w-3.5 text-orange-500" />
-                  <Dog v-else-if="event.label === 'dog'" class="h-3.5 w-3.5 text-yellow-500" />
-                  <Cat v-else-if="event.label === 'cat'" class="h-3.5 w-3.5 text-purple-500" />
-                  <Box v-else class="h-3.5 w-3.5 text-slate-400" />
-                  {{ event.label || 'Unknown' }}
-                </h3>
-                <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-zinc-800 text-slate-500">{{ Math.round((event.score||0)*100) }}%</span>
-             </div>
-             <p class="text-xs font-semibold text-slate-500 truncate mt-0.5">{{ event.camera || 'Unknown Camera' }}</p>
-             <p class="text-[10px] text-slate-400 mt-1 flex items-center gap-1">
-               <Clock class="h-3 w-3" />
-               {{ formatDate(event.start_time) }}
-             </p>
-          </div>
-        </div>
-      </div>
 
-      <!-- Detail View (Right Side) -->
-      <div class="lg:w-2/3">
-        <div v-if="selectedEvent" class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl overflow-hidden shadow-sm sticky top-6">
-          <div class="relative bg-slate-100 dark:bg-zinc-950 flex items-center justify-center border-b border-slate-200 dark:border-zinc-800 h-[45vh] lg:h-[55vh]">
-            <img 
-              v-if="selectedEvent.snapshot_file" 
-              :src="`${apiUrl}/assets/${selectedEvent.snapshot_file}?access_token=${systemToken}`" 
-              class="w-full h-full object-contain" 
-              alt="Snapshot"
-            />
-            <div v-else class="flex flex-col items-center text-slate-400">
-               <VideoOff class="h-12 w-12 mb-3" />
-               <span class="text-xs font-bold uppercase tracking-widest">No Snapshot Available</span>
+          <!-- Event Details -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-6 flex-1 min-w-0 items-center">
+            <div>
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Object Class</p>
+              <h3 class="text-sm font-black text-slate-900 dark:text-white capitalize truncate mt-0.5">
+                {{ event.label || 'Unknown' }}
+              </h3>
             </div>
             
-            <!-- Live Badge -->
-            <div class="absolute top-4 right-4 bg-black/75 backdrop-blur-md rounded-lg px-3 py-1.5 flex items-center gap-2 border border-white/10 shadow-sm">
-              <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span class="text-[10px] font-black text-white uppercase tracking-wider">Detection Event</span>
+            <div>
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Camera Source</p>
+              <p class="text-xs font-semibold text-slate-600 dark:text-slate-350 truncate mt-0.5">
+                {{ event.camera || 'Unknown Camera' }}
+              </p>
+            </div>
+
+            <div>
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Detection Time</p>
+              <p class="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mt-0.5">
+                <Clock class="h-3.5 w-3.5 text-slate-400" />
+                {{ formatDate(event.start_time) }}
+              </p>
             </div>
           </div>
-          
-          <div class="p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
-             <div>
-                <h2 class="text-xl font-black text-slate-900 dark:text-white capitalize flex items-center gap-2">
-                  <User v-if="selectedEvent.label === 'person'" class="h-5 w-5 text-blue-500" />
-                  <Car v-else-if="selectedEvent.label === 'car'" class="h-5 w-5 text-orange-500" />
-                  <Dog v-else-if="selectedEvent.label === 'dog'" class="h-5 w-5 text-yellow-500" />
-                  <Cat v-else-if="selectedEvent.label === 'cat'" class="h-5 w-5 text-purple-500" />
-                  <Box v-else class="h-5 w-5 text-slate-400" />
-                  {{ selectedEvent.label || 'Unknown Detection' }}
-                </h2>
-                <div class="flex flex-wrap items-center gap-4 mt-3">
-                  <div class="flex items-center gap-1.5 text-sm font-semibold text-slate-600 dark:text-slate-300">
-                    <Video class="h-4 w-4 text-slate-400" />
-                    {{ selectedEvent.camera || 'Unknown Camera' }}
-                  </div>
-                  <div class="flex items-center gap-1.5 text-sm font-semibold text-slate-600 dark:text-slate-300">
-                    <Clock class="h-4 w-4 text-slate-400" />
-                    {{ formatDate(selectedEvent.start_time) }}
-                  </div>
-                </div>
-             </div>
-             
-             <div class="flex flex-col items-end">
-               <span class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Confidence Score</span>
-               <div class="text-3xl font-black text-blue-600 dark:text-blue-400">
-                 {{ Math.round((selectedEvent.score||0)*100) }}%
-               </div>
-             </div>
-          </div>
         </div>
-        <div v-else class="h-full min-h-[50vh] flex flex-col items-center justify-center bg-slate-50 dark:bg-zinc-950/50 border border-dashed border-slate-300 dark:border-zinc-800 rounded-3xl">
-           <ScanFace class="h-12 w-12 text-slate-300 dark:text-zinc-800 mb-4" />
-           <p class="text-sm font-bold text-slate-500 dark:text-zinc-500">Select an event to view details</p>
+
+        <!-- Action / Score & Button -->
+        <div class="flex items-center gap-6 shrink-0 pl-4">
+          <div class="text-right hidden sm:block">
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Confidence</p>
+            <p class="text-sm font-black text-blue-600 dark:text-blue-400 mt-0.5">
+              {{ Math.round((event.score||0)*100) }}%
+            </p>
+          </div>
+
+          <button 
+            @click.stop="openEventImage(event)"
+            class="h-9 px-4 rounded-xl bg-blue-50 hover:bg-blue-100 dark:bg-blue-900/30 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 text-xs font-black uppercase tracking-wider flex items-center gap-2 border border-blue-100 dark:border-blue-900/50 transition-all shadow-sm"
+          >
+            <Eye class="h-3.5 w-3.5" />
+            View Image
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Image Lightbox Modal -->
+    <div v-if="isModalOpen && selectedEvent && selectedEvent.snapshot_file" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 animate-in fade-in duration-200" @click="isModalOpen = false">
+      <div class="relative max-w-5xl w-full max-h-[90vh] flex flex-col items-center justify-center" @click.stop>
+        <button 
+          @click="isModalOpen = false" 
+          class="absolute top-4 right-4 z-50 h-10 w-10 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center text-white border border-white/10 transition-colors"
+        >
+          <X class="h-6 w-6" />
+        </button>
+        <img 
+          :src="resolveSnapshotUrl(selectedEvent.snapshot_file)" 
+          class="rounded-2xl max-w-full max-h-[85vh] object-contain shadow-2xl border border-zinc-800" 
+          alt="Full Snapshot"
+        />
+        <div class="absolute bottom-4 bg-black/70 backdrop-blur-md rounded-xl px-4 py-2 border border-white/10 shadow-sm text-center">
+          <p class="text-xs font-black text-white uppercase tracking-wider capitalize">{{ selectedEvent.label }} - {{ selectedEvent.camera }}</p>
+          <p class="text-[10px] text-zinc-400 mt-0.5">{{ formatDate(selectedEvent.start_time) }}</p>
         </div>
       </div>
     </div>
@@ -246,13 +232,23 @@
 import { ref, onMounted } from 'vue';
 import { 
   ScanFace, Loader2, VideoOff, Camera, Clock, 
-  User, Car, Box, X, Search, Video, SlidersHorizontal, Activity, Dog, Cat, RefreshCcw, Cpu
+  User, Car, Box, X, Search, Video, SlidersHorizontal, Activity, Dog, Cat, RefreshCcw, Cpu,
+  Eye, EyeOff
 } from 'lucide-vue-next';
 import { authService } from "@/services/authService";
 
 const token = authService.getToken();
 const apiUrl = import.meta.env.VITE_API_URL;
 const systemToken = import.meta.env.VITE_API_TOKEN || 'p2pJHhZAjca6jQea0RbPVwNWRyrJG29X';
+
+const resolveSnapshotUrl = (snapshotFile) => {
+  if (!snapshotFile) return '';
+  if (snapshotFile.endsWith('.jpg') || snapshotFile.includes('.')) {
+    const knUrl = import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn';
+    return `${knUrl}/frigate-mqtt/snapshot?file=${encodeURIComponent(snapshotFile)}`;
+  }
+  return `${apiUrl}/assets/${snapshotFile}?access_token=${systemToken}`;
+};
 
 const events = ref([]);
 const nvrs = ref([]);
@@ -264,6 +260,9 @@ const selectedDeviceFilter = ref('');
 const cameraSearch = ref('');
 const selectedLabel = ref('all');
 const selectedEvent = ref(null);
+
+const showImage = ref(false);
+const isModalOpen = ref(false);
 
 let debounceTimer = null;
 
@@ -305,8 +304,9 @@ const formatDate = (dateString) => {
   }).format(date);
 };
 
-const selectEvent = (event) => {
+const openEventImage = (event) => {
   selectedEvent.value = event;
+  isModalOpen.value = true;
 };
 
 const fetchNvrs = async () => {
@@ -365,8 +365,10 @@ const fetchEvents = async () => {
     if (res.ok) {
       const data = await res.json();
       events.value = data.data || [];
-      if (events.value.length > 0 && (!selectedEvent.value || !events.value.find(e => e.id === selectedEvent.value.id))) {
-        selectedEvent.value = events.value[0];
+      // No automatic selection to prevent unwanted image downloads or modal popups
+      if (selectedEvent.value && !events.value.find(e => e.id === selectedEvent.value.id)) {
+        selectedEvent.value = null;
+        isModalOpen.value = false;
       }
     }
   } catch (err) {

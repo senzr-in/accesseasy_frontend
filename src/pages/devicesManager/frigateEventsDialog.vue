@@ -47,7 +47,7 @@
             <div class="h-32 bg-slate-100 dark:bg-zinc-950 relative overflow-hidden flex items-center justify-center border-b border-slate-200 dark:border-zinc-800">
               <img 
                 v-if="event.snapshot_file" 
-                :src="`${apiUrl}/assets/${event.snapshot_file}?access_token=${token}`" 
+                :src="resolveSnapshotUrl(event.snapshot_file)" 
                 class="w-full h-full object-cover"
                 alt="AI Detection Snapshot" 
               />
@@ -114,6 +114,15 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue']);
 const token = authService.getToken();
 const apiUrl = import.meta.env.VITE_API_URL;
+
+const resolveSnapshotUrl = (snapshotFile) => {
+  if (!snapshotFile) return '';
+  if (snapshotFile.endsWith('.jpg') || snapshotFile.includes('.')) {
+    const knUrl = import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn';
+    return `${knUrl}/frigate-mqtt/snapshot?file=${encodeURIComponent(snapshotFile)}`;
+  }
+  return `${apiUrl}/assets/${snapshotFile}?access_token=${token}`;
+};
 
 const events = ref([]);
 const loading = ref(false);
