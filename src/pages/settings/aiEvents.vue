@@ -214,12 +214,23 @@
         >
           <X class="h-6 w-6" />
         </button>
+        <div v-if="imageErrorMsg" class="absolute top-4 left-4 z-50 bg-red-500/90 text-white px-4 py-3 rounded-xl shadow-lg border border-red-400 backdrop-blur-md max-w-sm animate-in slide-in-from-top-4">
+          <p class="font-bold text-sm flex items-center gap-2">
+            <X class="h-4 w-4 bg-red-600 rounded-full p-0.5" />
+            Image Failed to Load
+          </p>
+          <p class="text-xs mt-1 text-red-100">{{ imageErrorMsg }}</p>
+          <p class="text-[10px] mt-2 opacity-80 uppercase tracking-wider font-semibold">Check Frigate NVR API & Retention Settings</p>
+        </div>
         <img 
+          v-show="!imageErrorMsg"
           :src="resolveSnapshotUrl(selectedEvent.snapshot_file)" 
+          @error="onImageError"
+          @load="imageErrorMsg = ''"
           class="rounded-2xl max-w-full max-h-[85vh] object-contain shadow-2xl border border-zinc-800" 
           alt="Full Snapshot"
         />
-        <div class="absolute bottom-4 bg-black/70 backdrop-blur-md rounded-xl px-4 py-2 border border-white/10 shadow-sm text-center">
+        <div v-if="!imageErrorMsg" class="absolute bottom-4 bg-black/70 backdrop-blur-md rounded-xl px-4 py-2 border border-white/10 shadow-sm text-center">
           <p class="text-xs font-black text-white uppercase tracking-wider capitalize">{{ selectedEvent.label }} - {{ selectedEvent.camera }}</p>
           <p class="text-[10px] text-zinc-400 mt-0.5">{{ formatDate(selectedEvent.start_time) }}</p>
         </div>
@@ -263,6 +274,7 @@ const selectedEvent = ref(null);
 
 const showImage = ref(false);
 const isModalOpen = ref(false);
+const imageErrorMsg = ref('');
 
 let debounceTimer = null;
 
@@ -304,7 +316,13 @@ const formatDate = (dateString) => {
   }).format(date);
 };
 
+const onImageError = (e) => {
+  console.error("Image failed to load from proxy. Proxy may be returning 404 or 500.", e);
+  imageErrorMsg.value = "The Knative proxy could not fetch the image from Frigate. It returned a 404/500 error.";
+};
+
 const openEventImage = (event) => {
+  imageErrorMsg.value = ''; // Reset error state
   selectedEvent.value = event;
   isModalOpen.value = true;
 };

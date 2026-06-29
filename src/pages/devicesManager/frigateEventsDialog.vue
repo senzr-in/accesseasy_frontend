@@ -46,11 +46,16 @@
             <!-- Snapshot Area -->
             <div class="h-32 bg-slate-100 dark:bg-zinc-950 relative overflow-hidden flex items-center justify-center border-b border-slate-200 dark:border-zinc-800">
               <img 
-                v-if="event.snapshot_file" 
+                v-if="event.snapshot_file && !imageErrors[event.event_id]" 
                 :src="resolveSnapshotUrl(event.snapshot_file)" 
+                @error="imageErrors[event.event_id] = true"
                 class="w-full h-full object-cover"
                 alt="AI Detection Snapshot" 
               />
+              <div v-else-if="imageErrors[event.event_id]" class="flex flex-col items-center justify-center p-4 text-center bg-red-50 dark:bg-red-950/30 w-full h-full">
+                <Activity class="h-5 w-5 text-red-500 mb-1 opacity-50" />
+                <p class="text-[9px] font-bold text-red-600 dark:text-red-400 uppercase tracking-widest">Image Unavailable</p>
+              </div>
               <Camera v-else class="h-8 w-8 text-slate-300 dark:text-zinc-800" />
               <!-- Score Badge -->
               <div v-if="event.score > 0" class="absolute top-2 right-2 bg-black/70 backdrop-blur-md rounded-md px-2 py-1 flex items-center gap-1 border border-white/10 shadow-sm">
@@ -126,6 +131,7 @@ const resolveSnapshotUrl = (snapshotFile) => {
 
 const events = ref([]);
 const loading = ref(false);
+const imageErrors = ref({});
 
 const close = () => {
   emit('update:modelValue', false);
@@ -157,6 +163,8 @@ const fetchEvents = async () => {
     if (res.ok) {
       const data = await res.json();
       events.value = data.data || [];
+      // Reset errors when fetching new events
+      imageErrors.value = {};
     } else {
       console.error('Failed to fetch Frigate events', res.statusText);
     }
