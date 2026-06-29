@@ -647,6 +647,108 @@ const close = () => {
   emit('update:modelValue', false);
 };
 
+const syncKnativeFromDialog = async () => {
+    if (!formData.value.rfidCard || !formData.value.groupId) {
+        return false;
+    }
+    
+    try {
+        const groupRes = await fetch(`${import.meta.env.VITE_API_URL}/items/accesslevels/${formData.value.groupId}?fields=assignDoorsGroup`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!groupRes.ok) return false;
+        
+        const groupData = await groupRes.json();
+        if (!groupData.data?.assignDoorsGroup?.length) {
+            return false;
+        }
+
+        const doorIds = groupData.data.assignDoorsGroup.join(',');
+        const doorsRes = await fetch(`${import.meta.env.VITE_API_URL}/items/doors?filter[id][_in]=${doorIds}&fields=deviceUuid,uniqueId,doorNumber`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!doorsRes.ok) return false;
+        
+        const doorsData = await doorsRes.json();
+        
+        const deviceDoorMasks = {};
+        const deviceDoorLists = {};
+        (doorsData.data || []).forEach(d => {
+            const uuid = d.deviceUuid || d.uniqueId;
+            if (uuid) {
+                const doorNum = parseInt(d.doorNumber || 1, 10);
+                const doorBitmask = 1 << (doorNum - 1);
+                if (!deviceDoorMasks[uuid]) deviceDoorMasks[uuid] = 0;
+                deviceDoorMasks[uuid] |= doorBitmask;
+                
+                if (!deviceDoorLists[uuid]) deviceDoorLists[uuid] = [];
+                const doorIndexStr = doorNum.toString().padStart(2, '0');
+                if (!deviceDoorLists[uuid].includes(doorIndexStr)) {
+                    deviceDoorLists[uuid].push(doorIndexStr);
+                }
+            }
+        });
+
+        const uuids = new Set(Object.keys(deviceDoorMasks));
+        if (uuids.size === 0) return false;
+        
+        let controllerTypes = {};
+        const uuidsQuery = Array.from(uuids).join(',');
+        const ctrlRes = await fetch(`${import.meta.env.VITE_API_URL}/items/controllers?filter[sn][_in]=${uuidsQuery}&fields=sn,controllerType`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        if (ctrlRes.ok) {
+            const ctrlData = await ctrlRes.json();
+            (ctrlData.data || []).forEach(c => { controllerTypes[c.sn] = c.controllerType; });
+        }
+
+        for (const [uuid, bitmask] of Object.entries(deviceDoorMasks)) {
+            const type = controllerTypes[uuid] || 1;
+            const indexData = type !== 1 ? deviceDoorLists[uuid] : bitmask.toString(16).padStart(2, '0').toUpperCase();
+            
+            const userName = `${formData.value.firstName || ''} ${formData.value.lastName || ''}`.trim() || 'Employee';
+
+            if (formData.value.accessOn) {
+                const payloadData = Array.isArray(indexData) ? indexData.map(idx => ({
+                    id: String(formData.value.rfidCard),
+                    type: 200,
+                    code: String(formData.value.rfidCard),
+                    index: idx,
+                    time: { type: 0 },
+                    extra: { name: userName }
+                })) : [{
+                    id: String(formData.value.rfidCard),
+                    type: 200,
+                    code: String(formData.value.rfidCard),
+                    index: indexData,
+                    time: { type: 0 },
+                    extra: { name: userName }
+                }];
+
+                const payload = { action: "insertPermission", uuid: uuid, data: payloadData };
+                
+                await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-mqtt`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+            } else {
+                const payload = { action: "delPermission", uuid: uuid, data: [String(formData.value.rfidCard)] };
+                await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-mqtt`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+            }
+        }
+        
+        return true;
+    } catch(err) {
+        console.error("Knative Sync Error in Onboard Dialog:", err);
+        return false;
+    }
+};
+
 const fetchDepartments = async () => {
   try {
     const res = await fetch(`${import.meta.env.VITE_API_URL}/items/department?filter[tenant][tenantId][_eq]=${tenantId}`, {
@@ -704,8 +806,8 @@ const handleSubmit = async () => {
 
     // Validate RFID Card format and uniqueness if entered
     if (formData.value.rfidCard) {
-      if (!/^\d{10}$/.test(formData.value.rfidCard)) {
-        throw new Error("RFID Card number must be exactly 10 digits.");
+      if (!/^\d{7}$/.test(formData.value.rfidCard)) {
+        throw new Error("RFID Card number must be exactly 7 digits.");
       }
       if (formData.value.rfidCard !== originalCardNumber.value) {
         const cardCheckRes = await fetch(`${import.meta.env.VITE_API_URL}/items/cardManagement?filter[rfidCard][_eq]=${formData.value.rfidCard}`, {
@@ -901,6 +1003,9 @@ const handleSubmit = async () => {
         }
       }
     }
+
+    // Trigger Knative Sync
+    await syncKnativeFromDialog();
 
     emit('success');
     close();

@@ -1372,15 +1372,26 @@ const syncCredentialToDevice = async (deviceUuid, doorIndexOrArray, credentialCo
       uuid: deviceUuid,
       data: payloadData
     };
+    
+    // DEBUG ALERT
+    alert(`Sending Knative Payload:\nUUID: ${deviceUuid}\nAction: insertPermission\nPayload: ${JSON.stringify(payloadData)}`);
 
-    await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-mqtt`, {
+    const res = await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-mqtt`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
+    
+    if (res.ok) {
+        alert(`Successfully sent insertPermission to Knative for ${deviceUuid}`);
+    } else {
+        alert(`Failed to send to Knative! Status: ${res.status}`);
+    }
+
     console.log(`Synced credential ${numericId} (Type: ${credentialType}) to device ${deviceUuid}`);
     await sleep(500);
   } catch (err) {
+    alert(`Error syncing to Knative: ${err.message}`);
     console.error("Failed to sync credential to Knative:", err);
   }
 };
@@ -1399,20 +1410,31 @@ const deleteCredentialFromDevice = async (deviceUuid, credentialIds) => {
       data: validNumericIds
     };
 
-    await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-mqtt`, {
+    alert(`Sending Knative Payload:\nUUID: ${deviceUuid}\nAction: delPermission\nIDs: ${JSON.stringify(validNumericIds)}`);
+
+    const res = await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-mqtt`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
+    
+    if (res.ok) {
+        alert(`Successfully sent delPermission to Knative for ${deviceUuid}`);
+    }
+
     console.log(`Deleted credentials for ${validNumericIds} from device ${deviceUuid}`);
     await sleep(1500);
   } catch (err) {
+    alert(`Error deleting from Knative: ${err.message}`);
     console.error("Failed to delete credential from Knative:", err);
   }
 };
 
 const updateAccessCatagory = async () => {
-  if (!hasChanges.value) return;
+  if (!hasChanges.value) {
+    alert("Save aborted: No changes detected to cards or access level.");
+    return;
+  }
 
   try {
     const payload = {
@@ -1448,6 +1470,9 @@ const updateAccessCatagory = async () => {
        }
     });
     const uuids = new Set(Object.keys(deviceDoorMasks));
+    
+    // DEBUG ALERT
+    alert(`Found ${uuids.size} devices for this access level.\nDevices: ${Array.from(uuids).join(', ')}`);
 
     let controllerTypes = {};
     if (uuids.size > 0) {
@@ -1593,12 +1618,18 @@ const updateAccessCatagory = async () => {
         );
 
         // If card was not new, but we wiped and rebuilt the devices (or access level changed),
+        // OR if the card's state was specifically changed (e.g. newly enabled),
         // we must re-sync this remaining active card to the devices
-        if (shouldWipeNewDevices && cardAccess) {
+        if ((shouldWipeNewDevices || card.isChanged) && cardAccess) {
           for (const [uuid, bitmask] of Object.entries(deviceDoorMasks)) {
             const type = controllerTypes[uuid] || 1;
             const indexData = type !== 1 ? deviceDoorLists[uuid] : bitmask.toString(16).padStart(2, '0').toUpperCase();
             await syncCredentialToDevice(uuid, indexData, card.rfidCard, 200, `${card.rfidCard}`);
+          }
+        } else if (card.isChanged && !cardAccess) {
+          // If the card was specifically toggled OFF, we must delete it from the hardware
+          for (const [uuid, bitmask] of Object.entries(deviceDoorMasks)) {
+            await deleteCredentialFromDevice(uuid, [card.rfidCard]);
           }
         }
       }
@@ -1678,8 +1709,8 @@ const addNewCard = async () => {
   if (!cardInput.value) return;
 
   // Check RFID Card format
-  if (!/^\d{10}$/.test(cardInput.value)) {
-    showErrorMessage("RFID Card number must be exactly 10 digits.");
+  if (!/^\d{7}$/.test(cardInput.value)) {
+    showErrorMessage("RFID Card number must be exactly 7 digits.");
     return;
   }
 
@@ -1739,8 +1770,8 @@ const handleCardFocus = () => {
 const handleCardInput = (event) => {
   if (cardInput.value) {
     cardInput.value = cardInput.value.toString().replace(/\D/g, "");
-    if (cardInput.value.length > 10) {
-      cardInput.value = cardInput.value.slice(0, 10);
+    if (cardInput.value.length > 7) {
+      cardInput.value = cardInput.value.slice(0, 7);
     }
   }
 };
