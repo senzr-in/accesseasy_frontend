@@ -909,20 +909,19 @@ const generateQRCode = async () => {
     );
 
     // Sync QR to device via Knative
-    const deviceDoorLists = {};
+    const deviceDoorMasks = {};
     (accessLevelDetails.value?.assignedDoors || []).forEach(d => {
        if (d.doors_id && (d.doors_id.deviceUuid || d.doors_id.uniqueId)) {
            const uuid = d.doors_id.deviceUuid || d.doors_id.uniqueId;
            const doorNum = parseInt(d.doors_id.doorNumber || 1, 10);
-           const doorIndexStr = doorNum.toString().padStart(2, '0');
-           if (!deviceDoorLists[uuid]) deviceDoorLists[uuid] = [];
-           if (!deviceDoorLists[uuid].includes(doorIndexStr)) {
-               deviceDoorLists[uuid].push(doorIndexStr);
-           }
+           const doorBitmask = 1 << (doorNum - 1);
+           if (!deviceDoorMasks[uuid]) deviceDoorMasks[uuid] = 0;
+           deviceDoorMasks[uuid] |= doorBitmask;
        }
     });
-    for (const [uuid, doorList] of Object.entries(deviceDoorLists)) {
-      await syncCredentialToDevice(uuid, doorList, qrCodeValue, 101, `${props.id}1`);
+    for (const [uuid, bitmask] of Object.entries(deviceDoorMasks)) {
+      const hexIndex = bitmask.toString(16).padStart(2, '0');
+      await syncCredentialToDevice(uuid, hexIndex, qrCodeValue, 101, `${props.id}1`);
     }
 
     // Fetch the updated QR code data
@@ -1317,23 +1316,23 @@ const handleAccessLevelChange = async (value) => {
   }
 };
 
-const syncCredentialToDevice = async (deviceUuid, doorIndexList, credentialCode, credentialType, credentialId) => {
+const syncCredentialToDevice = async (deviceUuid, doorIndexHex, credentialCode, credentialType, credentialId) => {
   try {
     const numericId = String(credentialId || "UnknownUser").replace(/\D/g, "");
     if (!numericId) return;
 
-    const dataArr = doorIndexList.map(index => ({
-      id: numericId,
-      type: credentialType,
-      code: String(credentialCode),
-      index: index, // Send correct string format like "01"
-      time: { type: 0 }
-    }));
-
     const payload = {
       action: "insertPermission",
       uuid: deviceUuid,
-      data: dataArr
+      data: [
+        {
+          id: numericId,
+          type: credentialType,
+          code: String(credentialCode),
+          index: doorIndexHex,
+          time: { type: 0 }
+        }
+      ]
     };
 
     await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-mqtt`, {
@@ -1341,7 +1340,7 @@ const syncCredentialToDevice = async (deviceUuid, doorIndexList, credentialCode,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
-    console.log(`Synced credential ${numericId} (Type: ${credentialType}) to device ${deviceUuid} for doors ${doorIndexList}`);
+    console.log(`Synced credential ${numericId} (Type: ${credentialType}) to device ${deviceUuid}`);
     await sleep(500);
   } catch (err) {
     console.error("Failed to sync credential to Knative:", err);
@@ -1391,20 +1390,18 @@ const updateAccessCatagory = async () => {
 
     const userName = props.employeeData?.first_name || String(props.id);
     
-    // 1. Get the current/new devices map of UUID -> Door Numbers
-    const deviceDoorLists = {};
+    // 1. Get the current/new devices map of UUID -> Door Bitmask
+    const deviceDoorMasks = {};
     (accessLevelDetails.value?.assignedDoors || []).forEach(d => {
        if (d.doors_id && (d.doors_id.deviceUuid || d.doors_id.uniqueId)) {
            const uuid = d.doors_id.deviceUuid || d.doors_id.uniqueId;
            const doorNum = parseInt(d.doors_id.doorNumber || 1, 10);
-           const doorIndexStr = doorNum.toString().padStart(2, '0');
-           if (!deviceDoorLists[uuid]) deviceDoorLists[uuid] = [];
-           if (!deviceDoorLists[uuid].includes(doorIndexStr)) {
-               deviceDoorLists[uuid].push(doorIndexStr);
-           }
+           const doorBitmask = 1 << (doorNum - 1);
+           if (!deviceDoorMasks[uuid]) deviceDoorMasks[uuid] = 0;
+           deviceDoorMasks[uuid] |= doorBitmask;
        }
     });
-    const uuids = new Set(Object.keys(deviceDoorLists));
+    const uuids = new Set(Object.keys(deviceDoorMasks));
     
     // Function to get all possible IDs for a user to wipe them completely
     const getAllUserCredentialIds = () => {
@@ -1516,8 +1513,9 @@ const updateAccessCatagory = async () => {
 
         // Sync card to device via Knative if access is active
         if (accessOn.value && cardAccess) {
-          for (const [uuid, doorList] of Object.entries(deviceDoorLists)) {
-            await syncCredentialToDevice(uuid, doorList, card.rfidCard, 200, `${card.rfidCard}`);
+          for (const [uuid, bitmask] of Object.entries(deviceDoorMasks)) {
+            const hexIndex = bitmask.toString(16).padStart(2, '0');
+            await syncCredentialToDevice(uuid, hexIndex, card.rfidCard, 200, `${card.rfidCard}`);
           }
         }
       } else {
@@ -1536,8 +1534,9 @@ const updateAccessCatagory = async () => {
         // If card was not new, but we wiped and rebuilt the devices (or access level changed),
         // we must re-sync this remaining active card to the devices
         if (shouldWipeNewDevices && cardAccess) {
-          for (const [uuid, doorList] of Object.entries(deviceDoorLists)) {
-            await syncCredentialToDevice(uuid, doorList, card.rfidCard, 200, `${card.rfidCard}`);
+          for (const [uuid, bitmask] of Object.entries(deviceDoorMasks)) {
+            const hexIndex = bitmask.toString(16).padStart(2, '0');
+            await syncCredentialToDevice(uuid, hexIndex, card.rfidCard, 200, `${card.rfidCard}`);
           }
         }
       }
@@ -1558,16 +1557,18 @@ const updateAccessCatagory = async () => {
 
     // Sync Face Data if access is active (either new or re-synced after delete-wipe / access level change)
     if (faceEmbedData.value?.base64Data && accessOn.value) {
-      for (const [uuid, doorList] of Object.entries(deviceDoorLists)) {
-          await syncCredentialToDevice(uuid, doorList, faceEmbedData.value.base64Data, 300, `${props.id}2`);
-        }
+      for (const [uuid, bitmask] of Object.entries(deviceDoorMasks)) {
+        const hexIndex = bitmask.toString(16).padStart(2, '0');
+        await syncCredentialToDevice(uuid, hexIndex, faceEmbedData.value.base64Data, 300, `${props.id}2`);
+      }
     }
 
     // Sync Fingerprint Data if access is active (either new or re-synced after delete-wipe / access level change)
     if (fingerData.value?.base64_UserFingers && accessOn.value) {
-      for (const [uuid, doorList] of Object.entries(deviceDoorLists)) {
-          await syncCredentialToDevice(uuid, doorList, fingerData.value.base64_UserFingers, 500, `${props.id}3`);
-        }
+      for (const [uuid, bitmask] of Object.entries(deviceDoorMasks)) {
+        const hexIndex = bitmask.toString(16).padStart(2, '0');
+        await syncCredentialToDevice(uuid, hexIndex, fingerData.value.base64_UserFingers, 500, `${props.id}3`);
+      }
     }
 
     const response = await fetch(
