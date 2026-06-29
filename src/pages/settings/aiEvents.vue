@@ -312,8 +312,6 @@ const selectedEvent = ref(null);
 const showImage = ref(false);
 const isModalOpen = ref(false);
 const imageErrorMsg = ref('');
-const snapshotBlobUrl = ref('');
-const loadingImage = ref(false);
 
 let debounceTimer = null;
 
