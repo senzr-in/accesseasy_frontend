@@ -222,15 +222,17 @@
           <p class="text-xs mt-1 text-red-100">{{ imageErrorMsg }}</p>
           <p class="text-[10px] mt-2 opacity-80 uppercase tracking-wider font-semibold">Check Frigate NVR API & Retention Settings</p>
         </div>
+        <div v-if="loadingImage && !imageErrorMsg" class="flex flex-col items-center justify-center gap-3 py-16">
+          <Loader2 class="h-8 w-8 animate-spin text-blue-400" />
+          <p class="text-xs text-zinc-400 uppercase tracking-widest font-bold">Fetching Snapshot...</p>
+        </div>
         <img 
-          v-show="!imageErrorMsg"
-          :src="resolveSnapshotUrl(selectedEvent.snapshot_file)" 
-          @error="onImageError"
-          @load="imageErrorMsg = ''"
+          v-show="snapshotBlobUrl && !imageErrorMsg && !loadingImage"
+          :src="snapshotBlobUrl" 
           class="rounded-2xl max-w-full max-h-[85vh] object-contain shadow-2xl border border-zinc-800" 
           alt="Full Snapshot"
         />
-        <div v-if="!imageErrorMsg" class="absolute bottom-4 bg-black/70 backdrop-blur-md rounded-xl px-4 py-2 border border-white/10 shadow-sm text-center">
+        <div v-if="snapshotBlobUrl && !imageErrorMsg && !loadingImage" class="absolute bottom-4 bg-black/70 backdrop-blur-md rounded-xl px-4 py-2 border border-white/10 shadow-sm text-center">
           <p class="text-xs font-black text-white uppercase tracking-wider capitalize">{{ selectedEvent.label }} - {{ selectedEvent.camera }}</p>
           <p class="text-[10px] text-zinc-400 mt-0.5">{{ formatDate(selectedEvent.start_time) }}</p>
         </div>
@@ -261,6 +263,41 @@ const resolveSnapshotUrl = (snapshotFile) => {
   return `${apiUrl}/assets/${snapshotFile}?access_token=${systemToken}`;
 };
 
+// Fetch image as blob to handle base64-encoded responses from proxy
+const snapshotBlobUrl = ref('');
+const loadingImage = ref(false);
+
+const loadSnapshotBlob = async (snapshotFile) => {
+  if (!snapshotFile) return;
+  loadingImage.value = true;
+  snapshotBlobUrl.value = '';
+  imageErrorMsg.value = '';
+  try {
+    const url = resolveSnapshotUrl(snapshotFile);
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`Proxy returned ${res.status}`);
+    // Handle both raw binary and base64 text responses
+    const contentType = res.headers.get('content-type') || '';
+    if (contentType.includes('image')) {
+      const blob = await res.blob();
+      snapshotBlobUrl.value = URL.createObjectURL(blob);
+    } else {
+      // Proxy returned base64 text — decode it manually
+      const text = await res.text();
+      const byteChars = atob(text.trim());
+      const byteArray = new Uint8Array(byteChars.length);
+      for (let i = 0; i < byteChars.length; i++) byteArray[i] = byteChars.charCodeAt(i);
+      const blob = new Blob([byteArray], { type: 'image/jpeg' });
+      snapshotBlobUrl.value = URL.createObjectURL(blob);
+    }
+  } catch (err) {
+    console.error('Failed to load snapshot:', err.message);
+    imageErrorMsg.value = `Proxy error: ${err.message}`;
+  } finally {
+    loadingImage.value = false;
+  }
+};
+
 const events = ref([]);
 const nvrs = ref([]);
 const linkedControllers = ref([]);
@@ -275,6 +312,8 @@ const selectedEvent = ref(null);
 const showImage = ref(false);
 const isModalOpen = ref(false);
 const imageErrorMsg = ref('');
+const snapshotBlobUrl = ref('');
+const loadingImage = ref(false);
 
 let debounceTimer = null;
 
@@ -317,14 +356,16 @@ const formatDate = (dateString) => {
 };
 
 const onImageError = (e) => {
-  console.error("Image failed to load from proxy. Proxy may be returning 404 or 500.", e);
+  console.error("Image failed to load from proxy.", e);
   imageErrorMsg.value = "The Knative proxy could not fetch the image from Frigate. It returned a 404/500 error.";
 };
 
 const openEventImage = (event) => {
-  imageErrorMsg.value = ''; // Reset error state
+  imageErrorMsg.value = '';
+  snapshotBlobUrl.value = '';
   selectedEvent.value = event;
   isModalOpen.value = true;
+  if (event.snapshot_file) loadSnapshotBlob(event.snapshot_file);
 };
 
 const fetchNvrs = async () => {
