@@ -1318,16 +1318,19 @@ const handleAccessLevelChange = async (value) => {
 
 const syncCredentialToDevice = async (deviceUuid, doorIndexHex, credentialCode, credentialType, credentialId) => {
   try {
+    const numericId = String(credentialId || "UnknownUser").replace(/\D/g, "");
+    if (!numericId) return;
+
     const payload = {
       action: "insertPermission",
       uuid: deviceUuid,
       data: [
         {
-          id: String(credentialId || "UnknownUser"),
+          id: numericId,
           type: credentialType,
           code: String(credentialCode),
-          index: doorIndexHex,       // Target sub-device
-          time: { type: 0 }  // 0 = Permanent access
+          index: doorIndexHex,
+          time: { type: 0 }
         }
       ]
     };
@@ -1337,18 +1340,25 @@ const syncCredentialToDevice = async (deviceUuid, doorIndexHex, credentialCode, 
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
-    console.log(`Synced credential (type ${credentialType}) to device ${deviceUuid}`);
+    console.log(`Synced credential ${numericId} (Type: ${credentialType}) to device ${deviceUuid}`);
+    await sleep(500);
   } catch (err) {
     console.error("Failed to sync credential to Knative:", err);
   }
 };
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 const deleteCredentialFromDevice = async (deviceUuid, credentialIds) => {
   try {
+    const rawIds = Array.isArray(credentialIds) ? credentialIds : [credentialIds];
+    const validNumericIds = rawIds.map(String).filter(id => /^\d+$/.test(id));
+    if (validNumericIds.length === 0) return;
+
     const payload = {
       action: "delPermission",
       uuid: deviceUuid,
-      data: Array.isArray(credentialIds) ? credentialIds.map(String) : [String(credentialIds)]
+      data: validNumericIds
     };
 
     await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-mqtt`, {
@@ -1356,7 +1366,8 @@ const deleteCredentialFromDevice = async (deviceUuid, credentialIds) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
-    console.log(`Deleted credentials for ${credentialIds} from device ${deviceUuid}`);
+    console.log(`Deleted credentials for ${validNumericIds} from device ${deviceUuid}`);
+    await sleep(1500);
   } catch (err) {
     console.error("Failed to delete credential from Knative:", err);
   }
@@ -1394,11 +1405,14 @@ const updateAccessCatagory = async () => {
     
     // Function to get all possible IDs for a user to wipe them completely
     const getAllUserCredentialIds = () => {
-      const ids = [`${props.id}1`, `${props.id}2`, `${props.id}3`];
-      originalCards.value.forEach(c => ids.push(`${c.rfidCard}`));
-      assignedCards.value.forEach(c => ids.push(`${c.rfidCard}`));
-      return [...new Set(ids)];
-    };
+    const ids = [];
+    if (!isNaN(parseInt(props.id, 10))) {
+      ids.push(`${props.id}1`, `${props.id}2`, `${props.id}3`);
+    }
+    originalCards.value.forEach(c => c.rfidCard && ids.push(`${c.rfidCard}`));
+    assignedCards.value.forEach(c => c.rfidCard && ids.push(`${c.rfidCard}`));
+    return [...new Set(ids)].filter(id => /^\d+$/.test(id));
+  };
     const allUserIds = getAllUserCredentialIds();
 
     // 2. Fetch and identify old devices set to check for cleanup
