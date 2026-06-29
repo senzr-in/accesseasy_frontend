@@ -921,7 +921,7 @@ const generateQRCode = async () => {
     });
     for (const [uuid, bitmask] of Object.entries(deviceDoorMasks)) {
       const hexIndex = bitmask.toString(16).padStart(2, '0');
-      await syncCredentialToDevice(uuid, hexIndex, qrCodeValue, 101, `${props.id}_qr`);
+      await syncCredentialToDevice(uuid, hexIndex, qrCodeValue, 101, `${props.id}1`);
     }
 
     // Fetch the updated QR code data
@@ -1355,7 +1355,7 @@ const deleteCredentialFromDevice = async (deviceUuid, credentialIds) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
     });
-    console.log(`Deleted credentials for ${credentialId} from device ${deviceUuid}`);
+    console.log(`Deleted credentials for ${credentialIds} from device ${deviceUuid}`);
   } catch (err) {
     console.error("Failed to delete credential from Knative:", err);
   }
@@ -1393,9 +1393,9 @@ const updateAccessCatagory = async () => {
     
     // Function to get all possible IDs for a user to wipe them completely
     const getAllUserCredentialIds = () => {
-      const ids = [`${props.id}_qr`, `${props.id}_face`, `${props.id}_finger`];
-      originalCards.value.forEach(c => ids.push(`${props.id}_c_${c.rfidCard}`));
-      assignedCards.value.forEach(c => ids.push(`${props.id}_c_${c.rfidCard}`));
+      const ids = [`${props.id}1`, `${props.id}2`, `${props.id}3`];
+      originalCards.value.forEach(c => ids.push(`${c.rfidCard}`));
+      assignedCards.value.forEach(c => ids.push(`${c.rfidCard}`));
       return [...new Set(ids)];
     };
     const allUserIds = getAllUserCredentialIds();
@@ -1500,7 +1500,7 @@ const updateAccessCatagory = async () => {
         if (accessOn.value && cardAccess) {
           for (const [uuid, bitmask] of Object.entries(deviceDoorMasks)) {
             const hexIndex = bitmask.toString(16).padStart(2, '0');
-            await syncCredentialToDevice(uuid, hexIndex, card.rfidCard, 200, `${props.id}_c_${card.rfidCard}`);
+            await syncCredentialToDevice(uuid, hexIndex, card.rfidCard, 200, `${card.rfidCard}`);
           }
         }
       } else {
@@ -1521,7 +1521,7 @@ const updateAccessCatagory = async () => {
         if (shouldWipeNewDevices && cardAccess) {
           for (const [uuid, bitmask] of Object.entries(deviceDoorMasks)) {
             const hexIndex = bitmask.toString(16).padStart(2, '0');
-            await syncCredentialToDevice(uuid, hexIndex, card.rfidCard, 200, `${props.id}_c_${card.rfidCard}`);
+            await syncCredentialToDevice(uuid, hexIndex, card.rfidCard, 200, `${card.rfidCard}`);
           }
         }
       }
@@ -1544,7 +1544,7 @@ const updateAccessCatagory = async () => {
     if (faceEmbedData.value?.base64Data && accessOn.value) {
       for (const [uuid, bitmask] of Object.entries(deviceDoorMasks)) {
         const hexIndex = bitmask.toString(16).padStart(2, '0');
-        await syncCredentialToDevice(uuid, hexIndex, faceEmbedData.value.base64Data, 300, `${props.id}_face`);
+        await syncCredentialToDevice(uuid, hexIndex, faceEmbedData.value.base64Data, 300, `${props.id}2`);
       }
     }
 
@@ -1552,7 +1552,7 @@ const updateAccessCatagory = async () => {
     if (fingerData.value?.base64_UserFingers && accessOn.value) {
       for (const [uuid, bitmask] of Object.entries(deviceDoorMasks)) {
         const hexIndex = bitmask.toString(16).padStart(2, '0');
-        await syncCredentialToDevice(uuid, hexIndex, fingerData.value.base64_UserFingers, 500, `${props.id}_finger`);
+        await syncCredentialToDevice(uuid, hexIndex, fingerData.value.base64_UserFingers, 500, `${props.id}3`);
       }
     }
 
