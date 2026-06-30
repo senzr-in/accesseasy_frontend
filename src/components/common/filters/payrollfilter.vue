@@ -854,28 +854,36 @@ export default {
 <style scoped>
 .filter-header {
   padding: 1rem 1.25rem;
-  border: 1px solid red;
-  background: #f5dcda;
+  border-bottom: 1px solid #e2e8f0;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background-color: #f8fafc;
+}
+
+:global(.dark) .filter-header {
+  border-bottom-color: #27272a;
+  background-color: #18181b;
 }
 
 .filter-header h2 {
   font-size: 1rem;
   font-weight: 700;
-  color: #111827;
+  color: #0f172a;
   margin: 0;
   text-align: left;
-  margin-left: 0.5rem;
+}
+
+:global(.dark) .filter-header h2 {
+  color: #ffffff;
 }
 
 .filter-wrapper {
   display: flex;
   flex-direction: column;
-  background: white;
+  background: transparent;
   overflow-y: auto;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  height: 100%;
 }
 
 .filter-content-container {
@@ -909,6 +917,12 @@ export default {
   font-size: 0.875rem;
 }
 
+:global(.dark) .error-message {
+  background: rgba(220, 38, 38, 0.1);
+  border-color: rgba(220, 38, 38, 0.2);
+  color: #f87171;
+}
+
 .error-icon {
   width: 18px;
   height: 18px;
@@ -940,24 +954,35 @@ export default {
   gap: 0.5rem;
   font-weight: 600;
   font-size: 0.875rem;
-  color: #374151;
+  color: #475569;
+}
+
+:global(.dark) .filter-label {
+  color: #a1a1aa;
 }
 
 .label-icon {
   width: 16px;
   height: 16px;
   stroke-width: 2;
-  color: #6b7280;
+  color: currentcolor;
 }
 
 .filter-input {
   padding: 0.75rem 1rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid #e2e8f0;
   border-radius: 6px;
   font-size: 0.875rem;
   transition: all 0.2s ease;
-  background: white;
+  background: #ffffff;
+  color: #0f172a;
   min-height: 44px;
+}
+
+:global(.dark) .filter-input {
+  background: #09090b;
+  border-color: #27272a;
+  color: #f4f4f5;
 }
 
 .filter-input:focus {
@@ -966,11 +991,21 @@ export default {
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
+:global(.dark) .filter-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
 .filter-input:disabled {
-  background: #f9fafb;
-  color: #9ca3af;
+  background: #f8fafc;
+  color: #94a3b8;
   cursor: not-allowed;
   opacity: 0.6;
+}
+
+:global(.dark) .filter-input:disabled {
+  background: #18181b;
+  color: #52525b;
 }
 
 .filter-wrapper {
@@ -994,12 +1029,22 @@ export default {
   color: #0c4a6e;
 }
 
+:global(.dark) .cycle-stats {
+  background: rgba(14, 165, 233, 0.1);
+  border-color: rgba(14, 165, 233, 0.2);
+  color: #38bdf8;
+}
+
 .cycle-stats p {
   margin: 0.25rem 0;
 }
 
 .cycle-stats strong {
   color: #075985;
+}
+
+:global(.dark) .cycle-stats strong {
+  color: #7dd3fc;
 }
 
 @keyframes slideDown {
