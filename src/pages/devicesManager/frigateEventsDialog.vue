@@ -160,8 +160,9 @@ const apiUrl = import.meta.env.VITE_API_URL;
 const resolveSnapshotUrl = (snapshotFile) => {
   if (!snapshotFile) return '';
   if (snapshotFile.endsWith('.jpg') || snapshotFile.includes('.')) {
-    const knUrl = import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn';
-    return `${knUrl}/frigate-mqtt?file=${encodeURIComponent(snapshotFile)}`;
+    // Use the direct frigate-mqtt Knative function URL
+    const frigateProxy = 'http://frigate-mqtt.knative-fn.65.109.41.139.sslip.io';
+    return `${frigateProxy}/?file=${encodeURIComponent(snapshotFile)}`;
   }
   return `${apiUrl}/assets/${snapshotFile}?access_token=${token}`;
 };

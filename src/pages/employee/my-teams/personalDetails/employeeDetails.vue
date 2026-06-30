@@ -377,7 +377,7 @@ const employeeToDelete = ref(null);
 const deleting = ref(false);
 
 const showExportDialog = ref(false);
-const showFilters = ref(true);
+const showFilters = ref(false);
 const filters = reactive({
   branch: "",
   department: "",

@@ -1,7 +1,7 @@
 <template>
-  <div class="filter-wrapper">
-    <div class="filter-header">
-      <h2>Filters</h2>
+  <div class="flex flex-col bg-transparent overflow-y-auto h-full relative z-10">
+    <div class="p-4 border-b border-slate-200 dark:border-zinc-800 bg-transparent flex justify-between items-center">
+      <h2 class="text-sm font-bold text-slate-900 dark:text-white m-0 text-left">Filters</h2>
       <BaseButton
         variant="secondary"
         size="sm"
@@ -13,16 +13,16 @@
     </div>
     <!-- Filter Content - Properly Collapsible -->
     <div
-      class="filter-content-container"
-      :class="{ collapsed: !isFilterVisible }"
+      class="overflow-auto transition-all duration-300 ease-in-out"
+      :class="{ 'max-h-0 opacity-0 overflow-hidden': !isFilterVisible, 'max-h-[800px] opacity-100': isFilterVisible }"
     >
-      <div class="filter-content">
+      <div class="p-5 flex flex-col gap-6">
         <div
           v-if="error"
-          class="error-message"
+          class="flex items-center gap-2 px-4 py-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-md text-red-600 dark:text-red-400 text-sm"
         >
           <svg
-            class="error-icon"
+            class="w-[18px] h-[18px] shrink-0"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -41,15 +41,15 @@
           {{ error }}
         </div>
 
-        <div class="filter-grid">
+        <div class="grid gap-5 grid-cols-1 md:grid-cols-[repeat(auto-fit,minmax(240px,1fr))]">
           <div
             v-for="filter in visibleFilters"
             :key="filter.key"
-            class="filter-item"
+            class="flex flex-col gap-2"
           >
-            <label class="filter-label">
+            <label class="flex items-center gap-2 font-semibold text-sm text-slate-700 dark:text-zinc-400">
               <svg
-                class="label-icon"
+                class="w-4 h-4 stroke-2 text-current"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -64,7 +64,7 @@
               v-if="filter.type === 'month'"
               type="month"
               :value="localFilters[filter.key]"
-              class="filter-input"
+              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
               @change="handleMonthChange($event.target.value)"
             >
 
@@ -72,7 +72,7 @@
             <select
               v-else-if="filter.key === 'organization'"
               :value="localFilters[filter.key]"
-              class="filter-input"
+              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
               @change="handleInputChange(filter.key, $event.target.value)"
             >
               <option value="">
@@ -91,7 +91,7 @@
             <select
               v-else-if="filter.key === 'branch'"
               :value="localFilters[filter.key]"
-              class="filter-input"
+              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
               @change="handleInputChange(filter.key, $event.target.value)"
             >
               <option value="">
@@ -110,7 +110,7 @@
             <select
               v-else-if="filter.key === 'department'"
               :value="localFilters[filter.key]"
-              class="filter-input"
+              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
               @change="handleInputChange(filter.key, $event.target.value)"
             >
               <option value="">
@@ -128,11 +128,11 @@
             <!-- Attendance Cycle Select -->
             <div
               v-else-if="filter.key === 'attendanceCycle'"
-              class="attendance-cycle-container"
+              class="flex flex-col gap-2"
             >
               <select
                 :value="localFilters[filter.key]"
-                class="filter-input"
+                class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
                 :disabled="isLoadingCycles"
                 @change="handleAttendanceCycleChange($event.target.value)"
               >
@@ -159,7 +159,7 @@
               <!-- Display Dynamic Cycle Stats -->
               <div
                 v-if="selectedCycleWithDates && !isLoadingCycles"
-                class="cycle-stats"
+                class="mt-2 p-3 bg-sky-50 dark:bg-sky-500/10 border border-sky-200 dark:border-sky-500/20 rounded-lg text-sm text-sky-900 dark:text-sky-400"
               >
                 <p>
                   <strong>Cycle Period:</strong>
@@ -181,7 +181,7 @@
             <select
               v-else-if="filter.key === 'cycleType'"
               :value="localFilters[filter.key]"
-              class="filter-input"
+              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
               @change="handleInputChange(filter.key, $event.target.value)"
             >
               <option value="">
@@ -200,7 +200,7 @@
             <select
               v-else-if="filter.key === 'status'"
               :value="localFilters[filter.key]"
-              class="filter-input"
+              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
               @change="handleInputChange(filter.key, $event.target.value)"
             >
               <option value="">
@@ -219,7 +219,7 @@
             <select
               v-else-if="filter.key === 'mode'"
               :value="localFilters[filter.key]"
-              class="filter-input"
+              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
               @change="handleInputChange(filter.key, $event.target.value)"
             >
               <option value="">
@@ -238,7 +238,7 @@
             <select
               v-else-if="filter.key === 'attendance'"
               :value="localFilters[filter.key]"
-              class="filter-input"
+              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
               @change="handleInputChange(filter.key, $event.target.value)"
             >
               <option value="">
@@ -263,7 +263,7 @@
             <select
               v-else-if="filter.type === 'select' && filter.options"
               :value="localFilters[filter.key]"
-              class="filter-input"
+              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
               @change="handleInputChange(filter.key, $event.target.value)"
             >
               <option value="">
@@ -284,7 +284,7 @@
               type="text"
               :value="localFilters[filter.key]"
               :placeholder="filter.placeholder || ''"
-              class="filter-input"
+              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
               @input="handleInputChange(filter.key, $event.target.value)"
             >
 
@@ -293,7 +293,7 @@
               v-else-if="filter.type === 'date'"
               type="date"
               :value="localFilters[filter.key]"
-              class="filter-input"
+              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
               @change="handleInputChange(filter.key, $event.target.value)"
             >
 
@@ -303,7 +303,7 @@
               type="number"
               :value="localFilters[filter.key]"
               :placeholder="filter.placeholder || ''"
-              class="filter-input"
+              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
               @input="handleInputChange(filter.key, $event.target.value)"
             >
           </div>
@@ -851,214 +851,4 @@ export default {
 };
 </script>
 
-<style scoped>
-.filter-header {
-  padding: 1rem 1.25rem;
-  border-bottom: 1px solid #e2e8f0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #f8fafc;
-}
 
-:global(.dark) .filter-header {
-  border-bottom-color: #27272a;
-  background-color: #18181b;
-}
-
-.filter-header h2 {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #0f172a;
-  margin: 0;
-  text-align: left;
-}
-
-:global(.dark) .filter-header h2 {
-  color: #ffffff;
-}
-
-.filter-wrapper {
-  display: flex;
-  flex-direction: column;
-  background: transparent;
-  overflow-y: auto;
-  height: 100%;
-}
-
-.filter-content-container {
-  overflow: auto;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  max-height: 800px;
-  opacity: 1;
-}
-
-.filter-content-container.collapsed {
-  max-height: 0;
-  opacity: 0;
-}
-
-.filter-content {
-  padding: 1.5rem 1.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.error-message {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 6px;
-  color: #dc2626;
-  font-size: 0.875rem;
-}
-
-:global(.dark) .error-message {
-  background: rgba(220, 38, 38, 0.1);
-  border-color: rgba(220, 38, 38, 0.2);
-  color: #f87171;
-}
-
-.error-icon {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-}
-
-.filter-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1.25rem;
-}
-
-@media (max-width: 768px) {
-  .filter-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-}
-
-.filter-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.filter-label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-weight: 600;
-  font-size: 0.875rem;
-  color: #475569;
-}
-
-:global(.dark) .filter-label {
-  color: #a1a1aa;
-}
-
-.label-icon {
-  width: 16px;
-  height: 16px;
-  stroke-width: 2;
-  color: currentcolor;
-}
-
-.filter-input {
-  padding: 0.75rem 1rem;
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  transition: all 0.2s ease;
-  background: #ffffff;
-  color: #0f172a;
-  min-height: 44px;
-}
-
-:global(.dark) .filter-input {
-  background: #09090b;
-  border-color: #27272a;
-  color: #f4f4f5;
-}
-
-.filter-input:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-:global(.dark) .filter-input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-}
-
-.filter-input:disabled {
-  background: #f8fafc;
-  color: #94a3b8;
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-:global(.dark) .filter-input:disabled {
-  background: #18181b;
-  color: #52525b;
-}
-
-.filter-wrapper {
-  position: relative;
-  z-index: 10;
-}
-
-.attendance-cycle-container {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.cycle-stats {
-  margin-top: 0.5rem;
-  padding: 0.75rem;
-  background: #f0f9ff;
-  border: 1px solid #bae6fd;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  color: #0c4a6e;
-}
-
-:global(.dark) .cycle-stats {
-  background: rgba(14, 165, 233, 0.1);
-  border-color: rgba(14, 165, 233, 0.2);
-  color: #38bdf8;
-}
-
-.cycle-stats p {
-  margin: 0.25rem 0;
-}
-
-.cycle-stats strong {
-  color: #075985;
-}
-
-:global(.dark) .cycle-stats strong {
-  color: #7dd3fc;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.filter-content-container:not(.collapsed) .filter-content {
-  animation: slideDown 0.3s ease-out;
-}
-</style>
