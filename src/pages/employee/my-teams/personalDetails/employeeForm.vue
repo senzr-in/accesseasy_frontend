@@ -699,9 +699,9 @@
                 type="text"
                 inputmode="numeric"
                 label="ESI Account Number"
-                @update:model-value="val => formData.ESIAccountNumber = (val || '').replace(/\D/g, '')"
                 variant="outlined"
                 density="comfortable"
+                @update:model-value="val => formData.ESIAccountNumber = (val || '').replace(/\D/g, '')"
               />
             </v-col>
             <v-col

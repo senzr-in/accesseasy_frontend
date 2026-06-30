@@ -189,9 +189,9 @@
               required
               type="text"
               inputmode="numeric"
-              @update:model-value="val => tempFormData.accountNumber = (val || '').replace(/\D/g, '')"
               variant="outlined"
               density="comfortable"
+              @update:model-value="val => tempFormData.accountNumber = (val || '').replace(/\D/g, '')"
             />
             <v-text-field
               v-model="tempFormData.IFSC"

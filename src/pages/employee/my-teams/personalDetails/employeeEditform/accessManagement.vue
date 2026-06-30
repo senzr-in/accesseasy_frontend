@@ -375,9 +375,9 @@
                     class="card-input"
                     append-inner-icon="mdi-credit-card-scan"
                     :disabled="!accessOn"
+                    maxlength="10"
                     @focus="handleCardFocus"
                     @input="handleCardInput"
-                    maxlength="10"
                   />
                   <v-btn
                     color="#2563EB"

@@ -172,10 +172,10 @@
               type="text"
               inputmode="numeric"
               :rules="[(v) => !!v || 'Account Number is required']"
-              @update:model-value="val => tempFormData.accountNumber = (val || '').replace(/\D/g, '')"
               required
               variant="outlined"
               density="comfortable"
+              @update:model-value="val => tempFormData.accountNumber = (val || '').replace(/\D/g, '')"
             />
             <v-text-field
               v-model="tempFormData.IFSC"

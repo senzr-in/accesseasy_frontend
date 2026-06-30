@@ -22,10 +22,16 @@
           <FileDown class="w-4 h-4" /> Export
         </button>
         <div class="absolute right-0 mt-2 w-40 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl shadow-lg py-1 z-50 hidden group-hover:block">
-          <button @click="exportVisitorsExcel" class="w-full text-left px-4 py-2 text-xs font-bold text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors">
+          <button
+            class="w-full text-left px-4 py-2 text-xs font-bold text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors"
+            @click="exportVisitorsExcel"
+          >
             Export Excel
           </button>
-          <button @click="exportVisitorsCSV" class="w-full text-left px-4 py-2 text-xs font-bold text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors">
+          <button
+            class="w-full text-left px-4 py-2 text-xs font-bold text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors"
+            @click="exportVisitorsCSV"
+          >
             Export CSV
           </button>
         </div>
@@ -223,7 +229,15 @@
           <div class="grid grid-cols-2 gap-4">
             <div class="space-y-1.5">
               <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Mobile Number <span class="text-rose-500">*</span></label>
-              <input v-model="form.mobileNumber" @input="form.mobileNumber = $event.target.value.replace(/\D/g, '')" type="text" inputmode="numeric" maxlength="10" placeholder="10-digit number" class="w-full h-10 px-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:border-indigo-500 transition-all text-slate-900 dark:text-white" />
+              <input
+                v-model="form.mobileNumber"
+                type="text"
+                inputmode="numeric"
+                maxlength="10"
+                placeholder="10-digit number"
+                class="w-full h-10 px-3 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm focus:outline-none focus:border-indigo-500 transition-all text-slate-900 dark:text-white"
+                @input="form.mobileNumber = $event.target.value.replace(/\D/g, '')"
+              >
             </div>
             <div class="space-y-1.5">
               <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Email</label>

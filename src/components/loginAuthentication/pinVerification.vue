@@ -157,6 +157,7 @@
                   class="w-14 h-16 text-center rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none text-2xl font-black text-slate-900 dark:text-white shadow-sm"
                   @input="handlePinDigitInput(index)"
                   @keydown="handlePinKeydown($event, index)"
+                  @paste="handlePinPaste($event, index)"
                 >
                 <button 
                   class="absolute -right-2 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-blue-600 transition-colors"
@@ -244,6 +245,7 @@
                   class="w-12 h-14 text-center rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none text-xl font-black text-slate-900 dark:text-white shadow-sm"
                   @input="handleOtpInput(index)"
                   @keydown="handleOtpKeydown($event, index)"
+                  @paste="handleOtpPaste($event, index)"
                 >
               </div>
               <div class="flex items-center justify-between px-1">
@@ -292,6 +294,7 @@
                   class="w-14 h-16 text-center rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none text-2xl font-black text-slate-900 dark:text-white shadow-sm"
                   @input="handleNewPinDigitInput(index)"
                   @keydown="handleNewPinKeydown($event, index)"
+                  @paste="handleNewPinPaste($event, index)"
                 >
                 <button 
                   class="absolute -right-2 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-blue-600 transition-colors"
@@ -473,11 +476,54 @@ function handlePinDigitInput(index) {
   }
 }
 
+function handlePinPaste(event, index) {
+  event.preventDefault();
+  const pastedData = event.clipboardData.getData("text").replace(/[^0-9]/g, "");
+  if (!pastedData) return;
+
+  let pasteIndex = index;
+  if (pastedData.length === 4) {
+    pasteIndex = 0;
+  }
+
+  for (let i = 0; i < pastedData.length && pasteIndex < 4; i++) {
+    pinDigits.value[pasteIndex] = pastedData[i];
+    pasteIndex++;
+  }
+  currentPin.value = pinDigits.value.join("");
+
+  const focusTarget = Math.min(pasteIndex, 3);
+  nextTick(() => {
+    pinFields.value[focusTarget]?.focus();
+  });
+}
+
 function handleOtpInput(index) {
   otpDigits.value[index] = otpDigits.value[index].replace(/[^0-9]/g, "");
   if (otpDigits.value[index] && index < 5) {
     nextTick(() => otpFields.value[index + 1]?.focus());
   }
+}
+
+function handleOtpPaste(event, index) {
+  event.preventDefault();
+  const pastedData = event.clipboardData.getData("text").replace(/[^0-9]/g, "");
+  if (!pastedData) return;
+
+  let pasteIndex = index;
+  if (pastedData.length === 6) {
+    pasteIndex = 0;
+  }
+
+  for (let i = 0; i < pastedData.length && pasteIndex < 6; i++) {
+    otpDigits.value[pasteIndex] = pastedData[i];
+    pasteIndex++;
+  }
+
+  const focusTarget = Math.min(pasteIndex, 5);
+  nextTick(() => {
+    otpFields.value[focusTarget]?.focus();
+  });
 }
 
 function handleNewPinDigitInput(index) {
@@ -487,6 +533,28 @@ function handleNewPinDigitInput(index) {
   if (newPinDigits.value[index] && index < 3) {
     nextTick(() => newPinFields.value[index + 1]?.focus());
   }
+}
+
+function handleNewPinPaste(event, index) {
+  event.preventDefault();
+  const pastedData = event.clipboardData.getData("text").replace(/[^0-9]/g, "");
+  if (!pastedData) return;
+
+  let pasteIndex = index;
+  if (pastedData.length === 4) {
+    pasteIndex = 0;
+  }
+
+  for (let i = 0; i < pastedData.length && pasteIndex < 4; i++) {
+    newPinDigits.value[pasteIndex] = pastedData[i];
+    pasteIndex++;
+  }
+  currentNewPin.value = newPinDigits.value.join("");
+
+  const focusTarget = Math.min(pasteIndex, 3);
+  nextTick(() => {
+    newPinFields.value[focusTarget]?.focus();
+  });
 }
 
 /* ------------------------------------------------------------------ */

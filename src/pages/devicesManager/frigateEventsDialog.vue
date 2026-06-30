@@ -1,7 +1,9 @@
 <template>
-  <div v-if="modelValue" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+  <div
+    v-if="modelValue"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300"
+  >
     <div class="bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl w-full max-w-4xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-      
       <!-- Header -->
       <div class="flex items-center justify-between p-5 border-b border-slate-100 dark:border-zinc-900 bg-slate-50 dark:bg-zinc-900/50">
         <div class="flex items-center gap-3">
@@ -9,35 +11,55 @@
             <Activity class="h-5 w-5 text-blue-600 dark:text-blue-400" />
           </div>
           <div>
-            <h2 class="text-lg font-black text-slate-900 dark:text-white uppercase tracking-wider">AI Events Timeline</h2>
+            <h2 class="text-lg font-black text-slate-900 dark:text-white uppercase tracking-wider">
+              AI Events Timeline
+            </h2>
             <p class="text-xs font-semibold text-slate-500 flex items-center gap-2">
               <Video class="h-3.5 w-3.5" />
               {{ device?.controllerName || 'Frigate NVR' }} <span class="text-slate-300 dark:text-zinc-700">•</span> {{ device?.sn || 'N/A' }}
             </p>
           </div>
         </div>
-        <button @click="close" class="h-8 w-8 rounded-full hover:bg-slate-200 dark:hover:bg-zinc-800 flex items-center justify-center text-slate-500 transition-colors">
+        <button
+          class="h-8 w-8 rounded-full hover:bg-slate-200 dark:hover:bg-zinc-800 flex items-center justify-center text-slate-500 transition-colors"
+          @click="close"
+        >
           <X class="h-5 w-5" />
         </button>
       </div>
 
       <!-- Content -->
       <div class="flex-1 overflow-y-auto p-6 bg-slate-50 dark:bg-zinc-950/50">
-        <div v-if="loading" class="flex flex-col items-center justify-center h-64 text-slate-400">
+        <div
+          v-if="loading"
+          class="flex flex-col items-center justify-center h-64 text-slate-400"
+        >
           <Loader2 class="h-8 w-8 animate-spin mb-4 text-blue-500" />
-          <p class="text-xs font-black uppercase tracking-widest">Loading Telemetry...</p>
+          <p class="text-xs font-black uppercase tracking-widest">
+            Loading Telemetry...
+          </p>
         </div>
         
-        <div v-else-if="events.length === 0" class="flex flex-col items-center justify-center h-64">
+        <div
+          v-else-if="events.length === 0"
+          class="flex flex-col items-center justify-center h-64"
+        >
           <div class="h-16 w-16 bg-slate-100 dark:bg-zinc-900 rounded-2xl flex items-center justify-center border border-slate-200 dark:border-zinc-800 mb-4 shadow-sm">
             <ScanLine class="h-8 w-8 text-slate-400" />
           </div>
-          <p class="text-[11px] font-black uppercase tracking-widest text-slate-900 dark:text-white mb-1">No Events Detected</p>
-          <p class="text-xs font-semibold text-slate-500">The AI hasn't picked up any activity yet.</p>
+          <p class="text-[11px] font-black uppercase tracking-widest text-slate-900 dark:text-white mb-1">
+            No Events Detected
+          </p>
+          <p class="text-xs font-semibold text-slate-500">
+            The AI hasn't picked up any activity yet.
+          </p>
         </div>
 
         <!-- Grid of Events -->
-        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div
+          v-else
+          class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+        >
           <div 
             v-for="event in events" 
             :key="event.event_id" 
@@ -51,12 +73,19 @@
                 @error="imageErrors[event.event_id] = true"
                 class="w-full h-full object-cover"
                 alt="AI Detection Snapshot" 
+              >
+              <Camera
+                v-else
+                class="h-8 w-8 text-slate-300 dark:text-zinc-800"
               />
+<<<<<<< Updated upstream
               <div v-else-if="imageErrors[event.event_id]" class="flex flex-col items-center justify-center p-4 text-center bg-red-50 dark:bg-red-950/30 w-full h-full">
                 <Activity class="h-5 w-5 text-red-500 mb-1 opacity-50" />
                 <p class="text-[9px] font-bold text-red-600 dark:text-red-400 uppercase tracking-widest">Image Unavailable</p>
               </div>
               <Camera v-else class="h-8 w-8 text-slate-300 dark:text-zinc-800" />
+=======
+>>>>>>> Stashed changes
               <!-- Score Badge -->
               <div v-if="event.score > 0" class="absolute top-2 right-2 bg-black/70 backdrop-blur-md rounded-md px-2 py-1 flex items-center gap-1 border border-white/10 shadow-sm">
                 <Focus class="h-3 w-3 text-emerald-400" />
@@ -71,9 +100,18 @@
             <div class="p-4 flex items-center justify-between">
               <div>
                 <h3 class="text-sm font-black text-slate-900 dark:text-white capitalize tracking-wide flex items-center gap-2">
-                  <User v-if="event.label === 'person'" class="h-4 w-4 text-blue-500" />
-                  <Car v-else-if="event.label === 'car'" class="h-4 w-4 text-orange-500" />
-                  <Box v-else class="h-4 w-4 text-purple-500" />
+                  <User
+                    v-if="event.label === 'person'"
+                    class="h-4 w-4 text-blue-500"
+                  />
+                  <Car
+                    v-else-if="event.label === 'car'"
+                    class="h-4 w-4 text-orange-500"
+                  />
+                  <Box
+                    v-else
+                    class="h-4 w-4 text-purple-500"
+                  />
                   {{ event.label }}
                 </h3>
                 <p class="text-xs text-slate-500 font-medium mt-1 flex items-center gap-1.5">
@@ -92,13 +130,12 @@
       <!-- Footer -->
       <div class="p-4 border-t border-slate-100 dark:border-zinc-900 bg-white dark:bg-zinc-950 flex justify-end">
         <button 
-          @click="close"
           class="px-5 h-9 rounded-xl bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 text-[11px] font-black uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors"
+          @click="close"
         >
           Close Viewer
         </button>
       </div>
-
     </div>
   </div>
 </template>

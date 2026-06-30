@@ -43,11 +43,16 @@
               </p>
             </div>
 
-            <div v-else-if="activeQrUrl" class="flex flex-col items-center w-full animate-in zoom-in-95 duration-500">
+            <div
+              v-else-if="activeQrUrl"
+              class="flex flex-col items-center w-full animate-in zoom-in-95 duration-500"
+            >
               <!-- ENTRY / EXIT Badge -->
-              <span :class="activeQrType === 'EXIT'
-                ? 'px-3 py-1 mb-3 rounded-full text-[10px] font-black uppercase tracking-widest bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-600 dark:text-amber-400'
-                : 'px-3 py-1 mb-3 rounded-full text-[10px] font-black uppercase tracking-widest bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400'">
+              <span
+                :class="activeQrType === 'EXIT'
+                  ? 'px-3 py-1 mb-3 rounded-full text-[10px] font-black uppercase tracking-widest bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 text-amber-600 dark:text-amber-400'
+                  : 'px-3 py-1 mb-3 rounded-full text-[10px] font-black uppercase tracking-widest bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400'"
+              >
                 {{ activeQrType === 'EXIT' ? '↑ Exit Key' : '↓ Entry Key' }}
               </span>
               <div class="bg-white p-3 rounded-xl shadow-inner border border-slate-100 flex items-center justify-center">
@@ -57,11 +62,20 @@
                   class="w-44 h-44 block rendering-pixelated"
                 >
               </div>
-              <p class="text-[10px] text-slate-400 mt-2 font-medium">Valid for 2 hours · Single use</p>
+              <p class="text-[10px] text-slate-400 mt-2 font-medium">
+                Valid for 2 hours · Single use
+              </p>
               
               <div class="mt-4 flex flex-col sm:flex-row gap-3 w-full px-4 justify-center items-center">
-                <button @click="handleGenerateQr" :disabled="generatingQr" class="w-full sm:w-auto px-4 h-9 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-zinc-300 hover:bg-slate-100 transition-colors flex items-center justify-center disabled:opacity-50">
-                  <RefreshCw class="w-3.5 h-3.5 mr-2" :class="{ 'animate-spin': generatingQr }" />
+                <button
+                  :disabled="generatingQr"
+                  class="w-full sm:w-auto px-4 h-9 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-zinc-300 hover:bg-slate-100 transition-colors flex items-center justify-center disabled:opacity-50"
+                  @click="handleGenerateQr"
+                >
+                  <RefreshCw
+                    class="w-3.5 h-3.5 mr-2"
+                    :class="{ 'animate-spin': generatingQr }"
+                  />
                   Regenerate
                 </button>
                 <button
@@ -71,19 +85,33 @@
                   <Download class="w-3.5 h-3.5 mr-2" />
                   Download
                 </button>
-                <button @click="activeQrUrl = null; activeQrType = ''" class="w-full sm:w-auto px-4 h-9 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-[10px] font-black uppercase tracking-widest text-rose-600 hover:bg-rose-50 transition-colors flex items-center justify-center">
+                <button
+                  class="w-full sm:w-auto px-4 h-9 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-[10px] font-black uppercase tracking-widest text-rose-600 hover:bg-rose-50 transition-colors flex items-center justify-center"
+                  @click="activeQrUrl = null; activeQrType = ''"
+                >
                   <X class="w-3.5 h-3.5 mr-2" />
                   Revoke
                 </button>
               </div>
             </div>
 
-            <div v-else class="flex flex-col items-center w-full py-4">
-              <div :class="nextQrType === 'EXIT'
-                ? 'w-20 h-20 bg-amber-50 dark:bg-amber-500/10 rounded-full flex items-center justify-center mb-4'
-                : 'w-20 h-20 bg-indigo-50 dark:bg-indigo-500/10 rounded-full flex items-center justify-center mb-4'">
-                <LogOut v-if="nextQrType === 'EXIT'" class="w-8 h-8 text-amber-500" />
-                <LogIn v-else class="w-8 h-8 text-indigo-500" />
+            <div
+              v-else
+              class="flex flex-col items-center w-full py-4"
+            >
+              <div
+                :class="nextQrType === 'EXIT'
+                  ? 'w-20 h-20 bg-amber-50 dark:bg-amber-500/10 rounded-full flex items-center justify-center mb-4'
+                  : 'w-20 h-20 bg-indigo-50 dark:bg-indigo-500/10 rounded-full flex items-center justify-center mb-4'"
+              >
+                <LogOut
+                  v-if="nextQrType === 'EXIT'"
+                  class="w-8 h-8 text-amber-500"
+                />
+                <LogIn
+                  v-else
+                  class="w-8 h-8 text-indigo-500"
+                />
               </div>
               <h3 class="text-base font-black text-slate-900 dark:text-white mb-1">
                 {{ nextQrType === 'EXIT' ? 'Exit Key' : 'Entry Key' }}
@@ -93,13 +121,25 @@
                   ? 'Generate a secure exit token to check out. Valid for 2 hours, single use.'
                   : 'Generate a secure entry token to access your door. Valid for 2 hours, single use.' }}
               </p>
-              <button @click="handleGenerateQr" :disabled="generatingQr || loadingNextType"
+              <button
+                :disabled="generatingQr || loadingNextType"
                 :class="nextQrType === 'EXIT'
                   ? 'w-full max-w-xs flex items-center justify-center h-11 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold tracking-wide shadow-lg shadow-amber-500/25 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-75'
-                  : 'w-full max-w-xs flex items-center justify-center h-11 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold tracking-wide shadow-lg shadow-indigo-500/25 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-75'">
-                <Loader2 v-if="generatingQr || loadingNextType" class="w-4 h-4 mr-2 animate-spin" />
-                <LogOut v-else-if="nextQrType === 'EXIT'" class="w-4 h-4 mr-2" />
-                <LogIn v-else class="w-4 h-4 mr-2" />
+                  : 'w-full max-w-xs flex items-center justify-center h-11 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold tracking-wide shadow-lg shadow-indigo-500/25 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-75'"
+                @click="handleGenerateQr"
+              >
+                <Loader2
+                  v-if="generatingQr || loadingNextType"
+                  class="w-4 h-4 mr-2 animate-spin"
+                />
+                <LogOut
+                  v-else-if="nextQrType === 'EXIT'"
+                  class="w-4 h-4 mr-2"
+                />
+                <LogIn
+                  v-else
+                  class="w-4 h-4 mr-2"
+                />
                 {{ generatingQr ? 'Generating...' : (nextQrType === 'EXIT' ? 'Generate Exit Key' : 'Generate Entry Key') }}
               </button>
             </div>

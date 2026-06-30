@@ -268,9 +268,24 @@
               </div>
               <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Role <span class="text-red-500">*</span></label>
-                <select v-model="formData.roleConfigId" required class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground">
-                  <option value="" disabled>Select Role</option>
-                  <option v-for="rc in roleConfigurators" :key="rc.id" :value="rc.id">{{ rc.roleName }}</option>
+                <select
+                  v-model="formData.roleConfigId"
+                  required
+                  class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground"
+                >
+                  <option
+                    value=""
+                    disabled
+                  >
+                    Select Role
+                  </option>
+                  <option
+                    v-for="rc in roleConfigurators"
+                    :key="rc.id"
+                    :value="rc.id"
+                  >
+                    {{ rc.roleName }}
+                  </option>
                 </select>
               </div>
             </div>

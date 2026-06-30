@@ -1,5 +1,9 @@
 <template>
-  <div class="vp-root" :class="themeClass" :style="cssVars">
+  <div
+    class="vp-root"
+    :class="themeClass"
+    :style="cssVars"
+  >
     <!-- ── Loading ── -->
     <div
       v-if="loading"
@@ -375,10 +379,31 @@
                 </p>
               </div>
 
-              <div v-if="resolvedFields.mobile.visible" class="vp-field">
-                <label class="vp-label">{{ resolvedFields.mobile.label }} <span v-if="resolvedFields.mobile.required" class="vp-required">*</span></label>
-                <input v-model="visitorData.mobile" @input="visitorData.mobile = $event.target.value.replace(/\D/g, '')" type="text" inputmode="numeric" maxlength="10" :placeholder="resolvedFields.mobile.placeholder" class="vp-input" :class="{ 'vp-input-error': errors.mobile }" @blur="validateField('mobile')" />
-                <p v-if="errors.mobile" class="vp-err-msg">{{ errors.mobile }}</p>
+              <div
+                v-if="resolvedFields.mobile.visible"
+                class="vp-field"
+              >
+                <label class="vp-label">{{ resolvedFields.mobile.label }} <span
+                  v-if="resolvedFields.mobile.required"
+                  class="vp-required"
+                >*</span></label>
+                <input
+                  v-model="visitorData.mobile"
+                  type="text"
+                  inputmode="numeric"
+                  maxlength="10"
+                  :placeholder="resolvedFields.mobile.placeholder"
+                  class="vp-input"
+                  :class="{ 'vp-input-error': errors.mobile }"
+                  @input="visitorData.mobile = $event.target.value.replace(/\D/g, '')"
+                  @blur="validateField('mobile')"
+                >
+                <p
+                  v-if="errors.mobile"
+                  class="vp-err-msg"
+                >
+                  {{ errors.mobile }}
+                </p>
               </div>
 
               <!-- Email Address -->

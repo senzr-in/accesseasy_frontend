@@ -126,13 +126,13 @@
               <div class="relative group">
                 <input
                   v-model="mobileNumber"
-                  @input="mobileNumber = $event.target.value.replace(/\D/g, '')"
                   type="text"
                   inputmode="numeric"
                   required
                   placeholder="10-digit number"
                   maxlength="10"
                   class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
+                  @input="mobileNumber = $event.target.value.replace(/\D/g, '')"
                 >
                 <Phone class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
               </div>

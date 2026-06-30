@@ -247,7 +247,15 @@
             <div class="grid grid-cols-2 gap-4">
               <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-slate-500 dark:text-zinc-400 uppercase tracking-widest">Phone</label>
-                <input v-model="form.phone" @input="form.phone = $event.target.value.replace(/\D/g, '')" type="text" inputmode="numeric" maxlength="10" placeholder="10-digit phone number" class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all text-foreground shadow-sm focus:border-indigo-500" />
+                <input
+                  v-model="form.phone"
+                  type="text"
+                  inputmode="numeric"
+                  maxlength="10"
+                  placeholder="10-digit phone number"
+                  class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all text-foreground shadow-sm focus:border-indigo-500"
+                  @input="form.phone = $event.target.value.replace(/\D/g, '')"
+                >
               </div>
 
               <div class="space-y-1.5">
