@@ -49,42 +49,42 @@
             >
               <!-- Minimalist Light Mode ID Badge -->
               <div class="relative w-full max-w-sm mb-6">
-                <!-- Crisp Card Container -->
-                <div class="relative bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl shadow-[0_12px_40px_rgba(0,0,0,0.06)] dark:shadow-none overflow-hidden p-6 sm:p-7 w-full transition-colors">
+                <!-- Crisp Card Container (Forced Light Mode) -->
+                <div class="relative bg-white border border-slate-200 rounded-3xl shadow-[0_12px_40px_rgba(0,0,0,0.08)] overflow-hidden p-6 sm:p-7 w-full">
                   
                   <!-- Top Section: Avatar + Info -->
                   <div class="flex items-center gap-5 mb-6">
-                    <div class="relative w-16 h-16 rounded-full border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 shrink-0 shadow-sm flex items-center justify-center">
-                      <span class="font-black text-2xl text-slate-700 dark:text-slate-300">
+                    <div class="relative w-16 h-16 rounded-full border border-slate-200 bg-slate-50 shrink-0 shadow-sm flex items-center justify-center">
+                      <span class="font-black text-2xl text-slate-700">
                         {{ rawUser?.first_name?.charAt(0).toUpperCase() || '?' }}
                       </span>
                     </div>
                     <div class="flex-1 overflow-hidden">
-                      <h2 class="text-xl sm:text-2xl font-black text-slate-800 dark:text-white tracking-tight uppercase truncate">{{ rawUser?.first_name || 'N/A' }} {{ rawUser?.last_name || '' }}</h2>
-                      <p class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-0.5">{{ employee?.employeeId || rawUser?.id || 'ID N/A' }}</p>
+                      <h2 class="text-xl sm:text-2xl font-black text-slate-800 tracking-tight uppercase truncate">{{ rawUser?.first_name || 'N/A' }} {{ rawUser?.last_name || '' }}</h2>
+                      <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">{{ employee?.employeeId || rawUser?.id || 'ID N/A' }}</p>
                     </div>
                   </div>
 
                   <!-- Details Row -->
-                  <div class="w-full text-[10px] font-medium text-slate-500 dark:text-slate-400 flex flex-wrap gap-x-4 gap-y-2 uppercase tracking-widest border-y border-slate-100 dark:border-zinc-800 py-3 mb-6">
-                    <span>Access: <strong class="text-slate-900 dark:text-white font-bold">{{ employee?.access_level?.accessLevelName || 'General' }}</strong></span>
-                    <span class="text-slate-200 dark:text-zinc-700">|</span>
-                    <span>Status: <strong class="text-slate-900 dark:text-white font-bold">ACTIVE</strong></span>
+                  <div class="w-full text-[10px] font-medium text-slate-500 flex flex-wrap gap-x-4 gap-y-2 uppercase tracking-widest border-y border-slate-100 py-3 mb-6">
+                    <span>Access: <strong class="text-slate-900 font-bold">{{ employee?.access_level?.accessLevelName || 'General' }}</strong></span>
+                    <span class="text-slate-200">|</span>
+                    <span>Status: <strong class="text-slate-900 font-bold">ACTIVE</strong></span>
                   </div>
 
                   <!-- Bottom: QR Code & Status -->
                   <div class="flex items-center justify-between gap-4">
                     <div class="shrink-0">
-                       <div class="p-2.5 bg-white rounded-2xl border border-slate-200 dark:border-zinc-700 shadow-sm w-[120px] h-[120px] flex items-center justify-center">
+                       <div class="p-2.5 bg-white rounded-2xl border border-slate-200 shadow-sm w-[120px] h-[120px] flex items-center justify-center">
                          <img :src="activeQrUrl" class="w-full h-full block rendering-pixelated" alt="QR Code" />
                        </div>
                     </div>
 
                     <div class="flex flex-col items-end text-right">
-                       <div class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1 text-right">
+                       <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1 text-right">
                          Permanent ID<br/>Never Expires
                        </div>
-                       <div class="text-xs font-black uppercase tracking-widest mt-3 px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-zinc-800 border border-slate-100 dark:border-zinc-700 text-slate-700 dark:text-slate-300">
+                       <div class="text-xs font-black uppercase tracking-widest mt-3 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-700 shadow-sm">
                          ACCESS KEY
                        </div>
                     </div>
