@@ -89,10 +89,10 @@
 
                     <div class="flex flex-col items-end text-right">
                        <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1 text-right">
-                         Single Use<br/>Valid 2 Hrs
+                         Permanent ID<br/>Never Expires
                        </div>
-                       <div class="text-xs font-black uppercase tracking-widest mt-2 px-2 py-1 rounded bg-black/40 border border-white/10" :class="activeQrType === 'EXIT' ? 'text-amber-400 drop-shadow-[0_0_5px_rgba(251,191,36,0.5)]' : 'text-emerald-400 drop-shadow-[0_0_5px_rgba(52,211,153,0.5)]'">
-                         {{ activeQrType === 'EXIT' ? 'EXIT KEY' : 'ENTRY KEY' }}
+                       <div class="text-xs font-black uppercase tracking-widest mt-2 px-2 py-1 rounded bg-black/40 border border-white/10 text-indigo-400 drop-shadow-[0_0_5px_rgba(99,102,241,0.5)]">
+                         ACCESS KEY
                        </div>
                     </div>
                   </div>
@@ -102,29 +102,11 @@
               <!-- Action Buttons -->
               <div class="flex gap-2 w-full max-w-sm justify-center">
                 <button
-                  :disabled="generatingQr"
-                  class="flex-1 h-10 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-zinc-300 hover:bg-slate-100 transition-colors flex items-center justify-center disabled:opacity-50 shadow-sm"
-                  @click="handleGenerateQr"
-                >
-                  <RefreshCw
-                    class="w-4 h-4 mr-1.5"
-                    :class="{ 'animate-spin': generatingQr }"
-                  />
-                  Regen
-                </button>
-                <button
                   class="flex-1 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors flex items-center justify-center shadow-sm"
                   @click="downloadQrCode"
                 >
                   <Download class="w-4 h-4 mr-1.5" />
-                  Save
-                </button>
-                <button
-                  class="flex-1 h-10 rounded-xl bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-[10px] font-black uppercase tracking-widest text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/20 transition-colors flex items-center justify-center shadow-sm"
-                  @click="activeQrUrl = null; activeQrType = ''"
-                >
-                  <X class="w-4 h-4 mr-1.5" />
-                  Revoke
+                  Save ID Badge
                 </button>
               </div>
             </div>
@@ -133,48 +115,29 @@
               v-else
               class="flex flex-col items-center w-full py-4"
             >
-              <div
-                :class="nextQrType === 'EXIT'
-                  ? 'w-20 h-20 bg-amber-50 dark:bg-amber-500/10 rounded-full flex items-center justify-center mb-4'
-                  : 'w-20 h-20 bg-indigo-50 dark:bg-indigo-500/10 rounded-full flex items-center justify-center mb-4'"
-              >
-                <LogOut
-                  v-if="nextQrType === 'EXIT'"
-                  class="w-8 h-8 text-amber-500"
-                />
-                <LogIn
-                  v-else
-                  class="w-8 h-8 text-indigo-500"
-                />
+              <div class="w-20 h-20 bg-indigo-50 dark:bg-indigo-500/10 rounded-full flex items-center justify-center mb-4">
+                <IdCard class="w-8 h-8 text-indigo-500" />
               </div>
               <h3 class="text-base font-black text-slate-900 dark:text-white mb-1">
-                {{ nextQrType === 'EXIT' ? 'Exit Key' : 'Entry Key' }}
+                Digital ID Badge
               </h3>
               <p class="text-xs text-slate-500 text-center max-w-xs mb-6">
-                {{ nextQrType === 'EXIT'
-                  ? 'Generate a secure exit token to check out. Valid for 2 hours, single use.'
-                  : 'Generate a secure entry token to access your door. Valid for 2 hours, single use.' }}
+                Generate your secure digital ID badge for access. This is a one-time setup.
               </p>
               <button
-                :disabled="generatingQr || loadingNextType"
-                :class="nextQrType === 'EXIT'
-                  ? 'w-full max-w-xs flex items-center justify-center h-11 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-bold tracking-wide shadow-lg shadow-amber-500/25 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-75'
-                  : 'w-full max-w-xs flex items-center justify-center h-11 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold tracking-wide shadow-lg shadow-indigo-500/25 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-75'"
+                :disabled="generatingQr"
+                class="w-full max-w-xs flex items-center justify-center h-11 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold tracking-wide shadow-lg shadow-indigo-500/25 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-75"
                 @click="handleGenerateQr"
               >
                 <Loader2
-                  v-if="generatingQr || loadingNextType"
+                  v-if="generatingQr"
                   class="w-4 h-4 mr-2 animate-spin"
                 />
-                <LogOut
-                  v-else-if="nextQrType === 'EXIT'"
-                  class="w-4 h-4 mr-2"
-                />
-                <LogIn
+                <IdCard
                   v-else
                   class="w-4 h-4 mr-2"
                 />
-                {{ generatingQr ? 'Generating...' : (nextQrType === 'EXIT' ? 'Generate Exit Key' : 'Generate Entry Key') }}
+                {{ generatingQr ? 'Generating...' : 'Generate ID Badge' }}
               </button>
             </div>
           </div>
@@ -377,44 +340,17 @@ const loadEmployeeData = async () => {
 };
 
 const fetchNextQrType = async () => {
-  if (!employee.value) return;
-  loadingNextType.value = true;
-  try {
-    const empId = employee.value.personalModuleId || employee.value.id;
-    const today = new Date().toISOString().split('T')[0];
-    const url = `${import.meta.env.VITE_API_URL}/items/logs`
-      + `?filter[_and][0][employeeId][_eq]=${empId}`
-      + `&filter[_and][1][date][_eq]=${today}`
-      + `&filter[_and][2][ValidLogs][_eq]=authorized`
-      + `&sort=-timeStamp`
-      + `&limit=1`
-      + `&fields=action`;
-    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-    if (res.ok) {
-      const data = await res.json();
-      const lastLog = data?.data?.[0];
-      // Last action 'in' → next should be EXIT; otherwise ENTRY
-      nextQrType.value = (lastLog?.action === 'in') ? 'EXIT' : 'ENTRY';
-    }
-  } catch (e) {
-    console.warn('Could not fetch last log, defaulting to ENTRY', e);
-    nextQrType.value = 'ENTRY';
-  } finally {
-    loadingNextType.value = false;
-  }
+  // Unused now that QR is one-time static badge
 };
 
-// Check if employee already has an unscanned, unexpired QR in DB.
-// Active = qraccess:true AND expires_at > now
+// Check if employee already has a QR in DB.
 const checkActiveQr = async () => {
   try {
     const empId = employee.value?.personalModuleId || employee.value?.id;
-    const now = new Date().toISOString();
     const url = `${import.meta.env.VITE_API_URL}/items/qrgenerate`
       + `?filter[_and][0][employeeId][_eq]=${empId}`
       + `&filter[_and][1][qraccess][_eq]=true`
-      + `&filter[_and][2][expires_at][_gt]=${encodeURIComponent(now)}`
-      + `&sort=-date_created&limit=1&fields=id,qr_type,expires_at`;
+      + `&sort=-date_created&limit=1&fields=id,qrcode,qr_type`;
     const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
     if (res.ok) {
       const data = await res.json();
@@ -426,16 +362,27 @@ const checkActiveQr = async () => {
   return null;
 };
 
-// Wrapper called by both buttons:
-// 1. Check for existing active QR  2. Refresh type from logs  3. Generate
+// 1. Check for existing active QR  2. Generate if none exists
 const handleGenerateQr = async () => {
   const activeQr = await checkActiveQr();
-  if (activeQr) {
-    const typeLabel = activeQr.qr_type ? activeQr.qr_type.toLowerCase() : 'access';
-    alert(`You already have an active ${typeLabel} QR. Ask the guard to scan it first.`);
+  if (activeQr && activeQr.qrcode) {
+    // If it exists, just load it visually
+    activeQrToken.value = activeQr.qrcode;
+    activeQrType.value = 'ACCESS';
+    
+    const qrPayloadObj = JSON.stringify({
+      type: "EMPLOYEE",
+      qr_type: "ACCESS",
+      token: activeQr.qrcode,
+      name: rawUser?.first_name || "Employee",
+      empId: employee.value?.employeeId || ""
+    });
+    
+    activeQrUrl.value = await QRCodeLib.toDataURL(qrPayloadObj, {
+      width: 400, margin: 1, color: { dark: '#000000', light: '#ffffff' }
+    });
     return;
   }
-  await fetchNextQrType();
   await generateNewQr();
 };
 
@@ -456,21 +403,19 @@ const generateNewQr = async () => {
       }
     }
 
-    const qrType = nextQrType.value; // 'ENTRY' or 'EXIT'
+    const qrType = 'ACCESS';
 
-    // 1. Generate AES-256 encrypted token with timestamp
+    // 1. Generate AES-256 encrypted token
     const authId = employee.value?.id || rawUser.id || 'unassigned';
     const rawToken = generateEncryptedQrToken(authId, accessLevelId);
     console.log("Generated Encrypted token:", rawToken, "| Type:", qrType);
 
-    // 2. Post to Directus — 2-hour expiry, tagged with qr_type
-    const expiresAt = new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString();
+    // 2. Post to Directus — No expiry
     const payload = {
       tenant: tenantId,
       accessLevelsId: accessLevelId,
       qrcode: rawToken,
       qraccess: true,
-      expires_at: expiresAt,
       qr_type: qrType,
     };
 
@@ -580,6 +525,24 @@ const removeRfidCard = async () => {
 
 onMounted(async () => {
   await loadEmployeeData();
-  await fetchNextQrType();
+  
+  // Try to load an existing badge if one was already generated
+  const activeQr = await checkActiveQr();
+  if (activeQr && activeQr.qrcode) {
+    activeQrToken.value = activeQr.qrcode;
+    activeQrType.value = 'ACCESS';
+    
+    const qrPayloadObj = JSON.stringify({
+      type: "EMPLOYEE",
+      qr_type: "ACCESS",
+      token: activeQr.qrcode,
+      name: rawUser?.first_name || "Employee",
+      empId: employee.value?.employeeId || ""
+    });
+    
+    activeQrUrl.value = await QRCodeLib.toDataURL(qrPayloadObj, {
+      width: 400, margin: 1, color: { dark: '#000000', light: '#ffffff' }
+    });
+  }
 });
 </script>
