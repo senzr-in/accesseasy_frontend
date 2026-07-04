@@ -297,48 +297,7 @@
               <Building class="w-4 h-4 text-violet-500" /> Organization Structure
             </h4>
             <div class="grid grid-cols-2 gap-4">
-              <div class="space-y-1.5">
-                <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Department</label>
-                <select
-                  v-model="formData.departmentId"
-                  class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground"
-                >
-                  <option
-                    value=""
-                    disabled
-                  >
-                    Select department
-                  </option>
-                  <option
-                    v-for="dept in departments"
-                    :key="dept.id"
-                    :value="dept.id"
-                  >
-                    {{ dept.name || dept.departmentName }}
-                  </option>
-                </select>
-              </div>
-              <div class="space-y-1.5">
-                <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Branch</label>
-                <select
-                  v-model="formData.branchId"
-                  class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground"
-                >
-                  <option
-                    value=""
-                    disabled
-                  >
-                    Select branch
-                  </option>
-                  <option
-                    v-for="branch in branches"
-                    :key="branch.id"
-                    :value="branch.id"
-                  >
-                    {{ branch.locdetail?.locationName || branch.name || branch.branchName }}
-                  </option>
-                </select>
-              </div>
+
               <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Access Group</label>
                 <select

@@ -216,35 +216,105 @@
           </p>
         </div>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <button
-            class="group p-6 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-xl shadow-indigo-500/20 hover:scale-[1.02] transition-all text-left relative overflow-hidden"
+            class="group p-6 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-xl shadow-indigo-500/20 hover:scale-[1.02] transition-all text-left relative overflow-hidden flex flex-col justify-between"
             @click="$router.push('/dashboard/my-access')"
           >
             <div class="absolute -right-4 -top-4 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-colors" />
             <QrCode class="w-10 h-10 mb-4 opacity-90" />
-            <h3 class="text-xl font-black mb-1">
-              Generate Mobile Key
-            </h3>
-            <p class="text-xs font-medium text-indigo-100">
-              Create a dynamic QR code for secure door access.
-            </p>
+            <div>
+              <h3 class="text-xl font-black mb-1">
+                Generate Mobile Key
+              </h3>
+              <p class="text-xs font-medium text-indigo-100">
+                Create a dynamic QR code for secure door access.
+              </p>
+            </div>
           </button>
           
           <button
-            class="group p-6 rounded-2xl bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 shadow-md hover:shadow-lg transition-all text-left"
+            class="group p-6 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-600 text-white shadow-xl shadow-blue-500/20 hover:scale-[1.02] transition-all text-left relative overflow-hidden flex flex-col justify-between"
+            @click="$router.push('/dashboard/visitors')"
+          >
+            <div class="absolute -right-4 -top-4 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-colors" />
+            <UserPlus class="w-10 h-10 mb-4 opacity-90" />
+            <div>
+              <h3 class="text-xl font-black mb-1">
+                Pre-Register Visitor
+              </h3>
+              <p class="text-xs font-medium text-blue-100">
+                Create a visitor pass for your upcoming guests.
+              </p>
+            </div>
+          </button>
+
+          <button
+            class="group p-6 rounded-2xl bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 shadow-md hover:shadow-lg transition-all text-left flex flex-col justify-between"
             @click="$router.push('/dashboard/my-attendance')"
           >
-            <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center mb-4 text-emerald-600 dark:text-emerald-400">
+            <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center mb-4 text-emerald-600 dark:text-emerald-400 shrink-0">
               <Calendar class="w-5 h-5" />
             </div>
-            <h3 class="text-xl font-black text-slate-900 dark:text-white mb-1">
-              My Attendance & Logs
-            </h3>
-            <p class="text-xs font-medium text-slate-500 dark:text-zinc-400">
-              Review your daily check-in times and entry history.
-            </p>
+            <div>
+              <h3 class="text-xl font-black text-slate-900 dark:text-white mb-1">
+                My Attendance & Logs
+              </h3>
+              <p class="text-xs font-medium text-slate-500 dark:text-zinc-400">
+                Review your daily check-in times and entry history.
+              </p>
+            </div>
           </button>
+        </div>
+
+        <!-- Recent Activity Feed -->
+        <div class="bg-white dark:bg-zinc-950 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-sm overflow-hidden mt-2">
+          <div class="px-5 py-4 border-b border-slate-100 dark:border-zinc-800 flex items-center justify-between">
+            <h2 class="text-sm font-black uppercase tracking-widest text-slate-700 dark:text-zinc-300">
+              My Recent Access Logs
+            </h2>
+            <button
+              class="text-[10px] font-bold text-indigo-500 hover:text-indigo-700 uppercase tracking-widest"
+              @click="$router.push('/dashboard/my-logs')"
+            >
+              View All →
+            </button>
+          </div>
+          <div
+            v-if="recentLogsLoading"
+            class="flex items-center justify-center h-32 text-[10px] font-black uppercase tracking-widest text-slate-400"
+          >
+            Loading feed...
+          </div>
+          <div
+            v-else-if="recentLogs.length === 0"
+            class="flex items-center justify-center h-32 text-[10px] font-black uppercase tracking-widest text-slate-400"
+          >
+            No events today
+          </div>
+          <div
+            v-else
+            class="divide-y divide-slate-100 dark:divide-zinc-800"
+          >
+            <div
+              v-for="log in recentLogs.slice(0, 5)"
+              :key="log.id"
+              class="flex items-center gap-4 px-5 py-3 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors"
+            >
+              <div :class="['w-2 h-2 rounded-full shrink-0', (log.ValidLogs === 'authorized' || log.ValidLogs === true) ? 'bg-emerald-500' : 'bg-rose-500']" />
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold text-slate-900 dark:text-white truncate">
+                  {{ log.door?.doorName || 'Unknown Door' }}
+                </p>
+                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                  {{ formatTime(log.date_created) }}
+                </p>
+              </div>
+              <span :class="['text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-md', (log.ValidLogs === 'authorized' || log.ValidLogs === true) ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400' : 'bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400']">
+                {{ (log.ValidLogs === 'authorized' || log.ValidLogs === true) ? 'Auth' : 'Denied' }}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </template>

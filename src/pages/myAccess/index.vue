@@ -396,8 +396,8 @@ const checkActiveQr = async () => {
 const handleGenerateQr = async () => {
   const activeQr = await checkActiveQr();
   if (activeQr) {
-    // TODO: replace with your toast/snackbar component
-    alert(`You already have an active ${activeQr.qr_type} QR. Ask the guard to scan it first.`);
+    const typeLabel = activeQr.qr_type ? activeQr.qr_type.toLowerCase() : 'access';
+    alert(`You already have an active ${typeLabel} QR. Ask the guard to scan it first.`);
     return;
   }
   await fetchNextQrType();

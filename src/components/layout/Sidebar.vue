@@ -263,6 +263,7 @@ import {
   Settings, 
   List, 
   Users, 
+  UserCircle,
   Building, 
   Key, 
   Server, 
@@ -296,6 +297,7 @@ const navigationItems = computed(() => {
       { name: "Live Insights", href: "/dashboard", icon: LayoutDashboard },
       { name: "Authorize", href: "/dashboard/authorize", icon: ShieldCheck },
       { name: "Live Logs", href: "/dashboard/settings/logs", icon: List },
+      { name: "My Profile", href: "/dashboard/profile", icon: UserCircle },
     ];
   }
 
@@ -303,7 +305,8 @@ const navigationItems = computed(() => {
     return [
       { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
       { name: "My Access", href: "/dashboard/my-access", icon: Key },
-      { name: "My Attendance", href: "/dashboard/my-attendance", icon: List }
+      { name: "My Attendance", href: "/dashboard/my-attendance", icon: List },
+      { name: "My Profile", href: "/dashboard/profile", icon: UserCircle }
     ];
   }
   
@@ -316,6 +319,7 @@ const navigationItems = computed(() => {
     { name: "Employees", href: "/dashboard/easy-access/employees", icon: Users, role: "Admin" },
     { name: "Visitor Portals", href: "/dashboard/visitor-portals", icon: Users, role: "Admin" },
     { name: "Scheduled Reports", href: "/dashboard/report-automation", icon: CalendarClock, role: "Admin" },
+    { name: "My Profile", href: "/dashboard/profile", icon: UserCircle, role: "Admin" },
     { 
       name: "Settings", 
       icon: Settings, 

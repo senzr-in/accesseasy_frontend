@@ -40,10 +40,7 @@
       <p class="vp-error-msg">
         {{ error }}
       </p>
-      <button
-        class="vp-btn-primary"
-        @click="fetchPortal"
-      >
+      <button class="vp-btn-primary" @click="fetchPortal">
         Retry
       </button>
     </div>
@@ -81,13 +78,6 @@
           </div>
           <span class="vp-nav-title">{{ portal.Title }}</span>
         </div>
-        <button
-          v-if="content.enableRegistrationForm !== false"
-          class="vp-btn-primary vp-btn-sm"
-          @click="openModal"
-        >
-          Check In
-        </button>
       </nav>
 
       <!-- Hero -->
@@ -226,126 +216,64 @@
               v-if="submitted"
               class="vp-success"
             >
-              <div class="vp-success-icon">
-                <svg
-                  width="36"
-                  height="36"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                ><path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2.5"
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                /></svg>
-              </div>
-              <h3 class="vp-success-title">
-                Checked In!
-              </h3>
-              <p class="vp-success-msg">
-                Welcome, <strong>{{ visitorData.name }}</strong>. Your visit has been recorded.
-              </p>
-
-              <!-- QR Code Block -->
-              <div class="vp-qr-block">
-                <!-- If backend returned a base64 image -->
-                <img
-                  v-if="qrToken && qrToken.startsWith('data:image')"
-                  :src="qrToken"
-                  class="vp-qr-img"
-                  alt="Visitor QR Code"
-                >
-                <!-- If backend returned a token string → render with qrcode.vue -->
-                <QrcodeVue
-                  v-else-if="qrToken"
-                  :value="qrToken"
-                  :size="180"
-                  level="H"
-                  class="vp-qr-img"
-                />
-                <!-- Fallback if backend hasn't returned a QR yet -->
-                <div
-                  v-else
-                  class="vp-qr-pending"
-                >
-                  <svg
-                    width="32"
-                    height="32"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  ><rect
-                    x="3"
-                    y="3"
-                    width="7"
-                    height="7"
-                    rx="1"
-                    stroke-width="2"
-                  /><rect
-                    x="14"
-                    y="3"
-                    width="7"
-                    height="7"
-                    rx="1"
-                    stroke-width="2"
-                  /><rect
-                    x="3"
-                    y="14"
-                    width="7"
-                    height="7"
-                    rx="1"
-                    stroke-width="2"
-                  /><path
-                    stroke-width="2"
-                    d="M14 14h3v3h-3zM17 17h3v3h-3zM14 20h3"
-                  /></svg>
-                  <p>QR code will appear here once the backend service is activated.</p>
+              <!-- ID Card Wrapper -->
+              <div class="vp-id-card-wrapper" ref="idCardRef">
+                <div class="vp-id-card">
+                  <div class="vp-id-card-header">
+                    <img v-if="logoUrl" :src="logoUrl" class="vp-id-card-logo" crossorigin="anonymous" />
+                    <span class="vp-id-card-brand">{{ portal.Title }}</span>
+                  </div>
+                  <div class="vp-id-card-body">
+                    <div class="vp-id-card-profile">
+                      <img v-if="photoPreview" :src="photoPreview" class="vp-id-card-photo" crossorigin="anonymous" />
+                      <div v-else class="vp-id-card-photo-placeholder">
+                        <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                      </div>
+                      <div class="vp-id-card-profile-info">
+                        <h3 class="vp-id-card-name">{{ visitorData.name }}</h3>
+                        <p class="vp-id-card-role">VISITOR</p>
+                      </div>
+                    </div>
+                    
+                    <div class="vp-id-card-qr-section">
+                      <div class="vp-id-card-qr-container">
+                        <img v-if="qrToken && qrToken.startsWith('data:image')" :src="qrToken" class="vp-id-qr-img" crossorigin="anonymous" />
+                        <div v-else-if="qrToken" ref="qrCodeContainer" class="vp-id-qr-img" style="width: 160px; height: 160px; overflow: hidden; border-radius: 4px;"></div>
+                        <div v-else class="vp-id-qr-pending">
+                          Generating QR...
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="vp-id-card-details">
+                    <div class="vp-id-card-detail-item">
+                      <span>Date & Time</span>
+                      <strong>{{ checkInTime }}</strong>
+                    </div>
+                    <div class="vp-id-card-detail-item" v-if="visitorData.reasonForVisit">
+                      <span>Purpose</span>
+                      <strong>{{ visitorData.reasonForVisit === 'Other' ? visitorData.reasonForVisitOther : visitorData.reasonForVisit }}</strong>
+                    </div>
+                    <div class="vp-id-card-detail-item" v-if="visitorData.personToMeet">
+                      <span>Host</span>
+                      <strong>{{ visitorData.personToMeet }}</strong>
+                    </div>
+                  </div>
+                  <div class="vp-id-card-footer">
+                    Please show this pass at the gate
+                  </div>
                 </div>
-                <p class="vp-qr-label">
-                  Show this QR to the security guard at the gate
-                </p>
-                <button
-                  v-if="qrToken"
-                  class="vp-qr-download-btn"
-                  @click="downloadQR"
-                >
-                  <svg
-                    width="14"
-                    height="14"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  ><path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2.5"
-                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                  /></svg>
-                  Download QR Pass
+              </div>
+
+              <div class="vp-success-actions">
+                <button v-if="qrToken" class="vp-btn-primary vp-btn-full vp-download-btn" @click="downloadIDCard">
+                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                  Download ID Card
+                </button>
+                <button class="vp-btn-secondary vp-btn-full" @click="resetModal">
+                  Done
                 </button>
               </div>
-
-              <div class="vp-success-summary">
-                <div class="vp-summary-row">
-                  <span>Check-in Time</span><strong>{{ checkInTime }}</strong>
-                </div>
-                <div class="vp-summary-row">
-                  <span>Reason</span><strong>{{ visitorData.reasonForVisit }}</strong>
-                </div>
-                <div
-                  v-if="visitorData.personToMeet"
-                  class="vp-summary-row"
-                >
-                  <span>Meeting</span><strong>{{ visitorData.personToMeet }}</strong>
-                </div>
-              </div>
-              <button
-                class="vp-btn-primary vp-btn-full"
-                @click="resetModal"
-              >
-                Done
-              </button>
             </div>
 
             <!-- Form -->
@@ -579,55 +507,54 @@
                   v-else
                   class="vp-badge-opt"
                 >Optional</span></label>
-                <div
-                  class="vp-upload-box"
-                  :class="{ 'vp-input-error': errors.photo }"
-                  @click="$refs.photoInput.click()"
-                >
-                  <img
-                    v-if="photoPreview"
-                    :src="photoPreview"
-                    class="vp-upload-preview"
-                  >
-                  <div
-                    v-else
-                    class="vp-upload-placeholder"
-                  >
-                    <svg
-                      width="24"
-                      height="24"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    ><path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-                    /><circle
-                      cx="12"
-                      cy="13"
-                      r="3"
-                      stroke-width="2"
-                    /></svg>
-                    <span>{{ resolvedFields.photo.placeholder }}</span>
+                <!-- Camera UI -->
+                <div v-if="isCameraOpen" class="vp-camera-container">
+                  <video ref="videoRef" class="vp-camera-video" autoplay playsinline></video>
+                  <canvas ref="canvasRef" style="display:none;"></canvas>
+                  <div class="vp-camera-controls">
+                    <button class="vp-btn-secondary vp-btn-sm" @click="stopCamera">Cancel</button>
+                    <button class="vp-btn-primary vp-btn-sm" @click="capturePhoto">Snap Photo</button>
                   </div>
                 </div>
-                <input
-                  ref="photoInput"
-                  type="file"
-                  accept="image/*"
-                  capture="user"
-                  class="hidden"
-                  @change="handlePhotoChange"
-                >
-                <button
-                  v-if="photoPreview"
-                  class="vp-upload-clear"
-                  @click.stop="clearPhoto"
-                >
-                  Remove photo
-                </button>
+
+                <!-- Normal Upload Box -->
+                <div v-else>
+                  <div class="vp-photo-actions" v-if="!photoPreview">
+                    <button class="vp-btn-secondary vp-btn-full" style="margin-bottom:0.75rem;" @click="startCamera">
+                      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><circle cx="12" cy="13" r="3" stroke-width="2" /></svg>
+                      Take Selfie
+                    </button>
+                    <div
+                      class="vp-upload-box"
+                      :class="{ 'vp-input-error': errors.photo }"
+                      @click="$refs.photoInput.click()"
+                    >
+                      <div class="vp-upload-placeholder">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                        <span>Upload Photo File</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div v-else class="vp-photo-preview-container">
+                    <img :src="photoPreview" class="vp-upload-preview">
+                  </div>
+                  
+                  <input
+                    ref="photoInput"
+                    type="file"
+                    accept="image/*"
+                    class="hidden"
+                    @change="handlePhotoChange"
+                  >
+                  <button
+                    v-if="photoPreview"
+                    class="vp-upload-clear"
+                    @click.stop="clearPhoto"
+                  >
+                    Remove photo
+                  </button>
+                </div>
                 <p
                   v-if="errors.photo"
                   class="vp-err-msg"
@@ -773,11 +700,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watchEffect } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watchEffect, watch } from 'vue';
+import QRCodeStyling from 'qr-code-styling';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
 import QrcodeVue from 'qrcode.vue';
 import QRCode from 'qrcode';
+import { toPng } from 'html-to-image';
 
 const route = useRoute();
 
@@ -791,12 +720,10 @@ const submitError = ref('');
 const checkInTime = ref('');
 const qrToken     = ref('');    // QR token returned from backend
 const visitorId   = ref('');   // visitor record ID
+const idCardRef   = ref(null);
 
-// ── File upload state ─────────────────────────────────────────────────────
-const photoFile    = ref(null);
-const photoPreview = ref(null);
-const proofFile    = ref(null);
-const proofFileName= ref(null);
+const qrCodeContainer = ref(null);
+let qrCodeInstance = null;
 
 const DEFAULT_ASSET_ID = 'b88c5273-ba1e-45db-b874-c34ad791afeb';
 
@@ -811,6 +738,51 @@ const logoUrl   = ref(null);
 const bannerUrl = ref(null);
 
 const brandColor = computed(() => content.value.primaryColor || '#2563eb');
+
+watch([qrToken, qrCodeContainer, brandColor, logoUrl], ([token, container, color, logo]) => {
+  if (token && !token.startsWith('data:image') && container) {
+    if (!qrCodeInstance) {
+      qrCodeInstance = new QRCodeStyling({
+        width: 160,
+        height: 160,
+        type: "canvas",
+        data: token,
+        image: logo || undefined,
+        imageOptions: {
+          crossOrigin: "anonymous",
+          margin: 5,
+          imageSize: 0.3,
+          hideBackgroundDots: true
+        },
+        dotsOptions: { color: "#0f172a", type: "square" },
+        cornersSquareOptions: { color: color, type: "square" },
+        cornersDotOptions: { color: color, type: "square" },
+        backgroundOptions: { color: "#ffffff" },
+        margin: 0
+      });
+      container.innerHTML = '';
+      qrCodeInstance.append(container);
+    } else {
+      qrCodeInstance.update({
+        data: token,
+        cornersSquareOptions: { color: color, type: "square" },
+        cornersDotOptions: { color: color, type: "square" },
+        image: logo || undefined
+      });
+    }
+  }
+});
+
+const isCameraOpen = ref(false);
+const videoRef     = ref(null);
+const canvasRef    = ref(null);
+let videoStream    = null;
+
+// ── File upload state ─────────────────────────────────────────────────────
+const photoFile    = ref(null);
+const photoPreview = ref(null);
+const proofFile    = ref(null);
+const proofFileName= ref(null);
 
 const themeClass = computed(() => {
   const t = content.value?.theme || 'Modern Blue';
@@ -851,6 +823,7 @@ watchEffect(() => {
 });
 
 onUnmounted(() => {
+  stopCamera();
   document.documentElement.classList.forEach(className => {
     if (className.startsWith('theme-')) {
       document.documentElement.classList.remove(className);
@@ -950,36 +923,27 @@ const resetModal = () => {
   proofFile.value = null; proofFileName.value = null;
   visitorData.value = { name:'', mobile:'', email:'', govtIdType:'Aadhar', govtIdNumber:'', reasonForVisit:'', reasonForVisitOther:'', personToMeet:'', company:'' };
   errors.value = {};
+  stopCamera();
 };
 
-// Download QR Code
-const downloadQR = async () => {
+// Download ID Card
+const downloadIDCard = async () => {
+  if (!idCardRef.value) return;
   const fileName = `visitor-pass-${visitorData.value.name.replace(/\s+/g,'-')}-${new Date().toISOString().split('T')[0]}.png`;
 
   try {
-    if (qrToken.value.startsWith('data:image')) {
-      // It's already a base64 image — direct download
-      const link = document.createElement('a');
-      link.href = qrToken.value;
-      link.download = fileName;
-      link.click();
-    } else if (qrToken.value) {
-      // Render token string to canvas → download PNG
-      const canvas = document.createElement('canvas');
-      await QRCode.toCanvas(canvas, qrToken.value, {
-        width: 300, margin: 2,
-        color: { dark: '#0f172a', light: '#ffffff' }
-      });
-      canvas.toBlob((blob) => {
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url; link.download = fileName;
-        link.click();
-        URL.revokeObjectURL(url);
-      }, 'image/png');
-    }
+    const dataUrl = await toPng(idCardRef.value, {
+      quality: 1,
+      pixelRatio: 2,
+      backgroundColor: '#ffffff'
+    });
+    
+    const link = document.createElement('a');
+    link.href = dataUrl;
+    link.download = fileName;
+    link.click();
   } catch (e) {
-    console.error('QR download error:', e);
+    console.error('ID Card download error:', e);
   }
 };
 
@@ -1144,13 +1108,60 @@ const submitRegistration = async () => {
     qrToken.value   = res.data.data?.qrToken || res.data.data?.generated_Qr || '';
     visitorId.value = res.data.data?.visitorId || res.data.data?.id || '';
 
-    checkInTime.value = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    checkInTime.value = new Date().toLocaleString([], { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     submitted.value = true;
   } catch (err) {
     submitError.value = err.response?.data?.message || err.message || 'Failed to submit. Please try again.';
   } finally {
     submitting.value = false;
   }
+};
+
+// ── Camera handlers ───────────────────────────────────────────────────────
+const startCamera = async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+    videoStream = stream;
+    isCameraOpen.value = true;
+    // Wait for DOM to update so videoRef is available
+    setTimeout(() => {
+      if (videoRef.value) {
+        videoRef.value.srcObject = stream;
+        videoRef.value.play();
+      }
+    }, 100);
+  } catch (err) {
+    console.error('Camera error:', err);
+    alert('Unable to access camera. Please check your permissions.');
+  }
+};
+
+const stopCamera = () => {
+  if (videoStream) {
+    videoStream.getTracks().forEach(track => track.stop());
+    videoStream = null;
+  }
+  isCameraOpen.value = false;
+};
+
+const capturePhoto = () => {
+  if (!videoRef.value || !canvasRef.value) return;
+  const video = videoRef.value;
+  const canvas = canvasRef.value;
+  const ctx = canvas.getContext('2d');
+  
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+  
+  canvas.toBlob((blob) => {
+    if (!blob) return;
+    const file = new File([blob], 'selfie.jpg', { type: 'image/jpeg' });
+    photoFile.value = file;
+    photoPreview.value = URL.createObjectURL(file);
+    errors.value.photo = '';
+    stopCamera();
+  }, 'image/jpeg', 0.8);
 };
 
 onMounted(fetchPortal);
@@ -1269,7 +1280,7 @@ onMounted(fetchPortal);
 /* ── Navbar ── */
 .vp-nav {
   position: sticky; top: 0; z-index: 50;
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex; align-items: center; justify-content: center;
   padding: 1rem 1.5rem;
   background: var(--vp-nav-bg);
   backdrop-filter: blur(20px);
@@ -1588,8 +1599,8 @@ onMounted(fetchPortal);
 
 .vp-upload-preview {
   width: 100%;
-  max-height: 140px;
-  object-fit: cover;
+  max-height: 200px;
+  object-fit: contain;
   display: block;
 }
 
@@ -1613,4 +1624,195 @@ onMounted(fetchPortal);
   padding: 0;
 }
 .vp-upload-clear:hover { text-decoration: underline; }
+
+/* ── Secondary Button ── */
+.vp-btn-secondary {
+  display: inline-flex !important; align-items: center !important; justify-content: center !important; gap: 0.5rem !important;
+  background: var(--vp-input-bg) !important;
+  color: var(--vp-text) !important;
+  font-family: var(--vp-font, 'Inter', sans-serif) !important;
+  font-weight: 700 !important;
+  font-size: 0.875rem !important;
+  padding: 0.75rem 1.5rem !important;
+  border-radius: 9999px !important;
+  border: 1px solid var(--vp-input-border) !important;
+  cursor: pointer !important;
+  transition: background 0.2s, transform 0.2s !important;
+}
+.vp-btn-secondary:hover { background: var(--vp-card-border) !important; transform: translateY(-1px) !important; }
+
+/* ── ID Card ── */
+.vp-success {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 1.25rem; padding: 1.5rem; text-align: center;
+  background: #f8fafc;
+}
+.vp-id-card-wrapper {
+  width: 100%;
+  max-width: 320px;
+  background: #ffffff;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  border: 1px solid #e2e8f0;
+}
+.vp-id-card-header {
+  background: var(--vp-brand);
+  color: #ffffff;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.vp-id-card-logo {
+  height: 24px;
+  max-width: 80px;
+  object-fit: contain;
+  background: #fff;
+  border-radius: 4px;
+  padding: 2px;
+}
+.vp-id-card-brand {
+  font-weight: 800;
+  font-size: 0.9rem;
+  letter-spacing: -0.01em;
+}
+.vp-id-card-body {
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 1rem;
+  gap: 1.25rem;
+  align-items: center;
+  border-bottom: 1px dashed #e2e8f0;
+}
+.vp-id-card-profile {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  gap: 1rem;
+}
+.vp-id-card-profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.vp-id-card-photo, .vp-id-card-photo-placeholder {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--vp-brand-light);
+}
+.vp-id-card-photo-placeholder {
+  background: #f1f5f9;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.vp-id-card-name {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.2;
+  text-align: left;
+}
+.vp-id-card-role {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: var(--vp-brand);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+  background: var(--vp-brand-light);
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  display: inline-block;
+  align-self: flex-start;
+}
+.vp-id-card-qr-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+.vp-id-card-qr-container {
+  width: 170px;
+  height: 170px;
+  background: #fff;
+  padding: 0.5rem;
+  border-radius: 0.75rem;
+  border: 2px solid #e2e8f0;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+}
+.vp-id-qr-img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.vp-id-qr-pending {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.6rem; color: #94a3b8; text-align: center;
+}
+.vp-id-card-details {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: #fafafa;
+}
+.vp-id-card-detail-item {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  line-height: 1.3;
+}
+.vp-id-card-detail-item span {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 0.02em;
+}
+.vp-id-card-detail-item strong {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+.vp-id-card-footer {
+  background: var(--vp-brand);
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.vp-success-actions {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.vp-camera-container {
+  display: flex; flex-direction: column; gap: 0.5rem;
+  background: #f8fafc; padding: 0.5rem; border-radius: 0.75rem;
+  border: 1.5px solid var(--vp-input-border);
+}
+.vp-camera-video {
+  width: 100%; border-radius: 0.5rem; background: #000;
+  max-height: 240px; object-fit: cover; transform: scaleX(-1);
+}
+.vp-camera-controls {
+  display: flex; justify-content: flex-end; gap: 0.5rem;
+}
+.vp-photo-preview-container {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
 </style>

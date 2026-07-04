@@ -369,9 +369,13 @@ const openEventImage = (event) => {
 
 const fetchNvrs = async () => {
   if (!token) return;
+  const tenantId = authService.getTenantId();
   try {
     const url = new URL(`${apiUrl}/items/controllers`);
     url.searchParams.append('filter[controllerType][_eq]', 'frigate_nvr');
+    if (tenantId) {
+      url.searchParams.append('filter[tenant][_eq]', tenantId);
+    }
     const res = await fetch(url.toString(), {
       headers: { Authorization: `Bearer ${systemToken}` }
     });
@@ -386,8 +390,18 @@ const fetchNvrs = async () => {
 
 const fetchLinkedControllers = async () => {
   if (!token) return;
+  const tenantId = authService.getTenantId();
   try {
-    const res = await fetch(`${apiUrl}/items/controllers?fields[]=id&fields[]=controllerName&fields[]=sn&fields[]=linkedCamera&filter[linkedCamera][_nnull]=true`, {
+    const url = new URL(`${apiUrl}/items/controllers`);
+    url.searchParams.append('fields[]', 'id');
+    url.searchParams.append('fields[]', 'controllerName');
+    url.searchParams.append('fields[]', 'sn');
+    url.searchParams.append('fields[]', 'linkedCamera');
+    url.searchParams.append('filter[linkedCamera][_nnull]', 'true');
+    if (tenantId) {
+      url.searchParams.append('filter[tenant][_eq]', tenantId);
+    }
+    const res = await fetch(url.toString(), {
       headers: { Authorization: `Bearer ${systemToken}` }
     });
     if (res.ok) {
@@ -403,10 +417,24 @@ const fetchEvents = async () => {
   if (!token) return;
   loading.value = true;
   try {
+    const allowedCameras = linkedControllers.value
+      .map(c => c.linkedCamera)
+      .filter(Boolean);
+
+    // If tenant has no allowed cameras, return empty list immediately to prevent showing other tenant's events.
+    if (allowedCameras.length === 0) {
+      events.value = [];
+      loading.value = false;
+      return;
+    }
+
     const url = new URL(`${apiUrl}/items/frigateEvents`);
     url.searchParams.append('sort', '-start_time');
     url.searchParams.append('limit', '2000');
     url.searchParams.append('filter[snapshot_file][_nnull]', 'true');
+    
+    // Filter by allowed cameras for this tenant
+    url.searchParams.append('filter[camera][_in]', allowedCameras.join(','));
 
     // Add filter logic
     if (selectedLabel.value !== 'all') {
@@ -437,9 +465,9 @@ const fetchEvents = async () => {
   }
 };
 
-onMounted(() => {
-  fetchNvrs();
-  fetchLinkedControllers();
-  fetchEvents();
+onMounted(async () => {
+  await fetchNvrs();
+  await fetchLinkedControllers();
+  await fetchEvents();
 });
 </script>

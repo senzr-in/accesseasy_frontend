@@ -249,7 +249,7 @@ const routes = [
         path: "visitors",
         name: "Visitors",
         component: () => import("@/pages/visitors/index.vue"),
-        meta: { roles: ["Admin", "Guard"] }
+        meta: { roles: ["Admin", "Guard", "Employee"] }
       },
       {
         path: "visitor-portals",

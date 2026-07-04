@@ -110,6 +110,7 @@ import {
   Focus, Clock, User, Car, Box, ExternalLink 
 } from 'lucide-vue-next';
 import { authService } from "@/services/authService";
+import { currentUserTenant } from "@/utils/currentUserTenant";
 
 const props = defineProps({
   modelValue: Boolean,
@@ -149,12 +150,42 @@ const formatDate = (dateString) => {
 
 const fetchEvents = async () => {
   if (!token) return;
+  
+  // Always resolve tenantId async
+  const tenantId = await currentUserTenant.getTenantIdAsync();
+  if (!tenantId) return;
+
   loading.value = true;
   try {
-    const url = new URL(`${import.meta.env.VITE_API_URL}/items/frigateEvents`);
+    // 1. Fetch allowed cameras for this tenant
+    const controllersUrl = new URL(`${apiUrl}/items/controllers`);
+    controllersUrl.searchParams.append('fields[]', 'linkedCamera');
+    controllersUrl.searchParams.append('filter[linkedCamera][_nnull]', 'true');
+    controllersUrl.searchParams.append('filter[tenant][_eq]', tenantId);
+
+    const controllersRes = await fetch(controllersUrl.toString(), {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    
+    let allowedCameras = [];
+    if (controllersRes.ok) {
+      const data = await controllersRes.json();
+      allowedCameras = (data.data || []).map(c => c.linkedCamera).filter(Boolean);
+    }
+
+    if (allowedCameras.length === 0) {
+      events.value = [];
+      loading.value = false;
+      return;
+    }
+
+    // 2. Fetch events
+    const url = new URL(`${apiUrl}/items/frigateEvents`);
     url.searchParams.append('sort', '-start_time');
     url.searchParams.append('limit', '20');
     url.searchParams.append('filter[snapshot_file][_nnull]', 'true');
+    url.searchParams.append('filter[camera][_in]', allowedCameras.join(','));
+
     // If we want to filter by a specific camera mapped to this controller:
     // url.searchParams.append('filter[controller_id][_eq]', props.device.id);
 

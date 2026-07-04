@@ -36,15 +36,12 @@
           </button>
         </div>
       </div>
-      <!-- Hide Pre-Register Visitor Action (commented out for future use if needed) -->
-      <!--
       <button
         @click="showAddModal = true"
         class="flex items-center gap-2 h-10 px-4 rounded-xl bg-indigo-600 dark:bg-indigo-500 text-white text-[11px] font-black uppercase tracking-widest hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-colors shadow-sm shrink-0"
       >
         <UserPlus class="w-4 h-4" /> Pre-Register Visitor
       </button>
-      -->
     </div>
 
     <!-- Main Table Card -->

@@ -38,21 +38,24 @@
             <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">First Name</label>
             <input 
               v-model="firstName" 
-              class="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
+              disabled
+              class="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-800/50 opacity-80"
             >
           </div>
           <div class="space-y-2">
             <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Last Name</label>
             <input 
               v-model="lastName" 
-              class="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
+              disabled
+              class="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-800/50 opacity-80"
             >
           </div>
           <div class="space-y-2">
             <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Personal Phone</label>
             <input 
               v-model="phone" 
-              class="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
+              disabled
+              class="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-800/50 opacity-80"
             >
           </div>
           <div class="space-y-2">
@@ -60,7 +63,7 @@
             <input 
               v-model="email" 
               disabled
-              class="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-800/50 opacity-60"
+              class="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-800/50 opacity-80"
             >
           </div>
         </div>
@@ -69,17 +72,9 @@
         <label class="text-[10px] font-black uppercase tracking-widest text-slate-400">Home Address</label>
         <input 
           v-model="address" 
-          class="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900"
+          disabled
+          class="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-800/50 opacity-80"
         >
-      </div>
-      <div class="flex justify-end pt-4">
-        <button 
-          :disabled="saving"
-          class="px-8 h-10 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black shadow-lg shadow-blue-500/20 transition-all active:scale-95 disabled:opacity-50"
-          @click="handleSaveProfile"
-        >
-          {{ saving ? "Saving..." : "Save Changes" }}
-        </button>
       </div>
     </div>
 
