@@ -47,59 +47,64 @@
               v-else-if="activeQrUrl"
               class="flex flex-col items-center w-full animate-in zoom-in-95 duration-500"
             >
-              <!-- Minimalist Light Mode ID Badge -->
-              <div class="relative w-full max-w-sm mb-6">
-                <!-- Crisp Card Container (Forced Light Mode) -->
-                <div class="relative bg-white border border-slate-200 rounded-3xl shadow-[0_12px_40px_rgba(0,0,0,0.08)] overflow-hidden p-6 sm:p-7 w-full">
-                  
-                  <!-- Top Section: Avatar + Info -->
-                  <div class="flex items-center gap-5 mb-6">
-                    <div class="relative w-16 h-16 rounded-full border border-slate-200 bg-slate-50 shrink-0 shadow-sm flex items-center justify-center">
-                      <span class="font-black text-2xl text-slate-700">
+              <!-- Vertical Minimalist ID Badge -->
+              <div class="relative w-full max-w-[320px] mb-6 flex flex-col items-center mx-auto">
+                
+                <!-- The Badge Card (Target for html2canvas) -->
+                <div 
+                  ref="badgeCardRef"
+                  class="bg-white border border-slate-200 rounded-[2rem] shadow-[0_12px_40px_rgba(0,0,0,0.08)] overflow-hidden p-8 w-full flex flex-col items-center text-slate-900"
+                >
+                  <!-- Avatar -->
+                  <div class="relative w-32 h-32 rounded-full border-[3px] border-slate-200 p-1 mb-6 shrink-0 shadow-sm">
+                    <div class="w-full h-full rounded-full bg-slate-50 flex items-center justify-center overflow-hidden">
+                      <span class="font-black text-5xl text-slate-400">
                         {{ rawUser?.first_name?.charAt(0).toUpperCase() || '?' }}
                       </span>
                     </div>
-                    <div class="flex-1 overflow-hidden">
-                      <h2 class="text-xl sm:text-2xl font-black text-slate-800 tracking-tight uppercase truncate">{{ rawUser?.first_name || 'N/A' }} {{ rawUser?.last_name || '' }}</h2>
-                      <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">{{ employee?.employeeId || rawUser?.id || 'ID N/A' }}</p>
-                    </div>
                   </div>
 
-                  <!-- Details Row -->
-                  <div class="w-full text-[10px] font-medium text-slate-500 flex flex-wrap gap-x-4 gap-y-2 uppercase tracking-widest border-y border-slate-100 py-3 mb-6">
-                    <span>Access: <strong class="text-slate-900 font-bold">{{ employee?.access_level?.accessLevelName || 'General' }}</strong></span>
-                    <span class="text-slate-200">|</span>
-                    <span>Status: <strong class="text-slate-900 font-bold">ACTIVE</strong></span>
+                  <!-- Name and Role -->
+                  <h2 class="text-3xl font-black text-center tracking-tight uppercase leading-none mb-1 text-slate-900">{{ rawUser?.first_name || 'N/A' }} {{ rawUser?.last_name || '' }}</h2>
+                  <p class="text-sm text-slate-500 font-bold tracking-widest uppercase text-center mb-8">Employee</p>
+
+                  <!-- Details Block -->
+                  <div class="w-full text-[11px] font-medium text-slate-600 space-y-1.5 mb-8">
+                    <div>EMPLOYEE ID: <span class="font-black text-slate-900">{{ employee?.employeeId || rawUser?.id || 'N/A' }}</span></div>
+                    <div>DEPARTMENT: <span class="font-black text-slate-900">{{ employee?.access_level?.accessLevelName || 'GENERAL' }}</span></div>
                   </div>
 
-                  <!-- Bottom: QR Code & Status -->
-                  <div class="flex items-center justify-between gap-4">
-                    <div class="shrink-0">
-                       <div class="p-2.5 bg-white rounded-2xl border border-slate-200 shadow-sm w-[120px] h-[120px] flex items-center justify-center">
-                         <img :src="activeQrUrl" class="w-full h-full block rendering-pixelated" alt="QR Code" />
-                       </div>
-                    </div>
+                  <!-- QR Code with Brackets -->
+                  <div class="relative p-2 shrink-0 mb-6 w-full flex justify-center">
+                     <!-- Brackets (Thin black borders) -->
+                     <div class="absolute top-0 left-[15%] w-6 h-6 border-t-[3px] border-l-[3px] border-slate-900"></div>
+                     <div class="absolute top-0 right-[15%] w-6 h-6 border-t-[3px] border-r-[3px] border-slate-900"></div>
+                     <div class="absolute bottom-0 left-[15%] w-6 h-6 border-b-[3px] border-l-[3px] border-slate-900"></div>
+                     <div class="absolute bottom-0 right-[15%] w-6 h-6 border-b-[3px] border-r-[3px] border-slate-900"></div>
+                     
+                     <div class="p-2 bg-white w-48 h-48 flex items-center justify-center z-10 relative">
+                       <img :src="activeQrUrl" class="w-full h-full block rendering-pixelated" alt="QR Code" />
+                     </div>
+                  </div>
 
-                    <div class="flex flex-col items-end text-right">
-                       <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1 text-right">
-                         Permanent ID<br/>Never Expires
-                       </div>
-                       <div class="text-xs font-black uppercase tracking-widest mt-3 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-700 shadow-sm">
-                         ACCESS KEY
-                       </div>
-                    </div>
+                  <!-- Footer text -->
+                  <div class="text-center w-full mt-auto">
+                    <div class="text-xs font-black text-slate-900 uppercase tracking-wider mb-1">Scan for verification</div>
+                    <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Valid Thru: Permanent</div>
                   </div>
                 </div>
               </div>
               
               <!-- Action Buttons -->
-              <div class="flex gap-2 w-full max-w-sm justify-center">
+              <div class="flex gap-2 w-full max-w-[320px] justify-center mx-auto">
                 <button
-                  class="flex-1 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors flex items-center justify-center shadow-sm"
-                  @click="downloadQrCode"
+                  :disabled="isDownloading"
+                  class="flex-1 h-12 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center shadow-lg disabled:opacity-75 active:scale-95"
+                  @click="downloadFullBadge"
                 >
-                  <Download class="w-4 h-4 mr-1.5" />
-                  Save ID Badge
+                  <Loader2 v-if="isDownloading" class="w-4 h-4 mr-2 animate-spin" />
+                  <Download v-else class="w-4 h-4 mr-2" />
+                  {{ isDownloading ? 'Saving...' : 'Save ID Badge' }}
                 </button>
               </div>
             </div>
@@ -278,6 +283,7 @@ import { authService } from "@/services/authService";
 import { currentUserTenant } from "@/utils/currentUserTenant";
 import QRCodeLib from "qrcode";
 import { generateEncryptedQrToken } from "@/utils/security/access-control.js";
+import html2canvas from "html2canvas";
 
 const token = authService.getToken();
 const tenantId = currentUserTenant.getTenantId();
@@ -286,6 +292,9 @@ const rawUser = authService.getUserData();
 const loadingEmployee = ref(true);
 const employee = ref(null);
 const showIdBadge = ref(false);
+
+const badgeCardRef = ref(null);
+const isDownloading = ref(false);
 
 const generatingQr = ref(false);
 const activeQrUrl = ref(null);
@@ -453,14 +462,25 @@ const generateNewQr = async () => {
   }
 };
 
-const downloadQrCode = () => {
-  if (!activeQrUrl.value) return;
-  const link = document.createElement("a");
-  link.href = activeQrUrl.value;
-  link.download = `Access_Key_${employee.value?.id || 'User'}_${new Date().toISOString().split('T')[0]}.png`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+const downloadFullBadge = async () => {
+  if (!badgeCardRef.value) return;
+  isDownloading.value = true;
+  try {
+    const canvas = await html2canvas(badgeCardRef.value, {
+      scale: 3, // High resolution for sharp printing/saving
+      useCORS: true,
+      backgroundColor: "#ffffff",
+    });
+    
+    const link = document.createElement("a");
+    link.download = `Employee_Badge_${employee.value?.employeeId || rawUser?.id || 'ID'}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  } catch (err) {
+    console.error("Error generating badge image:", err);
+  } finally {
+    isDownloading.value = false;
+  }
 };
 
 const assignRfidCard = async () => {
