@@ -166,59 +166,97 @@
       </DataTableWrapper>
     </div>
   </div>
-  <!-- QR Code Preview Dialog -->
-  <v-dialog
-    v-model="showQRPreviewDialog"
-    max-width="500px"
-  >
-    <v-card>
-      <v-card-title class="d-flex align-center">
-        <v-icon class="mr-2">
-          mdi-qrcode-scan
-        </v-icon>
-        QR Code Preview
-        <v-spacer />
-        <BaseButton
-          icon
-          variant="text"
-          @click="showQRPreviewDialog = false"
-        >
-          <v-icon>mdi-close</v-icon>
-        </BaseButton>
-      </v-card-title>
-      <v-card-text class="text-center pa-6">
-        <div class="qr-preview-container">
-          <canvas
-            ref="qrCanvas"
-            class="qr-canvas"
-          />
+  <!-- Digital ID Card Modal (Holographic Rectangle) -->
+  <div v-if="showQRPreviewDialog && selectedQR" class="fixed inset-0 z-[200] flex items-center justify-center p-4">
+    <!-- Dark backdrop -->
+    <div class="absolute inset-0 bg-slate-950/90 backdrop-blur-md print:hidden" @click="showQRPreviewDialog = false" />
+    
+    <div class="relative flex flex-col items-center animate-in zoom-in-95 duration-300 w-full max-w-3xl">
+      <!-- Print Header -->
+      <div class="hidden print:block text-center mb-6 w-full">
+        <h1 class="text-2xl font-black text-black">EMPLOYEE PASS</h1>
+      </div>
+
+      <!-- Animated glowing orb behind the card -->
+      <div class="absolute inset-0 bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-500 rounded-3xl blur-2xl opacity-30 animate-pulse print:hidden -z-10"></div>
+      
+      <!-- Glassmorphic Container -->
+      <div class="relative bg-slate-900/60 backdrop-blur-2xl border border-white/20 rounded-3xl shadow-[0_0_50px_rgba(79,70,229,0.3)] overflow-hidden p-6 sm:p-10 w-full print:bg-white print:border-black print:shadow-none print:rounded-none">
+        
+        <!-- Top Section: Avatar + Name -->
+        <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-8 text-center sm:text-left">
+          <!-- Avatar -->
+          <div class="relative w-28 h-28 rounded-full p-1 bg-gradient-to-tr from-cyan-400 via-indigo-500 to-purple-500 shrink-0 print:bg-black">
+            <div class="w-full h-full rounded-full overflow-hidden border-4 border-slate-900 bg-slate-800 print:border-white">
+              <div class="w-full h-full flex items-center justify-center font-black text-4xl text-white bg-slate-800 print:text-black print:bg-white">
+                {{ selectedQR.employeeName?.charAt(0).toUpperCase() || '?' }}
+              </div>
+            </div>
+          </div>
+          
+          <!-- Name and Basic Info -->
+          <div class="flex-1 mt-2 sm:mt-0">
+            <h2 class="text-3xl sm:text-4xl font-black text-white tracking-tight uppercase print:text-black">{{ selectedQR.employeeName || 'N/A' }}</h2>
+            <p class="text-lg font-bold text-slate-300 mt-1 uppercase tracking-widest print:text-slate-600">EMPLOYEE ID</p>
+            <p class="text-sm text-cyan-400 mt-1 font-semibold uppercase tracking-widest print:text-slate-500">{{ selectedQR.employeeId || 'N/A' }}</p>
+          </div>
         </div>
-        <div class="qr-info mt-4">
-          <p>
-            <strong>Employee:</strong> {{ selectedQR?.employeeName || "N/A" }}
-          </p>
-          <p><strong>QR Code:</strong> {{ selectedQR?.qrcode }}</p>
-          <p>
-            <strong>Status:</strong>
-            <v-chip
-              :color="selectedQR?.qraccess ? 'success' : 'error'"
-              size="small"
-            >
-              {{ selectedQR?.qraccess ? "Enabled" : "Disabled" }}
-            </v-chip>
-          </p>
+
+        <!-- Middle Divider Info Row -->
+        <div class="w-full text-[10px] sm:text-xs font-semibold text-slate-300 flex flex-wrap justify-center sm:justify-start gap-x-3 gap-y-2 uppercase tracking-widest border-y border-white/10 py-4 mb-8 print:border-slate-300 print:text-slate-600">
+          <span>Employee ID: <strong class="text-white print:text-black">#{{ (selectedQR.employeeId || '000').toString().slice(0, 8) }}</strong></span>
+          <span class="text-white/20 print:hidden">|</span>
+          <span>Access: <strong class="text-white print:text-black">{{ selectedQR.accessLevelsId || 'General' }}</strong></span>
+          <span class="text-white/20 print:hidden">|</span>
+          <span>Status: <strong class="text-white print:text-black">{{ selectedQR.qraccess ? 'Enabled' : 'Disabled' }}</strong></span>
         </div>
-        <BaseButton
-          color="primary"
-          prepend-icon="mdi-download"
-          class="mt-4"
-          @click="downloadSingleQR(selectedQR)"
-        >
-          Download QR Code
-        </BaseButton>
-      </v-card-text>
-    </v-card>
-  </v-dialog>
+
+        <!-- Bottom Section: QR Code & Status -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
+          <!-- QR Code with glowing brackets -->
+          <div class="relative p-1 shrink-0">
+             <!-- Glowing corners (simulating high tech) -->
+             <div class="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-cyan-400 print:hidden"></div>
+             <div class="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-cyan-400 print:hidden"></div>
+             <div class="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-purple-500 print:hidden"></div>
+             <div class="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-purple-500 print:hidden"></div>
+             
+             <div class="m-2 p-3 bg-white/95 rounded-xl shadow-[0_0_30px_rgba(255,255,255,0.15)] print:shadow-none print:border print:border-black flex justify-center items-center" style="width: 144px; height: 144px;">
+               <canvas ref="qrCanvas" class="qr-canvas" style="width: 100% !important; height: 100% !important;"></canvas>
+             </div>
+          </div>
+
+          <!-- Logo & Status -->
+          <div class="flex flex-col items-center sm:items-end text-center sm:text-right">
+             <div class="flex items-center gap-3 mb-4">
+               <!-- Simple AccessEasy logo placeholder -->
+               <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center font-black text-indigo-600 text-xl print:border print:border-black">A</div>
+               <div class="text-left">
+                 <div class="text-lg font-black text-white leading-none print:text-black">AccessEasy</div>
+                 <div class="text-[10px] text-slate-400 tracking-widest uppercase print:text-slate-500">Employee Management</div>
+               </div>
+             </div>
+             <div class="text-xs font-bold text-slate-400 uppercase tracking-widest print:text-slate-500">
+               STATUS: 
+               <span class="text-base ml-2" :class="selectedQR.qraccess ? 'text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.6)] print:text-black' : 'text-rose-400 drop-shadow-[0_0_8px_rgba(244,63,94,0.6)] print:text-black'">
+                 {{ selectedQR.qraccess ? 'ACTIVE' : 'INACTIVE' }}
+               </span>
+             </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- External Actions -->
+      <div class="mt-6 flex justify-end gap-4 w-full print:hidden relative z-10">
+        <button @click="downloadSingleQR(selectedQR)" class="px-6 py-2.5 rounded-xl border border-white/20 font-bold text-xs uppercase tracking-widest text-slate-300 hover:bg-white/10 hover:text-white transition-all bg-indigo-600/80 hover:bg-indigo-600 backdrop-blur-sm">
+          Download QR
+        </button>
+        <button @click="showQRPreviewDialog = false" class="px-6 py-2.5 rounded-xl border border-white/20 font-bold text-xs uppercase tracking-widest text-slate-300 hover:bg-white/10 hover:text-white transition-all bg-slate-900/50 backdrop-blur-sm">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>

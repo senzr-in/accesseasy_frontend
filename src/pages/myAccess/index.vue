@@ -66,7 +66,7 @@
                 Valid for 2 hours · Single use
               </p>
               
-              <div class="mt-4 flex flex-col sm:flex-row gap-3 w-full px-4 justify-center items-center">
+              <div class="mt-4 flex flex-col sm:flex-row gap-2 w-full px-2 justify-center items-center flex-wrap">
                 <button
                   :disabled="generatingQr"
                   class="w-full sm:w-auto px-4 h-9 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-zinc-300 hover:bg-slate-100 transition-colors flex items-center justify-center disabled:opacity-50"
@@ -76,14 +76,21 @@
                     class="w-3.5 h-3.5 mr-2"
                     :class="{ 'animate-spin': generatingQr }"
                   />
-                  Regenerate
+                  Regen
                 </button>
                 <button
                   class="w-full sm:w-auto px-4 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 text-[10px] font-black uppercase tracking-widest text-indigo-600 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 transition-colors flex items-center justify-center"
+                  @click="showIdBadge = true"
+                >
+                  <IdCard class="w-3.5 h-3.5 mr-2" />
+                  Badge
+                </button>
+                <button
+                  class="w-full sm:w-auto px-4 h-9 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-zinc-300 hover:bg-slate-100 transition-colors flex items-center justify-center"
                   @click="downloadQrCode"
                 >
                   <Download class="w-3.5 h-3.5 mr-2" />
-                  Download
+                  Save
                 </button>
                 <button
                   class="w-full sm:w-auto px-4 h-9 rounded-xl bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-[10px] font-black uppercase tracking-widest text-rose-600 hover:bg-rose-50 transition-colors flex items-center justify-center"
@@ -278,12 +285,103 @@
         </div>
       </div>
     </div>
+    <!-- Digital ID Card Modal (Holographic Rectangle) -->
+    <div v-if="showIdBadge" class="fixed inset-0 z-[200] flex items-center justify-center p-4">
+      <!-- Dark backdrop -->
+      <div class="absolute inset-0 bg-slate-950/90 backdrop-blur-md print:hidden" @click="showIdBadge = false" />
+      
+      <div class="relative flex flex-col items-center animate-in zoom-in-95 duration-300 w-full max-w-3xl">
+        <!-- Print Header -->
+        <div class="hidden print:block text-center mb-6 w-full">
+          <h1 class="text-2xl font-black text-black">EMPLOYEE PASS</h1>
+        </div>
+
+        <!-- Animated glowing orb behind the card -->
+        <div class="absolute inset-0 bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-500 rounded-3xl blur-2xl opacity-30 animate-pulse print:hidden -z-10"></div>
+        
+        <!-- Glassmorphic Container -->
+        <div class="relative bg-slate-900/60 backdrop-blur-2xl border border-white/20 rounded-3xl shadow-[0_0_50px_rgba(79,70,229,0.3)] overflow-hidden p-6 sm:p-10 w-full print:bg-white print:border-black print:shadow-none print:rounded-none">
+          
+          <!-- Top Section: Avatar + Name -->
+          <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-8 text-center sm:text-left">
+            <!-- Avatar -->
+            <div class="relative w-28 h-28 rounded-full p-1 bg-gradient-to-tr from-cyan-400 via-indigo-500 to-purple-500 shrink-0 print:bg-black">
+              <div class="w-full h-full rounded-full overflow-hidden border-4 border-slate-900 bg-slate-800 print:border-white">
+                <div class="w-full h-full flex items-center justify-center font-black text-4xl text-white bg-slate-800 print:text-black print:bg-white">
+                  {{ rawUser?.first_name?.charAt(0).toUpperCase() || '?' }}
+                </div>
+              </div>
+            </div>
+            
+            <!-- Name and Basic Info -->
+            <div class="flex-1 mt-2 sm:mt-0">
+              <h2 class="text-3xl sm:text-4xl font-black text-white tracking-tight uppercase print:text-black">{{ rawUser?.first_name || 'N/A' }} {{ rawUser?.last_name || '' }}</h2>
+              <p class="text-lg font-bold text-slate-300 mt-1 uppercase tracking-widest print:text-slate-600">EMPLOYEE ID</p>
+              <p class="text-sm text-cyan-400 mt-1 font-semibold uppercase tracking-widest print:text-slate-500">{{ employee?.employeeId || rawUser?.id || 'N/A' }}</p>
+            </div>
+          </div>
+
+          <!-- Middle Divider Info Row -->
+          <div class="w-full text-[10px] sm:text-xs font-semibold text-slate-300 flex flex-wrap justify-center sm:justify-start gap-x-3 gap-y-2 uppercase tracking-widest border-y border-white/10 py-4 mb-8 print:border-slate-300 print:text-slate-600">
+            <span>Employee ID: <strong class="text-white print:text-black">#{{ (employee?.employeeId || rawUser?.id || '000').toString().slice(0, 8) }}</strong></span>
+            <span class="text-white/20 print:hidden">|</span>
+            <span>Access: <strong class="text-white print:text-black">{{ employee?.access_level?.accessLevelName || 'General' }}</strong></span>
+            <span class="text-white/20 print:hidden">|</span>
+            <span>Status: <strong class="text-white print:text-black">ACTIVE</strong></span>
+          </div>
+
+          <!-- Bottom Section: QR Code & Status -->
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-6">
+            <!-- QR Code with glowing brackets -->
+            <div class="relative p-1 shrink-0">
+               <!-- Glowing corners (simulating high tech) -->
+               <div class="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-cyan-400 print:hidden"></div>
+               <div class="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-cyan-400 print:hidden"></div>
+               <div class="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-purple-500 print:hidden"></div>
+               <div class="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-purple-500 print:hidden"></div>
+               
+               <div class="m-2 p-3 bg-white/95 rounded-xl shadow-[0_0_30px_rgba(255,255,255,0.15)] print:shadow-none print:border print:border-black flex justify-center items-center" style="width: 144px; height: 144px;">
+                 <img :src="activeQrUrl" class="w-full h-full block rendering-pixelated" alt="QR Code" />
+               </div>
+            </div>
+
+            <!-- Logo & Status -->
+            <div class="flex flex-col items-center sm:items-end text-center sm:text-right">
+               <div class="flex items-center gap-3 mb-4">
+                 <!-- Simple AccessEasy logo placeholder -->
+                 <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center font-black text-indigo-600 text-xl print:border print:border-black">A</div>
+                 <div class="text-left">
+                   <div class="text-lg font-black text-white leading-none print:text-black">AccessEasy</div>
+                   <div class="text-[10px] text-slate-400 tracking-widest uppercase print:text-slate-500">Employee Management</div>
+                 </div>
+               </div>
+               <div class="text-xs font-bold text-slate-400 uppercase tracking-widest print:text-slate-500">
+                 KEY TYPE: 
+                 <span class="text-base ml-2" :class="activeQrType === 'EXIT' ? 'text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)] print:text-black' : 'text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.6)] print:text-black'">
+                   {{ activeQrType === 'EXIT' ? 'EXIT KEY' : 'ENTRY KEY' }}
+                 </span>
+               </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- External Actions -->
+        <div class="mt-6 flex justify-end gap-4 w-full print:hidden relative z-10">
+          <button @click="downloadQrCode" class="px-6 py-2.5 rounded-xl border border-white/20 font-bold text-xs uppercase tracking-widest text-slate-300 hover:bg-white/10 hover:text-white transition-all bg-indigo-600/80 hover:bg-indigo-600 backdrop-blur-sm">
+            Save QR
+          </button>
+          <button @click="showIdBadge = false" class="px-6 py-2.5 rounded-xl border border-white/20 font-bold text-xs uppercase tracking-widest text-slate-300 hover:bg-white/10 hover:text-white transition-all bg-slate-900/50 backdrop-blur-sm">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { QrCode, CreditCard, ShieldCheck, Plus, Loader2, AlertCircle, RefreshCw, X, Download, LogIn, LogOut } from "lucide-vue-next";
+import { QrCode, CreditCard, ShieldCheck, Plus, Loader2, AlertCircle, RefreshCw, X, Download, LogIn, LogOut, IdCard } from "lucide-vue-next";
 import { authService } from "@/services/authService";
 import { currentUserTenant } from "@/utils/currentUserTenant";
 import QRCodeLib from "qrcode";
@@ -295,6 +393,7 @@ const rawUser = authService.getUserData();
 
 const loadingEmployee = ref(true);
 const employee = ref(null);
+const showIdBadge = ref(false);
 
 const generatingQr = ref(false);
 const activeQrUrl = ref(null);
