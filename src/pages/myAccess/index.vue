@@ -47,51 +47,44 @@
               v-else-if="activeQrUrl"
               class="flex flex-col items-center w-full animate-in zoom-in-95 duration-500"
             >
-              <!-- Glassmorphic ID Badge Inline -->
+              <!-- Minimalist Light Mode ID Badge -->
               <div class="relative w-full max-w-sm mb-6">
-                <!-- Glowing orb -->
-                <div class="absolute inset-0 bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-500 rounded-3xl blur-xl opacity-30 animate-pulse -z-10"></div>
-                
-                <div class="relative bg-slate-900/80 backdrop-blur-2xl border border-white/20 rounded-3xl shadow-[0_0_30px_rgba(79,70,229,0.3)] overflow-hidden p-6 w-full">
+                <!-- Crisp Card Container -->
+                <div class="relative bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-3xl shadow-[0_12px_40px_rgba(0,0,0,0.06)] dark:shadow-none overflow-hidden p-6 sm:p-7 w-full transition-colors">
                   
                   <!-- Top Section: Avatar + Info -->
-                  <div class="flex items-center gap-4 mb-6">
-                    <div class="relative w-16 h-16 rounded-full p-1 bg-gradient-to-tr from-cyan-400 via-indigo-500 to-purple-500 shrink-0">
-                      <div class="w-full h-full rounded-full overflow-hidden border-2 border-slate-900 bg-slate-800 flex items-center justify-center font-black text-2xl text-white">
+                  <div class="flex items-center gap-5 mb-6">
+                    <div class="relative w-16 h-16 rounded-full border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 shrink-0 shadow-sm flex items-center justify-center">
+                      <span class="font-black text-2xl text-slate-700 dark:text-slate-300">
                         {{ rawUser?.first_name?.charAt(0).toUpperCase() || '?' }}
-                      </div>
+                      </span>
                     </div>
                     <div class="flex-1 overflow-hidden">
-                      <h2 class="text-xl font-black text-white tracking-tight uppercase truncate">{{ rawUser?.first_name || 'N/A' }} {{ rawUser?.last_name || '' }}</h2>
-                      <p class="text-xs font-bold text-cyan-400 uppercase tracking-widest mt-0.5">{{ employee?.employeeId || rawUser?.id || 'ID N/A' }}</p>
+                      <h2 class="text-xl sm:text-2xl font-black text-slate-800 dark:text-white tracking-tight uppercase truncate">{{ rawUser?.first_name || 'N/A' }} {{ rawUser?.last_name || '' }}</h2>
+                      <p class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-0.5">{{ employee?.employeeId || rawUser?.id || 'ID N/A' }}</p>
                     </div>
                   </div>
 
                   <!-- Details Row -->
-                  <div class="w-full text-[10px] font-semibold text-slate-300 flex flex-wrap gap-x-3 gap-y-2 uppercase tracking-widest border-y border-white/10 py-3 mb-6">
-                    <span>Access: <strong class="text-white">{{ employee?.access_level?.accessLevelName || 'General' }}</strong></span>
-                    <span class="text-white/20">|</span>
-                    <span>Status: <strong class="text-white">ACTIVE</strong></span>
+                  <div class="w-full text-[10px] font-medium text-slate-500 dark:text-slate-400 flex flex-wrap gap-x-4 gap-y-2 uppercase tracking-widest border-y border-slate-100 dark:border-zinc-800 py-3 mb-6">
+                    <span>Access: <strong class="text-slate-900 dark:text-white font-bold">{{ employee?.access_level?.accessLevelName || 'General' }}</strong></span>
+                    <span class="text-slate-200 dark:text-zinc-700">|</span>
+                    <span>Status: <strong class="text-slate-900 dark:text-white font-bold">ACTIVE</strong></span>
                   </div>
 
                   <!-- Bottom: QR Code & Status -->
                   <div class="flex items-center justify-between gap-4">
-                    <div class="relative p-1 shrink-0">
-                       <div class="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-cyan-400"></div>
-                       <div class="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-cyan-400"></div>
-                       <div class="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-purple-500"></div>
-                       <div class="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-purple-500"></div>
-                       
-                       <div class="m-1.5 p-2 bg-white/95 rounded-xl w-28 h-28 flex items-center justify-center">
+                    <div class="shrink-0">
+                       <div class="p-2.5 bg-white rounded-2xl border border-slate-200 dark:border-zinc-700 shadow-sm w-[120px] h-[120px] flex items-center justify-center">
                          <img :src="activeQrUrl" class="w-full h-full block rendering-pixelated" alt="QR Code" />
                        </div>
                     </div>
 
                     <div class="flex flex-col items-end text-right">
-                       <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1 text-right">
+                       <div class="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1 text-right">
                          Permanent ID<br/>Never Expires
                        </div>
-                       <div class="text-xs font-black uppercase tracking-widest mt-2 px-2 py-1 rounded bg-black/40 border border-white/10 text-indigo-400 drop-shadow-[0_0_5px_rgba(99,102,241,0.5)]">
+                       <div class="text-xs font-black uppercase tracking-widest mt-3 px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-zinc-800 border border-slate-100 dark:border-zinc-700 text-slate-700 dark:text-slate-300">
                          ACCESS KEY
                        </div>
                     </div>
