@@ -1,13 +1,11 @@
 @import "tailwindcss";
 
 /* ============================================================
-   Tailwind v4 dark mode configuration
-   Using class-based dark mode: adds .dark to <html>
+   Tailwind v4 — Light Mode Only (No dark variant)
    ============================================================ */
-@variant dark (&:where(.dark, .dark *));
 
 /* ============================================================
-   Design token aliases (used by bg-background, text-foreground etc.)
+   Design token aliases
    ============================================================ */
 @theme {
   --color-background: hsl(var(--background));
@@ -44,83 +42,234 @@
 }
 
 /* ============================================================
-   Light mode CSS variable values  (:root = default = light)
+   LIGHT MODE DESIGN SYSTEM
    ============================================================ */
 @layer base {
   :root {
-    --background: 0 0% 97%;          /* near-white #f7f7f7 */
-    --foreground: 222 47% 11%;       /* deep navy text */
+    /* App background: soft light slate */
+    --background: 210 40% 96%;
+    /* #F1F5F9 */
+    --foreground: 222 47% 11%;
+    /* #0F172A slate-900 */
 
-    --card: 0 0% 100%;               /* pure white cards */
+    /* Surface — white cards */
+    --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
 
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    --primary: 221 83% 53%;          /* blue-600 */
+    /* Primary — Indigo */
+    --primary: 239 84% 57%;
+    /* #4F46E5 indigo-600 */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 94%;
+    /* Secondary — light slate */
+    --secondary: 210 40% 96%;
     --secondary-foreground: 222 47% 11%;
 
-    --muted: 210 40% 94%;
+    /* Muted */
+    --muted: 210 40% 96%;
     --muted-foreground: 215 16% 47%;
+    /* slate-500 */
 
-    --accent: 210 40% 94%;
-    --accent-foreground: 222 47% 11%;
+    /* Accent — indigo-50 */
+    --accent: 238 100% 97%;
+    /* #EEF2FF */
+    --accent-foreground: 239 84% 57%;
 
+    /* Destructive — red */
     --destructive: 0 84% 60%;
+    /* #EF4444 */
     --destructive-foreground: 0 0% 100%;
 
-    --border: 214 32% 88%;
-    --input: 214 32% 88%;
-    --ring: 221 83% 53%;
+    --border: 214 32% 91%;
+    /* #E2E8F0 slate-200 */
+    --input: 214 32% 91%;
+    --ring: 239 84% 57%;
 
-    --radius: 0.5rem;
+    --radius: 0.625rem;
+  }
+}
+
+/* ============================================================
+   Utility Classes — Clean Light Design
+   ============================================================ */
+@layer utilities {
+
+  /* Card — replaces glass-panel */
+  .ae-card {
+    @apply bg-white border border-slate-200 rounded-xl shadow-sm;
   }
 
-  /* ============================================================
-     Dark mode CSS variable values (.dark class on <html>)
-     ============================================================ */
-  .dark {
-    --background: 222 24% 8%;        /* very dark blue-gray */
-    --foreground: 210 40% 96%;       /* near-white text */
-
-    --card: 222 24% 11%;             /* slightly lighter than background */
-    --card-foreground: 210 40% 96%;
-
-    --popover: 222 24% 11%;
-    --popover-foreground: 210 40% 96%;
-
-    --primary: 217 91% 60%;          /* brighter blue */
-    --primary-foreground: 222 47% 11%;
-
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 96%;
-
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 20% 65%;
-
-    --accent: 217 33% 17%;
-    --accent-foreground: 210 40% 96%;
-
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 40% 96%;
-
-    --border: 217 33% 18%;
-    --input: 217 33% 18%;
-    --ring: 224 76% 48%;
+  .ae-card-hover {
+    @apply hover:shadow-md hover:-translate-y-0.5 transition-all duration-200;
   }
 
-  /* Apply background & text to html + body so the whole page gets the theme */
-  html,
-  body,
-  #app {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
+  /* Status badges */
+  .badge {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold;
   }
 
-  * {
-    border-color: hsl(var(--border));
+  .badge-success {
+    @apply bg-emerald-50 text-emerald-700 border border-emerald-200;
+  }
+
+  .badge-warning {
+    @apply bg-amber-50 text-amber-700 border border-amber-200;
+  }
+
+  .badge-danger {
+    @apply bg-red-50 text-red-700 border border-red-200;
+  }
+
+  .badge-info {
+    @apply bg-blue-50 text-blue-700 border border-blue-200;
+  }
+
+  .badge-muted {
+    @apply bg-slate-100 text-slate-600 border border-slate-200;
+  }
+
+  .badge-primary {
+    @apply bg-indigo-50 text-indigo-700 border border-indigo-200;
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm active:scale-[0.98];
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold rounded-lg border border-slate-200 transition-colors shadow-sm active:scale-[0.98];
+  }
+
+  .btn-danger {
+    @apply inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-lg transition-colors shadow-sm active:scale-[0.98];
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 px-3 py-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 text-sm font-medium rounded-lg transition-colors;
+  }
+
+  .btn-icon {
+    @apply p-2 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors;
+  }
+
+  /* Inputs */
+  .ae-input {
+    @apply w-full h-9 px-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all;
+  }
+
+  .ae-select {
+    @apply w-full h-9 px-3 bg-white border border-slate-200 rounded-lg text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 transition-all;
+  }
+
+  /* Page section header */
+  .ae-page-header {
+    @apply flex items-center justify-between mb-6;
+  }
+
+  .ae-section-label {
+    @apply text-[10px] font-bold uppercase tracking-wider text-slate-600;
+  }
+
+  /* Stat card */
+  .stat-card {
+    @apply bg-white border border-slate-200 rounded-xl p-5 shadow-sm;
+  }
+
+  /* Table */
+  .ae-table {
+    @apply w-full text-sm border-collapse;
+  }
+
+  .ae-table thead {
+    @apply bg-slate-50 border-b border-slate-200;
+  }
+
+  .ae-table thead th {
+    @apply px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500;
+  }
+
+  .ae-table tbody tr {
+    @apply border-b border-slate-100 hover:bg-slate-50 transition-colors;
+  }
+
+  .ae-table tbody td {
+    @apply px-4 py-3 text-slate-700;
+  }
+}
+
+/* ============================================================
+   Scrollbar — Light Mode
+   ============================================================ */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* ============================================================
+   Global Base Styles
+   ============================================================ */
+body {
+  @apply bg-slate-100 text-slate-900 antialiased;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-feature-settings: "rlig" 1, "calt" 1;
+}
+
+/* Custom scrollbar for containers */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 99px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Animate-in utility for page transitions */
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation: fadeSlideUp 0.35s ease-out both;
+}
+
+/* Print utilities */
+@media print {
+  .no-print {
+    display: none !important;
   }
 }

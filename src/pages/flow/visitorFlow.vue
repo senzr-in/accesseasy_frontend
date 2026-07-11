@@ -151,22 +151,11 @@
           <button
             type="submit"
             class="btn btn-generate"
-            :disabled="singleVisitor.generated_Qr"
+            :disabled="singleVisitor.generated_Qr || isSaving"
           >
             <i class="fas fa-qrcode" />
-            Generate QR
-          </button>
-          <button
-            type="button"
-            class="btn btn-save"
-            :disabled="!singleVisitor.generated_Qr || isSaving"
-            @click="saveVisitorData(true)"
-          >
-            <span
-              v-if="isSaving"
-              class="loading-spinner"
-            />
-            {{ isSaving ? "Saving..." : "Save" }}
+            <span v-if="isSaving" class="loading-spinner" />
+            {{ isSaving ? "Saving..." : "Generate & Save Pass" }}
           </button>
           <button
             type="button"
@@ -318,22 +307,11 @@
           <button
             type="submit"
             class="btn btn-generate"
-            :disabled="multiVisitor.generatedQRs.length > 0"
+            :disabled="multiVisitor.generatedQRs.length > 0 || isSaving"
           >
             <i class="fas fa-qrcode" />
-            Generate QRs
-          </button>
-          <button
-            type="button"
-            class="btn btn-save"
-            :disabled="multiVisitor.generatedQRs.length === 0 || isSaving"
-            @click="saveVisitorData(false)"
-          >
-            <span
-              v-if="isSaving"
-              class="loading-spinner"
-            />
-            {{ isSaving ? "Saving..." : "Save" }}
+            <span v-if="isSaving" class="loading-spinner" />
+            {{ isSaving ? "Saving..." : "Generate & Save Passes" }}
           </button>
           <button
             type="button"
@@ -611,8 +589,6 @@ export default {
     },
 
     async generateUniqueQR(visitorData) {
-      console.log("Starting generateUniqueQR with data:", visitorData);
-
       const startDateTime = new Date(
         `${visitorData.startDate}T${visitorData.startTime}`,
       );
@@ -620,45 +596,24 @@ export default {
         `${visitorData.endDate}T${visitorData.endTime}`,
       );
 
-      console.log("Calculated date/times:", {
-        startDateTime,
-        endDateTime,
-      });
-
       const qrData = {
-        ...visitorData,
-        validFrom: startDateTime.toISOString(),
-        validUntil: endDateTime.toISOString(),
-        uniqueId: Date.now() + Math.random().toString(36).substr(2, 9),
+        type: 'VISITOR',
+        token: visitorData.id,
+        name: visitorData.personName,
       };
 
-      console.log("Generated QR data object:", qrData);
-
       try {
-        console.log("Attempting to generate QR code data URL...");
         const qrCodeDataUrl = await QRCode.toDataURL(JSON.stringify(qrData));
-        console.log("QR code data URL generated successfully");
 
-        const result = {
+        return {
           qrCode: qrCodeDataUrl,
           validFrom: startDateTime,
           validUntil: endDateTime,
-          uniqueId: qrData.uniqueId,
+          uniqueId: visitorData.id,
           status: this.determineInitialStatus(startDateTime, endDateTime),
         };
-
-        console.log("Final QR result:", {
-          ...result,
-          qrCode: "QR code data URL (truncated)",
-        });
-
-        return result;
       } catch (error) {
         console.error("Error in QR generation:", error);
-        console.log("Error details:", {
-          message: error.message,
-          stack: error.stack,
-        });
         throw error;
       }
     },
@@ -702,14 +657,32 @@ export default {
     },
 
     async handleSingleQRGenerate() {
+      if (this.isSaving) return;
+      this.isSaving = true;
       try {
+        const userTenant = await this.fetchUserTenant();
+        if (!userTenant) throw new Error("User tenant not found");
+
         const startDateTime = new Date(
           `${this.singleVisitor.startDate}T${this.singleVisitor.startTime}`,
         );
         const endDateTime = new Date(
           `${this.singleVisitor.endDate}T${this.singleVisitor.endTime}`,
         );
-        const qrResult = await this.generateUniqueQR({
+        const initialStatus = this.determineInitialStatus(startDateTime, endDateTime);
+
+        // 0. Pre-generate a dummy QR in case the database requires the field
+        const dummyQrResult = await this.generateUniqueQR({
+          id: "pending",
+          personName: this.singleVisitor.personName,
+          startDate: this.singleVisitor.startDate,
+          endDate: this.singleVisitor.endDate,
+          startTime: this.singleVisitor.startTime,
+          endTime: this.singleVisitor.endTime,
+        });
+
+        // 1. Save visitor FIRST with dummy QR
+        const payload = {
           personName: this.singleVisitor.personName,
           email: this.singleVisitor.email,
           mobileNumber: this.singleVisitor.mobileNumber,
@@ -717,52 +690,118 @@ export default {
           endDate: this.singleVisitor.endDate,
           startTime: this.singleVisitor.startTime,
           endTime: this.singleVisitor.endTime,
-          assignedAccessLevel: this.singleVisitor.assignedAccessLevel,
+          assignedAccessLevels: this.singleVisitor.assignedAccessLevel,
+          generated_Qr: dummyQrResult.qrCode,
+          status: initialStatus,
+          tenant: userTenant,
+          quantity: 1,
+        };
+
+        const response = await this.submitVisitorData(payload);
+        const visitorId = response.data.id;
+
+        // 2. Generate final QR with real ID
+        const qrResult = await this.generateUniqueQR({
+          id: visitorId,
+          personName: this.singleVisitor.personName,
+          startDate: this.singleVisitor.startDate,
+          endDate: this.singleVisitor.endDate,
+          startTime: this.singleVisitor.startTime,
+          endTime: this.singleVisitor.endTime,
         });
 
-        const initialStatus = this.determineInitialStatus(
-          startDateTime,
-          endDateTime,
-        );
+        // 3. Update visitor with QR image
+        await this.updateVisitorQR(visitorId, qrResult.qrCode);
+
+        // Update UI
         this.singleVisitor.generatedQR = qrResult.qrCode;
         this.singleVisitor.generated_Qr = qrResult.qrCode;
         this.singleVisitor.status = initialStatus;
 
         this.startSingleQRStatusCheck(startDateTime, endDateTime);
-        console.log(
-          "QR code set for UI:",
-          this.singleVisitor.generatedQR ? "Generated" : "Not generated",
-        );
-        console.log(
-          "QR code set for payload:",
-          this.singleVisitor.generated_Qr ? "Generated" : "Not generated",
-        );
+        this.showSuccessMessage("Pass generated and saved successfully");
+        
+        // Refresh table in background
+        this.fetchVisitorData();
       } catch (error) {
-        console.error("Failed to generate QR code:", error);
-        this.showErrorMessage("Failed to generate QR code. Please try again.");
+        console.error("Failed to generate and save pass:", error);
+        this.showErrorMessage("Failed to process pass. Please try again.");
+      } finally {
+        this.isSaving = false;
       }
     },
 
     async handleMultiQRGenerate() {
+      if (this.isSaving) return;
+      this.isSaving = true;
       try {
+        const userTenant = await this.fetchUserTenant();
+        if (!userTenant) throw new Error("User tenant not found");
+
         const generatedQRs = [];
-        for (let i = 0; i < this.multiVisitor.quantity; i++) {
-          const qrResult = await this.generateUniqueQR({
+        const totalEntries = this.multiVisitor.quantity;
+
+        const startDateTime = new Date(`${this.multiVisitor.startDate}T${this.multiVisitor.startTime}`);
+        const endDateTime = new Date(`${this.multiVisitor.endDate}T${this.multiVisitor.endTime}`);
+        const initialStatus = this.determineInitialStatus(startDateTime, endDateTime);
+
+        for (let i = 0; i < totalEntries; i++) {
+          const personName = `Visitor ${i + 1}`;
+          
+          // 0. Pre-generate dummy QR
+          const dummyQrResult = await this.generateUniqueQR({
+            id: "pending",
+            personName: personName,
             startDate: this.multiVisitor.startDate,
             endDate: this.multiVisitor.endDate,
             startTime: this.multiVisitor.startTime,
             endTime: this.multiVisitor.endTime,
-            assignedAccessLevel: this.multiVisitor.assignedAccessLevel,
-            batchId: Date.now(),
-            qrIndex: i + 1,
           });
+
+          // 1. Save visitor
+          const payload = {
+            startDate: this.multiVisitor.startDate,
+            endDate: this.multiVisitor.endDate,
+            startTime: this.multiVisitor.startTime,
+            endTime: this.multiVisitor.endTime,
+            assignedAccessLevels: this.multiVisitor.assignedAccessLevel,
+            generated_Qr: dummyQrResult.qrCode,
+            status: initialStatus,
+            quantity: totalEntries,
+            personName: personName,
+            email: `visitor${i + 1}@placeholder.com`,
+            mobileNumber: `0000000000`,
+            tenant: userTenant,
+          };
+
+          const response = await this.submitVisitorData(payload);
+          const visitorId = response.data.id;
+
+          // 2. Generate QR
+          const qrResult = await this.generateUniqueQR({
+            id: visitorId,
+            personName: personName,
+            startDate: this.multiVisitor.startDate,
+            endDate: this.multiVisitor.endDate,
+            startTime: this.multiVisitor.startTime,
+            endTime: this.multiVisitor.endTime,
+          });
+
+          // 3. Update DB with QR
+          await this.updateVisitorQR(visitorId, qrResult.qrCode);
           generatedQRs.push(qrResult);
         }
+
         this.multiVisitor.generatedQRs = generatedQRs;
         this.multiVisitor.status = generatedQRs[0].status;
+        
+        this.showSuccessMessage(`Successfully generated and saved ${totalEntries} passes`);
+        this.fetchVisitorData();
       } catch (error) {
-        alert("Failed to generate QR codes:", error);
-        throw error;
+        console.error("Failed to generate multi QR:", error);
+        alert("Failed to generate and save passes.");
+      } finally {
+        this.isSaving = false;
       }
     },
 
@@ -776,77 +815,19 @@ export default {
       }
     },
 
-    async saveVisitorData(isSingle = true) {
-      this.isSaving = true;
-      try {
-        const userTenant = await this.fetchUserTenant();
-        if (!userTenant) throw new Error("User tenant not found");
-
-        if (isSingle) {
-          if (!this.singleVisitor.generated_Qr) {
-            this.showErrorMessage("Please generate QR code first");
-            return;
-          }
-
-          const payload = {
-            personName: this.singleVisitor.personName,
-            email: this.singleVisitor.email,
-            mobileNumber: this.singleVisitor.mobileNumber,
-            startDate: this.singleVisitor.startDate,
-            endDate: this.singleVisitor.endDate,
-            startTime: this.singleVisitor.startTime,
-            endTime: this.singleVisitor.endTime,
-            assignedAccessLevels: this.singleVisitor.assignedAccessLevel,
-            generated_Qr: this.singleVisitor.generated_Qr,
-            status: "inactive",
-            tenant: userTenant,
-            quantity: 1,
-          };
-
-          const response = await this.submitVisitorData(payload);
-          if (response) {
-            this.showSuccessMessage("QR code saved successfully");
-            this.resetForm(true);
-            this.showSingleGeneratePopup = false;
-            await this.fetchVisitorData();
-          }
-        } else {
-          const totalEntries = this.multiVisitor.quantity;
-          const savePromises = [];
-
-          for (let i = 0; i < totalEntries; i++) {
-            const qrCode = this.multiVisitor.generatedQRs[i];
-            const visitorPayload = {
-              startDate: this.multiVisitor.startDate,
-              endDate: this.multiVisitor.endDate,
-              startTime: this.multiVisitor.startTime,
-              endTime: this.multiVisitor.endTime,
-              assignedAccessLevels: this.multiVisitor.assignedAccessLevel,
-              generated_Qr: qrCode.qrCode,
-              status: "inactive",
-              quantity: totalEntries,
-              personName: `Visitor ${i + 1}`,
-              email: `visitor${i + 1}@placeholder.com`,
-              mobileNumber: `0000000000`,
-              tenant: userTenant,
-            };
-            savePromises.push(this.submitVisitorData(visitorPayload));
-          }
-
-          await Promise.all(savePromises);
-
-          this.showSuccessMessage(
-            `Successfully saved ${totalEntries} QR codes`,
-          );
-          this.resetForm(false);
-          this.showMultiGeneratePopup = false;
-          await this.fetchVisitorData();
+    async updateVisitorQR(visitorId, qrCodeDataUrl) {
+      const token = await authService.getToken();
+      await fetch(
+        `${import.meta.env.VITE_API_URL}/items/visitor/${visitorId}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ generated_Qr: qrCodeDataUrl }),
         }
-      } catch (error) {
-        this.showErrorMessage("Failed to save visitor data. Please try again.");
-      } finally {
-        this.isSaving = false;
-      }
+      );
     },
 
     async submitVisitorData(payload) {

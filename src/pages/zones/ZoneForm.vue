@@ -1,122 +1,66 @@
 <template>
-  <div class="zone-form-container">
-    <v-form
-      ref="formRef"
-      v-model="valid"
-      @submit.prevent="handleSubmit"
-    >
-      <v-row>
-        <!-- Zone Name -->
-        <v-col cols="12">
-          <v-text-field
-            v-model="formData.zoneName"
-            label="Zone Name"
-            placeholder="Enter zone name"
-            variant="outlined"
-            density="comfortable"
-            :rules="zoneNameRules"
-            required
-          />
-        </v-col>
+  <div class="space-y-6">
+    <!-- Zone Name -->
+    <div>
+      <label class="ae-section-label mb-1.5 block">Zone Name</label>
+      <input
+        v-model="formData.zoneName"
+        type="text"
+        class="ae-input w-full"
+        placeholder="e.g. Main Hub Area"
+      />
+      <p v-if="!formData.zoneName && attemptSubmit" class="text-xs text-rose-500 mt-1">Zone name is required</p>
+    </div>
 
-        <!-- Entry Doors -->
-        <v-col
-          cols="12"
-          md="6"
-        >
-          <v-select
-            v-model="selectedEntryDoors"
-            :items="availableDoors"
-            item-title="displayName"
-            item-value="id"
-            label="Entry Doors"
-            placeholder="Select entry doors"
-            variant="outlined"
-            density="comfortable"
-            multiple
-            chips
-            closable-chips
-            :rules="doorsValidationRules"
+    <div class="grid grid-cols-1 gap-6">
+      <!-- Access Points -->
+      <div class="border border-slate-200 rounded-xl overflow-hidden flex flex-col">
+        <div class="bg-slate-50 px-4 py-2 border-b border-slate-200">
+          <label class="ae-section-label">Linked Access Points</label>
+        </div>
+        <div class="p-3 max-h-64 overflow-y-auto space-y-1">
+          <label 
+            v-for="door in availableDoors" 
+            :key="door.id"
+            class="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"
           >
-            <template #chip="{ item, props }">
-              <v-chip
-                v-bind="props"
-                :text="item.raw.displayName"
-                closable
-              />
-            </template>
-          </v-select>
-        </v-col>
+            <input 
+              type="checkbox" 
+              :value="door.id" 
+              v-model="selectedDoors"
+              class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-600"
+            />
+            <span class="text-sm font-medium text-slate-700">{{ door.displayName }}</span>
+          </label>
+          <div v-if="availableDoors.length === 0" class="text-xs text-slate-400 text-center py-4">
+            No access points available
+          </div>
+        </div>
+      </div>
+    </div>
 
-        <!-- Exit Doors -->
-        <v-col
-          cols="12"
-          md="6"
-        >
-          <v-select
-            v-model="selectedExitDoors"
-            :items="availableDoors"
-            item-title="displayName"
-            item-value="id"
-            label="Exit Doors"
-            placeholder="Select exit doors"
-            variant="outlined"
-            density="comfortable"
-            multiple
-            chips
-            closable-chips
-            :rules="doorsValidationRules"
-          >
-            <template #chip="{ item, props }">
-              <v-chip
-                v-bind="props"
-                :text="item.raw.displayName"
-                closable
-              />
-            </template>
-          </v-select>
-        </v-col>
+    <!-- Validation Error -->
+    <div v-if="attemptSubmit && selectedDoors.length === 0" class="p-3 bg-rose-50 border border-rose-200 rounded-lg text-rose-700 text-xs font-medium flex items-center">
+      At least one Access Point must be selected.
+    </div>
 
-        <!-- Overlap Warning -->
-        <v-col
-          v-if="hasOverlappingDoors"
-          cols="12"
-        >
-          <v-alert
-            type="warning"
-            variant="tonal"
-            density="compact"
-          >
-            <v-icon start>
-              mdi-alert
-            </v-icon>
-            Warning: Some doors are selected in both Entry and Exit doors.
-          </v-alert>
-        </v-col>
-
-        <!-- Action Buttons -->
-        <v-col
-          cols="12"
-          class="d-flex justify-end gap-2"
-        >
-          <BaseButton
-            variant="secondary"
-            :disabled="loading"
-            @click="handleCancel"
-          >
-            Cancel
-          </BaseButton>
-          <BaseButton
-            variant="primary"
-            :loading="loading"
-            :disabled="!valid"
-            @click="handleSubmit"
-          >
-            {{ isEditing ? "Update Zone" : "Create Zone" }}
-          </BaseButton>
-        </v-col>
-      </v-row>
-    </v-form>
+    <!-- Action Buttons -->
+    <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
+      <button
+        class="btn-secondary text-sm px-5"
+        :disabled="loading"
+        @click="handleCancel"
+      >
+        Cancel
+      </button>
+      <button
+        class="btn-primary text-sm px-5"
+        :disabled="loading"
+        @click="handleSubmit"
+      >
+        {{ loading ? 'Saving...' : (isEditing ? "Update Zone" : "Create Zone") }}
+      </button>
+    </div>
   </div>
 </template>
 
@@ -139,12 +83,10 @@ const props = defineProps({
 const emit = defineEmits(["save-success", "cancel"]);
 
 // Form state
-const formRef = ref(null);
-const valid = ref(false);
+const attemptSubmit = ref(false);
 const loading = ref(false);
 const availableDoors = ref([]);
-const selectedEntryDoors = ref([]);
-const selectedExitDoors = ref([]);
+const selectedDoors = ref([]);
 
 const formData = ref({
   zoneName: "",
@@ -152,35 +94,11 @@ const formData = ref({
   exit_doors: [],
 });
 
-// Validation rules
-const zoneNameRules = [
-  (v) => !!v || "Zone name is required",
-  (v) => (v && v.length >= 3) || "Zone name must be at least 3 characters",
-];
-
-const doorsValidationRules = [
-  () => {
-    const hasEntryDoors = selectedEntryDoors.value.length > 0;
-    const hasExitDoors = selectedExitDoors.value.length > 0;
-    return (
-      hasEntryDoors ||
-      hasExitDoors ||
-      "At least one Entry Door or Exit Door must be selected"
-    );
-  },
-];
-
-// Computed properties
-const hasOverlappingDoors = computed(() => {
-  const entrySet = new Set(selectedEntryDoors.value);
-  const exitSet = new Set(selectedExitDoors.value);
-  
-  for (const doorId of entrySet) {
-    if (exitSet.has(doorId)) {
-      return true;
-    }
-  }
-  return false;
+// Validation rules (manual)
+const isValid = computed(() => {
+  if (!formData.value.zoneName || formData.value.zoneName.length < 3) return false;
+  if (selectedDoors.value.length === 0) return false;
+  return true;
 });
 
 /**
@@ -235,8 +153,11 @@ const initializeForm = () => {
     formData.value.zoneName = props.zoneData.zoneName || "";
     
     // Convert door objects to IDs for selection
-    selectedEntryDoors.value = convertDoorObjectsToIds(props.zoneData.entry_doors);
-    selectedExitDoors.value = convertDoorObjectsToIds(props.zoneData.exit_doors);
+    const allIds = [
+      ...convertDoorObjectsToIds(props.zoneData.entry_doors),
+      ...convertDoorObjectsToIds(props.zoneData.exit_doors)
+    ];
+    selectedDoors.value = [...new Set(allIds)];
   }
 };
 
@@ -244,16 +165,19 @@ const initializeForm = () => {
  * Handle form submission
  */
 const handleSubmit = async () => {
-  const { valid: isValid } = await formRef.value.validate();
+  attemptSubmit.value = true;
   
-  if (!isValid) return;
+  if (!isValid.value) return;
 
   loading.value = true;
 
   try {
     // Convert selected door IDs to door objects
-    formData.value.entry_doors = convertDoorIdsToObjects(selectedEntryDoors.value);
-    formData.value.exit_doors = convertDoorIdsToObjects(selectedExitDoors.value);
+    const doorObjects = convertDoorIdsToObjects(selectedDoors.value);
+    
+    // Store all selected access points in entry_doors to maintain schema compatibility
+    formData.value.entry_doors = doorObjects;
+    formData.value.exit_doors = [];
 
     if (props.isEditing) {
       await zoneService.updateZone(props.zoneData.id, formData.value);
@@ -277,14 +201,7 @@ const handleCancel = () => {
   emit("cancel");
 };
 
-// Watch for changes in door selections to trigger validation
-watch([selectedEntryDoors, selectedExitDoors], () => {
-  if (formRef.value) {
-    formRef.value.validate();
-  }
-});
 
-// Watch for changes in zoneData prop to re-initialize form
 watch(() => props.zoneData, (newData) => {
   if (newData && Object.keys(newData).length > 0) {
     initializeForm();
@@ -296,15 +213,3 @@ onMounted(async () => {
   initializeForm();
 });
 </script>
-
-<style scoped>
-.zone-form-container {
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.gap-2 {
-  gap: 8px;
-}
-</style>

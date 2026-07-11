@@ -161,7 +161,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, computed, watch, onMounted, onUnmounted } from "vue";
 import { 
   Activity, Search, User, 
   LogIn, LogOut, Loader2, Fingerprint, 
@@ -354,5 +354,81 @@ onMounted(async () => {
   tenantId = currentUserTenant.getTenantId();
   userRole = currentUserTenant.getRole();
   fetchLogs();
+  
+  pollInterval = setInterval(() => {
+    // Only background poll if we are on the first page and not searching
+    if (page.value === 1 && !searchQuery.value) {
+      // Fetch logs silently in background
+      fetchLogsInBackground();
+    }
+  }, 5000);
+});
+
+let pollInterval = null;
+
+const fetchLogsInBackground = async () => {
+  const tenantId = await currentUserTenant.getTenantIdAsync();
+  if (!token || !tenantId) return;
+
+  try {
+    const params = new URLSearchParams({
+      limit: limit.toString(),
+      page: page.value.toString(),
+      "sort[]": "-date_created",
+      "filter[_and][0][tenant][tenantId][_eq]": tenantId,
+      "filter[_and][1][mode][_neq]": "cronJob"
+    });
+
+    const fields = [
+      "status", "action", "employeeId.employeeId", 
+      "employeeId.assignedUser.id", "employeeId.assignedUser.first_name", 
+      "employeeId.assignedUser.last_name", "employeeId.assignedUser.avatar.id",
+      "mode", "timeStamp", "date", "id", "ValidLogs", "date_created",
+      "name"
+    ];
+
+    fields.forEach(f => params.append("fields[]", f));
+
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/items/logs?${params.toString()}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      
+      const newItems = await Promise.all(data.data.map(async (logItem) => {
+        if (logItem.employeeId?.assignedUser?.avatar?.id) {
+           // Basic URL is enough for background, avoid re-fetching blobs to save memory
+           logItem.avatarImage = `${import.meta.env.VITE_API_URL}/assets/${logItem.employeeId.assignedUser.avatar.id}?access_token=${token}`;
+        }
+        return logItem;
+      }));
+      
+      // Update only if items changed or lengths differ
+      if (newItems.length > 0) {
+        items.value = newItems;
+      }
+    }
+    
+    // Also update count silently
+    const countParams = new URLSearchParams({
+      "aggregate[count]": "id",
+      "filter[_and][0][tenant][tenantId][_eq]": tenantId,
+      "filter[_and][1][mode][_neq]": "cronJob"
+    });
+    const countRes = await fetch(`${import.meta.env.VITE_API_URL}/items/logs?${countParams.toString()}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (countRes.ok) {
+        const cData = await countRes.json();
+        totalItems.value = cData?.data?.[0]?.count?.id || 0;
+    }
+  } catch (error) {
+    // Silent
+  }
+};
+
+onUnmounted(() => {
+  if (pollInterval) clearInterval(pollInterval);
 });
 </script>

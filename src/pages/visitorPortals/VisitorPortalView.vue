@@ -1089,7 +1089,7 @@ const submitRegistration = async () => {
       endDate: startDate,
       startTime: timeNow,
       endTime: '23:59:59',
-      status: 'active',
+      status: 'inactive',
       quantity: 1,
       tenant: { tenantId: portal.value.tenant },
       personToMeet: resolvedFields.value.personToMeet.visible ? visitorData.value.personToMeet : '',

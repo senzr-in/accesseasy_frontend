@@ -36,6 +36,14 @@
             <SkipForward class="w-4 h-4" /> Skip
           </button>
           <button
+            v-if="isOnStepPage"
+            class="flex items-center gap-1 px-3 h-8 rounded-md bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold transition-colors border border-emerald-400/20"
+            @click="handleComplete"
+          >
+            Mark Completed & Next <ArrowRight class="w-4 h-4" />
+          </button>
+          <button
+            v-else
             class="flex items-center gap-1 px-3 h-8 rounded-md bg-white text-blue-600 hover:bg-white/90 text-xs font-semibold transition-colors"
             @click="handleContinue"
           >
@@ -54,15 +62,22 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { ArrowRight, SkipForward, X } from 'lucide-vue-next';
 import { onboardingService } from '@/services/onboardingService';
 import { authService } from '@/services/authService';
 
+const route = useRoute();
 const router = useRouter();
 const stepData = ref(null);
 const isSkipping = ref(false);
+
+const isOnStepPage = computed(() => {
+  if (!stepData.value?.stepConfig?.url) return false;
+  const stepPath = stepData.value.stepConfig.url.split('?')[0];
+  return route.path === stepPath;
+});
 
 onMounted(() => {
   // Only show onboarding banner for Admin users — Guards and Employees should not see it
@@ -77,6 +92,20 @@ const handleContinue = () => {
   const data = onboardingService.getCurrentStep();
   if (data?.stepConfig?.url) {
     router.push(data.stepConfig.url);
+  }
+};
+
+const handleComplete = () => {
+  const current = onboardingService.getCurrentStep();
+  const { isFinished } = onboardingService.markStepCompleted(current.currentStep);
+  if (isFinished) {
+    stepData.value = null;
+    router.push('/dashboard');
+  } else {
+    stepData.value = onboardingService.getCurrentStep();
+    if (stepData.value?.stepConfig?.url) {
+      router.push(stepData.value.stepConfig.url);
+    }
   }
 };
 

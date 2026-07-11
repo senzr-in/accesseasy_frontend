@@ -1,41 +1,16 @@
 <template>
   <div class="p-6 space-y-6 bg-slate-50 dark:bg-zinc-950 min-h-screen">
-    <!-- Header with statistics -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-      <div>
-        <h1 class="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-2">
-          <div class="h-10 w-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center border border-blue-200 dark:border-blue-800/50">
-            <ScanFace class="h-6 w-6 text-blue-600 dark:text-blue-400" />
-          </div>
-          AI Cam Events
-        </h1>
-        <p class="text-xs font-semibold text-slate-500 mt-1">
-          Monitor real-time AI object detections and snapshots across all NVR controllers.
-        </p>
-      </div>
-      
-      <!-- Stats Summary & Actions -->
-      <div class="flex gap-4">
-        <button 
-          @click="fetchEvents"
-          class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl px-4 py-3 shadow-sm flex items-center gap-2 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors"
-          :disabled="loading"
-        >
-          <RefreshCcw class="h-4 w-4 text-blue-600 dark:text-blue-400" :class="{ 'animate-spin': loading }" />
-          <span class="text-xs font-black text-slate-700 dark:text-zinc-300 uppercase tracking-wider">Refresh</span>
-        </button>
-
-        <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl px-5 py-3 shadow-sm flex items-center gap-3">
-          <div class="h-8 w-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
-            <Activity class="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-          </div>
-          <div>
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Total Detections</p>
-            <p class="text-lg font-black text-slate-900 dark:text-white mt-1">{{ events.length }}</p>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- Value Header -->
+    <ValueHeader
+      title="Camera Events"
+      valueStatement="Get notified before security becomes a problem."
+      :benefits="['AI object detection', 'Real-time timeline', 'Link camera controllers', 'Class filters']"
+      valueBadge="Respond instantly to security incidents."
+      actionText="Refresh Feed"
+      :actionIcon="RefreshCcw"
+      themeColor="indigo"
+      @action="fetchEvents"
+    />
 
     <!-- Filters Section -->
     <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl p-5 shadow-sm space-y-4">
@@ -93,10 +68,15 @@
 
         <!-- Label Selector -->
         <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1.5 flex items-center gap-1.5">
-            <SlidersHorizontal class="h-3.5 w-3.5" />
-            Object Class
-          </label>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+              <SlidersHorizontal class="h-3.5 w-3.5" />
+              Object Class
+            </label>
+            <span class="text-[10px] font-black uppercase tracking-wider text-slate-500 bg-slate-100 dark:bg-zinc-850 border border-slate-200 dark:border-zinc-800 px-2 py-0.5 rounded">
+              {{ events.length }} Detections
+            </span>
+          </div>
           <div class="flex flex-wrap gap-2">
             <button 
               v-for="l in ['all', 'person', 'car', 'dog', 'cat']" 
@@ -249,6 +229,7 @@ import {
   Eye, EyeOff
 } from 'lucide-vue-next';
 import { authService } from "@/services/authService";
+import ValueHeader from "@/components/common/ValueHeader.vue";
 
 const token = authService.getToken();
 const apiUrl = import.meta.env.VITE_API_URL;

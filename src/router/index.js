@@ -150,12 +150,7 @@ const routes = [
         component: DashboardHome,
         meta: { roles: ["Admin", "Manager", "Employee", "Guard"] }
       },
-      {
-        path: "visitors-overview",
-        name: "VisitorDashboardHome",
-        component: () => import("@/pages/dashboard/visitors.vue"),
-        meta: { roles: ["Admin", "Guard"] }
-      },
+
       {
         path: "easy-access/employees",
         name: "Employees",
@@ -238,6 +233,12 @@ const routes = [
         name: "Guards",
         component: () => import("@/pages/guard/index.vue"),
         meta: { roles: ["Admin"] }
+      },
+      {
+        path: "patrols",
+        name: "Patrols",
+        component: () => import("@/pages/guard/tabs/PatrolsTab.vue"),
+        meta: { roles: ["Admin", "Manager", "Guard"] }
       },
       {
         path: "authorize",

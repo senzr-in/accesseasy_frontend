@@ -8,16 +8,9 @@
 <script setup>
 import { onMounted } from 'vue';
 
-// Apply dark mode class to <html> based on localStorage preference.
-// Defaults to dark mode so the premium dark design is visible immediately.
+// Force light mode — remove any previously stored dark preference
 onMounted(() => {
-  const saved = localStorage.getItem('ae_theme');
-  if (saved === 'light') {
-    document.documentElement.classList.remove('dark');
-  } else {
-    // Default to dark mode
-    document.documentElement.classList.add('dark');
-    if (!saved) localStorage.setItem('ae_theme', 'dark');
-  }
+  document.documentElement.classList.remove('dark');
+  localStorage.removeItem('ae_theme');
 });
 </script>

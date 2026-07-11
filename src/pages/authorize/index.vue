@@ -1,5 +1,15 @@
 <template>
   <div class="h-full flex flex-col pt-2 pb-6 px-4 max-w-2xl mx-auto w-full relative animate-in fade-in duration-500">
+    <!-- Back Navigation Bar -->
+    <div class="flex items-center justify-between mb-4">
+      <button 
+        @click="$router.push('/dashboard/visitors')"
+        class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-zinc-800 text-slate-500 hover:text-slate-700 bg-white dark:bg-zinc-950 font-black text-[10px] uppercase tracking-widest active:scale-95 shadow-sm cursor-pointer"
+      >
+        <ArrowLeft class="w-3.5 h-3.5" /> Back to Console
+      </button>
+    </div>
+
     <div class="text-center mb-6">
       <h1 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight flex justify-center items-center gap-2">
         <Scan class="w-6 h-6 text-indigo-500" />
@@ -136,7 +146,7 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
-import { Scan, ShieldCheck, ShieldAlert, Loader2, RefreshCw, VideoOff } from 'lucide-vue-next';
+import { Scan, ShieldCheck, ShieldAlert, Loader2, RefreshCw, VideoOff, ArrowLeft } from 'lucide-vue-next';
 import jsQR from 'jsqr';
 import { authService } from '@/services/authService';
 import { currentUserTenant } from '@/utils/currentUserTenant';
@@ -397,6 +407,21 @@ const handleCodeDecoded = async (qrString) => {
                  };
                  accessData.value = scanData;
                  authResult.value = 'success';
+                 
+                 // Update visitor status directly in database so the Dashboard sees the Check-in
+                 try {
+                   await fetch(`${import.meta.env.VITE_API_URL}/items/visitor/${visitorQrData.visitorId}`, {
+                     method: 'PATCH',
+                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                     body: JSON.stringify({ 
+                       status: isEntry ? 'active' : 'inactive',
+                       ...(isEntry && { startTime: new Date().toLocaleTimeString('en-GB') })
+                     })
+                   });
+                 } catch (patchErr) {
+                   console.error('VIS-01: Failed to update visitor status:', patchErr);
+                 }
+
                  await postVerificationLog('authorized', null, isEntry ? 'in' : 'out', `${finalName} (Visitor)`);
                } else {
                  // DENIED or error from backend

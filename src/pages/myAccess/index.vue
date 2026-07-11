@@ -48,49 +48,76 @@
               class="flex flex-col items-center w-full animate-in zoom-in-95 duration-500"
             >
               <!-- Vertical Minimalist ID Badge -->
-              <div class="relative w-full max-w-[320px] mb-6 flex flex-col items-center mx-auto">
+              <div class="relative w-full mb-6 flex flex-col items-center mx-auto">
                 
                 <!-- The Badge Card (Target for html2canvas) -->
                 <div 
                   ref="badgeCardRef"
-                  class="bg-white border border-slate-200 rounded-[2rem] shadow-[0_12px_40px_rgba(0,0,0,0.08)] overflow-hidden p-8 w-full flex flex-col items-center text-slate-900"
+                  class="bg-[#fafafa] border border-slate-200 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden w-full max-w-[340px] flex flex-col items-center relative pt-8 pb-0 min-h-[540px]"
                 >
+                  <!-- Lanyard hole and clip at top -->
+                  <div class="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-2.5 bg-purple-900 rounded-b-md z-10 shadow-sm"></div>
+                  <div class="absolute top-5 left-1/2 -translate-x-1/2 w-14 h-3.5 bg-slate-200 rounded-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.15)] border border-slate-300 z-10"></div>
+
+                  <!-- Header / Logo -->
+                  <div class="flex items-center gap-2.5 mt-5 mb-6 z-10">
+                    <div class="w-10 h-11 bg-purple-800 flex items-center justify-center shadow-sm" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
+                      <span class="text-white font-black text-2xl mt-0.5">N</span>
+                    </div>
+                    <div class="flex flex-col justify-center">
+                      <span class="text-purple-800 font-extrabold text-[26px] leading-none tracking-tight">Nexora</span>
+                      <span class="text-purple-900 font-bold text-[10px] tracking-[0.12em] mt-0.5">TECHNOLOGIES</span>
+                    </div>
+                  </div>
+
                   <!-- Avatar -->
-                  <div class="relative w-32 h-32 rounded-full border-[3px] border-slate-200 p-1 mb-6 shrink-0 shadow-sm">
-                    <div class="w-full h-full rounded-full bg-slate-50 flex items-center justify-center overflow-hidden">
-                      <span class="font-black text-5xl text-slate-400">
-                        {{ rawUser?.first_name?.charAt(0).toUpperCase() || '?' }}
+                  <div class="relative w-36 h-36 rounded-full border-[1.5px] border-purple-500 p-1 mb-5 shrink-0 z-10 bg-white shadow-sm">
+                    <div class="w-full h-full rounded-full bg-slate-100 flex items-center justify-center overflow-hidden shadow-inner">
+                      <!-- For demo purposes, an image is inserted if present, else fallback to initials -->
+                      <img v-if="employee?.avatarUrl" :src="employee.avatarUrl" class="w-full h-full object-cover" />
+                      <!-- We use a placeholder image from unavatar or similar if no initial is present, or just use the initial -->
+                      <img v-else-if="!rawUser?.first_name" src="https://i.pravatar.cc/300?img=47" class="w-full h-full object-cover" />
+                      <span v-else class="font-black text-6xl text-slate-300">
+                        {{ rawUser?.first_name?.charAt(0).toUpperCase() || 'P' }}
                       </span>
                     </div>
                   </div>
 
-                  <!-- Name and Role -->
-                  <h2 class="text-3xl font-black text-center tracking-tight uppercase leading-none mb-1 text-slate-900">{{ rawUser?.first_name || 'N/A' }} {{ rawUser?.last_name || '' }}</h2>
-                  <p class="text-sm text-slate-500 font-bold tracking-widest uppercase text-center mb-8">Employee</p>
-
-                  <!-- Details Block -->
-                  <div class="w-full text-[11px] font-medium text-slate-600 space-y-1.5 mb-8">
-                    <div>EMPLOYEE ID: <span class="font-black text-slate-900">{{ employee?.employeeId || rawUser?.id || 'N/A' }}</span></div>
-                    <div>DEPARTMENT: <span class="font-black text-slate-900">{{ employee?.access_level?.accessLevelName || 'GENERAL' }}</span></div>
+                  <!-- Details -->
+                  <div class="flex flex-col items-center z-10 mb-5 px-4 w-full">
+                    <h2 class="text-2xl font-black text-purple-800 tracking-tight uppercase leading-none mb-2 text-center w-full truncate">
+                      {{ rawUser?.first_name || 'PRIYA' }} {{ rawUser?.last_name || 'SHARMA' }}
+                    </h2>
+                    <p class="text-[12px] text-slate-800 font-bold tracking-[0.05em] uppercase text-center mb-2 w-full truncate">
+                      {{ employee?.access_level?.accessLevelName || 'MARKETING EXECUTIVE' }}
+                    </p>
+                    <p class="text-[13px] font-bold text-purple-800 uppercase text-center tracking-wide">
+                      EMP ID: {{ employee?.employeeId || rawUser?.id || 'NX32567' }}
+                    </p>
                   </div>
 
-                  <!-- QR Code with Brackets -->
-                  <div class="relative p-2 shrink-0 mb-6 w-full flex justify-center">
-                     <!-- Brackets (Thin black borders) -->
-                     <div class="absolute top-0 left-[15%] w-6 h-6 border-t-[3px] border-l-[3px] border-slate-900"></div>
-                     <div class="absolute top-0 right-[15%] w-6 h-6 border-t-[3px] border-r-[3px] border-slate-900"></div>
-                     <div class="absolute bottom-0 left-[15%] w-6 h-6 border-b-[3px] border-l-[3px] border-slate-900"></div>
-                     <div class="absolute bottom-0 right-[15%] w-6 h-6 border-b-[3px] border-r-[3px] border-slate-900"></div>
-                     
-                     <div class="p-2 bg-white w-48 h-48 flex items-center justify-center z-10 relative">
-                       <img :src="activeQrUrl" class="w-full h-full block rendering-pixelated" alt="QR Code" />
-                     </div>
+                  <!-- QR Code -->
+                  <div class="bg-white w-44 h-44 flex items-center justify-center z-10 relative mb-16 shadow-sm border border-slate-100 p-2 rounded-md">
+                    <img :src="activeQrUrl" class="w-full h-full block rendering-pixelated" alt="QR Code" />
                   </div>
 
-                  <!-- Footer text -->
-                  <div class="text-center w-full mt-auto">
-                    <div class="text-xs font-black text-slate-900 uppercase tracking-wider mb-1">Scan for verification</div>
-                    <div class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Valid Thru: Permanent</div>
+                  <!-- Bottom Decorative Waves -->
+                  <div class="absolute bottom-0 left-0 w-full h-40 overflow-hidden z-0 pointer-events-none">
+                    <!-- Layer 1: Light purple -->
+                    <svg class="absolute bottom-0 left-0 w-full h-32 text-purple-800" preserveAspectRatio="none" viewBox="0 0 100 100" fill="currentColor">
+                      <path d="M0,100 L0,30 Q40,80 100,0 L100,100 Z" opacity="0.8" />
+                    </svg>
+                    <!-- Layer 2: Dark purple foreground -->
+                    <svg class="absolute bottom-0 left-0 w-full h-24 text-purple-900" preserveAspectRatio="none" viewBox="0 0 100 100" fill="currentColor">
+                      <path d="M0,100 L0,50 Q50,100 100,20 L100,100 Z" />
+                    </svg>
+                  </div>
+                  
+                  <!-- Bottom Text -->
+                  <div class="absolute bottom-0 left-0 w-full h-10 flex items-center justify-center z-10">
+                    <span class="text-[9.5px] font-semibold text-white/95 tracking-[0.2em] uppercase">
+                      Think &bull; Innovate &bull; Inspire
+                    </span>
                   </div>
                 </div>
               </div>

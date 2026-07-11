@@ -1,321 +1,211 @@
 <template>
-  <div class="space-y-8 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-    <!-- Header Section -->
-    <div class="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-      <div class="flex items-center gap-4">
-        <!-- Title moved to global App Bar -->
+  <div class="h-full flex flex-col gap-6 overflow-hidden animate-in pb-6 bg-slate-50/50 text-slate-900 rounded-2xl p-6 relative">
+    <!-- Header -->
+    <div class="flex items-center justify-between shrink-0 relative z-10">
+      <div>
+        <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Team Overview</h1>
+        <p class="text-xs font-semibold text-slate-500 mt-1">Manage security personnel</p>
       </div>
-      <div class="flex gap-3">
-        <button
-          class="flex items-center gap-2 rounded-xl bg-slate-900 dark:bg-white px-4 py-2 text-[10px] font-black text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors shadow-sm uppercase tracking-widest shrink-0"
-          @click="openAddDialog"
-        >
-          <UserPlus class="h-3.5 w-3.5" />
-          Add Guard
-        </button>
-      </div>
-    </div>
-
-    <!-- Stats & Search Section -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <!-- Stats Cards -->
-      <div class="col-span-1 md:col-span-2 grid grid-cols-2 gap-4">
-        <div class="bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl p-5 shadow-sm flex flex-col justify-center relative overflow-hidden group">
-          <div class="absolute -right-4 -top-4 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl group-hover:bg-blue-500/10 transition-colors duration-500" />
-          <div class="flex items-center gap-3 mb-2">
-            <div class="p-2 rounded-lg bg-slate-50 dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 text-slate-500">
-              <ShieldCheck class="w-4 h-4" />
-            </div>
-            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-              Total Force
-            </p>
-          </div>
-          <h3 class="text-3xl font-bold text-slate-900 dark:text-white">
-            {{ items.length }}
-          </h3>
-        </div>
-        <div class="bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl p-5 shadow-sm flex flex-col justify-center relative overflow-hidden group">
-          <div class="absolute -right-4 -top-4 w-24 h-24 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition-colors duration-500" />
-          <div class="flex items-center gap-3 mb-2">
-            <div class="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400">
-              <ShieldCheck class="w-4 h-4" />
-            </div>
-            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-              Active Personnel
-            </p>
-          </div>
-          <h3 class="text-3xl font-bold text-slate-900 dark:text-white">
-            {{ items.filter(g => g.status === 'active').length }}
-          </h3>
-        </div>
-      </div>
-
-      <!-- Search -->
-      <div class="col-span-1 flex items-end">
-        <div class="relative w-full">
-          <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-          <input
-            v-model="searchQuery"
-            type="search"
-            placeholder="Search guards by name or email..."
-            class="w-full rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 h-10 pl-9 pr-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-sm"
-          >
-        </div>
-      </div>
-    </div>
-
-    <!-- Loading -->
-    <div
-      v-if="loading"
-      class="flex items-center justify-center py-24"
-    >
-      <Loader2 class="w-8 h-8 animate-spin text-blue-500 mx-auto" />
-    </div>
-
-    <!-- Guard Cards Grid -->
-    <div
-      v-else-if="filteredItems.length > 0"
-      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-    >
-      <div
-        v-for="guard in filteredItems"
-        :key="guard.id"
-        class="group/card bg-white dark:bg-zinc-950 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-sm hover:shadow-lg hover:border-indigo-500/30 dark:hover:border-indigo-500/30 transition-all duration-300 flex flex-col overflow-hidden relative"
-      >
-        <!-- Top accent -->
-        <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-indigo-500/0 via-indigo-500/20 to-purple-500/0 opacity-0 group-hover/card:opacity-100 transition-opacity duration-500" />
-
-        <div class="p-5 flex flex-col items-center text-center relative border-b border-slate-100 dark:border-zinc-800/50 bg-slate-50/50 dark:bg-zinc-900/20">
-          <div class="absolute top-4 right-4">
-            <span
-              :class="[
-                'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest border',
-                guard.status === 'active'
-                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20'
-                  : 'bg-zinc-100 text-zinc-600 border-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700'
-              ]"
-            >
-              {{ guard.status || 'active' }}
-            </span>
-          </div>
-
-          <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-50 dark:from-indigo-500/10 to-purple-50 dark:to-purple-500/10 flex items-center justify-center border border-indigo-100 dark:border-indigo-500/20 text-indigo-700 dark:text-indigo-400 font-bold text-xl shadow-inner mb-3 group-hover/card:scale-105 transition-transform duration-300 relative">
-            {{ initials(guard) }}
-            <div class="absolute inset-0 rounded-2xl ring-1 ring-inset ring-black/5 dark:ring-white/5" />
-          </div>
-          <h3 class="text-[14px] font-bold text-slate-900 dark:text-white group-hover/card:text-indigo-600 dark:group-hover/card:text-indigo-400 transition-colors">
-            {{ fullName(guard) }}
-          </h3>
-          <p class="text-[11px] text-slate-500 mt-0.5 truncate max-w-full px-2">
-            {{ guard.email || 'No email provided' }}
-          </p>
-        </div>
-
-        <div class="p-5 space-y-3 flex-1 bg-white dark:bg-zinc-950">
-          <div class="flex items-center gap-3 text-sm">
-            <div class="p-1.5 rounded-md bg-slate-50 dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 text-slate-400">
-              <Phone class="w-3.5 h-3.5" />
-            </div>
-            <span class="text-slate-600 dark:text-zinc-300 text-[12px] font-medium">{{ guard.phone || 'No phone' }}</span>
-          </div>
-          <div class="flex items-center gap-3 text-sm">
-            <div class="p-1.5 rounded-md bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 text-indigo-500">
-              <ShieldCheck class="w-3.5 h-3.5" />
-            </div>
-            <span class="text-indigo-600 dark:text-indigo-400 text-[12px] font-black tracking-widest uppercase">Guard Role</span>
-          </div>
-        </div>
-
-        <!-- Inline Actions -->
-        <div class="absolute right-3 bottom-4 flex gap-1.5 opacity-0 group-hover/card:opacity-100 transition-opacity translate-y-2 group-hover/card:translate-y-0 duration-200">
-          <button
-            title="Edit Guard"
-            class="h-7 w-7 rounded-md flex items-center justify-center border border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-700 shadow-sm transition-colors"
-            @click="editGuard(guard)"
-          >
-            <Settings class="w-3.5 h-3.5" />
-          </button>
-          <button
-            title="Delete Guard"
-            class="flex items-center justify-center p-0 h-7 w-7 rounded-md bg-white dark:bg-zinc-800 text-rose-600 hover:text-rose-700 hover:bg-rose-50 transition-colors border border-rose-200 dark:border-rose-900/50 dark:hover:bg-rose-900/20 shadow-sm"
-            @click="deleteGuard(guard)"
-          >
-            <Trash2 class="w-3.5 h-3.5" />
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Empty State -->
-    <div
-      v-if="filteredItems.length === 0 && !loading"
-      class="flex flex-col items-center justify-center py-24 rounded-2xl border border-dashed border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-900/20"
-    >
-      <div class="h-16 w-16 bg-white dark:bg-zinc-900 rounded-2xl flex items-center justify-center border border-slate-200 dark:border-zinc-800 shadow-sm mb-4">
-        <ShieldCheck class="h-8 w-8 text-slate-400" />
-      </div>
-      <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest mb-1">
-        No Guards Found
-      </h3>
-      <p class="text-[13px] font-medium text-slate-500 max-w-sm text-center mb-6">
-        You do not have any guards registered in the system yet.
-      </p>
       <button
-        class="h-9 px-4 rounded-xl flex items-center justify-center bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all shadow-md"
         @click="openAddDialog"
+        class="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-sm flex items-center gap-2 px-4 py-2 rounded-xl transition-colors shadow-sm font-medium"
       >
-        <UserPlus class="w-3.5 h-3.5 mr-2" /> Add Guard
+        <UserPlus class="w-4 h-4" /> Add Guard
       </button>
     </div>
 
-    <!-- Add/Edit Dialog -->
-    <div
-      v-if="showDialog"
-      class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-300 p-4 w-full"
-    >
-      <div class="relative w-full max-w-lg flex flex-col bg-white dark:bg-zinc-950 rounded-[24px] shadow-2xl shadow-indigo-500/10 border border-white/20 dark:border-zinc-800/80 overflow-hidden transform transition-all animate-in zoom-in-95 duration-300">
-        <!-- Premium Glass Header -->
-        <div class="relative px-8 py-6 flex justify-between items-start bg-gradient-to-b from-slate-50 to-white dark:from-zinc-900 dark:to-zinc-950 border-b border-zinc-100 dark:border-zinc-800/80 z-10 shrink-0">
-          <div class="absolute inset-0 bg-white/40 dark:bg-zinc-950/40 backdrop-blur-xl" />
-          <div class="relative z-10">
-            <div class="flex items-center gap-3 mb-1">
-              <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center border border-indigo-100 dark:border-indigo-500/20 shadow-inner">
-                <ShieldCheck class="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-              </div>
-              <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                {{ editingGuard ? 'Edit Guard' : 'Create Guard' }}
-              </h2>
+    <!-- Loading -->
+    <div v-if="loading" class="flex items-center justify-center py-24 flex-1 relative z-10">
+      <Loader2 class="w-8 h-8 animate-spin text-emerald-600" />
+    </div>
+
+    <!-- Empty State -->
+    <div v-else-if="items.length === 0" class="flex flex-col items-center justify-center flex-1 text-center py-24 relative z-10">
+      <ShieldCheck class="w-12 h-12 text-slate-300 mb-4" />
+      <h3 class="text-sm font-bold text-slate-700 uppercase tracking-widest mb-2">No Guards Found</h3>
+      <p class="text-xs font-medium text-slate-500 max-w-sm mb-6">Add your first guard using their mobile number. They will log in using OTP.</p>
+      <button @click="openAddDialog" class="text-xs font-bold text-emerald-600 hover:text-emerald-700 transition-colors">Add Guard</button>
+    </div>
+
+    <!-- Grid View -->
+    <div v-else class="overflow-y-auto flex-1 custom-scrollbar relative z-10 pr-2">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pb-4">
+        <div
+          v-for="guard in items"
+          :key="guard.id"
+          :class="[
+            'group relative flex flex-col rounded-[20px] p-5 border bg-white backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-xl overflow-hidden',
+            guard.status === 'active' ? 'border-emerald-200 hover:border-emerald-300 hover:shadow-emerald-500/5' :
+            guard.status === 'break' ? 'border-blue-200 hover:border-blue-300 hover:shadow-blue-500/5' :
+            'border-slate-200 hover:border-slate-300 hover:shadow-slate-500/5'
+          ]"
+        >
+          <!-- Ambient glow background based on status (lighter for light theme) -->
+          <div
+            :class="[
+              'absolute top-0 left-1/2 -translate-x-1/2 w-[120%] h-32 blur-3xl opacity-10 pointer-events-none transition-colors duration-500',
+              guard.status === 'active' ? 'bg-emerald-400' :
+              guard.status === 'break' ? 'bg-blue-400' : 'bg-slate-400'
+            ]"
+          />
+
+          <!-- Status Dot (Top Right) -->
+          <div class="absolute top-4 right-4 flex items-center justify-center">
+            <div
+              :class="[
+                'w-2 h-2 rounded-full shadow-sm',
+                guard.status === 'active' ? 'bg-emerald-500' :
+                guard.status === 'break' ? 'bg-blue-500' : 'bg-slate-400'
+              ]"
+            />
+          </div>
+
+          <!-- Avatar & Identity -->
+          <div class="relative z-10 flex flex-col items-center mt-2 mb-4">
+            <div class="w-16 h-16 rounded-full overflow-hidden bg-slate-50 border-2 border-slate-100 shadow-sm mb-3 flex items-center justify-center text-slate-500 font-bold text-xl">
+              <img v-if="guard.avatar" :src="getAvatarUrl(guard.avatar)" :alt="guard.first_name" class="w-full h-full object-cover" @error="guard.avatar = null" />
+              <span v-else>{{ guard.first_name?.charAt(0).toUpperCase() || '?' }}</span>
             </div>
-            <p class="text-[13px] font-medium text-slate-500 dark:text-zinc-400 ml-[52px]">
-              {{ editingGuard ? 'Update the security personnel details.' : 'Register a new guard to the system.' }}
+            <h3 class="text-[16px] font-bold text-slate-900 tracking-wide">
+              {{ guard.first_name }} {{ guard.last_name }}
+            </h3>
+            <p class="text-[11px] text-slate-500 mt-0.5">
+              Employee ID {{ guard.employee_id || guard.id.toString().substring(0, 8).toUpperCase() }}
             </p>
           </div>
-          <button
-            class="relative z-10 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-zinc-700 transition-all duration-200"
-            @click="showDialog = false"
-          >
-            <X class="w-4 h-4" />
-          </button>
-        </div>
 
-        <!-- Dialog Body -->
-        <div class="px-8 py-6 space-y-5 overflow-y-auto max-h-[60vh] bg-zinc-50/50 dark:bg-zinc-950/80 custom-scrollbar">
-          <div
-            v-if="dialogError"
-            class="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-600 dark:text-red-400 text-[11px] font-bold uppercase tracking-widest"
-          >
-            <AlertTriangle class="w-4 h-4 shrink-0" />
-            {{ dialogError }}
+          <!-- Details List -->
+          <div class="relative z-10 space-y-3 flex-1 w-full px-1">
+            <!-- Status Row -->
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-slate-500">Status</span>
+              <div class="flex items-center gap-2">
+                <span
+                  :class="[
+                    'px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider',
+                    guard.status === 'active' ? 'bg-emerald-100 text-emerald-700' :
+                    guard.status === 'break' ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-600'
+                  ]"
+                >
+                  {{ guard.status === 'active' ? 'ON DUTY' : guard.status === 'break' ? 'BREAK' : 'OFF DUTY' }}
+                </span>
+                <span class="w-6 h-5 flex items-center justify-center rounded bg-slate-50 border border-slate-200 text-[10px] font-mono text-slate-600">
+                  {{ guard.employee_id ? guard.employee_id.slice(-2) : guard.id.toString().substring(0, 2).toUpperCase() }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Assigned Zone Row -->
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-slate-500">Assigned Zone</span>
+              <div class="flex items-center gap-1.5 text-slate-700 font-medium truncate max-w-[120px]" title="Unassigned">
+                <span class="truncate">Unassigned</span>
+                <MapPin class="w-3 h-3 text-slate-400 shrink-0" />
+              </div>
+            </div>
           </div>
 
-          <form
-            id="guard-form"
-            class="space-y-6"
-            @submit.prevent="handleSubmit"
-          >
-            <div class="grid grid-cols-2 gap-4">
-              <div class="space-y-1.5">
-                <label class="text-[10px] font-black text-slate-500 dark:text-zinc-400 uppercase tracking-widest">First Name <span class="text-red-500">*</span></label>
-                <input
-                  v-model="form.first_name"
-                  type="text"
-                  placeholder="John"
-                  class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all text-foreground shadow-sm focus:border-indigo-500"
-                >
-              </div>
-              <div class="space-y-1.5">
-                <label class="text-[10px] font-black text-slate-500 dark:text-zinc-400 uppercase tracking-widest">Last Name</label>
-                <input
-                  v-model="form.last_name"
-                  type="text"
-                  placeholder="Doe"
-                  class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all text-foreground shadow-sm focus:border-indigo-500"
-                >
-              </div>
-            </div>
+          <!-- Actions Row -->
+          <div class="relative z-10 mt-6 grid grid-cols-2 gap-3">
+            <button class="flex items-center justify-center gap-2 h-9 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-600 text-xs font-medium transition-colors group/btn">
+              <MessageSquare class="w-3.5 h-3.5 text-slate-400 group-hover/btn:text-slate-600" />
+              Message
+            </button>
+            <button class="flex items-center justify-center gap-2 h-9 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 text-slate-600 text-xs font-medium transition-colors group/btn">
+              <Phone class="w-3.5 h-3.5 text-slate-400 group-hover/btn:text-slate-600" />
+              Call
+            </button>
+          </div>
 
-            <div class="space-y-1.5">
-              <label class="text-[10px] font-black text-slate-500 dark:text-zinc-400 uppercase tracking-widest">Email <span class="text-red-500">*</span></label>
-              <input
-                v-model="form.email"
-                type="email"
-                placeholder="guard@example.com"
-                class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all text-foreground shadow-sm focus:border-indigo-500"
-              >
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-              <div class="space-y-1.5">
-                <label class="text-[10px] font-black text-slate-500 dark:text-zinc-400 uppercase tracking-widest">Phone</label>
-                <input
-                  v-model="form.phone"
-                  type="text"
-                  inputmode="numeric"
-                  maxlength="10"
-                  placeholder="10-digit phone number"
-                  class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all text-foreground shadow-sm focus:border-indigo-500"
-                  @input="form.phone = $event.target.value.replace(/\D/g, '')"
-                >
-              </div>
-
-              <div class="space-y-1.5">
-                <label class="text-[10px] font-black text-slate-500 dark:text-zinc-400 uppercase tracking-widest">Assigned Door <span class="text-red-500">*</span></label>
-                <select
-                  v-model="form.assigned_door"
-                  class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all text-foreground shadow-sm focus:border-indigo-500"
-                >
-                  <option
-                    :value="null"
-                    disabled
-                  >
-                    Select a Door
-                  </option>
-                  <option
-                    v-for="door in doors"
-                    :key="door.id"
-                    :value="door.id"
-                  >
-                    {{ door.doorName || 'Unnamed Door' }}
-                  </option>
-                </select>
-              </div>
-            </div>
-
-            <div
-              v-if="!editingGuard"
-              class="space-y-1.5"
+          <!-- Admin Actions (Edit / Delete) appearing on hover -->
+          <div class="absolute top-4 left-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
+            <button
+              title="Edit Guard"
+              class="h-8 w-8 rounded-full flex items-center justify-center bg-white text-slate-600 hover:bg-slate-50 transition-colors border border-slate-200 shadow-sm"
+              @click.stop="editGuard(guard)"
             >
-              <label class="text-[10px] font-black text-slate-500 dark:text-zinc-400 uppercase tracking-widest">Password <span class="text-red-500">*</span></label>
-              <input
-                v-model="form.password"
-                type="password"
-                placeholder="Minimum 8 characters"
-                class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all text-foreground shadow-sm focus:border-indigo-500"
-              >
-            </div>
-          </form>
+              <Settings class="w-3.5 h-3.5" />
+            </button>
+            <button
+              title="Delete Guard"
+              class="h-8 w-8 rounded-full flex items-center justify-center bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors border border-rose-200 shadow-sm"
+              @click.stop="deleteGuard(guard)"
+            >
+              <Trash2 class="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
+      </div>
+    </div>
 
-        <!-- Dialog Footer -->
-        <div class="relative px-8 py-5 border-t border-zinc-100 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 flex justify-end gap-3 z-10 shrink-0">
-          <button
-            type="button"
-            class="px-6 h-10 rounded-xl border border-zinc-200 dark:border-zinc-800 text-[13px] font-bold text-slate-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-all duration-200 shadow-sm"
-            @click="showDialog = false"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            form="guard-form"
-            :disabled="dialogLoading"
-            class="group relative px-6 h-10 rounded-xl bg-gradient-to-b from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white flex items-center gap-2 text-[13px] font-bold shadow-[0px_1px_2px_0px_rgba(255,255,255,0.5)_inset,0px_4px_6px_-1px_rgba(79,70,229,0.3)] disabled:opacity-50 transition-all active:scale-95 duration-200"
-          >
-            <Loader2
-              v-if="dialogLoading"
-              class="w-4 h-4 animate-spin"
-            />
-            <span class="relative z-10">{{ editingGuard ? 'Update Guard' : 'Create Personnel' }}</span>
+    <!-- Add Guard Modal -->
+    <div v-if="showAddDialog" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm overflow-y-auto">
+      <div class="w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-200 border border-slate-100 flex flex-col my-auto">
+        <div class="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50/50">
+          <h3 class="text-sm font-bold text-slate-900 uppercase tracking-widest">{{ editingGuard ? 'Edit Guard' : 'Add Guard' }}</h3>
+          <button @click="showAddDialog = false" class="text-slate-400 hover:text-slate-600 transition-colors"><X class="w-5 h-5" /></button>
+        </div>
+        <div class="p-5 space-y-5 text-left max-h-[70vh] overflow-y-auto custom-scrollbar">
+          
+          <!-- Photo Upload Section -->
+          <div class="flex flex-col items-center justify-center gap-3">
+             <div class="relative w-24 h-24 rounded-full border-2 border-dashed border-slate-300 bg-slate-50 flex items-center justify-center overflow-hidden cursor-pointer hover:border-emerald-500 transition-colors group" @click="triggerFileUpload">
+               <img v-if="form.avatarPreview" :src="form.avatarPreview" class="w-full h-full object-cover" />
+               <img v-else-if="editingGuard?.avatar" :src="getAvatarUrl(editingGuard.avatar)" class="w-full h-full object-cover" @error="editingGuard.avatar = null" />
+               <div v-else class="text-slate-400 group-hover:text-emerald-500 flex flex-col items-center">
+                 <Camera class="w-6 h-6 mb-1" />
+                 <span class="text-[8px] uppercase font-bold tracking-widest">Upload</span>
+               </div>
+               <div v-if="form.avatarPreview || editingGuard?.avatar" class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                 <Camera class="w-6 h-6 text-white" />
+               </div>
+             </div>
+             <input type="file" ref="fileInput" class="hidden" accept="image/*" @change="onFileChange" />
+             <div class="text-center">
+               <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Guard Photo</p>
+               <p class="text-[9px] text-slate-400 mt-0.5">Click to upload or change image</p>
+             </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">First Name</label>
+              <input v-model="form.first_name" type="text" placeholder="John" class="w-full h-9 px-3 rounded-md border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-slate-900 shadow-sm focus:border-emerald-500 transition-all">
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Last Name</label>
+              <input v-model="form.last_name" type="text" placeholder="Doe" class="w-full h-9 px-3 rounded-md border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-slate-900 shadow-sm focus:border-emerald-500 transition-all">
+            </div>
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Email Address (Optional)</label>
+            <input v-model="form.email" type="email" placeholder="guard@example.com" class="w-full h-9 px-3 rounded-md border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-slate-900 shadow-sm focus:border-emerald-500 transition-all">
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Mobile Number</label>
+              <input v-model="form.phone" type="text" placeholder="10-digit number" class="w-full h-9 px-3 rounded-md border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-slate-900 shadow-sm focus:border-emerald-500 transition-all">
+            </div>
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Assigned Zone</label>
+              <select v-model="form.assigned_door" class="w-full h-9 px-3 rounded-md border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-slate-900 shadow-sm focus:border-emerald-500 transition-all">
+                <option :value="null">Unassigned</option>
+                <option v-for="door in doors" :key="door.id" :value="door.id">{{ door.doorName || 'Unnamed Zone' }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-slate-100" v-if="!editingGuard">
+            <p class="text-[9px] text-slate-500 font-semibold mb-2">Guards login using their mobile number and OTP.</p>
+          </div>
+        </div>
+        <div class="p-5 border-t border-slate-100 flex justify-end gap-3 bg-slate-50/50">
+          <button @click="showAddDialog = false" class="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-700 transition-colors">Cancel</button>
+          <button @click="saveGuard" class="px-4 py-2 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors flex items-center" :disabled="saving">
+            <Loader2 v-if="saving" class="w-4 h-4 animate-spin mr-2 inline" />
+            Save Guard
           </button>
         </div>
       </div>
@@ -324,143 +214,106 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import { UserPlus, Search, Loader2, ShieldCheck, Phone, Settings, Trash2, X, AlertTriangle } from 'lucide-vue-next';
+import { ref, onMounted } from 'vue';
+import { UserPlus, ShieldCheck, Loader2, X, MapPin, MessageSquare, Phone, Map, Settings, Trash2, Camera } from 'lucide-vue-next';
 import { authService } from '@/services/authService';
 import { currentUserTenant } from '@/utils/currentUserTenant';
 
-const items = ref([]);
+const apiUrl = import.meta.env.VITE_API_URL;
 const loading = ref(false);
-const searchQuery = ref('');
-const showDialog = ref(false);
+const saving = ref(false);
+const showAddDialog = ref(false);
 const editingGuard = ref(null);
-const dialogLoading = ref(false);
-const dialogError = ref('');
 const doors = ref([]);
+const fileInput = ref(null);
+const form = ref({ 
+  first_name: '', 
+  last_name: '', 
+  email: '', 
+  phone: '',
+  assigned_door: null,
+  avatarFile: null,
+  avatarPreview: null
+});
+const items = ref([]);
 const guardRoleId = ref(null);
 
-const fetchGuardRoleId = async () => {
-  try {
-    const token = authService.getToken();
-    const tenantId = await currentUserTenant.getTenantIdAsync();
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/items/roleConfigurator?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][_and][1][accessType][_eq]=accessEasy&filter[_and][0][_and][2][roleName][_contains]=guard&fields[]=id`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    if (res.ok) {
-      const data = await res.json();
-      if (data.data && data.data.length > 0) {
-        guardRoleId.value = data.data[0].id;
-      }
-    }
-  } catch (err) {
-    console.error('Failed to fetch guard role config:', err);
+const onFileChange = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  form.value.avatarFile = file;
+  form.value.avatarPreview = URL.createObjectURL(file);
+};
+
+const triggerFileUpload = () => {
+  if (fileInput.value) {
+    fileInput.value.click();
   }
 };
 
-const form = ref({
-  first_name: '',
-  last_name: '',
-  email: '',
-  phone: '',
-  password: '',
-  assigned_door: null,
-});
-
-const filteredItems = computed(() => {
-  if (!searchQuery.value) return items.value;
-  const q = searchQuery.value.toLowerCase();
-  return items.value.filter(g =>
-    fullName(g).toLowerCase().includes(q) || (g.email || '').toLowerCase().includes(q)
-  );
-});
-
-const fullName = (g) => `${g.first_name || ''} ${g.last_name || ''}`.trim() || 'Unknown';
-const initials = (g) => fullName(g).charAt(0).toUpperCase();
+const getAvatarUrl = (avatarId) => {
+  if (!avatarId) return '';
+  const token = authService.getToken();
+  return `${apiUrl}/assets/${avatarId}?access_token=${token}&width=100&height=100&fit=cover`;
+};
 
 const openAddDialog = () => {
   editingGuard.value = null;
-  dialogError.value = '';
-  form.value = { first_name: '', last_name: '', email: '', phone: '', password: '', assigned_door: null };
-  showDialog.value = true;
+  form.value = { 
+    first_name: '', 
+    last_name: '', 
+    email: '', 
+    phone: '',
+    assigned_door: null,
+    avatarFile: null,
+    avatarPreview: null
+  };
+  showAddDialog.value = true;
 };
 
 const editGuard = async (guard) => {
   editingGuard.value = guard;
-  dialogError.value = '';
   form.value = {
     first_name: guard.first_name || '',
     last_name: guard.last_name || '',
     email: guard.email || '',
     phone: (guard.phone || '').replace(/^\+91/, ''),
-    password: '',
     assigned_door: null,
+    avatarFile: null,
+    avatarPreview: null
   };
+  showAddDialog.value = true;
   
-  // Fetch personalModule to get assigned_door
   try {
-    dialogLoading.value = true;
     const token = authService.getToken();
-    const pmRes = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule?filter[assignedUser][_eq]=${guard.id}&fields[]=id&fields[]=assigned_door`, {
+    const pmRes = await fetch(`${apiUrl}/items/personalModule?filter[assignedUser][_eq]=${guard.id}&fields[]=id&fields[]=assigned_door`, {
         headers: { Authorization: `Bearer ${token}` }
     });
     if (pmRes.ok) {
         const pmData = await pmRes.json();
         if (pmData.data && pmData.data.length > 0) {
-            form.value.assigned_door = pmData.data[0].assigned_door;
-            editingGuard.value.personalModuleId = pmData.data[0].id;
+            const pm = pmData.data[0];
+            form.value.assigned_door = typeof pm.assigned_door === 'object' && pm.assigned_door !== null ? pm.assigned_door.id || pm.assigned_door : pm.assigned_door;
+            editingGuard.value.personalModuleId = pm.id;
         }
     }
   } catch(err) {
       console.error('Failed to fetch guard personal info:', err);
-  } finally {
-      dialogLoading.value = false;
   }
-
-  showDialog.value = true;
 };
 
-const fetchGuards = async () => {
-  loading.value = true;
+const deleteGuard = async (guard) => {
+  if (!confirm(`Are you sure you want to delete ${guard.first_name}?`)) return;
   try {
     const token = authService.getToken();
-    const tenantId = await currentUserTenant.getTenantIdAsync();
-
-    if (!guardRoleId.value) {
-      await fetchGuardRoleId();
-    }
-
-    let filterString = `filter[_and][0][tenant][tenantId][_eq]=${tenantId}`;
-    if (guardRoleId.value) {
-      filterString += `&filter[_and][1][accesseasyRole][_eq]=${guardRoleId.value}`;
-    } else {
-      filterString += `&filter[_and][1][accesseasyRole][roleName][_contains]=guard`;
-    }
-
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/users?${filterString}&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=email&fields[]=phone&fields[]=status&fields[]=title&fields[]=accesseasyRole.*&fields[]=tenant.userApp`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    if (res.ok) {
-      const data = await res.json();
-      const allUsers = data.data || [];
-      items.value = allUsers.filter(u => {
-        if (!u.tenant) return false;
-        let userApps = u.tenant.userApp || [];
-        if (typeof userApps === "string") {
-          try {
-            userApps = JSON.parse(userApps);
-          } catch (e) {
-            userApps = [];
-          }
-        }
-        return Array.isArray(userApps) && userApps.some(app => app.userApp === "accesseasy");
-      });
-    }
+    await fetch(`${apiUrl}/users/${guard.id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    await fetchGuards();
   } catch (err) {
-    console.error('Failed to fetch guards:', err);
-  } finally {
-    loading.value = false;
+    console.error('Delete error', err);
+    alert('Failed to delete guard');
   }
 };
 
@@ -468,7 +321,7 @@ const fetchDoors = async () => {
   try {
     const token = authService.getToken();
     const tenantId = await currentUserTenant.getTenantIdAsync();
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/doors?filter[tenant][_eq]=${tenantId}&filter[status][_neq]=archived&fields[]=id&fields[]=doorName`, {
+    const res = await fetch(`${apiUrl}/items/doors?filter[tenant][_eq]=${tenantId}&filter[status][_neq]=archived&fields[]=id&fields[]=doorName`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     if (res.ok) {
@@ -480,66 +333,141 @@ const fetchDoors = async () => {
   }
 };
 
-const handleSubmit = async () => {
-  dialogError.value = '';
-  if (!form.value.first_name.trim()) {
-    dialogError.value = 'First name is required.';
-    return;
-  }
-  if (!form.value.email.trim()) {
-    dialogError.value = 'Email is required.';
-    return;
-  }
-  if (form.value.phone && !/^\d{10}$/.test(form.value.phone)) {
-    dialogError.value = 'Phone number must be exactly 10 digits.';
-    return;
-  }
-  if (!editingGuard.value && !form.value.password.trim()) {
-    dialogError.value = 'Password is required for new guards.';
-    return;
-  }
-  if (!form.value.assigned_door) {
-    dialogError.value = 'Assigned door is required.';
-    return;
-  }
-
-  dialogLoading.value = true;
+const fetchGuardRoleId = async () => {
   try {
     const token = authService.getToken();
     const tenantId = await currentUserTenant.getTenantIdAsync();
+    const res = await fetch(
+      `${apiUrl}/items/roleConfigurator?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][_and][1][accessType][_eq]=accessEasy&filter[_and][0][_and][2][roleName][_contains]=guard&fields[]=id`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (res.ok) {
+      const data = await res.json();
+      if (data.data && data.data.length > 0) {
+        guardRoleId.value = data.data[0].id;
+        return data.data[0].id;
+      }
+    }
+  } catch (err) {
+    console.error('Failed to fetch guard role ID:', err);
+  }
+  return null;
+};
 
-    const isEdit = !!editingGuard.value;
-    const url = isEdit
-      ? `${import.meta.env.VITE_API_URL}/users/${editingGuard.value.id}`
-      : `${import.meta.env.VITE_API_URL}/users`;
+const fetchGuards = async () => {
+  loading.value = true;
+  try {
+    const token = authService.getToken();
+    const tenantId = await currentUserTenant.getTenantIdAsync();
+    
+    let roleId = guardRoleId.value;
+    if (!roleId) {
+      roleId = await fetchGuardRoleId();
+    }
+
+    let filterString = `filter[tenant][_eq]=${tenantId}`;
+    if (roleId) {
+      filterString += `&filter[accesseasyRole][_eq]=${roleId}`;
+    }
+
+    const res = await fetch(
+      `${apiUrl}/users?${filterString}&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=email&fields[]=phone&fields[]=status&fields[]=title&fields[]=avatar&fields[]=accesseasyRole.*&fields[]=tenant.userApp`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (res.ok) {
+      const data = await res.json();
+      items.value = (data.data || []).map(u => ({
+        ...u,
+        employee_id: u.title || null
+      }));
+      
+      const guardIds = items.value.map(g => g.id).join(',');
+      if (guardIds) {
+        const pmRes = await fetch(`${apiUrl}/items/personalModule?filter[assignedUser][_in]=${guardIds}&fields[]=assignedUser&fields[]=assigned_door.doorName`, {
+           headers: { Authorization: `Bearer ${token}` }
+        });
+        if (pmRes.ok) {
+           const pmData = await pmRes.json();
+           const zoneMap = {};
+           pmData.data.forEach(pm => {
+              if (pm.assignedUser && pm.assigned_door && pm.assigned_door.doorName) {
+                  zoneMap[pm.assignedUser] = pm.assigned_door.doorName;
+              }
+           });
+           items.value.forEach(g => {
+              if (zoneMap[g.id]) g.assigned_zone_name = zoneMap[g.id];
+           });
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Fetch error', err);
+  } finally {
+    loading.value = false;
+  }
+};
+
+const saveGuard = async () => {
+  if (!form.value.first_name.trim()) return alert("First name is required");
+  if (!form.value.phone || form.value.phone.length < 10) return alert("Valid 10-digit mobile number is required");
+  
+  saving.value = true;
+  try {
+    const token = authService.getToken();
+    const tenantId = await currentUserTenant.getTenantIdAsync();
+    
+    const roleRes = await fetch(`${apiUrl}/roles?filter[name][_eq]=Employee`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const roleData = await roleRes.json();
+    const employeeRoleId = roleData?.data?.[0]?.id;
 
     const payload = {
       first_name: form.value.first_name,
       last_name: form.value.last_name,
-      email: form.value.email,
-      phone: form.value.phone ? `+91${form.value.phone}` : null,
-      userApp: 'accesseasy',
-      accesseasyRole: guardRoleId.value || null,
-      tenant: tenantId,
+      phone: `+91${form.value.phone.replace(/\D/g, '')}`,
     };
-
-    if (!isEdit) {
-      // Fetch the generic Employee role dynamically for system auth
-      const roleRes = await fetch(`${import.meta.env.VITE_API_URL}/roles?filter[name][_eq]=Employee`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const roleData = await roleRes.json();
-      const employeeRoleId = roleData?.data?.[0]?.id;
-
-      if (employeeRoleId) {
-        payload.role = employeeRoleId;
-      }
-      
-      payload.password = form.value.password;
+    
+    if (form.value.email) {
+      payload.email = form.value.email;
+    }
+    
+    if (!editingGuard.value) {
+      payload.userApp = 'accesseasy';
+      payload.accesseasyRole = guardRoleId.value || null;
+      payload.tenant = tenantId;
+      payload.role = employeeRoleId;
+      if (!payload.email) payload.email = `guard_${Date.now()}@accesseasy.app`;
     }
 
+    if (form.value.avatarFile) {
+      const formData = new FormData();
+      formData.append('title', `guard-avatar-${Date.now()}`);
+      formData.append('file', form.value.avatarFile);
+      
+      const fileRes = await fetch(`${apiUrl}/files`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
+      });
+      if (fileRes.ok) {
+        const fileData = await fileRes.json();
+        payload.avatar = fileData.data.id;
+      } else {
+         const errData = await fileRes.json();
+         console.warn("Avatar upload failed", errData);
+         alert("Image upload failed: " + (errData.errors?.[0]?.message || "Unknown error"));
+         saving.value = false;
+         return;
+      }
+    }
+
+    const url = editingGuard.value
+      ? `${apiUrl}/users/${editingGuard.value.id}`
+      : `${apiUrl}/users`;
+
     const res = await fetch(url, {
-      method: isEdit ? 'PATCH' : 'POST',
+      method: editingGuard.value ? 'PATCH' : 'POST',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
@@ -551,27 +479,26 @@ const handleSubmit = async () => {
       const userData = await res.json();
       const newUserId = userData.data?.id;
 
-      // If this is a newly created Guard, they strictly require a personalModule profile to pass Flow validation!
-      if (!isEdit && newUserId) {
+      // Personal Module for Guard
+      if (!editingGuard.value && newUserId) {
         const generatedEmpId = `GRD-${Date.now().toString().slice(-5)}`;
         const personalPayload = {
           employeeId: generatedEmpId,
           firstName: form.value.first_name,
           lastName: form.value.last_name || '-',
-          personalEmail: form.value.email,
-          personalPhone: form.value.phone ? `+91${form.value.phone}` : null,
+          personalPhone: payload.phone,
+          personalEmail: payload.email,
           designation: 'Guard',
           status: 'true',
           accessOn: true,
           uniqueId: `${tenantId}-${generatedEmpId}`,
-          config: [{ shiftName: 1, startTime: "09:00", endTime: "18:00" }],
-          attendancePolicyHistory: { status: "published" },
           tenant: tenantId,
           assignedUser: newUserId,
           assigned_door: form.value.assigned_door,
+          mobilePermissions: { enable_incidents: true, enable_patrols: true }
         };
 
-        const personalRes = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule`, {
+        await fetch(`${apiUrl}/items/personalModule`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
@@ -579,57 +506,32 @@ const handleSubmit = async () => {
           },
           body: JSON.stringify(personalPayload),
         });
-
-        if (!personalRes.ok) {
-          console.warn('Backend rejected personalModule assignment for Guard.');
-        }
-      } else if (isEdit && editingGuard.value.personalModuleId) {
-        // Update assigned_door
-        const personalPayload = {
-            firstName: form.value.first_name,
-            lastName: form.value.last_name || '-',
-            personalEmail: form.value.email,
-            personalPhone: form.value.phone ? `+91${form.value.phone}` : null,
-            assigned_door: form.value.assigned_door
-        };
-        await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule/${editingGuard.value.personalModuleId}`, {
+      } else if (editingGuard.value && editingGuard.value.personalModuleId) {
+        // Update assigned_door and email
+        await fetch(`${apiUrl}/items/personalModule/${editingGuard.value.personalModuleId}`, {
           method: 'PATCH',
           headers: { 
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`
           },
-          body: JSON.stringify(personalPayload),
+          body: JSON.stringify({
+             assigned_door: form.value.assigned_door,
+             personalEmail: form.value.email
+          }),
         });
       }
 
-      showDialog.value = false;
+      showAddDialog.value = false;
       await fetchGuards();
     } else {
-      const errData = await res.json();
-      dialogError.value = errData.errors?.[0]?.message || 'Failed to save guard.';
+      const err = await res.json();
+      alert(err.errors?.[0]?.message || 'Failed to save guard');
     }
   } catch (err) {
-    dialogError.value = `Network error: ${err.message}`;
+    console.error('Save error', err);
+    alert('An error occurred while saving the guard.');
   } finally {
-    dialogLoading.value = false;
-  }
-};
-
-const deleteGuard = async (guard) => {
-  if (!confirm(`Delete guard "${fullName(guard)}"?`)) return;
-  try {
-    const token = authService.getToken();
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/users/${guard.id}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (res.ok) {
-      await fetchGuards();
-    } else {
-      alert('Failed to delete guard.');
-    }
-  } catch (err) {
-    console.error('Delete error:', err);
+    saving.value = false;
   }
 };
 

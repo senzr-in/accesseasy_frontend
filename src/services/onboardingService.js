@@ -2,15 +2,14 @@
 // Persists to localStorage using key 'ae_onboarding'
 
 const STORAGE_KEY = 'ae_onboarding';
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 5;
 
 export const ONBOARDING_STEPS = [
   { id: 1, name: 'doors',         title: 'Create Door Access',    description: 'Define entry/exit points',   url: '/dashboard/access-control/doors?onboarding=true' },
-  { id: 2, name: 'zones',         title: 'Create Zones',          description: 'Organize locations',         url: '/dashboard/access-control/zones?onboarding=true' },
-  { id: 3, name: 'branches',      title: 'Setup Branches',        description: 'Setup locations',            url: '/dashboard/easy-access/configurators/branches?onboarding=true' },
-  { id: 4, name: 'access-levels', title: 'Create Access Levels',  description: 'Define permissions',         url: '/dashboard/easy-access/configurators/access-levels?onboarding=true' },
-  { id: 5, name: 'devices',       title: 'Add Devices',           description: 'Add hardware',               url: '/dashboard/devices?onboarding=true' },
-  { id: 6, name: 'employees',     title: 'Add Employees',         description: 'Add team members',           url: '/dashboard/easy-access/employees?onboarding=true' },
+  { id: 2, name: 'zones',         title: 'Create Zones',          description: 'Organize locations',         url: '/dashboard/settings/zones?onboarding=true' },
+  { id: 3, name: 'access-levels', title: 'Create Access Levels',  description: 'Define permissions',         url: '/dashboard/easy-access/configurators/access-levels?onboarding=true' },
+  { id: 4, name: 'devices',       title: 'Add Devices',           description: 'Add hardware',               url: '/dashboard/settings/devices?onboarding=true' },
+  { id: 5, name: 'employees',     title: 'Add Employees',         description: 'Add team members',           url: '/dashboard/easy-access/employees?onboarding=true' },
 ];
 
 function loadState() {
@@ -46,18 +45,26 @@ export const onboardingService = {
 
   start() {
     const state = loadState();
-    if (!state.currentStep) {
-      saveState({ ...state, currentStep: 1, completedSteps: [] });
-    }
+    saveState({ 
+      ...state, 
+      currentStep: 1, 
+      completedSteps: [], 
+      skippedSteps: [],
+      completed: false, 
+      dismissed: false 
+    });
   },
 
   getCurrentStep() {
     const state = loadState();
-    const currentStepId = state.currentStep || 1;
-    const completedSteps = state.completedSteps || [];
-    const skippedSteps = state.skippedSteps || [];
+    let currentStepId = state.currentStep || 1;
+    if (currentStepId > TOTAL_STEPS) {
+      currentStepId = TOTAL_STEPS;
+    }
+    const completedSteps = (state.completedSteps || []).filter(id => id <= TOTAL_STEPS);
+    const skippedSteps = (state.skippedSteps || []).filter(id => id <= TOTAL_STEPS);
     const stepConfig = ONBOARDING_STEPS.find(s => s.id === currentStepId);
-    const progress = Math.round((completedSteps.length / TOTAL_STEPS) * 100);
+    const progress = Math.min(100, Math.round((completedSteps.length / TOTAL_STEPS) * 100));
 
     return {
       currentStep: currentStepId,
@@ -71,7 +78,7 @@ export const onboardingService = {
 
   markStepCompleted(stepId) {
     const state = loadState();
-    const completedSteps = state.completedSteps || [];
+    const completedSteps = (state.completedSteps || []).filter(id => id <= TOTAL_STEPS);
     if (!completedSteps.includes(stepId)) completedSteps.push(stepId);
     const nextStep = stepId + 1;
     const isFinished = nextStep > TOTAL_STEPS;
@@ -86,7 +93,7 @@ export const onboardingService = {
 
   skipStep(stepId) {
     const state = loadState();
-    const skippedSteps = state.skippedSteps || [];
+    const skippedSteps = (state.skippedSteps || []).filter(id => id <= TOTAL_STEPS);
     if (!skippedSteps.includes(stepId)) skippedSteps.push(stepId);
     const nextStep = stepId + 1;
     const isFinished = nextStep > TOTAL_STEPS;

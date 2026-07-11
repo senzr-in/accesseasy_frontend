@@ -1,5 +1,0 @@
-c6e401b chore: upload videos folder
-c477547 feat: resolve QR assignment and apply complete UI updates
-f336e25 Update deploy.yml
-188b295 zone create, access level date
-0e8f093 zone and qr generate employeeId pass

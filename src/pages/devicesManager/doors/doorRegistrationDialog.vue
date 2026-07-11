@@ -3,25 +3,25 @@
     v-if="modelValue"
     class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-300"
   >
-    <div class="relative w-full max-w-3xl max-h-[90vh] flex flex-col bg-white dark:bg-zinc-950 rounded-[24px] shadow-2xl shadow-indigo-500/10 border border-white/20 dark:border-zinc-800/80 overflow-hidden transform transition-all animate-in zoom-in-95 duration-300">
+    <div class="relative w-full max-w-3xl max-h-[90vh] flex flex-col bg-white  rounded-[24px] shadow-2xl shadow-indigo-500/10 border border-white/20  overflow-hidden transform transition-all animate-in zoom-in-95 duration-300">
       <!-- Premium Glass Header -->
-      <div class="relative px-8 py-6 flex justify-between items-start bg-gradient-to-b from-slate-50 to-white dark:from-zinc-900 dark:to-zinc-950 border-b border-zinc-100 dark:border-zinc-800/80 z-10">
-        <div class="absolute inset-0 bg-white/40 dark:bg-zinc-950/40 backdrop-blur-xl" />
+      <div class="relative px-8 py-6 flex justify-between items-start bg-gradient-to-b from-slate-50 to-white   border-b border-zinc-100  z-10">
+        <div class="absolute inset-0 bg-white/40  backdrop-blur-xl" />
         <div class="relative z-10">
           <div class="flex items-center gap-3 mb-1">
-            <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center border border-blue-100 dark:border-blue-500/20 shadow-inner">
-              <DoorOpen class="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <div class="w-10 h-10 rounded-xl bg-blue-50  flex items-center justify-center border border-blue-100  shadow-inner">
+              <DoorOpen class="w-5 h-5 text-blue-600 " />
             </div>
-            <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-              {{ door ? 'Configure Door' : 'Register Access Point' }}
+            <h2 class="text-2xl font-black text-slate-900  tracking-tight">
+              {{ door ? 'Configure Access Point' : 'Register Access Point' }}
             </h2>
           </div>
-          <p class="text-[13px] font-medium text-slate-500 dark:text-zinc-400 ml-[52px]">
+          <p class="text-[13px] font-medium text-slate-500  ml-[52px]">
             {{ door ? 'Update hardware parameters and access rules' : 'Define a new physical barrier in your security topology' }}
           </p>
         </div>
         <button
-          class="relative z-10 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-zinc-700 transition-all duration-200"
+          class="relative z-10 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100  text-slate-400 hover:text-slate-900 :text-white hover:bg-slate-200 :bg-zinc-700 transition-all duration-200"
           @click="close"
         >
           <X class="w-4 h-4" />
@@ -29,7 +29,7 @@
       </div>
 
       <!-- Content with custom scrollbar -->
-      <div class="px-8 py-6 overflow-y-auto flex-1 bg-zinc-50/50 dark:bg-zinc-950/80 custom-scrollbar">
+      <div class="px-8 py-6 overflow-y-auto flex-1 bg-zinc-50/50  custom-scrollbar">
         <form
           id="door-form"
           class="space-y-10"
@@ -37,28 +37,28 @@
         >
           <!-- Basic Information Section -->
           <div class="space-y-5">
-            <h4 class="text-xs font-black uppercase tracking-widest border-b border-zinc-200 dark:border-zinc-800/80 pb-3 flex items-center gap-2 text-zinc-400 dark:text-zinc-500">
+            <h4 class="text-xs font-black uppercase tracking-widest border-b border-zinc-200  pb-3 flex items-center gap-2 text-zinc-400 ">
               <DoorOpen class="w-4 h-4 text-blue-500" /> Basic Information
             </h4>
             <div class="grid grid-cols-2 gap-4">
               <div class="space-y-1.5">
-                <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Door Number <span class="text-red-500">*</span></label>
+                <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Access Point Number <span class="text-red-500">*</span></label>
                 <input
                   v-model.number="formData.doorNumber"
                   type="number"
                   required
                   min="1"
-                  class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground placeholder:text-zinc-500"
+                  class="w-full h-9 px-3 rounded-md border border-zinc-200  bg-white  text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground placeholder:text-zinc-500"
                 >
               </div>
               <div class="space-y-1.5">
-                <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Door Name <span class="text-red-500">*</span></label>
+                <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Access Point Name <span class="text-red-500">*</span></label>
                 <input
                   v-model="formData.doorName"
                   type="text"
                   required
                   placeholder="Main Entrance"
-                  class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground placeholder:text-zinc-500"
+                  class="w-full h-9 px-3 rounded-md border border-zinc-200  bg-white  text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground placeholder:text-zinc-500"
                 >
               </div>
               
@@ -70,31 +70,11 @@
                   v-model="formData.location"
                   type="text"
                   placeholder="Floor 1, Building A"
-                  class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground placeholder:text-zinc-500"
+                  class="w-full h-9 px-3 rounded-md border border-zinc-200  bg-white  text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground placeholder:text-zinc-500"
                 />
               </div>
               
-              <!-- Controller Dropdown -->
-              <div class="space-y-1.5 col-span-2">
-                <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
-                  Linked Hardware Controller
-                </label>
-                <select
-                  v-model="formData.deviceUuid"
-                  class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground"
-                >
-                  <option value="">
-                    No hardware linked
-                  </option>
-                  <option
-                    v-for="c in controllers"
-                    :key="c.id"
-                    :value="c.sn"
-                  >
-                    {{ c.controllerName }} ({{ c.sn }})
-                  </option>
-                </select>
-              </div>
+
             </div>
           </div>
 
@@ -102,24 +82,24 @@
 
           <!-- Security & Access Section -->
           <div class="space-y-5">
-            <h4 class="text-xs font-black uppercase tracking-widest border-b border-zinc-200 dark:border-zinc-800/80 pb-3 flex items-center gap-2 text-zinc-400 dark:text-zinc-500">
+            <h4 class="text-xs font-black uppercase tracking-widest border-b border-zinc-200  pb-3 flex items-center gap-2 text-zinc-400 ">
               <ShieldCheck class="w-4 h-4 text-blue-500" /> Security & Access Rules
             </h4>
             <div class="space-y-1.5 max-w-sm">
               <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Authorized Departments</label>
-              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-60 overflow-y-auto p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-inner">
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-60 overflow-y-auto p-4 rounded-xl border border-zinc-200  bg-white  shadow-inner">
                 <label
                   v-for="dept in departments"
                   :key="dept.id"
-                  class="flex items-center gap-2 cursor-pointer p-1.5 rounded-md hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
+                  class="flex items-center gap-2 cursor-pointer p-1.5 rounded-md hover:bg-zinc-50 :bg-zinc-900 transition-colors"
                 >
                   <input
                     v-model="formData.assignedDepts"
                     type="checkbox"
                     :value="dept.id"
-                    class="w-4 h-4 rounded text-blue-600 focus:ring-blue-600 border-zinc-300 dark:border-zinc-700 dark:bg-zinc-900"
+                    class="w-4 h-4 rounded text-blue-600 focus:ring-blue-600 border-zinc-300  "
                   >
-                  <span class="text-xs font-semibold text-slate-700 dark:text-zinc-300 truncate">{{ dept.departmentName || dept.name }}</span>
+                  <span class="text-xs font-semibold text-slate-700  truncate">{{ dept.departmentName || dept.name }}</span>
                 </label>
                 <div
                   v-if="departments.length === 0"
@@ -136,12 +116,12 @@
       <!-- Inline Error Banner -->
       <div
         v-if="errorMessage"
-        class="mx-8 mb-4 flex items-start gap-3 p-4 rounded-xl border border-red-200 dark:border-red-800/60 bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400 text-sm font-medium animate-in slide-in-from-top-2 duration-200"
+        class="mx-8 mb-4 flex items-start gap-3 p-4 rounded-xl border border-red-200  bg-red-50  text-red-700  text-sm font-medium animate-in slide-in-from-top-2 duration-200"
       >
         <AlertTriangle class="w-4 h-4 mt-0.5 shrink-0 text-red-500" />
         <span class="flex-1 break-words">{{ errorMessage }}</span>
         <button
-          class="shrink-0 text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors"
+          class="shrink-0 text-red-400 hover:text-red-600 :text-red-300 transition-colors"
           @click="errorMessage = ''"
         >
           <X class="w-4 h-4" />
@@ -149,10 +129,10 @@
       </div>
 
       <!-- Footer Action Bar -->
-      <div class="relative px-8 py-5 border-t border-zinc-100 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 flex justify-end gap-3 z-10">
+      <div class="relative px-8 py-5 border-t border-zinc-100  bg-white  flex justify-end gap-3 z-10">
         <button
           type="button"
-          class="px-6 h-10 rounded-xl border border-zinc-200 dark:border-zinc-800 text-[13px] font-bold text-slate-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-900 hover:text-slate-900 dark:hover:text-white transition-all duration-200"
+          class="px-6 h-10 rounded-xl border border-zinc-200  text-[13px] font-bold text-slate-600  hover:bg-slate-50 :bg-zinc-900 hover:text-slate-900 :text-white transition-all duration-200"
           @click="close"
         >
           Cancel
@@ -167,7 +147,7 @@
             v-if="loading"
             class="w-4 h-4 animate-spin"
           />
-          <span class="relative z-10">{{ door ? 'Update Installation' : 'Deploy Door' }}</span>
+          <span class="relative z-10">{{ door ? 'Update Installation' : 'Deploy Access Point' }}</span>
         </button>
       </div>
     </div>

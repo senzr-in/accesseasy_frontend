@@ -12,10 +12,10 @@
       </div>
       <div class="flex items-center gap-3">
         <button
-          class="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800"
+          class="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 dark:border-zinc-800 text-slate-500 hover:text-slate-700 bg-white dark:bg-zinc-950 font-black text-[10px] uppercase tracking-widest active:scale-95 shadow-sm cursor-pointer"
           @click="router.push('/dashboard/visitor-portals')"
         >
-          ← Back
+          <ArrowLeft class="w-3.5 h-3.5" /> Back
         </button>
         <button
           :disabled="saving"
@@ -350,7 +350,7 @@ import { authService } from '@/services/authService';
 import {
   Loader2, Settings, Image as ImageIcon, Plus, Layout, UploadCloud,
   ClipboardSignature, Save, Check, Copy, MessageCircle, Mail, Phone, X,
-  SlidersHorizontal, Camera, FileUp, ShieldOff
+  SlidersHorizontal, Camera, FileUp, ShieldOff, ArrowLeft
 } from 'lucide-vue-next';
 
 const route  = useRoute();
