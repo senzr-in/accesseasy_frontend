@@ -46,7 +46,7 @@
           </div>
           <div
             v-if="isVerifying"
-            class="absolute inset-0 z-20 bg-white/60 dark:bg-zinc-950/80 backdrop-blur-sm flex flex-col items-center justify-center text-center p-8 animate-in fade-in transition-all"
+            class="absolute inset-0 z-20 bg-white dark:bg-slate-900/60 dark:bg-zinc-950/80 backdrop-blur-sm flex flex-col items-center justify-center text-center p-8 animate-in fade-in transition-all"
           >
             <div class="space-y-4">
               <div class="relative flex justify-center">
@@ -89,14 +89,14 @@
           >
             {{ result.message }}
           </h2>
-          <span class="inline-flex px-2 py-0.5 rounded-md border border-slate-200 dark:border-zinc-800 text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400 bg-slate-50 dark:bg-zinc-900">
+          <span class="inline-flex px-2 py-0.5 rounded-md border border-slate-200 dark:border-zinc-800 text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400 bg-slate-50 dark:hover:bg-zinc-800">
             {{ result.data?.type || "Unknown Pass" }}
           </span>
         </div>
 
         <div
           v-if="result.success && result.data"
-          class="w-full space-y-4 bg-slate-50 dark:bg-zinc-900 p-6 rounded-xl border border-slate-100 dark:border-zinc-800"
+          class="w-full space-y-4 bg-slate-50 dark:hover:bg-zinc-800 p-6 rounded-xl border border-slate-100 dark:border-zinc-800"
         >
           <div class="flex flex-col gap-4 text-left">
             <div class="flex items-start gap-4">
@@ -118,13 +118,13 @@
         <div class="pt-4 w-full flex flex-col gap-3">
           <template v-if="result.success">
             <button
-              class="w-full bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 hover:opacity-90 rounded-xl px-4 py-3 font-black uppercase tracking-widest text-xs shadow-sm transition-all active:scale-[0.98]"
+              class="w-full bg-zinc-900 text-white dark:bg-white dark:bg-slate-900 dark:text-zinc-900 hover:opacity-90 rounded-xl px-4 py-3 font-black uppercase tracking-widest text-xs shadow-sm transition-all active:scale-[0.98]"
               @click="resetScan"
             >
               Approve Entry
             </button>
             <button
-              class="w-full bg-white dark:bg-zinc-950 text-slate-700 dark:text-zinc-300 border border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-zinc-900 rounded-xl px-4 py-3 font-black uppercase tracking-widest text-xs shadow-sm transition-all"
+              class="w-full bg-white dark:bg-zinc-950 text-slate-700 dark:text-zinc-300 border border-slate-200 dark:border-zinc-800 hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 rounded-xl px-4 py-3 font-black uppercase tracking-widest text-xs shadow-sm transition-all"
               @click="resetScan"
             >
               Deny Entry
@@ -132,7 +132,7 @@
           </template>
           <button
             v-else
-            class="w-full bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 hover:opacity-90 rounded-xl px-4 py-3 font-black uppercase tracking-widest text-xs shadow-sm transition-all active:scale-[0.98]"
+            class="w-full bg-zinc-900 text-white dark:bg-white dark:bg-slate-900 dark:text-zinc-900 hover:opacity-90 rounded-xl px-4 py-3 font-black uppercase tracking-widest text-xs shadow-sm transition-all active:scale-[0.98]"
             @click="resetScan"
           >
             Try Scanning Again
@@ -143,11 +143,11 @@
 
     <!-- Footer Actions -->
     <div class="mt-8 grid grid-cols-2 gap-4 max-w-lg mx-auto w-full">
-      <button class="h-16 rounded-xl border border-slate-200 dark:border-zinc-800 flex flex-col gap-1 items-center justify-center bg-white dark:bg-zinc-950 shadow-sm hover:shadow-lg transition-all duration-200 hover:bg-slate-50 dark:hover:bg-zinc-900 active:scale-[0.98]">
+      <button class="h-16 rounded-xl border border-slate-200 dark:border-zinc-800 flex flex-col gap-1 items-center justify-center bg-white dark:bg-zinc-950 shadow-sm hover:shadow-lg transition-all duration-200 hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 active:scale-[0.98]">
         <History class="w-4 h-4 text-slate-400 dark:text-zinc-500" />
         <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">My Logs</span>
       </button>
-      <button class="h-16 rounded-xl border border-slate-200 dark:border-zinc-800 flex flex-col gap-1 items-center justify-center bg-white dark:bg-zinc-950 shadow-sm hover:shadow-lg transition-all duration-200 hover:bg-slate-50 dark:hover:bg-zinc-900 active:scale-[0.98]">
+      <button class="h-16 rounded-xl border border-slate-200 dark:border-zinc-800 flex flex-col gap-1 items-center justify-center bg-white dark:bg-zinc-950 shadow-sm hover:shadow-lg transition-all duration-200 hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 active:scale-[0.98]">
         <DoorOpen class="w-4 h-4 text-slate-400 dark:text-zinc-500" />
         <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">My Passes</span>
       </button>

@@ -3,25 +3,25 @@
     v-if="modelValue"
     class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-300"
   >
-    <div class="relative w-full max-w-3xl max-h-[90vh] flex flex-col bg-white  rounded-[24px] shadow-2xl shadow-indigo-500/10 border border-white/20  overflow-hidden transform transition-all animate-in zoom-in-95 duration-300">
+    <div class="relative w-full max-w-3xl max-h-[90vh] flex flex-col bg-white dark:bg-slate-900  rounded-[24px] shadow-2xl shadow-indigo-500/10 border border-white/20  overflow-hidden transform transition-all animate-in zoom-in-95 duration-300">
       <!-- Premium Glass Header -->
       <div class="relative px-8 py-6 flex justify-between items-start bg-gradient-to-b from-slate-50 to-white   border-b border-zinc-100  z-10">
-        <div class="absolute inset-0 bg-white/40  backdrop-blur-xl" />
+        <div class="absolute inset-0 bg-white dark:bg-slate-900/40  backdrop-blur-xl" />
         <div class="relative z-10">
           <div class="flex items-center gap-3 mb-1">
             <div class="w-10 h-10 rounded-xl bg-blue-50  flex items-center justify-center border border-blue-100  shadow-inner">
               <DoorOpen class="w-5 h-5 text-blue-600 " />
             </div>
-            <h2 class="text-2xl font-black text-slate-900  tracking-tight">
+            <h2 class="text-2xl font-black text-slate-900 dark:text-slate-100  tracking-tight">
               {{ door ? 'Configure Access Point' : 'Register Access Point' }}
             </h2>
           </div>
-          <p class="text-[13px] font-medium text-slate-500  ml-[52px]">
+          <p class="text-[13px] font-medium text-slate-500 dark:text-slate-400  ml-[52px]">
             {{ door ? 'Update hardware parameters and access rules' : 'Define a new physical barrier in your security topology' }}
           </p>
         </div>
         <button
-          class="relative z-10 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100  text-slate-400 hover:text-slate-900 :text-white hover:bg-slate-200 :bg-zinc-700 transition-all duration-200"
+          class="relative z-10 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-950  text-slate-400 hover:text-slate-900 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 :text-white hover:bg-slate-200 :bg-zinc-700 transition-all duration-200"
           @click="close"
         >
           <X class="w-4 h-4" />
@@ -48,7 +48,7 @@
                   type="number"
                   required
                   min="1"
-                  class="w-full h-9 px-3 rounded-md border border-zinc-200  bg-white  text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground placeholder:text-zinc-500"
+                  class="w-full h-9 px-3 rounded-md border border-zinc-200  bg-white dark:bg-slate-900  text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground placeholder:text-zinc-500"
                 >
               </div>
               <div class="space-y-1.5">
@@ -58,7 +58,7 @@
                   type="text"
                   required
                   placeholder="Main Entrance"
-                  class="w-full h-9 px-3 rounded-md border border-zinc-200  bg-white  text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground placeholder:text-zinc-500"
+                  class="w-full h-9 px-3 rounded-md border border-zinc-200  bg-white dark:bg-slate-900  text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground placeholder:text-zinc-500"
                 >
               </div>
               
@@ -70,11 +70,9 @@
                   v-model="formData.location"
                   type="text"
                   placeholder="Floor 1, Building A"
-                  class="w-full h-9 px-3 rounded-md border border-zinc-200  bg-white  text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground placeholder:text-zinc-500"
-                />
+                  class="w-full h-9 px-3 rounded-md border border-zinc-200  bg-white dark:bg-slate-900  text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground placeholder:text-zinc-500"
+                >
               </div>
-              
-
             </div>
           </div>
 
@@ -87,11 +85,11 @@
             </h4>
             <div class="space-y-1.5 max-w-sm">
               <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Authorized Departments</label>
-              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-60 overflow-y-auto p-4 rounded-xl border border-zinc-200  bg-white  shadow-inner">
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-60 overflow-y-auto p-4 rounded-xl border border-zinc-200  bg-white dark:bg-slate-900  shadow-inner">
                 <label
                   v-for="dept in departments"
                   :key="dept.id"
-                  class="flex items-center gap-2 cursor-pointer p-1.5 rounded-md hover:bg-zinc-50 :bg-zinc-900 transition-colors"
+                  class="flex items-center gap-2 cursor-pointer p-1.5 rounded-md hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors"
                 >
                   <input
                     v-model="formData.assignedDepts"
@@ -99,7 +97,7 @@
                     :value="dept.id"
                     class="w-4 h-4 rounded text-blue-600 focus:ring-blue-600 border-zinc-300  "
                   >
-                  <span class="text-xs font-semibold text-slate-700  truncate">{{ dept.departmentName || dept.name }}</span>
+                  <span class="text-xs font-semibold text-slate-700 dark:text-slate-200  truncate">{{ dept.departmentName || dept.name }}</span>
                 </label>
                 <div
                   v-if="departments.length === 0"
@@ -129,10 +127,10 @@
       </div>
 
       <!-- Footer Action Bar -->
-      <div class="relative px-8 py-5 border-t border-zinc-100  bg-white  flex justify-end gap-3 z-10">
+      <div class="relative px-8 py-5 border-t border-zinc-100  bg-white dark:bg-slate-900  flex justify-end gap-3 z-10">
         <button
           type="button"
-          class="px-6 h-10 rounded-xl border border-zinc-200  text-[13px] font-bold text-slate-600  hover:bg-slate-50 :bg-zinc-900 hover:text-slate-900 :text-white transition-all duration-200"
+          class="px-6 h-10 rounded-xl border border-zinc-200  text-[13px] font-bold text-slate-600 dark:text-slate-300  hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 hover:text-slate-900 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 :text-white transition-all duration-200"
           @click="close"
         >
           Cancel

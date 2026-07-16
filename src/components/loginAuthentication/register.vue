@@ -1,7 +1,7 @@
 <template>
   <div class="flex min-h-screen w-full bg-[#f8fafc] dark:bg-[#020617] text-slate-900 dark:text-slate-100 flex-col lg:flex-row relative overflow-hidden font-sans">
     <!-- Left Side: Marketing Content -->
-    <div class="flex-1 flex flex-col justify-center px-6 py-8 lg:px-14 lg:py-6 bg-white/10 dark:bg-black/20 backdrop-blur-md border-r border-slate-200 dark:border-white/10 relative overflow-hidden border-b lg:border-b-0">
+    <div class="flex-1 flex flex-col justify-center px-6 py-8 lg:px-14 lg:py-6 bg-white dark:bg-slate-900/10 dark:bg-black/20 backdrop-blur-md border-r border-slate-200 dark:border-white/10 relative overflow-hidden border-b lg:border-b-0">
       <!-- Grid Background Pattern -->
       <div 
         class="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none"
@@ -35,7 +35,7 @@
           <span class="text-blue-600">Enterprise</span> Network.
         </h1>
 
-        <p class="text-[12px] text-slate-500 font-bold mb-8 leading-relaxed max-w-sm uppercase tracking-wide">
+        <p class="text-[12px] text-slate-500 dark:text-slate-400 font-bold mb-8 leading-relaxed max-w-sm uppercase tracking-wide">
           Join the elite organizations using AccessEasy for unified infrastructure security.
         </p>
 
@@ -55,7 +55,7 @@
               <h3 class="font-black text-[10px] tracking-[0.05em] uppercase text-slate-900 dark:text-white">
                 {{ h.text }}
               </h3>
-              <p class="text-[9px] font-bold text-slate-500 leading-snug mt-0.5 uppercase tracking-widest">
+              <p class="text-[9px] font-bold text-slate-500 dark:text-slate-400 leading-snug mt-0.5 uppercase tracking-widest">
                 {{ h.sub }}
               </p>
             </div>
@@ -63,7 +63,7 @@
         </div>
 
         <div class="pt-6 border-t border-slate-200 dark:border-white/5">
-          <p class="text-[8px] font-black tracking-[0.3em] text-slate-400 dark:text-slate-600 mb-4 uppercase">
+          <p class="text-[8px] font-black tracking-[0.3em] text-slate-400 dark:text-slate-600 dark:text-slate-300 mb-4 uppercase">
             Industry Standards
           </p>
           <div class="flex flex-wrap gap-x-6 gap-y-3">
@@ -84,11 +84,11 @@
     </div>
 
     <!-- Right Side: Registration Form -->
-    <div class="flex-1 flex items-center justify-center p-4 lg:p-10 relative overflow-hidden bg-slate-50/50 dark:bg-transparent">
+    <div class="flex-1 flex items-center justify-center p-4 lg:p-10 relative overflow-hidden bg-slate-50 dark:bg-slate-900/50 dark:bg-transparent">
       <!-- Glow effect -->
       <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-blue-600/5 rounded-full blur-[100px] pointer-events-none" />
 
-      <div class="w-full max-w-[480px] rounded-[2rem] bg-white/90 dark:bg-[#0a0e1a]/80 backdrop-blur-xl p-8 shadow-2xl border border-slate-200 dark:border-white/10 relative z-10 animate-fade-in-up">
+      <div class="w-full max-w-[480px] rounded-[2rem] bg-white dark:bg-slate-900/90 dark:bg-[#0a0e1a]/80 backdrop-blur-xl p-8 shadow-2xl border border-slate-200 dark:border-white/10 relative z-10 animate-fade-in-up">
         <div class="text-center mb-8">
           <div class="mx-auto mb-4 h-12 w-12 flex items-center justify-center rounded-[1rem] bg-blue-600 text-white shadow-lg shadow-blue-600/30 border border-blue-500/20">
             <UserPlus class="h-5 w-5" />
@@ -108,21 +108,21 @@
           <!-- Personal Info Grid -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="space-y-1.5">
-              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 ml-1 uppercase">Full Name</label>
+              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Full Name</label>
               <div class="relative group">
                 <input
                   v-model="fullName"
                   type="text"
                   required
                   placeholder="John Doe"
-                  class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
+                  class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
                 >
                 <User class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
               </div>
             </div>
 
             <div class="space-y-1.5">
-              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 ml-1 uppercase">Phone Number</label>
+              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Phone Number</label>
               <div class="relative group">
                 <input
                   v-model="mobileNumber"
@@ -131,7 +131,7 @@
                   required
                   placeholder="10-digit number"
                   maxlength="10"
-                  class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
+                  class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
                   @input="mobileNumber = $event.target.value.replace(/\D/g, '')"
                 >
                 <Phone class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
@@ -139,14 +139,14 @@
             </div>
             
             <div class="space-y-1.5">
-              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 ml-1 uppercase">Work Email</label>
+              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Work Email</label>
               <div class="relative group">
                 <input
                   v-model="email"
                   type="email"
                   required
                   placeholder="name@company.com"
-                  class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
+                  class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
                   @input="email = email.toLowerCase()"
                 >
                 <Mail class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
@@ -154,14 +154,14 @@
             </div>
 
             <div class="space-y-1.5">
-              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 ml-1 uppercase">Employee ID</label>
+              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Employee ID</label>
               <div class="relative group">
                 <input
                   v-model="employeeId"
                   type="text"
                   required
                   placeholder="EMP-001"
-                  class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
+                  class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
                 >
                 <IdCard class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
               </div>
@@ -170,14 +170,14 @@
 
           <!-- Company info -->
           <div class="space-y-1.5">
-            <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 ml-1 uppercase">Company Name</label>
+            <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Company Name</label>
             <div class="relative group">
               <input
                 v-model="companyName"
                 type="text"
                 required
                 placeholder="Acme Corporation"
-                class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
+                class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
               >
               <Building2 class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
             </div>
@@ -197,13 +197,13 @@
 
           <div class="flex items-center justify-between gap-4 py-2 opacity-50">
             <div class="h-[1px] flex-1 bg-slate-300 dark:bg-slate-700" />
-            <span class="text-[9px] font-black tracking-[0.3em] text-slate-500 uppercase">OR</span>
+            <span class="text-[9px] font-black tracking-[0.3em] text-slate-500 dark:text-slate-400 uppercase">OR</span>
             <div class="h-[1px] flex-1 bg-slate-300 dark:bg-slate-700" />
           </div>
 
           <button
             type="button"
-            class="w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.1em] flex items-center justify-center gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 hover:border-blue-500/50 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-white shadow-sm transition-all group"
+            class="w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.1em] flex items-center justify-center gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 hover:border-blue-500/50 hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-slate-800 text-slate-700 dark:text-white shadow-sm transition-all group"
             @click="signupWithGoogle"
           >
             <svg
@@ -231,7 +231,7 @@
             Sign up with Google
           </button>
 
-          <p class="text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider pt-2">
+          <p class="text-center text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider pt-2">
             Already have an account? 
             <router-link
               to="/login"
@@ -255,7 +255,7 @@
         <div 
           v-for="toast in toasts" 
           :key="toast.id"
-          class="pointer-events-auto min-w-[320px] p-4 rounded-2xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200 dark:border-white/10 shadow-2xl flex items-start gap-3 animate-fade-in-up"
+          class="pointer-events-auto min-w-[320px] p-4 rounded-2xl bg-white dark:bg-slate-900/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200 dark:border-white/10 shadow-2xl flex items-start gap-3 animate-fade-in-up"
         >
           <div
             :class="[
@@ -281,12 +281,12 @@
             <p class="text-[11px] font-black uppercase tracking-wider text-slate-900 dark:text-white leading-tight">
               {{ toast.type === 'success' ? 'Success' : toast.type === 'error' ? 'Notice' : 'Information' }}
             </p>
-            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mt-1">
+            <p class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-1">
               {{ toast.message }}
             </p>
           </div>
           <button
-            class="text-slate-400 hover:text-slate-600"
+            class="text-slate-400 hover:text-slate-600 dark:text-slate-300"
             @click="removeToast(toast.id)"
           >
             <X class="w-4 h-4" />
@@ -313,7 +313,6 @@ const router = useRouter();
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   headers: {
-    Authorization: `Bearer ${import.meta.env.VITE_API_TOKEN}`,
     "Content-Type": "application/json",
   },
 });

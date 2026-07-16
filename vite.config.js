@@ -17,9 +17,6 @@ export default defineConfig(({ mode }) => {
         "@": path.resolve(__dirname, "./src"),
       },
     },
-    define: {
-      VITE_API_URL: JSON.stringify(env.VITE_API_URL),
-    },
     server: {
       port: 5173,
       host: "0.0.0.0", // Required for Docker/Cloud Run

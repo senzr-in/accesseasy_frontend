@@ -6,13 +6,13 @@
         <h1 class="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
           Firmware Management
         </h1>
-        <p class="text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black opacity-80">
+        <p class="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-[0.3em] font-black opacity-80">
           System Update Distribution
         </p>
       </div>
 
       <div class="flex items-center gap-4">
-        <button class="h-10 sm:h-12 px-6 sm:px-8 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-xs tracking-widest uppercase bg-slate-900 border border-slate-800 text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-200 gap-2 shadow-xl shadow-slate-900/10 dark:shadow-white/5 active:scale-95 transition-all flex items-center justify-center">
+        <button class="h-10 sm:h-12 px-6 sm:px-8 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-xs tracking-widest uppercase bg-slate-900 border border-slate-800 text-white hover:bg-slate-800 dark:bg-slate-100 dark:bg-slate-950 dark:text-slate-900 dark:text-slate-100 dark:hover:bg-slate-200 gap-2 shadow-xl shadow-slate-900/10 dark:shadow-white/5 active:scale-95 transition-all flex items-center justify-center">
           <Upload class="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
           New Release
         </button>
@@ -56,7 +56,7 @@
                 <ChevronDown class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
               </div>
             </div>
-            <p class="text-[11px] text-slate-500 leading-relaxed italic pr-4">
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed italic pr-4">
               Select a specific hardware to view current production status and individual binary history.
             </p>
           </div>
@@ -70,7 +70,7 @@
             class="text-center space-y-4 py-8"
           >
             <div class="w-16 h-16 bg-slate-50 dark:bg-slate-800/50 rounded-2xl mx-auto flex items-center justify-center border border-slate-100 dark:border-slate-700/50">
-              <Package class="w-8 h-8 text-slate-300 dark:text-slate-600" />
+              <Package class="w-8 h-8 text-slate-300 dark:text-slate-600 dark:text-slate-300" />
             </div>
             <p class="text-xs font-black uppercase tracking-[0.2em] text-slate-400">
               No Profile Selected
@@ -88,7 +88,7 @@
                 <h3 class="text-sm font-black text-slate-900 dark:text-white mb-1">
                   Production Ready
                 </h3>
-                <p class="text-xs font-medium text-slate-500">
+                <p class="text-xs font-medium text-slate-500 dark:text-slate-400">
                   Hardware Profile: <span class="font-bold text-slate-700 dark:text-slate-300">{{ selectedProfileId }}</span>
                 </p>
               </div>
@@ -133,21 +133,21 @@
       <div class="rounded-[2.5rem] border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 overflow-hidden shadow-sm">
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse whitespace-nowrap">
-            <thead class="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+            <thead class="border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 dark:bg-slate-900/50">
               <tr>
-                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
                   Version
                 </th>
-                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
                   Hardware Code
                 </th>
-                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
                   Payload Size
                 </th>
-                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+                <th class="px-8 py-5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
                   Release Date
                 </th>
-                <th class="px-8 py-5 text-right text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
+                <th class="px-8 py-5 text-right text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
                   Actions
                 </th>
               </tr>
@@ -159,8 +159,8 @@
                   class="px-8 py-24 text-center"
                 >
                   <div class="flex flex-col items-center gap-4">
-                    <Activity class="h-10 w-10 animate-pulse text-slate-300 dark:text-slate-700" />
-                    <p class="text-sm font-black text-slate-500 uppercase tracking-widest">
+                    <Activity class="h-10 w-10 animate-pulse text-slate-300 dark:text-slate-700 dark:text-slate-200" />
+                    <p class="text-sm font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                       Scanning Registry...
                     </p>
                   </div>
@@ -172,7 +172,7 @@
                   class="px-8 py-24 text-center"
                 >
                   <div class="flex flex-col items-center gap-4">
-                    <Package class="h-10 w-10 text-slate-200 dark:text-slate-800" />
+                    <Package class="h-10 w-10 text-slate-200 dark:text-slate-800 dark:text-slate-200" />
                     <p class="text-sm font-black text-slate-400 uppercase tracking-widest">
                       No matching releases
                     </p>
@@ -183,7 +183,7 @@
                 v-for="(fw, idx) in filteredFirmware" 
                 v-else 
                 :key="idx" 
-                class="group hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors border-l-4 border-l-transparent hover:border-l-slate-300 dark:hover:border-l-slate-700"
+                class="group hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-slate-800/30 transition-colors border-l-4 border-l-transparent hover:border-l-slate-300 dark:hover:border-l-slate-700"
               >
                 <td class="px-8 py-5">
                   <div class="flex items-center gap-4">
@@ -204,11 +204,11 @@
                   </div>
                 </td>
                 <td class="px-8 py-5">
-                  <span class="inline-flex rounded-xl bg-slate-100 dark:bg-slate-800 px-3 py-1.5 text-[11px] font-black uppercase text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 shadow-sm transition-colors group-hover:bg-white dark:group-hover:bg-slate-900">
+                  <span class="inline-flex rounded-xl bg-slate-100 dark:bg-slate-800 px-3 py-1.5 text-[11px] font-black uppercase text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 shadow-sm transition-colors group-hover:bg-white dark:bg-slate-900 dark:group-hover:bg-slate-900">
                     {{ fw.hardwareProfileCode }}
                   </span>
                 </td>
-                <td class="px-8 py-5 text-[12px] text-slate-500 font-mono font-bold tracking-tighter">
+                <td class="px-8 py-5 text-[12px] text-slate-500 dark:text-slate-400 font-mono font-bold tracking-tighter">
                   {{ formatSize(fw.size) }}
                 </td>
                 <td class="px-8 py-5">
@@ -219,7 +219,7 @@
                 </td>
                 <td class="px-8 py-5 text-right">
                   <div class="flex items-center justify-end gap-2">
-                    <button class="h-10 w-10 inline-flex items-center justify-center rounded-2xl text-slate-400 hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white transition-all active:scale-90">
+                    <button class="h-10 w-10 inline-flex items-center justify-center rounded-2xl text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 hover:text-slate-900 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:bg-slate-800 dark:hover:text-white transition-all active:scale-90">
                       <Download class="h-5 w-5" />
                     </button>
                     <button

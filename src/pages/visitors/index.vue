@@ -1,26 +1,32 @@
 <template>
   <div class="h-full flex flex-col gap-4 overflow-hidden animate-in">
-
     <!-- Page Header -->
     <div class="flex items-center justify-between shrink-0">
       <div class="flex items-center gap-3">
         <div>
-          <h1 class="text-lg font-bold text-slate-900">Visitor Management</h1>
-          <p class="text-xs text-slate-500">Register, manage and track all visitors</p>
+          <h1 class="text-lg font-bold text-slate-900 dark:text-slate-100">
+            Visitor Management
+          </h1>
+          <p class="text-xs text-slate-500 dark:text-slate-400">
+            Register, manage and track all visitors
+          </p>
         </div>
       </div>
       <div class="flex items-center gap-2">
         <!-- Portal Link Share -->
         <button
           v-if="activePortal"
-          @click="copyPortalLink"
           class="btn-secondary text-xs"
           title="Share visitor registration link"
+          @click="copyPortalLink"
         >
           <LinkIcon class="w-3.5 h-3.5" />
           Share Portal Link
         </button>
-        <button @click="showAddModal = true" class="btn-primary text-sm">
+        <button
+          class="btn-primary text-sm"
+          @click="showAddModal = true"
+        >
           <UserPlus class="w-4 h-4" />
           Register Visitor
         </button>
@@ -29,81 +35,122 @@
 
     <!-- Portal link copied toast -->
     <transition name="fade">
-      <div v-if="linkCopied" class="shrink-0 flex items-center gap-2 px-4 py-2.5 bg-emerald-50 border border-emerald-200 rounded-lg text-sm font-medium text-emerald-700">
+      <div
+        v-if="linkCopied"
+        class="shrink-0 flex items-center gap-2 px-4 py-2.5 bg-emerald-50 border border-emerald-200 rounded-lg text-sm font-medium text-emerald-700"
+      >
         <CheckCircle class="w-4 h-4" />
         Portal link copied to clipboard! Share it with visitors to self-register.
       </div>
     </transition>
 
     <!-- Navigation Tabs -->
-    <div class="flex items-center gap-2 border-b border-slate-200 shrink-0">
+    <div class="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 shrink-0">
       <button 
-        @click="activeTab = 'records'"
         class="px-4 py-2 text-sm font-bold transition-all relative"
-        :class="activeTab === 'records' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-800'"
+        :class="activeTab === 'records' ? 'text-indigo-600' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:text-slate-200'"
+        @click="activeTab = 'records'"
       >
         Visitor Records
-        <span v-if="activeTab === 'records'" class="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 rounded-t-full"></span>
+        <span
+          v-if="activeTab === 'records'"
+          class="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 rounded-t-full"
+        />
       </button>
       <button 
-        @click="activeTab = 'logs'"
         class="px-4 py-2 text-sm font-bold transition-all relative flex items-center gap-1.5"
-        :class="activeTab === 'logs' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-800'"
+        :class="activeTab === 'logs' ? 'text-indigo-600' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:text-slate-200'"
+        @click="activeTab = 'logs'"
       >
         <Activity class="w-3.5 h-3.5" /> Live Logs
         <span class="flex h-1.5 w-1.5 relative -top-1">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+          <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500" />
         </span>
-        <span v-if="activeTab === 'logs'" class="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 rounded-t-full"></span>
+        <span
+          v-if="activeTab === 'logs'"
+          class="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 rounded-t-full"
+        />
       </button>
       <button 
-        @click="activeTab = 'analytics'"
         class="px-4 py-2 text-sm font-bold transition-all relative flex items-center gap-1.5"
-        :class="activeTab === 'analytics' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-800'"
+        :class="activeTab === 'analytics' ? 'text-indigo-600' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:text-slate-200'"
+        @click="activeTab = 'analytics'"
       >
         <BarChart3 class="w-3.5 h-3.5" /> Analytics
-        <span v-if="activeTab === 'analytics'" class="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 rounded-t-full"></span>
+        <span
+          v-if="activeTab === 'analytics'"
+          class="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 rounded-t-full"
+        />
       </button>
       <button 
-        @click="activeTab = 'portals'"
         class="px-4 py-2 text-sm font-bold transition-all relative flex items-center gap-1.5"
-        :class="activeTab === 'portals' ? 'text-indigo-600' : 'text-slate-500 hover:text-slate-800'"
+        :class="activeTab === 'portals' ? 'text-indigo-600' : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:text-slate-200'"
+        @click="activeTab = 'portals'"
       >
         <Globe class="w-3.5 h-3.5" /> Registration Links
-        <span v-if="activeTab === 'portals'" class="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 rounded-t-full"></span>
+        <span
+          v-if="activeTab === 'portals'"
+          class="absolute bottom-0 left-0 w-full h-0.5 bg-indigo-600 rounded-t-full"
+        />
       </button>
     </div>
 
     <!-- Analytics Tab -->
-    <div v-if="activeTab === 'analytics'" class="flex flex-col gap-4 animate-in">
+    <div
+      v-if="activeTab === 'analytics'"
+      class="flex flex-col gap-4 animate-in"
+    >
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div class="ae-card p-4 ae-card-hover border-l-4 border-l-indigo-500">
-          <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Total Database</p>
-          <p class="text-3xl font-bold text-slate-900">{{ totalItems }}</p>
+          <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
+            Total Database
+          </p>
+          <p class="text-3xl font-bold text-slate-900 dark:text-slate-100">
+            {{ totalItems }}
+          </p>
         </div>
         <div class="ae-card p-4 ae-card-hover border-l-4 border-l-emerald-500">
-          <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Checked In (Active)</p>
-          <p class="text-3xl font-bold text-emerald-600">{{ analytics.checkedIn }}</p>
+          <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
+            Checked In (Active)
+          </p>
+          <p class="text-3xl font-bold text-emerald-600">
+            {{ analytics.checkedIn }}
+          </p>
         </div>
         <div class="ae-card p-4 ae-card-hover border-l-4 border-l-slate-400">
-          <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Checked Out</p>
-          <p class="text-3xl font-bold text-slate-700">{{ analytics.checkedOut }}</p>
+          <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
+            Checked Out
+          </p>
+          <p class="text-3xl font-bold text-slate-700 dark:text-slate-200">
+            {{ analytics.checkedOut }}
+          </p>
         </div>
         <div class="ae-card p-4 ae-card-hover border-l-4 border-l-rose-500">
-          <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Blocked / Denied</p>
-          <p class="text-3xl font-bold text-rose-600">{{ analytics.blocked }}</p>
+          <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
+            Blocked / Denied
+          </p>
+          <p class="text-3xl font-bold text-rose-600">
+            {{ analytics.blocked }}
+          </p>
         </div>
       </div>
-      <div class="ae-card flex-1 min-h-[300px] flex flex-col items-center justify-center text-center p-10 bg-slate-50/50">
+      <div class="ae-card flex-1 min-h-[300px] flex flex-col items-center justify-center text-center p-10 bg-slate-50 dark:bg-slate-900/50">
         <BarChart3 class="w-12 h-12 text-slate-300 mb-3" />
-        <h3 class="text-sm font-bold text-slate-700">Visitor Trends</h3>
-        <p class="text-xs text-slate-500 mt-1 max-w-sm">Historical visitor trend charts and peak time analytics will populate here once enough data is collected.</p>
+        <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200">
+          Visitor Trends
+        </h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm">
+          Historical visitor trend charts and peak time analytics will populate here once enough data is collected.
+        </p>
       </div>
     </div>
 
     <!-- Search & Export Bar (Only in Records Tab) -->
-    <div v-if="activeTab === 'records'" class="flex items-center gap-3 shrink-0 animate-in">
+    <div
+      v-if="activeTab === 'records'"
+      class="flex items-center gap-3 shrink-0 animate-in"
+    >
       <div class="relative flex-1 max-w-sm">
         <Search class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
         <input
@@ -112,19 +159,19 @@
           placeholder="Search by name, email, mobile..."
           class="ae-input pl-9"
           @input="debouncedSearch"
-        />
+        >
       </div>
 
       <!-- Status Filter -->
-      <div class="flex items-center bg-white border border-slate-200 rounded-lg p-1 gap-1">
+      <div class="flex items-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg p-1 gap-1">
         <button
           v-for="f in filters"
           :key="f.value"
-          @click="statusFilter = f.value"
           class="px-3 py-1 rounded-md text-xs font-semibold transition-all"
           :class="statusFilter === f.value
             ? 'bg-indigo-600 text-white shadow-sm'
-            : 'text-slate-500 hover:text-slate-700'"
+            : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:text-slate-200'"
+          @click="statusFilter = f.value"
         >
           {{ f.label }}
         </button>
@@ -137,10 +184,16 @@
           Export
         </button>
         <div class="absolute right-0 mt-1 w-36 ae-card shadow-lg py-1 z-50 hidden group-hover:block">
-          <button class="w-full text-left px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors" @click="exportVisitorsExcel">
+          <button
+            class="w-full text-left px-4 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+            @click="exportVisitorsExcel"
+          >
             Export Excel
           </button>
-          <button class="w-full text-left px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors" @click="exportVisitorsCSV">
+          <button
+            class="w-full text-left px-4 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+            @click="exportVisitorsCSV"
+          >
             Export CSV
           </button>
         </div>
@@ -148,29 +201,60 @@
     </div>
 
     <!-- Visitor Table -->
-    <div v-if="activeTab === 'records'" class="ae-card overflow-hidden flex flex-col flex-1 min-h-0 animate-in">
+    <div
+      v-if="activeTab === 'records'"
+      class="ae-card overflow-hidden flex flex-col flex-1 min-h-0 animate-in"
+    >
       <!-- Table Header -->
-      <div class="grid grid-cols-12 px-5 py-3 border-b border-slate-100 bg-slate-50 text-[10px] font-semibold uppercase tracking-wider text-slate-400 shrink-0">
-        <div class="col-span-4">Visitor</div>
-        <div class="col-span-3 hidden md:block">Contact</div>
-        <div class="col-span-2 hidden lg:block">Validity</div>
-        <div class="col-span-2 text-center">Status</div>
-        <div class="col-span-1 text-center">Actions</div>
+      <div class="grid grid-cols-12 px-5 py-3 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 text-[10px] font-semibold uppercase tracking-wider text-slate-400 shrink-0">
+        <div class="col-span-4">
+          Visitor
+        </div>
+        <div class="col-span-3 hidden md:block">
+          Contact
+        </div>
+        <div class="col-span-2 hidden lg:block">
+          Validity
+        </div>
+        <div class="col-span-2 text-center">
+          Status
+        </div>
+        <div class="col-span-1 text-center">
+          Actions
+        </div>
       </div>
 
       <!-- Body -->
       <div class="overflow-y-auto flex-1 custom-scrollbar">
         <!-- Loading -->
-        <div v-if="loading" class="flex flex-col gap-3 p-4">
-          <div v-for="i in 5" :key="i" class="h-14 bg-slate-100 animate-pulse rounded-lg" />
+        <div
+          v-if="loading"
+          class="flex flex-col gap-3 p-4"
+        >
+          <div
+            v-for="i in 5"
+            :key="i"
+            class="h-14 bg-slate-100 dark:bg-slate-950 animate-pulse rounded-lg"
+          />
         </div>
 
         <!-- Empty -->
-        <div v-else-if="filteredItems.length === 0" class="py-20 text-center">
+        <div
+          v-else-if="filteredItems.length === 0"
+          class="py-20 text-center"
+        >
           <Users class="w-10 h-10 text-slate-300 mx-auto mb-3" />
-          <p class="text-sm font-semibold text-slate-500">No visitors found</p>
-          <p class="text-xs text-slate-400 mt-1">Try adjusting your search or filters</p>
-          <button v-if="searchQuery" class="mt-3 text-xs font-medium text-indigo-600 hover:underline" @click="searchQuery = ''; loadVisitors()">
+          <p class="text-sm font-semibold text-slate-500 dark:text-slate-400">
+            No visitors found
+          </p>
+          <p class="text-xs text-slate-400 mt-1">
+            Try adjusting your search or filters
+          </p>
+          <button
+            v-if="searchQuery"
+            class="mt-3 text-xs font-medium text-indigo-600 hover:underline"
+            @click="searchQuery = ''; loadVisitors()"
+          >
             Clear search
           </button>
         </div>
@@ -179,64 +263,96 @@
         <div
           v-for="visitor in filteredItems"
           :key="visitor.id"
-          class="grid grid-cols-12 px-5 py-3.5 border-b border-slate-50 hover:bg-slate-50 transition-colors group cursor-pointer items-center"
+          class="grid grid-cols-12 px-5 py-3.5 border-b border-slate-50 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group cursor-pointer items-center"
           @click="viewVisitorCard(visitor)"
         >
           <!-- Avatar + Name -->
           <div class="col-span-4 flex items-center gap-4">
-            <div class="p-1 rounded-[1.25rem] bg-slate-100/80 border border-slate-200/60 shadow-sm shrink-0">
+            <div class="p-1 rounded-[1.25rem] bg-slate-100 dark:bg-slate-950/80 border border-slate-200 dark:border-slate-800/60 shadow-sm shrink-0">
               <div class="w-14 h-14 rounded-2xl overflow-hidden bg-indigo-100 flex items-center justify-center text-xl font-black text-indigo-700">
-                <img v-if="visitor.photo" :src="getPhotoUrl(visitor.photo)" class="w-full h-full object-cover" />
+                <img
+                  v-if="visitor.photo"
+                  :src="getPhotoUrl(visitor.photo)"
+                  class="w-full h-full object-cover"
+                >
                 <span v-else>{{ visitor.personName?.charAt(0).toUpperCase() || '?' }}</span>
               </div>
             </div>
             <div class="min-w-0">
-              <p class="text-base font-bold text-slate-900 truncate">{{ visitor.personName }}</p>
-              <p class="text-sm text-slate-500 truncate">{{ visitor.personToMeet ? `→ ${visitor.personToMeet}` : visitor.company || '' }}</p>
+              <p class="text-base font-bold text-slate-900 dark:text-slate-100 truncate">
+                {{ visitor.personName }}
+              </p>
+              <p class="text-sm text-slate-500 dark:text-slate-400 truncate">
+                {{ visitor.personToMeet ? `→ ${visitor.personToMeet}` : visitor.company || '' }}
+              </p>
             </div>
           </div>
 
           <!-- Contact -->
           <div class="col-span-3 hidden md:block">
-            <p class="text-sm text-slate-700">{{ visitor.mobileNumber || '—' }}</p>
-            <p class="text-xs text-slate-400 truncate">{{ visitor.email || '' }}</p>
+            <p class="text-sm text-slate-700 dark:text-slate-200">
+              {{ visitor.mobileNumber || '—' }}
+            </p>
+            <p class="text-xs text-slate-400 truncate">
+              {{ visitor.email || '' }}
+            </p>
           </div>
 
           <!-- Validity -->
           <div class="col-span-2 hidden lg:block">
-            <p class="text-sm text-slate-700">{{ formatDate(visitor.startDate) }}</p>
-            <p class="text-xs text-slate-400">{{ visitor.startTime?.slice(0, 5) || '' }} – {{ visitor.endTime?.slice(0, 5) || '' }}</p>
+            <p class="text-sm text-slate-700 dark:text-slate-200">
+              {{ formatDate(visitor.startDate) }}
+            </p>
+            <p class="text-xs text-slate-400">
+              {{ visitor.startTime?.slice(0, 5) || '' }} – {{ visitor.endTime?.slice(0, 5) || '' }}
+            </p>
           </div>
 
           <!-- Status -->
           <div class="col-span-2 flex justify-center">
-            <span class="badge" :class="getStatusClass(visitor.status)">
-              <span class="w-1.5 h-1.5 rounded-full" :class="getStatusDot(visitor.status)" />
+            <span
+              class="badge"
+              :class="getStatusClass(visitor.status)"
+            >
+              <span
+                class="w-1.5 h-1.5 rounded-full"
+                :class="getStatusDot(visitor.status)"
+              />
               {{ getStatusLabel(visitor.status) }}
             </span>
           </div>
 
           <!-- Actions -->
-          <div class="col-span-1 flex justify-center gap-1" @click.stop>
+          <div
+            class="col-span-1 flex justify-center gap-1"
+            @click.stop
+          >
             <!-- View -->
-            <button @click="viewVisitorCard(visitor)" class="btn-icon" title="View badge">
+            <button
+              class="btn-icon"
+              title="View badge"
+              @click="viewVisitorCard(visitor)"
+            >
               <Eye class="w-3.5 h-3.5" />
             </button>
             <!-- Block / Unblock -->
             <button
-              @click="toggleBlock(visitor)"
               class="btn-icon"
               :title="visitor.status === 'blocked' ? 'Unblock visitor' : 'Block visitor'"
               :class="visitor.status === 'blocked' ? 'text-rose-500 hover:text-rose-700 hover:bg-rose-50' : ''"
+              @click="toggleBlock(visitor)"
             >
-              <component :is="visitor.status === 'blocked' ? ShieldCheck : ShieldOff" class="w-3.5 h-3.5" />
+              <component
+                :is="visitor.status === 'blocked' ? ShieldCheck : ShieldOff"
+                class="w-3.5 h-3.5"
+              />
             </button>
           </div>
         </div>
       </div>
 
       <!-- Pagination -->
-      <div class="flex items-center justify-between px-5 py-3 border-t border-slate-100 bg-white shrink-0">
+      <div class="flex items-center justify-between px-5 py-3 border-t border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-900 shrink-0">
         <button
           class="btn-secondary text-xs py-1.5"
           :disabled="page <= 1 || loading"
@@ -244,7 +360,7 @@
         >
           ← Previous
         </button>
-        <span class="text-xs text-slate-500">
+        <span class="text-xs text-slate-500 dark:text-slate-400">
           Page {{ page }} of {{ totalPages || 1 }} &nbsp;·&nbsp; {{ totalItems }} total
         </span>
         <button
@@ -260,17 +376,25 @@
     <!-- Registration Modal -->
     <Teleport to="body">
       <transition name="fade">
-        <div v-if="showAddModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+        <div
+          v-if="showAddModal"
+          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+        >
           <div class="relative w-full max-w-md ae-card shadow-xl overflow-hidden animate-in flex flex-col max-h-[90vh]">
             <!-- Header -->
-            <div class="flex items-center justify-between p-5 border-b border-slate-100">
+            <div class="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-700">
               <div class="flex items-center gap-2">
                 <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center">
                   <UserPlus class="w-4 h-4 text-indigo-600" />
                 </div>
-                <h3 class="text-sm font-bold text-slate-900">Pre-Register Visitor</h3>
+                <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100">
+                  Pre-Register Visitor
+                </h3>
               </div>
-              <button @click="showAddModal = false" class="btn-icon">
+              <button
+                class="btn-icon"
+                @click="showAddModal = false"
+              >
                 <X class="w-4 h-4" />
               </button>
             </div>
@@ -279,72 +403,138 @@
             <div class="p-5 space-y-4 overflow-y-auto custom-scrollbar">
               <div class="space-y-1.5">
                 <label class="ae-section-label">Full Name <span class="text-rose-500">*</span></label>
-                <input v-model="form.personName" type="text" placeholder="John Doe" class="ae-input" />
+                <input
+                  v-model="form.personName"
+                  type="text"
+                  placeholder="John Doe"
+                  class="ae-input"
+                >
               </div>
 
               <div class="grid grid-cols-2 gap-3">
                 <div class="space-y-1.5">
                   <label class="ae-section-label">Mobile <span class="text-rose-500">*</span></label>
-                  <input v-model="form.mobileNumber" type="text" inputmode="numeric" maxlength="10" placeholder="10-digit" class="ae-input" @input="form.mobileNumber = $event.target.value.replace(/\D/g, '')" />
+                  <input
+                    v-model="form.mobileNumber"
+                    type="text"
+                    inputmode="numeric"
+                    maxlength="10"
+                    placeholder="10-digit"
+                    class="ae-input"
+                    @input="form.mobileNumber = $event.target.value.replace(/\D/g, '')"
+                  >
                 </div>
                 <div class="space-y-1.5">
                   <label class="ae-section-label">Email</label>
-                  <input v-model="form.email" type="email" placeholder="john@example.com" class="ae-input" />
+                  <input
+                    v-model="form.email"
+                    type="email"
+                    placeholder="john@example.com"
+                    class="ae-input"
+                  >
                 </div>
               </div>
 
               <div class="grid grid-cols-2 gap-3">
                 <div class="space-y-1.5">
                   <label class="ae-section-label">Start Date</label>
-                  <input v-model="form.startDate" type="date" class="ae-input" />
+                  <input
+                    v-model="form.startDate"
+                    type="date"
+                    class="ae-input"
+                  >
                 </div>
                 <div class="space-y-1.5">
                   <label class="ae-section-label">End Date</label>
-                  <input v-model="form.endDate" type="date" class="ae-input" />
+                  <input
+                    v-model="form.endDate"
+                    type="date"
+                    class="ae-input"
+                  >
                 </div>
               </div>
 
               <div class="grid grid-cols-2 gap-3">
                 <div class="space-y-1.5">
                   <label class="ae-section-label">Start Time</label>
-                  <input v-model="form.startTime" type="time" class="ae-input" />
+                  <input
+                    v-model="form.startTime"
+                    type="time"
+                    class="ae-input"
+                  >
                 </div>
                 <div class="space-y-1.5">
                   <label class="ae-section-label">End Time</label>
-                  <input v-model="form.endTime" type="time" class="ae-input" />
+                  <input
+                    v-model="form.endTime"
+                    type="time"
+                    class="ae-input"
+                  >
                 </div>
               </div>
 
               <div class="grid grid-cols-2 gap-3">
                 <div class="space-y-1.5">
                   <label class="ae-section-label">Person to Meet</label>
-                  <input v-model="form.personToMeet" type="text" placeholder="Host name or department" class="ae-input" />
+                  <input
+                    v-model="form.personToMeet"
+                    type="text"
+                    placeholder="Host name or department"
+                    class="ae-input"
+                  >
                 </div>
                 <div class="space-y-1.5">
                   <label class="ae-section-label">Reason for Visit</label>
-                  <input v-model="form.reasonForVisit" type="text" placeholder="e.g. Meeting, Interview" class="ae-input" />
+                  <input
+                    v-model="form.reasonForVisit"
+                    type="text"
+                    placeholder="e.g. Meeting, Interview"
+                    class="ae-input"
+                  >
                 </div>
               </div>
 
               <div class="space-y-1.5">
                 <label class="ae-section-label">Access Level (Optional)</label>
-                <select v-model="form.assignedAccessLevels" class="ae-select">
-                  <option value="">None</option>
-                  <option v-for="lvl in accessLevels" :key="lvl.id" :value="lvl.id">{{ lvl.accessLevelName }}</option>
+                <select
+                  v-model="form.assignedAccessLevels"
+                  class="ae-select"
+                >
+                  <option value="">
+                    None
+                  </option>
+                  <option
+                    v-for="lvl in accessLevels"
+                    :key="lvl.id"
+                    :value="lvl.id"
+                  >
+                    {{ lvl.accessLevelName }}
+                  </option>
                 </select>
               </div>
             </div>
 
             <!-- Footer -->
-            <div class="p-5 border-t border-slate-100 flex justify-end gap-2">
-              <button @click="showAddModal = false" class="btn-ghost">Cancel</button>
+            <div class="p-5 border-t border-slate-100 dark:border-slate-700 flex justify-end gap-2">
+              <button
+                class="btn-ghost"
+                @click="showAddModal = false"
+              >
+                Cancel
+              </button>
               <button
                 :disabled="!form.personName || !form.mobileNumber || saving"
-                @click="submitVisitor"
                 class="btn-primary"
+                @click="submitVisitor"
               >
-                <Loader2 v-if="saving" class="w-4 h-4 animate-spin" />
-                <UserPlus v-else class="w-4 h-4" />
+                <Loader2
+                  v-if="saving"
+                  class="w-4 h-4 animate-spin"
+                />
+                <UserPlus
+                  v-else
+                  class="w-4 h-4"
+                />
                 Register
               </button>
             </div>
@@ -354,13 +544,22 @@
     </Teleport>
 
     <!-- Live Logs Tab -->
-    <div v-if="activeTab === 'logs'" class="flex-1 flex flex-col overflow-hidden animate-in">
-      <LiveVisitorLogsTable class="flex-1 shadow-none border border-slate-200/50" />
+    <div
+      v-if="activeTab === 'logs'"
+      class="flex-1 flex flex-col overflow-hidden animate-in"
+    >
+      <LiveVisitorLogsTable class="flex-1 shadow-none border border-slate-200 dark:border-slate-800/50" />
     </div>
 
     <!-- Registration Links Tab -->
-    <div v-if="activeTab === 'portals'" class="flex-1 flex flex-col overflow-hidden animate-in">
-      <VisitorPortals embedded class="flex-1 shadow-none border border-slate-200/50 rounded-xl" />
+    <div
+      v-if="activeTab === 'portals'"
+      class="flex-1 flex flex-col overflow-hidden animate-in"
+    >
+      <VisitorPortals
+        embedded
+        class="flex-1 shadow-none border border-slate-200 dark:border-slate-800/50 rounded-xl"
+      />
     </div>
 
     <!-- Visitor Pass Modal -->

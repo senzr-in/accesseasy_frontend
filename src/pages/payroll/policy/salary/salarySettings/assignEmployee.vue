@@ -4,7 +4,7 @@
     class="pa-4"
   >
     <v-card class="elevation-3 rounded-lg">
-      <v-card-title class="d-flex flex-wrap align-center py-4 px-6 bg-white">
+      <v-card-title class="d-flex flex-wrap align-center py-4 px-6 bg-white dark:bg-slate-900">
         <v-icon
           size="32"
           color="primary"

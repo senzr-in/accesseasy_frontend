@@ -154,7 +154,10 @@
             :disabled="singleVisitor.generated_Qr || isSaving"
           >
             <i class="fas fa-qrcode" />
-            <span v-if="isSaving" class="loading-spinner" />
+            <span
+              v-if="isSaving"
+              class="loading-spinner"
+            />
             {{ isSaving ? "Saving..." : "Generate & Save Pass" }}
           </button>
           <button
@@ -310,7 +313,10 @@
             :disabled="multiVisitor.generatedQRs.length > 0 || isSaving"
           >
             <i class="fas fa-qrcode" />
-            <span v-if="isSaving" class="loading-spinner" />
+            <span
+              v-if="isSaving"
+              class="loading-spinner"
+            />
             {{ isSaving ? "Saving..." : "Generate & Save Passes" }}
           </button>
           <button

@@ -1,366 +1,430 @@
 <template>
-  <div class="h-full flex flex-col md:flex-row overflow-hidden bg-white rounded-b-xl">
-
-    <!-- Left: Canvas Editor -->
-    <div class="flex-1 relative bg-slate-50 border-r border-slate-200 flex flex-col min-h-[350px]">
-      <!-- Top toolbar -->
-      <div class="flex flex-wrap justify-between items-center gap-3 px-4 py-3 bg-white border-b border-slate-200">
+  <div class="h-full flex flex-col md:flex-row overflow-hidden bg-white dark:bg-slate-900 rounded-b-xl">
+    <!-- Left: Master Checkpoint Library Picker -->
+    <div class="flex-1 relative bg-slate-50 dark:bg-slate-800/50 border-r border-slate-200 dark:border-slate-800 flex flex-col min-h-[350px]">
+      <!-- Top toolbar (Group Selection) -->
+      <div class="flex flex-wrap justify-between items-center gap-3 px-4 py-3 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shrink-0">
         <div class="flex items-center gap-3">
-          <label class="ae-section-label">Route</label>
+          <label class="ae-section-label">Checkpoint Group (Route)</label>
           <div class="flex gap-2">
-            <select v-model="selectedPatrolId" class="ae-select w-52">
-              <option v-for="grp in checkpointGroups" :key="grp.id" :value="grp.id">
+            <select
+              v-model="selectedPatrolId"
+              class="ae-select w-52"
+            >
+              <option
+                v-for="grp in checkpointGroups"
+                :key="grp.id"
+                :value="grp.id"
+              >
                 {{ grp.name || `Group ${grp.id}` }}
               </option>
             </select>
-            <button @click="showCreatePrompt = true" class="btn-primary px-3 text-xs flex items-center gap-1 whitespace-nowrap" title="Create New Checkpoint Group">
+            <button
+              class="btn-primary px-3 text-xs flex items-center gap-1 whitespace-nowrap"
+              title="Create New Checkpoint Group"
+              @click="showCreatePrompt = true"
+            >
               <Plus class="w-4 h-4 shrink-0" />
-              <span>Create Checkpoint Group</span>
+              <span>New Group</span>
             </button>
           </div>
         </div>
-        <div class="flex items-center gap-2">
-          <span class="inline-flex items-center gap-1.5 text-xs text-slate-600 font-semibold">
-            <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse" />
-            Click map to place checkpoint
-          </span>
+      </div>
+
+      <!-- Library List -->
+      <div class="px-4 py-3 border-b border-slate-200 dark:border-slate-700 bg-slate-100/50 dark:bg-slate-900/50 shrink-0">
+        <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100 mb-1">
+          Available Checkpoints
+        </h3>
+        <p class="text-[10px] text-slate-500">
+          Click to add to the selected group sequence on the right.
+        </p>
+        
+        <div class="relative mt-2">
+          <Search class="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Search library..."
+            class="ae-input w-full pl-8 text-xs py-1.5"
+          >
         </div>
       </div>
 
-      <!-- SVG Canvas -->
-      <div
-        class="flex-1 relative overflow-hidden flex items-center justify-center cursor-pointer select-none bg-white"
-        @click="handleCanvasClick"
-      >
-        <!-- Grid pattern -->
+      <div class="flex-1 overflow-y-auto custom-scrollbar p-4">
         <div
-          class="absolute inset-0 pointer-events-none opacity-30"
-          :style="{
-            backgroundImage: 'linear-gradient(to right, #E2E8F0 1px, transparent 1px), linear-gradient(to bottom, #E2E8F0 1px, transparent 1px)',
-            backgroundSize: '40px 40px'
-          }"
-        />
-
-        <svg class="w-full h-full" viewBox="0 0 600 400">
-          <!-- Route lines between checkpoints -->
-          <g :transform="`translate(300, 200)`">
-            <line
-              v-for="(cp, i) in checkpoints.slice(1)"
-              :key="`line-${i}`"
-              :x1="checkpoints[i].x * 2.2"
-              :y1="-checkpoints[i].y * 2.2"
-              :x2="cp.x * 2.2"
-              :y2="-cp.y * 2.2"
-              stroke="#CBD5E1"
-              stroke-width="1.5"
-              stroke-dasharray="4 3"
-            />
-
-            <!-- Draft route line (from last checkpoint to draft checkpoint) -->
-            <line
-              v-if="draftCp && checkpoints.length > 0"
-              :x1="checkpoints[checkpoints.length - 1].x * 2.2"
-              :y1="-checkpoints[checkpoints.length - 1].y * 2.2"
-              :x2="draftCp.x * 2.2"
-              :y2="-draftCp.y * 2.2"
-              stroke="#94A3B8"
-              stroke-width="1.5"
-              stroke-dasharray="4 3"
-              class="animate-pulse"
-            />
-
-            <!-- Checkpoint nodes -->
-            <g
-              v-for="(cp, index) in checkpoints"
-              :key="cp.checkpoint_id"
-              :transform="`translate(${cp.x * 2.2}, ${-cp.y * 2.2})`"
-              class="cursor-pointer group"
-              @click.stop="selectCheckpoint(cp)"
-            >
-              <!-- Outer ring (selected) -->
-              <circle
-                r="18"
-                fill="none"
-                :stroke="selectedCp?.checkpoint_id === cp.checkpoint_id ? '#4F46E5' : '#C7D2FE'"
-                stroke-width="2"
-                :opacity="selectedCp?.checkpoint_id === cp.checkpoint_id ? 0.8 : 0"
-                class="transition-all"
-              />
-              <!-- Main dot -->
-              <circle
-                r="8"
-                :fill="selectedCp?.checkpoint_id === cp.checkpoint_id ? '#4F46E5' : '#6366F1'"
-                class="transition-colors"
-              />
-              <!-- Sequence number -->
-              <text
-                text-anchor="middle"
-                dy="3"
-                fill="white"
-                font-size="7"
-                font-weight="bold"
-              >{{ index + 1 }}</text>
-              <!-- Label -->
-              <text
-                y="-24"
-                text-anchor="middle"
-                fill="#475569"
-                font-size="8"
-                font-weight="600"
-              >{{ cp.name }}</text>
-            </g>
-
-            <!-- Draft Checkpoint node -->
-            <g
-              v-if="draftCp"
-              :transform="`translate(${draftCp.x * 2.2}, ${-draftCp.y * 2.2})`"
-              class="cursor-pointer group"
-            >
-              <circle r="18" fill="none" stroke="#4F46E5" stroke-width="2" opacity="0.8" class="animate-pulse" />
-              <circle r="8" fill="#4F46E5" />
-              <text text-anchor="middle" dy="3" fill="white" font-size="7" font-weight="bold">*</text>
-              <text y="-24" text-anchor="middle" fill="#475569" font-size="8" font-weight="600">{{ draftCp.name }} (Unsaved)</text>
-            </g>
-          </g>
-        </svg>
-
-        <!-- Legend -->
-        <div class="absolute bottom-3 left-3 text-[10px] text-slate-400 font-medium">
-          {{ checkpoints.length }} checkpoints · Click to add more
+          v-if="loadingLibrary"
+          class="flex justify-center p-8"
+        >
+          <Loader2 class="w-8 h-8 animate-spin text-indigo-500" />
         </div>
+        <div
+          v-else-if="filteredMasterCheckpoints.length === 0"
+          class="flex flex-col items-center justify-center h-40 text-center"
+        >
+          <div class="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-3">
+            <Search class="w-5 h-5 text-slate-400" />
+          </div>
+          <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">
+            No checkpoints found.
+          </p>
+        </div>
+        <TransitionGroup
+          v-else
+          name="fade-list"
+          tag="div"
+          class="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-4"
+        >
+          <div
+            v-for="cp in filteredMasterCheckpoints"
+            :key="cp.id"
+            class="group relative bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/50 p-3.5 rounded-xl cursor-pointer transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-500/10 hover:border-indigo-300 dark:hover:border-indigo-500/50 active:scale-[0.98] flex flex-col gap-1 overflow-hidden"
+            @click="addCheckpointToGroup(cp)"
+          >
+            <!-- Decorative accent line -->
+            <div class="absolute left-0 top-0 bottom-0 w-1 bg-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+            
+            <div class="flex justify-between items-start">
+              <p class="text-[13px] font-bold text-slate-900 dark:text-slate-100 leading-tight pr-6">
+                {{ cp.name }}
+              </p>
+              <button class="absolute right-3 top-3.5 w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-400 flex items-center justify-center group-hover:bg-indigo-500 group-hover:text-white group-hover:scale-110 transition-all duration-300 shadow-sm">
+                <Plus class="w-3.5 h-3.5" />
+              </button>
+            </div>
+            <p class="text-[10px] text-slate-400 font-mono bg-slate-50 dark:bg-slate-900/50 px-2 py-0.5 rounded w-max mt-1 border border-slate-100 dark:border-slate-800">
+              {{ cp.checkpoint_id }}
+            </p>
+          </div>
+        </TransitionGroup>
       </div>
     </div>
 
-    <!-- Right: Config Panel -->
-    <div class="w-full md:w-[340px] bg-white flex flex-col h-full border-l border-slate-200 shrink-0">
-
+    <!-- Right: Config Panel (The Route Sequence) -->
+    <div class="w-full md:w-[360px] bg-white dark:bg-slate-900 flex flex-col h-full border-l border-slate-200 dark:border-slate-800 shrink-0">
       <!-- Tab Switcher -->
-      <div class="flex bg-slate-50 border-b border-slate-200 shrink-0">
+      <div class="flex bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 shrink-0">
         <button
-          @click="rightTab = 'editor'"
           class="flex-1 py-2.5 text-xs font-semibold transition-all border-b-2"
-          :class="rightTab === 'editor' ? 'text-indigo-600 border-indigo-600 bg-white' : 'text-slate-400 border-transparent hover:text-slate-600'"
+          :class="rightTab === 'sequence' ? 'text-indigo-600 border-indigo-600 bg-white dark:bg-slate-900' : 'text-slate-400 border-transparent hover:text-slate-600 dark:text-slate-300'"
+          @click="rightTab = 'sequence'"
         >
-          <Settings2 class="w-3.5 h-3.5 inline mr-1" /> Editor
+          <Route class="w-3.5 h-3.5 inline mr-1" /> Route Sequence
         </button>
         <button
+          class="flex-1 py-2.5 text-xs font-semibold transition-all border-b-2"
+          :class="rightTab === 'qr' ? 'text-indigo-600 border-indigo-600 bg-white dark:bg-slate-900' : 'text-slate-400 border-transparent hover:text-slate-600 dark:text-slate-300'"
           @click="rightTab = 'qr'"
-          class="flex-1 py-2.5 text-xs font-semibold transition-all border-b-2"
-          :class="rightTab === 'qr' ? 'text-indigo-600 border-indigo-600 bg-white' : 'text-slate-400 border-transparent hover:text-slate-600'"
         >
-          <QrCode class="w-3.5 h-3.5 inline mr-1" /> QR Badge
+          <QrCode class="w-3.5 h-3.5 inline mr-1" /> Route QRs
         </button>
       </div>
 
-      <!-- ═══ EDITOR TAB ═══ -->
-      <div v-show="rightTab === 'editor'" class="flex-1 flex flex-col min-h-0">
-
-        <!-- Checkpoint Editor -->
-        <div class="p-4 border-b border-slate-100 shrink-0">
-          <h3 class="text-sm font-semibold text-slate-900 mb-1">Checkpoint Editor</h3>
-          <p class="text-[10px] text-slate-400">Select or click canvas to configure</p>
-
-          <div v-if="editingCp" class="space-y-2.5 mt-3">
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="ae-section-label mb-1 block">Name</label>
-                <input v-model="editingCp.name" type="text" class="ae-input" placeholder="e.g. Checkpoint Alpha" />
-              </div>
-              <div>
-                <label class="ae-section-label mb-1 block flex items-center gap-1">NFC UID <span class="text-[9px] text-slate-400 font-normal">(Anti-Cheat)</span></label>
-                <input v-model="editingCp.nfc_uid" type="text" class="ae-input font-mono text-xs uppercase" placeholder="e.g. 04:A1:B2..." />
-              </div>
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="ae-section-label mb-1 block">Floor</label>
-                <input v-model="editingCp.floor" type="text" class="ae-input" placeholder="Floor 1" />
-              </div>
-              <div>
-                <label class="ae-section-label mb-1 block">Building</label>
-                <input v-model="editingCp.building_id" type="text" class="ae-input" placeholder="HUB-A" />
-              </div>
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="ae-section-label mb-1 block">Task / Notes</label>
-                <input v-model="editingCp.instructions" type="text" class="ae-input" placeholder="e.g. Check locks" />
-              </div>
-              <div>
-                <label class="ae-section-label mb-1 block">Dwell Time (min)</label>
-                <input v-model.number="editingCp.dwell_time" type="number" class="ae-input" placeholder="5" min="0" />
-              </div>
-            </div>
-            <div class="flex gap-2">
-              <button @click="saveCheckpoint" class="btn-primary flex-1 text-xs justify-center">Save</button>
-              <button @click="deleteCheckpoint" class="btn-secondary text-xs text-rose-600 border-rose-200 hover:bg-rose-50">Delete</button>
-            </div>
-          </div>
-
-          <div v-else class="mt-3 p-3 bg-slate-50 rounded-lg text-center">
-            <p class="text-xs text-slate-400">Click a node or click the canvas to add a new checkpoint.</p>
-          </div>
-        </div>
-
-        <!-- Route Sequence -->
-        <div class="flex-1 flex flex-col min-h-0">
-          <div class="px-4 pt-3 pb-2 shrink-0 flex items-center justify-between border-b border-slate-100">
-            <div>
-              <h3 class="text-sm font-semibold text-slate-700 uppercase tracking-wide">Checkpoints</h3>
-              <p class="text-[10px] text-slate-400 mt-0.5">Visits List</p>
-            </div>
-            <span class="text-[10px] font-semibold text-indigo-600 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-full">{{ checkpoints.length }} stops</span>
-          </div>
-          <div class="flex-1 overflow-y-auto custom-scrollbar px-3 pb-3 pt-2 space-y-1.5">
-            <div
-              v-for="(cp, idx) in checkpoints"
-              :key="cp.checkpoint_id"
-              class="checkpoint-row group flex items-center gap-2.5 py-2 px-3 rounded-lg border transition-all cursor-pointer"
-              :class="selectedCp?.checkpoint_id === cp.checkpoint_id
-                ? 'bg-indigo-50 border-indigo-300 shadow-sm'
-                : 'bg-white border-slate-200 hover:border-indigo-200 hover:bg-slate-50'"
-              @click="selectCheckpoint(cp)"
+      <!-- ═══ SEQUENCE TAB ═══ -->
+      <div
+        v-show="rightTab === 'sequence'"
+        class="flex-1 flex flex-col min-h-0"
+      >
+        <div class="px-4 pt-3 pb-2 shrink-0 flex items-center justify-between border-b border-slate-100 dark:border-slate-700">
+          <div>
+            <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200">
+              Current Group Sequence
+            </h3>
+            <p
+              v-if="selectedGroupObj"
+              class="text-[10px] text-slate-400 mt-0.5"
             >
-              <!-- Left status dot -->
-              <span
-                class="w-2 h-2 rounded-full shrink-0 transition-all"
-                :class="cp.status === 'completed' ? 'bg-emerald-500'
-                  : cp.status === 'missed'    ? 'bg-rose-400'
-                  : selectedCp?.checkpoint_id === cp.checkpoint_id ? 'bg-indigo-500 animate-pulse'
-                  : 'bg-slate-300'"
-              />
+              {{ selectedGroupObj.name }}
+            </p>
+          </div>
+          <span class="text-[10px] font-semibold text-indigo-600 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-full">{{ checkpoints.length }} stops</span>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto custom-scrollbar px-5 pb-5 pt-4 relative">
+          <div
+            v-if="!selectedPatrolId"
+            class="absolute inset-0 flex flex-col items-center justify-center text-center bg-white/80 dark:bg-slate-900/80 z-20 backdrop-blur-[2px]"
+          >
+            <div class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center mb-3">
+              <Route class="w-6 h-6 text-indigo-500" />
+            </div>
+            <p class="text-sm font-bold text-slate-700 dark:text-slate-200">
+              Select a Group
+            </p>
+            <p class="text-xs text-slate-400 mt-1 max-w-[200px]">
+              Choose a group from the dropdown or create a new one to start building.
+            </p>
+          </div>
+          
+          <div
+            v-else-if="!checkpoints.length"
+            class="absolute inset-0 flex flex-col items-center justify-center text-center px-4"
+          >
+            <div class="w-16 h-16 rounded-full bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 flex items-center justify-center mb-4">
+              <MapPin class="w-6 h-6 text-slate-300 dark:text-slate-600" />
+            </div>
+            <p class="text-sm font-bold text-slate-700 dark:text-slate-200">
+              Route is Empty
+            </p>
+            <p class="text-xs text-slate-400 mt-1 max-w-[200px]">
+              Click the <Plus class="w-3 h-3 inline text-indigo-500" /> buttons on the left to build your sequence.
+            </p>
+          </div>
 
-              <!-- Checkpoint name -->
-              <span
-                class="flex-1 text-xs font-semibold font-mono truncate"
-                :class="selectedCp?.checkpoint_id === cp.checkpoint_id ? 'text-indigo-700' : 'text-slate-700 group-hover:text-indigo-600'"
+          <div
+            v-else
+            class="relative pl-7 pb-4"
+          >
+            <!-- Timeline vertical line connecting items -->
+            <div class="absolute left-[11px] top-4 bottom-4 w-0.5 bg-indigo-100 dark:bg-indigo-900/30 z-0" />
+            
+            <TransitionGroup
+              name="sequence-list"
+              tag="div"
+              class="space-y-4 relative z-10 w-full"
+            >
+              <div
+                v-for="(cp, idx) in checkpoints"
+                :key="cp.id"
+                draggable="true"
+                class="group relative flex items-center gap-2.5 w-full rounded-xl border transition-all duration-300 cursor-grab active:cursor-grabbing"
+                :class="[
+                  dragOverIndex === idx && draggedIndex !== idx ? 'border-indigo-500 shadow-lg scale-[1.02] bg-indigo-50 dark:bg-indigo-900/30 ring-2 ring-indigo-500/20' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:-translate-y-0.5',
+                  draggedIndex === idx ? 'opacity-40 border-dashed border-indigo-400 bg-slate-50 dark:bg-slate-900/50' : ''
+                ]"
+                @dragstart="onDragStart(idx, $event)"
+                @dragenter.prevent="onDragEnter(idx)"
+                @dragover.prevent
+                @drop.prevent="onDrop(idx)"
+                @dragend="onDragEnd"
               >
-                {{ cp.name }}
-              </span>
+                <!-- Drag Handle Icon -->
+                <div class="pl-2 text-slate-300 group-hover:text-slate-400 transition-colors">
+                  <GripVertical class="w-4 h-4" />
+                </div>
 
-              <!-- Timestamp -->
-              <span class="text-[10px] font-mono text-slate-400 shrink-0 tabular-nums">
-                {{ cp.scanned_at || '--:--:--' }}
-              </span>
+                <!-- Number Badge / Timeline Node -->
+                <div class="absolute -left-7 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-white dark:bg-slate-900 border-2 border-indigo-500 flex items-center justify-center text-[11px] font-black text-indigo-600 dark:text-indigo-400 shadow-[0_0_10px_rgba(99,102,241,0.2)] z-20 group-hover:scale-110 group-hover:bg-indigo-50 transition-transform duration-300 pointer-events-none">
+                  {{ idx + 1 }}
+                </div>
 
-              <!-- Right live status dot -->
-              <span
-                class="w-2 h-2 rounded-full shrink-0"
-                :class="cp.status === 'completed' ? 'bg-emerald-500'
-                  : cp.status === 'missed'    ? 'bg-rose-400'
-                  : 'bg-slate-200'"
-              />
+                <!-- Info block -->
+                <div class="flex-1 min-w-0 py-2.5">
+                  <p class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate pr-2 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors pointer-events-none">
+                    {{ cp.name }}
+                  </p>
+                  <div class="flex items-center gap-2 mt-0.5 pointer-events-none">
+                    <span class="text-[9px] text-slate-400 font-mono tracking-wider bg-slate-50 dark:bg-slate-900/50 px-1.5 py-0.5 rounded">{{ cp.checkpoint_id }}</span>
+                  </div>
+                </div>
 
-              <!-- Reorder controls (hover) -->
-              <div class="flex flex-col gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" @click.stop>
-                <button
-                  @click="moveUp(idx)"
-                  :disabled="idx === 0"
-                  class="p-0.5 rounded text-slate-400 hover:text-indigo-600 disabled:opacity-20 transition-colors cursor-pointer"
-                >
-                  <ChevronUp class="w-3 h-3" />
-                </button>
-                <button
-                  @click="moveDown(idx)"
-                  :disabled="idx === checkpoints.length - 1"
-                  class="p-0.5 rounded text-slate-400 hover:text-indigo-600 disabled:opacity-20 transition-colors cursor-pointer"
-                >
-                  <ChevronDown class="w-3 h-3" />
-                </button>
+                <!-- Controls -->
+                <div class="flex items-center pr-2 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div class="flex flex-col gap-0.5 mr-1">
+                    <button
+                      :disabled="idx === 0"
+                      class="p-1 text-slate-300 hover:text-indigo-500 disabled:opacity-20 cursor-pointer hover:bg-indigo-50 rounded transition-colors"
+                      @click.stop="moveUp(idx)"
+                    >
+                      <ChevronUp class="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      :disabled="idx === checkpoints.length - 1"
+                      class="p-1 text-slate-300 hover:text-indigo-500 disabled:opacity-20 cursor-pointer hover:bg-indigo-50 rounded transition-colors"
+                      @click.stop="moveDown(idx)"
+                    >
+                      <ChevronDown class="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                  <div class="w-px h-8 bg-slate-100 dark:bg-slate-700 mx-1" />
+                  <button
+                    class="w-8 h-8 flex items-center justify-center text-slate-300 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg cursor-pointer transition-colors"
+                    title="Remove Stop"
+                    @click.stop="removeCheckpointFromGroup(cp)"
+                  >
+                    <X class="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-            </div>
-
-            <div v-if="!checkpoints.length" class="text-center text-xs text-slate-400 py-6">
-              <MapPin class="w-6 h-6 text-slate-300 mx-auto mb-2" />
-              No checkpoints added yet
-            </div>
+            </TransitionGroup>
           </div>
         </div>
       </div>
 
-      <!-- ═══ QR BADGE TAB ═══ -->
-      <div v-show="rightTab === 'qr'" class="flex-1 flex flex-col items-center justify-center p-5">
-
-        <div v-if="selectedCp" class="w-full space-y-4">
-          <!-- Badge card -->
-          <div id="qr-badge-card" class="bg-white border border-slate-200 rounded-xl p-5 flex flex-col items-center text-center shadow-sm">
-            <div class="border-b border-slate-100 pb-3 w-full mb-3">
-              <p class="text-xs font-black uppercase tracking-widest text-slate-900">ACCESSEASY</p>
-              <p class="text-[9px] text-slate-400 uppercase tracking-widest mt-0.5">Security Checkpoint</p>
-            </div>
-            <!-- Real QR -->
-            <div class="p-3 bg-white border border-slate-100 rounded-lg mb-3">
-              <canvas ref="qrCanvas" class="w-32 h-32" />
-            </div>
-            <p class="text-sm font-bold text-slate-900">{{ selectedCp.name }}</p>
-            <p class="text-[10px] font-mono text-slate-400 mt-0.5">{{ selectedCp.checkpoint_id }}</p>
-            <div class="grid grid-cols-2 gap-2 w-full mt-3 bg-slate-50 rounded-lg p-2.5 text-left text-[10px] text-slate-600">
-              <div><span class="text-slate-400 uppercase tracking-wide block text-[8px]">Floor</span>{{ selectedCp.floor }}</div>
-              <div><span class="text-slate-400 uppercase tracking-wide block text-[8px]">Building</span>{{ selectedCp.building_id }}</div>
-            </div>
+      <!-- ═══ QR TAB ═══ -->
+      <div
+        v-show="rightTab === 'qr'"
+        class="flex-1 flex flex-col min-h-0 bg-slate-50 dark:bg-slate-900/50"
+      >
+        <div class="px-4 py-3 shrink-0 flex items-center justify-between border-b border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800/50 backdrop-blur-sm sticky top-0 z-10">
+          <div>
+            <h3 class="text-sm font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+              <QrCode class="w-4 h-4 text-indigo-500" /> Route Badges
+            </h3>
+            <p class="text-[10px] text-slate-400 mt-0.5">
+              Physical QRs for {{ selectedGroupObj?.name || 'this route' }}
+            </p>
           </div>
-
-          <!-- Print Buttons -->
-          <div class="space-y-2">
-            <button @click="printBadge" class="w-full btn-secondary text-xs justify-center">
-              <Printer class="w-3.5 h-3.5" />
-              Print This Badge
-            </button>
-            <button @click="printAllCheckpoints" class="w-full btn-primary text-xs justify-center">
-              <Printer class="w-3.5 h-3.5" />
-              Print All Checkpoints ({{ checkpoints.length }})
-            </button>
-          </div>
+          <button
+            class="btn-primary text-xs shadow-lg shadow-indigo-500/20"
+            :disabled="!checkpoints.length"
+            @click="printAllCheckpoints"
+          >
+            <Printer class="w-3.5 h-3.5 mr-1" />
+            Print ({{ checkpoints.length }})
+          </button>
         </div>
-
-        <div v-else class="text-center py-10">
-          <QrCode class="w-10 h-10 text-slate-200 mx-auto mb-3" />
-          <p class="text-sm text-slate-400">Select a checkpoint to preview its QR badge</p>
+        
+        <div class="flex-1 overflow-y-auto custom-scrollbar p-4">
+          <div
+            v-if="!checkpoints.length"
+            class="text-center text-slate-400 text-xs py-10 flex flex-col items-center"
+          >
+            <div class="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-3">
+              <QrCode class="w-6 h-6 text-slate-300 dark:text-slate-600" />
+            </div>
+            Route is empty.
+          </div>
+          
+          <TransitionGroup
+            v-else
+            name="fade-list"
+            tag="div"
+            class="grid grid-cols-2 gap-3 pb-4"
+          >
+            <div 
+              v-for="(cp, idx) in checkpoints" 
+              :key="'qr-'+cp.id+'-'+idx" 
+              class="relative flex flex-col items-center p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-500/50 transition-all duration-300 group hover:-translate-y-0.5 overflow-hidden"
+            >
+              <div class="absolute top-0 left-0 bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 text-[10px] font-black px-2 py-1 rounded-br-lg border-b border-r border-indigo-100 dark:border-indigo-500/30 z-10">
+                #{{ idx + 1 }}
+              </div>
+              
+              <div class="w-20 h-20 bg-white p-1 rounded-lg border border-slate-100 dark:border-slate-600 mb-3 mt-4 shadow-sm group-hover:scale-105 transition-transform duration-300">
+                <img
+                  v-if="qrDataUrls[cp.checkpoint_id]"
+                  :src="qrDataUrls[cp.checkpoint_id]"
+                  class="w-full h-full object-contain mix-blend-multiply"
+                >
+                <div
+                  v-else
+                  class="w-full h-full flex items-center justify-center bg-slate-50 text-slate-300"
+                >
+                  <Loader2 class="w-4 h-4 animate-spin" />
+                </div>
+              </div>
+              
+              <p class="text-[11px] font-bold text-slate-800 dark:text-slate-100 text-center line-clamp-1 w-full">
+                {{ cp.name }}
+              </p>
+              <p class="text-[9px] text-slate-400 font-mono mt-0.5 tracking-wider">
+                {{ cp.checkpoint_id }}
+              </p>
+            </div>
+          </TransitionGroup>
         </div>
       </div>
-
     </div>
 
     <!-- Create Group Modal -->
     <Teleport to="body">
-      <div v-if="showCreatePrompt" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden animate-in zoom-in-95">
-          <div class="px-5 py-4 border-b border-slate-100 flex justify-between items-center">
-            <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2"><MapPin class="w-4 h-4 text-indigo-600"/> New Checkpoint Group</h3>
-            <button @click="showCreatePrompt = false" class="text-slate-400 hover:text-slate-600 hover:bg-slate-100 p-1 rounded-md transition-colors"><X class="w-4 h-4"/></button>
+      <div
+        v-if="showCreatePrompt"
+        class="fixed inset-0 z-[150] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4"
+      >
+        <div class="bg-white dark:bg-slate-900 rounded-xl shadow-xl w-full max-w-sm overflow-hidden animate-in zoom-in-95">
+          <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+            <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <MapPin class="w-4 h-4 text-indigo-600" /> New Checkpoint Group
+            </h3>
+            <button
+              class="btn-icon"
+              @click="showCreatePrompt = false"
+            >
+              <X class="w-4 h-4" />
+            </button>
           </div>
           <div class="p-5 space-y-4">
             <div>
               <label class="ae-section-label mb-1 block">Group Name</label>
-              <input v-model="newGroupName" type="text" class="ae-input w-full" placeholder="e.g. Night Patrol Route" autofocus />
+              <input
+                v-model="newGroupName"
+                type="text"
+                class="ae-input w-full"
+                placeholder="e.g. Night Patrol Route"
+                autofocus
+              >
             </div>
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="ae-section-label mb-1 block">Schedule Frequency</label>
-                <select v-model="newGroupFrequency" class="ae-select w-full">
-                  <option value="hourly">Hourly</option>
-                  <option value="shift">Once per Shift</option>
-                  <option value="daily">Daily</option>
-                  <option value="custom">Custom Time</option>
+                <select
+                  v-model="newGroupFrequency"
+                  class="ae-select w-full"
+                >
+                  <option value="hourly">
+                    Hourly
+                  </option>
+                  <option value="shift">
+                    Once per Shift
+                  </option>
+                  <option value="daily">
+                    Daily
+                  </option>
+                  <option value="custom">
+                    Custom Time
+                  </option>
                 </select>
               </div>
               <div>
                 <label class="ae-section-label mb-1 block">Grace Period (mins)</label>
-                <input v-model.number="newGroupGrace" type="number" class="ae-input w-full" placeholder="15" />
+                <input
+                  v-model.number="newGroupGrace"
+                  type="number"
+                  class="ae-input w-full"
+                  placeholder="15"
+                >
               </div>
             </div>
             <div>
               <label class="ae-section-label mb-1 block">Assign to Zone (Optional)</label>
-              <select v-model="newGroupZone" class="ae-select w-full" @keyup.enter="createGroup">
-                <option value="">No specific zone</option>
-                <option v-for="z in zones" :key="z.id" :value="z.id">{{ z.zoneName }}</option>
+              <select
+                v-model="newGroupZone"
+                class="ae-select w-full"
+              >
+                <option value="">
+                  No specific zone
+                </option>
+                <option
+                  v-for="z in zones"
+                  :key="z.id"
+                  :value="z.id"
+                >
+                  {{ z.zoneName }}
+                </option>
               </select>
             </div>
             <div class="flex gap-3 justify-end mt-2">
-              <button @click="showCreatePrompt = false" class="btn-ghost text-xs">Cancel</button>
-              <button @click="createGroup" class="btn-primary text-xs" :disabled="isCreating || !newGroupName.trim()">
-                <Loader2 v-if="isCreating" class="w-3.5 h-3.5 animate-spin mr-1" />
-                <Plus v-else class="w-3.5 h-3.5 mr-1" />
+              <button
+                class="btn-ghost text-xs"
+                @click="showCreatePrompt = false"
+              >
+                Cancel
+              </button>
+              <button
+                class="btn-primary text-xs"
+                :disabled="isCreating || !newGroupName.trim()"
+                @click="createGroup"
+              >
+                <Loader2
+                  v-if="isCreating"
+                  class="w-3.5 h-3.5 animate-spin mr-1"
+                />
+                <Plus
+                  v-else
+                  class="w-3.5 h-3.5 mr-1"
+                />
                 Create Group
               </button>
             </div>
@@ -372,18 +436,21 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, nextTick } from 'vue';
-import { Printer, ChevronUp, ChevronDown, QrCode, Settings2, Plus, X, Loader2, MapPin } from 'lucide-vue-next';
+import { ref, computed, watch, onMounted } from 'vue';
+import { Printer, ChevronUp, ChevronDown, QrCode, Route, Plus, X, Loader2, MapPin, Search, GripVertical } from 'lucide-vue-next';
 import { patrolService } from '@/services/patrolService';
 import { zoneService } from '@/services/zoneService';
 import QRCode from 'qrcode';
 
 const selectedPatrolId = ref(null);
-const checkpoints = ref([]);
-const selectedCp = ref(null);
-const editingCp = ref(null);
-const qrCanvas = ref(null);
-const rightTab = ref('editor');
+const checkpoints = ref([]); // Current group's sequence
+const masterCheckpoints = ref([]); // Library
+const rightTab = ref('sequence');
+const qrDataUrls = ref({});
+
+// Drag and drop state
+const draggedIndex = ref(null);
+const dragOverIndex = ref(null);
 
 const checkpointGroups = ref([]);
 const showCreatePrompt = ref(false);
@@ -394,6 +461,17 @@ const newGroupGrace = ref(15);
 const zones = ref([]);
 const isCreating = ref(false);
 
+const loadingLibrary = ref(false);
+const searchQuery = ref('');
+
+const selectedGroupObj = computed(() => checkpointGroups.value.find(g => g.id === selectedPatrolId.value));
+
+const filteredMasterCheckpoints = computed(() => {
+  if (!searchQuery.value) return masterCheckpoints.value;
+  const q = searchQuery.value.toLowerCase();
+  return masterCheckpoints.value.filter(c => c.name.toLowerCase().includes(q) || c.checkpoint_id.toLowerCase().includes(q));
+});
+
 const loadGroups = async () => {
   const groups = await patrolService.fetchCheckpointGroups();
   checkpointGroups.value = groups;
@@ -401,6 +479,29 @@ const loadGroups = async () => {
     selectedPatrolId.value = groups[0].id;
   }
 };
+
+const loadMasterCheckpoints = async () => {
+  loadingLibrary.value = true;
+  try {
+    masterCheckpoints.value = await patrolService.getMasterCheckpoints();
+  } catch (e) {
+    console.error(e);
+  } finally {
+    loadingLibrary.value = false;
+  }
+};
+
+const fetchCheckpoints = async () => {
+  if (!selectedPatrolId.value) {
+    checkpoints.value = [];
+    return;
+  }
+  try {
+    checkpoints.value = await patrolService.getCheckpointsForRoute(selectedPatrolId.value);
+  } catch (err) { console.error(err); }
+};
+
+watch(selectedPatrolId, fetchCheckpoints);
 
 const createGroup = async () => {
   if (!newGroupName.value.trim()) return;
@@ -420,93 +521,41 @@ const createGroup = async () => {
     newGroupFrequency.value = 'shift';
     newGroupGrace.value = 15;
   } catch (err) {
-    const errMsg = err.response?.data?.errors?.[0]?.message || err.message || "Unknown error";
-    alert(`Failed to create checkpoint group: ${errMsg}`);
-    console.error(err);
+    alert(`Failed to create checkpoint group: ${err.message}`);
   } finally {
     isCreating.value = false;
   }
 };
 
-const draftCp = computed(() => {
-  if (selectedCp.value && !checkpoints.value.some(c => c.checkpoint_id === selectedCp.value.checkpoint_id)) {
-    return selectedCp.value;
+// Add a clone of the master checkpoint to the current group
+const addCheckpointToGroup = async (masterCp) => {
+  if (!selectedPatrolId.value) {
+    alert("Please select or create a Checkpoint Group first.");
+    return;
   }
-  return null;
-});
-
-// Generate real QR on selected checkpoint change
-watch([selectedCp, qrCanvas], async ([cp, canvas]) => {
-  if (!cp || !canvas) return;
-  await nextTick();
-  const qrData = `ACPT::${cp.checkpoint_id}::${selectedPatrolId.value}`;
+  
+  // Clone the data, stripping out the DB id so it creates a new record
+  const clone = { ...masterCp };
+  delete clone.id; 
+  clone.group_id = selectedPatrolId.value;
+  clone.status = 'pending';
+  
   try {
-    await QRCode.toCanvas(canvas, qrData, {
-      width: 112,
-      margin: 1,
-      color: { dark: '#0F172A', light: '#FFFFFF' }
-    });
-  } catch (e) { console.error('QR generation failed', e); }
-}, { immediate: false });
-
-const fetchCheckpoints = async () => {
-  try {
-    checkpoints.value = await patrolService.getCheckpointsForRoute(selectedPatrolId.value);
-    selectedCp.value = checkpoints.value[0] || null;
-    editingCp.value = selectedCp.value ? { ...selectedCp.value } : null;
-  } catch (err) { console.error(err); }
+    const list = await patrolService.saveCheckpoint(selectedPatrolId.value, clone);
+    checkpoints.value = [...list];
+  } catch (err) {
+    console.error(err);
+  }
 };
 
-watch(selectedPatrolId, fetchCheckpoints);
-
-const selectCheckpoint = (cp) => {
-  selectedCp.value = cp;
-  editingCp.value = { ...cp };
-};
-
-const handleCanvasClick = (e) => {
-  const rect = e.currentTarget.getBoundingClientRect();
-  const scale = 2.2;
-  const rawX = (e.clientX - rect.left - rect.width / 2) * (600 / rect.width);
-  const rawY = (rect.height / 2 - (e.clientY - rect.top)) * (400 / rect.height);
-  const newId = `CP-${Math.floor(Math.random() * 900) + 100}`;
-  const newCp = {
-    checkpoint_id: newId,
-    name: `CP ${checkpoints.value.length + 1}`,
-    floor: '', building_id: '',
-    instructions: '', dwell_time: 0,
-    nfc_uid: '',
-    x: Math.round(rawX / scale), y: Math.round(rawY / scale),
-    status: 'pending'
-  };
-  selectedCp.value = newCp;
-  editingCp.value = { ...newCp };
-};
-
-const saveCheckpoint = async () => {
-  if (!editingCp.value) return;
+const removeCheckpointFromGroup = async (cp) => {
+  if (!selectedPatrolId.value) return;
   try {
-    const list = await patrolService.saveCheckpoint(selectedPatrolId.value, editingCp.value);
-    checkpoints.value = [...list]; // Ensure reactivity by spreading
-    
-    // Grab the saved object from the list to ensure we have the DB 'id'
-    // This prevents creating endless duplicates if they click save multiple times
-    const savedCp = list.find(c => c.checkpoint_id === editingCp.value.checkpoint_id);
-    if (savedCp) {
-      selectedCp.value = savedCp;
-      editingCp.value = { ...savedCp };
-    }
-  } catch (err) { console.error(err); }
-};
-
-const deleteCheckpoint = async () => {
-  if (!editingCp.value) return;
-  try {
-    const list = await patrolService.deleteCheckpoint(selectedPatrolId.value, editingCp.value.checkpoint_id);
-    checkpoints.value = [...list]; // Ensure reactivity by spreading
-    selectedCp.value = checkpoints.value[0] || null;
-    editingCp.value = selectedCp.value ? { ...selectedCp.value } : null;
-  } catch (err) { console.error(err); }
+    const list = await patrolService.deleteCheckpoint(selectedPatrolId.value, cp.id);
+    checkpoints.value = [...list];
+  } catch (err) {
+    console.error(err);
+  }
 };
 
 const moveUp = async (idx) => {
@@ -535,16 +584,69 @@ const moveDown = async (idx) => {
   } catch (err) { console.error(err); }
 };
 
-// Print single checkpoint
-const printBadge = async () => {
-  if (!selectedCp.value) return;
-  const qrDataUrl = await generateQrDataUrl(selectedCp.value);
-  const win = window.open('', '_blank');
-  win.document.write(buildPrintHtml([{ cp: selectedCp.value, qr: qrDataUrl, seq: checkpoints.value.findIndex(c => c.checkpoint_id === selectedCp.value.checkpoint_id) + 1 }]));
-  win.document.close();
+// Drag and Drop Handlers
+const onDragStart = (idx, event) => {
+  draggedIndex.value = idx;
+  event.dataTransfer.effectAllowed = 'move';
 };
 
-// Print ALL checkpoints on one sheet
+const onDragEnter = (idx) => {
+  if (draggedIndex.value !== null) {
+    dragOverIndex.value = idx;
+  }
+};
+
+const onDrop = async (idx) => {
+  if (draggedIndex.value === null || draggedIndex.value === idx) {
+    draggedIndex.value = null;
+    dragOverIndex.value = null;
+    return;
+  }
+  
+  const list = [...checkpoints.value];
+  const item = list.splice(draggedIndex.value, 1)[0];
+  list.splice(idx, 0, item);
+  
+  checkpoints.value = list;
+  draggedIndex.value = null;
+  dragOverIndex.value = null;
+
+  try {
+    const updated = await patrolService.reorderCheckpoints(selectedPatrolId.value, checkpoints.value);
+    checkpoints.value = [...updated];
+  } catch (err) { console.error(err); }
+};
+
+const onDragEnd = () => {
+  draggedIndex.value = null;
+  dragOverIndex.value = null;
+};
+
+const generateQrDataUrl = async (cp) => {
+  try {
+    const tenantId = authService.getTenantId();
+    const signature = btoa(`${cp.checkpoint_id}-${tenantId}-AccessEasy2026`).replace(/=/g, '');
+    const qrData = `ACPT::${cp.checkpoint_id}::${signature}`;
+    return await QRCode.toDataURL(qrData, {
+      width: 200, margin: 1, color: { dark: '#0F172A', light: '#FFFFFF' }
+    });
+  } catch { return ''; }
+};
+
+watch(checkpoints, async (newList) => {
+  const map = { ...qrDataUrls.value };
+  let changed = false;
+  for (const cp of newList) {
+    if (!map[cp.checkpoint_id]) {
+      map[cp.checkpoint_id] = await generateQrDataUrl(cp);
+      changed = true;
+    }
+  }
+  if (changed) {
+    qrDataUrls.value = map;
+  }
+}, { deep: true, immediate: true });
+
 const printAllCheckpoints = async () => {
   if (!checkpoints.value.length) return;
   const cards = await Promise.all(
@@ -555,22 +657,14 @@ const printAllCheckpoints = async () => {
     }))
   );
   const win = window.open('', '_blank');
-  win.document.write(buildPrintHtml(cards, true));
+  win.document.write(buildPrintHtml(cards));
   win.document.close();
 };
 
-const generateQrDataUrl = async (cp) => {
-  try {
-    return await QRCode.toDataURL(`ACPT::${cp.checkpoint_id}::${selectedPatrolId.value}`, {
-      width: 200, margin: 1, color: { dark: '#0F172A', light: '#FFFFFF' }
-    });
-  } catch { return ''; }
-};
-
-const buildPrintHtml = (cards, allMode = false) => `
+const buildPrintHtml = (cards) => `
   <html>
     <head>
-      <title>${allMode ? 'All Checkpoints' : 'Checkpoint Badge'} — ${selectedPatrolId.value}</title>
+      <title>Checkpoint Route Badges — ${selectedPatrolId.value}</title>
       <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: monospace, system-ui, sans-serif; background: #fff; width: 58mm; margin: 0 auto; color: #000; }
@@ -595,7 +689,7 @@ const buildPrintHtml = (cards, allMode = false) => `
     <body>
       ${cards.map(({ cp, seq, qr }) => `
         <div class="card">
-          <div class="brand">AccessEasy<div class="sub-brand">Security Checkpoint</div></div>
+          <div class="brand">AccessEasy<div class="sub-brand">Route Checkpoint</div></div>
           <div class="seq">Stop #${seq}</div>
           ${qr ? `<img src="${qr}" class="qr" />` : '<div class="qr" style="border:1px solid #000;"></div>'}
           <div class="name">${cp.name}</div>
@@ -607,16 +701,16 @@ const buildPrintHtml = (cards, allMode = false) => `
           <div class="footer">Scan QR to confirm<br>checkpoint</div>
         </div>
       `).join('')}
-      \x3Cscript>window.onload = () => { window.print(); window.close(); };\x3C/script>
+      <script>window.onload = () => { window.print(); window.close(); };<\/script>
     </body>
   </html>
 `;
 
- 
-
 onMounted(async () => {
-  loadGroups();
-  fetchCheckpoints();
+  await loadGroups();
+  await loadMasterCheckpoints();
+  if (selectedPatrolId.value) fetchCheckpoints();
+  
   try {
     zones.value = await zoneService.fetchZones();
   } catch (e) {
@@ -624,3 +718,39 @@ onMounted(async () => {
   }
 });
 </script>
+
+<style scoped>
+/* Left panel grid transition */
+.fade-list-move,
+.fade-list-enter-active,
+.fade-list-leave-active {
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.fade-list-enter-from,
+.fade-list-leave-to {
+  opacity: 0;
+  transform: translateY(15px) scale(0.95);
+}
+.fade-list-leave-active {
+  position: absolute;
+}
+
+/* Right panel sequence timeline transition */
+.sequence-list-move,
+.sequence-list-enter-active,
+.sequence-list-leave-active {
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.sequence-list-enter-from {
+  opacity: 0;
+  transform: translateX(40px) scale(0.9);
+}
+.sequence-list-leave-to {
+  opacity: 0;
+  transform: translateX(-40px) scale(0.9);
+}
+.sequence-list-leave-active {
+  position: absolute;
+  width: 100%;
+}
+</style>

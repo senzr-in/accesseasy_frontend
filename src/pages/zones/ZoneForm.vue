@@ -8,31 +8,39 @@
         type="text"
         class="ae-input w-full"
         placeholder="e.g. Main Hub Area"
-      />
-      <p v-if="!formData.zoneName && attemptSubmit" class="text-xs text-rose-500 mt-1">Zone name is required</p>
+      >
+      <p
+        v-if="!formData.zoneName && attemptSubmit"
+        class="text-xs text-rose-500 mt-1"
+      >
+        Zone name is required
+      </p>
     </div>
 
     <div class="grid grid-cols-1 gap-6">
       <!-- Access Points -->
-      <div class="border border-slate-200 rounded-xl overflow-hidden flex flex-col">
-        <div class="bg-slate-50 px-4 py-2 border-b border-slate-200">
+      <div class="border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden flex flex-col">
+        <div class="bg-slate-50 dark:bg-slate-800/50 px-4 py-2 border-b border-slate-200 dark:border-slate-800">
           <label class="ae-section-label">Linked Access Points</label>
         </div>
         <div class="p-3 max-h-64 overflow-y-auto space-y-1">
           <label 
             v-for="door in availableDoors" 
             :key="door.id"
-            class="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"
+            class="flex items-center gap-2 p-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer transition-colors"
           >
             <input 
+              v-model="selectedDoors" 
               type="checkbox" 
-              :value="door.id" 
-              v-model="selectedDoors"
+              :value="door.id"
               class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-600"
-            />
-            <span class="text-sm font-medium text-slate-700">{{ door.displayName }}</span>
+            >
+            <span class="text-sm font-medium text-slate-700 dark:text-slate-200">{{ door.displayName }}</span>
           </label>
-          <div v-if="availableDoors.length === 0" class="text-xs text-slate-400 text-center py-4">
+          <div
+            v-if="availableDoors.length === 0"
+            class="text-xs text-slate-400 text-center py-4"
+          >
             No access points available
           </div>
         </div>
@@ -40,12 +48,15 @@
     </div>
 
     <!-- Validation Error -->
-    <div v-if="attemptSubmit && selectedDoors.length === 0" class="p-3 bg-rose-50 border border-rose-200 rounded-lg text-rose-700 text-xs font-medium flex items-center">
+    <div
+      v-if="attemptSubmit && selectedDoors.length === 0"
+      class="p-3 bg-rose-50 border border-rose-200 rounded-lg text-rose-700 text-xs font-medium flex items-center"
+    >
       At least one Access Point must be selected.
     </div>
 
     <!-- Action Buttons -->
-    <div class="flex justify-end gap-3 pt-4 border-t border-slate-100">
+    <div class="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-700">
       <button
         class="btn-secondary text-sm px-5"
         :disabled="loading"

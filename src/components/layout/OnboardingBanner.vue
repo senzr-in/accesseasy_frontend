@@ -8,7 +8,7 @@
         <!-- Left: Progress and Step Info -->
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-3 mb-1.5">
-            <div class="bg-white/20 rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap">
+            <div class="bg-white dark:bg-slate-900/20 rounded-full px-3 py-1 text-xs font-semibold whitespace-nowrap">
               Step {{ stepData.currentStep }} of {{ stepData.totalSteps }}
             </div>
             <h3 class="font-semibold text-sm md:text-base truncate">
@@ -16,9 +16,9 @@
             </h3>
           </div>
           <div class="flex items-center gap-3">
-            <div class="flex-1 h-2 bg-white/20 rounded-full overflow-hidden">
+            <div class="flex-1 h-2 bg-white dark:bg-slate-900/20 rounded-full overflow-hidden">
               <div
-                class="h-full bg-white rounded-full transition-all duration-500"
+                class="h-full bg-white dark:bg-slate-900 rounded-full transition-all duration-500"
                 :style="{ width: stepData.progress + '%' }"
               />
             </div>
@@ -30,7 +30,7 @@
         <div class="flex items-center gap-2">
           <button
             :disabled="isSkipping"
-            class="hidden md:flex items-center gap-1 px-3 h-8 rounded-md text-white hover:bg-white/20 text-xs font-semibold transition-colors"
+            class="hidden md:flex items-center gap-1 px-3 h-8 rounded-md text-white hover:bg-white dark:bg-slate-900/20 text-xs font-semibold transition-colors"
             @click="handleSkip"
           >
             <SkipForward class="w-4 h-4" /> Skip
@@ -44,13 +44,13 @@
           </button>
           <button
             v-else
-            class="flex items-center gap-1 px-3 h-8 rounded-md bg-white text-blue-600 hover:bg-white/90 text-xs font-semibold transition-colors"
+            class="flex items-center gap-1 px-3 h-8 rounded-md bg-white dark:bg-slate-900 text-blue-600 hover:bg-white dark:bg-slate-900/90 text-xs font-semibold transition-colors"
             @click="handleContinue"
           >
             Continue <ArrowRight class="w-4 h-4" />
           </button>
           <button
-            class="flex items-center justify-center h-8 w-8 rounded-md text-white hover:bg-white/20 transition-colors"
+            class="flex items-center justify-center h-8 w-8 rounded-md text-white hover:bg-white dark:bg-slate-900/20 transition-colors"
             @click="handleDismiss"
           >
             <X class="w-4 h-4" />

@@ -40,7 +40,10 @@
       <p class="vp-error-msg">
         {{ error }}
       </p>
-      <button class="vp-btn-primary" @click="fetchPortal">
+      <button
+        class="vp-btn-primary"
+        @click="fetchPortal"
+      >
         Retry
       </button>
     </div>
@@ -217,29 +220,73 @@
               class="vp-success"
             >
               <!-- ID Card Wrapper -->
-              <div class="vp-id-card-wrapper" ref="idCardRef">
+              <div
+                ref="idCardRef"
+                class="vp-id-card-wrapper"
+              >
                 <div class="vp-id-card">
                   <div class="vp-id-card-header">
-                    <img v-if="logoUrl" :src="logoUrl" class="vp-id-card-logo" crossorigin="anonymous" />
+                    <img
+                      v-if="logoUrl"
+                      :src="logoUrl"
+                      class="vp-id-card-logo"
+                      crossorigin="anonymous"
+                    >
                     <span class="vp-id-card-brand">{{ portal.Title }}</span>
                   </div>
                   <div class="vp-id-card-body">
                     <div class="vp-id-card-profile">
-                      <img v-if="photoPreview" :src="photoPreview" class="vp-id-card-photo" crossorigin="anonymous" />
-                      <div v-else class="vp-id-card-photo-placeholder">
-                        <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                      <img
+                        v-if="photoPreview"
+                        :src="photoPreview"
+                        class="vp-id-card-photo"
+                        crossorigin="anonymous"
+                      >
+                      <div
+                        v-else
+                        class="vp-id-card-photo-placeholder"
+                      >
+                        <svg
+                          width="48"
+                          height="48"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        ><path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="1.5"
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        /></svg>
                       </div>
                       <div class="vp-id-card-profile-info">
-                        <h3 class="vp-id-card-name">{{ visitorData.name }}</h3>
-                        <p class="vp-id-card-role">VISITOR</p>
+                        <h3 class="vp-id-card-name">
+                          {{ visitorData.name }}
+                        </h3>
+                        <p class="vp-id-card-role">
+                          VISITOR
+                        </p>
                       </div>
                     </div>
                     
                     <div class="vp-id-card-qr-section">
                       <div class="vp-id-card-qr-container">
-                        <img v-if="qrToken && qrToken.startsWith('data:image')" :src="qrToken" class="vp-id-qr-img" crossorigin="anonymous" />
-                        <div v-else-if="qrToken" ref="qrCodeContainer" class="vp-id-qr-img" style="width: 160px; height: 160px; overflow: hidden; border-radius: 4px;"></div>
-                        <div v-else class="vp-id-qr-pending">
+                        <img
+                          v-if="qrToken && qrToken.startsWith('data:image')"
+                          :src="qrToken"
+                          class="vp-id-qr-img"
+                          crossorigin="anonymous"
+                        >
+                        <div
+                          v-else-if="qrToken"
+                          ref="qrCodeContainer"
+                          class="vp-id-qr-img"
+                          style="width: 160px; height: 160px; overflow: hidden; border-radius: 4px;"
+                        />
+                        <div
+                          v-else
+                          class="vp-id-qr-pending"
+                        >
                           Generating QR...
                         </div>
                       </div>
@@ -250,11 +297,17 @@
                       <span>Date & Time</span>
                       <strong>{{ checkInTime }}</strong>
                     </div>
-                    <div class="vp-id-card-detail-item" v-if="visitorData.reasonForVisit">
+                    <div
+                      v-if="visitorData.reasonForVisit"
+                      class="vp-id-card-detail-item"
+                    >
                       <span>Purpose</span>
                       <strong>{{ visitorData.reasonForVisit === 'Other' ? visitorData.reasonForVisitOther : visitorData.reasonForVisit }}</strong>
                     </div>
-                    <div class="vp-id-card-detail-item" v-if="visitorData.personToMeet">
+                    <div
+                      v-if="visitorData.personToMeet"
+                      class="vp-id-card-detail-item"
+                    >
                       <span>Host</span>
                       <strong>{{ visitorData.personToMeet }}</strong>
                     </div>
@@ -266,11 +319,29 @@
               </div>
 
               <div class="vp-success-actions">
-                <button v-if="qrToken" class="vp-btn-primary vp-btn-full vp-download-btn" @click="downloadIDCard">
-                  <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                <button
+                  v-if="qrToken"
+                  class="vp-btn-primary vp-btn-full vp-download-btn"
+                  @click="downloadIDCard"
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  ><path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2.5"
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                  /></svg>
                   Download ID Card
                 </button>
-                <button class="vp-btn-secondary vp-btn-full" @click="resetModal">
+                <button
+                  class="vp-btn-secondary vp-btn-full"
+                  @click="resetModal"
+                >
                   Done
                 </button>
               </div>
@@ -508,20 +579,64 @@
                   class="vp-badge-opt"
                 >Optional</span></label>
                 <!-- Camera UI -->
-                <div v-if="isCameraOpen" class="vp-camera-container">
-                  <video ref="videoRef" class="vp-camera-video" autoplay playsinline></video>
-                  <canvas ref="canvasRef" style="display:none;"></canvas>
+                <div
+                  v-if="isCameraOpen"
+                  class="vp-camera-container"
+                >
+                  <video
+                    ref="videoRef"
+                    class="vp-camera-video"
+                    autoplay
+                    playsinline
+                  />
+                  <canvas
+                    ref="canvasRef"
+                    style="display:none;"
+                  />
                   <div class="vp-camera-controls">
-                    <button class="vp-btn-secondary vp-btn-sm" @click="stopCamera">Cancel</button>
-                    <button class="vp-btn-primary vp-btn-sm" @click="capturePhoto">Snap Photo</button>
+                    <button
+                      class="vp-btn-secondary vp-btn-sm"
+                      @click="stopCamera"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      class="vp-btn-primary vp-btn-sm"
+                      @click="capturePhoto"
+                    >
+                      Snap Photo
+                    </button>
                   </div>
                 </div>
 
                 <!-- Normal Upload Box -->
                 <div v-else>
-                  <div class="vp-photo-actions" v-if="!photoPreview">
-                    <button class="vp-btn-secondary vp-btn-full" style="margin-bottom:0.75rem;" @click="startCamera">
-                      <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><circle cx="12" cy="13" r="3" stroke-width="2" /></svg>
+                  <div
+                    v-if="!photoPreview"
+                    class="vp-photo-actions"
+                  >
+                    <button
+                      class="vp-btn-secondary vp-btn-full"
+                      style="margin-bottom:0.75rem;"
+                      @click="startCamera"
+                    >
+                      <svg
+                        width="16"
+                        height="16"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      ><path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                      /><circle
+                        cx="12"
+                        cy="13"
+                        r="3"
+                        stroke-width="2"
+                      /></svg>
                       Take Selfie
                     </button>
                     <div
@@ -530,14 +645,31 @@
                       @click="$refs.photoInput.click()"
                     >
                       <div class="vp-upload-placeholder">
-                        <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                        <svg
+                          width="24"
+                          height="24"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        ><path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+                        /></svg>
                         <span>Upload Photo File</span>
                       </div>
                     </div>
                   </div>
                   
-                  <div v-else class="vp-photo-preview-container">
-                    <img :src="photoPreview" class="vp-upload-preview">
+                  <div
+                    v-else
+                    class="vp-photo-preview-container"
+                  >
+                    <img
+                      :src="photoPreview"
+                      class="vp-upload-preview"
+                    >
                   </div>
                   
                   <input
@@ -731,7 +863,7 @@ const content = computed(() => portal.value?.Contentjson || {});
 
 const assetUrl = (id) => {
   if (!id || id === DEFAULT_ASSET_ID) return null;
-  return `${import.meta.env.VITE_API_URL}/assets/${id}?access_token=${import.meta.env.VITE_API_TOKEN}`;
+  return `${import.meta.env.VITE_API_URL}/assets/${id}`;
 };
 
 const logoUrl   = ref(null);
@@ -1043,13 +1175,12 @@ const clearProof = () => { proofFile.value = null; proofFileName.value = null; }
 const uploadToDirectus = async (file, prefix) => {
   const formData = new FormData();
   formData.append('file', file, `${prefix}-${Date.now()}-${file.name}`);
-  const res = await axios.post(`${import.meta.env.VITE_API_URL}/files`, formData, {
+  const res = await axios.post(`${import.meta.env.VITE_KN_API_URL}/visitor-portal-flow/upload`, formData, {
     headers: {
-      'Authorization': `Bearer ${import.meta.env.VITE_API_TOKEN}`,
       'Content-Type': 'multipart/form-data'
     }
   });
-  return res.data?.data?.id || null;
+  return res.data?.data?.id || res.data?.id || null;
 };
 
 const submitRegistration = async () => {

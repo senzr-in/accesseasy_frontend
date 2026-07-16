@@ -5,8 +5,8 @@
       // Base styles
       'rounded-[18px] backdrop-blur-2xl border',
       // Theme matching (Apple/Linear inspired glass)
-      'bg-white/80 dark:bg-slate-900/60',
-      'border-slate-200/60 dark:border-white/10',
+      'bg-white dark:bg-slate-900/80 dark:bg-slate-900/60',
+      'border-slate-200 dark:border-slate-800/60 dark:border-white/10',
       'shadow-xl shadow-slate-200/20 dark:shadow-black/40',
       // Optional interactive styles
       interactive ? 'hover:shadow-2xl hover:border-cyan-500/30 dark:hover:border-cyan-400/30 cursor-pointer active:scale-[0.99]' : '',

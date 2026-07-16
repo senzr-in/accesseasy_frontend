@@ -7,13 +7,15 @@
           Today's Expected Visitors
           <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20">
             <span class="relative flex h-2 w-2">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
             </span>
             Live
           </span>
         </h2>
-        <p class="text-sm text-slate-500">Manage and verify visitor access passes.</p>
+        <p class="text-sm text-slate-500 dark:text-slate-400">
+          Manage and verify visitor access passes.
+        </p>
       </div>
       
       <div class="flex gap-2">
@@ -23,15 +25,18 @@
             v-model="searchQuery"
             type="search"
             placeholder="Search visitor..."
-            class="w-48 pl-8 pr-3 h-9 text-xs bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg focus:outline-none focus:border-indigo-500 transition-all shadow-sm text-slate-900 dark:text-white"
+            class="w-48 pl-8 pr-3 h-9 text-xs bg-white dark:hover:bg-zinc-800 border border-slate-200 dark:border-zinc-800 rounded-lg focus:outline-none focus:border-indigo-500 transition-all shadow-sm text-slate-900 dark:text-white"
             @input="debouncedSearch"
           >
         </div>
         <button 
+          class="flex items-center gap-2 rounded-lg bg-white dark:hover:bg-zinc-800 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-slate-200 px-3 py-1.5 text-[10px] font-black hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 transition-colors shadow-sm uppercase tracking-widest"
           @click="loadVisitors"
-          class="flex items-center gap-2 rounded-lg bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-slate-200 px-3 py-1.5 text-[10px] font-black hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors shadow-sm uppercase tracking-widest"
         >
-          <RefreshCw class="h-3.5 w-3.5" :class="{ 'animate-spin': loading }" />
+          <RefreshCw
+            class="h-3.5 w-3.5"
+            :class="{ 'animate-spin': loading }"
+          />
           Refresh
         </button>
       </div>
@@ -39,18 +44,28 @@
 
     <!-- Visitors List -->
     <div class="bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm flex flex-col flex-1 min-h-0">
-      <div class="overflow-y-auto flex-1 p-4 custom-scrollbar bg-slate-50/50 dark:bg-zinc-950/50">
+      <div class="overflow-y-auto flex-1 p-4 custom-scrollbar bg-slate-50 dark:bg-slate-900/50 dark:bg-zinc-950/50">
         <div class="flex flex-col gap-3">
           <!-- Loading State -->
-          <div v-if="loading" class="py-20 flex justify-center">
+          <div
+            v-if="loading"
+            class="py-20 flex justify-center"
+          >
             <Loader2 class="w-8 h-8 animate-spin text-indigo-500" />
           </div>
 
           <!-- Empty State -->
-          <div v-else-if="visitors.length === 0" class="py-20 text-center text-slate-500 dark:text-slate-400">
+          <div
+            v-else-if="visitors.length === 0"
+            class="py-20 text-center text-slate-500 dark:text-slate-400"
+          >
             <Users class="h-12 w-12 mx-auto mb-4 opacity-50 text-slate-300 dark:text-zinc-700" />
-            <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-1">No visitors found</h3>
-            <p class="text-xs">There are no expected visitors for today.</p>
+            <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-1">
+              No visitors found
+            </h3>
+            <p class="text-xs">
+              There are no expected visitors for today.
+            </p>
           </div>
 
           <!-- Visitor Rows -->
@@ -58,17 +73,21 @@
             v-for="visitor in visitors"
             v-else
             :key="visitor.id"
-            class="group relative flex items-center justify-between p-4 rounded-xl bg-white dark:bg-zinc-900/40 backdrop-blur-md border border-slate-200 dark:border-white/10 hover:border-indigo-500/40 hover:bg-slate-50 dark:hover:bg-zinc-800/80 transition-all duration-300 shadow-[0_4px_20px_rgb(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgb(0,0,0,0.2)]"
+            class="group relative flex items-center justify-between p-4 rounded-xl bg-white dark:hover:bg-zinc-800/40 backdrop-blur-md border border-slate-200 dark:border-white/10 hover:border-indigo-500/40 hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800/80 transition-all duration-300 shadow-[0_4px_20px_rgb(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgb(0,0,0,0.2)]"
           >
             <!-- Info -->
             <div class="flex items-center gap-4 flex-1">
               <div class="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-sm text-white shadow-inner shrink-0 overflow-hidden">
-                <img v-if="visitor.photo" :src="getPhotoUrl(visitor.photo)" class="w-full h-full object-cover" />
+                <img
+                  v-if="visitor.photo"
+                  :src="getPhotoUrl(visitor.photo)"
+                  class="w-full h-full object-cover"
+                >
                 <span v-else>{{ visitor.personName?.charAt(0).toUpperCase() || '?' }}</span>
               </div>
               <div class="flex flex-col">
                 <span class="block text-[13px] font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">{{ visitor.personName }}</span>
-                <span class="text-[10px] font-semibold text-slate-500 mt-0.5">
+                <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
                   {{ visitor.mobileNumber || 'No Phone' }} • {{ visitor.assignedAccessLevels?.accessLevelName || 'General Access' }}
                 </span>
               </div>
@@ -102,8 +121,8 @@
               </span>
 
               <button
-                @click="viewVisitorCard(visitor)"
                 class="flex items-center gap-2 h-8 px-3 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 border border-indigo-200 dark:border-indigo-500/20 text-[10px] font-black uppercase tracking-widest transition-all shadow-sm"
+                @click="viewVisitorCard(visitor)"
               >
                 <Printer class="w-3.5 h-3.5" /> 
                 <span class="hidden md:inline">View Pass</span>
@@ -114,19 +133,19 @@
       </div>
       
       <!-- Pagination -->
-      <div class="flex items-center justify-between p-3 border-t border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 shrink-0">
+      <div class="flex items-center justify-between p-3 border-t border-slate-100 dark:border-zinc-800 bg-slate-50 dark:hover:bg-zinc-800 shrink-0">
         <button
-          class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-950 disabled:opacity-50 transition-colors shadow-sm text-slate-700 dark:text-slate-300"
+          class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-zinc-800 hover:bg-white dark:bg-slate-900 dark:hover:bg-zinc-950 disabled:opacity-50 transition-colors shadow-sm text-slate-700 dark:text-slate-300"
           :disabled="page <= 1 || loading"
           @click="page--; loadVisitors()"
         >
           Prev
         </button>
-        <span class="text-[10px] font-black uppercase tracking-widest text-slate-500">
+        <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
           Page {{ page }} of {{ totalPages || 1 }}
         </span>
         <button
-          class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-950 disabled:opacity-50 transition-colors shadow-sm text-slate-700 dark:text-slate-300"
+          class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-zinc-800 hover:bg-white dark:bg-slate-900 dark:hover:bg-zinc-950 disabled:opacity-50 transition-colors shadow-sm text-slate-700 dark:text-slate-300"
           :disabled="page >= totalPages || loading"
           @click="page++; loadVisitors()"
         >

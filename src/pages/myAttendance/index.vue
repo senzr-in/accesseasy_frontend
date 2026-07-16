@@ -5,7 +5,7 @@
       <span class="px-2.5 py-1 rounded-md border border-blue-200 dark:border-blue-500/20 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 text-sm font-black uppercase tracking-widest leading-tight">
         {{ format(currentDate, "MMMM yyyy") }}
       </span>
-      <p class="text-xs font-medium text-slate-500">
+      <p class="text-xs font-medium text-slate-500 dark:text-slate-400">
         Your daily check-in/out summary for the month.
       </p>
     </div>
@@ -14,18 +14,18 @@
       <!-- Calendar View -->
       <div class="lg:col-span-1 border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 rounded-2xl p-4 shadow-sm">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500">
+          <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
             Monthly View
           </h3>
           <div class="flex items-center gap-1">
             <button
-              class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-600 dark:text-zinc-400 transition-colors"
+              class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-zinc-800 text-slate-600 dark:text-zinc-400 transition-colors"
               @click="prevMonth"
             >
               <ChevronLeft class="w-4 h-4" />
             </button>
             <button
-              class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 text-slate-600 dark:text-zinc-400 transition-colors"
+              class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-zinc-800 text-slate-600 dark:text-zinc-400 transition-colors"
               @click="nextMonth"
             >
               <ChevronRight class="w-4 h-4" />
@@ -92,7 +92,7 @@
       <!-- Attendance Table -->
       <div class="lg:col-span-2">
         <div class="flex items-center justify-between mb-2 px-1">
-          <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500">
+          <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
             Detailed Logs
           </h3>
           <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">{{ records.length }} Records</span>
@@ -100,7 +100,7 @@
 
         <div class="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm max-h-[420px] overflow-y-auto relative">
           <table class="w-full text-left border-collapse">
-            <thead class="bg-slate-50 dark:bg-zinc-900 border-b border-slate-100 dark:border-zinc-800 sticky top-0 z-10">
+            <thead class="bg-slate-50 dark:hover:bg-zinc-800 border-b border-slate-100 dark:border-zinc-800 sticky top-0 z-10">
               <tr>
                 <th class="px-4 py-2.5 text-[9px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">
                   Date
@@ -148,7 +148,7 @@
                 v-for="record in records"
                 v-else
                 :key="record.id"
-                class="hover:bg-slate-50/50 dark:hover:bg-zinc-900/50 transition-colors group"
+                class="hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-slate-800/50 dark:hoverdark:hover:bg-zinc-800/50 transition-colors group"
               >
                 <!-- Date -->
                 <td class="px-4 py-2">
@@ -389,11 +389,11 @@ const getAttendanceBadgeClass = (val) => {
       return "bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20";
     case "weekOff":
     case "holiday":
-      return "bg-slate-100 text-slate-600 border-slate-200 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700";
+      return "bg-slate-100 dark:bg-slate-950 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-800 dark:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700";
     case "paidLeave":
       return "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20";
     default:
-      return "bg-slate-50 text-slate-600 border-slate-200 dark:bg-zinc-900 dark:text-zinc-400 dark:border-zinc-700";
+      return "bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-800 dark:hover:bg-zinc-800 dark:text-zinc-400 dark:border-zinc-700";
   }
 };
 </script>

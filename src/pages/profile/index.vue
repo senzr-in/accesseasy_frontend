@@ -5,13 +5,13 @@
       <h1 class="text-4xl font-black tracking-tight text-slate-900 dark:text-white">
         Profile Settings
       </h1>
-      <p class="text-slate-500 font-medium mt-1">
+      <p class="text-slate-500 dark:text-slate-400 font-medium mt-1">
         Manage your personal information and security.
       </p>
     </div>
 
     <!-- Personal Details -->
-    <div class="rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 p-6 space-y-6">
+    <div class="rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 dark:bg-slate-900/50 p-6 space-y-6">
       <h2 class="text-sm font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
         <User class="h-4 w-4" />
         Personal Details
@@ -79,7 +79,7 @@
     </div>
 
     <!-- Security & Password -->
-    <div class="rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 p-6 space-y-6">
+    <div class="rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 dark:bg-slate-900/50 p-6 space-y-6">
       <h2 class="text-sm font-black uppercase tracking-widest text-slate-400 flex items-center gap-2">
         <Key class="h-4 w-4" />
         Security & Password
@@ -115,7 +115,7 @@
     <!-- Account Status -->
     <div class="rounded-2xl bg-blue-600 text-white shadow-xl shadow-blue-500/20 p-6 flex flex-col md:flex-row items-center justify-between gap-6">
       <div class="flex items-center gap-4 text-center md:text-left">
-        <div class="h-12 w-12 rounded-2xl bg-white/10 flex items-center justify-center">
+        <div class="h-12 w-12 rounded-2xl bg-white dark:bg-slate-900/10 flex items-center justify-center">
           <Shield class="h-6 w-6" />
         </div>
         <div>
@@ -140,7 +140,7 @@
           <p class="text-sm font-black text-white/80 mb-1">
             Status
           </p>
-          <span class="inline-flex items-center px-1.5 py-0.5 rounded-lg bg-white text-blue-600 font-black uppercase tracking-widest text-[9px]">Verified</span>
+          <span class="inline-flex items-center px-1.5 py-0.5 rounded-lg bg-white dark:bg-slate-900 text-blue-600 font-black uppercase tracking-widest text-[9px]">Verified</span>
         </div>
       </div>
     </div>

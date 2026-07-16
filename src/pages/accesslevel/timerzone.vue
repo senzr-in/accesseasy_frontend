@@ -12,7 +12,7 @@
         >
       </div>
       <button
-        class="flex items-center gap-2 h-10 px-4 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all shadow-sm shrink-0"
+        class="flex items-center gap-2 h-10 px-4 rounded-xl bg-slate-900 dark:bg-white dark:bg-slate-900 text-white dark:text-slate-900 dark:text-slate-100 text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all shadow-sm shrink-0"
         @click="openAddDialog"
       >
         <Plus class="w-4 h-4" /> Add Timer Zone
@@ -23,21 +23,21 @@
     <div class="rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm overflow-hidden flex flex-col flex-1 min-h-0">
       <div class="overflow-x-auto flex-1 h-full">
         <table class="w-full text-left border-collapse relative">
-          <thead class="bg-slate-50 dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-10">
+          <thead class="bg-slate-50 dark:hover:bg-zinc-800 border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-10">
             <tr>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
                 Name
               </th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
                 Start Time
               </th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
                 End Time
               </th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
                 Status
               </th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest text-right whitespace-nowrap">
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest text-right whitespace-nowrap">
                 Actions
               </th>
             </tr>
@@ -82,7 +82,7 @@
               >
                 <div class="flex flex-col items-center justify-center space-y-3">
                   <Clock class="w-10 h-10 text-slate-300 dark:text-zinc-700" />
-                  <p class="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                  <p class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
                     No timer zones found.
                   </p>
                   <button
@@ -94,7 +94,7 @@
                   </button>
                   <button
                     v-else
-                    class="h-9 px-4 rounded-lg bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-black uppercase tracking-widest hover:opacity-90 transition-opacity"
+                    class="h-9 px-4 rounded-lg bg-slate-900 dark:bg-slate-100 dark:bg-slate-950 text-white dark:text-slate-900 dark:text-slate-100 text-xs font-black uppercase tracking-widest hover:opacity-90 transition-opacity"
                     @click="openAddDialog"
                   >
                     <Plus class="w-4 h-4 inline mr-1" /> Add First Timer Zone
@@ -108,7 +108,7 @@
               v-for="item in filteredTimerZones"
               v-else
               :key="item.id"
-              class="group/row hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors duration-200 cursor-pointer"
+              class="group/row hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 transition-colors duration-200 cursor-pointer"
               @click="editZone(item)"
             >
               <td class="px-5 py-3">
@@ -157,8 +157,8 @@
           </tbody>
         </table>
       </div>
-      <div class="flex items-center justify-between p-4 border-t border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 shrink-0">
-        <div class="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-3">
+      <div class="flex items-center justify-between p-4 border-t border-slate-100 dark:border-zinc-800 bg-slate-50 dark:hover:bg-zinc-800 shrink-0">
+        <div class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 flex items-center gap-3">
           <span>{{ filteredTimerZones.length }} total</span>
         </div>
       </div>
@@ -174,12 +174,12 @@
         v-if="showDialog"
         class="w-full max-w-md bg-white dark:bg-zinc-950 rounded-2xl shadow-xl overflow-hidden border border-slate-200 dark:border-zinc-800 flex flex-col animate-in zoom-in-95 duration-200"
       >
-        <div class="flex items-center justify-between p-5 border-b border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900">
+        <div class="flex items-center justify-between p-5 border-b border-slate-100 dark:border-zinc-800 bg-slate-50 dark:hover:bg-zinc-800">
           <h3 class="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white">
             {{ isEditing ? "Edit Timer Zone" : "Add Timer Zone" }}
           </h3>
           <button
-            class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+            class="text-slate-400 hover:text-slate-600 dark:text-slate-300 dark:hover:text-slate-200"
             @click="closeDialog"
           >
             <X class="w-4 h-4" />
@@ -188,37 +188,37 @@
         
         <div class="p-5 space-y-4">
           <div>
-            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Time Zone Name *</label>
+            <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Time Zone Name *</label>
             <input
               v-model="formData.timeZoneName"
               type="text"
               placeholder="e.g., Work Hours"
-              class="w-full h-10 px-3 text-sm bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors shadow-sm text-slate-900 dark:text-white"
+              class="w-full h-10 px-3 text-sm bg-white dark:hover:bg-zinc-800 border border-slate-200 dark:border-zinc-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors shadow-sm text-slate-900 dark:text-white"
             >
           </div>
           <div class="flex gap-4">
             <div class="flex-1">
-              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Start Time *</label>
+              <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">Start Time *</label>
               <input
                 v-model="formData.entryTime"
                 type="time"
-                class="w-full h-10 px-3 text-sm bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors shadow-sm text-slate-900 dark:text-white [color-scheme:light] dark:[color-scheme:dark]"
+                class="w-full h-10 px-3 text-sm bg-white dark:hover:bg-zinc-800 border border-slate-200 dark:border-zinc-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors shadow-sm text-slate-900 dark:text-white [color-scheme:light] dark:[color-scheme:dark]"
               >
             </div>
             <div class="flex-1">
-              <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">End Time *</label>
+              <label class="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">End Time *</label>
               <input
                 v-model="formData.exitTime"
                 type="time"
-                class="w-full h-10 px-3 text-sm bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors shadow-sm text-slate-900 dark:text-white [color-scheme:light] dark:[color-scheme:dark]"
+                class="w-full h-10 px-3 text-sm bg-white dark:hover:bg-zinc-800 border border-slate-200 dark:border-zinc-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-colors shadow-sm text-slate-900 dark:text-white [color-scheme:light] dark:[color-scheme:dark]"
               >
             </div>
           </div>
         </div>
 
-        <div class="flex items-center justify-end gap-3 p-5 border-t border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900">
+        <div class="flex items-center justify-end gap-3 p-5 border-t border-slate-100 dark:border-zinc-800 bg-slate-50 dark:hover:bg-zinc-800">
           <button
-            class="h-9 px-4 text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
+            class="h-9 px-4 text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white transition-colors"
             @click="closeDialog"
           >
             Cancel
@@ -253,10 +253,10 @@
             Are you sure you want to delete <span class="font-bold text-slate-700 dark:text-slate-300">"{{ zoneToDelete?.timeZoneName }}"</span>? This action cannot be undone.
           </p>
         </div>
-        <div class="flex items-center gap-2 p-4 border-t border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900">
+        <div class="flex items-center gap-2 p-4 border-t border-slate-100 dark:border-zinc-800 bg-slate-50 dark:hover:bg-zinc-800">
           <button
             :disabled="deleting"
-            class="flex-1 h-10 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50"
+            class="flex-1 h-10 rounded-xl bg-white dark:hover:bg-zinc-800 border border-slate-200 dark:border-zinc-800 text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 transition-colors disabled:opacity-50"
             @click="showDeleteDialog = false"
           >
             Cancel

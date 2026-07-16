@@ -1,14 +1,41 @@
+:root {
+  /* Base */
+  --color-bg-page:      hsl(40, 10%, 95%);    /* #F5F4F1 */
+  --color-bg-surface:   hsl(40, 20%, 99%);    /* #FDFCFA */
+  --color-bg-alt:       hsl(38, 15%, 93%);    /* #EDEAE4 */
+  --color-border:       hsl(38, 20%, 88%);    /* #E5E1D8 */
+  --color-border-card:  hsla(38, 20%, 85%, 0.7);
+
+  /* Text */
+  --color-text-primary:   hsl(32, 15%, 15%);  /* #2A2720 */
+  --color-text-secondary: hsl(30, 10%, 40%);  /* #6B6560 */
+  --color-text-muted:     hsl(30, 8%, 55%);   /* #9C978F */
+
+  /* Accents */
+  --color-blue:    hsl(220, 65%, 52%);  /* #3E7DD4 */
+  --color-green:   hsl(155, 50%, 42%);  /* #35A673 */
+  --color-amber:   hsl(38, 75%, 42%);   /* #D4900A */
+  --color-red:     hsl(348, 65%, 52%);  /* #D44B62 */
+  --color-indigo:  hsl(240, 50%, 55%);  /* #5B69CF */
+  --color-purple:  hsl(270, 55%, 55%);  /* #7B5CC4 */
+}
+
 /* Enhanced App Container */
 .app-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f0f9ff 0%, #ffffff 50%, #f0f4ff 100%);
+  background: linear-gradient(
+    135deg,
+    hsl(40, 15%, 94%) 0%,
+    hsl(40, 10%, 97%) 50%,
+    hsl(240, 15%, 95%) 100%
+  );
 }
 
 /* Enhanced Header Styles */
 .app-header {
-  background: white;
-  border-bottom: 1px solid #e2e8f0;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  background: var(--color-bg-surface);
+  border-bottom: 1px solid var(--color-border);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
   position: sticky;
   top: 0;
   z-index: 20;
@@ -642,4 +669,39 @@
     flex-direction: column;
     width: 100%;
   }
+}
+
+/* Animations for wholesome experience */
+@keyframes slide-in-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float-gentle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(0.98); }
+}
+
+.animate-slide-up {
+  animation: slide-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0; /* Starts hidden, animation handles opacity */
+}
+
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
+
+.animate-float-gentle {
+  animation: float-gentle 4s ease-in-out infinite;
+}
+
+.animate-pulse-soft:hover {
+  animation: pulse-soft 2s ease-in-out infinite;
 }

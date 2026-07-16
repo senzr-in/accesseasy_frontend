@@ -1,7 +1,7 @@
 <template>
-  <div class="bg-white/80 backdrop-blur-xl border border-slate-200/50 rounded-2xl p-6 shadow-sm flex flex-col h-full overflow-hidden">
-    <div class="flex items-center justify-between pb-4 border-b border-slate-100 shrink-0">
-      <h3 class="text-xs font-black uppercase tracking-widest text-slate-900 flex items-center gap-2">
+  <div class="bg-white dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200 dark:border-slate-800/50 rounded-2xl p-6 shadow-sm flex flex-col h-full overflow-hidden">
+    <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-700 shrink-0">
+      <h3 class="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-slate-100 flex items-center gap-2">
         <Activity class="w-4 h-4 text-indigo-500" />
         Live Building Timeline
       </h3>
@@ -36,7 +36,7 @@
             <span>{{ event.type || 'Event' }}</span>
             <span>{{ event.time }}</span>
           </div>
-          <p class="font-bold text-slate-700 mt-1 leading-relaxed">
+          <p class="font-bold text-slate-700 dark:text-slate-200 mt-1 leading-relaxed">
             {{ event.text }}
           </p>
         </div>

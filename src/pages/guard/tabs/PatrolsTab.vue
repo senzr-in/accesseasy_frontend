@@ -1,26 +1,39 @@
 <template>
   <div class="h-full flex flex-col gap-0 overflow-hidden animate-in">
-
     <!-- Top Bar -->
     <div class="flex items-center justify-between px-1 pb-3 shrink-0">
       <div>
-        <h1 class="text-lg font-bold text-slate-900">Patrol Command Center</h1>
-        <p class="text-xs text-slate-500">Real-time overview of all patrol activities</p>
+        <h1 class="text-lg font-bold text-slate-900 dark:text-slate-100">
+          Patrol Command Center
+        </h1>
+        <p class="text-xs text-slate-500 dark:text-slate-400">
+          Real-time overview of all patrol activities
+        </p>
       </div>
     </div>
 
     <!-- SOS Alert Banner -->
-    <div v-if="activeAlerts.length" class="mb-3 shrink-0 bg-red-600 rounded-xl p-3 flex items-center justify-between shadow-lg shadow-red-600/20 animate-pulse border border-red-500">
+    <div
+      v-if="activeAlerts.length"
+      class="mb-3 shrink-0 bg-red-600 rounded-xl p-3 flex items-center justify-between shadow-lg shadow-red-600/20 animate-pulse border border-red-500"
+    >
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+        <div class="w-10 h-10 bg-white dark:bg-slate-900 rounded-lg flex items-center justify-center">
           <AlertTriangle class="w-6 h-6 text-red-600" />
         </div>
         <div>
-          <h2 class="text-white font-black uppercase tracking-widest">Emergency Alert Detected</h2>
-          <p class="text-red-100 text-sm font-semibold">Guard {{ activeAlerts[0].guard_name || 'Unknown' }} triggered an SOS in Zone: {{ activeAlerts[0].zone_name || 'Unknown' }}</p>
+          <h2 class="text-white font-black uppercase tracking-widest">
+            Emergency Alert Detected
+          </h2>
+          <p class="text-red-100 text-sm font-semibold">
+            Guard {{ activeAlerts[0].guard_name || 'Unknown' }} triggered an SOS in Zone: {{ activeAlerts[0].zone_name || 'Unknown' }}
+          </p>
         </div>
       </div>
-      <button @click="dismissAlert(activeAlerts[0].id)" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg text-sm font-bold transition-colors">
+      <button
+        class="bg-white dark:bg-slate-900 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold transition-colors shadow-sm"
+        @click="dismissAlert(activeAlerts[0].id)"
+      >
         Dismiss
       </button>
     </div>
@@ -33,8 +46,12 @@
           <Activity class="w-5 h-5" />
         </div>
         <div>
-          <p class="text-2xl font-bold text-indigo-700 leading-none">{{ statistics.running }}</p>
-          <p class="text-[10px] font-semibold text-slate-500 uppercase mt-0.5">Running</p>
+          <p class="text-2xl font-bold text-indigo-700 leading-none">
+            {{ statistics.running }}
+          </p>
+          <p class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase mt-0.5">
+            Running
+          </p>
         </div>
       </div>
       <!-- Completed -->
@@ -43,18 +60,35 @@
           <CheckCheck class="w-5 h-5" />
         </div>
         <div>
-          <p class="text-2xl font-bold text-emerald-700 leading-none">{{ statistics.completed }}</p>
-          <p class="text-[10px] font-semibold text-slate-500 uppercase mt-0.5">Completed</p>
+          <p class="text-2xl font-bold text-emerald-700 leading-none">
+            {{ statistics.completed }}
+          </p>
+          <p class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase mt-0.5">
+            Completed
+          </p>
         </div>
       </div>
       <!-- Missed -->
-      <div class="flex-1 ae-card p-3 flex items-center gap-3" :class="statistics.missed > 0 ? 'border-l-4 border-l-rose-500' : 'border-l-4 border-l-slate-200'">
-        <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" :class="statistics.missed > 0 ? 'bg-rose-50 text-rose-600' : 'bg-slate-50 text-slate-400'">
+      <div
+        class="flex-1 ae-card p-3 flex items-center gap-3"
+        :class="statistics.missed > 0 ? 'border-l-4 border-l-rose-500' : 'border-l-4 border-l-slate-200'"
+      >
+        <div
+          class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+          :class="statistics.missed > 0 ? 'bg-rose-50 text-rose-600' : 'bg-slate-50 dark:bg-slate-800/50 text-slate-400'"
+        >
           <AlertTriangle class="w-5 h-5" />
         </div>
         <div>
-          <p class="text-2xl font-bold leading-none" :class="statistics.missed > 0 ? 'text-rose-700' : 'text-slate-400'">{{ statistics.missed }}</p>
-          <p class="text-[10px] font-semibold text-slate-500 uppercase mt-0.5">Missed</p>
+          <p
+            class="text-2xl font-bold leading-none"
+            :class="statistics.missed > 0 ? 'text-rose-700' : 'text-slate-400'"
+          >
+            {{ statistics.missed }}
+          </p>
+          <p class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase mt-0.5">
+            Missed
+          </p>
         </div>
       </div>
       <!-- Delayed -->
@@ -63,53 +97,85 @@
           <Clock class="w-5 h-5" />
         </div>
         <div>
-          <p class="text-2xl font-bold text-amber-700 leading-none">{{ statistics.delayed }}</p>
-          <p class="text-[10px] font-semibold text-slate-500 uppercase mt-0.5">Delayed</p>
+          <p class="text-2xl font-bold text-amber-700 leading-none">
+            {{ statistics.delayed }}
+          </p>
+          <p class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase mt-0.5">
+            Delayed
+          </p>
         </div>
       </div>
       <!-- Total -->
       <div class="flex-1 ae-card p-3 flex items-center gap-3 border-l-4 border-l-slate-300">
-        <div class="w-10 h-10 rounded-xl bg-slate-50 text-slate-600 flex items-center justify-center shrink-0">
+        <div class="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-300 flex items-center justify-center shrink-0">
           <CalendarCheck class="w-5 h-5" />
         </div>
         <div>
-          <p class="text-2xl font-bold text-slate-800 leading-none">{{ statistics.total }}</p>
-          <p class="text-[10px] font-semibold text-slate-500 uppercase mt-0.5">Total Patrols</p>
+          <p class="text-2xl font-bold text-slate-800 dark:text-slate-200 leading-none">
+            {{ statistics.total }}
+          </p>
+          <p class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase mt-0.5">
+            Total Patrols
+          </p>
         </div>
       </div>
     </div>
 
     <!-- Quick Actions Strip -->
-    <div class="flex items-center gap-3 mb-3 shrink-0">
-      <button @click="showConfigurator = true" class="flex-1 rounded-xl border border-indigo-600 bg-indigo-600 p-3 flex items-center justify-center gap-2 hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-600/20 group">
-        <Settings class="w-4 h-4 text-indigo-100 group-hover:text-white" />
-        <span class="text-sm font-bold text-white">Check Point</span>
+    <div class="flex items-center gap-2 mb-3 shrink-0 overflow-x-auto custom-scrollbar">
+      <button
+        class="flex-1 min-w-[140px] rounded-xl border border-indigo-600 bg-indigo-600 p-3 flex items-center justify-center gap-2 hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-600/20 group"
+        @click="showLibrary = true"
+      >
+        <MapPin class="w-4 h-4 text-indigo-100 group-hover:text-white" />
+        <span class="text-xs font-bold text-white whitespace-nowrap">Checkpoint Library</span>
       </button>
-      <button @click="showWizard = true" class="flex-1 rounded-xl border border-indigo-600 bg-indigo-600 p-3 flex items-center justify-center gap-2 hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-600/20 group">
+      <button
+        class="flex-1 min-w-[140px] rounded-xl border border-indigo-600 bg-indigo-600 p-3 flex items-center justify-center gap-2 hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-600/20 group"
+        @click="showConfigurator = true"
+      >
+        <Route class="w-4 h-4 text-indigo-100 group-hover:text-white" />
+        <span class="text-xs font-bold text-white whitespace-nowrap">Route Builder</span>
+      </button>
+      <button
+        class="flex-1 min-w-[140px] rounded-xl border border-indigo-600 bg-indigo-600 p-3 flex items-center justify-center gap-2 hover:bg-indigo-700 transition-colors shadow-md shadow-indigo-600/20 group"
+        @click="showWizard = true"
+      >
         <PlusCircle class="w-4 h-4 text-indigo-100 group-hover:text-white" />
-        <span class="text-sm font-bold text-white">Create Patrol</span>
+        <span class="text-xs font-bold text-white whitespace-nowrap">Create Patrol</span>
       </button>
-      <button @click="showHistory = true" class="flex-1 ae-card p-3 flex items-center justify-center gap-2 hover:bg-sky-50 hover:text-sky-700 transition-colors group">
+      <button
+        class="flex-1 min-w-[140px] ae-card p-3 flex items-center justify-center gap-2 hover:bg-sky-50 hover:text-sky-700 transition-colors group"
+        @click="showHistory = true"
+      >
         <HistoryIcon class="w-4 h-4 text-sky-500 group-hover:text-sky-600" />
-        <span class="text-sm font-bold text-slate-700 group-hover:text-sky-700">Patrol History</span>
+        <span class="text-xs font-bold text-slate-700 dark:text-slate-200 group-hover:text-sky-700 whitespace-nowrap">History</span>
       </button>
-      <button @click="showReports = true" class="flex-1 ae-card p-3 flex items-center justify-center gap-2 hover:bg-emerald-50 hover:text-emerald-700 transition-colors group">
+      <button
+        class="flex-1 min-w-[140px] ae-card p-3 flex items-center justify-center gap-2 hover:bg-emerald-50 hover:text-emerald-700 transition-colors group"
+        @click="showReports = true"
+      >
         <BarChart3 class="w-4 h-4 text-emerald-500 group-hover:text-emerald-600" />
-        <span class="text-sm font-bold text-slate-700 group-hover:text-emerald-700">View Reports</span>
+        <span class="text-xs font-bold text-slate-700 dark:text-slate-200 group-hover:text-emerald-700 whitespace-nowrap">Reports</span>
       </button>
     </div>
 
     <!-- 2-Panel Body -->
     <div class="flex-1 min-h-0 grid grid-cols-[220px_1fr] gap-3">
-
       <!-- LEFT: Zone Scoreboard -->
       <div class="ae-card overflow-hidden flex flex-col">
-        <div class="px-3 py-2.5 border-b border-slate-100 bg-slate-50/70 shrink-0">
-          <p class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1.5">Zones Overview</p>
+        <div class="px-3 py-2.5 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 shrink-0">
+          <p class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">
+            Zones Overview
+          </p>
           <div class="relative">
             <Search class="w-3 h-3 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
-            <input v-model="zoneSearch" type="text" placeholder="Search zones..."
-              class="w-full text-[11px] pl-7 pr-2 py-1.5 rounded-lg border border-slate-200 bg-white focus:outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200" />
+            <input
+              v-model="zoneSearch"
+              type="text"
+              placeholder="Search zones..."
+              class="w-full text-[11px] pl-7 pr-2 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 focus:outline-none focus:border-indigo-300 focus:ring-1 focus:ring-indigo-200"
+            >
           </div>
         </div>
         <ZoneScoreboard
@@ -127,12 +193,11 @@
           :checkpoint-map="checkpointMap"
           :checkpoint-groups="checkpointGroups"
           :selected-zone-id="selectedZoneId"
-          @openMap="openMapReplay"
-          @editPatrol="editPatrol"
-          @deletePatrol="deletePatrol"
+          @open-map="openMapReplay"
+          @edit-patrol="editPatrol"
+          @delete-patrol="deletePatrol"
         />
       </div>
-
     </div>
 
     <!-- DIALOGS -->
@@ -158,18 +223,28 @@
       @create="onPatrolCreated"
     />
 
-    <!-- Checkpoint Configurator -->
+    <!-- Checkpoint Configurator (Route Builder) -->
     <Teleport to="body">
-      <div v-if="showConfigurator" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <div
+        v-if="showConfigurator"
+        class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+      >
         <div class="relative w-full max-w-5xl ae-card shadow-xl overflow-hidden flex flex-col max-h-[90vh] animate-in">
-          <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+          <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center shrink-0">
             <div>
-              <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
-                <Settings class="w-5 h-5 text-indigo-600" /> Checkpoint Configurator
+              <h2 class="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <Route class="w-5 h-5 text-indigo-600" /> Route Builder
               </h2>
-              <p class="text-xs text-slate-500 mt-0.5">Place and print QR codes for patrol routes</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Assemble checkpoints into groups and routes
+              </p>
             </div>
-            <button class="btn-icon" @click="closeConfigurator"><X class="w-4 h-4" /></button>
+            <button
+              class="btn-icon"
+              @click="closeConfigurator"
+            >
+              <X class="w-4 h-4" />
+            </button>
           </div>
           <div class="flex-1 overflow-hidden min-h-[750px] relative">
             <div class="absolute inset-0 flex flex-col">
@@ -180,17 +255,55 @@
       </div>
     </Teleport>
 
+    <!-- Checkpoint Library -->
+    <Teleport to="body">
+      <div
+        v-if="showLibrary"
+        class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+      >
+        <div class="relative w-full max-w-6xl ae-card shadow-xl overflow-hidden flex flex-col max-h-[90vh] animate-in">
+          <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center shrink-0">
+            <div>
+              <h2 class="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <MapPin class="w-5 h-5 text-indigo-600" /> Checkpoint Library
+              </h2>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Manage master checkpoints for route building
+              </p>
+            </div>
+            <button
+              class="btn-icon"
+              @click="showLibrary = false"
+            >
+              <X class="w-4 h-4" />
+            </button>
+          </div>
+          <div class="flex-1 overflow-hidden min-h-[600px] relative">
+            <CheckpointLibrary class="absolute inset-0" />
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
 
 
     <!-- History -->
     <Teleport to="body">
-      <div v-if="showHistory" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <div
+        v-if="showHistory"
+        class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+      >
         <div class="relative w-full max-w-4xl ae-card shadow-xl overflow-hidden flex flex-col max-h-[90vh] animate-in">
-          <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
-            <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+          <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+            <h2 class="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <HistoryIcon class="w-5 h-5 text-indigo-600" /> Patrol History
             </h2>
-            <button class="btn-icon" @click="showHistory = false"><X class="w-4 h-4" /></button>
+            <button
+              class="btn-icon"
+              @click="showHistory = false"
+            >
+              <X class="w-4 h-4" />
+            </button>
           </div>
           <div class="flex-1 overflow-y-auto custom-scrollbar">
             <div class="ae-card overflow-hidden m-0 rounded-none">
@@ -206,47 +319,97 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <template v-for="p in completedPatrols" :key="p.id">
-                    <tr class="hover:bg-slate-50 cursor-pointer" @click="toggleHistoryExpand(p.id)">
+                  <template
+                    v-for="p in completedPatrols"
+                    :key="p.id"
+                  >
+                    <tr
+                      class="hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer"
+                      @click="toggleHistoryExpand(p.id)"
+                    >
                       <td><span class="font-mono text-xs text-indigo-600 bg-indigo-50 px-2 py-1 rounded">{{ p.id }}</span></td>
-                      <td class="font-semibold text-slate-900">{{ p.guardName }}</td>
-                      <td class="text-slate-500">{{ p.zoneName || '—' }}</td>
-                      <td class="text-slate-500 text-xs">
-                        <div class="font-medium text-slate-800">Actual: {{ p.actual_start_time ? new Date(p.actual_start_time).toLocaleTimeString([], {timeStyle: 'short'}) : p.startTime }} → {{ p.actual_end_time ? new Date(p.actual_end_time).toLocaleTimeString([], {timeStyle: 'short'}) : p.endTime }}</div>
-                        <div class="text-[10px] text-slate-400">Scheduled: {{ p.startTime }} → {{ p.endTime }}</div>
+                      <td class="font-semibold text-slate-900 dark:text-slate-100">
+                        {{ p.guardName }}
+                      </td>
+                      <td class="text-slate-500 dark:text-slate-400">
+                        {{ p.zoneName || '—' }}
+                      </td>
+                      <td class="text-slate-500 dark:text-slate-400 text-xs">
+                        <div class="font-medium text-slate-800 dark:text-slate-200">
+                          Actual: {{ p.actual_start_time ? new Date(p.actual_start_time).toLocaleTimeString([], {timeStyle: 'short'}) : p.startTime }} → {{ p.actual_end_time ? new Date(p.actual_end_time).toLocaleTimeString([], {timeStyle: 'short'}) : p.endTime }}
+                        </div>
+                        <div class="text-[10px] text-slate-400">
+                          Scheduled: {{ p.startTime }} → {{ p.endTime }}
+                        </div>
                       </td>
                       <td>{{ p.checkpointsVisited || '—' }} / {{ p.totalCheckpoints || '—' }}</td>
                       <td>
-                        <span v-if="p.missedCheckpoints > 0" class="badge badge-danger">
+                        <span
+                          v-if="p.missedCheckpoints > 0"
+                          class="badge badge-danger"
+                        >
                           <AlertTriangle class="w-3 h-3" /> {{ p.missedCheckpoints }} Missed
                         </span>
-                        <span v-else class="badge badge-success">
+                        <span
+                          v-else
+                          class="badge badge-success"
+                        >
                           <CheckCheck class="w-3 h-3" /> Clear
                         </span>
                       </td>
                     </tr>
                     
                     <!-- Drill-down for missed checkpoints -->
-                    <tr v-if="expandedHistoryRow === p.id" class="bg-slate-50/50 shadow-inner">
-                      <td colspan="6" class="px-6 py-4">
-                        <h4 class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Checkpoints Detail</h4>
+                    <tr
+                      v-if="expandedHistoryRow === p.id"
+                      class="bg-slate-50 dark:bg-slate-900/50 shadow-inner"
+                    >
+                      <td
+                        colspan="6"
+                        class="px-6 py-4"
+                      >
+                        <h4 class="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-3">
+                          Checkpoints Detail
+                        </h4>
                         <div class="flex flex-wrap gap-2">
-                          <template v-for="cp in (checkpointMap[p.id] || [])" :key="cp.checkpoint_id || cp.id">
-                            <span class="text-xs px-2.5 py-1 rounded-full border flex items-center gap-1.5"
-                                  :class="['scanned', 'completed'].includes(cp.status) ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : cp.status === 'missed' ? 'bg-rose-50 border-rose-200 text-rose-700 font-bold' : 'bg-white border-slate-200 text-slate-500'">
-                              <CheckCheck v-if="['scanned', 'completed'].includes(cp.status)" class="w-3 h-3" />
-                              <X v-else-if="cp.status === 'missed'" class="w-3 h-3" />
-                              <span v-else class="w-3 h-3 flex items-center justify-center text-[10px]">-</span>
+                          <template
+                            v-for="cp in (checkpointMap[p.id] || [])"
+                            :key="cp.checkpoint_id || cp.id"
+                          >
+                            <span
+                              class="text-xs px-2.5 py-1 rounded-full border flex items-center gap-1.5"
+                              :class="['scanned', 'completed'].includes(cp.status) ? 'bg-emerald-50 border-emerald-200 text-emerald-700' : cp.status === 'missed' ? 'bg-rose-50 border-rose-200 text-rose-700 font-bold' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400'"
+                            >
+                              <CheckCheck
+                                v-if="['scanned', 'completed'].includes(cp.status)"
+                                class="w-3 h-3"
+                              />
+                              <X
+                                v-else-if="cp.status === 'missed'"
+                                class="w-3 h-3"
+                              />
+                              <span
+                                v-else
+                                class="w-3 h-3 flex items-center justify-center text-[10px]"
+                              >-</span>
                               {{ cp.name }}
                             </span>
                           </template>
-                          <span v-if="!(checkpointMap[p.id] || []).length" class="text-xs text-slate-400 italic">No checkpoints found.</span>
+                          <span
+                            v-if="!(checkpointMap[p.id] || []).length"
+                            class="text-xs text-slate-400 italic"
+                          >No checkpoints found.</span>
                         </div>
                       </td>
                     </tr>
                   </template>
                   <tr v-if="!completedPatrols.length">
-                    <td colspan="6" class="py-12 text-center text-sm text-slate-400">No patrol history yet.</td>
+                    <td
+                      colspan="6"
+                      class="py-12 text-center text-sm text-slate-400"
+                    >
+                      No patrol history yet.
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -258,18 +421,28 @@
 
     <!-- Reports & Incidents Modal -->
     <Teleport to="body">
-      <div v-if="showReports" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      <div
+        v-if="showReports"
+        class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+      >
         <div class="relative w-full max-w-5xl ae-card shadow-xl overflow-hidden flex flex-col max-h-[90vh] animate-in">
-          <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+          <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-900/50">
             <div>
-              <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+              <h2 class="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                 <BarChart3 class="w-5 h-5 text-emerald-600" /> Reports & Analytics
               </h2>
-              <p class="text-xs text-slate-500 mt-0.5">View compliance stats and file incident reports</p>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                View compliance stats and file incident reports
+              </p>
             </div>
-            <button class="btn-icon" @click="showReports = false"><X class="w-4 h-4" /></button>
+            <button
+              class="btn-icon"
+              @click="showReports = false"
+            >
+              <X class="w-4 h-4" />
+            </button>
           </div>
-          <div class="flex-1 overflow-y-auto custom-scrollbar p-6 bg-slate-50/30">
+          <div class="flex-1 overflow-y-auto custom-scrollbar p-6 bg-slate-50 dark:bg-slate-900/50">
             <PatrolReports />
           </div>
         </div>
@@ -279,7 +452,10 @@
     <!-- Patrol Created Toast -->
     <Teleport to="body">
       <transition name="fade">
-        <div v-if="toastMsg" class="fixed bottom-6 right-6 z-[200] bg-emerald-600 text-white text-sm font-semibold px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 animate-in">
+        <div
+          v-if="toastMsg"
+          class="fixed bottom-6 right-6 z-[200] bg-emerald-600 text-white text-sm font-semibold px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 animate-in"
+        >
           <CheckCheck class="w-4 h-4" /> {{ toastMsg }}
         </div>
       </transition>
@@ -288,26 +464,42 @@
     <!-- Replay / Map Modal -->
     <Teleport to="body">
       <transition name="fade">
-        <div v-if="selectedPatrolForMap" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 lg:p-8">
-          <div class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm" @click="selectedPatrolForMap = null"></div>
+        <div
+          v-if="selectedPatrolForMap"
+          class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 lg:p-8"
+        >
+          <div
+            class="absolute inset-0 bg-slate-950/80 backdrop-blur-sm"
+            @click="selectedPatrolForMap = null"
+          />
           
-          <div class="relative w-full max-w-6xl max-h-full flex flex-col bg-white rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200" style="height: 80vh;">
+          <div
+            class="relative w-full max-w-6xl max-h-full flex flex-col bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
+            style="height: 80vh;"
+          >
             <!-- Header -->
-            <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-white shrink-0">
+            <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between bg-white dark:bg-slate-900 shrink-0">
               <div class="flex items-center gap-4">
                 <div class="w-12 h-12 rounded-xl flex items-center justify-center text-lg font-black shadow-md bg-indigo-500 text-white border-4 border-indigo-100">
                   {{ (selectedPatrolForMap.patrol.guardName || '?').charAt(0).toUpperCase() }}
                 </div>
                 <div>
-                  <h3 class="text-xl font-bold text-slate-900 leading-none mb-1.5">{{ selectedPatrolForMap.patrol.guardName || 'Unknown Guard' }}</h3>
-                  <p class="text-xs font-semibold text-slate-500">Guard • {{ selectedPatrolForMap.patrol.id }}</p>
+                  <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100 leading-none mb-1.5">
+                    {{ selectedPatrolForMap.patrol.guardName || 'Unknown Guard' }}
+                  </h3>
+                  <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                    Guard • {{ selectedPatrolForMap.patrol.id }}
+                  </p>
                 </div>
               </div>
               <div class="flex items-center gap-4">
                 <span class="flex items-center gap-1.5 text-xs font-black tracking-widest uppercase bg-emerald-100 text-emerald-700 px-3 py-1.5 rounded-full">
-                   {{ selectedPatrolForMap.patrol.status }}
+                  {{ selectedPatrolForMap.patrol.status }}
                 </span>
-                <button @click="selectedPatrolForMap = null" class="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors border border-slate-100 shadow-sm">
+                <button
+                  class="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 rounded-full transition-colors border border-slate-100 dark:border-slate-700 shadow-sm"
+                  @click="selectedPatrolForMap = null"
+                >
                   <X class="w-5 h-5" />
                 </button>
               </div>
@@ -321,7 +513,6 @@
         </div>
       </transition>
     </Teleport>
-
   </div>
 </template>
 
@@ -329,7 +520,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import {
   Settings, BarChart3, History as HistoryIcon, X, AlertTriangle,
-  CheckCheck, PlusCircle, Activity, Clock, CalendarCheck, Search, Route
+  CheckCheck, PlusCircle, Activity, Clock, CalendarCheck, Search, Route, MapPin
 } from 'lucide-vue-next';
 import { useRoute, useRouter } from 'vue-router';
 import { patrolService } from '@/services/patrolService';
@@ -340,6 +531,7 @@ import ZoneScoreboard from './components/ZoneScoreboard.vue';
 import PatrolLiveFeed from './components/PatrolLiveFeed.vue';
 import PatrolMapReplay from './components/PatrolMapReplay.vue';
 import RouteConfigurator from './components/RouteConfigurator.vue';
+import CheckpointLibrary from './components/CheckpointLibrary.vue';
 import PatrolReports from './components/PatrolReports.vue';
 
 import PatrolWizardModal from './components/PatrolWizardModal.vue';
@@ -351,6 +543,7 @@ const router = useRouter();
 // UI state
 const editingPatrol   = ref(null);
 const showConfigurator = ref(false);
+const showLibrary = ref(false);
 
 const showHistory = ref(false);
 const showReports = ref(false);
@@ -506,8 +699,12 @@ const guards = ref([]);
 const activeAlerts = ref([]);
 
 const dismissAlert = async (alertId) => {
-  // In a real app, this would call an API to mark it as resolved.
-  activeAlerts.value = activeAlerts.value.filter(a => a.id !== alertId);
+  try {
+    await patrolService.updateAlertStatus(alertId, 'resolved');
+    activeAlerts.value = activeAlerts.value.filter(a => a.id !== alertId);
+  } catch (error) {
+    console.error("Failed to dismiss alert:", error);
+  }
 };
 
 // Selected zone

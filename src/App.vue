@@ -6,11 +6,11 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { useDark } from '@vueuse/core';
 
-// Force light mode — remove any previously stored dark preference
-onMounted(() => {
-  document.documentElement.classList.remove('dark');
-  localStorage.removeItem('ae_theme');
+
+// Initialize dark mode
+useDark({
+  storageKey: 'ae_theme',
 });
 </script>

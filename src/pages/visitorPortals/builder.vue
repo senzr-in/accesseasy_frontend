@@ -12,7 +12,7 @@
       </div>
       <div class="flex items-center gap-3">
         <button
-          class="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 dark:border-zinc-800 text-slate-500 hover:text-slate-700 bg-white dark:bg-zinc-950 font-black text-[10px] uppercase tracking-widest active:scale-95 shadow-sm cursor-pointer"
+          class="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 dark:border-zinc-800 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:text-slate-200 bg-white dark:bg-zinc-950 font-black text-[10px] uppercase tracking-widest active:scale-95 shadow-sm cursor-pointer"
           @click="router.push('/dashboard/visitor-portals')"
         >
           <ArrowLeft class="w-3.5 h-3.5" /> Back
@@ -115,7 +115,7 @@
           </div>
 
           <!-- Section: Registration & Default Group -->
-          <div class="p-8 space-y-6 bg-slate-50/50 dark:bg-zinc-900/50">
+          <div class="p-8 space-y-6 bg-slate-50 dark:bg-slate-900/50 dark:bg-zinc-900/50">
             <div class="flex items-center justify-between">
               <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
                 <ClipboardSignature class="w-3.5 h-3.5 text-blue-500" /> Check-in Experience
@@ -126,8 +126,8 @@
                   type="checkbox"
                   class="sr-only peer"
                 >
-                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600" />
-                <span class="ms-3 text-[10px] font-black text-slate-500 uppercase tracking-widest">Enabled</span>
+                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white dark:bg-slate-900 after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600" />
+                <span class="ms-3 text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Enabled</span>
               </label>
             </div>
 
@@ -227,7 +227,7 @@
                           class="sr-only peer"
                           @change="!field.visible && (field.required = false)"
                         >
-                        <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600" />
+                        <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white dark:bg-slate-900 after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600" />
                       </label>
                     </div>
                     
@@ -246,7 +246,7 @@
                           :disabled="!field.visible || key === 'name' || key === 'mobile'"
                           class="sr-only peer"
                         >
-                        <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600" />
+                        <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white dark:bg-slate-900 after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600" />
                       </label>
                     </div>
                   </div>
@@ -312,7 +312,7 @@
         <h3 class="text-xl font-black text-slate-900 dark:text-white mb-2">
           Portal Published!
         </h3>
-        <p class="text-sm font-medium text-slate-500 mb-6">
+        <p class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-6">
           Your visitor portal is now ready to use.
         </p>
 
@@ -369,7 +369,7 @@ const accessLevels         = ref([]);
 
 // ── Assets ─────────────────────────────────────────────────────────────────
 const DEFAULT_ASSET_ID  = 'b88c5273-ba1e-45db-b874-c34ad791afeb';
-const getAssetUrl = (id) => `${import.meta.env.VITE_API_URL}/assets/${id}?access_token=${import.meta.env.VITE_API_TOKEN}`;
+const getAssetUrl = (id) => `${import.meta.env.VITE_API_URL}/assets/${id}`;
 const DEFAULT_ASSET_URL = getAssetUrl(DEFAULT_ASSET_ID);
 
 // ── Page Config ────────────────────────────────────────────────────────────

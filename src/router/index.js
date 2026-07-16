@@ -36,15 +36,76 @@ import BranchAddForm from "@/pages/settings/configuration/branch/branchAddForm.v
 import BranchEditForm from "@/pages/settings/configuration/branch/branchEditForm.vue";
 import AppearanceSettings from "@/pages/settings/appearance.vue";
 
+const getRoleHome = () => {
+  if (!authService.isAuthenticated()) return "/login";
+  const role = authService.getUserRole();
+  if (role === "esslAdmin")  return "/dealer-dashboard";
+  if (role === "Guard")      return "/dashboard/patrols";    // Security App home
+  if (role === "Employee")   return "/dashboard/my-access";  // Workforce App home
+  return "/dashboard"; // Admin & Manager → Command Center
+};
+
+const appMode = import.meta.env.VITE_APP_MODE || 'workforce';
+
+let dashboardChildren = [];
+
+if (appMode === 'security') {
+  dashboardChildren = [
+    { path: "", name: "DashboardHome", component: DashboardHome, meta: { roles: ["Admin", "Manager", "Employee", "Guard"] } },
+    { path: "settings", meta: { roles: ["Admin"] }, redirect: '/dashboard/settings/branches' },
+    { path: "settings/appearance", name: "SettingsAppearance", component: AppearanceSettings, meta: { roles: ["Admin"] } },
+    { path: "settings/devices", name: "SettingsDevices", component: Devices, meta: { roles: ["Admin"] } },
+    { path: "settings/checkpoints", name: "SettingsCheckpoints", component: () => import("@/pages/settings/checkpoints/index.vue"), meta: { roles: ["Admin", "Manager"] } },
+    { path: "settings/ai-events", name: "SettingsAiEvents", component: () => import("@/pages/settings/aiEvents.vue"), meta: { roles: ["Admin", "Manager", "Guard"] } },
+    { path: "settings/logs", name: "SettingsLogs", component: Logs, meta: { roles: ["Admin", "Manager", "Guard"] } },
+    { path: "settings/zones", name: "SettingsZones", component: Zones, meta: { roles: ["Admin"] } },
+    { path: "monitoring", name: "Monitoring", component: () => import("@/pages/monitoring/index.vue"), meta: { roles: ["Admin", "Manager"] } },
+    { path: "reports", name: "Reports", component: () => import("@/pages/reports/index.vue"), meta: { roles: ["Admin", "Manager"] } }
+  ];
+} else {
+  dashboardChildren = [
+    { path: "", name: "DashboardHome", component: DashboardHome, meta: { roles: ["Admin", "Manager", "Employee", "Guard"] } },
+    { path: "easy-access/employees", name: "Employees", component: Employees, meta: { roles: ["Admin", "Manager"] } },
+    { path: "settings", meta: { roles: ["Admin"] }, redirect: '/dashboard/settings/branches' },
+    { path: "settings/appearance", name: "SettingsAppearance", component: AppearanceSettings, meta: { roles: ["Admin"] } },
+    { path: "settings/devices", name: "SettingsDevices", component: Devices, meta: { roles: ["Admin"] } },
+    { path: "settings/checkpoints", name: "SettingsCheckpoints", component: () => import("@/pages/settings/checkpoints/index.vue"), meta: { roles: ["Admin", "Manager"] } },
+    { path: "settings/ai-events", name: "SettingsAiEvents", component: () => import("@/pages/settings/aiEvents.vue"), meta: { roles: ["Admin", "Manager", "Guard"] } },
+    { path: "settings/logs", name: "SettingsLogs", component: Logs, meta: { roles: ["Admin", "Manager", "Guard"] } },
+    { path: "settings/zones", name: "SettingsZones", component: Zones, meta: { roles: ["Admin"] } },
+    { path: "settings/timezones", name: "SettingsTimezones", component: Timerzones, meta: { roles: ["Admin"] } },
+    { path: "settings/branches", name: "SettingsBranches", component: BranchConfiguration, meta: { roles: ["Admin"] } },
+    { path: "settings/branches/add", name: "SettingsBranchAdd", component: BranchAddForm, meta: { roles: ["Admin"] } },
+    { path: "settings/branches/:id/edit", name: "SettingsBranchEdit", component: BranchEditForm, meta: { roles: ["Admin"] } },
+    { path: "access-control/doors", name: "Doors", component: Doors, meta: { roles: ["Admin"] } },
+    { path: "easy-access/configurators/access-levels", name: "AccessLevels", component: () => import("@/pages/devicesManager/accesslevel/accesslevelCatagory.vue"), meta: { roles: ["Admin"] } },
+    { path: "guards", name: "Guards", component: () => import("@/pages/guard/index.vue"), meta: { roles: ["Admin", "Manager"] } },
+    { path: "patrols", name: "Patrols", component: () => import("@/pages/guard/tabs/PatrolsTab.vue"), meta: { roles: ["Admin", "Manager", "Guard"] } },
+    { path: "authorize", name: "Authorize", component: () => import("@/pages/authorize/index.vue"), meta: { roles: ["Admin", "Guard"] } },
+    { path: "visitors", name: "Visitors", component: () => import("@/pages/visitors/index.vue"), meta: { roles: ["Admin", "Guard", "Employee"] } },
+    { path: "visitor-portals", name: "VisitorPortals", component: () => import("@/pages/visitorPortals/index.vue"), meta: { roles: ["Admin"] } },
+    { path: "visitor-portals/builder/:id?", name: "VisitorPortalBuilder", component: () => import("@/pages/visitorPortals/builder.vue"), meta: { roles: ["Admin"] } },
+    { path: "access-control/schedules", name: "Schedules", component: () => import("@/pages/schedules/index.vue"), meta: { roles: ["Admin", "Manager"] } },
+    { path: "access-control/rules", name: "Rules", component: () => import("@/pages/rules/index.vue"), meta: { roles: ["Admin"] } },
+    { path: "monitoring", name: "Monitoring", component: () => import("@/pages/monitoring/index.vue"), meta: { roles: ["Admin", "Manager"] } },
+    { path: "firmware", name: "Firmware", component: () => import("@/pages/firmware/index.vue"), meta: { roles: ["Admin"] } },
+    { path: "device-types", name: "DeviceTypes", component: () => import("@/pages/deviceTypes/index.vue"), meta: { roles: ["Admin"] } },
+    { path: "mobile-pass", name: "MobilePass", component: () => import("@/pages/mobilePass/index.vue"), meta: { roles: ["Admin", "Manager", "Employee"] } },
+    { path: "easy-access/biometrics/face", name: "FaceEmbedding", component: () => import("@/pages/faceEmbedding/index.vue"), meta: { roles: ["Admin", "Manager"] } },
+    { path: "easy-access/biometrics/fingerprint", name: "FingerprintManagement", component: () => import("@/pages/fingerData/index.vue"), meta: { roles: ["Admin", "Manager"] } },
+    { path: "easy-access/biometrics/qr", name: "QRGenerate", component: () => import("@/pages/qrgenerate/index.vue"), meta: { roles: ["Admin", "Manager"] } },
+    { path: "my-access", name: "MyAccess", component: () => import("@/pages/myAccess/index.vue"), meta: { roles: ["Admin", "Manager", "Employee"] } },
+    { path: "my-attendance", name: "MyAttendance", component: () => import("@/pages/myAttendance/index.vue"), meta: { roles: ["Admin", "Manager", "Employee"] } },
+    { path: "my-logs", name: "MyLogs", component: () => import("@/pages/myLogs/index.vue"), meta: { roles: ["Admin", "Manager", "Employee"] } },
+    { path: "profile", name: "Profile", component: () => import("@/pages/profile/index.vue"), meta: { roles: ["Admin", "Manager", "Employee"] } },
+    { path: "report-automation", name: "ReportAutomation", component: () => import("@/pages/reportAutomation/index.vue"), meta: { roles: ["Admin"] } }
+  ];
+}
+
 const routes = [
   {
     path: "/",
-    redirect: () => {
-      if (!authService.isAuthenticated()) return "/login";
-      // Superadmin gets their own portal
-      const role = authService.getUserRole();
-      return role === "esslAdmin" ? "/dealer-dashboard" : "/dashboard";
-    },
+    redirect: getRoleHome,
   },
   {
     path: "/dealer-dashboard",
@@ -86,8 +147,7 @@ const routes = [
             return;
           }
         }
-        const role = authService.getUserRole();
-        next(role === "esslAdmin" ? "/dealer-dashboard" : "/dashboard");
+        next(getRoleHome());
       } else {
         next();
       }
@@ -105,12 +165,12 @@ const routes = [
     name: "Register",
     component: Register,
   },
-  // ⚠ DEV ONLY — Remove before production deployment
-  {
+  // ⚠ DEV ONLY — Hidden in production deployment
+  ...(import.meta.env.DEV ? [{
     path: "/dev-login",
     name: "DevLogin",
     component: DevLogin,
-  },
+  }] : []),
   {
     path: "/verification/:phoneNumber",
     name: "Verification",
@@ -143,212 +203,7 @@ const routes = [
     path: "/dashboard",
     component: DashboardLayout,
     meta: { requiresAuth: true },
-    children: [
-      {
-        path: "",
-        name: "DashboardHome",
-        component: DashboardHome,
-        meta: { roles: ["Admin", "Manager", "Employee", "Guard"] }
-      },
-
-      {
-        path: "easy-access/employees",
-        name: "Employees",
-        component: Employees,
-        meta: { roles: ["Admin", "Manager"] }
-      },
-      {
-        path: "settings",
-        meta: { roles: ["Admin"] },
-        redirect: '/dashboard/settings/branches'
-      },
-      {
-        path: "settings/appearance",
-        name: "SettingsAppearance",
-        component: AppearanceSettings,
-        meta: { roles: ["Admin"] }
-      },
-      {
-        path: "settings/devices",
-        name: "SettingsDevices",
-        component: Devices,
-        meta: { roles: ["Admin"] }
-      },
-      {
-        path: "settings/ai-events",
-        name: "SettingsAiEvents",
-        component: () => import("@/pages/settings/aiEvents.vue"),
-        meta: { roles: ["Admin", "Manager", "Guard"] }
-      },
-      {
-        path: "settings/logs",
-        name: "SettingsLogs",
-        component: Logs,
-        meta: { roles: ["Admin", "Manager", "Guard"] }
-      },
-      {
-        path: "settings/zones",
-        name: "SettingsZones",
-        component: Zones,
-        meta: { roles: ["Admin"] }
-      },
-      {
-        path: "settings/timezones",
-        name: "SettingsTimezones",
-        component: Timerzones,
-        meta: { roles: ["Admin"] }
-      },
-      {
-        path: "settings/branches",
-        name: "SettingsBranches",
-        component: BranchConfiguration,
-        meta: { roles: ["Admin"] }
-      },
-      {
-        path: "settings/branches/add",
-        name: "SettingsBranchAdd",
-        component: BranchAddForm,
-        meta: { roles: ["Admin"] }
-      },
-      {
-        path: "settings/branches/:id/edit",
-        name: "SettingsBranchEdit",
-        component: BranchEditForm,
-        meta: { roles: ["Admin"] }
-      },
-      {
-        path: "access-control/doors",
-        name: "Doors",
-        component: Doors,
-        meta: { roles: ["Admin"] }
-      },
-      {
-        path: "easy-access/configurators/access-levels",
-        name: "AccessLevels",
-        component: () => import("@/pages/devicesManager/accesslevel/accesslevelCatagory.vue"), // Existing component
-        meta: { roles: ["Admin"] }
-      },
-      {
-        path: "guards",
-        name: "Guards",
-        component: () => import("@/pages/guard/index.vue"),
-        meta: { roles: ["Admin"] }
-      },
-      {
-        path: "patrols",
-        name: "Patrols",
-        component: () => import("@/pages/guard/tabs/PatrolsTab.vue"),
-        meta: { roles: ["Admin", "Manager", "Guard"] }
-      },
-      {
-        path: "authorize",
-        name: "Authorize",
-        component: () => import("@/pages/authorize/index.vue"),
-        meta: { roles: ["Admin", "Guard"] }
-      },
-      {
-        path: "visitors",
-        name: "Visitors",
-        component: () => import("@/pages/visitors/index.vue"),
-        meta: { roles: ["Admin", "Guard", "Employee"] }
-      },
-      {
-        path: "visitor-portals",
-        name: "VisitorPortals",
-        component: () => import("@/pages/visitorPortals/index.vue"),
-        meta: { roles: ["Admin"] }
-      },
-      {
-        path: "visitor-portals/builder/:id?",
-        name: "VisitorPortalBuilder",
-        component: () => import("@/pages/visitorPortals/builder.vue"),
-        meta: { roles: ["Admin"] }
-      },
-      {
-        path: "access-control/schedules",
-        name: "Schedules",
-        component: () => import("@/pages/schedules/index.vue"),
-        meta: { roles: ["Admin"] }
-      },
-      {
-        path: "access-control/rules",
-        name: "Rules",
-        component: () => import("@/pages/rules/index.vue"),
-        meta: { roles: ["Admin"] }
-      },
-      {
-        path: "monitoring",
-        name: "Monitoring",
-        component: () => import("@/pages/monitoring/index.vue"),
-        meta: { roles: ["Admin", "Manager"] }
-      },
-      {
-        path: "firmware",
-        name: "Firmware",
-        component: () => import("@/pages/firmware/index.vue"),
-        meta: { roles: ["Admin"] }
-      },
-      {
-        path: "device-types",
-        name: "DeviceTypes",
-        component: () => import("@/pages/deviceTypes/index.vue"),
-        meta: { roles: ["Admin"] }
-      },
-      {
-        path: "mobile-pass",
-        name: "MobilePass",
-        component: () => import("@/pages/mobilePass/index.vue"),
-        meta: { roles: ["Admin", "Manager", "Employee"] }
-      },
-      {
-        path: "easy-access/biometrics/face",
-        name: "FaceEmbedding",
-        component: () => import("@/pages/faceEmbedding/index.vue"),
-        meta: { roles: ["Admin", "Manager"] }
-      },
-      {
-        path: "easy-access/biometrics/fingerprint",
-        name: "FingerprintManagement",
-        component: () => import("@/pages/fingerData/index.vue"),
-        meta: { roles: ["Admin", "Manager"] }
-      },
-      {
-        path: "easy-access/biometrics/qr",
-        name: "QRGenerate",
-        component: () => import("@/pages/qrgenerate/index.vue"),
-        meta: { roles: ["Admin", "Manager"] }
-      },
-      {
-        path: "my-access",
-        name: "MyAccess",
-        component: () => import("@/pages/myAccess/index.vue"),
-        meta: { roles: ["Admin", "Manager", "Employee"] }
-      },
-      {
-        path: "my-attendance",
-        name: "MyAttendance",
-        component: () => import("@/pages/myAttendance/index.vue"),
-        meta: { roles: ["Admin", "Manager", "Employee"] }
-      },
-      {
-        path: "my-logs",
-        name: "MyLogs",
-        component: () => import("@/pages/myLogs/index.vue"),
-        meta: { roles: ["Admin", "Manager", "Employee"] }
-      },
-      {
-        path: "profile",
-        name: "Profile",
-        component: () => import("@/pages/profile/index.vue"),
-        meta: { roles: ["Admin", "Manager", "Employee"] }
-      },
-      {
-        path: "report-automation",
-        name: "ReportAutomation",
-        component: () => import("@/pages/reportAutomation/index.vue"),
-        meta: { roles: ["Admin"] }
-      }
-    ]
+    children: dashboardChildren
   },
   // Visitor Portal Route
   {
@@ -356,10 +211,10 @@ const routes = [
     name: "VisitorPortalView",
     component: VisitorPortalView
   },
-  // Catch-all 404
+  // Catch-all — send to role-appropriate home
   {
     path: "/:pathMatch(.*)*",
-    redirect: "/dashboard"
+    redirect: getRoleHome
   }
 ];
 
@@ -439,11 +294,12 @@ router.beforeEach(async (to, from, next) => {
   if (requiredRoles) {
     const userRole = authService.getUserRole() || userData?.role?.name || '';
     if (!requiredRoles.includes(userRole)) {
-      if (to.path === '/dashboard') {
-        next();
+      const homePath = getRoleHome();
+      if (to.path === homePath) {
+        next("/login");
         return;
       }
-      next("/dashboard");
+      next(homePath);
       return;
     }
   }

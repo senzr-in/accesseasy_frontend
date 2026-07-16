@@ -2,7 +2,7 @@
   <div class="space-y-6 p-8 pb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-4">
-        <button class="h-9 w-9 rounded-full flex items-center justify-center hover:bg-emerald-50 dark:hover:bg-emerald-500/10 text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-500 transition-colors">
+        <button class="h-9 w-9 rounded-full flex items-center justify-center hover:bg-emerald-50 dark:hover:bg-emerald-500/10 text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-500 transition-colors">
           <ArrowLeft class="w-5 h-5" />
         </button>
         <div>
@@ -45,7 +45,7 @@
                     v-for="emp in employees"
                     :key="emp.id"
                     :value="emp.id"
-                    class="text-slate-700 dark:bg-slate-900 dark:text-white"
+                    class="text-slate-700 dark:text-slate-200 dark:bg-slate-900 dark:text-white"
                   >
                     {{ emp.name }} ({{ emp.email }})
                   </option>
@@ -70,7 +70,7 @@
                     v-for="al in accessLevels"
                     :key="al.id"
                     :value="al.id"
-                    class="text-slate-700 dark:bg-slate-900 dark:text-white"
+                    class="text-slate-700 dark:text-slate-200 dark:bg-slate-900 dark:text-white"
                   >
                     {{ al.name }}
                   </option>
@@ -87,25 +87,25 @@
                 >
                   <option
                     value="15"
-                    class="text-slate-700 dark:bg-slate-900 dark:text-white"
+                    class="text-slate-700 dark:text-slate-200 dark:bg-slate-900 dark:text-white"
                   >
                     15 Minutes
                   </option>
                   <option
                     value="60"
-                    class="text-slate-700 dark:bg-slate-900 dark:text-white"
+                    class="text-slate-700 dark:text-slate-200 dark:bg-slate-900 dark:text-white"
                   >
                     1 Hour
                   </option>
                   <option
                     value="480"
-                    class="text-slate-700 dark:bg-slate-900 dark:text-white"
+                    class="text-slate-700 dark:text-slate-200 dark:bg-slate-900 dark:text-white"
                   >
                     8 Hours
                   </option>
                   <option
                     value="1440"
-                    class="text-slate-700 dark:bg-slate-900 dark:text-white"
+                    class="text-slate-700 dark:text-slate-200 dark:bg-slate-900 dark:text-white"
                   >
                     24 Hours
                   </option>
@@ -145,16 +145,16 @@
             </p>
           </div>
           <div class="p-6 flex flex-col items-center gap-4">
-            <div class="p-4 bg-white rounded-2xl border border-emerald-500/20 shadow-inner flex flex-col items-center justify-center relative w-44 h-44">
+            <div class="p-4 bg-white dark:bg-slate-900 rounded-2xl border border-emerald-500/20 shadow-inner flex flex-col items-center justify-center relative w-44 h-44">
               <!-- Inline QR Code SVG Mockup for simplicity in UI matching without extra libraries -->
-              <QrCode class="w-32 h-32 text-slate-900" />
+              <QrCode class="w-32 h-32 text-slate-900 dark:text-slate-100" />
             </div>
             <div class="flex gap-2 w-full">
-              <button class="flex-1 h-8 inline-flex items-center justify-center rounded-md border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+              <button class="flex-1 h-8 inline-flex items-center justify-center rounded-md border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800 transition-colors">
                 <Share2 class="w-3 h-3 mr-1" /> Share
               </button>
               <button
-                class="flex-1 h-8 inline-flex items-center justify-center rounded-md text-xs font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-colors"
+                class="flex-1 h-8 inline-flex items-center justify-center rounded-md text-xs font-medium text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white transition-colors"
                 @click="currentQR = null"
               >
                 Dismiss

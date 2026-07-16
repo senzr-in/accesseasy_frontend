@@ -6,7 +6,7 @@
     <div class="relative w-full max-w-lg flex flex-col bg-white dark:bg-zinc-950 rounded-[24px] shadow-2xl shadow-emerald-500/10 border border-white/20 dark:border-zinc-800/80 overflow-hidden transform transition-all animate-in zoom-in-95 duration-300">
       <!-- Premium Glass Header -->
       <div class="relative px-8 py-6 flex justify-between items-start bg-gradient-to-b from-slate-50 to-white dark:from-zinc-900 dark:to-zinc-950 border-b border-zinc-100 dark:border-zinc-800/80 z-10 shrink-0">
-        <div class="absolute inset-0 bg-white/40 dark:bg-zinc-950/40 backdrop-blur-xl" />
+        <div class="absolute inset-0 bg-white dark:bg-slate-900/40 dark:bg-zinc-950/40 backdrop-blur-xl" />
         <div class="relative z-10">
           <div class="flex items-center gap-3 mb-1">
             <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center border border-emerald-100 dark:border-emerald-500/20 shadow-inner">
@@ -21,7 +21,7 @@
           </p>
         </div>
         <button
-          class="relative z-10 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-zinc-700 transition-all duration-200"
+          class="relative z-10 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-400 hover:text-slate-900 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-zinc-700 transition-all duration-200"
           @click="close"
         >
           <X class="w-4 h-4" />
@@ -91,7 +91,7 @@
                   'flex items-center gap-4 p-4 rounded-[16px] border cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md',
                   formData.assignDoorsGroup.includes(door.id || door.RecordId) 
                     ? 'border-emerald-500/50 bg-emerald-50/50 dark:bg-emerald-500/10 ring-1 ring-emerald-500/20' 
-                    : 'border-zinc-200 dark:border-zinc-800/80 bg-white dark:bg-zinc-900 hover:border-emerald-200 dark:hover:border-emerald-800/50'
+                    : 'border-zinc-200 dark:border-zinc-800/80 bg-white dark:hover:bg-zinc-800 hover:border-emerald-200 dark:hover:border-emerald-800/50'
                 ]"
               >
                 <input 
@@ -117,7 +117,7 @@
       <div class="relative px-8 py-5 border-t border-zinc-100 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 flex justify-end gap-3 z-10 shrink-0">
         <button
           type="button"
-          class="px-6 h-10 rounded-xl border border-zinc-200 dark:border-zinc-800 text-[13px] font-bold text-slate-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-900 hover:text-slate-900 dark:hover:text-white transition-all duration-200"
+          class="px-6 h-10 rounded-xl border border-zinc-200 dark:border-zinc-800 text-[13px] font-bold text-slate-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 hover:text-slate-900 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white transition-all duration-200"
           @click="close"
         >
           Cancel

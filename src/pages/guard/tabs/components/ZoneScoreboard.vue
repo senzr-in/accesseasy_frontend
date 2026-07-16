@@ -1,28 +1,34 @@
 <template>
   <div class="flex flex-col gap-1.5 overflow-y-auto custom-scrollbar h-full p-2.5">
-
     <!-- "All Zones" option to deselect -->
-    <div @click="$emit('select', { id: null })"
+    <div
       class="rounded-lg border p-2 cursor-pointer transition-all hover:shadow-sm text-center"
-      :class="!selectedId ? 'border-indigo-300 bg-indigo-50/60' : 'border-slate-200 bg-white hover:border-indigo-200'">
-      <p class="text-xs font-bold text-indigo-700 uppercase tracking-wider">All Zones</p>
+      :class="!selectedId ? 'border-indigo-300 bg-indigo-50/60' : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-200'"
+      @click="$emit('select', { id: null })"
+    >
+      <p class="text-xs font-bold text-indigo-700 uppercase tracking-wider">
+        All Zones
+      </p>
     </div>
 
     <!-- Zone cards (compact for scalability) -->
     <div
       v-for="zone in zonesWithStatus"
       :key="zone.id"
-      @click="$emit('select', zone)"
       class="rounded-lg border p-2.5 cursor-pointer transition-all hover:shadow-sm"
       :class="[
-        selectedId === zone.id ? 'border-indigo-300 bg-indigo-50/60 shadow-sm' : 'border-slate-200 bg-white hover:border-indigo-200',
+        selectedId === zone.id ? 'border-indigo-300 bg-indigo-50/60 shadow-sm' : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-indigo-200',
         zone.hasMissed ? 'border-l-[3px] border-l-rose-500' : zone.hasActive ? 'border-l-[3px] border-l-emerald-500' : 'border-l-[3px] border-l-slate-200'
       ]"
+      @click="$emit('select', zone)"
     >
       <div class="flex items-center justify-between mb-1.5">
         <div class="flex items-center gap-1.5 min-w-0">
-          <Building2 class="w-3 h-3 shrink-0" :class="zone.hasMissed ? 'text-rose-600' : zone.hasActive ? 'text-emerald-600' : 'text-slate-400'" />
-          <span class="text-sm font-bold text-slate-900 leading-tight truncate">{{ zone.name }}</span>
+          <Building2
+            class="w-3 h-3 shrink-0"
+            :class="zone.hasMissed ? 'text-rose-600' : zone.hasActive ? 'text-emerald-600' : 'text-slate-400'"
+          />
+          <span class="text-sm font-bold text-slate-900 dark:text-slate-100 leading-tight truncate">{{ zone.name }}</span>
         </div>
         <ChevronRight class="w-3 h-3 text-slate-300 shrink-0" />
       </div>
@@ -37,9 +43,14 @@
       </div>
     </div>
 
-    <div v-if="!zonesWithStatus.length" class="flex flex-col items-center justify-center h-full text-center py-6">
+    <div
+      v-if="!zonesWithStatus.length"
+      class="flex flex-col items-center justify-center h-full text-center py-6"
+    >
       <Building2 class="w-7 h-7 text-slate-200 mx-auto mb-2" />
-      <p class="text-xs text-slate-400 font-semibold">No zones configured</p>
+      <p class="text-xs text-slate-400 font-semibold">
+        No zones configured
+      </p>
     </div>
   </div>
 </template>

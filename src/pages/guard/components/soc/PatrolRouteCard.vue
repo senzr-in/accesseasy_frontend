@@ -5,7 +5,9 @@
 
     <!-- Header -->
     <div class="flex justify-between items-start mb-1">
-      <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Route Name</p>
+      <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">
+        Route Name
+      </p>
       <span class="inline-flex items-center px-2 py-0.5 rounded border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
         Active
       </span>
@@ -40,14 +42,20 @@
     <!-- Checkpoints List -->
     <div class="flex-1 min-h-0 flex flex-col mb-6">
       <span class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Checkpoints</span>
-      <span class="text-xs text-slate-500 mb-3">Visits List</span>
+      <span class="text-xs text-slate-500 dark:text-slate-400 mb-3">Visits List</span>
       
       <!-- Scrollable timeline -->
       <div class="flex-1 overflow-y-auto custom-scrollbar pr-2 relative">
-        <div v-if="loading" class="flex justify-center py-4">
+        <div
+          v-if="loading"
+          class="flex justify-center py-4"
+        >
           <div class="w-5 h-5 rounded-full border-2 border-cyan-500/30 border-t-cyan-400 animate-spin" />
         </div>
-        <div v-else class="relative border-l border-slate-700/50 ml-1.5 space-y-4 py-1">
+        <div
+          v-else
+          class="relative border-l border-slate-700/50 ml-1.5 space-y-4 py-1"
+        >
           <div 
             v-for="(cp, index) in checkpoints" 
             :key="cp.checkpoint_id"
@@ -60,13 +68,19 @@
             />
             
             <!-- Checkpoint Name -->
-            <span class="text-xs font-semibold" :class="cp.status === 'scanned' ? 'text-white' : 'text-slate-500'">
+            <span
+              class="text-xs font-semibold"
+              :class="cp.status === 'scanned' ? 'text-white' : 'text-slate-500 dark:text-slate-400'"
+            >
               {{ cp.name }}
             </span>
             
             <!-- Time / Status indicator -->
             <div class="flex items-center gap-2">
-              <span v-if="cp.status === 'scanned'" class="text-[10px] font-mono text-slate-400">{{ cp.scanTime }}</span>
+              <span
+                v-if="cp.status === 'scanned'"
+                class="text-[10px] font-mono text-slate-400"
+              >{{ cp.scanTime }}</span>
               <!-- Status dot right aligned -->
               <span 
                 class="w-1.5 h-1.5 rounded-full"
@@ -81,9 +95,23 @@
     <!-- Incidents -->
     <div class="mb-5">
       <span class="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2">Incident Icon</span>
-      <div class="flex items-center gap-2" :class="patrol.alerts > 0 ? 'text-rose-400' : 'text-slate-500'">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="drop-shadow-[0_0_5px_rgba(251,113,133,0.5)]">
-          <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/>
+      <div
+        class="flex items-center gap-2"
+        :class="patrol.alerts > 0 ? 'text-rose-400' : 'text-slate-500 dark:text-slate-400'"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="drop-shadow-[0_0_5px_rgba(251,113,133,0.5)]"
+        >
+          <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" /><path d="M12 9v4" /><path d="M12 17h.01" />
         </svg>
         <span class="text-xs font-bold">{{ patrol.alerts }} incidents flagged</span>
       </div>
@@ -94,14 +122,40 @@
       <span class="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2">Actions</span>
       <div class="flex gap-2">
         <button class="flex-1 flex items-center justify-center gap-1.5 bg-slate-800/50 hover:bg-slate-700 border border-white/5 hover:border-cyan-500/30 rounded-lg py-2 transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-cyan-400"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="text-cyan-400"
+          ><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle
+            cx="12"
+            cy="10"
+            r="3"
+          /></svg>
           <span class="text-[10px] font-bold text-slate-300">View Map</span>
         </button>
         <button class="flex-1 flex items-center justify-center gap-1 bg-slate-800/50 hover:bg-slate-700 border border-white/5 hover:border-cyan-500/30 rounded-lg py-2 transition-colors">
           <span class="text-[10px] font-bold text-slate-300">Contact Guard</span>
         </button>
         <button class="flex-1 flex items-center justify-center gap-1 bg-slate-800/50 hover:bg-slate-700 border border-white/5 hover:border-cyan-500/30 rounded-lg py-2 transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="text-slate-400"
+          ><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /><path d="M12 7v5l4 2" /></svg>
           <span class="text-[10px] font-bold text-slate-300">History</span>
         </button>
       </div>

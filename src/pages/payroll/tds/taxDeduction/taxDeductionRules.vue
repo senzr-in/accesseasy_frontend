@@ -83,7 +83,7 @@
               </button>
               <div
                 v-if="showNewDropdown"
-                class="bg-white rounded-lg shadow-md border border-slate-200 w-full max-w-md"
+                class="bg-white dark:bg-slate-900 rounded-lg shadow-md border border-slate-200 dark:border-slate-800 w-full max-w-md"
               >
                 <div class="px-4 py-3 border-b">
                   <p class="font-bold text-lg">
@@ -95,7 +95,7 @@
                     <div
                       v-for="(slab, i) in newBreakdown"
                       :key="i"
-                      class="rounded-lg bg-slate-50 p-3"
+                      class="rounded-lg bg-slate-50 dark:bg-slate-800/50 p-3"
                     >
                       <div class="flex items-center gap-2">
                         <span
@@ -104,10 +104,10 @@
                           <div class="h-3 w-3 rounded-full bg-green-500" />
                         </span>
                         <span class="font-medium">{{ slab.range }}</span>
-                        <span class="text-slate-500">—</span>
+                        <span class="text-slate-500 dark:text-slate-400">—</span>
                         <span>₹{{ slab.income.toLocaleString() }}</span>
                         <span
-                          class="ml-auto bg-slate-200 text-slate-700 text-xs font-medium px-2.5 py-0.5 rounded"
+                          class="ml-auto bg-slate-200 text-slate-700 dark:text-slate-200 text-xs font-medium px-2.5 py-0.5 rounded"
                         >
                           {{ slab.percentage }}%
                         </span>
@@ -129,7 +129,7 @@
                             stroke-linejoin="round"
                           />
                         </svg>
-                        <span class="text-slate-600">Tax:</span>
+                        <span class="text-slate-600 dark:text-slate-300">Tax:</span>
                         <span class="ml-1.5 font-semibold">₹{{ slab.tax.toLocaleString() }}</span>
                       </div>
                     </div>
@@ -165,7 +165,7 @@
               </button>
               <div
                 v-if="showOldDropdown"
-                class="bg-white rounded-lg shadow-md border border-slate-200 w-full max-w-md"
+                class="bg-white dark:bg-slate-900 rounded-lg shadow-md border border-slate-200 dark:border-slate-800 w-full max-w-md"
               >
                 <div class="px-4 py-3 border-b">
                   <p class="font-bold text-lg">
@@ -177,7 +177,7 @@
                     <div
                       v-for="(slab, i) in oldBreakdown"
                       :key="i"
-                      class="rounded-lg bg-slate-50 p-3"
+                      class="rounded-lg bg-slate-50 dark:bg-slate-800/50 p-3"
                     >
                       <div class="flex items-center gap-2">
                         <span
@@ -186,10 +186,10 @@
                           <div class="h-3 w-3 rounded-full bg-yellow-500" />
                         </span>
                         <span class="font-medium">{{ slab.range }}</span>
-                        <span class="text-slate-500">—</span>
+                        <span class="text-slate-500 dark:text-slate-400">—</span>
                         <span>₹{{ slab.income.toLocaleString() }}</span>
                         <span
-                          class="ml-auto bg-slate-200 text-slate-700 text-xs font-medium px-2.5 py-0.5 rounded"
+                          class="ml-auto bg-slate-200 text-slate-700 dark:text-slate-200 text-xs font-medium px-2.5 py-0.5 rounded"
                         >
                           {{ slab.percentage }}%
                         </span>
@@ -211,7 +211,7 @@
                             stroke-linejoin="round"
                           />
                         </svg>
-                        <span class="text-slate-600">Tax:</span>
+                        <span class="text-slate-600 dark:text-slate-300">Tax:</span>
                         <span class="ml-1.5 font-semibold">₹{{ slab.tax.toLocaleString() }}</span>
                       </div>
                     </div>

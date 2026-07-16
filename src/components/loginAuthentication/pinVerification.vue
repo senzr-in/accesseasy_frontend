@@ -1,7 +1,7 @@
 <template>
   <div class="flex min-h-screen w-full bg-[#f8fafc] dark:bg-[#020617] text-slate-900 dark:text-slate-100 flex-col lg:flex-row relative overflow-hidden font-sans">
     <!-- Left Side: Marketing Content (Same as Login) -->
-    <div class="flex-1 flex flex-col justify-center px-6 py-8 lg:px-14 lg:py-6 bg-white/10 dark:bg-black/20 backdrop-blur-md border-r border-slate-200 dark:border-white/10 relative overflow-hidden border-b lg:border-b-0">
+    <div class="flex-1 flex flex-col justify-center px-6 py-8 lg:px-14 lg:py-6 bg-white dark:bg-slate-900/10 dark:bg-black/20 backdrop-blur-md border-r border-slate-200 dark:border-white/10 relative overflow-hidden border-b lg:border-b-0">
       <!-- Grid Background Pattern -->
       <div 
         class="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none"
@@ -35,7 +35,7 @@
           <span class="text-blue-600">Frictionless</span> Access.
         </h1>
 
-        <p class="text-[12px] text-slate-500 font-bold mb-8 leading-relaxed max-w-sm uppercase tracking-wide">
+        <p class="text-[12px] text-slate-500 dark:text-slate-400 font-bold mb-8 leading-relaxed max-w-sm uppercase tracking-wide">
           Manage identity and physical security with the industry's most advanced platform.
         </p>
 
@@ -55,7 +55,7 @@
               <h3 class="font-black text-[10px] tracking-[0.05em] uppercase text-slate-900 dark:text-white">
                 {{ h.text }}
               </h3>
-              <p class="text-[9px] font-bold text-slate-500 leading-snug mt-0.5 uppercase tracking-widest">
+              <p class="text-[9px] font-bold text-slate-500 dark:text-slate-400 leading-snug mt-0.5 uppercase tracking-widest">
                 {{ h.sub }}
               </p>
             </div>
@@ -63,7 +63,7 @@
         </div>
 
         <div class="pt-6 border-t border-slate-200 dark:border-white/5">
-          <p class="text-[8px] font-black tracking-[0.3em] text-slate-400 dark:text-slate-600 mb-4 uppercase">
+          <p class="text-[8px] font-black tracking-[0.3em] text-slate-400 dark:text-slate-600 dark:text-slate-300 mb-4 uppercase">
             Infrastructure Partners
           </p>
           <div class="flex flex-wrap gap-x-6 gap-y-3">
@@ -84,11 +84,11 @@
     </div>
 
     <!-- Right Side: PIN/OTP Form Container -->
-    <div class="flex-1 flex items-center justify-center p-4 lg:p-10 relative overflow-hidden bg-slate-50/50 dark:bg-transparent">
+    <div class="flex-1 flex items-center justify-center p-4 lg:p-10 relative overflow-hidden bg-slate-50 dark:bg-slate-900/50 dark:bg-transparent">
       <!-- Glow effect -->
       <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-blue-600/5 rounded-full blur-[100px] pointer-events-none" />
 
-      <div class="w-full max-w-[420px] rounded-[2rem] bg-white/90 dark:bg-[#0a0e1a]/80 backdrop-blur-xl p-8 pb-14 shadow-2xl border border-slate-200 dark:border-white/10 relative z-10 animate-fade-in-up">
+      <div class="w-full max-w-[420px] rounded-[2rem] bg-white dark:bg-slate-900/90 dark:bg-[#0a0e1a]/80 backdrop-blur-xl p-8 pb-14 shadow-2xl border border-slate-200 dark:border-white/10 relative z-10 animate-fade-in-up">
         <!-- Form Header -->
         <div class="text-center mb-6">
           <div class="mx-auto mb-4 h-12 w-12 flex items-center justify-center rounded-[1rem] bg-blue-600 text-white shadow-lg shadow-blue-600/30 border border-blue-500/20">
@@ -145,7 +145,7 @@
               v-if="!maxAttemptsReached"
               class="space-y-2"
             >
-              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 ml-1 uppercase">Enter 4-Digit PIN</label>
+              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Enter 4-Digit PIN</label>
               <div class="flex justify-center gap-3 relative">
                 <input
                   v-for="(digit, index) in 4"
@@ -154,7 +154,7 @@
                   v-model="pinDigits[index]"
                   maxlength="1"
                   :type="showPin ? 'text' : 'password'"
-                  class="w-14 h-16 text-center rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none text-2xl font-black text-slate-900 dark:text-white shadow-sm"
+                  class="w-14 h-16 text-center rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none text-2xl font-black text-slate-900 dark:text-white shadow-sm"
                   @input="handlePinDigitInput(index)"
                   @keydown="handlePinKeydown($event, index)"
                   @paste="handlePinPaste($event, index)"
@@ -184,7 +184,7 @@
               <h3 class="text-xs font-black text-rose-600 uppercase tracking-widest mb-1">
                 Max Attempts Reached
               </h3>
-              <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-4">
+              <p class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-4">
                 Please reset your PIN to continue
               </p>
               <button 
@@ -219,7 +219,7 @@
                 Forgot your PIN?
               </button>
               <button
-                class="text-[10px] font-bold text-slate-400 hover:text-slate-600 uppercase tracking-widest transition-colors"
+                class="text-[10px] font-bold text-slate-400 hover:text-slate-600 dark:text-slate-300 uppercase tracking-widest transition-colors"
                 @click="goToAlternateLogin"
               >
                 Switch Account
@@ -233,7 +233,7 @@
             class="space-y-6"
           >
             <div class="space-y-2">
-              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 ml-1 uppercase">Enter 6-Digit OTP</label>
+              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Enter 6-Digit OTP</label>
               <div class="flex justify-between gap-2">
                 <input
                   v-for="(digit, index) in 6"
@@ -242,14 +242,14 @@
                   v-model="otpDigits[index]"
                   maxlength="1"
                   type="text"
-                  class="w-12 h-14 text-center rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none text-xl font-black text-slate-900 dark:text-white shadow-sm"
+                  class="w-12 h-14 text-center rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none text-xl font-black text-slate-900 dark:text-white shadow-sm"
                   @input="handleOtpInput(index)"
                   @keydown="handleOtpKeydown($event, index)"
                   @paste="handleOtpPaste($event, index)"
                 >
               </div>
               <div class="flex items-center justify-between px-1">
-                <p class="text-[9px] font-bold text-slate-500 uppercase tracking-wider">
+                <p class="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                   Didn't receive code?
                 </p>
                 <button
@@ -280,7 +280,7 @@
             class="space-y-6"
           >
             <div class="space-y-2">
-              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 ml-1 uppercase">
+              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">
                 {{ isConfirmingPin ? "Confirm Your PIN" : "Setup New PIN" }}
               </label>
               <div class="flex justify-center gap-3 relative">
@@ -291,7 +291,7 @@
                   v-model="newPinDigits[index]"
                   maxlength="1"
                   :type="showPin ? 'text' : 'password'"
-                  class="w-14 h-16 text-center rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none text-2xl font-black text-slate-900 dark:text-white shadow-sm"
+                  class="w-14 h-16 text-center rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none text-2xl font-black text-slate-900 dark:text-white shadow-sm"
                   @input="handleNewPinDigitInput(index)"
                   @keydown="handleNewPinKeydown($event, index)"
                   @paste="handleNewPinPaste($event, index)"
@@ -331,7 +331,7 @@
             class="text-center"
           >
             <button
-              class="text-[10px] font-black text-slate-500 hover:text-slate-700 uppercase tracking-widest transition-colors flex items-center justify-center gap-2 mx-auto"
+              class="text-[10px] font-black text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:text-slate-200 uppercase tracking-widest transition-colors flex items-center justify-center gap-2 mx-auto"
               @click="resetToPinEntry"
             >
               <ArrowLeft class="h-3 w-3" />

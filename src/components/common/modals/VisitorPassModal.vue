@@ -1,12 +1,20 @@
 <template>
-  <div v-if="show && visitor" class="fixed inset-0 z-[200] flex items-center justify-center p-4">
+  <div
+    v-if="show && visitor"
+    class="fixed inset-0 z-[200] flex items-center justify-center p-4"
+  >
     <!-- Dark backdrop -->
-    <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm print:hidden" @click="closeModal" />
+    <div
+      class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm print:hidden"
+      @click="closeModal"
+    />
     
     <div class="relative flex flex-col items-center animate-in zoom-in-95 duration-200 w-full max-w-3xl">
       <!-- Print Header -->
       <div class="hidden print:block text-center mb-6 w-full">
-        <h1 class="text-2xl font-bold text-black">VISITOR PASS</h1>
+        <h1 class="text-2xl font-bold text-black">
+          VISITOR PASS
+        </h1>
       </div>
 
       <!-- Clean Card Container -->
@@ -16,60 +24,97 @@
         :class="{ 'border-none rounded-none shadow-none': isExporting }" 
       >
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-          
           <!-- Column 1: Who is arriving? -->
           <div class="flex flex-col items-center md:items-start text-center md:text-left space-y-4">
-            <div class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Visitor Identity</div>
+            <div class="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2">
+              Visitor Identity
+            </div>
             <div class="w-24 h-24 rounded-full border border-slate-200 dark:border-slate-700 p-1 bg-slate-50 dark:bg-slate-800">
               <div class="w-full h-full rounded-full overflow-hidden bg-slate-200 dark:bg-slate-700">
-                <img v-if="visitor.photo" :src="getPhotoUrl(visitor.photo)" class="w-full h-full object-cover" crossorigin="anonymous" />
-                <div v-else class="w-full h-full flex items-center justify-center font-bold text-3xl text-slate-400">
+                <img
+                  v-if="visitor.photo"
+                  :src="getPhotoUrl(visitor.photo)"
+                  class="w-full h-full object-cover"
+                  crossorigin="anonymous"
+                >
+                <div
+                  v-else
+                  class="w-full h-full flex items-center justify-center font-bold text-3xl text-slate-400"
+                >
                   {{ visitor.personName?.charAt(0).toUpperCase() || '?' }}
                 </div>
               </div>
             </div>
             <div>
-              <h2 class="text-xl font-bold text-slate-900 dark:text-white uppercase">{{ visitor.personName }}</h2>
-              <p class="text-xs font-semibold text-slate-500 mt-1 uppercase tracking-wider">{{ visitor.mobileNumber || 'No Phone' }}</p>
+              <h2 class="text-xl font-bold text-slate-900 dark:text-white uppercase">
+                {{ visitor.personName }}
+              </h2>
+              <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-wider">
+                {{ visitor.mobileNumber || 'No Phone' }}
+              </p>
             </div>
           </div>
 
           <!-- Column 2: Why are they here? -->
           <div class="flex flex-col space-y-6 md:border-l border-slate-200 dark:border-slate-800 md:pl-8">
-            <div class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Visit Details</div>
-            
-            <div>
-              <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Host / Department</p>
-              <p class="text-sm font-bold text-slate-900 dark:text-white mt-1">{{ visitor.personToMeet || 'General Access' }}</p>
+            <div class="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2">
+              Visit Details
             </div>
             
             <div>
-              <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Company</p>
-              <p class="text-sm font-bold text-blue-600 dark:text-blue-400 mt-1">{{ visitor.company || 'Personal Visit' }}</p>
+              <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                Host / Department
+              </p>
+              <p class="text-sm font-bold text-slate-900 dark:text-white mt-1">
+                {{ visitor.personToMeet || 'General Access' }}
+              </p>
+            </div>
+            
+            <div>
+              <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                Company
+              </p>
+              <p class="text-sm font-bold text-blue-600 dark:text-blue-400 mt-1">
+                {{ visitor.company || 'Personal Visit' }}
+              </p>
             </div>
 
             <div>
-              <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Valid Time</p>
-              <p class="text-sm font-bold text-slate-900 dark:text-white mt-1">{{ formatDate(visitor.startDate) }} • {{ visitor.startTime?.slice(0, 5) || 'All Day' }}</p>
+              <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                Valid Time
+              </p>
+              <p class="text-sm font-bold text-slate-900 dark:text-white mt-1">
+                {{ formatDate(visitor.startDate) }} • {{ visitor.startTime?.slice(0, 5) || 'All Day' }}
+              </p>
             </div>
           </div>
 
           <!-- Column 3: Can I let them in? (QR & Status) -->
           <div class="flex flex-col items-center justify-center space-y-6 md:border-l border-slate-200 dark:border-slate-800 md:pl-8">
-            <div class="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2">Access Credentials</div>
+            <div class="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-2">
+              Access Credentials
+            </div>
             
-            <div class="p-3 bg-white border border-slate-200 rounded-lg">
-              <qrcode-vue :value="JSON.stringify({ type: 'VISITOR', token: visitor.id, name: visitor.personName })" :size="100" level="H" :margin="0" background="#ffffff" foreground="#000000" />
+            <div class="p-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg">
+              <qrcode-vue
+                :value="JSON.stringify({ type: 'VISITOR', token: visitor.id, name: visitor.personName })"
+                :size="100"
+                level="H"
+                :margin="0"
+                background="#ffffff"
+                foreground="#000000"
+              />
             </div>
 
             <div class="text-center w-full">
-              <span class="inline-block px-4 py-1.5 rounded text-xs font-bold uppercase tracking-wider w-full"
-                :class="visitor.status === 'active' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800' : 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800'">
+              <span
+                class="inline-block px-4 py-1.5 rounded text-xs font-bold uppercase tracking-wider w-full"
+                :class="visitor.status === 'active' ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800' : 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-200 dark:border-amber-800'"
+              >
                 {{ visitor.status || 'PENDING' }}
               </span>
             </div>
           </div>
-
         </div>
       </div>
       
@@ -77,35 +122,47 @@
       <div class="mt-6 flex flex-wrap justify-end gap-3 w-full print:hidden relative z-10">
         <button 
           :disabled="isExporting"
-          @click="downloadImage" 
-          class="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition-colors shadow-sm disabled:opacity-50"
+          class="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition-colors shadow-sm disabled:opacity-50" 
+          @click="downloadImage"
         >
-          <Loader2 v-if="isExporting === 'image'" class="w-4 h-4 animate-spin" />
-          <Image v-else class="w-4 h-4" />
+          <Loader2
+            v-if="isExporting === 'image'"
+            class="w-4 h-4 animate-spin"
+          />
+          <Image
+            v-else
+            class="w-4 h-4"
+          />
           {{ isExporting === 'image' ? 'Saving...' : 'Save Badge' }}
         </button>
         
         <button 
           :disabled="isExporting"
-          @click="downloadPDF" 
-          class="flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 font-semibold text-xs transition-colors shadow-sm disabled:opacity-50"
+          class="flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 font-semibold text-xs transition-colors shadow-sm disabled:opacity-50" 
+          @click="downloadPDF"
         >
-          <Loader2 v-if="isExporting === 'pdf'" class="w-4 h-4 animate-spin" />
-          <FileText v-else class="w-4 h-4" />
+          <Loader2
+            v-if="isExporting === 'pdf'"
+            class="w-4 h-4 animate-spin"
+          />
+          <FileText
+            v-else
+            class="w-4 h-4"
+          />
           {{ isExporting === 'pdf' ? 'Generating...' : 'Download PDF' }}
         </button>
 
         <button 
-          @click="printPass" 
-          class="flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 font-semibold text-xs transition-colors shadow-sm"
+          class="flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-300 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 font-semibold text-xs transition-colors shadow-sm" 
+          @click="printPass"
         >
           <Printer class="w-4 h-4" />
           Print
         </button>
         
         <button 
-          @click="closeModal" 
-          class="px-4 py-2 rounded-lg font-semibold text-xs text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors ml-auto"
+          class="px-4 py-2 rounded-lg font-semibold text-xs text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800 transition-colors ml-auto" 
+          @click="closeModal"
         >
           Close
         </button>

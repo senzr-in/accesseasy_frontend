@@ -17,7 +17,7 @@
             v-model="search" 
             type="text" 
             placeholder="Search schedules..."
-            class="w-full pl-9 pr-4 h-10 text-sm rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all placeholder:text-slate-500" 
+            class="w-full pl-9 pr-4 h-10 text-sm rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 transition-all placeholder:text-slate-500 dark:text-slate-400" 
           >
         </div>
         <button 
@@ -32,7 +32,7 @@
     <!-- Empty State -->
     <div
       v-if="filtered.length === 0"
-      class="border-dashed border-2 border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20 rounded-2xl"
+      class="border-dashed border-2 border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 dark:bg-slate-900/20 rounded-2xl"
     >
       <div class="flex flex-col items-center justify-center p-16 text-center space-y-4">
         <div class="p-4 rounded-full bg-cyan-50 dark:bg-cyan-500/5 border border-cyan-100 dark:border-cyan-500/10">
@@ -42,7 +42,7 @@
           <h3 class="font-black text-lg text-slate-900 dark:text-white">
             No Schedules Found
           </h3>
-          <p class="text-sm font-medium text-slate-500 max-w-xs mx-auto"> 
+          <p class="text-sm font-medium text-slate-500 dark:text-slate-400 max-w-xs mx-auto"> 
             Create time ranges and day patterns to control access flow across doors and zones.
           </p>
         </div>
@@ -62,24 +62,24 @@
     >
       <div class="overflow-x-auto">
         <table class="w-full text-left whitespace-nowrap">
-          <thead class="bg-slate-50/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800">
+          <thead class="bg-slate-50 dark:bg-slate-900/50 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800">
             <tr>
-              <th class="h-12 px-6 font-black text-[10px] text-slate-500 uppercase tracking-widest">
+              <th class="h-12 px-6 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                 Schedule Name
               </th>
-              <th class="h-12 px-6 font-black text-[10px] text-slate-500 uppercase tracking-widest">
+              <th class="h-12 px-6 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                 Days Active
               </th>
-              <th class="h-12 px-6 font-black text-[10px] text-slate-500 uppercase tracking-widest">
+              <th class="h-12 px-6 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                 Time Window
               </th>
-              <th class="h-12 px-6 font-black text-[10px] text-slate-500 uppercase tracking-widest">
+              <th class="h-12 px-6 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                 Zones Applied
               </th>
-              <th class="h-12 px-6 font-black text-[10px] text-slate-500 uppercase tracking-widest">
+              <th class="h-12 px-6 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                 Status
               </th>
-              <th class="h-12 px-6 font-black text-[10px] text-slate-500 uppercase tracking-widest text-right">
+              <th class="h-12 px-6 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest text-right">
                 Actions
               </th>
             </tr>
@@ -88,7 +88,7 @@
             <tr
               v-for="sch in filtered"
               :key="sch.id"
-              class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group"
+              class="hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-slate-800/50 transition-colors group"
             >
               <td class="px-6 py-4">
                 <div class="flex items-center gap-3">
@@ -124,7 +124,7 @@
               <td class="px-6 py-4">
                 <div 
                   class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] font-black uppercase tracking-widest border"
-                  :class="sch.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : 'bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'"
+                  :class="sch.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : 'bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'"
                 >
                   <span
                     class="w-1.5 h-1.5 rounded-full"
@@ -149,8 +149,8 @@
         </table>
       </div>
       
-      <div class="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-center">
-        <span class="text-[10px] font-black uppercase tracking-widest text-slate-500">
+      <div class="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 dark:bg-slate-900/50 text-center">
+        <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
           Showing {{ filtered.length }} of {{ schedules.length }} schedules
         </span>
       </div>

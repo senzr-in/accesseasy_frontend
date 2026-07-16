@@ -3,12 +3,12 @@
     <!-- Value Header -->
     <ValueHeader
       title="Guard Management"
-      valueStatement="Manage every security guard digitally."
+      value-statement="Manage every security guard digitally."
       :benefits="['Force tracking', 'Duty assignment', 'Status overview', 'Access permissions']"
-      valueBadge="Better accountability with less manual supervision."
-      actionText="Add Guard"
-      :actionIcon="UserPlus"
-      themeColor="indigo"
+      value-badge="Better accountability with less manual supervision."
+      action-text="Add Guard"
+      :action-icon="UserPlus"
+      theme-color="indigo"
       @action="openAddDialog"
     />
 
@@ -19,10 +19,10 @@
         <div class="bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl p-5 shadow-sm flex flex-col justify-center relative overflow-hidden group">
           <div class="absolute -right-4 -top-4 w-24 h-24 bg-blue-500/5 rounded-full blur-2xl group-hover:bg-blue-500/10 transition-colors duration-500" />
           <div class="flex items-center gap-3 mb-2">
-            <div class="p-2 rounded-lg bg-slate-50 dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 text-slate-500">
+            <div class="p-2 rounded-lg bg-slate-50 dark:hover:bg-zinc-800 border border-slate-100 dark:border-zinc-800 text-slate-500 dark:text-slate-400">
               <ShieldCheck class="w-4 h-4" />
             </div>
-            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+            <p class="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
               Total Force
             </p>
           </div>
@@ -36,7 +36,7 @@
             <div class="p-2 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400">
               <ShieldCheck class="w-4 h-4" />
             </div>
-            <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest">
+            <p class="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
               Active Personnel
             </p>
           </div>
@@ -106,7 +106,12 @@
         <!-- Avatar & Identity -->
         <div class="relative z-10 flex flex-col items-center mt-2 mb-4">
           <div class="w-16 h-16 rounded-full overflow-hidden bg-zinc-800 border-2 border-zinc-700/50 shadow-inner mb-3 flex items-center justify-center text-zinc-400 font-bold text-xl">
-            <img v-if="guard.avatar" :src="guard.avatar" :alt="fullName(guard)" class="w-full h-full object-cover" />
+            <img
+              v-if="guard.avatar"
+              :src="guard.avatar"
+              :alt="fullName(guard)"
+              class="w-full h-full object-cover"
+            >
             <span v-else>{{ initials(guard) }}</span>
           </div>
           <h3 class="text-[16px] font-bold text-white tracking-wide">
@@ -141,7 +146,10 @@
           <!-- Assigned Zone Row -->
           <div class="flex items-center justify-between text-xs">
             <span class="text-zinc-400">Assigned Zone</span>
-            <div class="flex items-center gap-1.5 text-zinc-300 font-medium truncate max-w-[120px]" :title="guard.assigned_zone_name || 'Unassigned'">
+            <div
+              class="flex items-center gap-1.5 text-zinc-300 font-medium truncate max-w-[120px]"
+              :title="guard.assigned_zone_name || 'Unassigned'"
+            >
               <span class="truncate">{{ guard.assigned_zone_name || 'Unassigned' }}</span>
               <MapPin class="w-3 h-3 text-zinc-500 shrink-0" />
             </div>
@@ -149,8 +157,11 @@
         </div>
 
         <!-- Actions Row -->
-        <div class="relative z-10 mt-6 grid grid-cols-2 gap-3">
-          <button class="flex items-center justify-center gap-2 h-9 rounded-lg border border-zinc-700 hover:border-zinc-500 hover:bg-zinc-800 text-zinc-300 text-xs font-medium transition-colors group/btn">
+        <div class="relative z-30 mt-6 grid grid-cols-2 gap-3">
+          <button 
+            class="flex items-center justify-center gap-2 h-9 rounded-lg border border-zinc-700 hover:border-zinc-500 hover:bg-zinc-800 text-zinc-300 text-xs font-medium transition-colors group/btn"
+            @click.stop.prevent="openMessageModal(guard)"
+          >
             <MessageSquare class="w-3.5 h-3.5 text-zinc-400 group-hover/btn:text-white" />
             Message
           </button>
@@ -161,7 +172,7 @@
         </div>
         
         <!-- Overlay Admin Actions -->
-        <div class="absolute inset-0 bg-zinc-950/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3 z-20">
+        <div class="absolute inset-0 bg-zinc-950/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3 z-20 pointer-events-none group-hover:pointer-events-auto">
           <button
             title="View Patrol Route"
             class="h-10 w-10 rounded-full flex items-center justify-center bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white transition-colors border border-emerald-500/30"
@@ -190,19 +201,19 @@
     <!-- Empty State -->
     <div
       v-if="filteredItems.length === 0 && !loading"
-      class="flex flex-col items-center justify-center py-24 rounded-2xl border border-dashed border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-900/20"
+      class="flex flex-col items-center justify-center py-24 rounded-2xl border border-dashed border-slate-200 dark:border-zinc-800 bg-slate-50 dark:bg-slate-900/50 dark:hover:bg-zinc-800/20"
     >
-      <div class="h-16 w-16 bg-white dark:bg-zinc-900 rounded-2xl flex items-center justify-center border border-slate-200 dark:border-zinc-800 shadow-sm mb-4">
+      <div class="h-16 w-16 bg-white dark:hover:bg-zinc-800 rounded-2xl flex items-center justify-center border border-slate-200 dark:border-zinc-800 shadow-sm mb-4">
         <ShieldCheck class="h-8 w-8 text-slate-400" />
       </div>
       <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest mb-1">
         No Guards Found
       </h3>
-      <p class="text-[13px] font-medium text-slate-500 max-w-sm text-center mb-6">
+      <p class="text-[13px] font-medium text-slate-500 dark:text-slate-400 max-w-sm text-center mb-6">
         You do not have any guards registered in the system yet.
       </p>
       <button
-        class="h-9 px-4 rounded-xl flex items-center justify-center bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all shadow-md"
+        class="h-9 px-4 rounded-xl flex items-center justify-center bg-slate-900 dark:bg-white dark:bg-slate-900 text-white dark:text-slate-900 dark:text-slate-100 text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all shadow-md"
         @click="openAddDialog"
       >
         <UserPlus class="w-3.5 h-3.5 mr-2" /> Add Guard
@@ -217,7 +228,7 @@
       <div class="relative w-full max-w-lg flex flex-col bg-white dark:bg-zinc-950 rounded-[24px] shadow-2xl shadow-indigo-500/10 border border-white/20 dark:border-zinc-800/80 overflow-hidden transform transition-all animate-in zoom-in-95 duration-300">
         <!-- Premium Glass Header -->
         <div class="relative px-8 py-6 flex justify-between items-start bg-gradient-to-b from-slate-50 to-white dark:from-zinc-900 dark:to-zinc-950 border-b border-zinc-100 dark:border-zinc-800/80 z-10 shrink-0">
-          <div class="absolute inset-0 bg-white/40 dark:bg-zinc-950/40 backdrop-blur-xl" />
+          <div class="absolute inset-0 bg-white dark:bg-slate-900/40 dark:bg-zinc-950/40 backdrop-blur-xl" />
           <div class="relative z-10">
             <div class="flex items-center gap-3 mb-1">
               <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center border border-indigo-100 dark:border-indigo-500/20 shadow-inner">
@@ -232,7 +243,7 @@
             </p>
           </div>
           <button
-            class="relative z-10 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-zinc-700 transition-all duration-200"
+            class="relative z-10 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-400 hover:text-slate-900 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-zinc-700 transition-all duration-200"
             @click="showDialog = false"
           >
             <X class="w-4 h-4" />
@@ -337,30 +348,48 @@
 
             <!-- Mobile App Permissions Section -->
             <div class="pt-2 border-t border-zinc-100 dark:border-zinc-800">
-              <h4 class="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-widest mb-3">Mobile App Features</h4>
+              <h4 class="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-widest mb-3">
+                Mobile App Features
+              </h4>
               
               <div class="space-y-4">
                 <!-- Incident Reporting Toggle -->
                 <div class="flex items-center justify-between">
                   <div>
-                    <p class="text-sm font-bold text-slate-900 dark:text-white">Incident Reporting</p>
-                    <p class="text-[11px] text-slate-500">Allow guard to submit incident reports with photos.</p>
+                    <p class="text-sm font-bold text-slate-900 dark:text-white">
+                      Incident Reporting
+                    </p>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                      Allow guard to submit incident reports with photos.
+                    </p>
                   </div>
                   <label class="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" v-model="form.enable_incidents" class="sr-only peer">
-                    <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-zinc-600 peer-checked:bg-indigo-600"></div>
+                    <input
+                      v-model="form.enable_incidents"
+                      type="checkbox"
+                      class="sr-only peer"
+                    >
+                    <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:bg-slate-900 after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-zinc-600 peer-checked:bg-indigo-600" />
                   </label>
                 </div>
 
                 <!-- Patrol Route Toggle -->
                 <div class="flex items-center justify-between">
                   <div>
-                    <p class="text-sm font-bold text-slate-900 dark:text-white">Patrol Routes</p>
-                    <p class="text-[11px] text-slate-500">Enable checkpoint scanning and patrol logging.</p>
+                    <p class="text-sm font-bold text-slate-900 dark:text-white">
+                      Patrol Routes
+                    </p>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                      Enable checkpoint scanning and patrol logging.
+                    </p>
                   </div>
                   <label class="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" v-model="form.enable_patrols" class="sr-only peer">
-                    <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-zinc-600 peer-checked:bg-emerald-500"></div>
+                    <input
+                      v-model="form.enable_patrols"
+                      type="checkbox"
+                      class="sr-only peer"
+                    >
+                    <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-zinc-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:bg-slate-900 after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-zinc-600 peer-checked:bg-emerald-500" />
                   </label>
                 </div>
               </div>
@@ -372,7 +401,7 @@
         <div class="relative px-8 py-5 border-t border-zinc-100 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 flex justify-end gap-3 z-10 shrink-0">
           <button
             type="button"
-            class="px-6 h-10 rounded-xl border border-zinc-200 dark:border-zinc-800 text-[13px] font-bold text-slate-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-all duration-200 shadow-sm"
+            class="px-6 h-10 rounded-xl border border-zinc-200 dark:border-zinc-800 text-[13px] font-bold text-slate-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 transition-all duration-200 shadow-sm"
             @click="showDialog = false"
           >
             Cancel
@@ -393,6 +422,13 @@
       </div>
     </div>
 
+    <!-- Message Guard Modal -->
+    <GuardMessageModal 
+      v-model:show="showMessageModal"
+      :guard="selectedGuardForMessage"
+      @sent="handleMessageSent"
+    />
+
     <!-- Patrol Route Map Modal -->
     <div
       v-if="showPatrolMap"
@@ -407,15 +443,22 @@
           <!-- Header -->
           <div class="flex items-start justify-between mb-8">
             <div>
-              <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Active Patrol Route</h2>
-              <p class="text-sm font-medium text-slate-500 mt-1">Guard: {{ fullName(activeGuardForMap) }} • Shift: Ongoing</p>
+              <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                Active Patrol Route
+              </h2>
+              <p class="text-sm font-medium text-slate-500 dark:text-slate-400 mt-1">
+                Guard: {{ fullName(activeGuardForMap) }} • Shift: Ongoing
+              </p>
             </div>
             <div class="flex items-center gap-3">
               <div class="px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 flex items-center gap-2 shadow-sm">
                 <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span class="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">In Progress</span>
               </div>
-              <button class="text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" @click="showPatrolMap = false">
+              <button
+                class="text-slate-400 hover:text-slate-900 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white transition-colors"
+                @click="showPatrolMap = false"
+              >
                 <X class="w-5 h-5" />
               </button>
             </div>
@@ -431,11 +474,13 @@
               <div class="relative z-10 w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20 ring-4 ring-white dark:ring-zinc-950 shrink-0 transform transition-transform group-hover:scale-110">
                 <Check class="w-5 h-5 text-white" />
               </div>
-              <div class="flex-1 bg-slate-50/50 dark:bg-zinc-900/50 rounded-2xl p-4 border border-slate-100 dark:border-zinc-800/80 backdrop-blur-sm transition-colors hover:bg-slate-50 dark:hover:bg-zinc-900 group-hover:border-emerald-200 dark:group-hover:border-emerald-500/30">
+              <div class="flex-1 bg-slate-50 dark:bg-slate-900/50 dark:hover:bg-zinc-800/50 rounded-2xl p-4 border border-slate-100 dark:border-zinc-800/80 backdrop-blur-sm transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 group-hover:border-emerald-200 dark:group-hover:border-emerald-500/30">
                 <div class="flex justify-between items-start">
                   <div>
-                    <h3 class="text-sm font-bold text-slate-900 dark:text-white">Main Lobby Desk</h3>
-                    <p class="text-[11px] text-slate-500 mt-1 flex items-center gap-1 font-medium">
+                    <h3 class="text-sm font-bold text-slate-900 dark:text-white">
+                      Main Lobby Desk
+                    </h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1 font-medium">
                       <MapPin class="w-3 h-3" /> NFC-001 • Checkpoint 1
                     </p>
                   </div>
@@ -451,11 +496,13 @@
               <div class="relative z-10 w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20 ring-4 ring-white dark:ring-zinc-950 shrink-0 transform transition-transform group-hover:scale-110">
                 <Check class="w-5 h-5 text-white" />
               </div>
-              <div class="flex-1 bg-slate-50/50 dark:bg-zinc-900/50 rounded-2xl p-4 border border-slate-100 dark:border-zinc-800/80 backdrop-blur-sm transition-colors hover:bg-slate-50 dark:hover:bg-zinc-900 group-hover:border-emerald-200 dark:group-hover:border-emerald-500/30">
+              <div class="flex-1 bg-slate-50 dark:bg-slate-900/50 dark:hover:bg-zinc-800/50 rounded-2xl p-4 border border-slate-100 dark:border-zinc-800/80 backdrop-blur-sm transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 group-hover:border-emerald-200 dark:group-hover:border-emerald-500/30">
                 <div class="flex justify-between items-start">
                   <div>
-                    <h3 class="text-sm font-bold text-slate-900 dark:text-white">Server Room Corridor</h3>
-                    <p class="text-[11px] text-slate-500 mt-1 flex items-center gap-1 font-medium">
+                    <h3 class="text-sm font-bold text-slate-900 dark:text-white">
+                      Server Room Corridor
+                    </h3>
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1 font-medium">
                       <MapPin class="w-3 h-3" /> QR-042 • Checkpoint 2
                     </p>
                   </div>
@@ -474,7 +521,9 @@
               <div class="flex-1 bg-rose-50/50 dark:bg-rose-500/5 rounded-2xl p-4 border border-rose-100 dark:border-rose-500/20 backdrop-blur-sm group-hover:border-rose-300 dark:group-hover:border-rose-500/40 transition-colors">
                 <div class="flex justify-between items-start">
                   <div>
-                    <h3 class="text-sm font-bold text-rose-900 dark:text-rose-100">South Parking Exit</h3>
+                    <h3 class="text-sm font-bold text-rose-900 dark:text-rose-100">
+                      South Parking Exit
+                    </h3>
                     <p class="text-[11px] text-rose-500 mt-1 flex items-center gap-1 font-medium">
                       <AlertCircle class="w-3 h-3" /> Missed Checkpoint
                     </p>
@@ -488,19 +537,22 @@
 
             <!-- Pending Checkpoint -->
             <div class="relative flex gap-6 items-start group">
-              <div class="relative z-10 w-10 h-10 rounded-xl bg-slate-100 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 flex items-center justify-center ring-4 ring-white dark:ring-zinc-950 shrink-0">
+              <div class="relative z-10 w-10 h-10 rounded-xl bg-slate-100 dark:hover:bg-zinc-800 border border-slate-200 dark:border-zinc-800 flex items-center justify-center ring-4 ring-white dark:ring-zinc-950 shrink-0">
                 <Clock class="w-4 h-4 text-slate-400" />
               </div>
-              <div class="flex-1 border-2 border-dashed border-slate-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-950/50 rounded-2xl p-4 opacity-60">
+              <div class="flex-1 border-2 border-dashed border-slate-200 dark:border-zinc-800 bg-white dark:bg-slate-900/50 dark:bg-zinc-950/50 rounded-2xl p-4 opacity-60">
                 <div class="flex justify-between items-start">
                   <div>
-                    <h3 class="text-sm font-bold text-slate-600 dark:text-zinc-400">North Gate</h3>
-                    <p class="text-[11px] text-slate-400 mt-1 font-medium">Pending Scan</p>
+                    <h3 class="text-sm font-bold text-slate-600 dark:text-zinc-400">
+                      North Gate
+                    </h3>
+                    <p class="text-[11px] text-slate-400 mt-1 font-medium">
+                      Pending Scan
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       </div>
@@ -514,6 +566,7 @@ import { UserPlus, Search, Loader2, ShieldCheck, Phone, Settings, Trash2, X, Ale
 import { authService } from '@/services/authService';
 import { currentUserTenant } from '@/utils/currentUserTenant';
 import ValueHeader from '@/components/common/ValueHeader.vue';
+import GuardMessageModal from '@/components/guard/GuardMessageModal.vue';
 
 const items = ref([]);
 const loading = ref(false);
@@ -528,9 +581,23 @@ const guardRoleId = ref(null);
 const showPatrolMap = ref(false);
 const activeGuardForMap = ref(null);
 
+const showMessageModal = ref(false);
+const selectedGuardForMessage = ref(null);
+
 const viewPatrolMap = (guard) => {
   activeGuardForMap.value = guard;
   showPatrolMap.value = true;
+};
+
+const openMessageModal = (guard) => {
+  console.log('Opening message modal for guard:', guard);
+  alert('Click handler fired! If you see this, the button works but the modal failed to show.');
+  selectedGuardForMessage.value = guard;
+  showMessageModal.value = true;
+};
+
+const handleMessageSent = () => {
+  console.log('Message sent successfully.');
 };
 
 const fetchGuardRoleId = async () => {

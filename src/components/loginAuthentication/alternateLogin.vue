@@ -1,7 +1,7 @@
 <template>
   <div class="flex min-h-screen w-full bg-[#f8fafc] dark:bg-[#020617] text-slate-900 dark:text-slate-100 flex-col lg:flex-row relative overflow-hidden font-sans">
     <!-- Left Side: Marketing Content -->
-    <div class="flex-1 flex flex-col justify-center px-6 py-8 lg:px-14 lg:py-6 bg-white/10 dark:bg-black/20 backdrop-blur-md border-r border-slate-200 dark:border-white/10 relative overflow-hidden border-b lg:border-b-0">
+    <div class="flex-1 flex flex-col justify-center px-6 py-8 lg:px-14 lg:py-6 bg-white dark:bg-slate-900/10 dark:bg-black/20 backdrop-blur-md border-r border-slate-200 dark:border-white/10 relative overflow-hidden border-b lg:border-b-0">
       <!-- Grid Background Pattern -->
       <div 
         class="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none"
@@ -35,7 +35,7 @@
           <span class="text-blue-600">Security</span> Profiles.
         </h1>
 
-        <p class="text-[12px] text-slate-500 font-bold mb-8 leading-relaxed max-w-sm uppercase tracking-wide">
+        <p class="text-[12px] text-slate-500 dark:text-slate-400 font-bold mb-8 leading-relaxed max-w-sm uppercase tracking-wide">
           Switch between organizations or verification methods seamlessly with our unified identity bridge.
         </p>
 
@@ -55,7 +55,7 @@
               <h3 class="font-black text-[10px] tracking-[0.05em] uppercase text-slate-900 dark:text-white">
                 {{ h.text }}
               </h3>
-              <p class="text-[9px] font-bold text-slate-500 leading-snug mt-0.5 uppercase tracking-widest">
+              <p class="text-[9px] font-bold text-slate-500 dark:text-slate-400 leading-snug mt-0.5 uppercase tracking-widest">
                 {{ h.sub }}
               </p>
             </div>
@@ -63,7 +63,7 @@
         </div>
 
         <div class="pt-6 border-t border-slate-200 dark:border-white/5">
-          <p class="text-[8px] font-black tracking-[0.3em] text-slate-400 dark:text-slate-600 mb-4 uppercase">
+          <p class="text-[8px] font-black tracking-[0.3em] text-slate-400 dark:text-slate-600 dark:text-slate-300 mb-4 uppercase">
             Connected Modules
           </p>
           <div class="flex flex-wrap gap-x-6 gap-y-3">
@@ -84,11 +84,11 @@
     </div>
 
     <!-- Right Side: Switch Account Form -->
-    <div class="flex-1 flex items-center justify-center p-4 lg:p-10 relative overflow-hidden bg-slate-50/50 dark:bg-transparent">
+    <div class="flex-1 flex items-center justify-center p-4 lg:p-10 relative overflow-hidden bg-slate-50 dark:bg-slate-900/50 dark:bg-transparent">
       <!-- Glow effect -->
       <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-emerald-600/5 rounded-full blur-[100px] pointer-events-none" />
 
-      <div class="w-full max-w-[420px] rounded-[2rem] bg-white/90 dark:bg-[#0a0e1a]/80 backdrop-blur-xl p-8 shadow-2xl border border-slate-200 dark:border-white/10 relative z-10 animate-fade-in-up">
+      <div class="w-full max-w-[420px] rounded-[2rem] bg-white dark:bg-slate-900/90 dark:bg-[#0a0e1a]/80 backdrop-blur-xl p-8 shadow-2xl border border-slate-200 dark:border-white/10 relative z-10 animate-fade-in-up">
         <div class="text-center mb-8">
           <div class="mx-auto mb-4 h-12 w-12 flex items-center justify-center rounded-[1rem] bg-emerald-600 text-white shadow-lg shadow-emerald-600/30 border border-emerald-500/20">
             <Users class="h-5 w-5" />
@@ -106,7 +106,7 @@
           <button 
             :class="[
               'flex-1 py-2.5 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all duration-300',
-              mode === 'phone' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-md' : 'text-slate-500 hover:text-slate-700'
+              mode === 'phone' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:text-slate-200'
             ]"
             @click="setMode('phone')"
           >
@@ -115,7 +115,7 @@
           <button 
             :class="[
               'flex-1 py-2.5 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all duration-300',
-              mode === 'email' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-md' : 'text-slate-500 hover:text-slate-700'
+              mode === 'email' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-md' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:text-slate-200'
             ]"
             @click="setMode('email')"
           >
@@ -151,7 +151,7 @@
             class="space-y-4"
           >
             <div class="space-y-1.5">
-              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 ml-1 uppercase">Mobile Number</label>
+              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Mobile Number</label>
               <div class="flex gap-2">
                 <div class="h-12 w-16 flex items-center justify-center bg-slate-100 dark:bg-slate-900 rounded-xl border border-transparent dark:border-white/5 text-[12px] font-black text-slate-900 dark:text-white">
                   +91
@@ -162,7 +162,7 @@
                     type="tel"
                     maxlength="10"
                     placeholder="Enter phone"
-                    class="w-full h-12 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-emerald-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-emerald-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
+                    class="w-full h-12 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-emerald-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-emerald-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
                     @input="sanitizePhone"
                     @keyup.enter="handleSubmit"
                   >
@@ -183,13 +183,13 @@
             class="space-y-4"
           >
             <div class="space-y-1.5">
-              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 ml-1 uppercase">Work Email</label>
+              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Work Email</label>
               <div class="relative group">
                 <input
                   v-model.trim="email"
                   type="email"
                   placeholder="name@company.com"
-                  class="w-full h-12 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-emerald-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-emerald-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
+                  class="w-full h-12 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-emerald-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-emerald-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
                   @keyup.enter="handleSubmit"
                 >
                 <Mail class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-emerald-600 transition-colors" />
@@ -205,7 +205,7 @@
 
           <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-white/5 flex gap-3">
             <ShieldCheck class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-            <p class="text-[10px] text-slate-500 font-bold leading-relaxed uppercase tracking-wider">
+            <p class="text-[10px] text-slate-500 dark:text-slate-400 font-bold leading-relaxed uppercase tracking-wider">
               We'll initiate a secure session and take you to OTP verification.
             </p>
           </div>
@@ -222,7 +222,7 @@
             </template>
           </button>
 
-          <p class="text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+          <p class="text-center text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Don't have an account? 
             <router-link
               to="/register"

@@ -13,7 +13,7 @@
               'flex items-center gap-2 px-4 h-10 text-sm font-semibold transition-colors relative',
               activeTab === tab.value 
                 ? 'text-blue-600 dark:text-blue-400' 
-                : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-400 dark:hover:text-slate-200'
             ]"
             @click="activeTab = tab.value; handleTabChange(tab.value)"
           >

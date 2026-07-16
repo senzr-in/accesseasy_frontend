@@ -9,7 +9,7 @@
           v-model="searchQuery"
           type="search"
           placeholder="Search access points by name or number..."
-          class="w-full pl-9 pr-4 h-10 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm text-slate-900 placeholder:text-slate-400"
+          class="w-full pl-9 pr-4 h-10 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400"
           @input="debouncedSearch"
         >
       </div>
@@ -24,29 +24,29 @@
     </div>
 
     <!-- Table Card -->
-    <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden flex flex-col flex-1 min-h-0">
+    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden flex flex-col flex-1 min-h-0">
       <div class="overflow-x-auto flex-1 h-full">
         <table class="w-full text-left border-collapse relative">
-          <thead class="bg-slate-50 border-b border-slate-200 sticky top-0 z-10">
+          <thead class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-10">
             <tr>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
                 Access Point Name
               </th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
                 #
               </th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
                 Location
               </th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
                 Status
               </th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest text-right whitespace-nowrap">
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest text-right whitespace-nowrap">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100 bg-white">
+          <tbody class="divide-y divide-slate-100 bg-white dark:bg-slate-900">
             <!-- Loading -->
             <tr v-if="loading">
               <td
@@ -65,7 +65,7 @@
               >
                 <div class="flex flex-col items-center justify-center space-y-3">
                   <DoorOpen class="w-10 h-10 text-slate-300" />
-                  <p class="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                  <p class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
                     No access points found.
                   </p>
                   <button
@@ -91,7 +91,7 @@
               v-for="door in items"
               v-else
               :key="door.id"
-              class="group/row hover:bg-slate-50 transition-colors duration-200"
+              class="group/row hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors duration-200"
             >
               <!-- Name -->
               <td class="px-5 py-3">
@@ -100,7 +100,7 @@
                     <DoorOpen class="h-4 w-4" />
                   </div>
                   <div>
-                    <span class="text-[13px] font-semibold text-slate-800">{{ door.doorName || 'Unnamed Access Point' }}</span>
+                    <span class="text-[13px] font-semibold text-slate-800 dark:text-slate-200">{{ door.doorName || 'Unnamed Access Point' }}</span>
                     <p class="text-[11px] text-slate-400 font-mono">
                       {{ String(door.id).substring(0, 8) }}…
                     </p>
@@ -110,14 +110,14 @@
 
               <!-- Number -->
               <td class="px-5 py-3">
-                <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-mono font-bold border border-slate-200">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-950 text-slate-700 dark:text-slate-200 text-[11px] font-mono font-bold border border-slate-200 dark:border-slate-800">
                   #{{ door.doorNumber || '—' }}
                 </span>
               </td>
 
               <!-- Location -->
               <td class="px-5 py-3">
-                <span class="text-[12px] font-semibold text-slate-500">{{ door.location || '—' }}</span>
+                <span class="text-[12px] font-semibold text-slate-500 dark:text-slate-400">{{ door.location || '—' }}</span>
               </td>
 
               <!-- Status -->
@@ -155,7 +155,7 @@
                     Lock
                   </button>
                   <button
-                    class="h-7 px-3 text-[10px] font-black uppercase tracking-widest bg-transparent border border-slate-200 rounded-md hover:bg-slate-50 text-slate-700 transition-colors shadow-sm"
+                    class="h-7 px-3 text-[10px] font-black uppercase tracking-widest bg-transparent border border-slate-200 dark:border-slate-800 rounded-md hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 transition-colors shadow-sm"
                     @click="editItem(door)"
                   >
                     Edit
@@ -175,19 +175,19 @@
       </div>
 
       <!-- Pagination (inside the card, at the bottom) -->
-      <div class="flex items-center justify-between p-4 border-t border-slate-100 bg-slate-50 shrink-0">
+      <div class="flex items-center justify-between p-4 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 shrink-0">
         <button
-          class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 hover:bg-white disabled:opacity-50 transition-colors shadow-sm text-slate-700"
+          class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-white dark:bg-slate-900 disabled:opacity-50 transition-colors shadow-sm text-slate-700 dark:text-slate-200"
           :disabled="page <= 1 || loading"
           @click="page--"
         >
           Previous
         </button>
-        <div class="text-[10px] font-black uppercase tracking-widest text-slate-500">
+        <div class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
           Page {{ page }} of {{ totalPages || 1 }} &nbsp;·&nbsp; {{ totalItems }} total
         </div>
         <button
-          class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 hover:bg-white disabled:opacity-50 transition-colors shadow-sm text-slate-700"
+          class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-white dark:bg-slate-900 disabled:opacity-50 transition-colors shadow-sm text-slate-700 dark:text-slate-200"
           :disabled="page >= totalPages || loading"
           @click="page++"
         >

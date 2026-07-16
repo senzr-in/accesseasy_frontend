@@ -9,7 +9,7 @@
           Device Architecture & Operational Parameters
         </p>
       </div>
-      <button class="h-10 sm:h-12 px-6 sm:px-8 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-xs tracking-widest uppercase bg-slate-900 border border-slate-800 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-200 gap-2 shadow-xl shadow-slate-900/10 dark:shadow-white/5 active:scale-95 transition-all flex items-center justify-center whitespace-nowrap">
+      <button class="h-10 sm:h-12 px-6 sm:px-8 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-xs tracking-widest uppercase bg-slate-900 border border-slate-800 text-white hover:bg-slate-800 dark:bg-white dark:bg-slate-900 dark:text-slate-900 dark:text-slate-100 dark:hover:bg-slate-200 gap-2 shadow-xl shadow-slate-900/10 dark:shadow-white/5 active:scale-95 transition-all flex items-center justify-center whitespace-nowrap">
         <Plus class="w-4 h-4 sm:w-5 sm:h-5 mr-2 -ml-1" />
         New Device Type
       </button>
@@ -20,7 +20,7 @@
       <div 
         v-for="type in deviceTypes" 
         :key="type.id"
-        class="group relative rounded-3xl border border-slate-200 dark:border-white/5 bg-white dark:bg-zinc-900/40 backdrop-blur-xl shadow-xl transition-all duration-500 hover:shadow-2xl hover:bg-slate-50 dark:hover:bg-zinc-900/60 overflow-hidden flex flex-col"
+        class="group relative rounded-3xl border border-slate-200 dark:border-white/5 bg-white dark:hover:bg-zinc-800/40 backdrop-blur-xl shadow-xl transition-all duration-500 hover:shadow-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hoverdark:hover:bg-zinc-800/60 overflow-hidden flex flex-col"
       >
         <!-- Scanning Effect -->
         <div class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-cyan-500/50 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-[1500ms] ease-in-out" />
@@ -55,10 +55,10 @@
           </p>
 
           <div class="flex flex-wrap gap-3">
-            <div class="px-3 py-1.5 bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-zinc-400 rounded-xl text-[9px] font-black border border-slate-200 dark:border-white/10 uppercase tracking-[0.15em] shadow-sm">
+            <div class="px-3 py-1.5 bg-slate-50 dark:bg-white dark:bg-slate-900/5 text-slate-600 dark:text-zinc-400 rounded-xl text-[9px] font-black border border-slate-200 dark:border-white/10 uppercase tracking-[0.15em] shadow-sm">
               {{ type._count?.parameters || 0 }} Params
             </div>
-            <div class="px-3 py-1.5 bg-slate-50 dark:bg-white/5 text-slate-600 dark:text-zinc-400 rounded-xl text-[9px] font-black border border-slate-200 dark:border-white/10 uppercase tracking-[0.15em] shadow-sm">
+            <div class="px-3 py-1.5 bg-slate-50 dark:bg-white dark:bg-slate-900/5 text-slate-600 dark:text-zinc-400 rounded-xl text-[9px] font-black border border-slate-200 dark:border-white/10 uppercase tracking-[0.15em] shadow-sm">
               {{ type._count?.alertRules || 0 }} Rules
             </div>
             <div class="px-3 py-1.5 bg-cyan-50 dark:bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 rounded-xl text-[9px] font-black border border-cyan-200 dark:border-cyan-500/20 uppercase tracking-[0.15em] shadow-sm">
@@ -66,8 +66,8 @@
             </div>
           </div>
 
-          <div class="flex gap-3 pt-4 border-t border-slate-100/50 dark:border-white/5 mt-auto">
-            <button class="flex-1 h-10 inline-flex items-center justify-center rounded-xl border border-slate-200 dark:border-white/10 text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-white/5 font-black text-[10px] uppercase tracking-[0.2em] gap-2 transition-all group/btn1">
+          <div class="flex gap-3 pt-4 border-t border-slate-100 dark:border-slate-700/50 dark:border-white/5 mt-auto">
+            <button class="flex-1 h-10 inline-flex items-center justify-center rounded-xl border border-slate-200 dark:border-white/10 text-slate-500 dark:text-zinc-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-slate-800/50 font-black text-[10px] uppercase tracking-[0.2em] gap-2 transition-all group/btn1">
               <Settings class="w-3.5 h-3.5 group-hover/btn1:rotate-90 transition-transform duration-500" />
               Config
             </button>
@@ -80,11 +80,11 @@
 
       <!-- Add New Card Area -->
       <div 
-        class="group relative rounded-3xl border-2 border-dashed border-slate-200 dark:border-white/10 flex items-center justify-center p-8 bg-slate-50/30 dark:bg-white/[0.02] hover:bg-slate-50/80 dark:hover:bg-white/[0.05] hover:border-cyan-500/50 transition-all duration-500 cursor-pointer min-h-[280px] overflow-hidden"
+        class="group relative rounded-3xl border-2 border-dashed border-slate-200 dark:border-white/10 flex items-center justify-center p-8 bg-slate-50 dark:bg-slate-900/50 dark:bg-white dark:bg-slate-900/[0.02] hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-slate-800/50 dark:hover:bg-white dark:bg-slate-900/[0.05] hover:border-cyan-500/50 transition-all duration-500 cursor-pointer min-h-[280px] overflow-hidden"
       >
         <div class="absolute inset-0 bg-cyan-500/[0.02] opacity-0 group-hover:opacity-100 transition-opacity" />
         <div class="text-center relative z-10 transition-transform duration-500 group-hover:scale-105">
-          <div class="h-16 w-16 bg-white dark:bg-white/5 rounded-2xl flex items-center justify-center border border-slate-200 dark:border-white/10 mx-auto mb-6 shadow-xl group-hover:border-cyan-500/50 group-hover:shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all">
+          <div class="h-16 w-16 bg-white dark:bg-white dark:bg-slate-900/5 rounded-2xl flex items-center justify-center border border-slate-200 dark:border-white/10 mx-auto mb-6 shadow-xl group-hover:border-cyan-500/50 group-hover:shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all">
             <Plus class="w-8 h-8 text-slate-400 dark:text-zinc-400 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors" />
           </div>
           <h3 class="text-[11px] font-black text-slate-900 dark:text-white uppercase tracking-[0.3em] mb-2">

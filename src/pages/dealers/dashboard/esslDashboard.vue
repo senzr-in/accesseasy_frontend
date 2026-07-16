@@ -26,12 +26,12 @@
       <div class="flex items-center gap-4">
         <!-- Search -->
         <div class="relative hidden md:block">
-          <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+          <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 dark:text-slate-400" />
           <input
             v-model="globalSearch"
             type="text"
             placeholder="Search tenants..."
-            class="h-9 w-56 pl-9 pr-4 rounded-xl bg-slate-900 border border-slate-800 text-sm font-medium text-slate-300 placeholder:text-slate-600 outline-none focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/10 transition-all"
+            class="h-9 w-56 pl-9 pr-4 rounded-xl bg-slate-900 border border-slate-800 text-sm font-medium text-slate-300 placeholder:text-slate-600 dark:text-slate-300 outline-none focus:border-violet-500/50 focus:ring-2 focus:ring-violet-500/10 transition-all"
           >
         </div>
 
@@ -44,7 +44,7 @@
         </div>
 
         <button
-          class="h-9 w-9 flex items-center justify-center rounded-xl hover:bg-slate-900 text-slate-500 hover:text-rose-400 transition-colors"
+          class="h-9 w-9 flex items-center justify-center rounded-xl hover:bg-slate-900 text-slate-500 dark:text-slate-400 hover:text-rose-400 transition-colors"
           @click="handleSignOut"
         >
           <LogOut class="w-4 h-4" />
@@ -70,7 +70,7 @@
             <div class="text-2xl font-black text-white">
               {{ stat.value }}
             </div>
-            <div class="text-[11px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">
+            <div class="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-0.5">
               {{ stat.label }}
             </div>
           </div>
@@ -86,7 +86,7 @@
             'flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all duration-200',
             activeTab === tab.id
               ? 'bg-violet-600 text-white shadow-lg shadow-violet-500/20'
-              : 'text-slate-500 hover:text-slate-300'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-300'
           ]"
           @click="activeTab = tab.id"
         >
@@ -97,7 +97,7 @@
           {{ tab.label }}
           <span
             v-if="tab.badge"
-            :class="['text-[10px] font-black px-1.5 py-0.5 rounded-full', activeTab === tab.id ? 'bg-white/20' : 'bg-slate-800 text-slate-400']"
+            :class="['text-[10px] font-black px-1.5 py-0.5 rounded-full', activeTab === tab.id ? 'bg-white dark:bg-slate-900/20' : 'bg-slate-800 text-slate-400']"
           >
             {{ tab.badge }}
           </span>
@@ -136,7 +136,7 @@
                   <th
                     v-for="h in tenantHeaders"
                     :key="h"
-                    class="text-left px-5 py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest"
+                    class="text-left px-5 py-3 text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest"
                   >
                     {{ h }}
                   </th>
@@ -152,7 +152,7 @@
                     <div class="font-bold text-sm text-white">
                       {{ tenant.tenantName || '—' }}
                     </div>
-                    <div class="text-[10px] text-slate-500 font-medium mt-0.5">
+                    <div class="text-[10px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">
                       ID: {{ tenant.tenantId || tenant.id || '—' }}
                     </div>
                   </td>
@@ -173,7 +173,7 @@
                 <tr v-if="filteredTenants.length === 0">
                   <td
                     colspan="4"
-                    class="px-5 py-12 text-center text-slate-600 font-semibold text-sm"
+                    class="px-5 py-12 text-center text-slate-600 dark:text-slate-300 font-semibold text-sm"
                   >
                     No tenants found
                   </td>
@@ -216,7 +216,7 @@
                   <th
                     v-for="h in dealerHeaders"
                     :key="h"
-                    class="text-left px-5 py-3 text-[10px] font-black text-slate-500 uppercase tracking-widest"
+                    class="text-left px-5 py-3 text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest"
                   >
                     {{ h }}
                   </th>
@@ -232,7 +232,7 @@
                     <div class="font-bold text-sm text-white">
                       {{ item.requestedBy?.assignedUser?.tenant?.tenantName || '—' }}
                     </div>
-                    <div class="text-[10px] text-slate-500 mt-0.5">
+                    <div class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
                       {{ item.requestedBy?.assignedUser?.tenant?.tenantId || '' }}
                     </div>
                   </td>
@@ -268,7 +268,7 @@
                       </button>
                       <span
                         v-if="item.dealerAccess !== 'requested'"
-                        class="text-xs text-slate-600 font-semibold"
+                        class="text-xs text-slate-600 dark:text-slate-300 font-semibold"
                       >—</span>
                     </div>
                   </td>
@@ -276,7 +276,7 @@
                 <tr v-if="dealers.length === 0">
                   <td
                     colspan="5"
-                    class="px-5 py-12 text-center text-slate-600 font-semibold text-sm"
+                    class="px-5 py-12 text-center text-slate-600 dark:text-slate-300 font-semibold text-sm"
                   >
                     No dealer requests found
                   </td>

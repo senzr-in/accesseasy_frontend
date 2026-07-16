@@ -22,7 +22,8 @@ ENV VITE_UI_URL=${VITE_UI_URL}
 ENV VITE_GOOGLE_MAPS_API_KEY=${VITE_GOOGLE_MAPS_API_KEY}
 
 RUN NODE_OPTIONS="--max-old-space-size=4096" npm run build
-
+RUN NODE_OPTIONS="--max-old-space-size=4096" npm run build:security
+RUN NODE_OPTIONS="--max-old-space-size=4096" npm run build:workforce
 # Production stage
 FROM nginx:stable-alpine as production-stage
 

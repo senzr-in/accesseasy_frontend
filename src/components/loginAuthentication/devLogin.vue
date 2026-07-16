@@ -108,7 +108,7 @@
         </button>
       </div>
 
-      <p class="mt-6 text-[10px] text-slate-600 font-semibold uppercase tracking-widest">
+      <p class="mt-6 text-[10px] text-slate-600 dark:text-slate-300 font-semibold uppercase tracking-widest">
         ⚠ Development only · Remove before production
       </p>
     </div>

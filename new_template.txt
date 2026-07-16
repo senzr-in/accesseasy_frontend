@@ -1,0 +1,298 @@
+<template>
+  <div class="h-full flex flex-col overflow-hidden bg-slate-50 p-4 pb-16 relative">
+    <div class="flex-1 grid grid-cols-12 gap-4 min-h-0 overflow-hidden">
+
+      <!-- LEFT COLUMN: OPERATIONS (col-span-3) -->
+      <div class="col-span-3 flex flex-col gap-3 overflow-y-auto pr-1 pb-2" style="scrollbar-width:none">
+        <div class="mb-1">
+          <h2 class="text-[11px] font-black text-slate-700 uppercase tracking-widest">OPERATIONS</h2>
+          <p class="text-[10px] text-slate-400 mt-0.5">Quick actions &amp; management</p>
+        </div>
+
+        <!-- VISITOR MANAGEMENT -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-5 h-5 rounded-md bg-indigo-100 flex items-center justify-center">
+              <Users class="w-3 h-3 text-indigo-600" />
+            </div>
+            <h3 class="text-[10px] font-bold text-indigo-600 uppercase tracking-widest">VISITOR MANAGEMENT</h3>
+          </div>
+          <div class="grid grid-cols-3 gap-2">
+            <button v-for="item in visitorActions" :key="item.label"
+              class="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-slate-50 transition-colors group"
+              @click="router.push(item.href)">
+              <div class="w-9 h-9 rounded-xl flex items-center justify-center transition-colors" :class="item.bg">
+                <component :is="item.icon" class="w-4 h-4" :class="item.color" />
+              </div>
+              <span class="text-[9px] font-semibold text-slate-500 text-center leading-tight group-hover:text-slate-700">{{ item.label }}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- GUARD OPERATIONS -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-5 h-5 rounded-md bg-emerald-100 flex items-center justify-center">
+              <Shield class="w-3 h-3 text-emerald-600" />
+            </div>
+            <h3 class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">GUARD OPERATIONS</h3>
+          </div>
+          <div class="grid grid-cols-3 gap-2">
+            <button v-for="item in guardActions" :key="item.label"
+              class="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-slate-50 transition-colors group"
+              @click="router.push(item.href)">
+              <div class="w-9 h-9 rounded-xl flex items-center justify-center transition-colors" :class="item.bg">
+                <component :is="item.icon" class="w-4 h-4" :class="item.color" />
+              </div>
+              <span class="text-[9px] font-semibold text-slate-500 text-center leading-tight group-hover:text-slate-700">{{ item.label }}</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ACCESS CONTROL -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
+          <div class="flex items-center gap-2 mb-3">
+            <div class="w-5 h-5 rounded-md bg-purple-100 flex items-center justify-center">
+              <Lock class="w-3 h-3 text-purple-600" />
+            </div>
+            <h3 class="text-[10px] font-bold text-purple-600 uppercase tracking-widest">ACCESS CONTROL</h3>
+          </div>
+          <div class="grid grid-cols-3 gap-2">
+            <button v-for="item in accessActions" :key="item.label"
+              class="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-slate-50 transition-colors group"
+              @click="router.push(item.href)">
+              <div class="w-9 h-9 rounded-xl flex items-center justify-center transition-colors" :class="item.bg">
+                <component :is="item.icon" class="w-4 h-4" :class="item.color" />
+              </div>
+              <span class="text-[9px] font-semibold text-slate-500 text-center leading-tight group-hover:text-slate-700">{{ item.label }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MIDDLE COLUMN: LIVE COMMAND CENTER (col-span-6) -->
+      <div class="col-span-6 flex flex-col gap-3 min-h-0 pb-2">
+        <!-- Header -->
+        <div class="flex items-center justify-between shrink-0">
+          <div>
+            <h2 class="text-sm font-black text-slate-800 uppercase tracking-wider">LIVE COMMAND CENTER</h2>
+            <p class="text-[10px] text-slate-400 font-medium">Real-time overview &amp; monitoring</p>
+          </div>
+          <button class="flex items-center gap-1.5 px-3 py-1.5 border border-slate-200 bg-white rounded-lg text-[11px] font-semibold text-slate-500 hover:bg-slate-50 transition-colors shadow-sm">
+            <SlidersHorizontal class="w-3 h-3" /> Customize View
+          </button>
+        </div>
+
+        <!-- KPI STATS ROW -->
+        <div class="grid grid-cols-4 gap-3 shrink-0">
+          <div class="bg-white border border-slate-200 rounded-xl px-3 py-2.5 shadow-sm flex items-center gap-3 cursor-pointer hover:border-emerald-200 transition-colors" @click="router.push('/dashboard/visitors')">
+            <span class="text-3xl font-black text-emerald-600 leading-none shrink-0">
+              <span v-if="loading" class="inline-block w-8 h-7 bg-slate-100 animate-pulse rounded" />
+              <span v-else>{{ stats.visitorsInside }}</span>
+            </span>
+            <div class="min-w-0">
+              <p class="text-[11px] font-bold text-slate-700 leading-tight">Visitors Inside</p>
+              <p class="text-[10px] text-emerald-500 font-semibold mt-0.5">↑ 12% from yesterday</p>
+            </div>
+          </div>
+
+          <div class="bg-white border border-slate-200 rounded-xl px-3 py-2.5 shadow-sm flex items-center gap-3 cursor-pointer hover:border-blue-200 transition-colors" @click="router.push('/dashboard/guards')">
+            <span class="text-3xl font-black text-blue-600 leading-none shrink-0">
+              <span v-if="loading" class="inline-block w-8 h-7 bg-slate-100 animate-pulse rounded" />
+              <span v-else>{{ stats.guardsOnDuty }}</span>
+            </span>
+            <div class="min-w-0">
+              <p class="text-[11px] font-bold text-slate-700 leading-tight">Guards On Duty</p>
+              <p class="text-[10px] text-slate-400 mt-0.5">{{ stats.patrolsRunning || 2 }} Patrolling</p>
+            </div>
+          </div>
+
+          <div class="bg-white border border-slate-200 rounded-xl px-3 py-2.5 shadow-sm flex items-center gap-3 cursor-pointer hover:border-amber-200 transition-colors" @click="router.push('/dashboard/patrols')">
+            <span class="text-3xl font-black text-amber-500 leading-none shrink-0">
+              <span v-if="loading" class="inline-block w-8 h-7 bg-slate-100 animate-pulse rounded" />
+              <span v-else>{{ stats.patrolsRunning || 2 }}</span>
+            </span>
+            <div class="min-w-0">
+              <p class="text-[11px] font-bold text-slate-700 leading-tight">Patrols Running</p>
+              <p class="text-[10px] text-slate-400 mt-0.5 truncate">North Zone, Parking</p>
+            </div>
+          </div>
+
+          <div class="bg-white border border-slate-200 rounded-xl px-3 py-2.5 shadow-sm flex items-center gap-3 cursor-pointer hover:border-rose-200 transition-colors" @click="router.push('/dashboard/incidents')">
+            <span class="text-3xl font-black text-rose-500 leading-none shrink-0">
+              <span v-if="loading" class="inline-block w-8 h-7 bg-slate-100 animate-pulse rounded" />
+              <span v-else>{{ stats.activeAlerts || 1 }}</span>
+            </span>
+            <div class="min-w-0">
+              <p class="text-[11px] font-bold text-slate-700 leading-tight">Active Alerts</p>
+              <p class="text-[10px] text-rose-500 font-semibold mt-0.5">Requires Attention</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- MAP -->
+        <div class="flex-1 rounded-2xl bg-white border border-slate-200 overflow-hidden relative shadow-sm min-h-[240px]">
+          <div ref="dashboardMapContainer" class="absolute inset-0"></div>
+          <div v-if="!activeGuards.length" class="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <span class="text-[11px] font-semibold text-slate-400 bg-white/90 px-4 py-2 rounded-full shadow-sm backdrop-blur">No active locations</span>
+          </div>
+        </div>
+
+        <!-- PATROL PROGRESS + LIVE ACTIVITY -->
+        <div class="grid grid-cols-2 gap-3 shrink-0 h-[200px]">
+          <!-- Patrol Progress -->
+          <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col overflow-hidden">
+            <div class="flex items-center justify-between mb-3 shrink-0">
+              <h3 class="text-[10px] font-black text-slate-700 uppercase tracking-widest">PATROL PROGRESS</h3>
+              <button class="text-[10px] font-bold text-indigo-500 hover:underline" @click="router.push('/dashboard/patrols')">View All</button>
+            </div>
+            <div class="flex-1 overflow-y-auto space-y-3" style="scrollbar-width:none">
+              <div v-for="patrol in patrolList" :key="patrol.name">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-[11px] font-bold text-slate-800">{{ patrol.name }}</span>
+                  <span class="text-[9px] font-bold px-1.5 py-0.5 rounded" :class="patrol.status === 'On Track' ? 'text-emerald-600 bg-emerald-50' : 'text-amber-600 bg-amber-50'">{{ patrol.status }}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                    <div class="h-full rounded-full transition-all" :class="patrol.status === 'On Track' ? 'bg-emerald-500' : 'bg-amber-400'" :style="{ width: patrol.pct + '%' }"></div>
+                  </div>
+                  <span class="text-[9px] text-slate-400 shrink-0">{{ patrol.done }}/{{ patrol.total }} CPs</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Live Activity -->
+          <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col overflow-hidden">
+            <div class="flex items-center justify-between mb-3 shrink-0">
+              <h3 class="text-[10px] font-black text-slate-700 uppercase tracking-widest">LIVE ACTIVITY</h3>
+              <button class="text-[10px] font-bold text-indigo-500 hover:underline" @click="router.push('/dashboard/logs')">View All</button>
+            </div>
+            <div class="flex-1 overflow-y-auto space-y-2.5" style="scrollbar-width:none">
+              <div v-for="event in liveEvents" :key="event.label" class="flex items-start gap-2.5">
+                <div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 mt-0.5" :class="event.iconBg">
+                  <component :is="event.icon" class="w-3.5 h-3.5" :class="event.iconColor" />
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center justify-between">
+                    <p class="text-[11px] font-bold truncate" :class="event.urgent ? 'text-rose-600' : 'text-slate-800'">{{ event.label }}</p>
+                    <span class="text-[9px] text-slate-400 shrink-0 ml-2">{{ event.time }}</span>
+                  </div>
+                  <p class="text-[10px] text-slate-400 truncate">{{ event.sub }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN: ALERTS + GUARDS (col-span-3) -->
+      <div class="col-span-3 flex flex-col gap-3 overflow-y-auto pl-1 pb-2" style="scrollbar-width:none">
+
+        <!-- ACTIVE ALERTS -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm shrink-0">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-[10px] font-black text-rose-600 uppercase tracking-widest">ACTIVE ALERTS</h3>
+            <button class="text-[10px] font-bold text-rose-500 hover:underline" @click="router.push('/dashboard/incidents')">View All</button>
+          </div>
+
+          <!-- Emergency SOS -->
+          <div class="bg-rose-50 border border-rose-200 rounded-xl p-3 mb-2 relative overflow-hidden">
+            <div class="absolute left-0 top-0 bottom-0 w-0.5 bg-rose-500 rounded-l-xl"></div>
+            <div class="flex justify-between items-center mb-1.5 pl-1">
+              <div class="flex items-center gap-1.5 text-rose-600">
+                <AlertTriangle class="w-3.5 h-3.5" />
+                <span class="text-[11px] font-black uppercase tracking-wide">EMERGENCY SOS</span>
+              </div>
+              <span class="text-[8px] font-black px-1.5 py-0.5 rounded bg-rose-500 text-white uppercase animate-pulse">LIVE</span>
+            </div>
+            <div class="pl-1 space-y-0.5">
+              <p class="text-[10px] text-slate-600">Guard: <span class="font-bold text-slate-800">idid</span></p>
+              <p class="text-[10px] text-slate-600">Location: <span class="font-bold text-slate-800">Parking Zone</span></p>
+              <p class="text-[10px] text-slate-600">Time: <span class="font-bold text-slate-800">09:53 PM</span></p>
+            </div>
+          </div>
+
+          <!-- Door Forced Open -->
+          <div class="border border-slate-100 rounded-xl p-2.5 mb-2 relative overflow-hidden">
+            <div class="absolute left-0 top-0 bottom-0 w-0.5 bg-amber-400 rounded-l-xl"></div>
+            <div class="flex justify-between items-center pl-1">
+              <div class="flex items-center gap-1.5 text-amber-600">
+                <DoorOpen class="w-3 h-3" />
+                <span class="text-[10px] font-bold">Door Forced Open</span>
+              </div>
+              <span class="text-[9px] text-slate-400">09:45 PM</span>
+            </div>
+            <p class="text-[9px] text-slate-400 mt-0.5 pl-1">Building A - Back Door</p>
+          </div>
+
+          <!-- Visitor Overstay -->
+          <div class="border border-slate-100 rounded-xl p-2.5 relative overflow-hidden">
+            <div class="absolute left-0 top-0 bottom-0 w-0.5 bg-blue-400 rounded-l-xl"></div>
+            <div class="flex justify-between items-center pl-1">
+              <div class="flex items-center gap-1.5 text-blue-500">
+                <Clock class="w-3 h-3" />
+                <span class="text-[10px] font-bold">Visitor Overstay</span>
+              </div>
+              <span class="text-[9px] text-slate-400">09:30 PM</span>
+            </div>
+            <p class="text-[9px] text-slate-400 mt-0.5 pl-1">John Doe - 45 mins</p>
+          </div>
+        </div>
+
+        <!-- GUARDS ON DUTY -->
+        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col flex-1 min-h-0">
+          <div class="flex items-center justify-between mb-3 shrink-0">
+            <h3 class="text-[10px] font-black text-slate-700 uppercase tracking-widest">GUARDS ON DUTY</h3>
+            <button class="text-[10px] font-bold text-indigo-500 hover:underline" @click="router.push('/dashboard/guards')">View All</button>
+          </div>
+
+          <div class="flex-1 overflow-y-auto space-y-2.5" style="scrollbar-width:none">
+            <div v-for="g in guardsList" :key="g.name" class="flex items-center gap-2.5 py-1 px-1 rounded-xl hover:bg-slate-50 transition-colors">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-black shrink-0 border-2 border-white shadow-sm" :class="[g.avatarBg, g.avatarText]">
+                {{ g.initials }}
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-[11px] font-bold text-slate-800 truncate">{{ g.name }}</p>
+                <p class="text-[9px] truncate font-medium" :class="g.patrolling ? 'text-emerald-500' : 'text-slate-400'">
+                  {{ g.patrolling ? 'Patrolling' : 'Standing By' }} - {{ g.loc }}
+                </p>
+              </div>
+              <div class="flex items-center gap-1 shrink-0">
+                <div class="w-1.5 h-1.5 rounded-full" :class="g.batColor === 'amber' ? 'bg-amber-400' : 'bg-emerald-500'"></div>
+                <span class="text-[9px] font-bold text-slate-500">{{ g.bat }}%</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-2.5 border-t border-slate-100 mt-auto shrink-0">
+            <div class="flex justify-between items-center">
+              <span class="text-[10px] text-slate-400 font-semibold">8 Guards On Duty</span>
+              <button class="text-[10px] font-bold text-indigo-500 hover:underline" @click="router.push('/dashboard/guards')">View All</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUICK ACTIONS BAR -->
+    <div class="absolute bottom-0 left-0 right-0 bg-white border-t border-slate-200 px-6 py-2.5 flex items-center gap-3 z-20 shadow-[0_-2px_12px_rgba(0,0,0,0.04)]">
+      <span class="text-[9px] font-black text-slate-600 uppercase tracking-widest border-r border-slate-200 pr-4 shrink-0">QUICK ACTIONS</span>
+      <button class="flex items-center gap-1.5 px-3 py-1.5 bg-rose-500 text-white rounded-lg text-[11px] font-bold hover:bg-rose-600 transition-colors whitespace-nowrap shadow-sm">
+        <span class="text-[9px] font-black">SOS</span> Emergency
+      </button>
+      <button class="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-700 border border-indigo-100 rounded-lg text-[11px] font-bold hover:bg-indigo-100 transition-colors whitespace-nowrap" @click="router.push('/dashboard/visitors')">
+        <UserPlus class="w-3.5 h-3.5" /> Register Visitor
+      </button>
+      <button class="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-lg text-[11px] font-bold hover:bg-emerald-100 transition-colors whitespace-nowrap" @click="router.push('/dashboard/visitors')">
+        <QrCode class="w-3.5 h-3.5" /> Scan QR
+      </button>
+      <button class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 border border-blue-100 rounded-lg text-[11px] font-bold hover:bg-blue-100 transition-colors whitespace-nowrap" @click="router.push('/dashboard/visitors')">
+        <Search class="w-3.5 h-3.5" /> Search
+      </button>
+      <button class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 text-slate-500 border border-slate-200 rounded-lg text-[11px] font-bold hover:bg-slate-100 transition-colors whitespace-nowrap ml-auto">
+        <MoreHorizontal class="w-3.5 h-3.5" /> More Actions
+      </button>
+    </div>
+  </div>
+</template>

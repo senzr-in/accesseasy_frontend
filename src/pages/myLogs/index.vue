@@ -5,11 +5,11 @@
       <div>
         <h1 class="text-3xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
           Activity Logs
-          <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-widest bg-slate-50 text-slate-600 border border-slate-200 dark:bg-slate-500/10 dark:text-slate-400 dark:border-slate-500/20">
+          <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-widest bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-800 dark:bg-slate-500/10 dark:text-slate-400 dark:border-slate-500/20">
             {{ logs.length }} Total
           </span>
         </h1>
-        <p class="text-slate-500 font-medium mt-1">
+        <p class="text-slate-500 dark:text-slate-400 font-medium mt-1">
           Real-time history of your access attempts.
         </p>
       </div>
@@ -28,7 +28,7 @@
     <div class="rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden shadow-sm flex flex-col h-[700px]">
       <div class="overflow-y-auto flex-1 h-full">
         <table class="w-full text-left border-collapse relative">
-          <thead class="bg-slate-50 dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-10 w-full">
+          <thead class="bg-slate-50 dark:hover:bg-zinc-800 border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-10 w-full">
             <tr>
               <th class="px-5 py-3 text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">
                 Time
@@ -64,12 +64,12 @@
             <tr
               v-for="log in filteredLogs"
               :key="log.id"
-              class="hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors group"
+              class="hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 transition-colors group"
             >
               <td class="px-5 py-3">
                 <div class="flex flex-col justify-center">
                   <span class="font-bold text-xs text-slate-900 dark:text-white">{{ formatDate(log.timestamp) }}</span>
-                  <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-widest mt-0.5">{{ formatTime(log.timestamp) }}</span>
+                  <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-0.5">{{ formatTime(log.timestamp) }}</span>
                 </div>
               </td>
               <td class="px-5 py-3">
@@ -81,7 +81,7 @@
                 </div>
               </td>
               <td class="px-5 py-3">
-                <span class="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 text-slate-500">
+                <span class="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-md bg-slate-50 dark:hover:bg-zinc-800 border border-slate-200 dark:border-zinc-800 text-slate-500 dark:text-slate-400">
                   {{ log.door?.zone?.name || '—' }}
                 </span>
               </td>

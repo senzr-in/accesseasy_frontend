@@ -1,7 +1,7 @@
 <template>
   <div class="flex min-h-screen w-full bg-[#f8fafc] dark:bg-[#020617] text-slate-900 dark:text-slate-100 flex-col lg:flex-row relative overflow-hidden font-sans">
     <!-- Left Side: Marketing Content -->
-    <div class="flex-1 flex flex-col justify-center px-6 py-8 lg:px-14 lg:py-6 bg-white/10 dark:bg-black/20 backdrop-blur-md border-r border-slate-200 dark:border-white/10 relative overflow-hidden">
+    <div class="flex-1 flex flex-col justify-center px-6 py-8 lg:px-14 lg:py-6 bg-white dark:bg-slate-900/10 dark:bg-black/20 backdrop-blur-md border-r border-slate-200 dark:border-white/10 relative overflow-hidden">
       <!-- Grid Background Pattern -->
       <div 
         class="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none"
@@ -35,7 +35,7 @@
           <span class="text-blue-600">Empower</span> your workforce.
         </h1>
 
-        <p class="text-[12px] text-slate-500 font-bold mb-8 leading-relaxed max-w-sm uppercase tracking-wide">
+        <p class="text-[12px] text-slate-500 dark:text-slate-400 font-bold mb-8 leading-relaxed max-w-sm uppercase tracking-wide">
           The ultimate platform for real-time access control and workforce intelligence.
         </p>
 
@@ -55,7 +55,7 @@
               <h3 class="font-black text-[10px] tracking-[0.05em] uppercase text-slate-900 dark:text-white">
                 {{ h.text }}
               </h3>
-              <p class="text-[9px] font-bold text-slate-500 leading-snug mt-0.5 uppercase tracking-widest">
+              <p class="text-[9px] font-bold text-slate-500 dark:text-slate-400 leading-snug mt-0.5 uppercase tracking-widest">
                 {{ h.sub }}
               </p>
             </div>
@@ -63,7 +63,7 @@
         </div>
 
         <div class="pt-6 border-t border-slate-200 dark:border-white/5">
-          <p class="text-[8px] font-black tracking-[0.3em] text-slate-400 dark:text-slate-600 mb-4 uppercase">
+          <p class="text-[8px] font-black tracking-[0.3em] text-slate-400 dark:text-slate-600 dark:text-slate-300 mb-4 uppercase">
             Trusted Enterprise Networks
           </p>
           <div class="flex flex-wrap gap-x-6 gap-y-3">
@@ -84,11 +84,11 @@
     </div>
 
     <!-- Right Side: Login Form -->
-    <div class="flex-1 flex items-center justify-center p-4 lg:p-10 relative overflow-hidden bg-slate-50/50 dark:bg-transparent">
+    <div class="flex-1 flex items-center justify-center p-4 lg:p-10 relative overflow-hidden bg-slate-50 dark:bg-slate-900/50 dark:bg-transparent">
       <!-- Glow effect -->
       <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-blue-600/5 rounded-full blur-[100px] pointer-events-none" />
 
-      <div class="w-full max-w-[420px] rounded-[2rem] bg-white/90 dark:bg-[#0a0e1a]/80 backdrop-blur-xl p-8 shadow-2xl border border-slate-200 dark:border-white/10 relative z-10 animate-fade-in-up">
+      <div class="w-full max-w-[420px] rounded-[2rem] bg-white dark:bg-slate-900/90 dark:bg-[#0a0e1a]/80 backdrop-blur-xl p-8 shadow-2xl border border-slate-200 dark:border-white/10 relative z-10 animate-fade-in-up">
         <div class="text-center mb-6">
           <div class="mx-auto mb-4 h-12 w-12 flex items-center justify-center rounded-[1rem] bg-blue-600 text-white shadow-lg shadow-blue-600/30 border border-blue-500/20">
             <Lock class="h-5 w-5" />
@@ -109,7 +109,7 @@
           <div class="flex p-1 bg-slate-100 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-white/5">
             <button
               type="button"
-              :class="['flex-1 py-2 .5 flex items-center justify-center gap-1.5 text-[10px] font-black uppercase tracking-[0.1em] rounded-lg transition-all duration-200', mode === 'phone' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white']"
+              :class="['flex-1 py-2 .5 flex items-center justify-center gap-1.5 text-[10px] font-black uppercase tracking-[0.1em] rounded-lg transition-all duration-200', mode === 'phone' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white']"
               @click="setMode('phone')"
             >
               <Phone class="h-3 w-3" />
@@ -117,7 +117,7 @@
             </button>
             <button
               type="button"
-              :class="['flex-1 py-2.5 flex items-center justify-center gap-1.5 text-[10px] font-black uppercase tracking-[0.1em] rounded-lg transition-all duration-200', mode === 'email' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white']"
+              :class="['flex-1 py-2.5 flex items-center justify-center gap-1.5 text-[10px] font-black uppercase tracking-[0.1em] rounded-lg transition-all duration-200', mode === 'email' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white']"
               @click="setMode('email')"
             >
               <Mail class="h-3 w-3" />
@@ -129,14 +129,14 @@
             v-if="mode === 'phone'"
             class="space-y-1"
           >
-            <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 ml-1 uppercase">Phone Number</label>
+            <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Phone Number</label>
             <div class="relative group">
               <Phone class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
               <input
                 v-model="phoneRaw"
                 type="tel"
                 required
-                class="w-full h-12 pl-10 pr-4 rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none text-[14px] font-bold text-slate-900 dark:text-white placeholder:text-slate-400"
+                class="w-full h-12 pl-10 pr-4 rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none text-[14px] font-bold text-slate-900 dark:text-white placeholder:text-slate-400"
                 placeholder="+91 00000 00000"
                 @input="sanitizePhone"
               >
@@ -153,14 +153,14 @@
             v-if="mode === 'email'"
             class="space-y-1"
           >
-            <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 ml-1 uppercase">Email Address</label>
+            <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Email Address</label>
             <div class="relative group">
               <Mail class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
               <input
                 v-model="email"
                 type="email"
                 required
-                class="w-full h-12 pl-10 pr-4 rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none text-[14px] font-bold text-slate-900 dark:text-white placeholder:text-slate-400"
+                class="w-full h-12 pl-10 pr-4 rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none text-[14px] font-bold text-slate-900 dark:text-white placeholder:text-slate-400"
                 placeholder="email@example.com"
               >
             </div>
@@ -193,13 +193,13 @@
 
           <div class="flex items-center justify-between gap-4 py-2 opacity-50">
             <div class="h-[1px] flex-1 bg-slate-300 dark:bg-slate-700" />
-            <span class="text-[9px] font-black tracking-[0.3em] text-slate-500 uppercase">OR</span>
+            <span class="text-[9px] font-black tracking-[0.3em] text-slate-500 dark:text-slate-400 uppercase">OR</span>
             <div class="h-[1px] flex-1 bg-slate-300 dark:bg-slate-700" />
           </div>
 
           <button
             type="button"
-            class="w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.1em] flex items-center justify-center gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 hover:border-blue-500/50 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-white shadow-sm transition-all group"
+            class="w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.1em] flex items-center justify-center gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 hover:border-blue-500/50 hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-slate-800 text-slate-700 dark:text-white shadow-sm transition-all group"
             @click="loginWithGoogle"
           >
             <svg
@@ -227,7 +227,7 @@
             Sign in with Google
           </button>
 
-          <p class="text-center text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+          <p class="text-center text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Don't have an account? 
             <a
               href="#"

@@ -2,7 +2,7 @@
   <div class="space-y-6 p-8 pb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div class="flex items-center gap-4">
-        <button class="h-9 w-9 rounded-full flex items-center justify-center hover:bg-emerald-50 dark:hover:bg-emerald-500/10 text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-500 transition-colors">
+        <button class="h-9 w-9 rounded-full flex items-center justify-center hover:bg-emerald-50 dark:hover:bg-emerald-500/10 text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-500 transition-colors">
           <ArrowLeft class="w-5 h-5" />
         </button>
         <div>
@@ -10,7 +10,7 @@
             Fingerprint Management
             <Fingerprint class="w-6 h-6 text-emerald-600" />
           </h1>
-          <p class="text-slate-500 mt-1 text-sm">
+          <p class="text-slate-500 dark:text-slate-400 mt-1 text-sm">
             Register and manage high-precision fingerprint biometric credentials.
           </p>
         </div>

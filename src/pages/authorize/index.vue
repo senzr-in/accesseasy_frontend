@@ -3,8 +3,8 @@
     <!-- Back Navigation Bar -->
     <div class="flex items-center justify-between mb-4">
       <button 
+        class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-zinc-800 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:text-slate-200 bg-white dark:bg-zinc-950 font-black text-[10px] uppercase tracking-widest active:scale-95 shadow-sm cursor-pointer"
         @click="$router.push('/dashboard/visitors')"
-        class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-zinc-800 text-slate-500 hover:text-slate-700 bg-white dark:bg-zinc-950 font-black text-[10px] uppercase tracking-widest active:scale-95 shadow-sm cursor-pointer"
       >
         <ArrowLeft class="w-3.5 h-3.5" /> Back to Console
       </button>
@@ -74,7 +74,7 @@
         v-else-if="authResult === 'success'"
         class="absolute inset-0 z-30 bg-emerald-600/95 backdrop-blur-xl flex flex-col items-center justify-center text-white animate-in zoom-in-95 duration-300"
       >
-        <div class="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mb-6 shadow-inner animate-bounce">
+        <div class="w-24 h-24 bg-white dark:bg-slate-900/20 rounded-full flex items-center justify-center mb-6 shadow-inner animate-bounce">
           <ShieldCheck class="w-12 h-12 text-white" />
         </div>
         <h2 class="text-4xl font-black uppercase tracking-tight text-white drop-shadow-xl mb-2">
@@ -92,7 +92,7 @@
           </p>
         </div>
         <button
-          class="h-12 px-8 bg-white text-emerald-700 font-bold uppercase tracking-widest text-sm rounded-xl hover:bg-emerald-50 transition-colors shadow-lg active:scale-95 flex items-center justify-center gap-2"
+          class="h-12 px-8 bg-white dark:bg-slate-900 text-emerald-700 font-bold uppercase tracking-widest text-sm rounded-xl hover:bg-emerald-50 transition-colors shadow-lg active:scale-95 flex items-center justify-center gap-2"
           @click="resetScanner"
         >
           <RefreshCw class="w-4 h-4" /> Scan Another Key
@@ -104,7 +104,7 @@
         v-else-if="authResult === 'failed'"
         class="absolute inset-0 z-30 bg-rose-600/95 backdrop-blur-xl flex flex-col items-center justify-center text-white animate-in zoom-in-95 duration-300"
       >
-        <div class="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mb-6 shadow-inner animate-pulse">
+        <div class="w-24 h-24 bg-white dark:bg-slate-900/20 rounded-full flex items-center justify-center mb-6 shadow-inner animate-pulse">
           <ShieldAlert class="w-12 h-12 text-white" />
         </div>
         <h2 class="text-4xl font-black uppercase tracking-tight text-white drop-shadow-xl mb-2">
@@ -114,7 +114,7 @@
           This token is invalid, expired, or holds insufficient clearance.
         </p>
         <button
-          class="h-12 px-8 bg-white text-rose-700 font-bold uppercase tracking-widest text-sm rounded-xl hover:bg-rose-50 transition-colors shadow-lg active:scale-95 flex items-center justify-center gap-2"
+          class="h-12 px-8 bg-white dark:bg-slate-900 text-rose-700 font-bold uppercase tracking-widest text-sm rounded-xl hover:bg-rose-50 transition-colors shadow-lg active:scale-95 flex items-center justify-center gap-2"
           @click="resetScanner"
         >
           <RefreshCw class="w-4 h-4" /> Try Again
@@ -126,7 +126,7 @@
         v-else-if="cameraStatus === 'error'"
         class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/80 px-4 text-center"
       >
-        <VideoOff class="w-12 h-12 text-slate-500 mb-4" />
+        <VideoOff class="w-12 h-12 text-slate-500 dark:text-slate-400 mb-4" />
         <p class="text-white font-bold mb-2">
           Camera Access Failed
         </p>
@@ -268,28 +268,24 @@ const handleCodeDecoded = async (qrString) => {
         
         if (!payload.employeeId) delete payload.employeeId;
 
-        await fetch(`${import.meta.env.VITE_API_URL}/items/logs`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify(payload)
-        });
+        await authService.protectedApi.post('/items/logs', payload);
       } catch(e) {
         console.error("Failed to post live log", e);
       }
     };
 
     // Explicitly request nested user structures and access level info
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/items/qrgenerate?filter[qrcode][_eq]=${encodeURIComponent(queryToken)}&filter[tenant][_eq]=${tenantId}&fields=*,employeeId.*,employeeId.assignedUser.*,employeeId.access_level.*`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-        signal: abortController.signal
-      }
-    );
+    const res = await authService.protectedApi.get('/items/qrgenerate', {
+      params: {
+        'filter[qrcode][_eq]': queryToken,
+        'filter[tenant][_eq]': tenantId,
+        'fields': '*,employeeId.*,employeeId.assignedUser.*,employeeId.access_level.*'
+      },
+      signal: abortController.signal
+    });
 
-    if (res.ok) {
-      const data = await res.json();
-      const match = data.data?.[0];
+    if (res.status === 200) {
+      const match = res.data.data?.[0];
       
       if (match && match.qraccess) {
          const emp = match.employeeId;
@@ -323,11 +319,15 @@ const handleCodeDecoded = async (qrString) => {
            
            try {
              const today = new Date().toISOString().split('T')[0];
-             const logRes = await fetch(`${import.meta.env.VITE_API_URL}/items/logs?filter[employeeId][_eq]=${empIdFallback}&filter[date][_eq]=${today}&filter[ValidLogs][_eq]=authorized`, {
-               headers: { Authorization: `Bearer ${token}` }
+             const logRes = await authService.protectedApi.get('/items/logs', {
+               params: {
+                 'filter[employeeId][_eq]': empIdFallback,
+                 'filter[date][_eq]': today,
+                 'filter[ValidLogs][_eq]': 'authorized'
+               }
              });
-             if (logRes.ok) {
-               const logData = await logRes.json();
+             if (logRes.status === 200) {
+               const logData = logRes.data;
                const logsToday = logData.data || [];
                if (logsToday.length > 0) {
                  actionType = "out";
@@ -348,11 +348,7 @@ const handleCodeDecoded = async (qrString) => {
            // If it's an Exit, disable the token to prevent a third scan
            if (isExit) {
              try {
-               await fetch(`${import.meta.env.VITE_API_URL}/items/qrgenerate/${match.id}`, {
-                 method: 'PATCH',
-                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                 body: JSON.stringify({ qraccess: false })
-               });
+               await authService.protectedApi.patch(`/items/qrgenerate/${match.id}`, { qraccess: false });
                console.log('IN-09: Token marked as used (Exit recorded).');
              } catch(e) {
                console.warn('IN-09: Failed to mark token as used:', e);
@@ -385,19 +381,15 @@ const handleCodeDecoded = async (qrString) => {
              } else {
                // Route through visitor-portal-flow backend (/guardians/scan)
                // This uses the admin Directus token (avoids 403) and handles Entry/Exit toggle
-               const scanRes = await fetch(
-                 `${import.meta.env.VITE_KN_API_URL}/visitor-portal-flow/guardians/scan`,
-                 {
-                   method: 'POST',
-                   headers: { 'Content-Type': 'application/json' },
-                   body: JSON.stringify({ qrToken: qrString, tenant: tenantId }),
-                   signal: abortController.signal
-                 }
+               const scanRes = await authService.knApi.post(
+                 '/visitor-portal-flow/guardians/scan',
+                 { qrToken: qrString, tenant: tenantId },
+                 { signal: abortController.signal }
                );
-               const scanData = await scanRes.json();
+               const scanData = scanRes.data;
                console.log('VIS-01: Backend scan response:', scanData);
 
-               if (scanRes.ok && (scanData.status === 'ACCESS_GRANTED' || scanData.status === 'EXIT_RECORDED')) {
+               if (scanRes.status === 200 && (scanData.status === 'ACCESS_GRANTED' || scanData.status === 'EXIT_RECORDED')) {
                  const isEntry = scanData.status === 'ACCESS_GRANTED';
                  const finalName = scanData.visitor?.name || visitorQrData?.name || 'Visitor';
                  console.log(`VIS-01: Visitor ${isEntry ? 'Entry' : 'Exit'} recorded:`, finalName);
@@ -410,13 +402,9 @@ const handleCodeDecoded = async (qrString) => {
                  
                  // Update visitor status directly in database so the Dashboard sees the Check-in
                  try {
-                   await fetch(`${import.meta.env.VITE_API_URL}/items/visitor/${visitorQrData.visitorId}`, {
-                     method: 'PATCH',
-                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                     body: JSON.stringify({ 
-                       status: isEntry ? 'active' : 'inactive',
-                       ...(isEntry && { startTime: new Date().toLocaleTimeString('en-GB') })
-                     })
+                   await authService.protectedApi.patch(`/items/visitor/${visitorQrData.visitorId}`, { 
+                     status: isEntry ? 'active' : 'inactive',
+                     ...(isEntry && { startTime: new Date().toLocaleTimeString('en-GB') })
                    });
                  } catch (patchErr) {
                    console.error('VIS-01: Failed to update visitor status:', patchErr);

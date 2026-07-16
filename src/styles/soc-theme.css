@@ -1,0 +1,51 @@
+/* SOC Dashboard Theme Tokens */
+:root {
+  --soc-bg: #0a0a0f;
+  --soc-surface: rgba(255, 255, 255, 0.04);
+  --soc-border: rgba(255, 255, 255, 0.08);
+  --soc-text-primary: #f8fafc;
+  --soc-text-muted: #94a3b8;
+  --soc-accent-blue: #3b82f6;
+  --soc-status-green: #22c55e;
+  --soc-status-orange: #f97316;
+  --soc-status-red: #ef4444;
+  --soc-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* Base styles to apply to the dashboard container */
+.soc-dashboard-container {
+  background-color: var(--soc-bg);
+  color: var(--soc-text-primary);
+  min-height: 100vh;
+  /* Make sure it covers everything */
+  margin: -1.5rem;
+  padding: 1.5rem;
+}
+
+.soc-card {
+  background: var(--soc-surface);
+  border: 1px solid var(--soc-border);
+  border-radius: 14px;
+  backdrop-filter: blur(20px);
+  box-shadow: var(--soc-shadow);
+}
+
+.soc-live-dot {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Custom Scrollbar for SOC elements */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}

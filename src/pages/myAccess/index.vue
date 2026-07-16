@@ -5,7 +5,7 @@
       <span class="px-2.5 py-1 rounded-md border border-indigo-200 dark:border-indigo-500/20 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-sm font-black uppercase tracking-widest leading-tight">
         Level {{ employee?.access_level?.accessLevelName || 'Unknown' }}
       </span>
-      <p class="text-xs font-medium text-slate-500">
+      <p class="text-xs font-medium text-slate-500 dark:text-slate-400">
         Manage your mobile keys and physical cards.
       </p>
     </div>
@@ -14,7 +14,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <!-- Left Column: Digital Access / QR -->
       <div class="space-y-3">
-        <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 px-1">
+        <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 px-1">
           Mobile Access
         </h3>
         
@@ -49,19 +49,21 @@
             >
               <!-- Vertical Minimalist ID Badge -->
               <div class="relative w-full mb-6 flex flex-col items-center mx-auto">
-                
                 <!-- The Badge Card (Target for html2canvas) -->
                 <div 
                   ref="badgeCardRef"
-                  class="bg-[#fafafa] border border-slate-200 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden w-full max-w-[340px] flex flex-col items-center relative pt-8 pb-0 min-h-[540px]"
+                  class="bg-[#fafafa] border border-slate-200 dark:border-slate-800 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden w-full max-w-[340px] flex flex-col items-center relative pt-8 pb-0 min-h-[540px]"
                 >
                   <!-- Lanyard hole and clip at top -->
-                  <div class="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-2.5 bg-purple-900 rounded-b-md z-10 shadow-sm"></div>
-                  <div class="absolute top-5 left-1/2 -translate-x-1/2 w-14 h-3.5 bg-slate-200 rounded-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.15)] border border-slate-300 z-10"></div>
+                  <div class="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-2.5 bg-purple-900 rounded-b-md z-10 shadow-sm" />
+                  <div class="absolute top-5 left-1/2 -translate-x-1/2 w-14 h-3.5 bg-slate-200 rounded-full shadow-[inset_0_2px_4px_rgba(0,0,0,0.15)] border border-slate-300 z-10" />
 
                   <!-- Header / Logo -->
                   <div class="flex items-center gap-2.5 mt-5 mb-6 z-10">
-                    <div class="w-10 h-11 bg-purple-800 flex items-center justify-center shadow-sm" style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);">
+                    <div
+                      class="w-10 h-11 bg-purple-800 flex items-center justify-center shadow-sm"
+                      style="clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);"
+                    >
                       <span class="text-white font-black text-2xl mt-0.5">N</span>
                     </div>
                     <div class="flex flex-col justify-center">
@@ -71,13 +73,24 @@
                   </div>
 
                   <!-- Avatar -->
-                  <div class="relative w-36 h-36 rounded-full border-[1.5px] border-purple-500 p-1 mb-5 shrink-0 z-10 bg-white shadow-sm">
-                    <div class="w-full h-full rounded-full bg-slate-100 flex items-center justify-center overflow-hidden shadow-inner">
+                  <div class="relative w-36 h-36 rounded-full border-[1.5px] border-purple-500 p-1 mb-5 shrink-0 z-10 bg-white dark:bg-slate-900 shadow-sm">
+                    <div class="w-full h-full rounded-full bg-slate-100 dark:bg-slate-950 flex items-center justify-center overflow-hidden shadow-inner">
                       <!-- For demo purposes, an image is inserted if present, else fallback to initials -->
-                      <img v-if="employee?.avatarUrl" :src="employee.avatarUrl" class="w-full h-full object-cover" />
+                      <img
+                        v-if="employee?.avatarUrl"
+                        :src="employee.avatarUrl"
+                        class="w-full h-full object-cover"
+                      >
                       <!-- We use a placeholder image from unavatar or similar if no initial is present, or just use the initial -->
-                      <img v-else-if="!rawUser?.first_name" src="https://i.pravatar.cc/300?img=47" class="w-full h-full object-cover" />
-                      <span v-else class="font-black text-6xl text-slate-300">
+                      <img
+                        v-else-if="!rawUser?.first_name"
+                        src="https://i.pravatar.cc/300?img=47"
+                        class="w-full h-full object-cover"
+                      >
+                      <span
+                        v-else
+                        class="font-black text-6xl text-slate-300"
+                      >
                         {{ rawUser?.first_name?.charAt(0).toUpperCase() || 'P' }}
                       </span>
                     </div>
@@ -88,7 +101,7 @@
                     <h2 class="text-2xl font-black text-purple-800 tracking-tight uppercase leading-none mb-2 text-center w-full truncate">
                       {{ rawUser?.first_name || 'PRIYA' }} {{ rawUser?.last_name || 'SHARMA' }}
                     </h2>
-                    <p class="text-[12px] text-slate-800 font-bold tracking-[0.05em] uppercase text-center mb-2 w-full truncate">
+                    <p class="text-[12px] text-slate-800 dark:text-slate-200 font-bold tracking-[0.05em] uppercase text-center mb-2 w-full truncate">
                       {{ employee?.access_level?.accessLevelName || 'MARKETING EXECUTIVE' }}
                     </p>
                     <p class="text-[13px] font-bold text-purple-800 uppercase text-center tracking-wide">
@@ -97,18 +110,35 @@
                   </div>
 
                   <!-- QR Code -->
-                  <div class="bg-white w-44 h-44 flex items-center justify-center z-10 relative mb-16 shadow-sm border border-slate-100 p-2 rounded-md">
-                    <img :src="activeQrUrl" class="w-full h-full block rendering-pixelated" alt="QR Code" />
+                  <div class="bg-white dark:bg-slate-900 w-44 h-44 flex items-center justify-center z-10 relative mb-16 shadow-sm border border-slate-100 dark:border-slate-700 p-2 rounded-md">
+                    <img
+                      :src="activeQrUrl"
+                      class="w-full h-full block rendering-pixelated"
+                      alt="QR Code"
+                    >
                   </div>
 
                   <!-- Bottom Decorative Waves -->
                   <div class="absolute bottom-0 left-0 w-full h-40 overflow-hidden z-0 pointer-events-none">
                     <!-- Layer 1: Light purple -->
-                    <svg class="absolute bottom-0 left-0 w-full h-32 text-purple-800" preserveAspectRatio="none" viewBox="0 0 100 100" fill="currentColor">
-                      <path d="M0,100 L0,30 Q40,80 100,0 L100,100 Z" opacity="0.8" />
+                    <svg
+                      class="absolute bottom-0 left-0 w-full h-32 text-purple-800"
+                      preserveAspectRatio="none"
+                      viewBox="0 0 100 100"
+                      fill="currentColor"
+                    >
+                      <path
+                        d="M0,100 L0,30 Q40,80 100,0 L100,100 Z"
+                        opacity="0.8"
+                      />
                     </svg>
                     <!-- Layer 2: Dark purple foreground -->
-                    <svg class="absolute bottom-0 left-0 w-full h-24 text-purple-900" preserveAspectRatio="none" viewBox="0 0 100 100" fill="currentColor">
+                    <svg
+                      class="absolute bottom-0 left-0 w-full h-24 text-purple-900"
+                      preserveAspectRatio="none"
+                      viewBox="0 0 100 100"
+                      fill="currentColor"
+                    >
                       <path d="M0,100 L0,50 Q50,100 100,20 L100,100 Z" />
                     </svg>
                   </div>
@@ -129,8 +159,14 @@
                   class="flex-1 h-12 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-black uppercase tracking-widest transition-all flex items-center justify-center shadow-lg disabled:opacity-75 active:scale-95"
                   @click="downloadFullBadge"
                 >
-                  <Loader2 v-if="isDownloading" class="w-4 h-4 mr-2 animate-spin" />
-                  <Download v-else class="w-4 h-4 mr-2" />
+                  <Loader2
+                    v-if="isDownloading"
+                    class="w-4 h-4 mr-2 animate-spin"
+                  />
+                  <Download
+                    v-else
+                    class="w-4 h-4 mr-2"
+                  />
                   {{ isDownloading ? 'Saving...' : 'Save ID Badge' }}
                 </button>
               </div>
@@ -146,7 +182,7 @@
               <h3 class="text-base font-black text-slate-900 dark:text-white mb-1">
                 Digital ID Badge
               </h3>
-              <p class="text-xs text-slate-500 text-center max-w-xs mb-6">
+              <p class="text-xs text-slate-500 dark:text-slate-400 text-center max-w-xs mb-6">
                 Generate your secure digital ID badge for access. This is a one-time setup.
               </p>
               <button
@@ -171,7 +207,7 @@
 
       <!-- Right Column: Physical Access -->
       <div class="space-y-3">
-        <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 px-1">
+        <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 px-1">
           Physical Credentials
         </h3>
         
@@ -200,7 +236,7 @@
                     </h4>
                     <p
                       v-if="employee?.card_number"
-                      class="text-xs text-slate-500 font-medium mt-0.5"
+                      class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5"
                     >
                       NFC ID: <span class="font-mono text-slate-700 dark:text-zinc-300">{{ employee.card_number }}</span>
                     </p>
@@ -233,7 +269,7 @@
                 v-if="!employee?.card_number"
                 class="mt-3 pt-3 border-t border-slate-100 dark:border-zinc-800"
               >
-                <p class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1.5">
+                <p class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-1.5">
                   Register NFC Card
                 </p>
                 <div class="flex items-center gap-2">
@@ -264,7 +300,7 @@
         </div>
 
         <!-- Clearance Summary Box -->
-        <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 px-1 pt-1">
+        <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 px-1 pt-1">
           Assigned Clearances
         </h3>
         <div class="rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 p-4 shadow-sm">
@@ -282,18 +318,18 @@
                 <h4 class="text-sm font-bold text-slate-900 dark:text-white">
                   {{ employee.access_level.accessLevelName }}
                 </h4>
-                <p class="text-xs text-slate-500">
+                <p class="text-xs text-slate-500 dark:text-slate-400">
                   ID: {{ employee.access_level.id }}
                 </p>
               </div>
             </div>
-            <p class="text-[11px] font-medium text-slate-500 leading-relaxed max-w-sm mt-0.5">
+            <p class="text-[11px] font-medium text-slate-500 dark:text-slate-400 leading-relaxed max-w-sm mt-0.5">
               This level defines the physical zones and time windows you are authorized to enter. Contact administration for clearance changes.
             </p>
           </div>
           <div
             v-else
-            class="text-sm text-slate-500 italic pb-1"
+            class="text-sm text-slate-500 dark:text-slate-400 italic pb-1"
           >
             No specific access level is currently assigned to your profile.
           </div>

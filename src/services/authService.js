@@ -9,7 +9,6 @@ class AuthService {
     this.api = axios.create({
       baseURL: import.meta.env.VITE_API_URL,
       headers: {
-        Authorization: `Bearer ${import.meta.env.VITE_API_TOKEN}`,
         "Content-Type": "application/json",
       },
       timeout: 30000,
@@ -18,7 +17,6 @@ class AuthService {
     this.knApi = axios.create({
       baseURL: import.meta.env.VITE_KN_API_URL,
       headers: {
-        Authorization: `Bearer ${import.meta.env.VITE_API_TOKEN}`,
         "Content-Type": "application/json",
       },
       timeout: 45000,
@@ -50,7 +48,8 @@ class AuthService {
       instance.interceptors.response.use((r) => r, handleNetworkErrors);
     });
 
-    this.protectedApi.interceptors.request.use(
+    [this.knApi, this.protectedApi].forEach((instance) => {
+      instance.interceptors.request.use(
       (config) => {
         const token = this.getToken();
         if (token) {
@@ -59,7 +58,8 @@ class AuthService {
         return config;
       },
       (error) => Promise.reject(error),
-    );
+      );
+    });
 
     this.protectedApi.interceptors.response.use(
       (response) => {
@@ -82,7 +82,10 @@ class AuthService {
         if (event.data?.type === "NEW_LOGIN") {
           const currentUserId = this.getUserId();
           if (currentUserId && event.data.userId === currentUserId) {
-            console.warn("[AuthService] Concurrent login detected on another tab. Invalidating session.");
+            console.log("[AuthService] Same user logged in on another tab. Keeping session alive.");
+            if (event.data.token) this.setToken(event.data.token);
+          } else {
+            console.warn("[AuthService] Different user logged in on another tab. Invalidating session.");
             this.handleConcurrentLogin();
           }
         }
@@ -262,15 +265,15 @@ class AuthService {
   }
 
   setToken(token) {
-    Cookies.set("userToken", token, { expires: 365 * 20 });
-    localStorage.setItem("userToken", token);
+    Cookies.set("userToken", token, { expires: 1 });
+    sessionStorage.setItem("userToken", token);
     this.protectedApi.defaults.headers.common["Authorization"] =
       `Bearer ${token}`;
     this.updateLastActivity();
   }
 
   getToken() {
-    return Cookies.get("userToken") || localStorage.getItem("userToken");
+    return Cookies.get("userToken") || sessionStorage.getItem("userToken");
   }
 
   setPhone(phone) {
@@ -473,7 +476,7 @@ class AuthService {
       return true;
     } catch (err) {
       console.warn("[AuthService] Token validation failed due to network/offline state:", err);
-      return true;
+      return false; // Fail-secure instead of fail-open
     }
   }
 
@@ -695,11 +698,12 @@ class AuthService {
 
     try {
       const targetApp = "accesseasy";
-      const envToken = import.meta.env.VITE_API_TOKEN;
+      const userToken = this.getToken();
+      if (!userToken) return;
       const getUrl = `${import.meta.env.VITE_API_URL}/items/tenant?filter[tenantId][_eq]=${tenantId}&fields[]=tenantId&fields[]=userApp&limit=1`;
 
       const response = await fetch(getUrl, {
-        headers: { Authorization: `Bearer ${envToken}` }
+        headers: { Authorization: `Bearer ${userToken}` }
       });
       const tenantJson = await response.json();
 
@@ -744,7 +748,7 @@ class AuthService {
       const patchRes = await fetch(`${import.meta.env.VITE_API_URL}/items/tenant/${tenantId}`, {
         method: "PATCH",
         headers: {
-          Authorization: `Bearer ${envToken}`,
+          Authorization: `Bearer ${userToken}`,
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
@@ -1009,34 +1013,12 @@ class AuthService {
     }
   }
 
-  async verifyForgotPinOtp({ phone, email, otp }) {
-    try {
-      const payload = {
-        action: "verify-forgotpin-otp",
-        otp
-      };
-
-      if (phone) {
-        payload.phone = phone.replace(/\s/g, "");
-      }
-      if (email) {
-        payload.email = email;
-      }
-
-      const response = await this.knApi.post("/auth-service", payload);
-      return response.data;
-    } catch (error) {
-      console.error("Error verifying forgot PIN OTP:", error);
-      throw error;
-    }
-  }
-
   setPinVerified(value) {
-    localStorage.setItem("pinVerifiedInSession", value ? "true" : "false");
+    sessionStorage.setItem("pinVerifiedInSession", value ? "true" : "false");
   }
 
   isPinVerified() {
-    return localStorage.getItem("pinVerifiedInSession") === "true";
+    return sessionStorage.getItem("pinVerifiedInSession") === "true";
   }
 
   initInactivityTracking() {

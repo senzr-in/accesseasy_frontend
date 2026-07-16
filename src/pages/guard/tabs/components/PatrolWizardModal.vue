@@ -1,104 +1,195 @@
 <template>
   <Teleport to="body">
     <div class="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in">
-      <div class="ae-card w-full max-w-lg bg-white shadow-2xl flex flex-col overflow-hidden max-h-[90vh]">
+      <div class="ae-card w-full max-w-lg bg-white dark:bg-slate-900 shadow-2xl flex flex-col overflow-hidden max-h-[90vh]">
         <!-- Header -->
-        <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between shrink-0 bg-slate-50/50">
+        <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between shrink-0 bg-slate-50 dark:bg-slate-900/50">
           <div>
-            <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+            <h2 class="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
               <PlusCircle class="w-5 h-5 text-indigo-600" />
               Create Patrol
             </h2>
-            <p class="text-xs text-slate-500 mt-0.5">Schedule a new patrol route</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Schedule a new patrol route
+            </p>
           </div>
-          <button @click="$emit('close')" class="btn-icon"><X class="w-4 h-4" /></button>
+          <button
+            class="btn-icon"
+            @click="$emit('close')"
+          >
+            <X class="w-4 h-4" />
+          </button>
         </div>
 
         <!-- Form -->
         <div class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-4">
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Zone</label>
-            <select v-model="form.zoneId" class="ae-input w-full">
-              <option value="">Select zone...</option>
-              <option v-for="z in zones" :key="z.id" :value="z.id">{{ z.name || z.zoneName }}</option>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">Zone</label>
+            <select
+              v-model="form.zoneId"
+              class="ae-input w-full"
+            >
+              <option value="">
+                Select zone...
+              </option>
+              <option
+                v-for="z in zones"
+                :key="z.id"
+                :value="z.id"
+              >
+                {{ z.name || z.zoneName }}
+              </option>
             </select>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Route / Checkpoint Group</label>
-            <select v-model="form.groupId" class="ae-input w-full">
-              <option v-for="g in groups" :key="g.id" :value="g.id">{{ g.name }}</option>
-              <option v-if="!groups.length" value="">Default Route</option>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">Route / Checkpoint Group</label>
+            <select
+              v-model="form.groupId"
+              class="ae-input w-full"
+            >
+              <option
+                v-for="g in groups"
+                :key="g.id"
+                :value="g.id"
+              >
+                {{ g.name }}
+              </option>
+              <option
+                v-if="!groups.length"
+                value=""
+              >
+                Default Route
+              </option>
             </select>
           </div>
 
           <!-- Guard Assignment (optional pre-assign) -->
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Assign Guard <span class="text-slate-400 font-normal">(optional — can be claimed on mobile)</span></label>
-            <select v-model="form.guardId" class="ae-input w-full">
-              <option value="">Unassigned — any guard can claim</option>
-              <option v-for="g in guards" :key="g.id" :value="g.id">{{ g.name || g.full_name }}</option>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">Assign Guard <span class="text-slate-400 font-normal">(optional — can be claimed on mobile)</span></label>
+            <select
+              v-model="form.guardId"
+              class="ae-input w-full"
+            >
+              <option value="">
+                Unassigned — any guard can claim
+              </option>
+              <option
+                v-for="g in guards"
+                :key="g.id"
+                :value="g.id"
+              >
+                {{ g.name || g.full_name }}
+              </option>
             </select>
           </div>
 
           <div class="grid grid-cols-2 gap-3">
             <div class="col-span-2">
-              <label class="block text-xs font-semibold text-slate-700 mb-1">Patrol Date</label>
-              <input type="date" v-model="form.date" class="ae-input w-full" />
+              <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">Patrol Date</label>
+              <input
+                v-model="form.date"
+                type="date"
+                class="ae-input w-full"
+              >
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1">Shift Start</label>
-              <input type="time" v-model="form.startTime" class="ae-input w-full" />
+              <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">Shift Start</label>
+              <input
+                v-model="form.startTime"
+                type="time"
+                class="ae-input w-full"
+              >
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-700 mb-1">Shift End</label>
-              <input type="time" v-model="form.endTime" class="ae-input w-full" />
+              <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">Shift End</label>
+              <input
+                v-model="form.endTime"
+                type="time"
+                class="ae-input w-full"
+              >
             </div>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-700 mb-1">Repeat Every</label>
-            <select v-model="form.repeat" class="ae-input w-full">
-              <option value="once">Once (single patrol)</option>
-              <option value="2h">Every 2 hours</option>
-              <option value="4h">Every 4 hours</option>
-              <option value="daily">Daily (once per day)</option>
-              <option value="custom">Custom interval...</option>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-200 mb-1">Repeat Every</label>
+            <select
+              v-model="form.repeat"
+              class="ae-input w-full"
+            >
+              <option value="once">
+                Once (single patrol)
+              </option>
+              <option value="2h">
+                Every 2 hours
+              </option>
+              <option value="4h">
+                Every 4 hours
+              </option>
+              <option value="daily">
+                Daily (once per day)
+              </option>
+              <option value="custom">
+                Custom interval...
+              </option>
             </select>
           </div>
 
           <!-- Custom Interval Picker -->
           <transition name="slide-down">
-            <div v-if="form.repeat === 'custom'" class="rounded-xl border border-amber-200 bg-amber-50/60 p-4 space-y-3">
-              <p class="text-xs font-bold text-amber-700 uppercase tracking-widest">Custom Interval</p>
+            <div
+              v-if="form.repeat === 'custom'"
+              class="rounded-xl border border-amber-200 bg-amber-50/60 p-4 space-y-3"
+            >
+              <p class="text-xs font-bold text-amber-700 uppercase tracking-widest">
+                Custom Interval
+              </p>
               <div class="flex items-center gap-3">
                 <div class="flex-1">
-                  <label class="block text-xs text-slate-600 mb-1">Hours</label>
+                  <label class="block text-xs text-slate-600 dark:text-slate-300 mb-1">Hours</label>
                   <input
-                    type="number" min="0" max="23"
                     v-model.number="form.customHours"
+                    type="number"
+                    min="0"
+                    max="23"
                     class="ae-input w-full text-center text-lg font-bold"
                     placeholder="0"
-                  />
+                  >
                 </div>
-                <div class="text-slate-400 font-bold text-lg mt-4">:</div>
+                <div class="text-slate-400 font-bold text-lg mt-4">
+                  :
+                </div>
                 <div class="flex-1">
-                  <label class="block text-xs text-slate-600 mb-1">Minutes</label>
+                  <label class="block text-xs text-slate-600 dark:text-slate-300 mb-1">Minutes</label>
                   <input
-                    type="number" min="0" max="59" step="5"
                     v-model.number="form.customMinutes"
+                    type="number"
+                    min="0"
+                    max="59"
+                    step="5"
                     class="ae-input w-full text-center text-lg font-bold"
                     placeholder="0"
-                  />
+                  >
                 </div>
               </div>
-              <p v-if="customIntervalMinutes > 0" class="text-xs text-amber-600 font-semibold">
+              <p
+                v-if="customIntervalMinutes > 0"
+                class="text-xs text-amber-600 font-semibold"
+              >
                 Patrol every {{ customIntervalLabel }} within the shift window
               </p>
-              <p v-else class="text-xs text-red-500">Enter a valid interval (minimum 5 minutes)</p>
+              <p
+                v-else
+                class="text-xs text-red-500"
+              >
+                Enter a valid interval (minimum 5 minutes)
+              </p>
             </div>
           </transition>
 
           <!-- Slot Preview -->
-          <div v-if="slotPreview.length > 0" class="rounded-xl border border-indigo-100 bg-indigo-50/60 p-4">
+          <div
+            v-if="slotPreview.length > 0"
+            class="rounded-xl border border-indigo-100 bg-indigo-50/60 p-4"
+          >
             <p class="text-xs font-bold text-indigo-700 uppercase tracking-widest mb-2">
               {{ slotPreview.length }} Patrol{{ slotPreview.length > 1 ? 's' : '' }} Will Be Created
             </p>
@@ -106,7 +197,7 @@
               <span
                 v-for="(slot, i) in slotPreview"
                 :key="i"
-                class="text-xs font-semibold bg-white border border-indigo-200 text-indigo-700 px-2.5 py-1 rounded-full"
+                class="text-xs font-semibold bg-white dark:bg-slate-900 border border-indigo-200 text-indigo-700 px-2.5 py-1 rounded-full"
               >
                 {{ slot }}
               </span>
@@ -115,9 +206,18 @@
         </div>
 
         <!-- Footer -->
-        <div class="px-6 py-4 border-t border-slate-100 flex justify-end gap-3 bg-slate-50/50 shrink-0">
-          <button @click="$emit('close')" class="btn-ghost">Cancel</button>
-          <button @click="submit" class="btn-primary" :disabled="!form.zoneId || !form.groupId">
+        <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-700 flex justify-end gap-3 bg-slate-50 dark:bg-slate-900/50 shrink-0">
+          <button
+            class="btn-ghost"
+            @click="$emit('close')"
+          >
+            Cancel
+          </button>
+          <button
+            class="btn-primary"
+            :disabled="!form.zoneId || !form.groupId"
+            @click="submit"
+          >
             <PlusCircle class="w-3.5 h-3.5" />
             Schedule {{ slotPreview.length > 1 ? slotPreview.length + ' Patrols' : 'Patrol' }}
           </button>

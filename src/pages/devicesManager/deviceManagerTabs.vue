@@ -13,14 +13,14 @@
           Mobile Pass Setup
         </button>
         <button
-          class="flex items-center gap-2 rounded-xl px-4 py-2 shadow-sm border border-slate-200 dark:border-zinc-800 font-black uppercase tracking-widest text-[10px] bg-white dark:bg-zinc-950 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors"
+          class="flex items-center gap-2 rounded-xl px-4 py-2 shadow-sm border border-slate-200 dark:border-zinc-800 font-black uppercase tracking-widest text-[10px] bg-white dark:bg-zinc-950 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 transition-colors"
           @click="showNetworkScanForm"
         >
           <Network class="h-3.5 w-3.5" />
           Scan Network
         </button>
         <button
-          class="flex items-center gap-2 rounded-xl bg-slate-900 dark:bg-white px-4 py-2 text-[10px] font-black text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors shadow-sm uppercase tracking-widest"
+          class="flex items-center gap-2 rounded-xl bg-slate-900 dark:bg-white dark:bg-slate-900 px-4 py-2 text-[10px] font-black text-white dark:text-slate-900 dark:text-slate-100 hover:bg-slate-800 dark:hover:bg-slate-100 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 transition-colors shadow-sm uppercase tracking-widest"
           @click="showAddDeviceForm"
         >
           <Plus class="h-3.5 w-3.5" />
@@ -43,7 +43,7 @@
       </div>
       
       <!-- Tab filter -->
-      <div class="flex bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-1 rounded-xl shadow-sm shrink-0">
+      <div class="flex bg-slate-50 dark:hover:bg-zinc-800 border border-slate-200 dark:border-zinc-800 p-1 rounded-xl shadow-sm shrink-0">
         <button 
           v-for="tab in ['all', 'approved', 'unApproved']" 
           :key="tab"
@@ -51,7 +51,7 @@
             'px-4 h-8 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all',
             activeStatusTab === tab 
               ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-sm border border-slate-200 dark:border-zinc-700' 
-              : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+              : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:text-slate-200 dark:hover:text-slate-300'
           ]"
           @click="activeStatusTab = tab"
         >
@@ -64,24 +64,24 @@
     <div class="rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm overflow-hidden flex flex-col h-[700px]">
       <div class="overflow-x-auto flex-1 h-full">
         <table class="w-full text-left border-collapse relative">
-          <thead class="bg-slate-50 dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-10 w-full">
+          <thead class="bg-slate-50 dark:hover:bg-zinc-800 border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-10 w-full">
             <tr>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
                 Identity Matrix
               </th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
                 Protocol Type
               </th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
                 Link Status
               </th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
                 Core Engine
               </th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
                 Authorization
               </th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap text-right">
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap text-right">
                 Operations
               </th>
             </tr>
@@ -90,7 +90,7 @@
             <tr v-if="loading">
               <td
                 colspan="6"
-                class="px-5 py-24 text-center text-slate-500"
+                class="px-5 py-24 text-center text-slate-500 dark:text-slate-400"
               >
                 <Loader2 class="w-8 h-8 animate-spin text-blue-500 mx-auto" />
               </td>
@@ -101,14 +101,14 @@
                 class="px-5 py-24 text-center"
               >
                 <div class="flex flex-col items-center gap-4 max-w-xs mx-auto">
-                  <div class="h-16 w-16 bg-slate-50 dark:bg-zinc-900 rounded-xl flex items-center justify-center border border-slate-200 dark:border-zinc-800">
+                  <div class="h-16 w-16 bg-slate-50 dark:hover:bg-zinc-800 rounded-xl flex items-center justify-center border border-slate-200 dark:border-zinc-800">
                     <Zap class="h-8 w-8 text-slate-400" />
                   </div>
                   <div class="space-y-1">
                     <p class="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white">
                       Empty Infrastructure
                     </p>
-                    <p class="text-xs font-semibold text-slate-500">
+                    <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">
                       No hardware nodes detected in the current matrix.
                     </p>
                   </div>
@@ -188,7 +188,7 @@
                   </span>
                 </div>
               </td>
-              <td class="px-5 py-3 text-xs text-slate-500 font-semibold mt-0.5">
+              <td class="px-5 py-3 text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
                 {{ device.serverIp || 'OFFLINE' }}
               </td>
               <td class="px-5 py-3 whitespace-nowrap">
@@ -231,7 +231,7 @@
                   </button>
                   <button 
                     title="Configuration Setup"
-                    class="h-7 w-7 rounded-md flex items-center justify-center border border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300 bg-transparent hover:bg-slate-50 dark:hover:bg-zinc-800 shadow-sm transition-colors"
+                    class="h-7 w-7 rounded-md flex items-center justify-center border border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300 bg-transparent hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 shadow-sm transition-colors"
                     @click="editItem(device)"
                   >
                     <Settings2 class="w-3.5 h-3.5" />
@@ -251,19 +251,19 @@
       </div>
 
       <!-- Pagination -->
-      <div class="flex items-center justify-between p-4 border-t border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 mt-auto shrink-0">
+      <div class="flex items-center justify-between p-4 border-t border-slate-100 dark:border-zinc-800 bg-slate-50 dark:hover:bg-zinc-800 mt-auto shrink-0">
         <button
-          class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-950 disabled:opacity-50 transition-colors shadow-sm text-slate-700 dark:text-slate-300"
+          class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-zinc-800 hover:bg-white dark:bg-slate-900 dark:hover:bg-zinc-950 disabled:opacity-50 transition-colors shadow-sm text-slate-700 dark:text-slate-300"
           :disabled="page <= 1 || loading"
           @click="page--"
         >
           Previous
         </button>
-        <div class="text-[10px] font-black uppercase tracking-widest text-slate-500">
+        <div class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
           Page {{ page }} of {{ totalPages || 1 }} (Total: {{ totalItems }})
         </div>
         <button
-          class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-950 disabled:opacity-50 transition-colors shadow-sm text-slate-700 dark:text-slate-300"
+          class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-zinc-800 hover:bg-white dark:bg-slate-900 dark:hover:bg-zinc-950 disabled:opacity-50 transition-colors shadow-sm text-slate-700 dark:text-slate-300"
           :disabled="page >= totalPages || loading"
           @click="page++"
         >

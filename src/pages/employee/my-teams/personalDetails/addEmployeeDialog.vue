@@ -6,7 +6,7 @@
     <div class="relative w-full max-w-4xl max-h-[95vh] flex flex-col bg-white dark:bg-zinc-950 rounded-[24px] shadow-2xl shadow-violet-500/10 border border-white/20 dark:border-zinc-800/80 overflow-hidden transform transition-all animate-in zoom-in-95 duration-300">
       <!-- Premium Glass Header -->
       <div class="relative px-8 py-6 flex justify-between items-start bg-gradient-to-b from-slate-50 to-white dark:from-zinc-900 dark:to-zinc-950 border-b border-zinc-100 dark:border-zinc-800/80 z-10 shrink-0">
-        <div class="absolute inset-0 bg-white/40 dark:bg-zinc-950/40 backdrop-blur-xl" />
+        <div class="absolute inset-0 bg-white dark:bg-slate-900/40 dark:bg-zinc-950/40 backdrop-blur-xl" />
         <div class="relative z-10">
           <div class="flex items-center gap-3 mb-1">
             <div class="w-10 h-10 rounded-xl bg-violet-50 dark:bg-violet-500/10 flex items-center justify-center border border-violet-100 dark:border-violet-500/20 shadow-inner">
@@ -21,7 +21,7 @@
           </p>
         </div>
         <button
-          class="relative z-10 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-zinc-700 transition-all duration-200"
+          class="relative z-10 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-400 hover:text-slate-900 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-zinc-700 transition-all duration-200"
           @click="close"
         >
           <X class="w-4 h-4" />
@@ -297,7 +297,6 @@
               <Building class="w-4 h-4 text-violet-500" /> Organization Structure
             </h4>
             <div class="grid grid-cols-2 gap-4">
-
               <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Access Group</label>
                 <select
@@ -364,7 +363,7 @@
               <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest block">Allowed Entrance Modes</label>
               <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-1">
                 <!-- Face -->
-                <label class="flex items-center gap-2 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 cursor-pointer hover:bg-slate-50 dark:hover:bg-zinc-900 transition-all">
+                <label class="flex items-center gap-2 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 transition-all">
                   <input
                     v-model="formData.face"
                     type="checkbox"
@@ -373,7 +372,7 @@
                   <span class="text-xs font-semibold text-slate-700 dark:text-zinc-300 select-none">Face</span>
                 </label>
                 <!-- Finger -->
-                <label class="flex items-center gap-2 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 cursor-pointer hover:bg-slate-50 dark:hover:bg-zinc-900 transition-all">
+                <label class="flex items-center gap-2 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 transition-all">
                   <input
                     v-model="formData.finger"
                     type="checkbox"
@@ -382,7 +381,7 @@
                   <span class="text-xs font-semibold text-slate-700 dark:text-zinc-300 select-none">Fingerprint</span>
                 </label>
                 <!-- RFID -->
-                <label class="flex items-center gap-2 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 cursor-pointer hover:bg-slate-50 dark:hover:bg-zinc-900 transition-all">
+                <label class="flex items-center gap-2 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 transition-all">
                   <input
                     v-model="formData.rfid"
                     type="checkbox"
@@ -391,7 +390,7 @@
                   <span class="text-xs font-semibold text-slate-700 dark:text-zinc-300 select-none">RFID</span>
                 </label>
                 <!-- QR -->
-                <label class="flex items-center gap-2 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 cursor-pointer hover:bg-slate-50 dark:hover:bg-zinc-900 transition-all">
+                <label class="flex items-center gap-2 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 transition-all">
                   <input
                     v-model="formData.QrAttendance"
                     type="checkbox"
@@ -400,7 +399,7 @@
                   <span class="text-xs font-semibold text-slate-700 dark:text-zinc-300 select-none">QR Code</span>
                 </label>
                 <!-- Geo -->
-                <label class="flex items-center gap-2 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 cursor-pointer hover:bg-slate-50 dark:hover:bg-zinc-900 transition-all">
+                <label class="flex items-center gap-2 p-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 transition-all">
                   <input
                     v-model="formData.GeoAttendance"
                     type="checkbox"
@@ -434,7 +433,7 @@
       <div class="relative px-8 py-5 border-t border-zinc-100 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 flex justify-end gap-3 z-10 shrink-0">
         <button
           type="button"
-          class="px-6 h-10 rounded-xl border border-zinc-200 dark:border-zinc-800 text-[13px] font-bold text-slate-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-900 hover:text-slate-900 dark:hover:text-white transition-all duration-200"
+          class="px-6 h-10 rounded-xl border border-zinc-200 dark:border-zinc-800 text-[13px] font-bold text-slate-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 hover:text-slate-900 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white transition-all duration-200"
           @click="close"
         >
           Cancel

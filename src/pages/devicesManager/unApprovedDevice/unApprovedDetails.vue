@@ -94,7 +94,7 @@
                   'px-4 h-8 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all flex items-center',
                   activeTab === 'all'
                     ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-sm border border-slate-200 dark:border-zinc-700'
-                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:text-slate-200 dark:hover:text-slate-300'
                 ]"
                 @click="activeTab = 'all'"
               >
@@ -111,7 +111,7 @@
                   'px-4 h-8 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all flex items-center',
                   activeTab === 'unApproved'
                     ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-sm border border-slate-200 dark:border-zinc-700'
-                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:text-slate-200 dark:hover:text-slate-300'
                 ]"
                 @click="activeTab = 'unApproved'"
               >
@@ -128,7 +128,7 @@
                   'px-4 h-8 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all flex items-center',
                   activeTab === 'approved'
                     ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-sm border border-slate-200 dark:border-zinc-700'
-                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:text-slate-200 dark:hover:text-slate-300'
                 ]"
                 @click="activeTab = 'approved'"
               >
@@ -161,7 +161,7 @@
 
               <div class="relative">
                 <button 
-                  class="flex items-center gap-2 h-10 px-4 text-xs font-bold uppercase tracking-widest rounded-xl border border-slate-200 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-950 transition-colors shadow-sm bg-slate-50 dark:bg-zinc-900 text-slate-700 dark:text-slate-300" 
+                  class="flex items-center gap-2 h-10 px-4 text-xs font-bold uppercase tracking-widest rounded-xl border border-slate-200 dark:border-zinc-800 hover:bg-white dark:bg-slate-900 dark:hover:bg-zinc-950 transition-colors shadow-sm bg-slate-50 dark:bg-zinc-900 text-slate-700 dark:text-slate-300" 
                   @click="toggleFilters"
                 >
                   <v-icon size="16">

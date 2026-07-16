@@ -3,7 +3,7 @@
     <!-- Data Table Card -->
     <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-sm overflow-hidden flex flex-col flex-1 min-h-0">
       <!-- Toolbar -->
-      <div class="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 p-4 flex flex-col sm:flex-row gap-4 items-center justify-between">
+      <div class="border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 dark:bg-slate-900/50 p-4 flex flex-col sm:flex-row gap-4 items-center justify-between">
         <div class="relative w-full sm:w-80">
           <Search class="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
           <input
@@ -19,24 +19,24 @@
       <!-- Table -->
       <div class="overflow-auto flex-1 min-h-0">
         <table class="w-full text-left border-collapse whitespace-nowrap relative">
-          <thead class="bg-slate-50 dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-10 w-full">
+          <thead class="bg-slate-50 dark:hover:bg-zinc-800 border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-10 w-full">
             <tr>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest w-16">
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest w-16">
                 Profile
               </th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest">
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                 Employee
               </th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest">
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                 Date & Time
               </th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest">
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                 Action
               </th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest">
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                 Mode
               </th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest">
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                 Status
               </th>
             </tr>
@@ -53,10 +53,10 @@
             <tr v-else-if="items.length === 0">
               <td
                 colspan="6"
-                class="h-64 text-center text-slate-500"
+                class="h-64 text-center text-slate-500 dark:text-slate-400"
               >
                 <div class="flex flex-col items-center justify-center space-y-3">
-                  <Activity class="w-12 h-12 text-slate-300 dark:text-slate-700" />
+                  <Activity class="w-12 h-12 text-slate-300 dark:text-slate-700 dark:text-slate-200" />
                   <p class="text-sm font-medium">
                     No system logs found.
                   </p>
@@ -67,7 +67,7 @@
               v-for="log in items"
               v-else 
               :key="log.id"
-              class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+              class="hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-slate-800/50 transition-colors"
             >
               <td class="px-5 py-3">
                 <div class="h-8 w-8 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden border border-slate-200 dark:border-slate-700 flex items-center justify-center font-bold text-xs text-slate-500 dark:text-slate-400">
@@ -87,7 +87,7 @@
                   <span class="font-bold text-xs text-slate-900 dark:text-white">
                     {{ getEmployeeName(log) }}
                   </span>
-                  <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-widest mt-0.5">
+                  <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-0.5">
                     {{ log.employeeId?.employeeId || 'N/A' }}
                   </span>
                 </div>
@@ -97,7 +97,7 @@
                   <span class="font-bold text-xs text-slate-900 dark:text-white">
                     {{ log.date || '-' }}
                   </span>
-                  <span class="text-[10px] font-semibold text-slate-500 mt-0.5">
+                  <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
                     {{ formatTime(log.timeStamp, log.date_created) }}
                   </span>
                 </div>
@@ -137,19 +137,19 @@
       </div>
 
       <!-- Pagination -->
-      <div class="flex items-center justify-between p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 mt-auto">
+      <div class="flex items-center justify-between p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 dark:bg-slate-900/50 mt-auto">
         <button
-          class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-white dark:hover:bg-slate-800 disabled:opacity-50 transition-colors bg-transparent text-slate-700 dark:text-slate-300 shadow-sm"
+          class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-800 disabled:opacity-50 transition-colors bg-transparent text-slate-700 dark:text-slate-300 shadow-sm"
           :disabled="page <= 1 || loading"
           @click="page--"
         >
           Previous
         </button>
-        <div class="text-[10px] font-black uppercase tracking-widest text-slate-500">
+        <div class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
           Page {{ page }} of {{ totalPages || 1 }}
         </div>
         <button
-          class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-white dark:hover:bg-slate-800 disabled:opacity-50 transition-colors bg-transparent text-slate-700 dark:text-slate-300 shadow-sm"
+          class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-white dark:bg-slate-900 dark:hover:bg-slate-800 disabled:opacity-50 transition-colors bg-transparent text-slate-700 dark:text-slate-300 shadow-sm"
           :disabled="page >= totalPages || loading"
           @click="page++"
         >
@@ -317,7 +317,7 @@ const formatTime = (timeStr, fallbackDateCreated) => {
 const getActionClass = (action) => {
   if(action?.toLowerCase() === 'in') return 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20';
   if(action?.toLowerCase() === 'out') return 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20';
-  return 'bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700';
+  return 'bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700';
 }
 
 const getModeIcon = (mode) => {
@@ -333,7 +333,7 @@ const getModeIcon = (mode) => {
 const getValidLogsClass = (valid) => {
    if (valid === true || valid === "authorized" || valid === 1) return 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20';
    if (valid === false || valid === "unAuthorized" || valid === 0) return 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20';
-   return 'bg-slate-50 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700';
+   return 'bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700';
 }
 
 const getValidLogsIcon = (valid) => {

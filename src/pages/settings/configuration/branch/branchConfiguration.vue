@@ -21,7 +21,7 @@
         >
       </div>
       <button
-        class="flex items-center gap-2 h-10 px-4 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all shadow-sm shrink-0"
+        class="flex items-center gap-2 h-10 px-4 rounded-xl bg-slate-900 dark:bg-white dark:bg-slate-900 text-white dark:text-slate-900 dark:text-slate-100 text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all shadow-sm shrink-0"
         @click="createLocation"
       >
         <Plus class="w-4 h-4" /> Create Branch
@@ -32,21 +32,21 @@
     <div class="rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm overflow-hidden flex flex-col flex-1 min-h-0">
       <div class="overflow-x-auto overflow-y-auto flex-1 h-full">
         <table class="w-full text-left border-collapse relative min-w-[800px]">
-          <thead class="bg-slate-50 dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-10">
+          <thead class="bg-slate-50 dark:hover:bg-zinc-800 border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-10">
             <tr>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
                 Location Name
               </th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
                 Address
               </th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
                 State
               </th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
                 Coordinates
               </th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest text-right whitespace-nowrap">
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest text-right whitespace-nowrap">
                 Actions
               </th>
             </tr>
@@ -91,7 +91,7 @@
               >
                 <div class="flex flex-col items-center justify-center space-y-3">
                   <Building2 class="w-10 h-10 text-slate-300 dark:text-zinc-700" />
-                  <p class="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                  <p class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
                     No branches found.
                   </p>
                   <button
@@ -103,7 +103,7 @@
                   </button>
                   <button
                     v-else
-                    class="h-9 px-4 rounded-lg bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-black uppercase tracking-widest hover:opacity-90 transition-opacity"
+                    class="h-9 px-4 rounded-lg bg-slate-900 dark:bg-slate-100 dark:bg-slate-950 text-white dark:text-slate-900 dark:text-slate-100 text-xs font-black uppercase tracking-widest hover:opacity-90 transition-opacity"
                     @click="createLocation"
                   >
                     <Plus class="w-4 h-4 inline mr-1" /> Add First Branch
@@ -117,7 +117,7 @@
               v-for="item in paginatedItems"
               v-else
               :key="item.id"
-              class="group/row hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors duration-200"
+              class="group/row hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 transition-colors duration-200"
             >
               <td class="px-5 py-3 whitespace-nowrap">
                 <div class="flex items-center gap-3">
@@ -157,7 +157,7 @@
               <td class="px-5 py-3 text-right whitespace-nowrap">
                 <div class="flex justify-end pr-2 opacity-0 group-hover/row:opacity-100 transition-opacity">
                   <button
-                    class="h-7 px-3 text-[10px] font-black uppercase tracking-widest bg-transparent border border-slate-200 dark:border-zinc-700 rounded-md hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 transition-colors shadow-sm"
+                    class="h-7 px-3 text-[10px] font-black uppercase tracking-widest bg-transparent border border-slate-200 dark:border-zinc-700 rounded-md hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 transition-colors shadow-sm"
                     @click="() => { selectedItem = item; handleEdit(); }"
                   >
                     Edit
@@ -170,21 +170,21 @@
       </div>
 
       <!-- Pagination -->
-      <div class="flex items-center justify-between p-4 border-t border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 shrink-0">
+      <div class="flex items-center justify-between p-4 border-t border-slate-100 dark:border-zinc-800 bg-slate-50 dark:hover:bg-zinc-800 shrink-0">
         <button
-          class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-950 disabled:opacity-50 transition-colors shadow-sm text-slate-700 dark:text-slate-300"
+          class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-zinc-800 hover:bg-white dark:bg-slate-900 dark:hover:bg-zinc-950 disabled:opacity-50 transition-colors shadow-sm text-slate-700 dark:text-slate-300"
           :disabled="page <= 1 || loading"
           @click="page--"
         >
           Previous
         </button>
-        <div class="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-3">
+        <div class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 flex items-center gap-3">
           <span>Page {{ page }} of {{ totalPages || 1 }}</span>
           <span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-zinc-700" />
           <span>{{ locations.length }} total</span>
         </div>
         <button
-          class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-950 disabled:opacity-50 transition-colors shadow-sm text-slate-700 dark:text-slate-300"
+          class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-zinc-800 hover:bg-white dark:bg-slate-900 dark:hover:bg-zinc-950 disabled:opacity-50 transition-colors shadow-sm text-slate-700 dark:text-slate-300"
           :disabled="page >= totalPages || loading"
           @click="page++"
         >

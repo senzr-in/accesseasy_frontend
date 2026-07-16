@@ -38,8 +38,8 @@
             <WifiOff class="w-3.5 h-3.5" /> Offline Mode Enabled
           </span>
           <button
+            class="px-5 py-2.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 text-rose-950 font-black text-xs uppercase tracking-widest shadow-md transition-all active:scale-95 shrink-0"
             @click="cancelEvacuation"
-            class="px-5 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-rose-950 font-black text-xs uppercase tracking-widest shadow-md transition-all active:scale-95 shrink-0"
           >
             Cancel Evacuation
           </button>
@@ -48,60 +48,83 @@
 
       <!-- Occupancy & Progress Counters -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6 py-6 shrink-0">
-        <div class="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col justify-between">
+        <div class="bg-white dark:bg-slate-900/5 border border-white/10 rounded-2xl p-5 flex flex-col justify-between">
           <span class="text-[9px] font-black uppercase tracking-widest text-rose-300">Checked In Occupancy</span>
-          <h2 class="text-4xl font-black mt-2">{{ totalGuests }}</h2>
-          <p class="text-[10px] text-rose-200 mt-1 uppercase tracking-widest">Total active badges in building</p>
+          <h2 class="text-4xl font-black mt-2">
+            {{ totalGuests }}
+          </h2>
+          <p class="text-[10px] text-rose-200 mt-1 uppercase tracking-widest">
+            Total active badges in building
+          </p>
         </div>
-        <div class="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col justify-between">
+        <div class="bg-white dark:bg-slate-900/5 border border-white/10 rounded-2xl p-5 flex flex-col justify-between">
           <span class="text-[9px] font-black uppercase tracking-widest text-rose-300">Accounted Safe</span>
-          <h2 class="text-4xl font-black text-emerald-400 mt-2">{{ safeCount }}</h2>
-          <p class="text-[10px] text-rose-200 mt-1 uppercase tracking-widest">Marked safe at assembly points</p>
+          <h2 class="text-4xl font-black text-emerald-400 mt-2">
+            {{ safeCount }}
+          </h2>
+          <p class="text-[10px] text-rose-200 mt-1 uppercase tracking-widest">
+            Marked safe at assembly points
+          </p>
         </div>
-        <div class="bg-white/5 border border-white/10 rounded-2xl p-5 flex flex-col justify-between">
+        <div class="bg-white dark:bg-slate-900/5 border border-white/10 rounded-2xl p-5 flex flex-col justify-between">
           <span class="text-[9px] font-black uppercase tracking-widest text-rose-300">Safety Percentage</span>
           <div class="flex items-center gap-4 mt-2">
-            <h2 class="text-4xl font-black text-amber-400">{{ safetyRatio }}%</h2>
-            <div class="flex-1 h-3 bg-white/10 rounded-full overflow-hidden border border-white/5">
-              <div class="h-full bg-emerald-500 transition-all duration-300" :style="{ width: `${safetyRatio}%` }" />
+            <h2 class="text-4xl font-black text-amber-400">
+              {{ safetyRatio }}%
+            </h2>
+            <div class="flex-1 h-3 bg-white dark:bg-slate-900/10 rounded-full overflow-hidden border border-white/5">
+              <div
+                class="h-full bg-emerald-500 transition-all duration-300"
+                :style="{ width: `${safetyRatio}%` }"
+              />
             </div>
           </div>
-          <p class="text-[10px] text-rose-200 mt-1 uppercase tracking-widest">Target: 100% accountability</p>
+          <p class="text-[10px] text-rose-200 mt-1 uppercase tracking-widest">
+            Target: 100% accountability
+          </p>
         </div>
       </div>
 
       <!-- Evacuation List -->
-      <div class="flex-1 overflow-y-auto bg-white/5 border border-white/10 rounded-2xl overflow-hidden flex flex-col mb-4">
-        <div class="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-white/5 sticky top-0 backdrop-blur-md z-10 shrink-0">
+      <div class="flex-1 overflow-y-auto bg-white dark:bg-slate-900/5 border border-white/10 rounded-2xl overflow-hidden flex flex-col mb-4">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-white dark:bg-slate-900/5 sticky top-0 backdrop-blur-md z-10 shrink-0">
           <h3 class="text-xs font-black uppercase tracking-widest text-white">
             Missing Visitors & Personnel List
           </h3>
           <div class="relative w-full sm:w-64">
             <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-rose-300" />
             <input
-              type="text"
               v-model="query"
+              type="text"
               placeholder="Filter by name..."
-              class="w-full pl-9 pr-4 py-2 rounded-xl bg-white/5 border border-white/15 text-xs text-white placeholder:text-rose-300/50 focus:outline-none focus:border-white/30"
-            />
+              class="w-full pl-9 pr-4 py-2 rounded-xl bg-white dark:bg-slate-900/5 border border-white/15 text-xs text-white placeholder:text-rose-300/50 focus:outline-none focus:border-white/30"
+            >
           </div>
         </div>
 
         <div class="flex-1 overflow-y-auto custom-scrollbar">
           <table class="w-full text-sm text-left border-collapse">
-            <thead class="text-[9px] font-black uppercase tracking-widest text-rose-300 bg-white/5 border-b border-white/10 sticky top-0 backdrop-blur-md z-10">
+            <thead class="text-[9px] font-black uppercase tracking-widest text-rose-300 bg-white dark:bg-slate-900/5 border-b border-white/10 sticky top-0 backdrop-blur-md z-10">
               <tr>
-                <th class="px-6 py-4">Visitor Name</th>
-                <th class="px-6 py-4">Company</th>
-                <th class="px-6 py-4">Host</th>
-                <th class="px-6 py-4 text-right">Accountability Check</th>
+                <th class="px-6 py-4">
+                  Visitor Name
+                </th>
+                <th class="px-6 py-4">
+                  Company
+                </th>
+                <th class="px-6 py-4">
+                  Host
+                </th>
+                <th class="px-6 py-4 text-right">
+                  Accountability Check
+                </th>
               </tr>
             </thead>
             <tbody class="divide-y divide-white/5">
               <tr 
                 v-for="visitor in filteredList" 
                 :key="visitor.id"
-                :class="['transition-colors', safeMap[visitor.id] ? 'bg-emerald-500/10 hover:bg-emerald-500/15' : 'hover:bg-white/5']"
+                :class="['transition-colors', safeMap[visitor.id] ? 'bg-emerald-500/10 hover:bg-emerald-500/15' : 'hover:bg-white dark:bg-slate-900/5']"
               >
                 <td class="px-6 py-4 font-bold text-white">
                   {{ visitor.personName }}
@@ -114,20 +137,23 @@
                 </td>
                 <td class="px-6 py-4 text-right">
                   <button
-                    @click="toggleSafe(visitor.id)"
                     :class="[
                       'px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all active:scale-95 shadow-sm',
                       safeMap[visitor.id] 
                         ? 'bg-emerald-500 text-white border-emerald-400/30' 
-                        : 'bg-white/5 text-rose-200 border-white/10 hover:border-white/20'
+                        : 'bg-white dark:bg-slate-900/5 text-rose-200 border-white/10 hover:border-white/20'
                     ]"
+                    @click="toggleSafe(visitor.id)"
                   >
                     {{ safeMap[visitor.id] ? 'SAFE ✓' : 'MARK SAFE' }}
                   </button>
                 </td>
               </tr>
               <tr v-if="filteredList.length === 0">
-                <td colspan="4" class="py-12 text-center text-xs font-black uppercase tracking-widest text-rose-300/60">
+                <td
+                  colspan="4"
+                  class="py-12 text-center text-xs font-black uppercase tracking-widest text-rose-300/60"
+                >
                   No missing individuals match the query.
                 </td>
               </tr>

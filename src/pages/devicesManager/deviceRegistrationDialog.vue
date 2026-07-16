@@ -10,7 +10,7 @@
     >
       <!-- Premium Glass Header -->
       <div class="relative px-8 py-6 flex justify-between items-start bg-gradient-to-b from-slate-50 to-white dark:from-zinc-900 dark:to-zinc-950 border-b border-zinc-100 dark:border-zinc-800/80 z-10 shrink-0">
-        <div class="absolute inset-0 bg-white/40 dark:bg-zinc-950/40 backdrop-blur-xl" />
+        <div class="absolute inset-0 bg-white dark:bg-slate-900/40 dark:bg-zinc-950/40 backdrop-blur-xl" />
         <div class="relative z-10">
           <div class="flex items-center gap-3 mb-1">
             <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center border border-amber-100 dark:border-amber-500/20 shadow-inner">
@@ -25,7 +25,7 @@
           </p>
         </div>
         <button 
-          class="relative z-10 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-zinc-700 transition-all duration-200" 
+          class="relative z-10 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-400 hover:text-slate-900 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-zinc-700 transition-all duration-200" 
           @click="close"
         >
           <X class="w-4 h-4" />
@@ -102,7 +102,10 @@
               </div>
 
               <!-- Camera Selection Dropdown (Only show for doors controllers, not NVRs themselves) -->
-              <div class="space-y-1.5 col-span-2" v-if="formData.controllerType && formData.controllerType !== 'frigate_nvr'">
+              <div
+                v-if="formData.controllerType && formData.controllerType !== 'frigate_nvr'"
+                class="space-y-1.5 col-span-2"
+              >
                 <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
                   Linked AI Camera
                 </label>
@@ -110,8 +113,14 @@
                   v-model="formData.linkedCamera"
                   class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground"
                 >
-                  <option value="">No Camera Linked</option>
-                  <option v-for="cam in cameras" :key="cam" :value="cam">
+                  <option value="">
+                    No Camera Linked
+                  </option>
+                  <option
+                    v-for="cam in cameras"
+                    :key="cam"
+                    :value="cam"
+                  >
                     {{ cam }}
                   </option>
                 </select>
@@ -135,7 +144,7 @@
                     type="checkbox"
                     class="sr-only peer"
                   >
-                  <div class="w-11 h-6 bg-zinc-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-500/30 rounded-full peer dark:bg-zinc-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-zinc-600 peer-checked:bg-amber-500" />
+                  <div class="w-11 h-6 bg-zinc-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-500/30 rounded-full peer dark:bg-zinc-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:bg-slate-900 after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-zinc-600 peer-checked:bg-amber-500" />
                 </label>
               </div>
 
@@ -172,7 +181,7 @@
       <div class="relative px-8 py-5 border-t border-zinc-100 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 flex justify-end gap-3 z-10 shrink-0">
         <button
           type="button"
-          class="px-6 h-10 rounded-xl border border-zinc-200 dark:border-zinc-800 text-[13px] font-bold text-slate-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-900 hover:text-slate-900 dark:hover:text-white transition-all duration-200"
+          class="px-6 h-10 rounded-xl border border-zinc-200 dark:border-zinc-800 text-[13px] font-bold text-slate-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 hover:text-slate-900 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white transition-all duration-200"
           @click="close"
         >
           Cancel
@@ -198,13 +207,13 @@
       class="relative w-full max-w-md max-h-[80vh] flex flex-col bg-white dark:bg-zinc-950 rounded-[24px] shadow-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden transform transition-all animate-in zoom-in-95 duration-300"
     >
       <!-- Scanner Header -->
-      <div class="px-6 py-4 flex justify-between items-center border-b border-zinc-100 dark:border-zinc-800 shrink-0 bg-slate-50 dark:bg-zinc-900">
+      <div class="px-6 py-4 flex justify-between items-center border-b border-zinc-100 dark:border-zinc-800 shrink-0 bg-slate-50 dark:hover:bg-zinc-800">
         <h3 class="font-black text-lg text-slate-900 dark:text-white flex items-center gap-2">
           <Wifi class="w-5 h-5 text-amber-500" />
           Network Scanner
         </h3>
         <button 
-          class="w-7 h-7 flex items-center justify-center rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors" 
+          class="w-7 h-7 flex items-center justify-center rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-400 hover:text-slate-900 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors" 
           @click="closeNetworkScanner"
         >
           <X class="w-4 h-4" />

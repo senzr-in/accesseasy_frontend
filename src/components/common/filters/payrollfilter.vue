@@ -1,7 +1,9 @@
 <template>
   <div class="flex flex-col bg-transparent overflow-y-auto h-full relative z-10">
     <div class="p-4 border-b border-slate-200 dark:border-zinc-800 bg-transparent flex justify-between items-center">
-      <h2 class="text-sm font-bold text-slate-900 dark:text-white m-0 text-left">Filters</h2>
+      <h2 class="text-sm font-bold text-slate-900 dark:text-white m-0 text-left">
+        Filters
+      </h2>
       <BaseButton
         variant="secondary"
         size="sm"
@@ -64,7 +66,7 @@
               v-if="filter.type === 'month'"
               type="month"
               :value="localFilters[filter.key]"
-              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
+              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:bg-slate-800/50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
               @change="handleMonthChange($event.target.value)"
             >
 
@@ -72,7 +74,7 @@
             <select
               v-else-if="filter.key === 'organization'"
               :value="localFilters[filter.key]"
-              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
+              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:bg-slate-800/50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
               @change="handleInputChange(filter.key, $event.target.value)"
             >
               <option value="">
@@ -91,7 +93,7 @@
             <select
               v-else-if="filter.key === 'branch'"
               :value="localFilters[filter.key]"
-              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
+              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:bg-slate-800/50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
               @change="handleInputChange(filter.key, $event.target.value)"
             >
               <option value="">
@@ -110,7 +112,7 @@
             <select
               v-else-if="filter.key === 'department'"
               :value="localFilters[filter.key]"
-              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
+              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:bg-slate-800/50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
               @change="handleInputChange(filter.key, $event.target.value)"
             >
               <option value="">
@@ -132,7 +134,7 @@
             >
               <select
                 :value="localFilters[filter.key]"
-                class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
+                class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:bg-slate-800/50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
                 :disabled="isLoadingCycles"
                 @change="handleAttendanceCycleChange($event.target.value)"
               >
@@ -181,7 +183,7 @@
             <select
               v-else-if="filter.key === 'cycleType'"
               :value="localFilters[filter.key]"
-              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
+              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:bg-slate-800/50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
               @change="handleInputChange(filter.key, $event.target.value)"
             >
               <option value="">
@@ -200,7 +202,7 @@
             <select
               v-else-if="filter.key === 'status'"
               :value="localFilters[filter.key]"
-              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
+              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:bg-slate-800/50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
               @change="handleInputChange(filter.key, $event.target.value)"
             >
               <option value="">
@@ -219,7 +221,7 @@
             <select
               v-else-if="filter.key === 'mode'"
               :value="localFilters[filter.key]"
-              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
+              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:bg-slate-800/50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
               @change="handleInputChange(filter.key, $event.target.value)"
             >
               <option value="">
@@ -238,7 +240,7 @@
             <select
               v-else-if="filter.key === 'attendance'"
               :value="localFilters[filter.key]"
-              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
+              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:bg-slate-800/50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
               @change="handleInputChange(filter.key, $event.target.value)"
             >
               <option value="">
@@ -263,7 +265,7 @@
             <select
               v-else-if="filter.type === 'select' && filter.options"
               :value="localFilters[filter.key]"
-              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
+              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:bg-slate-800/50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
               @change="handleInputChange(filter.key, $event.target.value)"
             >
               <option value="">
@@ -284,7 +286,7 @@
               type="text"
               :value="localFilters[filter.key]"
               :placeholder="filter.placeholder || ''"
-              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
+              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:bg-slate-800/50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
               @input="handleInputChange(filter.key, $event.target.value)"
             >
 
@@ -293,7 +295,7 @@
               v-else-if="filter.type === 'date'"
               type="date"
               :value="localFilters[filter.key]"
-              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
+              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:bg-slate-800/50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
               @change="handleInputChange(filter.key, $event.target.value)"
             >
 
@@ -303,7 +305,7 @@
               type="number"
               :value="localFilters[filter.key]"
               :placeholder="filter.placeholder || ''"
-              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
+              class="w-full px-4 py-2 border border-slate-200 dark:border-zinc-800 rounded-lg text-sm transition-all bg-white dark:bg-zinc-950 text-slate-900 dark:text-zinc-100 min-h-[40px] focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-500/40 disabled:bg-slate-50 dark:bg-slate-800/50 dark:disabled:bg-zinc-900 disabled:text-slate-400 dark:disabled:text-zinc-500 disabled:cursor-not-allowed disabled:opacity-60"
               @input="handleInputChange(filter.key, $event.target.value)"
             >
           </div>

@@ -1,39 +1,81 @@
 <template>
-  <div class="flex h-screen bg-slate-100 overflow-hidden text-slate-900 font-sans">
+  <div class="flex h-screen bg-slate-100 dark:bg-[#0b0f19] overflow-hidden text-slate-900 dark:text-white font-sans transition-colors duration-300">
     <div class="flex w-full h-full overflow-hidden">
       <!-- Sidebar -->
-      <Sidebar />
+      <component :is="activeSidebar" />
 
       <!-- Main Content -->
       <div class="flex flex-1 flex-col overflow-hidden min-w-0">
-        <!-- Top Header -->
-        <header class="flex h-14 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-6 gap-4">
-          <div class="flex items-center gap-3">
-            <!-- Left side empty or breadcrumbs can go here -->
+        <header class="flex h-16 shrink-0 items-center justify-between border-b border-white/60 dark:border-white/10 bg-white/60 dark:bg-[#151c2c]/40 backdrop-blur-xl px-6 gap-4 transition-colors duration-300 z-10 relative">
+          <!-- Left side: Search -->
+          <div class="flex items-center flex-1 max-w-xl">
+            <div class="relative w-full group">
+              <Search class="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2 group-hover:text-indigo-500:text-indigo-400 transition-colors" />
+              <input 
+                type="text" 
+                placeholder="Search anything... (Ctrl + K)" 
+                class="w-full h-10 pl-10 pr-4 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-slate-700 dark:text-slate-200 placeholder:text-slate-400 dark:text-slate-500:text-slate-500 dark:text-slate-400 shadow-sm shadow-slate-100"
+              >
+            </div>
           </div>
 
-          <div class="flex items-center gap-3">
+          <!-- Right side: Actions & Profile -->
+          <div class="flex items-center gap-4 pl-4 border-l border-slate-100 dark:border-white/5">
             <!-- Zone Filter -->
-            <div class="hidden md:flex items-center relative rounded-full bg-slate-50 border border-slate-200 transition-colors hover:bg-slate-100 pl-3 pr-2 py-1.5 cursor-pointer shadow-sm">
-              <MapPin class="w-4 h-4 text-slate-400 shrink-0 pointer-events-none" />
-              <select v-model="selectedZone" class="appearance-none bg-transparent text-sm font-semibold text-slate-700 outline-none border-none pl-2 pr-6 cursor-pointer max-w-[150px] truncate w-full">
-                <option value="all">All Zones</option>
-                <option v-for="z in zones" :key="z.id" :value="z.id">{{ z.zoneName }}</option>
+            <div class="hidden md:flex items-center relative rounded-xl bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20:border-white/20 transition-colors hover:bg-slate-50 dark:hover:bg-white/5 dark:bg-white/5:bg-slate-800:bg-slate-800:bg-white pl-3 pr-2 py-2 cursor-pointer shadow-sm min-w-[140px]">
+              <MapPin class="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0 pointer-events-none" />
+              <select
+                v-model="selectedZone"
+                class="appearance-none bg-transparent text-sm font-semibold text-slate-700 dark:text-slate-200 outline-none border-none pl-2 pr-6 cursor-pointer max-w-[150px] truncate w-full"
+              >
+                <option value="all">
+                  All Zones
+                </option>
+                <option
+                  v-for="z in zones"
+                  :key="z.id"
+                  :value="z.id"
+                >
+                  {{ z.zoneName }}
+                </option>
               </select>
-              <ChevronDown class="w-4 h-4 text-slate-600 absolute right-2.5 pointer-events-none" />
+              <ChevronDown class="w-4 h-4 text-slate-400 dark:text-slate-500 absolute right-2.5 pointer-events-none" />
             </div>
 
-            <!-- Organization Chip -->
-            <div class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200">
-              <Building class="w-3.5 h-3.5 text-slate-400" />
-              <span class="text-xs font-medium text-slate-600">{{ tenantName || 'No Organization' }}</span>
-            </div>
+            <!-- Theme Toggle -->
+            <button
+              class="relative w-10 h-10 rounded-xl bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-white/5 dark:bg-white/5:bg-slate-800:bg-slate-800:bg-white hover:text-indigo-600 dark:hover:text-indigo-400:text-indigo-400 transition-colors shadow-sm text-slate-500 dark:text-slate-400 dark:text-slate-500 group"
+              @click="toggleDark()"
+            >
+              <Sun
+                v-if="isDark"
+                class="w-5 h-5 group-hover:scale-110 transition-transform"
+              />
+              <Moon
+                v-else
+                class="w-5 h-5 group-hover:scale-110 transition-transform"
+              />
+            </button>
 
-            <!-- Role Chip -->
-            <div class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-indigo-50 border border-indigo-200">
-              <Shield class="w-3.5 h-3.5 text-indigo-500" />
-              <span class="text-xs font-semibold text-indigo-700">{{ userRole }}</span>
-            </div>
+            <!-- Notifications -->
+            <button class="relative w-10 h-10 rounded-xl bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-white/5 dark:bg-white/5:bg-slate-800:bg-slate-800:bg-white hover:text-indigo-600 dark:hover:text-indigo-400:text-indigo-400 transition-colors shadow-sm text-slate-500 dark:text-slate-400 dark:text-slate-500 group">
+              <Bell class="w-5 h-5 group-hover:scale-110 transition-transform" />
+              <span class="absolute top-0 right-0 w-3.5 h-3.5 bg-red-500 border-2 border-white rounded-full text-[8px] text-white font-bold flex items-center justify-center -mr-1 -mt-1">3</span>
+            </button>
+
+            <!-- User Profile -->
+            <button
+              class="flex items-center gap-3 pl-2 cursor-pointer group"
+              @click="handleSignOut"
+            >
+              <div class="flex flex-col text-right hidden sm:flex">
+                <span class="text-sm font-bold text-slate-900 dark:text-white leading-none group-hover:text-indigo-600 dark:group-hover:text-indigo-400 dark:hover:text-indigo-400:text-indigo-400 transition-colors">{{ userName }}</span>
+                <span class="text-[10px] font-semibold text-slate-400 dark:text-slate-500 mt-0.5">{{ userRole }}</span>
+              </div>
+              <div class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center border border-indigo-200 dark:border-indigo-500/30 shadow-sm">
+                <span class="text-sm font-bold text-indigo-700 dark:text-indigo-400">{{ userInitials }}</span>
+              </div>
+            </button>
           </div>
         </header>
 
@@ -41,7 +83,7 @@
         <OnboardingBanner />
 
         <!-- Page Content -->
-        <main class="flex-1 flex flex-col overflow-hidden px-6 pt-5 pb-6 relative">
+        <main class="flex-1 flex flex-col overflow-hidden relative">
           <router-view class="flex-1 min-h-0" />
         </main>
       </div>
@@ -52,23 +94,43 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { Building, Shield, MapPin, ChevronDown } from 'lucide-vue-next';
-import Sidebar from '@/components/layout/Sidebar.vue';
+import { useDark, useToggle } from '@vueuse/core';
+import { Building, Shield, MapPin, ChevronDown, Search, Bell, Sun, Moon } from 'lucide-vue-next';
+import SecuritySidebar from '@/components/layout/SecuritySidebar.vue';
+import WorkforceSidebar from '@/components/layout/WorkforceSidebar.vue';
 import OnboardingBanner from '@/components/layout/OnboardingBanner.vue';
 import { authService } from '@/services/authService';
 import { onboardingService } from '@/services/onboardingService';
 import { currentUserTenant } from '@/utils/currentUserTenant';
 import { generateEncryptedQrToken } from '@/utils/security/access-control';
+import { useZoneFilter } from '@/composables/useZoneFilter';
 
 const route = useRoute();
 const router = useRouter();
+const { selectedZone, zones } = useZoneFilter();
+
+const isDark = useDark({
+  storageKey: 'ae_theme',
+});
+const toggleDark = useToggle(isDark);
+
+const appMode = import.meta.env.VITE_APP_MODE || 'workforce';
+const activeSidebar = computed(() => appMode === 'security' ? SecuritySidebar : WorkforceSidebar);
 
 const _userData = authService.getUserData();
 const userRole = ref(authService.getUserRole() || 'Employee');
 const tenantName = ref(_userData?.tenant?.tenantName || authService.getTenantName() || '');
+const userName = computed(() => {
+  if (!_userData) return 'Admin User';
+  return `${_userData.first_name || ''} ${_userData.last_name || ''}`.trim() || 'Admin User';
+});
+const userInitials = computed(() => userName.value.charAt(0).toUpperCase());
 
-import { useZoneFilter } from '@/composables/useZoneFilter';
-const { selectedZone, zones } = useZoneFilter();
+const handleSignOut = async () => {
+  authService.logout();
+  router.push('/login');
+};
+
 
 // IN-04: Silently auto-generate QR for Employee users on first dashboard load
 const autoGenerateEmployeeQr = async () => {

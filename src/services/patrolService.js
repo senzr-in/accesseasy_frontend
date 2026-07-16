@@ -29,6 +29,45 @@ class PatrolService {
     }
   }
 
+  async getMasterCheckpoints() {
+    try {
+      const tenantId = authService.getTenantId();
+      const response = await authService.protectedApi.get(
+        `/items/checkpoints?filter[tenant][_eq]=${tenantId}&filter[group_id][_null]=true&sort=-date_created`
+      );
+      return response.data.data;
+    } catch (error) {
+      console.error("Error fetching master checkpoints:", error);
+      return [];
+    }
+  }
+
+  async saveMasterCheckpoint(cpData) {
+    try {
+      const tenantId = authService.getTenantId();
+      if (cpData.id) {
+        await authService.protectedApi.patch(`/items/checkpoints/${cpData.id}`, cpData);
+      } else {
+        const payload = { ...cpData, group_id: null, tenant: tenantId };
+        await authService.protectedApi.post("/items/checkpoints", payload);
+      }
+      return await this.getMasterCheckpoints();
+    } catch (error) {
+      console.error("Error saving master checkpoint:", error);
+      throw error;
+    }
+  }
+
+  async deleteMasterCheckpoint(cpId) {
+    try {
+      await authService.protectedApi.delete(`/items/checkpoints/${cpId}`);
+      return await this.getMasterCheckpoints();
+    } catch (error) {
+      console.error("Error deleting master checkpoint:", error);
+      throw error;
+    }
+  }
+
   async createCheckpointGroup(payload) {
     try {
       const tenantId = authService.getTenantId();
@@ -85,6 +124,15 @@ class PatrolService {
     }
   }
 
+  async updateAlertStatus(alertId, status) {
+    try {
+      await authService.protectedApi.patch(`/items/patrol_alerts/${alertId}`, { status });
+    } catch (error) {
+      console.error('Error updating alert status:', error);
+      throw error;
+    }
+  }
+
   async getCheckpointsForRoute(groupId) {
     if (!groupId) return [];
     try {
@@ -104,7 +152,7 @@ class PatrolService {
       const tenantId = authService.getTenantId();
       const today = new Date().toISOString().split('T')[0];
       const response = await authService.protectedApi.get(
-        `/items/patrol_logs?filter[date_created][_gte]=${today}T00:00:00&sort=timestamp`
+        `/items/patrol_logs?filter[tenant][_eq]=${tenantId}&filter[date_created][_gte]=${today}T00:00:00&sort=timestamp`
       );
       return response.data.data;
     } catch (error) {

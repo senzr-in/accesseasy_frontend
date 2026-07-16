@@ -10,7 +10,10 @@
             ? 'bg-sky-500/20 text-sky-400 border-sky-500/30'
             : 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'"
         >
-          <span class="w-1.5 h-1.5 rounded-full" :class="currentTrackingMode === 'outdoor' ? 'bg-sky-400 animate-pulse' : 'bg-emerald-400 animate-pulse'" />
+          <span
+            class="w-1.5 h-1.5 rounded-full"
+            :class="currentTrackingMode === 'outdoor' ? 'bg-sky-400 animate-pulse' : 'bg-emerald-400 animate-pulse'"
+          />
           {{ currentTrackingMode === 'outdoor' ? 'Outdoor: GPS Active' : 'Indoor: Dead Reckoning' }}
         </span>
 
@@ -107,8 +110,15 @@
                 :transform="`translate(${currentIndoorPosition.x * 3}, ${-currentIndoorPosition.y * 3})`"
                 class="transition-transform duration-100 ease-out"
               >
-                <circle r="24" fill="rgba(16, 185, 129, 0.2)" class="animate-ping" />
-                <circle r="14" fill="#10b981" />
+                <circle
+                  r="24"
+                  fill="rgba(16, 185, 129, 0.2)"
+                  class="animate-ping"
+                />
+                <circle
+                  r="14"
+                  fill="#10b981"
+                />
                 <!-- Small compass arrow pointing to heading direction -->
                 <polygon
                   points="0,-12 -6,6 6,6"
@@ -120,9 +130,21 @@
 
             <!-- SVG Defs for Neon Gradients -->
             <defs>
-              <linearGradient id="neon-blue-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#38bdf8" />
-                <stop offset="100%" stop-color="#059669" />
+              <linearGradient
+                id="neon-blue-gradient"
+                x1="0%"
+                y1="0%"
+                x2="100%"
+                y2="100%"
+              >
+                <stop
+                  offset="0%"
+                  stop-color="#38bdf8"
+                />
+                <stop
+                  offset="100%"
+                  stop-color="#059669"
+                />
               </linearGradient>
             </defs>
           </svg>
@@ -143,7 +165,7 @@
               :style="{ width: `${progressPercentage}%` }"
             >
               <!-- Glowing head -->
-              <div class="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white shadow-lg border-2 border-indigo-500" />
+              <div class="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white dark:bg-slate-900 shadow-lg border-2 border-indigo-500" />
             </div>
           </div>
           <span class="text-xs font-mono text-slate-400">{{ formatTime(totalDurationSeconds) }}</span>
@@ -157,8 +179,14 @@
               class="w-10 h-10 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center shadow-lg transition-colors"
               @click="togglePlay"
             >
-              <Pause v-if="isPlaying" class="w-5 h-5" />
-              <Play v-else class="w-5 h-5 fill-white" />
+              <Pause
+                v-if="isPlaying"
+                class="w-5 h-5"
+              />
+              <Play
+                v-else
+                class="w-5 h-5 fill-white"
+              />
             </button>
 
             <button
@@ -172,16 +200,28 @@
           <!-- Live telemetry stats -->
           <div class="hidden sm:flex items-center gap-6 text-xs bg-slate-950/50 px-4 py-2 rounded-xl border border-slate-800">
             <div>
-              <p class="text-slate-500 text-[10px] uppercase font-black">Steps</p>
-              <p class="font-mono font-bold">{{ currentTelemetry.steps }}</p>
+              <p class="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-black">
+                Steps
+              </p>
+              <p class="font-mono font-bold">
+                {{ currentTelemetry.steps }}
+              </p>
             </div>
             <div>
-              <p class="text-slate-500 text-[10px] uppercase font-black">Heading</p>
-              <p class="font-mono font-bold">{{ currentTelemetry.heading }}°</p>
+              <p class="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-black">
+                Heading
+              </p>
+              <p class="font-mono font-bold">
+                {{ currentTelemetry.heading }}°
+              </p>
             </div>
             <div>
-              <p class="text-slate-500 text-[10px] uppercase font-black">Speed</p>
-              <p class="font-mono font-bold">{{ currentTelemetry.speed }} m/s</p>
+              <p class="text-slate-500 dark:text-slate-400 text-[10px] uppercase font-black">
+                Speed
+              </p>
+              <p class="font-mono font-bold">
+                {{ currentTelemetry.speed }} m/s
+              </p>
             </div>
           </div>
 
@@ -192,7 +232,7 @@
               :key="sp"
               class="px-3 h-8 rounded-lg text-xs font-black uppercase transition-all"
               :class="speedMultiplier === sp
-                ? 'bg-white text-slate-900 font-bold shadow-md'
+                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-bold shadow-md'
                 : 'bg-slate-800 text-slate-400 hover:bg-slate-700'"
               @click="speedMultiplier = sp"
             >
@@ -206,8 +246,12 @@
     <!-- Right Column: Checkpoint Timeline / Log -->
     <div class="w-full lg:w-80 bg-slate-900 border-t lg:border-t-0 border-slate-800 flex flex-col max-h-[400px] lg:max-h-none overflow-hidden">
       <div class="p-6 border-b border-slate-800 shrink-0">
-        <h3 class="text-xs font-black uppercase tracking-widest text-slate-400">Scan Timeline</h3>
-        <p class="text-xs font-medium text-slate-500 mt-1">Verified checkpoints order</p>
+        <h3 class="text-xs font-black uppercase tracking-widest text-slate-400">
+          Scan Timeline
+        </h3>
+        <p class="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">
+          Verified checkpoints order
+        </p>
       </div>
 
       <div class="flex-1 p-6 overflow-y-auto custom-scrollbar space-y-6">
@@ -230,26 +274,37 @@
                 ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400'
                 : cp.status === 'missed'
                   ? 'bg-rose-500/10 border-rose-500 text-rose-400'
-                  : 'bg-slate-800 border-slate-700 text-slate-500'"
+                  : 'bg-slate-800 border-slate-700 text-slate-500 dark:text-slate-400'"
             >
-              <Check v-if="cp.status === 'scanned' || cp.status === 'completed'" class="w-3.5 h-3.5" />
-              <X v-else-if="cp.status === 'missed'" class="w-3.5 h-3.5" />
-              <Clock v-else class="w-3.5 h-3.5" />
+              <Check
+                v-if="cp.status === 'scanned' || cp.status === 'completed'"
+                class="w-3.5 h-3.5"
+              />
+              <X
+                v-else-if="cp.status === 'missed'"
+                class="w-3.5 h-3.5"
+              />
+              <Clock
+                v-else
+                class="w-3.5 h-3.5"
+              />
             </div>
           </div>
 
           <!-- Description -->
           <div class="flex-1 min-w-0">
             <div class="flex justify-between items-start">
-              <h4 class="text-xs font-bold text-slate-200 truncate pr-2">{{ cp.name }}</h4>
+              <h4 class="text-xs font-bold text-slate-200 truncate pr-2">
+                {{ cp.name }}
+              </h4>
               <span
                 v-if="cp.scanTime"
-                class="text-[9px] font-black text-slate-500 uppercase tracking-widest"
+                class="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest"
               >
                 {{ cp.scanTime }}
               </span>
             </div>
-            <p class="text-[10px] text-slate-500 mt-0.5">
+            <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
               <span v-if="cp.latitude && cp.longitude">
                 GPS: {{ parseFloat(cp.latitude).toFixed(4) }}, {{ parseFloat(cp.longitude).toFixed(4) }}
               </span>
@@ -263,7 +318,7 @@
                 ? 'text-emerald-500'
                 : cp.status === 'missed'
                   ? 'text-rose-500'
-                  : 'text-slate-500'"
+                  : 'text-slate-500 dark:text-slate-400'"
             >
               {{ cp.status }}
             </span>
