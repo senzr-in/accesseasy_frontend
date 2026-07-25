@@ -1,0 +1,111 @@
+/* Responsive Design */
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    min-height: auto;
+  }
+
+  .header-info-cards {
+    order: -1;
+  }
+
+  .content-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .form-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stat-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+  }
+
+  .tabs-nav {
+    padding: 0 1rem;
+    overflow-x: auto;
+  }
+
+  .tab-content {
+    padding: 1rem;
+  }
+
+  .field-basic-config {
+    grid-template-columns: 1fr;
+  }
+
+  .role-config-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .status-config-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-content {
+    width: 95%;
+    margin: 1rem;
+  }
+
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding: 1.5rem;
+  }
+
+  .field-type-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .wizard-steps {
+    gap: 1rem;
+  }
+
+  .help-steps {
+    gap: 0.75rem;
+  }
+
+  .field-types-help {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .main-contents {
+    padding: 1rem;
+  }
+
+  .form-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .empty-state-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .fields-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+
+  .modal-footer {
+    flex-direction: column-reverse;
+  }
+
+  .wizard-steps {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .wizard-step {
+    flex-direction: row;
+    justify-content: center;
+  }
+}

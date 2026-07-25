@@ -1,0 +1,42 @@
+/*src/assets/styles/typography.css*/
+/* Font-scale CSS variables — do NOT redefine Tailwind utility class names here. */
+:root {
+  --font-family-primary: "Inter", sans-serif;
+  --font-family-secondary: "Open Sans", sans-serif;
+
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1em;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 1.875rem;
+  --font-size-4xl: 2.25rem;
+  --font-size-5xl: 3rem;
+
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --line-height-tight: 1.25;
+  --line-height-snug: 1.375;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.625;
+  --line-height-loose: 2;
+
+  --letter-spacing-tight: -0.025em;
+  --letter-spacing-normal: 0em;
+  --letter-spacing-wide: 0.025em;
+}
+
+body,
+#app {
+  font-family: var(--font-family-primary);
+}
+
+/* NOTE: Do NOT define classes named .text-xs, .text-sm, .font-bold etc. here.
+   Those are Tailwind utility class names. Redefining them in plain CSS
+   breaks dark mode because the plain CSS takes precedence over Tailwind's
+   generated dark:bg-* and dark:text-* variants. */

@@ -1,0 +1,139 @@
+<template>
+  <div class="space-y-6 pb-12 overflow-y-auto custom-scrollbar relative">
+    
+    <!-- Unified Sticky Control Room Header -->
+    <div class="sticky top-0 z-[80] bg-white/70 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-white/5 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shrink-0 px-1">
+      <div>
+        <h1 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-3">
+          AccessEasy Operations
+          <span class="text-[10px] font-black uppercase tracking-widest px-2.5 py-1 rounded-md bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-200/50 dark:border-indigo-500/20">
+            {{ activeRole }} View
+          </span>
+        </h1>
+        <p class="text-xs font-semibold text-slate-400 mt-1 uppercase tracking-widest">
+          {{ formattedDate }} · {{ userName }}
+        </p>
+      </div>
+
+      <!-- Header actions -->
+      <div class="flex items-center gap-3 w-full sm:w-auto">
+        <!-- Search Trigger -->
+        <button
+          @click="commandPaletteOpen = true"
+          class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 dark:bg-zinc-900/50 dark:hover:bg-zinc-800 border border-slate-200/50 dark:border-zinc-800 text-slate-500 dark:text-zinc-400 text-xs font-bold shadow-sm transition-all w-full sm:w-48 text-left"
+        >
+          <Search class="w-4 h-4 text-slate-400" />
+          <span>Quick Actions...</span>
+          <kbd class="hidden sm:inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-white dark:bg-zinc-950 border dark:border-zinc-800 rounded text-[9px] font-black tracking-widest uppercase ml-auto text-slate-400">
+            Ctrl K
+          </kbd>
+        </button>
+
+        <!-- Simulated Role Switcher Widget (For Dev / Admin verification) -->
+        <div class="relative group shrink-0">
+          <button
+            class="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white dark:bg-zinc-900/50 border border-slate-200 dark:border-zinc-800 text-slate-700 dark:text-zinc-300 text-xs font-black uppercase tracking-widest shadow-sm hover:bg-slate-50 dark:hover:bg-zinc-800 transition-all active:scale-95"
+          >
+            <ShieldCheck class="w-4 h-4 text-indigo-500" />
+            Switch Role
+          </button>
+          <div class="absolute right-0 mt-2 w-48 bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl shadow-lg py-1 z-[90] hidden group-hover:block backdrop-blur-xl">
+            <button
+              v-for="role in ['Admin', 'Receptionist', 'Guard', 'Executive', 'Employee']"
+              :key="role"
+              class="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors uppercase tracking-widest"
+              @click="activeRole = role"
+            >
+              {{ role }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Component Layout Rendering -->
+    <div class="mt-4">
+      <Suspense>
+        <template #default>
+          <component :is="getActiveComponent" />
+        </template>
+        <template #fallback>
+          <div class="py-24 text-center text-xs font-black uppercase tracking-widest text-slate-400 animate-pulse">
+            Booting control center...
+          </div>
+        </template>
+      </Suspense>
+    </div>
+
+    <!-- Global Layout Overlay components -->
+    <CommandPalette />
+    <RightCommandDrawer />
+    <MusterEvacOverlay />
+  </div>
+</template>
+
+<script setup>
+import { ref, computed, onMounted, onUnmounted, defineAsyncComponent } from 'vue';
+import { Search, ShieldCheck } from 'lucide-vue-next';
+import { authService } from '@/services/authService';
+import { useDashboardState } from '@/composables/useDashboardState';
+
+// Async import role specific dashboards
+const AdminDashboard = defineAsyncComponent(() => import('./components/layouts/AdminDashboard.vue'));
+const ReceptionDashboard = defineAsyncComponent(() => import('./components/layouts/ReceptionDashboard.vue'));
+const GuardDashboard = defineAsyncComponent(() => import('./components/layouts/GuardDashboard.vue'));
+const ExecutiveDashboard = defineAsyncComponent(() => import('./components/layouts/ExecutiveDashboard.vue'));
+const EmployeeDashboard = defineAsyncComponent(() => import('./index.vue')); // Circular fallback or employee specific dashboard file
+
+// Import global layouts
+import CommandPalette from './components/CommandPalette.vue';
+import RightCommandDrawer from './components/RightCommandDrawer.vue';
+import MusterEvacOverlay from './components/MusterEvacOverlay.vue';
+
+const { commandPaletteOpen, loadDashboardData } = useDashboardState();
+
+const rawUser = authService.getUserData();
+const userName = computed(() => `${rawUser?.first_name || ''} ${rawUser?.last_name || ''}`.trim() || 'Employee');
+const defaultRole = computed(() => authService.getUserRole() || rawUser?.role?.name || 'Employee');
+
+const activeRole = ref('Admin');
+const formattedDate = computed(() => {
+  return new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+});
+
+// Map activeRole to Dashboard Component
+const getActiveComponent = computed(() => {
+  switch (activeRole.value) {
+    case 'Admin':
+      return AdminDashboard;
+    case 'Receptionist':
+      return ReceptionDashboard;
+    case 'Guard':
+      return GuardDashboard;
+    case 'Executive':
+      return ExecutiveDashboard;
+    case 'Employee':
+    default:
+      // Return simple employee key card generator mock directly if needed
+      return ReceptionDashboard;
+  }
+});
+
+// Key listener for Ctrl + K Command Palette
+const handleKeyDown = (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+    e.preventDefault();
+    commandPaletteOpen.value = !commandPaletteOpen.value;
+  }
+};
+
+onMounted(async () => {
+  window.addEventListener('keydown', handleKeyDown);
+  activeRole.value = defaultRole.value === 'Guard' ? 'Guard' : 'Admin';
+  await loadDashboardData();
+});
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeyDown);
+});
+</script>

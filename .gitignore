@@ -1,0 +1,9 @@
+node_modules
+.env
+.env.local
+.env.*.local
+/scripts/
+service-account.json
+decoded-service-account.json
+encoded-service-account.json
+gcloud-service-key.json

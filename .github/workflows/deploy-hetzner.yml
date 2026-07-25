@@ -1,0 +1,56 @@
+name: Deploy AccessEasy to Hetzner
+
+on:
+  push:
+    branches: [ hetzner ]
+  workflow_dispatch:
+
+jobs:
+  deploy-hetzner:
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+      - name: Checkout code 
+        uses: actions/checkout@v4
+        
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          
+      - name: Build and push Hetzner Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile.hetzner
+          platforms: linux/amd64
+          push: true
+          tags: senzr/accesseasy-frontend:hetzner,senzr/accesseasy-frontend:latest-hetzner
+          build-args: |
+            VITE_API_URL=https://privateapp.senzr.in/directus
+            VITE_API_TOKEN=${{ secrets.HETZNER_VITE_API_TOKEN }}
+            VITE_KN_API_URL=https://accesseasy-privateapp.senzr.in/kn
+            VITE_UI_URL=https://accesseasy-privateapp.senzr.in
+            VITE_GOOGLE_MAPS_API_KEY=AIzaSyAwpDlggo6hmUnaxPqzzS7ydmUhjKug11Y
+
+      - name: Set up Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.HETZNER_KUBE_CONFIG }}" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+
+      - name: Deploy to Hetzner Kubernetes
+        run: |
+          echo "Test connection to cluster:"
+          kubectl get nodes -o wide
+          
+          echo "Rolling out frontend deployment..."
+          kubectl rollout restart deployment/accesseasy-frontend -n core-services
+          kubectl rollout status deployment/accesseasy-frontend -n core-services --timeout=120s
+          
+          echo "Deployment successful!"

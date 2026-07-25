@@ -1,0 +1,549 @@
+<template>
+  <div class="min-h-screen bg-[#0b0f19] text-slate-50 p-6 font-sans overflow-y-auto flex flex-col gap-6">
+    <!-- Top Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
+      <div>
+        <h1 class="text-2xl font-bold text-white m-0 tracking-wide">Dashboard</h1>
+        <p class="text-sm text-slate-400 mt-1 mb-0">Real-time overview of your facility</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="inline-flex items-center gap-2 bg-green-500/10 border border-green-500/25 rounded-full px-3 py-1.5 text-xs font-bold text-green-500 tracking-wide">
+          <span class="w-2 h-2 rounded-full bg-green-500 inline-block animate-pulse"></span>
+          LIVE
+        </span>
+        <!-- MQTT Connection Badge -->
+        <span
+          :class="[
+            'inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold tracking-wide border',
+            mqttStatus === 'connected'
+              ? 'bg-cyan-500/10 border-cyan-500/25 text-cyan-400'
+              : mqttStatus === 'connecting'
+              ? 'bg-yellow-500/10 border-yellow-500/25 text-yellow-400'
+              : 'bg-slate-500/10 border-slate-500/25 text-slate-500'
+          ]"
+        >
+          <span
+            :class="[
+              'w-2 h-2 rounded-full inline-block',
+              mqttStatus === 'connected' ? 'bg-cyan-400 animate-pulse' : mqttStatus === 'connecting' ? 'bg-yellow-400 animate-pulse' : 'bg-slate-500'
+            ]"
+          ></span>
+          MQTT {{ mqttStatus === 'connected' ? 'Connected' : mqttStatus === 'connecting' ? 'Connecting…' : 'Offline' }}
+        </span>
+        <button @click="loadSOCData" class="bg-white/5 border border-white/10 rounded-lg px-4 py-2 text-slate-300 text-xs font-semibold cursor-pointer hover:bg-white/10 transition-colors">
+          ↺ Refresh
+        </button>
+      </div>
+    </div>
+
+    <!-- KPI CARDS -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 shrink-0">
+      <div v-for="card in kpiCardsFormatted" :key="card.label" class="bg-[#151c2c] border border-white/5 rounded-2xl p-5 flex flex-col justify-between shadow-lg">
+        <div class="flex items-center gap-4">
+          <div :class="`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 shadow-inner ${card.iconBg}`">
+            <span class="text-xl" v-html="card.icon"></span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-xs font-medium text-slate-400 m-0 truncate">{{ card.label }}</p>
+            <h3 class="text-2xl font-bold text-white m-0 leading-none mt-1">{{ card.value }}</h3>
+          </div>
+        </div>
+        <div class="mt-4 text-[11px] font-medium text-slate-500 bg-white/5 px-2 py-1 rounded-md self-start">
+          {{ card.sub }}
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN 3-COLUMN GRID -->
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-5 shrink-0">
+      
+      <!-- LEFT: Live Activity Feed -->
+      <div class="xl:col-span-3 bg-[#151c2c] border border-white/5 rounded-2xl flex flex-col shadow-lg overflow-hidden h-[340px]">
+        <div class="px-5 py-4 border-b border-white/5 flex items-center justify-between shrink-0">
+          <span class="text-sm font-semibold text-white">Live Activity</span>
+        </div>
+        <div class="p-2 flex-1 overflow-y-auto">
+          <div v-for="event in liveActivityFeed" :key="event.id" class="flex gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors mb-1 last:mb-0">
+            <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 bg-slate-800 border border-white/10 flex items-center justify-center text-sm shadow-inner">
+              <span v-if="event.status === 'authorized'">✅</span>
+              <span v-else>⚠️</span>
+            </div>
+            <div class="flex-1 min-w-0 flex flex-col justify-center">
+              <div class="flex items-center justify-between">
+                <span :class="`text-[11px] font-bold uppercase tracking-wider truncate ${event.status === 'authorized' ? 'text-green-500' : 'text-red-500'}`">{{ event.type }}</span>
+                <span class="text-[10px] text-slate-400 font-medium whitespace-nowrap">{{ event.time }}</span>
+              </div>
+              <p class="text-[13px] font-semibold text-white m-0 truncate mt-0.5">{{ event.name }}</p>
+              <p class="text-[11px] text-slate-400 m-0 truncate">{{ event.gate }}</p>
+            </div>
+          </div>
+          <p v-if="!liveActivityFeed.length" class="text-xs text-slate-500 text-center p-4">No activity yet</p>
+        </div>
+      </div>
+
+      <!-- CENTER: Camera Grid (MQTT Live) -->
+      <div class="xl:col-span-6 bg-[#151c2c] border border-white/5 rounded-2xl flex flex-col shadow-lg overflow-hidden h-[340px]">
+        <!-- Header + filter tabs -->
+        <div class="px-5 py-3 border-b border-white/5 flex items-center justify-between shrink-0">
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-semibold text-white">Live Monitoring</span>
+            <!-- live camera count badge -->
+            <span class="bg-green-500/15 text-green-400 border border-green-500/20 rounded-full px-2 py-0.5 text-[10px] font-bold">
+              {{ cameraRegistry.filter(c => c.isLive).length }}/{{ cameraRegistry.length }} Live
+            </span>
+          </div>
+          <div class="flex gap-1 text-xs font-semibold">
+            <button
+              v-for="tab in ['All','People','Vehicles']" :key="tab"
+              @click="cameraFilter = tab"
+              :class="[
+                'px-3 py-1 rounded-md transition-all',
+                cameraFilter === tab
+                  ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                  : 'text-slate-400 hover:text-white'
+              ]"
+            >{{ tab }}</button>
+          </div>
+        </div>
+
+        <!-- Camera grid -->
+        <div class="p-3 grid grid-cols-2 gap-3 flex-1 overflow-hidden bg-black/20">
+          <div
+            v-for="cam in filteredCameras"
+            :key="cam.id"
+            class="relative rounded-xl overflow-hidden bg-[#0a0d15] group shadow-sm border border-white/[0.06] h-full cursor-pointer"
+            :class="cam.hasActivePerson ? 'ring-1 ring-green-500/60 shadow-green-500/10' : ''"
+          >
+            <!-- Live MQTT snapshot (blob URL) -->
+            <img
+              v-if="cam.liveSnapshot"
+              :src="cam.liveSnapshot"
+              class="w-full h-full object-cover transition-opacity duration-500"
+              :class="cam.isLive ? 'opacity-90 group-hover:opacity-100' : 'opacity-40'"
+            />
+            <!-- Static fallback -->
+            <img
+              v-else-if="cam.fallbackUrl"
+              :src="cam.fallbackUrl"
+              class="w-full h-full object-cover opacity-50 group-hover:opacity-70 transition-opacity"
+            />
+            <!-- No signal placeholder -->
+            <div v-else class="w-full h-full flex flex-col items-center justify-center gap-1 bg-zinc-950 text-slate-600">
+              <span class="text-2xl">📷</span>
+              <span class="text-[10px] font-medium">No Signal</span>
+            </div>
+
+            <!-- Scanline overlay when live -->
+            <div v-if="cam.isLive" class="absolute inset-0 pointer-events-none bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.03)_50%)] bg-[length:100%_4px] opacity-30"></div>
+
+            <!-- TOP overlay: camera name + status badge -->
+            <div class="absolute inset-x-0 top-0 p-2.5 flex justify-between items-start bg-gradient-to-b from-black/80 to-transparent">
+              <span class="px-2 py-0.5 rounded text-[10px] font-semibold text-white bg-black/60 backdrop-blur-sm border border-white/10">
+                {{ cam.name }}
+              </span>
+              <span
+                :class="[
+                  'px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase',
+                  cam.isLive ? 'bg-green-500/25 text-green-400 border border-green-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                ]"
+              >
+                <span v-if="cam.isLive" class="inline-block w-1.5 h-1.5 rounded-full bg-green-400 mr-1 animate-pulse align-middle"></span>
+                {{ cam.isLive ? 'Live' : 'Offline' }}
+              </span>
+            </div>
+
+            <!-- BOTTOM overlay: person count + LP badge + timestamp -->
+            <div
+              v-if="cam.personCount > 0 || cam.latestLp || cam.hasActivePerson"
+              class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 to-transparent pt-6 pb-2 px-2.5 flex items-end justify-between gap-2"
+            >
+              <!-- Person count chip -->
+              <div v-if="cam.personCount > 0" class="flex items-center gap-1">
+                <span class="bg-blue-500/25 border border-blue-500/40 text-blue-300 rounded px-1.5 py-0.5 text-[10px] font-bold">
+                  👤 {{ cam.personCount }}
+                </span>
+                <span v-if="cam.hasActivePerson" class="bg-green-500/20 border border-green-500/30 text-green-300 rounded px-1.5 py-0.5 text-[10px] font-bold animate-pulse">
+                  DETECTING
+                </span>
+              </div>
+              <div v-else class="flex-1"></div>
+
+              <!-- LP thumbnail + confidence -->
+              <div v-if="cam.latestLp" class="flex items-center gap-1.5">
+                <img
+                  v-if="cam.latestLp.imageUrl"
+                  :src="cam.latestLp.imageUrl"
+                  class="h-6 w-10 object-cover rounded border border-purple-500/40"
+                  :title="cam.latestLp.snapshotFile"
+                />
+                <span class="bg-purple-500/25 border border-purple-500/40 text-purple-300 rounded px-1.5 py-0.5 text-[10px] font-bold">
+                  🚗 {{ (cam.latestLp.score * 100).toFixed(0) }}%
+                </span>
+              </div>
+            </div>
+
+            <!-- Last updated timestamp (bottom right corner, tiny) -->
+            <div v-if="cam.lastUpdated" class="absolute bottom-1 right-2 text-[9px] text-white/30 font-mono pointer-events-none">
+              {{ cam.lastUpdated }}
+            </div>
+          </div>
+
+          <!-- Empty state when filter returns nothing -->
+          <div v-if="filteredCameras.length === 0" class="col-span-2 flex flex-col items-center justify-center h-full text-slate-500 gap-2">
+            <span class="text-3xl">🔍</span>
+            <p class="text-xs font-medium">No cameras matching "{{ cameraFilter }}" filter</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Today's Overview + Alerts -->
+      <div class="xl:col-span-3 flex flex-col gap-5 h-[340px]">
+        <!-- Overview stats -->
+        <div class="bg-[#151c2c] border border-white/5 rounded-2xl p-5 shadow-lg shrink-0">
+          <div class="flex justify-between items-center mb-4">
+            <span class="text-sm font-semibold text-white">Today's Overview</span>
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Total</span>
+          </div>
+          <div class="flex flex-col gap-3">
+            <div v-for="stat in todayOverviewMapped" :key="stat.label" class="flex items-center justify-between">
+              <span class="text-xs font-medium text-slate-400">{{ stat.label }}</span>
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-bold text-white">{{ stat.value }}</span>
+                <span :class="`text-[10px] font-bold ${stat.trend > 0 ? 'text-green-500' : 'text-slate-500'}`">
+                  {{ stat.trend > 0 ? `+${stat.trend}%` : (stat.trend ? `${stat.trend}%` : '') }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Alerts -->
+        <div class="bg-[#151c2c] border border-white/5 rounded-2xl flex-1 flex flex-col shadow-lg overflow-hidden min-h-0">
+          <div class="px-5 py-4 border-b border-white/5 flex justify-between items-center shrink-0">
+            <span class="text-sm font-semibold text-white">Active Alerts</span>
+          </div>
+          <div class="p-2 flex-1 overflow-y-auto">
+             <div v-for="alert in alertsFeed" :key="alert.id" class="flex gap-3 p-2 rounded-lg hover:bg-white/5 transition-colors mb-1 last:mb-0">
+               <div :class="`w-2 h-2 mt-1.5 rounded-full shrink-0 shadow-sm ${alert.priority === 'critical' ? 'bg-red-500' : alert.priority === 'warning' ? 'bg-orange-500' : 'bg-blue-500'}`"></div>
+               <div class="flex-1 min-w-0">
+                 <p class="text-xs font-semibold m-0 text-white truncate">{{ alert.title }}</p>
+                 <p class="text-[11px] text-slate-400 m-0 truncate mt-0.5">{{ alert.location }}</p>
+               </div>
+               <span class="text-[10px] text-slate-500 font-medium whitespace-nowrap">{{ alert.time }}</span>
+             </div>
+             <p v-if="!alertsFeed.length" class="text-xs text-slate-500 text-center p-4">No active alerts</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── ANALYTICS ROW WITH APEXCHARTS ── -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 shrink-0">
+      
+      <div class="bg-[#151c2c] border border-white/5 rounded-2xl p-5 shadow-lg flex flex-col h-[220px]">
+        <div class="flex justify-between items-center mb-2 shrink-0">
+          <span class="text-sm font-semibold text-white">Entries vs Exits</span>
+          <div class="flex gap-2 text-[10px] font-bold uppercase tracking-wider">
+            <span class="text-blue-500">Entries</span>
+            <span class="text-purple-500">Exits</span>
+          </div>
+        </div>
+        <div class="flex-1 min-h-0 relative -mx-2">
+          <apexchart type="area" width="100%" height="100%" :options="entriesVsExitsOptions" :series="entriesVsExitsSeries" />
+        </div>
+        <div class="flex justify-between text-[10px] font-medium text-slate-500 shrink-0 px-2 mt-1">
+          <span v-for="(lbl, i) in lineChartLabels" :key="i" :class="{'hidden sm:block': i > 0 && i < lineChartLabels.length-1}">{{lbl}}</span>
+        </div>
+      </div>
+
+      <div class="bg-[#151c2c] border border-white/5 rounded-2xl p-5 shadow-lg flex flex-col h-[220px]">
+        <div class="flex justify-between items-center mb-2 shrink-0">
+          <span class="text-sm font-semibold text-white">Peak Entry Hours</span>
+        </div>
+        <div class="flex-1 min-h-0 relative -mx-2">
+          <apexchart type="bar" width="100%" height="100%" :options="peakHoursOptions" :series="peakHoursSeries" />
+        </div>
+        <div class="flex justify-between text-[10px] font-medium text-slate-500 shrink-0 px-2 mt-1">
+          <span v-for="(lbl, i) in barChartLabels" :key="i" :class="{'hidden sm:block': i > 0 && i < barChartLabels.length-1}">{{lbl}}</span>
+        </div>
+      </div>
+
+      <div class="bg-[#151c2c] border border-white/5 rounded-2xl p-5 shadow-lg flex flex-col h-[220px]">
+        <div class="flex justify-between items-center mb-2 shrink-0">
+          <span class="text-sm font-semibold text-white">Security Events Trend</span>
+        </div>
+        <div class="flex-1 min-h-0 relative -mx-2">
+          <apexchart type="line" width="100%" height="100%" :options="securityEventsOptions" :series="securityEventsSeries" />
+        </div>
+        <div class="flex justify-between text-[10px] font-medium text-slate-500 shrink-0 px-2 mt-1">
+          <span v-for="(lbl, i) in areaChartLabels" :key="i">{{lbl}}</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- QUICK ACTIONS -->
+    <div class="bg-[#151c2c] border border-white/5 rounded-2xl p-5 shadow-lg shrink-0">
+      <p class="text-sm font-semibold text-white m-0 mb-4">Quick Actions</p>
+      <div class="flex flex-wrap gap-3">
+        <button
+          v-for="action in quickActions"
+          :key="action.label"
+          @click="$router.push(action.href)"
+          class="bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl px-4 py-2.5 text-slate-300 hover:text-white text-xs font-semibold cursor-pointer flex items-center gap-2.5 transition-all shadow-sm"
+        >
+          <span class="text-base" v-html="action.icon"></span>
+          {{ action.label }}
+        </button>
+      </div>
+    </div>
+
+    <!-- ── MQTT LIVE DETECTIONS ROW ── -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 shrink-0">
+
+      <!-- Person Detection Feed -->
+      <div class="bg-[#151c2c] border border-white/5 rounded-2xl flex flex-col shadow-lg overflow-hidden h-[360px]">
+        <div class="px-5 py-4 border-b border-white/5 flex items-center justify-between shrink-0">
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-semibold text-white">👤 Person Detections</span>
+            <span class="bg-blue-500/15 text-blue-400 border border-blue-500/20 rounded-full px-2 py-0.5 text-[10px] font-bold">{{ personEvents.length }}</span>
+          </div>
+          <span class="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Live · MQTT</span>
+        </div>
+        <div class="flex-1 overflow-y-auto divide-y divide-white/5">
+          <div
+            v-for="ev in personEvents"
+            :key="ev.id"
+            class="flex gap-3 p-3 hover:bg-white/[0.03] transition-colors"
+          >
+            <!-- Snapshot or icon -->
+            <div class="w-12 h-12 rounded-lg overflow-hidden shrink-0 bg-slate-800 border border-white/10 flex items-center justify-center text-xl">
+              <img v-if="personSnapshots[ev.camera]" :src="personSnapshots[ev.camera]" class="w-full h-full object-cover" />
+              <span v-else>👤</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between gap-2">
+                <span
+                  :class="[
+                    'text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded',
+                    ev.type === 'new' ? 'bg-green-500/15 text-green-400'
+                    : ev.type === 'end' ? 'bg-slate-500/15 text-slate-400'
+                    : 'bg-blue-500/15 text-blue-400'
+                  ]"
+                >{{ ev.type }}</span>
+                <span class="text-[10px] text-slate-500 font-medium whitespace-nowrap">{{ new Date(ev.timestamp).toLocaleTimeString() }}</span>
+              </div>
+              <p class="text-[13px] font-semibold text-white m-0 mt-1 truncate">{{ ev.camera }}</p>
+              <div class="flex items-center gap-2 mt-0.5">
+                <span class="text-[11px] text-slate-400">Score: <span class="text-white font-semibold">{{ (ev.score * 100).toFixed(0) }}%</span></span>
+                <span v-if="ev.active" class="text-[10px] text-green-400 font-bold">● Active</span>
+                <span v-else class="text-[10px] text-slate-500">● Ended</span>
+              </div>
+            </div>
+          </div>
+          <div v-if="!personEvents.length" class="flex flex-col items-center justify-center h-full gap-2 text-slate-500">
+            <span class="text-3xl">📷</span>
+            <p class="text-xs font-medium">Waiting for person detections…</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- License Plate Feed -->
+      <div class="bg-[#151c2c] border border-white/5 rounded-2xl flex flex-col shadow-lg overflow-hidden h-[360px]">
+        <div class="px-5 py-4 border-b border-white/5 flex items-center justify-between shrink-0">
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-semibold text-white">🚗 License Plate Detections</span>
+            <span class="bg-purple-500/15 text-purple-400 border border-purple-500/20 rounded-full px-2 py-0.5 text-[10px] font-bold">{{ lpEvents.length }}</span>
+          </div>
+          <span class="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Live · MQTT</span>
+        </div>
+        <div class="flex-1 overflow-y-auto divide-y divide-white/5">
+          <div
+            v-for="ev in lpEvents"
+            :key="ev.id"
+            class="flex gap-3 p-3 hover:bg-white/[0.03] transition-colors"
+          >
+            <!-- Annotated snapshot or icon -->
+            <div class="w-24 h-14 rounded-lg overflow-hidden shrink-0 bg-slate-800 border border-white/10 flex items-center justify-center text-xl">
+              <img
+                v-if="lpSnapshots[ev.id]"
+                :src="lpSnapshots[ev.id]"
+                class="w-full h-full object-cover"
+                :title="ev.snapshotFile"
+              />
+              <span v-else>📷</span>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded bg-purple-500/15 text-purple-400">{{ ev.type }}</span>
+                <span class="text-[10px] text-slate-500 font-medium whitespace-nowrap">{{ new Date(ev.timestamp).toLocaleTimeString() }}</span>
+              </div>
+              <p class="text-[13px] font-semibold text-white m-0 mt-1 truncate">{{ ev.camera }}</p>
+              <div class="flex items-center gap-2 mt-0.5">
+                <span class="text-[11px] text-slate-400">Conf: <span class="text-white font-semibold">{{ (ev.score * 100).toFixed(0) }}%</span></span>
+                <span v-if="ev.hasSnapshot" class="text-[10px] text-cyan-400 font-bold">🖼️ Snapshot</span>
+              </div>
+              <p v-if="ev.snapshotFile" class="text-[10px] text-slate-500 m-0 mt-0.5 truncate" :title="ev.snapshotFile">{{ ev.snapshotFile }}</p>
+            </div>
+          </div>
+          <div v-if="!lpEvents.length" class="flex flex-col items-center justify-center h-full gap-2 text-slate-500">
+            <span class="text-3xl">🚘</span>
+            <p class="text-xs font-medium">Waiting for license plate detections…</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</template>
+
+<script setup>
+import { ref, computed, onMounted, onUnmounted } from 'vue';
+import VueApexCharts from 'vue3-apexcharts';
+import { useSOCState } from '@/composables/useSOCState';
+import { useMQTT } from '@/composables/useMQTT';
+
+const {
+  kpiData,
+  liveActivityFeed,
+  todayOverview,
+  alertsFeed,
+  analyticsData,
+  loadSOCData,
+  startPolling,
+  stopPolling,
+  startMQTT,
+  stopMQTT,
+} = useSOCState();
+
+const {
+  mqttStatus,
+  personEvents,
+  lpEvents,
+  personCounts,
+  personSnapshots,
+  lpSnapshots,
+} = useMQTT();
+
+// Register the component locally
+const apexchart = VueApexCharts;
+
+// KPI Cards mapped
+const kpiCardsFormatted = computed(() => [
+  { label: 'Employees Inside', value: kpiData.value.employeesInside, sub: `↑ ${kpiData.value.employeesTrend}% vs yesterday`, icon: '👤', iconBg: 'bg-blue-500/10 text-blue-500 border border-blue-500/20' },
+  { label: 'Vehicles Inside', value: kpiData.value.vehiclesInside, sub: `↑ ${kpiData.value.vehiclesTrend}% vs yesterday`, icon: '🚗', iconBg: 'bg-green-500/10 text-green-500 border border-green-500/20' },
+  { label: 'Unknown Persons', value: kpiData.value.unknownPersons, sub: 'Flagged for review', icon: '❓', iconBg: 'bg-yellow-500/10 text-yellow-500 border border-yellow-500/20' },
+  { label: 'Offline Devices', value: kpiData.value.offlineDevices, sub: 'Needs attention', icon: '🔌', iconBg: 'bg-red-500/10 text-red-500 border border-red-500/20' },
+  { label: 'Critical Alerts', value: kpiData.value.criticalAlerts, sub: 'Active incidents', icon: '⚠️', iconBg: 'bg-red-500/10 text-red-500 border border-red-500/20' },
+]);
+
+const todayOverviewMapped = computed(() => [
+  { label: 'Entries', value: todayOverview.value.entries || 0, trend: todayOverview.value.entriesTrend || 0 },
+  { label: 'Exits', value: todayOverview.value.exits || 0, trend: todayOverview.value.exitsTrend || 0 },
+  { label: 'Employees Inside', value: todayOverview.value.employeesInside || 0, trend: todayOverview.value.employeesInsideTrend || 0 },
+  { label: 'Vehicles Inside', value: todayOverview.value.vehiclesInside || 0, trend: todayOverview.value.vehiclesInsideTrend || 0 },
+]);
+
+// ── Camera registry ─────────────────────────────────────────────────────────
+// Static config — mqttId must match Frigate's camera name (e.g. 'laptop_cam')
+// type: 'people' | 'vehicle' | 'both'  — used by the filter tabs
+const CAMERA_CONFIG = [
+  { id: 1, name: 'Main Gate',          mqttId: 'main_gate',        type: 'both',    fallbackUrl: 'https://images.unsplash.com/photo-1558002038-1055907df827?w=400&q=60' },
+  { id: 2, name: 'Reception',          mqttId: 'reception',        type: 'people',  fallbackUrl: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=60' },
+  { id: 3, name: 'Warehouse Entrance', mqttId: 'laptop_cam',       type: 'people',  fallbackUrl: null },
+  { id: 4, name: 'Parking Area',       mqttId: 'parking_area',     type: 'vehicle', fallbackUrl: 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?w=400&q=60' },
+];
+
+// Filter tab state
+const cameraFilter = ref('All');
+
+// Reactive camera registry — merges static config with live MQTT state
+const cameraRegistry = computed(() =>
+  CAMERA_CONFIG.map(cfg => {
+    const liveSnap    = personSnapshots.value[cfg.mqttId] ?? null;
+    const count       = personCounts.value[cfg.mqttId]   ?? 0;
+    const activeEvent = personEvents.value.find(e => e.camera === cfg.mqttId && e.active);
+    const latestLp    = lpEvents.value.find(e => e.camera === cfg.mqttId && (e.imageUrl || e.hasSnapshot));
+    const isLive      = !!(liveSnap || count > 0);
+    const lastUpd     = activeEvent
+      ? new Date(activeEvent.timestamp).toLocaleTimeString()
+      : liveSnap
+      ? new Date().toLocaleTimeString()
+      : null;
+    return {
+      ...cfg,
+      liveSnapshot:    liveSnap,
+      personCount:     count,
+      hasActivePerson: !!activeEvent,
+      latestLp:        latestLp ?? null,
+      isLive,
+      lastUpdated:     lastUpd,
+    };
+  })
+);
+
+// Filter cameras by tab
+const filteredCameras = computed(() => {
+  if (cameraFilter.value === 'All')      return cameraRegistry.value;
+  if (cameraFilter.value === 'People')   return cameraRegistry.value.filter(c => c.type === 'people' || c.type === 'both');
+  if (cameraFilter.value === 'Vehicles') return cameraRegistry.value.filter(c => c.type === 'vehicle' || c.type === 'both');
+  return cameraRegistry.value;
+});
+
+const quickActions = [
+  { icon: '👤', label: 'Add Employee', href: '/dashboard/easy-access/employees' },
+  { icon: '🚪', label: 'Manage Doors', href: '/dashboard/access-control/doors' },
+  { icon: '🛡️', label: 'Patrol Status', href: '/dashboard/patrols' },
+  { icon: '📷', label: 'Live Monitoring', href: '/dashboard/monitoring' },
+  { icon: '📊', label: 'View Reports', href: '/dashboard/report-automation' },
+];
+
+// --- ApexCharts Configuration ---
+
+// 1. Entries vs Exits (Area Chart)
+const entriesVsExitsSeries = computed(() => [
+  { name: 'Entries', data: analyticsData.value.entriesVsExits?.entries || [10, 30, 20, 60, 40] },
+  { name: 'Exits', data: analyticsData.value.entriesVsExits?.exits || [5, 20, 15, 45, 30] }
+]);
+const lineChartLabels = computed(() => analyticsData.value.entriesVsExits?.labels || ['12A', '6A', '12P', '6P', '12A']);
+const entriesVsExitsOptions = {
+  chart: { type: 'area', toolbar: { show: false }, background: 'transparent', sparkline: { enabled: true }, animations: { enabled: false } },
+  stroke: { curve: 'smooth', width: 2 },
+  colors: ['#3b82f6', '#a855f7'],
+  fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.05, stops: [0, 100] } },
+  tooltip: { theme: 'dark', y: { formatter: (val) => val } }
+};
+
+// 2. Peak Entry Hours (Bar Chart)
+const peakHoursSeries = computed(() => [{ name: 'Volume', data: analyticsData.value.peakEntryHours?.data || [10, 40, 60, 30, 20, 10] }]);
+const barChartLabels = computed(() => analyticsData.value.peakEntryHours?.labels || ['6A', '8A', '10A', '12P', '2P', '4P']);
+const peakHoursOptions = {
+  chart: { type: 'bar', toolbar: { show: false }, background: 'transparent', sparkline: { enabled: true }, animations: { enabled: false } },
+  colors: ['#22c55e'],
+  plotOptions: { bar: { borderRadius: 3, columnWidth: '60%' } },
+  tooltip: { theme: 'dark' }
+};
+
+// 3. Security Events (Line Chart with markers)
+const securityEventsSeries = computed(() => [{ name: 'Events', data: analyticsData.value.securityEventsTrend?.data || [2, 5, 3, 8, 4, 1, 0] }]);
+const areaChartLabels = computed(() => analyticsData.value.securityEventsTrend?.labels || ['M', 'T', 'W', 'T', 'F', 'S', 'S']);
+const securityEventsOptions = {
+  chart: { type: 'line', toolbar: { show: false }, background: 'transparent', sparkline: { enabled: true }, animations: { enabled: false } },
+  stroke: { curve: 'straight', width: 2 },
+  colors: ['#f97316'],
+  markers: { size: 4, colors: ['#f97316'], strokeColors: '#151c2c', strokeWidth: 2, hover: { size: 6 } },
+  tooltip: { theme: 'dark' }
+};
+
+onMounted(() => {
+  loadSOCData();
+  startPolling(10000);
+  startMQTT();
+});
+
+onUnmounted(() => {
+  stopPolling();
+  stopMQTT();
+});
+</script>

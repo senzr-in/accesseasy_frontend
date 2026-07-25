@@ -1,0 +1,189 @@
+name: Deploy AccessEasy App to AWS 
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy-accesseasy:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+
+    steps:
+      - name: Checkout code 
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # NEW: Backup source code to S3
+      - name: Backup source code to S3
+        run: |
+          echo "💾 Creating source code backup..."
+          
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          COMMIT_SHORT=${{ github.sha }}
+          COMMIT_SHORT=${COMMIT_SHORT:0:7}
+          BACKUP_NAME="source-backup-${TIMESTAMP}-${COMMIT_SHORT}.tar.gz"
+          
+          echo "📦 Archiving source code..."
+          tar -czf "${BACKUP_NAME}" \
+            --exclude='node_modules' \
+            --exclude='dist' \
+            --exclude='build' \
+            --exclude='.git' \
+            --exclude='.next' \
+            --warning=no-file-changed \
+            --warning=no-file-removed \
+            . || if [ $? -eq 1 ]; then true; else exit $?; fi
+          
+          SIZE=$(ls -lh "${BACKUP_NAME}" | awk '{print $5}')
+          echo "📊 Archive size: ${SIZE}"
+          
+          echo "📤 Uploading to S3..."
+          aws s3 cp "${BACKUP_NAME}" "s3://accesseasy-production-assets/source-backups/${BACKUP_NAME}"
+          
+          echo "✅ Backup stored: source-backups/${BACKUP_NAME}"
+          
+          echo "🧹 Maintaining 30 backups (deleting oldest)..."
+          BACKUP_COUNT=$(aws s3 ls "s3://accesseasy-production-assets/source-backups/" | grep "source-backup-" | wc -l)
+          echo "📊 Current backup count: ${BACKUP_COUNT}"
+          
+          if [ ${BACKUP_COUNT} -gt 30 ]; then
+            aws s3 ls "s3://accesseasy-production-assets/source-backups/" | \
+              grep "source-backup-" | \
+              sort | \
+              head -n -30 | \
+              awk '{print $4}' | \
+              while read file; do
+                if [ ! -z "$file" ]; then
+                  echo "🗑️ Deleting oldest: $file"
+                  aws s3 rm "s3://accesseasy-production-assets/source-backups/$file"
+                fi
+              done
+          fi
+          
+          FINAL_COUNT=$(aws s3 ls "s3://accesseasy-production-assets/source-backups/" | grep "source-backup-" | wc -l)
+          echo "✅ Final backup count: ${FINAL_COUNT}"
+          echo "📋 Recent backups:"
+          aws s3 ls "s3://accesseasy-production-assets/source-backups/" | grep "source-backup-" | tail -5
+
+      - name: Setup Node.js 
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build AccessEasy App
+        run: |
+          echo "🔨 Building AccessEasy App..."
+          echo "📅 Build time: $(date)"
+          echo "🆔 Commit: ${{ github.sha }}"
+          npm run build
+          echo "✅ Build completed successfully!"
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_DIRECTUS_URL: ${{ secrets.VITE_DIRECTUS_URL }}
+          VITE_API_TOKEN: ${{ secrets.VITE_API_TOKEN }}
+          VITE_FIELDSEASY_DOMAIN: ${{ secrets.VITE_FIELDSEASY_DOMAIN }}
+          VITE_KN_API_URL: ${{ secrets.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn' }}
+          VITE_UI_URL: ${{ secrets.VITE_UI_URL }}
+          VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.VITE_GOOGLE_MAPS_API_KEY }}
+          # Add any additional environment variables your AccessEasy app needs
+
+      - name: Verify build output
+        run: |
+          echo "🔍 Verifying build..."
+          if [ ! -d "dist" ]; then
+            echo "❌ dist folder NOT found - build failed"
+            exit 1
+          fi
+          
+          if [ ! -f "dist/index.html" ]; then
+            echo "❌ index.html NOT found - build failed"
+            exit 1
+          fi
+          
+          echo "✅ Build verification passed"
+          echo "📁 Build contents:"
+          ls -la dist/
+          echo "📄 index.html preview:"
+          head -5 dist/index.html
+
+      - name: Deploy to S3
+        run: |
+          echo "🚀 Deploying to S3..."
+          echo "📅 Deploy time: $(date)"
+          echo "🎯 Target: s3://accesseasy-production-assets/"
+          
+          # Deploy with explicit error handling (exclude source-backups)
+          if aws s3 sync dist/ s3://accesseasy-production-assets/ \
+             --delete \
+             --cache-control "no-cache,no-store,must-revalidate" \
+             --metadata-directive REPLACE \
+             --exclude "source-backups/*"; then
+            echo "✅ S3 deployment successful!"
+          else
+            echo "❌ S3 deployment failed!"
+            exit 1
+          fi
+
+      - name: Verify S3 deployment
+        run: |
+          echo "🔍 Verifying S3 deployment..."
+          
+          # Check if files were uploaded
+          if aws s3 ls s3://accesseasy-production-assets/index.html; then
+            echo "✅ index.html found in S3"
+          else
+            echo "❌ index.html NOT found in S3"
+            exit 1
+          fi
+          
+          echo "📋 Recent files in S3:"
+          aws s3 ls s3://accesseasy-production-assets/ --recursive | tail -5
+
+      - name: Invalidate CloudFront cache 
+        run: |
+          echo "🔄 Invalidating CloudFront cache..."
+          
+          INVALIDATION_ID=$(aws cloudfront create-invalidation \
+            --distribution-id E3RVSZPF5S9R11 \
+            --paths "/*" \
+            --query 'Invalidation.Id' \
+            --output text)
+          
+          if [ ! -z "$INVALIDATION_ID" ]; then
+            echo "✅ CloudFront invalidation created: $INVALIDATION_ID"
+          else
+            echo "❌ CloudFront invalidation failed"
+            exit 1
+          fi
+
+      - name: Final verification
+        run: |
+          echo "🧪 Final verification..."
+          sleep 30
+          
+          # Test website response
+          if curl -f -s https://d35etz9gpobn8g.cloudfront.net/ >/dev/null; then
+            echo "✅ Website is responding"
+          else
+            echo "⚠️ Website not responding yet (may need more time)"
+          fi
+          
+          echo ""
+          echo "🎉 Deployment completed successfully!"
+          echo "🔗 Live site: https://d35etz9gpobn8g.cloudfront.net"
+          echo "🌐 Custom domain: https://app1.accesseasy.in"
+          echo "⏰ Wait 5-10 minutes for cache to fully clear"
+          echo ""
+          echo "💾 Source code backup location: s3://accesseasy-production-assets/source-backups/"

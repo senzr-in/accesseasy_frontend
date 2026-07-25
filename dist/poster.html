@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AccessEasy - Visitor Management & Guard App Poster</title>
+  <!-- Google Fonts: Outfit & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-dark: #3730a3;
+      --primary-glow: rgba(79, 70, 229, 0.12);
+      --success: #10b981;
+      --success-glow: rgba(16, 185, 129, 0.12);
+      --dark: #0f172a;
+      --light: #f8fafc;
+      --gray: #64748b;
+      --border: #e2e8f0;
+      --shadow-indigo: 0 20px 40px -15px rgba(79, 70, 229, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+      color: var(--dark);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 1rem;
+    }
+
+    /* Print & Preview Container */
+    .poster-container {
+      width: 100%;
+      max-width: 850px;
+      background: #ffffff;
+      border-radius: 28px;
+      box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.12), var(--shadow-indigo);
+      overflow: hidden;
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header Accent Line */
+    .header-gradient-bar {
+      height: 10px;
+      background: linear-gradient(90deg, #4f46e5, #8b5cf6, #10b981);
+      width: 100%;
+    }
+
+    /* Header styling */
+    .poster-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 2.25rem 3rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .brand img {
+      height: 44px;
+      object-fit: contain;
+    }
+
+    .brand-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.65rem;
+      font-weight: 800;
+      color: var(--dark);
+      letter-spacing: -0.03em;
+    }
+
+    .badge {
+      background: var(--primary-glow);
+      color: var(--primary);
+      padding: 0.6rem 1.25rem;
+      border-radius: 9999px;
+      font-size: 0.825rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border: 1px solid rgba(79, 70, 229, 0.25);
+    }
+
+    /* Poster Body */
+    .poster-body {
+      padding: 3rem;
+      display: flex;
+      flex-direction: column;
+      gap: 3rem;
+    }
+
+    .hero-section {
+      text-align: center;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .hero-section h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 3rem;
+      font-weight: 900;
+      line-height: 1.15;
+      color: var(--dark);
+      letter-spacing: -0.03em;
+      margin-bottom: 1.25rem;
+    }
+
+    .hero-section h1 span {
+      background: linear-gradient(135deg, #4f46e5 0%, #8b5cf6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-section p {
+      font-size: 1.15rem;
+      color: var(--gray);
+      line-height: 1.65;
+    }
+
+    /* Main Visual / Image */
+    .visual-wrapper {
+      position: relative;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 25px 50px rgba(15, 23, 42, 0.08);
+      border: 1px solid var(--border);
+      aspect-ratio: 16 / 9;
+      background: #f1f5f9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .visual-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .visual-wrapper:hover img {
+      transform: scale(1.025);
+    }
+
+    /* 3-Column Ecosystem Section */
+    .ecosystem-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1.75rem;
+      background: var(--light);
+      padding: 2.25rem;
+      border-radius: 24px;
+      border: 1px solid var(--border);
+    }
+
+    .eco-col {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .eco-num {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: var(--primary);
+      opacity: 0.35;
+      line-height: 1;
+    }
+
+    .eco-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--dark);
+    }
+
+    .eco-desc {
+      font-size: 0.9rem;
+      color: var(--gray);
+      line-height: 1.6;
+    }
+
+    .eco-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .eco-features li {
+      font-size: 0.85rem;
+      color: var(--dark);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .eco-features li::before {
+      content: "✓";
+      color: var(--success);
+      font-weight: 800;
+    }
+
+    /* Detailed Features Grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.75rem;
+    }
+
+    .feature-card {
+      background: #ffffff;
+      padding: 1.75rem;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      display: flex;
+      gap: 1.25rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .feature-card:hover {
+      border-color: var(--primary);
+      box-shadow: 0 15px 30px rgba(79, 70, 229, 0.06);
+      transform: translateY(-3px);
+    }
+
+    .icon-box {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: var(--primary-glow);
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .icon-box.success-theme {
+      background: var(--success-glow);
+      color: var(--success);
+    }
+
+    .icon-box svg {
+      width: 26px;
+      height: 26px;
+    }
+
+    .feature-info h3 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--dark);
+      margin-bottom: 0.45rem;
+      letter-spacing: -0.01em;
+    }
+
+    .feature-info p {
+      font-size: 0.95rem;
+      color: var(--gray);
+      line-height: 1.55;
+    }
+
+    /* Call to Action Section */
+    .cta-section {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+      color: #ffffff;
+      border-radius: 24px;
+      padding: 2.5rem 3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Decorative glowing orbs in CTA */
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -20%;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      background: rgba(79, 70, 229, 0.35);
+      filter: blur(80px);
+      pointer-events: none;
+    }
+
+    .cta-info {
+      max-width: 460px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .cta-info h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 0.65rem;
+      letter-spacing: -0.02em;
+    }
+
+    .cta-info p {
+      color: #94a3b8;
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+
+    .cta-actions {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Stylized QR Code container */
+    .qr-container {
+      background: #ffffff;
+      padding: 0.65rem;
+      border-radius: 16px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.45rem;
+    }
+
+    .qr-placeholder {
+      width: 110px;
+      height: 110px;
+      background: #0f172a;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    /* Elegant simulated SVG QR Code patterns */
+    .qr-placeholder svg {
+      width: 92px;
+      height: 92px;
+      color: #ffffff;
+    }
+
+    .qr-caption {
+      color: var(--dark);
+      font-size: 0.7rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    /* Footer area */
+    .poster-footer {
+      background: var(--light);
+      padding: 1.75rem 3rem;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      color: var(--gray);
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+    }
+
+    .footer-links a {
+      color: var(--gray);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+
+    .footer-links a:hover {
+      color: var(--primary);
+    }
+
+    /* Action bar above the poster */
+    .action-bar {
+      margin-bottom: 2rem;
+      display: flex;
+      gap: 1rem;
+      z-index: 10;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.85rem 1.75rem;
+      border-radius: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 10px 20px -3px rgba(79, 70, 229, 0.4);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: #ffffff;
+      color: var(--dark);
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-secondary:hover {
+      background: var(--light);
+      transform: translateY(-2px);
+    }
+
+    /* Print styling */
+    @media print {
+      body {
+        background: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .action-bar {
+        display: none;
+      }
+
+      .poster-container {
+        box-shadow: none;
+        border: none;
+        max-width: 100%;
+        width: 210mm; /* A4 width */
+        height: 297mm; /* A4 height */
+        border-radius: 0;
+      }
+
+      .cta-section {
+        background: #0f172a !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .poster-header {
+        padding: 1.5rem 2rem;
+      }
+      .poster-body {
+        padding: 2rem;
+        gap: 2.25rem;
+      }
+      .hero-section h1 {
+        font-size: 2.25rem;
+      }
+      .ecosystem-section {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        padding: 1.5rem;
+      }
+      .features-grid {
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+      }
+      .cta-section {
+        flex-direction: column;
+        text-align: center;
+        padding: 2rem;
+        gap: 2rem;
+      }
+      .cta-info {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Controls for web view -->
+  <div class="action-bar">
+    <button class="btn btn-primary" onclick="window.print()">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.82l-.24-2.4a1.98 1.98 0 011.07-1.916l7.7-3.85a1.98 1.98 0 012.75 1.82v5.18a1.98 1.98 0 01-1.07 1.82l-7.7 3.85a1.98 1.98 0 01-2.75-1.82v-2.714zm0 0h10.56M9 17h1"></path>
+        <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4"></path>
+      </svg>
+      Print Poster (A4 PDF)
+    </button>
+    <a href="index.html" class="btn btn-secondary">
+      Back to Dashboard
+    </a>
+  </div>
+
+  <!-- Poster Frame -->
+  <div class="poster-container">
+    <div class="header-gradient-bar"></div>
+    
+    <!-- Poster Header -->
+    <header class="poster-header">
+      <div class="brand">
+        <img src="images/accesseasylogo.png" alt="AccessEasy Logo" onerror="this.src='images/Logo-google-icon.png'">
+        <span class="brand-title">AccessEasy</span>
+      </div>
+      <span class="badge">Security Module</span>
+    </header>
+
+    <!-- Poster Content -->
+    <main class="poster-body">
+      <!-- Hero Header -->
+      <section class="hero-section">
+        <h1>Unified <span>Visitor Management</span> & Guard App</h1>
+        <p>A secure, professional, and end-to-end check-in system that coordinates guest registration, real-time security gate approval, and downloadable digital passes.</p>
+      </section>
+
+      <!-- Beautiful Visual Asset (Generated) -->
+      <div class="visual-wrapper">
+        <img src="images/visitor_guard_infographic.png" alt="Visitor Management Visual" onerror="this.src='images/loginimage.png'">
+      </div>
+
+      <!-- How it Works (3-Column Ecosystem) -->
+      <section class="ecosystem-section">
+        <!-- Step 1 -->
+        <div class="eco-col">
+          <span class="eco-num">01</span>
+          <h3 class="eco-title">Visitor Portal</h3>
+          <p class="eco-desc">Guests fill out basic details, take a selfie check-in photo, select their host, and specify the reason for visit.</p>
+          <ul class="eco-features">
+            <li>Selfie Verification</li>
+            <li>Govt ID Upload</li>
+            <li>Custom Branding</li>
+          </ul>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="eco-col">
+          <span class="eco-num">02</span>
+          <h3 class="eco-title">Visitor ID Card (IC)</h3>
+          <p class="eco-desc">An instant, downloadable pass is generated containing a secure, short-lived verification token within a custom styled QR code.</p>
+          <ul class="eco-features">
+            <li>Branded Passes</li>
+            <li>Download as PNG</li>
+            <li>High-Sec QR Token</li>
+          </ul>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="eco-col">
+          <span class="eco-num">03</span>
+          <h3 class="eco-title">Guard Verification</h3>
+          <p class="eco-desc">Guards scan the QR code via their mobile Guard App to verify details, authorize entry, log checkout, and notify hosts.</p>
+          <ul class="eco-features">
+            <li>Gate & Door Sync</li>
+            <li>Host Arrival Alerts</li>
+            <li>Real-time Checkout</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Detailed Features Grid -->
+      <section class="features-grid">
+        <!-- Feature 1 -->
+        <div class="feature-card">
+          <div class="icon-box">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-16v3m0 0h.01M12 12h.01M16 20h2M4 12h2m0 0H4a2 2 0 00-2 2v2a2 2 0 002 2h2m12-6H6a2 2 0 00-2 2v3m12-7V8a2 2 0 00-2-2h-3m3 8v3a2 2 0 01-2 2H9"></path>
+            </svg>
+          </div>
+          <div class="feature-info">
+            <h3>Verified Onboarding</h3>
+            <p>Support for custom verification workflows: collect selfies, capture identity proof documents, and cross-reference details before entry approval.</p>
+          </div>
+        </div>
+
+        <!-- Feature 2 -->
+        <div class="feature-card">
+          <div class="icon-box success-theme">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+            </svg>
+          </div>
+          <div class="feature-info">
+            <h3>Assigned Gate Management</h3>
+            <p>Tie guards to specific physical entrances (doors/turnstiles). Keep entries segregated and track exactly which visitor crossed which gate.</p>
+          </div>
+        </div>
+
+        <!-- Feature 3 -->
+        <div class="feature-card">
+          <div class="icon-box success-theme">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+            </svg>
+          </div>
+          <div class="feature-info">
+            <h3>Automated Host Alerts</h3>
+            <p>Guards instantly trigger secure notifications to the hosts (via system notification, SMS, or email) the moment the visitor's pass is verified.</p>
+          </div>
+        </div>
+
+        <!-- Feature 4 -->
+        <div class="feature-card">
+          <div class="icon-box">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+          </div>
+          <div class="feature-info">
+            <h3>Digital Audit Trails</h3>
+            <p>Complete compliance tracking. Maintain logs of check-in, check-out, host confirmation, and average stay duration for site audit compliance.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Call to Action -->
+      <section class="cta-section">
+        <div class="cta-info">
+          <h2>Secure Your Premises Today</h2>
+          <p>Digitize your entryways, optimize receptionist workloads, and improve gate security with AccessEasy Visitor Management.</p>
+        </div>
+        <div class="cta-actions">
+          <div class="qr-container">
+            <div class="qr-placeholder">
+              <!-- Stylized custom SVG QR Code -->
+              <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="4">
+                <!-- Corners -->
+                <rect x="10" y="10" width="24" height="24" rx="3" stroke-width="6"/>
+                <rect x="16" y="16" width="12" height="12" rx="1" fill="currentColor"/>
+                <rect x="66" y="10" width="24" height="24" rx="3" stroke-width="6"/>
+                <rect x="72" y="16" width="12" height="12" rx="1" fill="currentColor"/>
+                <rect x="10" y="66" width="24" height="24" rx="3" stroke-width="6"/>
+                <rect x="16" y="72" width="12" height="12" rx="1" fill="currentColor"/>
+                
+                <!-- Random dots and mini squares pattern -->
+                <path d="M45 10 h5 M55 10 h10 M45 20 h5 M45 30 h15 M50 25 h5 M60 25 h5 M45 45 h5 M55 45 h5 M65 45 h10 M45 55 h15 M70 55 h5 M10 45 h10 M25 45 h5 M35 45 h5 M10 55 h15 M30 55 h5 M45 65 h10 M65 65 h5 M75 65 h15 M45 75 h5 M55 75 h15 M45 85 h20 M70 85 h20 M55 70 h5 M60 80 h5 M80 35 h10 M85 45 h5 M80 50 h5 M75 75 h5" stroke-linecap="round" stroke-width="5"/>
+              </svg>
+            </div>
+            <span class="qr-caption">Scan to Portal</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="poster-footer">
+      <p>&copy; 2026 AccessEasy. All rights reserved.</p>
+      <div class="footer-links">
+        <a href="#">Terms</a>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Contact Support</a>
+      </div>
+    </footer>
+  </div>
+
+</body>
+</html>
