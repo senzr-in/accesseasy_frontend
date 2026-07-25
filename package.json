@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@lottiefiles/dotlottie-web": "^0.48.0",
+    "@mdi/font": "^7.4.47",
     "@vueuse/core": "^12.0.0",
     "apexcharts": "^5.16.0",
     "axios": "^1.7.9",
@@ -50,6 +51,7 @@
     "vue3-apexcharts": "^1.11.1",
     "vue3-cookies": "^1.0.6",
     "vue3-google-map": "^0.23.1",
+    "vuetify": "^4.1.6",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
