@@ -79,8 +79,7 @@
           </div>
         </header>
 
-        <!-- Onboarding Banner -->
-        <OnboardingBanner />
+        <!-- Onboarding Banner Removed as per request -->
 
         <!-- Page Content -->
         <main class="flex-1 flex flex-col overflow-hidden relative">
@@ -98,7 +97,7 @@ import { useDark, useToggle } from '@vueuse/core';
 import { Building, Shield, MapPin, ChevronDown, Search, Bell, Sun, Moon } from 'lucide-vue-next';
 import SecuritySidebar from '@/components/layout/SecuritySidebar.vue';
 import WorkforceSidebar from '@/components/layout/WorkforceSidebar.vue';
-import OnboardingBanner from '@/components/layout/OnboardingBanner.vue';
+
 import { authService } from '@/services/authService';
 import { onboardingService } from '@/services/onboardingService';
 import { currentUserTenant } from '@/utils/currentUserTenant';
@@ -184,7 +183,7 @@ const autoGenerateEmployeeQr = async () => {
 onMounted(() => {
   const role = authService.getUserRole();
   if (role === 'Admin' && !onboardingService.isCompleted() && !onboardingService.hasStarted()) {
-    router.push('/onboarding');
+    // router.push('/onboarding');
   }
   if (role === 'Employee') {
     autoGenerateEmployeeQr();

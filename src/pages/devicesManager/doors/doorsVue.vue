@@ -8,45 +8,45 @@
         <input
           v-model="searchQuery"
           type="search"
-          placeholder="Search access points by name or number..."
-          class="w-full pl-9 pr-4 h-10 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400"
+          placeholder="Search doors by name or number..."
+          class="w-full pl-9 pr-4 h-10 text-sm bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm text-slate-900 dark:text-white placeholder:text-slate-400"
           @input="debouncedSearch"
         >
       </div>
 
-      <!-- Add Access Point -->
+      <!-- Add Door -->
       <button
-        class="flex items-center gap-2 h-10 px-4 rounded-xl bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all shadow-sm shrink-0"
+        class="flex items-center gap-2 h-10 px-4 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all shadow-sm shrink-0"
         @click="showAddDoorForm"
       >
-        <Plus class="w-4 h-4" /> Add Access Point
+        <Plus class="w-4 h-4" /> Add Door
       </button>
     </div>
 
     <!-- Table Card -->
-    <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden flex flex-col flex-1 min-h-0">
+    <div class="rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm overflow-hidden flex flex-col flex-1 min-h-0">
       <div class="overflow-x-auto flex-1 h-full">
         <table class="w-full text-left border-collapse relative">
-          <thead class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-10">
+          <thead class="bg-slate-50 dark:bg-zinc-900 border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-10">
             <tr>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
-                Access Point Name
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">
+                Door Name
               </th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">
                 #
               </th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">
                 Location
               </th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">
                 Status
               </th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest text-right whitespace-nowrap">
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest text-right whitespace-nowrap">
                 Actions
               </th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100 bg-white dark:bg-slate-900">
+          <tbody class="divide-y divide-slate-100 dark:divide-zinc-800 bg-white dark:bg-zinc-950">
             <!-- Loading -->
             <tr v-if="loading">
               <td
@@ -64,9 +64,9 @@
                 class="px-5 py-24 text-center"
               >
                 <div class="flex flex-col items-center justify-center space-y-3">
-                  <DoorOpen class="w-10 h-10 text-slate-300" />
-                  <p class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
-                    No access points found.
+                  <DoorOpen class="w-10 h-10 text-slate-300 dark:text-zinc-700" />
+                  <p class="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                    No doors found.
                   </p>
                   <button
                     v-if="searchQuery"
@@ -77,10 +77,10 @@
                   </button>
                   <button
                     v-else
-                    class="h-9 px-4 rounded-lg bg-slate-900 text-white text-xs font-black uppercase tracking-widest hover:opacity-90 transition-opacity"
+                    class="h-9 px-4 rounded-lg bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-black uppercase tracking-widest hover:opacity-90 transition-opacity"
                     @click="showAddDoorForm"
                   >
-                    <Plus class="w-4 h-4 inline mr-1" /> Add First Access Point
+                    <Plus class="w-4 h-4 inline mr-1" /> Add First Door
                   </button>
                 </div>
               </td>
@@ -91,16 +91,16 @@
               v-for="door in items"
               v-else
               :key="door.id"
-              class="group/row hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors duration-200"
+              class="group/row hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors duration-200"
             >
               <!-- Name -->
               <td class="px-5 py-3">
                 <div class="flex items-center gap-3">
-                  <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 border border-blue-100 text-blue-600 shrink-0">
+                  <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 text-blue-600 dark:text-blue-400 shrink-0">
                     <DoorOpen class="h-4 w-4" />
                   </div>
                   <div>
-                    <span class="text-[13px] font-semibold text-slate-800 dark:text-slate-200">{{ door.doorName || 'Unnamed Access Point' }}</span>
+                    <span class="text-[13px] font-semibold text-slate-800 dark:text-white">{{ door.doorName || 'Unnamed Door' }}</span>
                     <p class="text-[11px] text-slate-400 font-mono">
                       {{ String(door.id).substring(0, 8) }}…
                     </p>
@@ -110,14 +110,14 @@
 
               <!-- Number -->
               <td class="px-5 py-3">
-                <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-950 text-slate-700 dark:text-slate-200 text-[11px] font-mono font-bold border border-slate-200 dark:border-slate-800">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 text-[11px] font-mono font-bold border border-slate-200 dark:border-zinc-700">
                   #{{ door.doorNumber || '—' }}
                 </span>
               </td>
 
               <!-- Location -->
               <td class="px-5 py-3">
-                <span class="text-[12px] font-semibold text-slate-500 dark:text-slate-400">{{ door.location || '—' }}</span>
+                <span class="text-[12px] font-semibold text-slate-500">{{ door.location || '—' }}</span>
               </td>
 
               <!-- Status -->
@@ -126,7 +126,7 @@
                   :class="[
                     'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold border',
                     door.status === 'active'
-                      ? 'bg-green-500/10 text-green-700 border-green-500/20'
+                      ? 'bg-green-500/10 text-green-700 border-green-500/20 dark:text-green-400'
                       : 'bg-gray-500/10 text-gray-600 border-gray-500/20'
                   ]"
                 >
@@ -140,29 +140,29 @@
                 <div class="flex justify-end gap-2 pr-2 opacity-0 group-hover/row:opacity-100 transition-opacity">
                   <button
                     v-if="door.deviceUuid"
-                    title="Open Access Point"
-                    class="h-7 px-3 text-[10px] font-black uppercase tracking-widest bg-transparent border border-emerald-200 rounded-md hover:bg-emerald-50 text-emerald-600 transition-colors shadow-sm"
+                    title="Open Door"
+                    class="h-7 px-3 text-[10px] font-black uppercase tracking-widest bg-transparent border border-emerald-200 dark:border-emerald-800 rounded-md hover:bg-emerald-50 dark:hover:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 transition-colors shadow-sm"
                     @click="openDoor(door)"
                   >
                     Open
                   </button>
                   <button
                     v-if="door.deviceUuid"
-                    title="Lock Access Point"
-                    class="h-7 px-3 text-[10px] font-black uppercase tracking-widest bg-transparent border border-rose-200 rounded-md hover:bg-rose-50 text-rose-600 transition-colors shadow-sm"
+                    title="Lock Door"
+                    class="h-7 px-3 text-[10px] font-black uppercase tracking-widest bg-transparent border border-rose-200 dark:border-rose-800 rounded-md hover:bg-rose-50 dark:hover:bg-rose-950/20 text-rose-600 dark:text-rose-400 transition-colors shadow-sm"
                     @click="lockDoor(door)"
                   >
                     Lock
                   </button>
                   <button
-                    class="h-7 px-3 text-[10px] font-black uppercase tracking-widest bg-transparent border border-slate-200 dark:border-slate-800 rounded-md hover:bg-slate-50 dark:hover:bg-slate-800/50 text-slate-700 dark:text-slate-200 transition-colors shadow-sm"
+                    class="h-7 px-3 text-[10px] font-black uppercase tracking-widest bg-transparent border border-slate-200 dark:border-zinc-700 rounded-md hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 transition-colors shadow-sm"
                     @click="editItem(door)"
                   >
                     Edit
                   </button>
                   <button
-                    title="Delete Access Point"
-                    class="h-7 w-7 p-0 flex items-center justify-center rounded-md border border-rose-200 bg-transparent text-rose-500 hover:text-rose-600 hover:bg-rose-50 transition-colors shadow-sm"
+                    title="Delete Door"
+                    class="h-7 w-7 p-0 flex items-center justify-center rounded-md border border-rose-200 dark:border-rose-900/50 bg-transparent text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors shadow-sm"
                     @click="deleteItem(door)"
                   >
                     <Trash2 class="h-3.5 w-3.5" />
@@ -175,19 +175,19 @@
       </div>
 
       <!-- Pagination (inside the card, at the bottom) -->
-      <div class="flex items-center justify-between p-4 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 shrink-0">
+      <div class="flex items-center justify-between p-4 border-t border-slate-100 dark:border-zinc-800 bg-slate-50 dark:bg-zinc-900 shrink-0">
         <button
-          class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-white dark:bg-slate-900 disabled:opacity-50 transition-colors shadow-sm text-slate-700 dark:text-slate-200"
+          class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-950 disabled:opacity-50 transition-colors shadow-sm text-slate-700 dark:text-slate-300"
           :disabled="page <= 1 || loading"
           @click="page--"
         >
           Previous
         </button>
-        <div class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
+        <div class="text-[10px] font-black uppercase tracking-widest text-slate-500">
           Page {{ page }} of {{ totalPages || 1 }} &nbsp;·&nbsp; {{ totalItems }} total
         </div>
         <button
-          class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-white dark:bg-slate-900 disabled:opacity-50 transition-colors shadow-sm text-slate-700 dark:text-slate-200"
+          class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-zinc-800 hover:bg-white dark:hover:bg-zinc-950 disabled:opacity-50 transition-colors shadow-sm text-slate-700 dark:text-slate-300"
           :disabled="page >= totalPages || loading"
           @click="page++"
         >
