@@ -128,20 +128,6 @@
       class="shrink-0 border-t border-slate-100 dark:border-white/5 space-y-1"
       :class="isCollapsed ? 'p-2' : 'p-3'"
     >
-      <!-- Settings link -->
-      <router-link
-        v-if="userRole === 'Admin'"
-        to="/dashboard/settings"
-        class="flex items-center w-full rounded-lg text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-slate-800/50 hover:text-blue-600 dark:hover:text-slate-200 transition-colors group"
-        :class="isCollapsed ? 'justify-center py-3' : 'gap-2.5 px-3 py-2'"
-        :title="isCollapsed ? 'Settings' : ''"
-      >
-        <Settings class="w-4 h-4 text-slate-400 dark:text-slate-500 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-slate-300 transition-colors shrink-0" />
-        <span
-          v-if="!isCollapsed"
-          class="truncate"
-        >Settings</span>
-      </router-link>
 
       <!-- User row -->
       <button
@@ -174,7 +160,7 @@ import { computed, ref } from 'vue';
 import { useRouter, RouterLink } from 'vue-router';
 import {
   LayoutDashboard, Users, Shield, ShieldCheck, MapPin, 
-  Settings, LogOut, ChevronLeft, ChevronRight, ClipboardList, Building2
+  Settings, LogOut, ChevronLeft, ChevronRight, ClipboardList, Building2, Server, Activity, FileText
 } from 'lucide-vue-next';
 import { authService } from '@/services/authService';
 
@@ -197,21 +183,23 @@ const userInitials = computed(() => userName.value.charAt(0).toUpperCase());
 const dailyOperationsNav = computed(() => {
   const items = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, exact: true },
-    { name: 'Visitors', href: '/dashboard/visitors', icon: Users },
-    { name: 'Access Points', href: '/dashboard/access-control/doors', icon: MapPin },
-    { name: 'Patrols', href: '/dashboard/patrols', icon: Shield },
+    { name: 'Employee Dashboard', href: '/dashboard/employee-dashboard', icon: LayoutDashboard },
+    { name: 'Doors', href: '/dashboard/access-control/doors', icon: MapPin },
+    { name: 'Groups', href: '/dashboard/easy-access/configurators/access-levels', icon: Shield },
+    { name: 'Guards', href: '/dashboard/guards', icon: ShieldCheck },
+    { name: 'Employees', href: '/dashboard/easy-access/employees', icon: Users },
+    { name: 'Scheduled Reports', href: '/dashboard/report-automation', icon: ClipboardList }
   ];
-  if (userRole.value === 'Admin' || userRole.value === 'Manager') {
-    items.push({ name: 'Guards', href: '/dashboard/guards', icon: ShieldCheck });
-  }
-  items.push({ name: 'Reports', href: '/dashboard/report-automation', icon: ClipboardList });
   return items;
 });
 
 const siteSetupNav = computed(() => {
   if (userRole.value === 'Admin' || userRole.value === 'Manager') {
     return [
-      { name: 'Zones', href: '/dashboard/settings/zones', icon: Building2 },
+      { name: 'Settings', href: '/dashboard/settings', icon: Settings },
+      { name: 'Devices', href: '/dashboard/settings/devices', icon: Server },
+      { name: 'AI Cam Events', href: '/dashboard/settings/ai-events', icon: Activity },
+      { name: 'Event Logs', href: '/dashboard/settings/logs', icon: FileText }
     ];
   }
   return [];

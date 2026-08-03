@@ -222,7 +222,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { onClickOutside } from '@vueuse/core';
 import { Building, Shield, MapPin, ChevronDown, ChevronRight, Search, Bell, Sun, Moon, User, Settings, Lock, LogOut, HelpCircle, AlertCircle, Clock, X, AlertTriangle, CheckCheck } from 'lucide-vue-next';
 import SecuritySidebar from '@/components/layout/SecuritySidebar.vue';
-import Sidebar from '@/components/layout/Sidebar.vue';
+import WorkforceSidebar from '@/components/layout/WorkforceSidebar.vue';
 
 import { authService } from '@/services/authService';
 import { patrolService } from '@/services/patrolService';
@@ -384,7 +384,7 @@ const formattedLastLogin = computed(() => {
 });
 
 const appMode = import.meta.env.VITE_APP_MODE || 'workforce';
-const activeSidebar = computed(() => (appMode === 'security' || appMode === 'patrol') ? SecuritySidebar : Sidebar);
+const activeSidebar = computed(() => (appMode === 'security' || appMode === 'patrol') ? SecuritySidebar : WorkforceSidebar);
 
 const _userData = authService.getUserData();
 const userRole = ref(authService.getUserRole() || 'Employee');
