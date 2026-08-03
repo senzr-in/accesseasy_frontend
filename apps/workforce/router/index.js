@@ -163,7 +163,7 @@ const routes = [
       {
         path: "settings",
         meta: { roles: ["Admin"] },
-        redirect: '/dashboard/settings/branches'
+        redirect: '/dashboard/settings/appearance'
       },
       {
         path: "settings/appearance",

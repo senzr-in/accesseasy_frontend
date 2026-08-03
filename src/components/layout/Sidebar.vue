@@ -42,7 +42,7 @@
         class="flex flex-col leading-none whitespace-nowrap"
       >
         <span class="text-sm font-bold text-white tracking-tight">AccessEasy</span>
-        <span class="text-[10px] font-medium text-slate-400 mt-0.5">{{ appMode === 'security' ? 'Security Platform' : 'Workforce Platform' }}</span>
+        <span class="text-[10px] font-medium text-slate-400 mt-0.5">{{ appMode === 'security' ? 'Security Platform' : appMode === 'patrol' ? 'Patrol Platform' : 'Workforce Platform' }}</span>
       </div>
     </div>
     <!-- Navigation -->
@@ -208,8 +208,7 @@ const dailyOperationsNav = computed(() => {
   const items = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, exact: true },
     { name: 'Visitors', href: '/dashboard/visitors', icon: Users },
-    { name: 'Access Points', href: '/dashboard/access-control/doors', icon: MapPin },
-    { name: 'Patrols', href: '/dashboard/patrols', icon: Shield },
+    { name: 'Access Points', href: '/dashboard/access-control/doors', icon: MapPin }
   ];
   if (userRole.value === 'Admin' || userRole.value === 'Manager') {
     items.push({ name: 'Guards', href: '/dashboard/guards', icon: ShieldCheck });

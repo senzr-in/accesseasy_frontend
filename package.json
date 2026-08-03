@@ -7,14 +7,17 @@
     "dev": "vite",
     "dev:security": "vite --config vite.config.security.js",
     "dev:workforce": "vite --config vite.config.workforce.js",
-    "build": "vite build",
+    "dev:patrol": "vite --config vite.config.patrol.js",
+    "build": "vite build --config vite.config.patrol.js",
     "build:security": "vite build --config vite.config.security.js",
     "build:workforce": "vite build --config vite.config.workforce.js",
+    "build:patrol": "vite build --config vite.config.patrol.js",
     "preview": "vite preview",
     "lint": "eslint . --fix"
   },
   "dependencies": {
     "@lottiefiles/dotlottie-web": "^0.48.0",
+    "@mdi/font": "^7.4.47",
     "@vueuse/core": "^12.0.0",
     "apexcharts": "^5.16.0",
     "axios": "^1.7.9",
@@ -48,6 +51,7 @@
     "vue3-apexcharts": "^1.11.1",
     "vue3-cookies": "^1.0.6",
     "vue3-google-map": "^0.23.1",
+    "vuetify": "^4.1.6",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
