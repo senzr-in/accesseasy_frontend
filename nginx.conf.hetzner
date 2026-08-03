@@ -43,7 +43,52 @@ server {
     error_page 404 /index.html;
 }
 
-# Security App Server (security.accesseasy.in)
+# Patrol App Server (patrol.accesseasy.in)
+server {
+    listen 8080;
+    server_name patrol.accesseasy.in;
+
+    root /usr/share/nginx/html/patrol;
+    index index.html;
+
+    # CORS Headers (global)
+    add_header 'Access-Control-Allow-Origin' '*' always;
+    add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS, DELETE, PUT' always;
+    add_header 'Access-Control-Allow-Headers' 'Origin, Content-Type, Accept, Authorization' always;
+
+    if ($request_method = 'OPTIONS') {
+        return 204;
+    }
+
+    location / {
+        try_files $uri /index.html;
+    }
+
+    location /api/ {
+        proxy_pass https://privateapp.senzr.in/;
+        proxy_set_header Host privateapp.senzr.in;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location ~ ^/kn/(?<fun>[^/?]+) {
+        rewrite ^/kn/[^/?]+/?(.*)$ /$1 break;
+        proxy_pass http://kourier-internal.kourier-system.svc.cluster.local;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_set_header Host $fun.knative-fn.65.109.41.139.sslip.io;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 60s;
+        proxy_connect_timeout 10s;
+    }
+
+    error_page 404 /index.html;
+}
+
+
 server {
     listen 8080;
     server_name security.accesseasy.in;
