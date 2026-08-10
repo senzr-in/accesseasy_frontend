@@ -146,11 +146,11 @@
 
     <!-- Main 3-Column Layout -->
     <div class="grid grid-cols-1 xl:grid-cols-12 gap-3 mb-4">
-      <!-- AI Event Feed -->
-      <div class="xl:col-span-5 bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/5 rounded-2xl flex flex-col shadow-sm h-[380px]">
+      <!-- Unified Security Feed -->
+      <div class="xl:col-span-7 bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/5 rounded-2xl flex flex-col shadow-sm h-[380px]">
         <div class="px-5 py-4 border-b border-slate-100 dark:border-white/5 flex items-center justify-between shrink-0">
           <h2 class="text-sm font-bold text-slate-900 dark:text-white">
-            AI Event Feed
+            Unified Security Feed
           </h2>
           <button class="text-xs font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 transition-colors">
             View All Events
@@ -160,7 +160,8 @@
           <div
             v-for="event in processedActivityFeed"
             :key="event.id"
-            class="flex items-center gap-4 py-3 border-b border-slate-100 dark:border-white/5 last:border-0 group hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-slate-800/50 transition-colors px-2 -mx-2 rounded-lg"
+            class="flex items-center gap-4 py-3 border-b border-slate-100 dark:border-white/5 last:border-0 group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors px-2 -mx-2 rounded-lg cursor-pointer"
+            @click="openLightbox(event)"
           >
             <!-- Dot -->
             <div :class="`w-2 h-2 rounded-full shrink-0 ${event.dotColor}`" />
@@ -236,7 +237,7 @@
       </div>
 
       <!-- Recent Snapshots -->
-      <div class="xl:col-span-3 bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/5 rounded-2xl flex flex-col shadow-sm h-[380px]">
+      <div class="xl:col-span-5 bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/5 rounded-2xl flex flex-col shadow-sm h-[380px]">
         <div class="px-4 py-4 border-b border-slate-100 dark:border-white/5 shrink-0 flex flex-col gap-3">
           <h2 class="text-sm font-bold text-slate-900 dark:text-white">
             Recent Snapshots
@@ -273,6 +274,7 @@
             v-for="snap in recentSnapshots"
             :key="snap.id"
             class="flex gap-3 mb-4 last:mb-0 items-center group cursor-pointer border-b border-slate-50 dark:border-white/5 pb-4 last:border-0 last:pb-0"
+            @click="openLightbox(snap)"
           >
             <div class="w-12 h-12 rounded-lg overflow-hidden shrink-0 border border-slate-200 dark:border-white/10 relative shadow-sm group-hover:border-blue-500/30 transition-colors">
               <img
@@ -304,82 +306,12 @@
         </div>
       </div>
 
-      <!-- Platform Modules -->
-      <div class="xl:col-span-4 bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/5 rounded-2xl shadow-sm flex flex-col overflow-hidden h-[380px]">
-        <div class="px-5 py-4 border-b border-slate-100 dark:border-white/5 shrink-0">
-          <h2 class="text-sm font-bold text-slate-900 dark:text-white">
-            Platform Modules
-          </h2>
-          <p class="text-[10px] font-medium text-slate-500 dark:text-slate-400 mt-1">
-            Enable and manage platform modules
-          </p>
-        </div>
-        <div class="p-4 overflow-y-auto flex-1 custom-scrollbar">
-          <div class="mb-5">
-            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
-              Installed
-            </p>
-            <div class="bg-green-50 dark:bg-green-500/5 border border-green-200 dark:border-green-500/20 rounded-xl p-3 flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <div class="w-6 h-6 rounded-full bg-green-500 text-white flex items-center justify-center shrink-0">
-                  <Check class="w-3.5 h-3.5" />
-                </div>
-                <div class="min-w-0">
-                  <h4 class="text-[11px] font-bold text-slate-900 dark:text-white truncate">
-                    AI Camera Analytics
-                  </h4>
-                  <p class="text-[9px] font-medium text-slate-500 dark:text-slate-400 truncate mt-0.5">
-                    Face, Vehicle & Person Detection
-                  </p>
-                </div>
-              </div>
-              <span class="bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400 text-[9px] font-bold px-2 py-0.5 rounded border border-green-200 dark:border-green-500/30 shrink-0 ml-2">Active</span>
-            </div>
-          </div>
-          
-          <div>
-            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
-              Available Add-ons
-            </p>
-            <div class="space-y-2">
-              <div
-                v-for="module in availableModules"
-                :key="module.id"
-                class="border border-slate-100 dark:border-white/5 rounded-xl p-2.5 flex items-center justify-between hover:border-blue-200 dark:hover:border-blue-500/30 transition-colors bg-white dark:bg-transparent"
-              >
-                <div class="flex items-center gap-3 min-w-0">
-                  <div :class="`w-6 h-6 rounded flex items-center justify-center text-white shrink-0 ${module.color}`">
-                    <component
-                      :is="module.icon"
-                      class="w-3.5 h-3.5"
-                    />
-                  </div>
-                  <div class="min-w-0">
-                    <h4 class="text-[11px] font-bold text-slate-900 dark:text-white truncate">
-                      {{ module.title }}
-                    </h4>
-                    <p class="text-[9px] font-medium text-slate-500 dark:text-slate-400 mt-0.5 truncate">
-                      {{ module.desc }}
-                    </p>
-                  </div>
-                </div>
-                <button class="text-[10px] font-bold text-blue-600 dark:text-blue-400 px-2.5 py-1 rounded hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors shrink-0 ml-2">
-                  Enable
-                </button>
-              </div>
-            </div>
-            <button class="text-[11px] font-bold text-blue-600 hover:text-blue-700 dark:text-blue-400 mt-4 transition-colors">
-              See all modules in marketplace &rsaquo;
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- Camera Health + Promo Row -->
     <div class="grid grid-cols-1 xl:grid-cols-12 gap-3">
       <!-- Camera Health -->
-      <div class="xl:col-span-9 bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/5 rounded-2xl flex flex-col shadow-sm">
+      <div class="xl:col-span-12 bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/5 rounded-2xl flex flex-col shadow-sm">
         <div class="px-5 py-4 border-b border-slate-100 dark:border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <h2 class="text-sm font-bold text-slate-900 dark:text-white">
             Camera Health
@@ -440,21 +372,36 @@
         </div>
       </div>
 
-      <!-- Promo Card -->
-      <div class="xl:col-span-3 bg-gradient-to-br from-[#0f172a] to-[#1e3a8a] border border-blue-900/50 rounded-2xl p-4 flex flex-col justify-center relative overflow-hidden shadow-lg">
-        <div class="relative z-10">
-          <h3 class="text-[14px] font-bold text-white mb-2">
-            Need more features?
-          </h3>
-          <p class="text-[11px] font-medium text-blue-200/80 mb-4 leading-relaxed">
-            Explore our advanced modules to extend the power of your platform.
+    </div>
+
+    <!-- Snapshot Lightbox Modal -->
+    <div
+      v-if="isLightboxOpen && selectedEvent"
+      class="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+      @click="closeLightbox"
+    >
+      <div class="relative max-w-5xl w-full max-h-[90vh] flex flex-col items-center justify-center" @click.stop>
+        <button
+          class="absolute top-4 right-4 z-50 h-10 w-10 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center text-white border border-white/10 transition-colors"
+          @click="closeLightbox"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+        <img
+          v-if="selectedEvent.image"
+          :src="selectedEvent.image"
+          class="rounded-2xl max-w-full max-h-[85vh] object-contain shadow-2xl border border-zinc-800"
+          alt="Full Snapshot"
+        >
+        <div class="absolute bottom-4 bg-black/70 backdrop-blur-md rounded-xl px-4 py-2 border border-white/10 shadow-sm text-center">
+          <p class="text-xs font-black text-white uppercase tracking-wider capitalize">
+            {{ selectedEvent.title }} - {{ selectedEvent.camera || selectedEvent.location }}
           </p>
-          <button class="bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold py-2 px-4 rounded-lg transition-colors shadow-md">
-            Explore Modules
-          </button>
-        </div>
-        <div class="absolute -right-6 -bottom-6 text-[90px] text-white/10 rotate-12 select-none pointer-events-none">
-          🧩
+          <p class="text-[10px] text-zinc-400 mt-0.5">
+            {{ selectedEvent.time }}
+          </p>
         </div>
       </div>
     </div>
@@ -472,15 +419,35 @@ import {
   Plus, EyeOff, Check
 } from 'lucide-vue-next';
 
+const isLightboxOpen = ref(false);
+const selectedEvent = ref(null);
+
+const openLightbox = (event) => {
+  if (event.image) {
+    selectedEvent.value = event;
+    isLightboxOpen.value = true;
+  }
+};
+
+const closeLightbox = () => {
+  isLightboxOpen.value = false;
+  setTimeout(() => {
+    selectedEvent.value = null;
+  }, 200);
+};
+
 const {
   kpiData,
   liveActivityFeed,
+  unifiedActivityFeed,
+  registeredCameras,
   todayOverview,
   alertsFeed,
   analyticsData,
   loadSOCData,
   startPolling,
   stopPolling,
+  startMQTT,
 } = useSOCState();
 
 const {
@@ -495,135 +462,153 @@ const {
 const kpiCardsFormatted = computed(() => [
   { 
     label: 'Cameras Online', 
-    value: '18', 
-    total: '20',
-    progress: { label: '90% Online', value: 90 },
+    value: (kpiData.value.onlineCameras || 0).toString(), 
+    total: (kpiData.value.totalCameras || 0).toString(),
+    progress: { label: `${kpiData.value.totalCameras ? Math.round((kpiData.value.onlineCameras / kpiData.value.totalCameras) * 100) : 0}% Online`, value: kpiData.value.totalCameras ? (kpiData.value.onlineCameras / kpiData.value.totalCameras) * 100 : 0 },
     icon: Video, 
     iconBg: 'bg-green-500 text-white' 
   },
   { 
     label: 'Faces Detected Today', 
-    value: '152', 
-    trend: '12%',
-    trendIcon: '↑',
-    trendColor: 'text-green-500',
+    value: (kpiData.value.employeesInside || 0).toString(), 
+    trend: 'Live',
+    trendIcon: '●',
+    trendColor: 'text-blue-500 animate-pulse',
     icon: Scan, 
     iconBg: 'bg-blue-600 text-white' 
   },
   { 
     label: 'Vehicles Detected Today', 
-    value: '87', 
-    trend: '8%',
-    trendIcon: '↑',
-    trendColor: 'text-green-500',
+    value: (kpiData.value.vehiclesInside || 0).toString(), 
+    trend: 'Live',
+    trendIcon: '●',
+    trendColor: 'text-blue-500 animate-pulse',
     icon: Car, 
     iconBg: 'bg-purple-600 text-white' 
   },
   { 
     label: 'People Detected Today', 
-    value: '231', 
-    trend: '15%',
-    trendIcon: '↑',
-    trendColor: 'text-green-500',
+    value: (kpiData.value.unknownPersons || 0).toString(), 
+    trend: 'Live',
+    trendIcon: '●',
+    trendColor: 'text-blue-500 animate-pulse',
     icon: User, 
     iconBg: 'bg-orange-500 text-white' 
   },
   { 
-    label: 'Active Alerts', 
-    value: alertsFeed.value.length.toString(), 
+    label: 'Offline Devices', 
+    value: (kpiData.value.offlineDevices || 0).toString(), 
     link: 'View all alerts',
     icon: Bell, 
-    iconBg: 'bg-red-500 text-white' 
+    iconBg: kpiData.value.offlineDevices > 0 ? 'bg-red-500 text-white' : 'bg-slate-400 text-white' 
   },
 ]);
 
-const processedActivityFeed = computed(() => [
-  {
-    id: 1,
-    title: 'Employee Recognized',
-    subtitle: 'John Doe',
-    badge: 'ID: EMP1023',
-    badgeClass: 'bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-500/20',
-    time: '09:45 AM',
-    location: 'Main Gate',
-    camera: 'Camera 01',
-    icon: Scan,
-    iconBg: 'bg-green-50 dark:bg-green-500/15 text-green-600 dark:text-green-400 border border-green-100 dark:border-transparent',
-    dotColor: 'bg-green-500',
-    image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=60',
-    smallIcon: Scan,
-    iconColor: 'bg-green-500 text-white'
-  },
-  {
-    id: 2,
-    title: 'Unknown Person Detected',
-    subtitle: 'Confidence: 92%',
-    time: '09:43 AM',
-    location: 'Warehouse',
-    camera: 'Camera 04',
-    icon: Scan,
-    iconBg: 'bg-red-50 dark:bg-red-500/15 text-red-600 dark:text-red-400 border border-red-100 dark:border-transparent',
-    dotColor: 'bg-red-500',
-    image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&q=60',
-    smallIcon: Scan,
-    iconColor: 'bg-red-500 text-white'
-  },
-  {
-    id: 3,
-    title: 'Vehicle Detected',
-    subtitle: 'TN09AB1234',
-    badge: 'TN09AB1234',
-    badgeClass: 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20',
-    time: '09:40 AM',
-    location: 'Entry Gate',
-    camera: 'Camera 02',
-    icon: Car,
-    iconBg: 'bg-blue-50 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-transparent',
-    dotColor: 'bg-blue-500',
-    image: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=100&q=60',
-    smallIcon: Car,
-    iconColor: 'bg-blue-500 text-white'
-  },
-  {
-    id: 4,
-    title: 'Person in Restricted Area',
-    subtitle: 'Confidence: 88%',
-    time: '09:36 AM',
-    location: 'Production Area',
-    camera: 'Camera 07',
-    icon: User,
-    iconBg: 'bg-orange-50 dark:bg-orange-500/15 text-orange-600 dark:text-orange-400 border border-orange-100 dark:border-transparent',
-    dotColor: 'bg-orange-500',
-    image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=60',
-    smallIcon: User,
-    iconColor: 'bg-orange-500 text-white'
-  },
-  {
-    id: 5,
-    title: 'Camera Offline',
-    subtitle: 'No Signal',
-    time: '09:31 AM',
-    location: 'Parking',
-    camera: 'Camera 12',
-    icon: VideoOff,
-    iconBg: 'bg-slate-50 dark:bg-slate-500/15 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-transparent',
-    dotColor: 'bg-red-500',
-    fallbackIcon: EyeOff
-  }
-]);
+const processedActivityFeed = computed(() => {
+  return unifiedActivityFeed.value.map((e, index) => {
+    let icon, iconBg, dotColor, badgeClass, badgeText, smallIcon, iconColor, fallbackIcon;
+
+    if (e.isLog) {
+      icon = Lock;
+      fallbackIcon = User;
+      if (e.status === 'authorized') {
+        iconBg = 'bg-green-50 dark:bg-green-500/15 text-green-600 dark:text-green-400 border border-green-100 dark:border-transparent';
+        dotColor = 'bg-green-500';
+        iconColor = 'bg-green-500 text-white';
+        badgeClass = 'bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-500/20';
+        badgeText = 'Authorized';
+      } else {
+        iconBg = 'bg-red-50 dark:bg-red-500/15 text-red-600 dark:text-red-400 border border-red-100 dark:border-transparent';
+        dotColor = 'bg-red-500';
+        iconColor = 'bg-red-500 text-white';
+        badgeClass = 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/20';
+        badgeText = 'Denied';
+      }
+      smallIcon = Shield;
+
+      return {
+        id: e.id || index,
+        title: e.type,
+        subtitle: e.name + (e.subtitle && e.subtitle !== 'N/A' ? ` - ${e.subtitle}` : ''),
+        badge: badgeText,
+        badgeClass,
+        time: e.time,
+        location: e.gate,
+        camera: e.method,
+        icon, iconBg, dotColor, image: e.photo, smallIcon, iconColor, fallbackIcon, rawEvent: e.eventData
+      };
+    }
+
+    if (e.eventData?.label === 'face') {
+      icon = Scan;
+      if (e.eventData?.person_name) {
+        iconBg = 'bg-green-50 dark:bg-green-500/15 text-green-600 dark:text-green-400 border border-green-100 dark:border-transparent';
+        dotColor = 'bg-green-500';
+        badgeClass = 'bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 border border-green-200 dark:border-green-500/20';
+        badgeText = 'Recognized';
+        iconColor = 'bg-green-500 text-white';
+      } else {
+        iconBg = 'bg-red-50 dark:bg-red-500/15 text-red-600 dark:text-red-400 border border-red-100 dark:border-transparent';
+        dotColor = 'bg-red-500';
+        iconColor = 'bg-red-500 text-white';
+      }
+      smallIcon = Scan;
+    } else if (e.eventData?.label === 'car') {
+      icon = Car;
+      iconBg = 'bg-blue-50 dark:bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-transparent';
+      dotColor = 'bg-blue-500';
+      iconColor = 'bg-blue-500 text-white';
+      smallIcon = Car;
+    } else {
+      icon = User;
+      iconBg = 'bg-orange-50 dark:bg-orange-500/15 text-orange-600 dark:text-orange-400 border border-orange-100 dark:border-transparent';
+      dotColor = 'bg-orange-500';
+      iconColor = 'bg-orange-500 text-white';
+      smallIcon = User;
+    }
+
+    return {
+      id: e.id || index,
+      title: e.title || e.type,
+      subtitle: e.eventData?.person_name ? e.eventData.person_name : (e.eventData?.score ? `Confidence: ${Math.round(e.eventData.score * 100)}%` : 'Detected'),
+      badge: badgeText,
+      badgeClass,
+      time: e.time,
+      location: e.gate,
+      camera: e.gate,
+      icon,
+      iconBg,
+      dotColor,
+      image: e.photo,
+      smallIcon,
+      iconColor,
+      fallbackIcon: EyeOff,
+      rawEvent: e.eventData
+    };
+  });
+});
 
 const activeSnapshotFilter = ref('All');
 
-const ALL_SNAPSHOTS = [
-  { id: 1, type: 'Scan', image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=60', icon: Scan, iconBg: 'bg-green-500 text-white', time: '09:45 AM', title: 'Employee Recognized', location: 'Main Gate - Camera 01' },
-  { id: 2, type: 'Scan', image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&q=60', icon: Scan, iconBg: 'bg-red-500 text-white', time: '09:43 AM', title: 'Unknown Person', location: 'Warehouse - Camera 04' },
-  { id: 3, type: 'Car', image: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=100&q=60', icon: Car, iconBg: 'bg-blue-500 text-white', time: '09:40 AM', title: 'Vehicle TN09AB1234', location: 'Entry Gate - Camera 02' },
-  { id: 4, type: 'User', image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=60', icon: User, iconBg: 'bg-orange-500 text-white', time: '09:36 AM', title: 'Person Detected', location: 'Production Area - Camera 07' },
-];
-
 const recentSnapshots = computed(() => {
-  if (activeSnapshotFilter.value === 'All') return ALL_SNAPSHOTS;
-  return ALL_SNAPSHOTS.filter(s => s.type === activeSnapshotFilter.value);
+  let snaps = unifiedActivityFeed.value
+    .filter(e => e.photo && !e.isLog)
+    .map(e => ({
+      id: e.id,
+      type: e.eventData?.label === 'face' ? 'Scan' : e.eventData?.label === 'car' ? 'Car' : 'User',
+      image: e.photo,
+      icon: e.eventData?.label === 'face' ? Scan : e.eventData?.label === 'car' ? Car : User,
+      iconBg: e.eventData?.label === 'face' ? 'bg-green-500 text-white' : e.eventData?.label === 'car' ? 'bg-blue-500 text-white' : 'bg-orange-500 text-white',
+      time: e.time,
+      title: e.type,
+      location: e.gate,
+      rawEvent: e.eventData
+    }));
+
+  if (activeSnapshotFilter.value !== 'All') {
+    snaps = snaps.filter(s => s.type === activeSnapshotFilter.value);
+  }
+  return snaps;
 });
 
 const availableModules = [
@@ -635,31 +620,32 @@ const availableModules = [
   { id: 6, title: 'Incident Management', desc: 'Manage incidents & reports', icon: AlertCircle, color: 'bg-red-600' },
 ];
 
-const CAMERA_CONFIG = [
-  { id: 1, name: 'Camera 01', mqttId: 'main_gate', type: 'both', fallbackUrl: 'https://images.unsplash.com/photo-1558002038-1055907df827?w=400&q=60' },
-  { id: 2, name: 'Camera 02', mqttId: 'entry_gate', type: 'both', fallbackUrl: 'https://images.unsplash.com/photo-1506521781263-d8422e82f27a?w=400&q=60' },
-  { id: 3, name: 'Camera 03', mqttId: 'reception', type: 'people', fallbackUrl: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=60' },
-  { id: 4, name: 'Camera 04', mqttId: 'warehouse', type: 'people', fallbackUrl: null },
-  { id: 5, name: 'Camera 05', mqttId: 'parking', type: 'vehicle', fallbackUrl: 'https://images.unsplash.com/photo-1470224114660-3f6686c562eb?w=400&q=60' },
-];
-
-const cameraRegistry = computed(() =>
-  CAMERA_CONFIG.map(cfg => {
-    const liveSnap = personSnapshots.value[cfg.mqttId] ?? null;
-    const count = personCounts.value[cfg.mqttId] ?? 0;
-    const isLive = !!(liveSnap || count > 0) || cfg.id !== 4; // Mock logic
+const cameraRegistry = computed(() => {
+  if (!registeredCameras.value || registeredCameras.value.length === 0) {
+    return [];
+  }
+  return registeredCameras.value.map(cfg => {
+    const liveSnap = personSnapshots.value[cfg.linkedCamera] ?? null;
+    const count = personCounts.value[cfg.linkedCamera] ?? 0;
+    const isLive = !!(liveSnap || count > 0) || cfg.status === 'online' || cfg.status === 'active';
     return {
       ...cfg,
+      id: cfg.id,
+      name: cfg.name || cfg.deviceId || 'Camera Node',
+      mqttId: cfg.linkedCamera || cfg.deviceId,
+      type: cfg.type || 'both',
+      fallbackUrl: null,
       liveSnapshot: liveSnap,
       isLive,
     };
-  })
-);
+  });
+});
 
 const filteredCameras = computed(() => cameraRegistry.value);
 
 onMounted(() => {
   loadSOCData();
+  startMQTT();
   startPolling(10000);
 });
 

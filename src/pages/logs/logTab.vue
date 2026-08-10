@@ -3,7 +3,7 @@
     <!-- Data Table Card -->
     <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-sm overflow-hidden flex flex-col flex-1 min-h-0">
       <!-- Toolbar -->
-      <div class="border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 dark:bg-slate-900/50 p-4 flex flex-col sm:flex-row gap-4 items-center justify-between">
+      <div class="border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 p-4 flex flex-col sm:flex-row gap-4 items-center justify-between">
         <div class="relative w-full sm:w-80">
           <Search class="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
           <input
@@ -13,6 +13,17 @@
             class="w-full pl-9 h-10 rounded-lg text-sm bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-900 dark:text-white shadow-sm"
             @input="debouncedSearch"
           >
+        </div>
+        <div class="flex items-center gap-2">
+          <button
+            class="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800"
+            @click="fetchLogs"
+            title="Refresh logs"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+          </button>
         </div>
       </div>
 
@@ -88,7 +99,7 @@
                     {{ getEmployeeName(log) }}
                   </span>
                   <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-0.5">
-                    {{ log.employeeId?.employeeId || 'N/A' }}
+                    {{ log.employeeId?.employeeId || log.rfid || 'N/A' }}
                   </span>
                 </div>
               </td>
@@ -203,7 +214,8 @@ const aggregateCount = async () => {
     const params = new URLSearchParams({
       "aggregate[count]": "id",
       "filter[_and][0][tenant][tenantId][_eq]": tenantId,
-      "filter[_and][1][mode][_neq]": "cronJob"
+      "filter[_and][1][mode][_neq]": "cronJob",
+      "_t": Date.now().toString()
     });
     
     if (searchQuery.value) {
@@ -234,7 +246,8 @@ const fetchLogs = async () => {
       page: page.value.toString(),
       "sort[]": "-date_created",
       "filter[_and][0][tenant][tenantId][_eq]": tenantId,
-      "filter[_and][1][mode][_neq]": "cronJob"
+      "filter[_and][1][mode][_neq]": "cronJob",
+      "_t": Date.now().toString()
     });
 
     const fields = [
@@ -242,7 +255,7 @@ const fetchLogs = async () => {
       "employeeId.assignedUser.id", "employeeId.assignedUser.first_name", 
       "employeeId.assignedUser.last_name", "employeeId.assignedUser.avatar.id",
       "mode", "timeStamp", "date", "id", "ValidLogs", "date_created",
-      "name"
+      "name", "rfid"
     ];
 
     fields.forEach(f => params.append("fields[]", f));
@@ -261,6 +274,24 @@ const fetchLogs = async () => {
       const data = await response.json();
       
       items.value = await Promise.all(data.data.map(async (logItem) => {
+        // Fallback: If employeeId is missing but rfid exists, look up assigned employee from cardManagement
+        if (!logItem.employeeId && logItem.rfid) {
+          try {
+            const cardRes = await fetch(
+              `${import.meta.env.VITE_API_URL}/items/cardManagement?filter[rfidCard][_eq]=${encodeURIComponent(logItem.rfid)}&fields=employeeId.employeeId,employeeId.assignedUser.id,employeeId.assignedUser.first_name,employeeId.assignedUser.last_name,employeeId.assignedUser.avatar.id`,
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            if (cardRes.ok) {
+              const cardData = await cardRes.json();
+              if (cardData.data?.[0]?.employeeId) {
+                logItem.employeeId = cardData.data[0].employeeId;
+              }
+            }
+          } catch (e) {
+            console.debug('Fallback card lookup error:', e);
+          }
+        }
+
         if (logItem.employeeId?.assignedUser?.avatar?.id) {
           const avatarUrl = `${import.meta.env.VITE_API_URL}/assets/${logItem.employeeId.assignedUser.avatar.id}`;
           try {
@@ -282,22 +313,13 @@ const fetchLogs = async () => {
 };
 
 const getEmployeeName = (item) => {
-  let first_name = '';
-  let last_name = '';
-  
   if (item?.employeeId?.assignedUser) {
-    first_name = item.employeeId.assignedUser.first_name || '';
-    last_name = item.employeeId.assignedUser.last_name || '';
-  } else if (item?.employeeId) {
-    first_name = item.employeeId.first_name || item.employeeId.firstName || '';
-    last_name = item.employeeId.last_name || item.employeeId.lastName || '';
+    return `${item.employeeId.assignedUser.first_name || ''} ${item.employeeId.assignedUser.last_name || ''}`.trim() || "Unknown";
   }
-
-  const fullName = `${first_name} ${last_name}`.trim();
   
-  if (fullName) return fullName;
   if (item?.name) return item.name;
   if (item?.employeeName) return item.employeeName;
+  if (item?.rfid) return "Unassigned Card";
   
   return "Unknown";
 };
@@ -376,7 +398,8 @@ const fetchLogsInBackground = async () => {
       page: page.value.toString(),
       "sort[]": "-date_created",
       "filter[_and][0][tenant][tenantId][_eq]": tenantId,
-      "filter[_and][1][mode][_neq]": "cronJob"
+      "filter[_and][1][mode][_neq]": "cronJob",
+      "_t": Date.now().toString()
     });
 
     const fields = [
@@ -384,7 +407,7 @@ const fetchLogsInBackground = async () => {
       "employeeId.assignedUser.id", "employeeId.assignedUser.first_name", 
       "employeeId.assignedUser.last_name", "employeeId.assignedUser.avatar.id",
       "mode", "timeStamp", "date", "id", "ValidLogs", "date_created",
-      "name"
+      "name", "rfid"
     ];
 
     fields.forEach(f => params.append("fields[]", f));
@@ -414,7 +437,8 @@ const fetchLogsInBackground = async () => {
     const countParams = new URLSearchParams({
       "aggregate[count]": "id",
       "filter[_and][0][tenant][tenantId][_eq]": tenantId,
-      "filter[_and][1][mode][_neq]": "cronJob"
+      "filter[_and][1][mode][_neq]": "cronJob",
+      "_t": Date.now().toString()
     });
     const countRes = await fetch(`${import.meta.env.VITE_API_URL}/items/logs?${countParams.toString()}`, {
       headers: { Authorization: `Bearer ${token}` }

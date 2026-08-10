@@ -15,6 +15,7 @@
 
 import { ref, onMounted, onUnmounted } from 'vue';
 import { mqttService } from '@/services/mqttService';
+import { correlationEngine } from '@/services/correlationEngine';
 
 const MAX_EVENTS = 50;
 
@@ -22,6 +23,9 @@ const MAX_EVENTS = 50;
 const mqttStatus      = ref('disconnected');
 const personEvents    = ref([]);
 const lpEvents        = ref([]);
+const swipeEvents     = ref([]);
+const alarmEvents     = ref([]);
+const activeAlarms    = ref([]);
 const personCounts    = ref({});
 const personSnapshots = ref({});
 const lpSnapshots     = ref({});
@@ -29,6 +33,8 @@ const lpSnapshots     = ref({});
 let _refCount      = 0;
 let _statusUnsub   = null;
 let _eventUnsub    = null;
+let _swipeUnsub    = null;
+let _alarmUnsub    = null;
 let _countUnsub    = null;
 let _snapUnsub     = null;
 let _lpSnapUnsub   = null;
@@ -46,7 +52,74 @@ function prepend(refArr, item) {
   refArr.value = [item, ...refArr.value].slice(0, MAX_EVENTS);
 }
 
+function dismissAlarm(alarmId) {
+  activeAlarms.value = activeAlarms.value.filter(a => a.id !== alarmId);
+}
+
 // ── MQTT message handlers ─────────────────────────────────────────────────────
+
+function handleAlarmEvent(topic, payload) {
+  let msg;
+  try { msg = JSON.parse(payload.toString()); }
+  catch { return; }
+
+  // Check MD5 signature verification if sign present
+  if (msg.sign && !mqttService.verifyMD5Signature(msg)) {
+    console.warn('[useMQTT] Signature verification failed for alarm payload from:', msg.uuid);
+    return;
+  }
+
+  const data = msg.data || {};
+  const alarmType = data.type !== undefined ? Number(data.type) : -1;
+  const alarmVal = data.value !== undefined ? Number(data.value) : (data.state === 'activated' ? 1 : 0);
+  const doorIdx = data.index || data.doorIndex || '01';
+
+  let alarmTitle = '';
+  let severity = 'info'; // info | warning | critical
+
+  if (alarmType === 1 || data.fireAlarm || data.type === 'fireAlarm') {
+    alarmTitle = '🔥 FIRE ALARM ACTIVATED';
+    severity = 'critical';
+  } else if (alarmType === 6 || data.tamperAlarm || data.type === 'tamperAlarm') {
+    alarmTitle = '🚨 ANTI-TAMPER ALARM TRIGGERED';
+    severity = 'critical';
+  } else if (alarmType === 2 || data.doorAlarm === 'forceOpen') {
+    alarmTitle = '⚠️ UNAUTHORIZED DOOR FORCED OPEN';
+    severity = 'warning';
+  } else if (alarmType === 3 || data.doorAlarm === 'leftOpenTimeout') {
+    alarmTitle = '⌛ DOOR LEFT OPEN TIMEOUT';
+    severity = 'warning';
+  } else if (alarmType === 0) {
+    alarmTitle = `Door ${doorIdx} Sensor: ${alarmVal === 1 ? 'OPEN' : 'CLOSED'}`;
+    severity = 'info';
+  } else {
+    alarmTitle = `Alarm Event (Type ${alarmType})`;
+  }
+
+  const timeVal = msg.time;
+  const timestampMs = (timeVal && timeVal < 1e11) ? timeVal * 1000 : (timeVal || Date.now());
+
+  const alarmObj = {
+    id: msg.serialNo || `alarm-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    uuid: msg.uuid || 'UNKNOWN-GATEWAY',
+    doorIndex: doorIdx,
+    type: alarmType,
+    value: alarmVal,
+    title: alarmTitle,
+    severity: severity,
+    timestamp: timestampMs,
+    formattedTime: new Date(timestampMs).toLocaleTimeString(),
+  };
+
+  prepend(alarmEvents, alarmObj);
+
+  // Push to active critical/warning alarms list for real-time banner display
+  if (severity === 'critical' || severity === 'warning') {
+    activeAlarms.value = [alarmObj, ...activeAlarms.value.filter(a => a.id !== alarmObj.id)];
+  }
+
+  console.warn(`[useMQTT] 🚨 Gateway Alarm Received: ${alarmTitle} [UUID: ${alarmObj.uuid}]`);
+}
 
 function handleFrigateEvent(_topic, payload) {
   let msg;
@@ -88,6 +161,16 @@ function handleFrigateEvent(_topic, payload) {
       }
     } else {
       prepend(personEvents, ev);
+    }
+
+    if (type === 'new' || type === 'update') {
+      // Feed to correlation engine
+      correlationEngine.addCameraEvent({
+        id: ev.id,
+        timestamp: ev.timestamp,
+        doorId: ev.camera,
+        snapshotUrl: personSnapshots.value[ev.camera] || `http://frigate-mqtt.knative-fn.65.109.41.139.sslip.io/api/events/${ev.id}/snapshot.jpg`
+      });
     }
   }
 
@@ -143,7 +226,6 @@ function handleLPSnapshotFile(topic, payload) {
 }
 
 function handleLPBase64(topic, payload) {
-  // topic: frigate/<camera>/license_plate/snapshot/bytes/<eventId>
   const parts   = topic.split('/');
   const eventId = parts[parts.length - 1];
   const b64     = payload.toString();
@@ -160,12 +242,55 @@ function handleLPBase64(topic, payload) {
   }
 }
 
+function handleSwipeEvent(topic, payload) {
+  let msg;
+  try { msg = JSON.parse(payload.toString()); }
+  catch { console.warn('[useMQTT] Could not parse swipe event payload'); return; }
+
+  // If topic is access_device/v1/event/alarm, delegate to alarm handler
+  if (topic.includes('/event/alarm')) {
+    handleAlarmEvent(topic, payload);
+    return;
+  }
+
+  // Normalize timestamp: if seconds (10 digits < 1e11), convert to ms for JS Date
+  const timeVal = msg.time;
+  const timestampMs = (timeVal && timeVal < 1e11) ? timeVal * 1000 : (timeVal || Date.now());
+
+  const data = msg.data || {};
+  const ev = {
+    id: msg.serialNo || `swipe-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    uuid: msg.uuid,
+    cardNo: data.cardNo || data.code || 'N/A',
+    doorIndex: data.doorIndex || data.index || '01',
+    readerType: data.readerType || '1',
+    swipeTime: data.swipeTime || new Date(timestampMs).toLocaleString(),
+    action: data.action || (data.status === 1 || data.result === 1 ? 'Access Granted' : 'Access Denied'),
+    status: data.status !== undefined ? data.status : (data.result ?? 0),
+    timestamp: timestampMs,
+  };
+
+  prepend(swipeEvents, ev);
+  console.debug(`[useMQTT] ▶ access_device swipe event card=${ev.cardNo} door=${ev.doorIndex} action="${ev.action}"`);
+
+  // Feed to correlation engine
+  correlationEngine.addSwipeEvent({
+    id: ev.id,
+    timestamp: ev.timestamp,
+    doorId: ev.uuid || 'unknown', // Map gateway UUID or doorIndex to doorId
+    employeeName: `Card ${ev.cardNo}`,
+    cardId: ev.cardNo,
+    profilePic: null
+  });
+}
+
 // ── Lifecycle helpers ─────────────────────────────────────────────────────────
 
 function _subscribe() {
   console.log('[useMQTT] Subscribing handlers + connecting MQTT service');
   _statusUnsub   = mqttService.onStatus(s => { mqttStatus.value = s; });
   _eventUnsub    = mqttService.on('frigate/events',                           handleFrigateEvent);
+  _swipeUnsub    = mqttService.on('access_device/v1/event/#',                 handleSwipeEvent);
   _countUnsub    = mqttService.on('frigate/+/person',                         handlePersonCount);
   _snapUnsub     = mqttService.on('frigate/+/person/snapshot',                handlePersonSnapshot);
   _lpSnapUnsub   = mqttService.on('frigate/+/license_plate/snapshot',         handleLPSnapshotFile);
@@ -177,6 +302,8 @@ function _unsubscribe() {
   console.log('[useMQTT] Unsubscribing handlers + disconnecting MQTT service');
   _statusUnsub?.();
   _eventUnsub?.();
+  _swipeUnsub?.();
+  _alarmUnsub?.();
   _countUnsub?.();
   _snapUnsub?.();
   _lpSnapUnsub?.();
@@ -208,8 +335,23 @@ export function useMQTT() {
     mqttStatus,
     personEvents,
     lpEvents,
+    swipeEvents,
+    alarmEvents,
+    activeAlarms,
     personCounts,
     personSnapshots,
     lpSnapshots,
+    dismissAlarm,
+    // Access Control Gateway RPC Actions
+    sendRemoteDoorOpen:   (uuid, doorIndex, timing) => mqttService.sendRemoteDoorOpen(uuid, doorIndex, timing),
+    sendInsertPermission: (uuid, cardNo, doorIndices, accessLevel) => mqttService.sendInsertPermission(uuid, cardNo, doorIndices, accessLevel),
+    sendDeletePermission: (uuid, cardNo) => mqttService.sendDeletePermission(uuid, cardNo),
+    sendClearCards:       (uuid) => mqttService.sendClearCards(uuid),
+    sendReboot:           (uuid) => mqttService.sendReboot(uuid),
+    sendGetConfig:        (uuid) => mqttService.sendGetConfig(uuid),
+    sendGetChildConfig:   (uuid) => mqttService.sendGetChildConfig(uuid),
+    sendSetConfig:        (uuid, configObj) => mqttService.sendSetConfig(uuid, configObj),
+    sendSet4DoorConfig:   (uuid, childInfoArray) => mqttService.sendSet4DoorConfig(uuid, childInfoArray),
+    batchSyncCards:       (uuid, cardsList, chunkSize, progressCb) => mqttService.batchSyncCards(uuid, cardsList, chunkSize, progressCb),
   };
 }

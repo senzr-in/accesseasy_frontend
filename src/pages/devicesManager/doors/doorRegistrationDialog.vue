@@ -21,7 +21,7 @@
           </p>
         </div>
         <button
-          class="relative z-10 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-zinc-700 transition-all duration-200"
+          class="relative z-10 w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-zinc-800 text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-zinc-700 transition-all duration-200 cursor-pointer"
           @click="close"
         >
           <X class="w-4 h-4" />
@@ -32,7 +32,7 @@
       <div class="px-8 py-6 overflow-y-auto flex-1 bg-zinc-50/50 dark:bg-zinc-950/80 custom-scrollbar">
         <form
           id="door-form"
-          class="space-y-10"
+          class="space-y-8"
           @submit.prevent="handleSubmit"
         >
           <!-- Basic Information Section -->
@@ -62,8 +62,6 @@
                 >
               </div>
               
-
-              
               <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Location</label>
                 <input
@@ -75,7 +73,7 @@
               </div>
               
               <!-- Controller Dropdown -->
-              <div class="space-y-1.5 col-span-2">
+              <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
                   Linked Hardware Controller
                 </label>
@@ -98,7 +96,65 @@
             </div>
           </div>
 
+          <!-- Hardware Rules & Door Controls Section -->
+          <div class="space-y-5">
+            <h4 class="text-xs font-black uppercase tracking-widest border-b border-zinc-200 dark:border-zinc-800/80 pb-3 flex items-center gap-2 text-zinc-400 dark:text-zinc-500">
+              <Sliders class="w-4 h-4 text-blue-500" /> Hardware Rules & Relay Settings
+            </h4>
+            <div class="grid grid-cols-2 gap-4">
+              <!-- Anti-Passback Mode -->
+              <div class="space-y-1.5">
+                <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Anti-Passback Mode</label>
+                <select
+                  v-model.number="formData.antiPassbackMode"
+                  class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground"
+                >
+                  <option :value="0">Disabled</option>
+                  <option :value="1">Prevent Double Entry (Strict APB)</option>
+                  <option :value="2">Warning Log Only</option>
+                </select>
+              </div>
 
+              <!-- Interlock Mode -->
+              <div class="space-y-1.5">
+                <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Interlock Mode</label>
+                <select
+                  v-model.number="formData.interlockMode"
+                  class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground"
+                >
+                  <option :value="0">Disabled (No Interlock)</option>
+                  <option :value="1">Door 1 & 2 Interlock</option>
+                  <option :value="2">Door 1, 2 & 3 Interlock</option>
+                  <option :value="4">All Doors Interlock</option>
+                </select>
+              </div>
+
+              <!-- Relay Unlock Timing (Duration) -->
+              <div class="space-y-1.5">
+                <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Relay Hold Time (Seconds)</label>
+                <input
+                  v-model.number="formData.doorTiming"
+                  type="number"
+                  min="1"
+                  max="60"
+                  placeholder="5"
+                  class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground"
+                />
+              </div>
+
+              <!-- Door Sensor -->
+              <div class="space-y-1.5">
+                <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Door Position Sensor</label>
+                <select
+                  v-model.number="formData.sensorMode"
+                  class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground"
+                >
+                  <option :value="1">Enabled (Monitor Open/Close)</option>
+                  <option :value="0">Disabled</option>
+                </select>
+              </div>
+            </div>
+          </div>
 
           <!-- Security & Access Section -->
           <div class="space-y-5">
@@ -141,7 +197,7 @@
         <AlertTriangle class="w-4 h-4 mt-0.5 shrink-0 text-red-500" />
         <span class="flex-1 break-words">{{ errorMessage }}</span>
         <button
-          class="shrink-0 text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors"
+          class="shrink-0 text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-colors cursor-pointer"
           @click="errorMessage = ''"
         >
           <X class="w-4 h-4" />
@@ -152,7 +208,7 @@
       <div class="relative px-8 py-5 border-t border-zinc-100 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 flex justify-end gap-3 z-10">
         <button
           type="button"
-          class="px-6 h-10 rounded-xl border border-zinc-200 dark:border-zinc-800 text-[13px] font-bold text-slate-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-900 hover:text-slate-900 dark:hover:text-white transition-all duration-200"
+          class="px-6 h-10 rounded-xl border border-zinc-200 dark:border-zinc-800 text-[13px] font-bold text-slate-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-900 hover:text-slate-900 dark:hover:text-white transition-all duration-200 cursor-pointer"
           @click="close"
         >
           Cancel
@@ -161,7 +217,7 @@
           type="submit"
           form="door-form"
           :disabled="loading"
-          class="group relative px-6 h-10 rounded-xl bg-gradient-to-b from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white flex items-center gap-2 text-[13px] font-bold shadow-[0px_1px_2px_0px_rgba(255,255,255,0.5)_inset,0px_4px_6px_-1px_rgba(59,130,246,0.3)] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 active:scale-95"
+          class="group relative px-6 h-10 rounded-xl bg-gradient-to-b from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white flex items-center gap-2 text-[13px] font-bold shadow-[0px_1px_2px_0px_rgba(255,255,255,0.5)_inset,0px_4px_6px_-1px_rgba(59,130,246,0.3)] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 active:scale-95 cursor-pointer"
         >
           <Loader2
             v-if="loading"
@@ -176,9 +232,10 @@
 
 <script setup>
 import { ref, watch } from 'vue';
-import { X, Loader2, DoorOpen, ShieldCheck, AlertTriangle } from 'lucide-vue-next';
+import { X, Loader2, DoorOpen, ShieldCheck, AlertTriangle, Sliders } from 'lucide-vue-next';
 import { authService } from '@/services/authService';
 import { currentUserTenant } from '@/utils/currentUserTenant';
+import { mqttService } from '@/services/mqttService';
 
 const props = defineProps({
   modelValue: Boolean, // controls v-if
@@ -192,15 +249,17 @@ const errorMessage = ref('');
 const departments = ref([]);
 const controllers = ref([]);
 
-
-
 // Form state
 const formData = ref({
   doorNumber: 1,
   doorName: '',
   location: '',
   deviceUuid: '',
-  assignedDepts: []
+  assignedDepts: [],
+  antiPassbackMode: 0,
+  interlockMode: 0,
+  doorTiming: 5,
+  sensorMode: 1
 });
 
 watch(() => props.modelValue, (isOpen) => {
@@ -216,8 +275,11 @@ watch(() => props.modelValue, (isOpen) => {
         doorName: props.door.doorName || '',
         location: props.door.location || '',
         deviceUuid: props.door.deviceUuid || '',
-        // Directus returns assignedDepts as array of objects potentially
-        assignedDepts: (props.door.assignedDepts || []).map(d => d.id || d)
+        assignedDepts: (props.door.assignedDepts || []).map(d => d.id || d),
+        antiPassbackMode: props.door.antiPassbackMode !== undefined ? props.door.antiPassbackMode : 0,
+        interlockMode: props.door.interlockMode !== undefined ? props.door.interlockMode : 0,
+        doorTiming: props.door.doorTiming || 5,
+        sensorMode: props.door.sensorMode !== undefined ? props.door.sensorMode : 1
       };
     } else {
       // Reset
@@ -226,7 +288,11 @@ watch(() => props.modelValue, (isOpen) => {
         doorName: '',
         location: '',
         deviceUuid: '',
-        assignedDepts: []
+        assignedDepts: [],
+        antiPassbackMode: 0,
+        interlockMode: 0,
+        doorTiming: 5,
+        sensorMode: 1
       };
     }
   }
@@ -300,11 +366,9 @@ const handleSubmit = async () => {
       ? `${import.meta.env.VITE_API_URL}/items/doors/${props.door.id}`
       : `${import.meta.env.VITE_API_URL}/items/doors`;
     
-    // Auto-generate doorNumber and uniqueId for new doors (matching reference repo)
     const doorNumber = isEdit ? (props.door.doorNumber || '1') : await generateDoorNumber(token, tenantId);
     const uniqueId = isEdit ? (props.door.uniqueId || `${tenantId}-${doorNumber}`) : `${tenantId}-${doorNumber}`;
 
-    // Build payload matching the reference repo schema
     const payload = {
       doorName: formData.value.doorName,
       doorNumber,
@@ -313,7 +377,10 @@ const handleSubmit = async () => {
       tenant: tenantId,
       uniqueId,
       deviceUuid: formData.value.deviceUuid || null,
-      // departmentIds is stored as JSON string array (per reference repo)
+      antiPassbackMode: formData.value.antiPassbackMode,
+      interlockMode: formData.value.interlockMode,
+      doorTiming: formData.value.doorTiming,
+      sensorMode: formData.value.sensorMode,
       departmentIds: formData.value.assignedDepts.length > 0
         ? JSON.stringify(formData.value.assignedDepts)
         : null,
@@ -329,7 +396,20 @@ const handleSubmit = async () => {
     });
 
     if (res.ok) {
-      // Handle Many-to-Many departments update if necessary, or just rely on Directus relational save
+      // If a hardware controller is linked, publish updated door configuration via MQTT V1.0.6
+      if (formData.value.deviceUuid) {
+        const doorNum = ((parseInt(doorNumber, 10) - 1) % 4) + 1;
+        const doorIndex = String(doorNum).padStart(2, '0');
+        mqttService.sendSetConfig(formData.value.deviceUuid, {
+          index: doorIndex,
+          timing: formData.value.doorTiming || 5,
+          buzzer: 1,
+          sensor: formData.value.sensorMode,
+          apb: formData.value.antiPassbackMode,
+          interlock: formData.value.interlockMode
+        });
+      }
+
       emit('success');
       close();
     } else {

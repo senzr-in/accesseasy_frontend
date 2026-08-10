@@ -126,6 +126,92 @@
                 </select>
               </div>
 
+              <!-- Camera MQTT Topic Name -->
+              <div
+                v-if="formData.linkedCamera"
+                class="space-y-1.5 col-span-2"
+              >
+                <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                  Camera MQTT Topic Name
+                  <span class="text-zinc-400 font-normal normal-case tracking-normal ml-1">— e.g. <code class="bg-zinc-100 dark:bg-zinc-800 px-1 rounded text-amber-600">laptop_cam</code></span>
+                </label>
+                <input
+                  v-model="formData.cameraTopic"
+                  type="text"
+                  placeholder="e.g. laptop_cam, entrance_gate_cam"
+                  class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground"
+                >
+                <p class="text-[10px] text-zinc-400 mt-1">
+                  Matches MQTT topic: <code class="text-amber-500">frigate/{{ formData.cameraTopic || '…' }}/face/…</code>
+                </p>
+              </div>
+
+              <!-- Face Recognition Auto-Unlock & Threshold -->
+              <div
+                v-if="formData.linkedCamera"
+                class="col-span-2 bg-white dark:bg-zinc-950 p-5 rounded-[16px] border border-zinc-200 dark:border-zinc-800 flex items-center justify-between shadow-sm relative overflow-hidden group hover:border-amber-500/50 transition-colors"
+              >
+                <div class="absolute left-0 top-0 bottom-0 w-1 bg-zinc-200 dark:bg-zinc-800 group-hover:bg-amber-500 transition-colors" />
+                <div class="pl-2">
+                  <h4 class="text-sm font-bold flex items-center gap-2 text-foreground">
+                    <span class="text-lg">🔓</span>
+                    Auto Unlock on Face Recognition
+                  </h4>
+                  <p class="text-[11px] text-muted-foreground mt-1 font-medium">
+                    Automatically open the linked door relay when a registered face is detected above the similarity threshold.
+                  </p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input
+                    v-model="formData.autoUnlockOnFace"
+                    type="checkbox"
+                    class="sr-only peer"
+                  >
+                  <div class="w-11 h-6 bg-zinc-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-500/30 rounded-full peer dark:bg-zinc-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white dark:bg-slate-900 after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-zinc-600 peer-checked:bg-amber-500" />
+                </label>
+              </div>
+
+              <!-- Min Similarity Score threshold -->
+              <div
+                v-if="formData.linkedCamera && formData.autoUnlockOnFace"
+                class="space-y-2 col-span-2 animate-in fade-in"
+              >
+                <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
+                  Min Match Confidence Threshold
+                  <span class="ml-2 text-amber-500 font-mono">{{ Math.round(formData.minMatchScore * 100) }}%</span>
+                </label>
+                <input
+                  v-model.number="formData.minMatchScore"
+                  type="range"
+                  min="0.50"
+                  max="1.00"
+                  step="0.01"
+                  class="w-full accent-amber-500"
+                >
+                <div class="flex justify-between text-[10px] text-zinc-400">
+                  <span>50% (Lenient)</span>
+                  <span>80% (Recommended)</span>
+                  <span>100% (Strict)</span>
+                </div>
+              </div>
+
+              <!-- Door Relay Index -->
+              <div
+                v-if="formData.linkedCamera && formData.autoUnlockOnFace"
+                class="space-y-1.5 col-span-2 animate-in fade-in"
+              >
+                <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Door Relay to Unlock <span class="text-red-500">*</span></label>
+                <select
+                  v-model="formData.doorIndex"
+                  class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground"
+                >
+                  <option value="01">Door Relay 01</option>
+                  <option value="02">Door Relay 02</option>
+                  <option value="03">Door Relay 03</option>
+                  <option value="04">Door Relay 04</option>
+                </select>
+              </div>
+
               <!-- Network Switch -->
               <div class="col-span-2 bg-white dark:bg-zinc-950 p-5 rounded-[16px] border border-zinc-200 dark:border-zinc-800 flex items-center justify-between shadow-sm relative overflow-hidden group hover:border-amber-500/50 transition-colors">
                 <div class="absolute left-0 top-0 bottom-0 w-1 bg-zinc-200 dark:bg-zinc-800 group-hover:bg-amber-500 transition-colors" />
@@ -178,27 +264,46 @@
       </div>
 
       <!-- Footer Action Bar -->
-      <div class="relative px-8 py-5 border-t border-zinc-100 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 flex justify-end gap-3 z-10 shrink-0">
+      <div class="relative px-8 py-5 border-t border-zinc-100 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 flex justify-between items-center z-10 shrink-0">
         <button
+          v-if="device || formData.sn"
           type="button"
-          class="px-6 h-10 rounded-xl border border-zinc-200 dark:border-zinc-800 text-[13px] font-bold text-slate-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 hover:text-slate-900 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white transition-all duration-200"
-          @click="close"
+          class="px-4 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/60 border border-amber-200 dark:border-amber-800/60 text-[13px] font-bold text-amber-700 dark:text-amber-300 flex items-center gap-2 transition-all duration-200 cursor-pointer"
+          @click="showHardwareConfig = true"
         >
-          Cancel
+          <SlidersHorizontal class="w-4 h-4" />
+          <span>4-Door Hardware Config</span>
         </button>
-        <button
-          type="submit"
-          form="device-form"
-          :disabled="loading"
-          class="group relative px-6 h-10 rounded-xl bg-gradient-to-b from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white flex items-center gap-2 text-[13px] font-bold shadow-[0px_1px_2px_0px_rgba(255,255,255,0.5)_inset,0px_4px_6px_-1px_rgba(245,158,11,0.3)] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 active:scale-95"
-        >
-          <Loader2
-            v-if="loading"
-            class="w-4 h-4 animate-spin"
-          />
-          <span class="relative z-10">{{ device ? 'Update Device' : 'Register Hardware' }}</span>
-        </button>
+        <div v-else />
+
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            class="px-6 h-10 rounded-xl border border-zinc-200 dark:border-zinc-800 text-[13px] font-bold text-slate-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 hover:text-slate-900 dark:hover:text-white transition-all duration-200"
+            @click="close"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            form="device-form"
+            :disabled="loading"
+            class="group relative px-6 h-10 rounded-xl bg-gradient-to-b from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white flex items-center gap-2 text-[13px] font-bold shadow-[0px_1px_2px_0px_rgba(255,255,255,0.5)_inset,0px_4px_6px_-1px_rgba(245,158,11,0.3)] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 active:scale-95"
+          >
+            <Loader2
+              v-if="loading"
+              class="w-4 h-4 animate-spin"
+            />
+            <span class="relative z-10">{{ device ? 'Update Device' : 'Register Hardware' }}</span>
+          </button>
+        </div>
       </div>
+
+      <!-- 4-Door Hardware Config Modal -->
+      <DoorConfigModal
+        v-model="showHardwareConfig"
+        :device-uuid="formData.sn || ''"
+      />
     </div>
 
     <!-- Network Scanner Panel -->
@@ -284,9 +389,12 @@
 
 <script setup>
 import { ref, watch } from 'vue';
-import { X, Loader2, Network, Cpu, Wifi } from 'lucide-vue-next';
+import { X, Loader2, Network, Cpu, Wifi, SlidersHorizontal } from 'lucide-vue-next';
 import { authService } from '@/services/authService';
 import { currentUserTenant } from '@/utils/currentUserTenant';
+import DoorConfigModal from './doors/doorConfigModal.vue';
+
+const showHardwareConfig = ref(false);
 
 const props = defineProps({
   modelValue: Boolean,
@@ -312,7 +420,11 @@ const formData = ref({
   useIpProtocol: false,
   serverIp: '',
   macAddress: '',
-  linkedCamera: ''
+  linkedCamera: '',
+  cameraTopic: '',
+  autoUnlockOnFace: false,
+  minMatchScore: 0.80,
+  doorIndex: '01',
 });
 
 watch(() => props.modelValue, (isOpen) => {
@@ -328,23 +440,31 @@ watch(() => props.modelValue, (isOpen) => {
     
     if (props.device) {
       formData.value = {
-        controllerName: props.device.controllerName || '',
-        sn: props.device.sn || '',
-        controllerType: props.device.controllerType || '',
-        useIpProtocol: !!props.device.serverIp,
-        serverIp: props.device.serverIp || '',
-        macAddress: props.device.macAddress || '',
-        linkedCamera: props.device.linkedCamera || ''
+        controllerName:   props.device.controllerName || '',
+        sn:               props.device.sn || '',
+        controllerType:   props.device.controllerType || '',
+        useIpProtocol:    !!props.device.serverIp,
+        serverIp:         props.device.serverIp || '',
+        macAddress:       props.device.macAddress || '',
+        linkedCamera:     props.device.linkedCamera || '',
+        cameraTopic:      props.device.cameraTopic || '',
+        autoUnlockOnFace: props.device.autoUnlockOnFace || false,
+        minMatchScore:    props.device.minMatchScore ?? 0.80,
+        doorIndex:        props.device.doorIndex || '01',
       };
     } else {
       formData.value = {
-        controllerName: '',
-        sn: '',
-        controllerType: '',
-        useIpProtocol: false,
-        serverIp: '',
-        macAddress: '',
-        linkedCamera: ''
+        controllerName:   '',
+        sn:               '',
+        controllerType:   '',
+        useIpProtocol:    false,
+        serverIp:         '',
+        macAddress:       '',
+        linkedCamera:     '',
+        cameraTopic:      '',
+        autoUnlockOnFace: false,
+        minMatchScore:    0.80,
+        doorIndex:        '01',
       };
     }
     discoveredDeviceId.value = null;
@@ -438,15 +558,24 @@ const handleSubmit = async () => {
 
     // Build explicit clean payload
     const payload = {
-      controllerName: formData.value.controllerName,
-      sn: formData.value.sn,
-      controllerType: formData.value.controllerType,
-      tenant: tenantId,
-      status: isEdit ? (props.device.status || 'unApproved') : 'approved',
+      controllerName:   formData.value.controllerName,
+      sn:               formData.value.sn,
+      controllerType:   formData.value.controllerType,
+      tenant:           tenantId,
+      status:           isEdit ? (props.device.status || 'unApproved') : 'approved',
       controllerStatus: isEdit ? (props.device.controllerStatus || 'offline') : 'online',
-      serverIp: formData.value.useIpProtocol ? (formData.value.serverIp || null) : null,
-      macAddress: formData.value.useIpProtocol ? (formData.value.macAddress || null) : null,
-      linkedCamera: formData.value.linkedCamera || null
+      serverIp:         formData.value.useIpProtocol ? (formData.value.serverIp || null) : null,
+      macAddress:       formData.value.useIpProtocol ? (formData.value.macAddress || null) : null,
+      linkedCamera:     formData.value.linkedCamera || null,
+      // Face recognition MQTT mapping fields
+      cameraTopic:      formData.value.linkedCamera ? (formData.value.cameraTopic || null) : null,
+      autoUnlockOnFace: formData.value.linkedCamera ? formData.value.autoUnlockOnFace : false,
+      minMatchScore:    formData.value.linkedCamera && formData.value.autoUnlockOnFace
+                          ? formData.value.minMatchScore
+                          : null,
+      doorIndex:        formData.value.linkedCamera && formData.value.autoUnlockOnFace
+                          ? formData.value.doorIndex
+                          : null,
     };
 
     if (!isEdit) {

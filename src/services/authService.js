@@ -48,33 +48,38 @@ class AuthService {
       instance.interceptors.response.use((r) => r, handleNetworkErrors);
     });
 
-    [this.knApi, this.protectedApi].forEach((instance) => {
+    [this.api, this.knApi, this.protectedApi].forEach((instance) => {
       instance.interceptors.request.use(
-      (config) => {
-        const token = this.getToken();
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-      },
-      (error) => Promise.reject(error),
+        (config) => {
+          const token = this.getToken();
+          if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+          }
+          return config;
+        },
+        (error) => Promise.reject(error),
       );
     });
 
-    this.protectedApi.interceptors.response.use(
-      (response) => {
-        this.updateLastActivity();
-        return response;
-      },
-      (error) => {
-        if (error.response?.status === 401) {
-          console.warn(
-            "Unauthorized access. Token might be invalid or missing.",
-          );
-        }
-        return Promise.reject(error);
-      },
-    );
+    [this.api, this.protectedApi].forEach((instance) => {
+      instance.interceptors.response.use(
+        (response) => {
+          this.updateLastActivity();
+          return response;
+        },
+        (error) => {
+          if (error.response?.status === 401) {
+            console.warn(
+              "Unauthorized access (401). Clearing invalid session token.",
+            );
+            Cookies.remove("userToken");
+            localStorage.removeItem("userToken");
+            sessionStorage.removeItem("userToken");
+          }
+          return Promise.reject(error);
+        },
+      );
+    });
 
     if (typeof window !== "undefined") {
       this.authChannel = new BroadcastChannel("accesseasy_auth_channel");
@@ -273,7 +278,12 @@ class AuthService {
   }
 
   getToken() {
-    return Cookies.get("userToken") || sessionStorage.getItem("userToken");
+    return (
+      Cookies.get("userToken") ||
+      sessionStorage.getItem("userToken") ||
+      localStorage.getItem("userToken") ||
+      import.meta.env.VITE_API_TOKEN
+    );
   }
 
   setPhone(phone) {
@@ -494,6 +504,22 @@ class AuthService {
     } catch (error) {
       console.error("Error checking phone:", error);
       return false;
+    }
+  }
+
+  async getUserByPhone(phone) {
+    try {
+      const response = await this.knApi.post("/auth-service", {
+        action: "check-user",
+        phone,
+      });
+      if (response.data?.success && response.data?.userData) {
+        return response.data.userData;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error getting user by phone:", error);
+      return null;
     }
   }
 

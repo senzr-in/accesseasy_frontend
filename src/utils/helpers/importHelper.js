@@ -34,11 +34,70 @@ export const downloadCollectionTemplate = async (collectionName) => {
   }
 };
 
-export const processCSVImport = async (file, collectionName, userTenant) => {
+const checkBatchDuplicates = async (collectionName, batch, userTenant) => {
+  if (!batch || !batch.length) return new Map();
+
+  let checkKey = '';
+  if (collectionName === "accesslevels") checkKey = 'accessLevelName';
+  else if (collectionName === "doors") checkKey = 'doorName';
+  else if (collectionName === "branch") checkKey = 'branchName';
+  else if (collectionName === "department") checkKey = 'departmentName';
+  else if (collectionName === "personalModule") checkKey = 'uniqueId';
+
+  if (!checkKey) return new Map();
+
+  const valuesToCheck = batch
+    .map(data => (collectionName === 'personalModule' ? data.uniqueId : data[checkKey]))
+    .filter(val => val !== undefined && val !== null && val !== '');
+
+  if (!valuesToCheck.length) return new Map();
+
+  const params = new URLSearchParams();
+  valuesToCheck.forEach((val, idx) => {
+    params.append(`filter[_or][${idx}][${checkKey}][_eq]`, val.toString());
+  });
+
+  if (collectionName !== "personalModule") {
+    params.append('filter[tenant][_eq]', userTenant);
+  }
+  params.append('limit', batch.length.toString());
+  params.append('fields', `id,${checkKey}`);
+
+  try {
+    const response = await fetch(`/items/${collectionName}?${params.toString()}`);
+    const existingData = await response.json();
+    const records = existingData.data || [];
+    const resultMap = new Map();
+    records.forEach(r => {
+      if (r[checkKey]) {
+        resultMap.set(r[checkKey].toString().trim().toLowerCase(), r);
+      }
+    });
+    return resultMap;
+  } catch (error) {
+    console.error('Error in batch duplicate check:', error);
+    return new Map();
+  }
+};
+
+const sendPatchRequest = async (itemId, data, collectionName) => {
+  const response = await fetch(`/items/${collectionName}/${itemId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(`Failed to update ${collectionName} item ${itemId}: ${errorData.errors?.[0]?.message || "Unknown error"}`);
+  }
+  return response.json();
+};
+
+export const processCSVImport = async (file, collectionName, userTenant, options = {}) => {
   if (!file || !collectionName) throw new Error("File and collection name are required");
   if (!userTenant) throw new Error("Tenant ID is required");
 
-  const BATCH_SIZE = 20; // Process 20 records at a time
+  const BATCH_SIZE = 50; // Process 50 records per batch request
 
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -60,7 +119,7 @@ export const processCSVImport = async (file, collectionName, userTenant) => {
         }).filter(Boolean);
 
         let validRecords = [];
-        let duplicateRecords = [];
+        let duplicateItems = [];
         let processedCount = 0;
         let startingNumber;
 
@@ -80,84 +139,90 @@ export const processCSVImport = async (file, collectionName, userTenant) => {
         // Process in batches
         while (processedCount < transformedData.length) {
           const batch = transformedData.slice(processedCount, processedCount + BATCH_SIZE);
-         
-          // Process batch
-          const batchPromises = batch.map(async (data) => {
-            try {
-              let checkURL = '';
-              let nameField = '';
-             
-              // Set check parameters based on collection
-              if (collectionName === "accesslevels") {
-                checkURL = `/items/accesslevels?filter[accessLevelName][_eq]=${data.accessLevelName}&filter[tenant][_eq]=${userTenant}`;
-                nameField = 'accessLevelName';
-              } else if (collectionName === "doors") {
-                checkURL = `/items/doors?filter[doorName][_eq]=${data.doorName}&filter[tenant][_eq]=${userTenant}`;
-                nameField = 'doorName';
-              } else if (collectionName === "branch") {
-                checkURL = `/items/branch?filter[branchName][_eq]=${data.branchName}&filter[tenant][_eq]=${userTenant}`;
-                nameField = 'branchName';
-              } else if (collectionName === "department") {
-                checkURL = `/items/department?filter[departmentName][_eq]=${data.departmentName}&filter[tenant][_eq]=${userTenant}`;
-                nameField = 'departmentName';
-              } else if (collectionName === "personalModule") {
-                checkURL = `/items/personalModule?filter[uniqueId][_eq]=${data.uniqueId}`;
-                nameField = 'employeeId';
-              }
+          const existingMap = await checkBatchDuplicates(collectionName, batch, userTenant);
 
-              const checkResponse = await fetch(checkURL);
-              const existingData = await checkResponse.json();
+          batch.forEach((data) => {
+            let nameField = 'doorName';
+            if (collectionName === "accesslevels") nameField = 'accessLevelName';
+            else if (collectionName === "doors") nameField = 'doorName';
+            else if (collectionName === "branch") nameField = 'branchName';
+            else if (collectionName === "department") nameField = 'departmentName';
+            else if (collectionName === "personalModule") nameField = 'employeeId';
 
-              if (existingData.data?.length > 0) {
-                return { isDuplicate: true, name: data[nameField] };
-              }
+            let checkVal = collectionName === 'personalModule' ? data.uniqueId : data[nameField];
+            let normalizedVal = checkVal?.toString().trim().toLowerCase();
 
+            if (normalizedVal && existingMap.has(normalizedVal)) {
+              const existingRecord = existingMap.get(normalizedVal);
+              duplicateItems.push({
+                data,
+                name: data[nameField] || data.employeeId,
+                existingRecord
+              });
+            } else {
               // Assign sequence number and uniqueId
               data[`${collectionName === 'accesslevels' ? 'accessLevelNumber' : collectionName.slice(0, -1) + 'Id'}`] = currentNumber.toString();
               data.uniqueId = `${userTenant}-${currentNumber}`;
               currentNumber++;
-
-              return { isDuplicate: false, data };
-            } catch (error) {
-              console.error(`Error processing record:`, error);
-              return { isError: true, error };
-            }
-          });
-
-          // Wait for batch to complete
-          const batchResults = await Promise.all(batchPromises);
-
-          // Process batch results
-          batchResults.forEach(result => {
-            if (result.isDuplicate) {
-              duplicateRecords.push(result.name);
-            } else if (!result.isError) {
-              validRecords.push(result.data);
+              validRecords.push(data);
             }
           });
 
           processedCount += BATCH_SIZE;
-
-          // Optional: Add progress notification
           console.log(`Processed ${processedCount}/${transformedData.length} records`);
         }
 
-        // Show duplicates alert if any
-        if (duplicateRecords.length > 0) {
-          alert(`Following records are duplicates and will be skipped:\n${duplicateRecords.join('\n')}`);
+        let userChoice = 'skip';
+        if (duplicateItems.length > 0) {
+          if (typeof options.onDuplicateFound === 'function') {
+            userChoice = await options.onDuplicateFound({
+              duplicateRecords: duplicateItems.map(d => d.name),
+              duplicateItems,
+              count: duplicateItems.length
+            });
+          } else {
+            const duplicateNames = duplicateItems.map(d => d.name);
+            const sampleNames = duplicateNames.slice(0, 10).join(', ');
+            const moreCount = duplicateNames.length > 10 ? ` (+${duplicateNames.length - 10} more)` : '';
+            const confirmEdit = confirm(
+              `Found ${duplicateItems.length} duplicate record(s): ${sampleNames}${moreCount}\n\n` +
+              `Click [OK] to Edit/Update existing records with new CSV data.\n` +
+              `Click [Cancel] to Skip duplicates and import only new records.`
+            );
+            userChoice = confirmEdit ? 'edit' : 'skip';
+          }
         }
 
-        // Import valid records
-        if (validRecords.length > 0) {
-          const response = await sendImportRequest(validRecords, collectionName);
-          resolve({
-            success: true,
-            message: `Successfully imported ${validRecords.length} records. ${duplicateRecords.length} duplicates were skipped.`,
-            data: validRecords
-          });
-        } else {
-          throw new Error("No valid records to import after duplicate check");
+        let updatedCount = 0;
+        if (userChoice === 'edit' && duplicateItems.length > 0) {
+          for (const item of duplicateItems) {
+            try {
+              await sendPatchRequest(item.existingRecord.id, item.data, collectionName);
+              updatedCount++;
+            } catch (err) {
+              console.error(`Failed to update duplicate record ${item.name}:`, err);
+            }
+          }
         }
+
+        // Import valid (new) records
+        if (validRecords.length > 0) {
+          await sendImportRequest(validRecords, collectionName);
+        }
+
+        if (validRecords.length === 0 && updatedCount === 0) {
+          throw new Error("No records were imported or updated.");
+        }
+
+        resolve({
+          success: true,
+          message: `Import completed: ${validRecords.length} new record(s) created, ${updatedCount} existing record(s) updated, ${userChoice === 'skip' ? duplicateItems.length : duplicateItems.length - updatedCount} skipped.`,
+          data: {
+            newRecords: validRecords,
+            updatedCount,
+            skippedCount: userChoice === 'skip' ? duplicateItems.length : duplicateItems.length - updatedCount
+          }
+        });
 
       } catch (error) {
         alert(error.message);

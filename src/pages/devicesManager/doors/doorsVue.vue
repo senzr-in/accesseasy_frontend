@@ -89,9 +89,8 @@
             <!-- Rows -->
             <tr
               v-for="door in items"
-              v-else
               :key="door.id"
-              class="group/row hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors duration-200"
+              class="group hover:bg-slate-50 dark:hover:bg-zinc-900 transition-colors duration-200"
             >
               <!-- Name -->
               <td class="px-5 py-3">
@@ -137,22 +136,15 @@
 
               <!-- Actions -->
               <td class="px-5 py-3 text-right">
-                <div class="flex justify-end gap-2 pr-2 opacity-0 group-hover/row:opacity-100 transition-opacity">
+                <div class="flex justify-end gap-2 pr-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
                     v-if="door.deviceUuid"
-                    title="Open Door"
-                    class="h-7 px-3 text-[10px] font-black uppercase tracking-widest bg-transparent border border-emerald-200 dark:border-emerald-800 rounded-md hover:bg-emerald-50 dark:hover:bg-emerald-950/20 text-emerald-600 dark:text-emerald-400 transition-colors shadow-sm"
-                    @click="openDoor(door)"
+                    title="Control Door & Open Duration"
+                    class="h-7 px-3 text-[10px] font-black uppercase tracking-widest bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/20 rounded-md transition-all shadow-sm flex items-center gap-1.5"
+                    @click="openControlModal(door)"
                   >
-                    Open
-                  </button>
-                  <button
-                    v-if="door.deviceUuid"
-                    title="Lock Door"
-                    class="h-7 px-3 text-[10px] font-black uppercase tracking-widest bg-transparent border border-rose-200 dark:border-rose-800 rounded-md hover:bg-rose-50 dark:hover:bg-rose-950/20 text-rose-600 dark:text-rose-400 transition-colors shadow-sm"
-                    @click="lockDoor(door)"
-                  >
-                    Lock
+                    <DoorOpen class="w-3.5 h-3.5" />
+                    <span>Control Door</span>
                   </button>
                   <button
                     class="h-7 px-3 text-[10px] font-black uppercase tracking-widest bg-transparent border border-slate-200 dark:border-zinc-700 rounded-md hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 transition-colors shadow-sm"
@@ -201,16 +193,39 @@
         :door="selectedDoor"
         @success="fetchDoorData"
       />
+
+      <!-- Door Control Modal -->
+      <DoorControlModal
+        v-model="showControlModal"
+        :door="targetControlDoor"
+        @toast="handleModalToast"
+      />
+
+      <!-- 4-Door Hardware Config Modal -->
+      <DoorConfigModal
+        v-model="showConfigModal"
+        @toast="handleModalToast"
+      />
+
+      <!-- Toast Banner Notification -->
+      <div v-if="toastMessage" class="fixed top-5 right-5 z-50 flex items-center gap-3 px-4 py-3 bg-slate-900 text-white rounded-xl shadow-xl border border-slate-800 animate-in slide-in-from-top-2 duration-300">
+        <div class="w-2 h-2 rounded-full" :class="toastType === 'success' ? 'bg-emerald-400' : 'bg-rose-400'" />
+        <span class="text-xs font-bold">{{ toastMessage }}</span>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted } from "vue";
-import { Plus, Search, DoorOpen, DoorClosed, AlertCircle, Settings, Trash2, Filter, X, Loader2 } from "lucide-vue-next";
+import { Plus, Search, DoorOpen, Trash2, Loader2, SlidersHorizontal } from "lucide-vue-next";
 import { authService } from "@/services/authService";
 import { currentUserTenant } from "@/utils/currentUserTenant";
 import DoorRegistrationDialog from "./doorRegistrationDialog.vue";
+import DoorControlModal from "./doorControlModal.vue";
+import DoorConfigModal from "./doorConfigModal.vue";
+
+const showConfigModal = ref(false);
 
 // Accessors
 const token = authService.getToken();
@@ -224,6 +239,33 @@ const itemsPerPage = 10;
 const totalItems = ref(0);
 const showDialog = ref(false);
 const selectedDoor = ref(null);
+
+// Door Control Modal State
+const showControlModal = ref(false);
+const targetControlDoor = ref(null);
+
+// Toast Banner State
+const toastMessage = ref("");
+const toastType = ref("success");
+let toastTimeout = null;
+
+const showToast = (msg, type = "success") => {
+  toastMessage.value = msg;
+  toastType.value = type;
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => {
+    toastMessage.value = "";
+  }, 3500);
+};
+
+const handleModalToast = ({ msg, type }) => {
+  showToast(msg, type);
+};
+
+const openControlModal = (door) => {
+  targetControlDoor.value = door;
+  showControlModal.value = true;
+};
 
 const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage));
 
@@ -242,7 +284,6 @@ watch(page, () => {
 
 const fetchDoorData = async () => {
   if (!token) return;
-  // Always resolve tenantId async — the sync getter returns null before initialization
   const tenantId = await currentUserTenant.getTenantIdAsync();
   if (!tenantId) return;
 
@@ -266,7 +307,6 @@ const fetchDoorData = async () => {
       ...filterParams
     });
 
-    // Only request fields that exist and have read permissions (matching reference codebase)
     const fields = [
       "id", "doorNumber", "doorName", "status",
       "departmentIds", "location", "uniqueId", "deviceUuid"
@@ -300,75 +340,6 @@ const editItem = (item) => {
   showDialog.value = true;
 };
 
-const openDoor = async (door) => {
-  try {
-    const deviceUuid = door.deviceUuid || door.uniqueId || "UNKNOWN-DEVICE";
-    const doorNum = parseInt(door.doorNumber || 1, 10);
-    const doorBitmask = 1 << (doorNum - 1);
-    const doorIndex = doorBitmask.toString(16).padStart(2, '0');
-
-    const response = await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-mqtt`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "remoteControl",
-        uuid: deviceUuid,
-        data: {
-          command: 1, // 1 = Remote door opening
-          index: doorIndex
-        }
-      })
-    });
-
-    const result = await response.json();
-    if (result.success || response.ok) {
-      alert("Door open command sent successfully!");
-    } else {
-      console.error("Failed to open door:", result.error);
-      alert("Failed to open door");
-    }
-  } catch (err) {
-    console.error("Network error communicating with Knative bridge:", err);
-    alert("Network error communicating with Knative bridge");
-  }
-};
-
-const lockDoor = async (door) => {
-  try {
-    const deviceUuid = door.deviceUuid || door.uniqueId || "UNKNOWN-DEVICE";
-    const doorNum = parseInt(door.doorNumber || 1, 10);
-    const doorBitmask = 1 << (doorNum - 1);
-    const doorIndex = doorBitmask.toString(16).padStart(2, '0');
-
-    const response = await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-mqtt`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "remoteControl",
-        uuid: deviceUuid,
-        data: {
-          command: 6, // 6 = Unified control
-          index: doorIndex,
-          extra: {
-            action: 0 // 0 = Lock
-          }
-        }
-      })
-    });
-
-    const result = await response.json();
-    if (result.success || response.ok) {
-      alert("Door lock command sent successfully!");
-    } else {
-      console.error("Failed to lock door:", result.error);
-      alert("Failed to lock door");
-    }
-  } catch (err) {
-    console.error("Network error communicating with Knative bridge:", err);
-    alert("Network error communicating with Knative bridge");
-  }
-};
-
 const deleteItem = async (door) => {
     if (confirm("Are you sure you want to delete this door?")) {
         try {
@@ -381,7 +352,7 @@ const deleteItem = async (door) => {
             if (response.ok) {
                 fetchDoorData();
             } else {
-                alert("Failed to delete door");
+                showToast("Failed to delete door", "error");
             }
         } catch(err) {
             console.error("Failed to delete door", err);

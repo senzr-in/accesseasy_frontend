@@ -351,45 +351,9 @@
             </div>
           </div>
 
-          <!-- Live Activity -->
-          <div class="bg-[#FDFCFA]/70 dark:bg-[#151c2c]/40 backdrop-blur-xl shadow-xl shadow-slate-200/20 dark:shadow-none border border-[#E5E1D8]/80 dark:border-white/10 rounded-[20px] p-4 shadow-sm flex flex-col overflow-hidden">
-            <div class="flex items-center justify-between mb-4 shrink-0">
-              <h3 class="text-[13px] font-black text-slate-800 dark:text-slate-100">
-                Live Activity Feed
-              </h3>
-            </div>
-            <div class="flex-1 overflow-y-auto space-y-4 custom-scrollbar pr-2">
-              <div
-                v-for="event in liveEvents"
-                :key="event.label"
-                class="flex items-start gap-3 group"
-              >
-                <div
-                  class="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border"
-                  :class="event.iconBg"
-                >
-                  <component
-                    :is="event.icon"
-                    class="w-4 h-4"
-                    :class="event.iconColor"
-                  />
-                </div>
-                <div class="flex-1 min-w-0 flex flex-col justify-center">
-                  <div class="flex items-center justify-between">
-                    <p
-                      class="text-[13px] font-bold truncate"
-                      :class="event.urgent ? 'text-rose-600' : 'text-slate-800 dark:text-slate-100'"
-                    >
-                      {{ event.label }}
-                    </p>
-                    <span class="text-[11px] font-medium text-slate-400 dark:text-slate-500 shrink-0 ml-2">{{ event.time }}</span>
-                  </div>
-                  <p class="text-xs text-slate-500 dark:text-slate-400 dark:text-slate-500 truncate mt-0.5">
-                    {{ event.sub }}
-                  </p>
-                </div>
-              </div>
-            </div>
+          <!-- Unified Access Events -->
+          <div class="bg-[#FDFCFA]/70 dark:bg-[#151c2c]/40 backdrop-blur-xl shadow-xl shadow-slate-200/20 dark:shadow-none border border-[#E5E1D8]/80 dark:border-white/10 rounded-[20px] shadow-sm flex flex-col overflow-hidden h-full">
+            <UnifiedEventLog class="w-full h-full overflow-y-auto" />
           </div>
         </div>
       </div>
@@ -1035,6 +999,7 @@ import {
 } from 'lucide-vue-next';
 import PatrolMapReplay from '@/pages/guard/tabs/components/PatrolMapReplay.vue';
 import QrcodeVue from 'qrcode.vue';
+import UnifiedEventLog from '@/components/UnifiedEventLog.vue';
 import { authService } from '@/services/authService';
 import { currentUserTenant } from '@/utils/currentUserTenant';
 import { useDashboardState } from '@/composables/useDashboardState';

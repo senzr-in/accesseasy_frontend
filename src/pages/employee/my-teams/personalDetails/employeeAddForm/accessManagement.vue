@@ -340,8 +340,6 @@
                 variant="outlined"
                 type="text"
                 density="comfortable"
-                maxlength="7"
-                minlength="7"
                 hide-details
                 class="card-input"
                 @focus="handleCardFocus"
@@ -582,9 +580,6 @@ const forceToggleUpdate = () => {
 const handleCardInput = (event) => {
   if (cardInput.value) {
     cardInput.value = cardInput.value.toString().replace(/\D/g, "");
-    if (cardInput.value.length > 7) {
-      cardInput.value = cardInput.value.slice(0, 7);
-    }
   }
 };
 
@@ -642,8 +637,8 @@ const addNewCard = async () => {
   if (!cardInput.value || !formData.value.accessOn) return;
 
   // Check RFID Card format
-  if (!/^\d{7}$/.test(cardInput.value)) {
-    showError("RFID Card number must be exactly 7 digits.");
+  if (!/^\d+$/.test(cardInput.value)) {
+    showError("RFID Card number must contain digits only.");
     return;
   }
 

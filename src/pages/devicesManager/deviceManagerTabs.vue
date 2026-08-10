@@ -7,20 +7,21 @@
       </div>
       <div class="flex gap-3">
         <button
-          class="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-[10px] font-black text-white hover:bg-blue-700 transition-colors shadow-sm uppercase tracking-widest"
+          class="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-[10px] font-black text-white hover:bg-indigo-700 transition-colors shadow-sm uppercase tracking-widest cursor-pointer"
+          @click="showHardwareConfigModal = true"
         >
-          <Zap class="h-3.5 w-3.5 fill-current" />
-          Mobile Pass Setup
+          <SlidersHorizontal class="h-3.5 w-3.5 fill-current" />
+          4-Door Hardware Config
         </button>
         <button
-          class="flex items-center gap-2 rounded-xl px-4 py-2 shadow-sm border border-slate-200 dark:border-zinc-800 font-black uppercase tracking-widest text-[10px] bg-white dark:bg-zinc-950 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 transition-colors"
+          class="flex items-center gap-2 rounded-xl px-4 py-2 shadow-sm border border-slate-200 dark:border-zinc-800 font-black uppercase tracking-widest text-[10px] bg-white dark:bg-zinc-950 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
           @click="showNetworkScanForm"
         >
           <Network class="h-3.5 w-3.5" />
           Scan Network
         </button>
         <button
-          class="flex items-center gap-2 rounded-xl bg-slate-900 dark:bg-white dark:bg-slate-900 px-4 py-2 text-[10px] font-black text-white dark:text-slate-900 dark:text-slate-100 hover:bg-slate-800 dark:hover:bg-slate-100 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 transition-colors shadow-sm uppercase tracking-widest"
+          class="flex items-center gap-2 rounded-xl bg-slate-900 dark:bg-white dark:bg-slate-900 px-4 py-2 text-[10px] font-black text-white dark:text-slate-900 hover:bg-slate-800 dark:hover:bg-slate-100 transition-colors shadow-sm uppercase tracking-widest cursor-pointer"
           @click="showAddDeviceForm"
         >
           <Plus class="h-3.5 w-3.5" />
@@ -301,18 +302,25 @@
         @close="closeDeleteDialog"
         @confirm="confirmDeleteDevice"
       />
+
+      <!-- 4-Door Hardware Config Modal -->
+      <DoorConfigModal
+        v-model="showHardwareConfigModal"
+        :device-uuid="selectedDevice?.sn || items[0]?.sn || ''"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted } from "vue";
-import { Zap, Network, Plus, Search, Loader2, Cpu, CheckCircle2, Clock, ShieldCheck, Settings2, DoorOpen, Trash2, Video, Activity } from "lucide-vue-next";
+import { Zap, Network, Plus, Search, Loader2, Cpu, CheckCircle2, Clock, ShieldCheck, Settings2, DoorOpen, Trash2, Video, Activity, SlidersHorizontal } from "lucide-vue-next";
 import { authService } from "@/services/authService";
 import { currentUserTenant } from "@/utils/currentUserTenant";
 import DeviceRegistrationDialog from "./deviceRegistrationDialog.vue";
 import FrigateEventsDialog from "./frigateEventsDialog.vue";
 import ConfirmDeleteModal from "@/components/common/modals/ConfirmDeleteModal.vue";
+import DoorConfigModal from "./doors/doorConfigModal.vue";
 
 // Accessors
 const token = authService.getToken();
@@ -327,6 +335,7 @@ const totalItems = ref(0);
 const activeStatusTab = ref("all");
 const showDialog = ref(false);
 const showFrigateEvents = ref(false);
+const showHardwareConfigModal = ref(false);
 const selectedDevice = ref(null);
 
 const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage));

@@ -365,27 +365,51 @@
                   </div>
                 </div>
 
-                <div class="action-row">
-                  <v-text-field
-                    v-model="cardInput"
-                    placeholder="Card Number"
-                    variant="outlined"
-                    density="compact"
-                    hide-details
-                    class="card-input"
-                    append-inner-icon="mdi-credit-card-scan"
-                    :disabled="!accessOn"
-                    maxlength="10"
-                    @focus="handleCardFocus"
-                    @input="handleCardInput"
-                  />
+                <div class="action-row d-flex flex-column gap-2">
+                  <div class="d-flex align-center gap-2 w-100">
+                    <v-text-field
+                      v-model="cardInput"
+                      placeholder="Card Number"
+                      variant="outlined"
+                      density="compact"
+                      hide-details
+                      class="card-input flex-grow-1"
+                      append-inner-icon="mdi-credit-card-scan"
+                      :disabled="!accessOn"
+                      @focus="handleCardFocus"
+                      @input="handleCardInput"
+                    />
+                    <select
+                      v-model.number="selectedCardSchedule"
+                      class="schedule-select h-10 px-2 text-xs font-medium border rounded-lg bg-white text-slate-800"
+                      title="Access Level Schedule ID (0 = 24/7, 1..255 = Shift)"
+                    >
+                      <option :value="0">0 (24/7 Access)</option>
+                      <option v-for="id in [1,2,3,4,5,10,20,50,100]" :key="id" :value="id">
+                        Shift ID {{ id }}
+                      </option>
+                    </select>
+                    <v-btn
+                      color="#2563EB"
+                      class="add-btn"
+                      :disabled="!cardInput || !accessOn"
+                      @click="addNewCard"
+                    >
+                      + Add
+                    </v-btn>
+                  </div>
                   <v-btn
-                    color="#2563EB"
-                    class="add-btn"
-                    :disabled="!cardInput || !accessOn"
-                    @click="addNewCard"
+                    v-if="assignedCards.length > 0"
+                    color="indigo"
+                    variant="tonal"
+                    density="compact"
+                    size="small"
+                    prepend-icon="mdi-sync"
+                    :loading="batchSyncing"
+                    class="mt-1 font-weight-bold"
+                    @click="triggerBatchSync"
                   >
-                    + Add
+                    Batch Sync All Cards
                   </v-btn>
                 </div>
               </div>
@@ -606,6 +630,7 @@ import { currentUserTenant } from "@/utils/currentUserTenant";
 import { convertToCardAccessHex } from "@/utils/helpers/convertToCardAccessHex";
 import QRCode from "qrcode";
 import EmptyState from "@/components/common/states/EmptyState.vue";
+import { mqttService } from "@/services/mqttService";
 
 const props = defineProps({
   employeeData: {
@@ -627,6 +652,8 @@ const accessLevelOptions = ref([]);
 const accessLevelDetails = ref(null);
 const activeTab = ref("general");
 const cardInput = ref("");
+const selectedCardSchedule = ref(0);
+const batchSyncing = ref(false);
 const selectedCardType = ref("rfid");
 const assignedCards = ref([]);
 const selectedAccessLevel = ref(null);
@@ -635,6 +662,42 @@ const showSuccessSnackbar = ref(false);
 const showErrorSnackbar = ref(false);
 const successMessage = ref("");
 const errorMessage = ref("");
+
+const triggerBatchSync = async () => {
+  if (assignedCards.value.length === 0) return;
+  batchSyncing.value = true;
+  try {
+    const cardList = assignedCards.value.map(c => ({
+      id: String(c.rfidCard),
+      code: String(c.rfidCard),
+      type: 200,
+      index: "01",
+      accessLevel: selectedCardSchedule.value
+    }));
+
+    // Broadcast batchSyncCards to all assigned devices
+    const deviceUuids = (accessLevelDetails.value?.assignedDoors || [])
+      .map(d => d.doors_id?.deviceUuid || d.doors_id?.uniqueId)
+      .filter(Boolean);
+
+    const uniqueUuids = [...new Set(deviceUuids)];
+    if (uniqueUuids.length === 0) {
+      showErrorMessage("No active hardware controllers found to sync cards to.");
+      return;
+    }
+
+    for (const uuid of uniqueUuids) {
+      await mqttService.batchSyncCards(uuid, cardList, 100);
+    }
+
+    showSuccessMessage(`Successfully batch synced ${cardList.length} cards across ${uniqueUuids.length} gateway controller(s)!`);
+  } catch (err) {
+    console.error("Batch sync failed:", err);
+    showErrorMessage("Batch sync failed: " + err.message);
+  } finally {
+    batchSyncing.value = false;
+  }
+};
 
 // Track original state for change detection
 const originalAccessLevel = ref(null);
@@ -1340,10 +1403,13 @@ const handleAccessLevelChange = async (value) => {
   }
 };
 
-const syncCredentialToDevice = async (deviceUuid, doorIndexOrArray, credentialCode, credentialType, credentialId) => {
+const syncCredentialToDevice = async (deviceUuid, doorIndexOrArray, credentialCode, credentialType, credentialId, accessLevel = 0) => {
   try {
     const numericId = String(credentialId || "UnknownUser").replace(/\D/g, "");
     if (!numericId) return;
+
+    const schedId = Number(accessLevel) || 0;
+    const timeObj = schedId === 0 ? { type: 0 } : { type: 1, scheduleId: schedId };
 
     // Handle both bitmask (string) and discrete list (array of strings) for CC104
     let payloadData = [];
@@ -1353,7 +1419,8 @@ const syncCredentialToDevice = async (deviceUuid, doorIndexOrArray, credentialCo
         type: credentialType,
         code: String(credentialCode),
         index: idx,
-        time: { type: 0 }
+        accessLevel: schedId,
+        time: timeObj
       }));
     } else {
       payloadData = [
@@ -1362,7 +1429,8 @@ const syncCredentialToDevice = async (deviceUuid, doorIndexOrArray, credentialCo
           type: credentialType,
           code: String(credentialCode),
           index: doorIndexOrArray,
-          time: { type: 0 }
+          accessLevel: schedId,
+          time: timeObj
         }
       ];
     }
@@ -1709,8 +1777,8 @@ const addNewCard = async () => {
   if (!cardInput.value) return;
 
   // Check RFID Card format
-  if (!/^\d{7}$/.test(cardInput.value)) {
-    showErrorMessage("RFID Card number must be exactly 7 digits.");
+  if (!/^\d+$/.test(cardInput.value)) {
+    showErrorMessage("RFID Card number must contain digits only.");
     return;
   }
 
@@ -1770,9 +1838,6 @@ const handleCardFocus = () => {
 const handleCardInput = (event) => {
   if (cardInput.value) {
     cardInput.value = cardInput.value.toString().replace(/\D/g, "");
-    if (cardInput.value.length > 7) {
-      cardInput.value = cardInput.value.slice(0, 7);
-    }
   }
 };
 

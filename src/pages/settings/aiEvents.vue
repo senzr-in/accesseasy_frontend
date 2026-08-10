@@ -93,18 +93,22 @@
           </div>
           <div class="flex flex-wrap gap-2">
             <button 
-              v-for="l in ['all', 'person', 'car', 'dog', 'cat']" 
+              v-for="l in ['all', 'person', 'face', 'car', 'dog', 'cat']" 
               :key="l" 
               :class="[ 
                 'px-4 h-10 rounded-xl text-xs font-bold uppercase tracking-wider border transition-all flex items-center gap-1.5', 
                 selectedLabel === l 
                   ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/10' 
-                  : 'bg-slate-50 dark:bg-zinc-950 border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-zinc-900/50' 
+                  : 'bg-slate-50 dark:bg-zinc-950 border-slate-200 dark:border-zinc-800 text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-slate-800/80 dark:bg-zinc-900/50' 
               ]" 
               @click="setLabel(l)"
             >
               <User
                 v-if="l === 'person'"
+                class="h-3.5 w-3.5"
+              />
+              <ScanFace
+                v-else-if="l === 'face'"
                 class="h-3.5 w-3.5"
               />
               <Car
@@ -176,6 +180,10 @@
           >
             <User
               v-if="event.label === 'person'"
+              class="h-5 w-5"
+            />
+            <ScanFace
+              v-else-if="event.label === 'face'"
               class="h-5 w-5"
             />
             <Car
@@ -316,7 +324,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { 
   ScanFace, Loader2, VideoOff, Camera, Clock, 
   User, Car, Box, X, Search, Video, SlidersHorizontal, Activity, Dog, Cat, RefreshCcw, Cpu,
@@ -330,8 +338,13 @@ const apiUrl = import.meta.env.VITE_API_URL;
 
 const resolveSnapshotUrl = (snapshotFile) => {
   if (!snapshotFile) return '';
+  if (snapshotFile.startsWith('http://') || snapshotFile.startsWith('https://')) {
+    return snapshotFile;
+  }
+  if (snapshotFile.length === 36 && !snapshotFile.endsWith('.jpg')) {
+    return `${apiUrl}/assets/${snapshotFile}?access_token=${token}`;
+  }
   if (snapshotFile.endsWith('.jpg') || snapshotFile.includes('.')) {
-    // Use the direct frigate-mqtt Knative function URL
     const frigateProxy = 'http://frigate-mqtt.knative-fn.65.109.41.139.sslip.io';
     return `${frigateProxy}/?file=${encodeURIComponent(snapshotFile)}`;
   }
@@ -348,26 +361,46 @@ const loadSnapshotBlob = async (snapshotFile) => {
   snapshotBlobUrl.value = '';
   imageErrorMsg.value = '';
   try {
-    const url = resolveSnapshotUrl(snapshotFile);
-    const res = await fetch(url);
-    if (!res.ok) throw new Error(`Proxy returned ${res.status}`);
-    // Handle both raw binary and base64 text responses
-    const contentType = res.headers.get('content-type') || '';
-    if (contentType.includes('image')) {
-      const blob = await res.blob();
-      snapshotBlobUrl.value = URL.createObjectURL(blob);
-    } else {
-      // Proxy returned base64 text — decode it manually
-      const text = await res.text();
-      const byteChars = atob(text.trim());
-      const byteArray = new Uint8Array(byteChars.length);
-      for (let i = 0; i < byteChars.length; i++) byteArray[i] = byteChars.charCodeAt(i);
-      const blob = new Blob([byteArray], { type: 'image/jpeg' });
-      snapshotBlobUrl.value = URL.createObjectURL(blob);
+    let url = resolveSnapshotUrl(snapshotFile);
+    let res = await fetch(url);
+    
+    // Directus asset fallback if Knative proxy returns 404
+    if (!res.ok && res.status === 404 && url.includes('knative-fn')) {
+      console.warn(`[aiEvents] Proxy 404 for ${snapshotFile}, attempting Directus asset fallback...`);
+      const fallbackUrl = `${apiUrl}/assets/${snapshotFile}?access_token=${token}`;
+      const fallbackRes = await fetch(fallbackUrl);
+      if (fallbackRes.ok) {
+        res = fallbackRes;
+      }
     }
+
+    if (!res.ok) {
+      if (res.status === 404) {
+        throw new Error("Snapshot image has expired or is no longer stored on NVR volume.");
+      }
+      throw new Error(`Server returned HTTP ${res.status}`);
+    }
+    
+    const blob = await res.blob();
+    // Handle proxy returning base64 text instead of raw binary
+    if (blob.type.includes('text') || blob.type.includes('json')) {
+      const text = await blob.text();
+      try {
+        const byteChars = atob(text.trim());
+        const byteArray = new Uint8Array(byteChars.length);
+        for (let i = 0; i < byteChars.length; i++) byteArray[i] = byteChars.charCodeAt(i);
+        const imgBlob = new Blob([byteArray], { type: 'image/jpeg' });
+        snapshotBlobUrl.value = URL.createObjectURL(imgBlob);
+        return;
+      } catch (e) {
+        throw new Error("Invalid base64 payload from proxy");
+      }
+    }
+
+    snapshotBlobUrl.value = URL.createObjectURL(blob);
   } catch (err) {
     console.error('Failed to load snapshot:', err.message);
-    imageErrorMsg.value = `Proxy error: ${err.message}`;
+    imageErrorMsg.value = err.message;
   } finally {
     loadingImage.value = false;
   }
@@ -446,7 +479,7 @@ const fetchNvrs = async () => {
   const tenantId = authService.getTenantId();
   try {
     const url = new URL(`${apiUrl}/items/controllers`);
-    url.searchParams.append('filter[controllerType][_eq]', 'frigate_nvr');
+    url.searchParams.append('filter[linkedCamera][_nnull]', 'true');
     if (tenantId) {
       url.searchParams.append('filter[tenant][_eq]', tenantId);
     }
@@ -487,28 +520,22 @@ const fetchLinkedControllers = async () => {
   }
 };
 
-const fetchEvents = async () => {
+const fetchEvents = async (silent = false) => {
   if (!token) return;
-  loading.value = true;
+  if (!silent) loading.value = true;
   try {
     const allowedCameras = linkedControllers.value
       .map(c => c.linkedCamera)
       .filter(Boolean);
 
-    // If tenant has no allowed cameras, return empty list immediately to prevent showing other tenant's events.
-    if (allowedCameras.length === 0) {
-      events.value = [];
-      loading.value = false;
-      return;
-    }
-
     const url = new URL(`${apiUrl}/items/frigateEvents`);
     url.searchParams.append('sort', '-start_time');
     url.searchParams.append('limit', '2000');
-    url.searchParams.append('filter[snapshot_file][_nnull]', 'true');
     
-    // Filter by allowed cameras for this tenant
-    url.searchParams.append('filter[camera][_in]', allowedCameras.join(','));
+    // Filter by allowed cameras if linked controllers exist for this tenant
+    if (allowedCameras.length > 0) {
+      url.searchParams.append('filter[camera][_in]', allowedCameras.join(','));
+    }
 
     // Add filter logic
     if (selectedLabel.value !== 'all') {
@@ -517,8 +544,6 @@ const fetchEvents = async () => {
     if (cameraSearch.value.trim() !== '') {
       url.searchParams.append('filter[camera][_contains]', cameraSearch.value.trim());
     }
-    // If selectedNvr is set, we can theoretically filter by it if directus tracks NVR relations.
-    // For now we filter events since frigate_events contains the camera label.
 
     const res = await fetch(url.toString(), {
       headers: { Authorization: `Bearer ${token}` }
@@ -526,7 +551,6 @@ const fetchEvents = async () => {
     if (res.ok) {
       const data = await res.json();
       events.value = data.data || [];
-      // No automatic selection to prevent unwanted image downloads or modal popups
       if (selectedEvent.value && !events.value.find(e => e.id === selectedEvent.value.id)) {
         selectedEvent.value = null;
         isModalOpen.value = false;
@@ -535,13 +559,24 @@ const fetchEvents = async () => {
   } catch (err) {
     console.error('Error fetching AI events:', err);
   } finally {
-    loading.value = false;
+    if (!silent) loading.value = false;
   }
 };
+
+let pollInterval;
 
 onMounted(async () => {
   await fetchNvrs();
   await fetchLinkedControllers();
   await fetchEvents();
+  
+  // Auto-refresh events every 5 seconds
+  pollInterval = setInterval(async () => {
+    await fetchEvents(true); // silent fetch
+  }, 5000);
+});
+
+onUnmounted(() => {
+  if (pollInterval) clearInterval(pollInterval);
 });
 </script>

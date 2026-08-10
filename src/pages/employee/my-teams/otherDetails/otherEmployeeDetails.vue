@@ -87,6 +87,15 @@
           </div>
         </template>
 
+        <!-- Deletion Progress Modal -->
+        <DeleteProgressModal
+          :show="deleteProgress.show"
+          :title="deleteProgress.title"
+          :current="deleteProgress.current"
+          :total="deleteProgress.total"
+          :status-text="deleteProgress.statusText"
+        />
+
         <div v-if="loading">
           <SkeletonLoader
             variant="table-body-only"
@@ -320,6 +329,7 @@ import CustomPagination from "@/utils/pagination/CustomPagination.vue";
 import EmployeeOtherDetailsExcelExport from "./excelExport/employeeExcelExport.vue";
 import RfidCardPopup from "./rfidCardPopup.vue";
 import SensitiveDataView from "@/components/sensitiveData/sensitiveDataView.vue";
+import DeleteProgressModal from "@/components/common/modals/DeleteProgressModal.vue";
 
 // State
 const rfidCardPopup = ref(null);
@@ -327,6 +337,14 @@ const router = useRouter();
 const tenantId = ref(currentUserTenant.getTenantId());
 const loading = ref(false);
 const error = ref(null);
+
+const deleteProgress = reactive({
+  show: false,
+  title: "Deleting Employees...",
+  current: 0,
+  total: 0,
+  statusText: "",
+});
 const showFilters = ref(true);
 const search = ref("");
 const page = ref(1);
@@ -910,12 +928,25 @@ const deleteSelected = async () => {
       `Are you sure you want to delete ${selectedItems.value.length} selected employee(s)?`
     )
   ) {
+    const totalCount = selectedItems.value.length;
+    deleteProgress.show = true;
+    deleteProgress.title = "Deleting Employees...";
+    deleteProgress.total = totalCount;
+    deleteProgress.current = 0;
+    deleteProgress.statusText = "Initializing deletion process...";
+
     try {
       const token = authService.getToken();
       let errors = 0;
-      for (const itemId of selectedItems.value) {
+
+      for (let idx = 0; idx < selectedItems.value.length; idx++) {
+        const itemId = selectedItems.value[idx];
         const item = items.value.find((emp) => emp.id === itemId);
         if (!item) continue;
+
+        const empName = `${item.assignedUser?.first_name || ''} ${item.assignedUser?.last_name || ''}`.trim() || `ID: ${itemId}`;
+        deleteProgress.current = idx + 1;
+        deleteProgress.statusText = `Deleting ${empName} (${idx + 1} of ${totalCount})...`;
 
         const deletePromises = [
           fetch(
@@ -964,6 +995,8 @@ const deleteSelected = async () => {
     } catch (error) {
       console.error("Error in delete operation:", error);
       alert("An error occurred during the delete operation. Please try again.");
+    } finally {
+      deleteProgress.show = false;
     }
   }
 };

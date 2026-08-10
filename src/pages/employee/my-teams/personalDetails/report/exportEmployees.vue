@@ -393,9 +393,9 @@ const fetchRFIDData = async (employeeIds) => {
 
   try {
     const params = new URLSearchParams({
-      fields: "employeeId.id,rfidCard",
+      fields: "employeeId,rfidCard",
       "filter[tenant][tenantId][_eq]": tenantId,
-      "filter[employeeId][id][_in]": employeeIds.join(","),
+      "filter[employeeId][_in]": employeeIds.join(","),
       "filter[cardAccess][_eq]": true,
     });
 
@@ -423,7 +423,7 @@ const fetchRFIDData = async (employeeIds) => {
 
     if (data.data && Array.isArray(data.data)) {
       data.data.forEach((card) => {
-        const employeeId = card.employeeId?.id;
+        const employeeId = typeof card.employeeId === 'object' ? card.employeeId?.id : card.employeeId;
         if (employeeId && card.rfidCard) {
           if (!rfidMap[employeeId]) {
             rfidMap[employeeId] = [];

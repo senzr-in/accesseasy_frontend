@@ -39,9 +39,9 @@ import AppearanceSettings from "@/pages/settings/appearance.vue";
 const getRoleHome = () => {
   if (!authService.isAuthenticated()) return "/login";
   const role = authService.getUserRole();
-  if (role === "esslAdmin")  return "/dealer-dashboard";
-  if (role === "Guard")      return "/dashboard/patrols";    // Security App home
-  if (role === "Employee")   return "/dashboard/my-access";  // Workforce App home
+  if (role === "esslAdmin") return "/dealer-dashboard";
+  if (role === "Guard") return "/dashboard/patrols";    // Security App home
+  if (role === "Employee") return "/dashboard/my-access";  // Workforce App home
   return "/dashboard"; // Admin & Manager → Command Center
 };
 

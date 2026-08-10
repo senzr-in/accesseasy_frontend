@@ -343,6 +343,7 @@
 import { ref, onMounted } from "vue";
 import { QrCode, CreditCard, ShieldCheck, Plus, Loader2, AlertCircle, RefreshCw, X, Download, LogIn, LogOut, IdCard } from "lucide-vue-next";
 import { authService } from "@/services/authService";
+import { mqttService } from "@/services/mqttService";
 import { currentUserTenant } from "@/utils/currentUserTenant";
 import QRCodeLib from "qrcode";
 import { generateEncryptedQrToken } from "@/utils/security/access-control.js";
@@ -549,6 +550,7 @@ const downloadFullBadge = async () => {
 const assignRfidCard = async () => {
   if (!employee.value || !newRfidCard.value) return;
   
+  const assignedCardNo = newRfidCard.value;
   isAssigningCard.value = true;
   try {
     const res = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule/${employee.value.id}`, {
@@ -557,12 +559,16 @@ const assignRfidCard = async () => {
         "Authorization": `Bearer ${token}`,
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ card_number: newRfidCard.value })
+      body: JSON.stringify({ card_number: assignedCardNo })
     });
 
     if (res.ok) {
-      employee.value.card_number = newRfidCard.value;
+      employee.value.card_number = assignedCardNo;
       newRfidCard.value = "";
+      // If a hardware controller UUID is associated, publish insertPermission over MQTT V1.0.6
+      if (employee.value.deviceUuid) {
+        mqttService.sendInsertPermission(employee.value.deviceUuid, assignedCardNo, ['01', '02', '03', '04']);
+      }
     } else {
       console.error("Failed to assign RFID card");
     }
@@ -578,6 +584,7 @@ const removeRfidCard = async () => {
   
   if (!confirm("Are you sure you want to revoke this RFID card?")) return;
 
+  const cardToRevoke = employee.value.card_number;
   isAssigningCard.value = true;
   try {
     const res = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule/${employee.value.id}`, {
@@ -591,6 +598,10 @@ const removeRfidCard = async () => {
 
     if (res.ok) {
       employee.value.card_number = null;
+      // If a hardware controller UUID is associated, publish deletePermission over MQTT V1.0.6
+      if (cardToRevoke && employee.value.deviceUuid) {
+        mqttService.sendDeletePermission(employee.value.deviceUuid, cardToRevoke);
+      }
     }
   } catch (error) {
     console.error("Error revoking RFID:", error);

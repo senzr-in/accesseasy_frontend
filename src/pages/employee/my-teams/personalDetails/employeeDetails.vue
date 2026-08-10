@@ -60,10 +60,53 @@
             />
           </button>
           <button
-            class="flex items-center gap-1.5 h-10 px-4 text-[10px] font-black uppercase tracking-widest rounded-xl border border-slate-200 dark:border-slate-800  hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 transition-colors shadow-sm text-slate-700 dark:text-slate-200 "
+            class="flex items-center gap-1.5 h-10 px-4 text-[10px] font-black uppercase tracking-widest rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors shadow-sm text-slate-700 dark:text-slate-200 cursor-pointer"
+            @click="showImportDialog = true"
+          >
+            <FileUp class="w-3.5 h-3.5 text-blue-500" /> Import
+          </button>
+          <button
+            class="flex items-center gap-1.5 h-10 px-4 text-[10px] font-black uppercase tracking-widest rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors shadow-sm text-slate-700 dark:text-slate-200 cursor-pointer"
             @click="showExportDialog = true"
           >
             <FileDown class="w-3.5 h-3.5" /> Export
+          </button>
+        </div>
+      </div>
+
+      <!-- Bulk Action Bar -->
+      <div
+        v-if="selectedEmployeeIds.length > 0"
+        class="flex items-center justify-between px-4 py-2.5 bg-blue-50 dark:bg-slate-800 border border-blue-200 dark:border-slate-700 rounded-xl shadow-sm"
+      >
+        <div class="flex items-center gap-2 text-xs font-bold text-blue-800 dark:text-blue-200">
+          <span>Selected {{ selectedEmployeeIds.length }} of {{ totalItems }} employee(s)</span>
+          <button
+            v-if="selectedEmployeeIds.length < totalItems"
+            class="px-2 py-0.5 text-xs font-bold text-blue-700 dark:text-blue-300 underline hover:text-blue-900 cursor-pointer"
+            @click="selectAllTenantEmployees"
+          >
+            Select All {{ totalItems }} Tenant Employees
+          </button>
+        </div>
+        <div class="flex items-center gap-2">
+          <button
+            class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
+            @click="openBulkAssignModal"
+          >
+            <ShieldCheck class="w-3.5 h-3.5" /> Assign Group & Role
+          </button>
+          <button
+            class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
+            @click="bulkDeleteEmployees"
+          >
+            <Trash2 class="w-3.5 h-3.5" /> Bulk Delete Selected
+          </button>
+          <button
+            class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+            @click="selectedEmployeeIds = []"
+          >
+            Clear Selection
           </button>
         </div>
       </div>
@@ -75,6 +118,17 @@
           <table class="w-full text-left border-collapse relative">
             <thead class="bg-slate-50 dark:bg-slate-800/50  border-b border-slate-200 dark:border-slate-800  sticky top-0 z-10 w-full">
               <tr>
+                <th
+                  scope="col"
+                  class="h-10 px-4 w-10 text-center"
+                >
+                  <input
+                    type="checkbox"
+                    :checked="isSelectAll"
+                    class="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                    @change="toggleSelectAll"
+                  >
+                </th>
                 <th
                   scope="col"
                   class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap"
@@ -122,7 +176,7 @@
             <tbody class="divide-y divide-slate-100  bg-white dark:bg-slate-900 ">
               <tr v-if="loading">
                 <td
-                  colspan="7"
+                  colspan="8"
                   class="h-24 text-center text-slate-500 dark:text-slate-400"
                 >
                   <Loader2 class="w-6 h-6 animate-spin text-blue-500 mx-auto" />
@@ -130,7 +184,7 @@
               </tr>
               <tr v-else-if="items.length === 0">
                 <td
-                  colspan="7"
+                  colspan="8"
                   class="h-32 text-center text-slate-500 dark:text-slate-400 text-sm font-medium"
                 >
                   No employees found.
@@ -143,6 +197,17 @@
                 class="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 transition-colors group"
                 @click="handleRowClick(emp.id)"
               >
+                <td
+                  class="px-4 py-3 text-center"
+                  @click.stop
+                >
+                  <input
+                    v-model="selectedEmployeeIds"
+                    type="checkbox"
+                    :value="emp.id"
+                    class="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
+                  >
+                </td>
                 <td class="px-5 py-3 text-xs font-black text-slate-700 dark:text-slate-200 ">
                   {{ emp.employeeId || '-' }}
                 </td>
@@ -259,19 +324,37 @@
         </div>
 
         <!-- Pagination -->
-        <div class="flex items-center justify-between p-4 border-t border-slate-100 dark:border-slate-700  bg-slate-50 dark:bg-slate-800/50  mt-auto shrink-0">
+        <!-- Pagination -->
+        <div class="flex items-center justify-between p-4 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 mt-auto shrink-0">
           <button
-            class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-slate-800  hover:bg-white dark:bg-slate-900 :bg-zinc-950 disabled:opacity-50 transition-colors shadow-sm text-slate-700 dark:text-slate-200 "
+            class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-white dark:bg-slate-900 disabled:opacity-50 transition-colors shadow-sm text-slate-700 dark:text-slate-200"
             :disabled="page <= 1 || loading"
             @click="page--"
           >
             Previous
           </button>
-          <div class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
-            Page {{ page }} of {{ totalPages || 1 }}
+
+          <div class="flex items-center gap-3">
+            <div class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
+              Page {{ page }} of {{ totalPages || 1 }} (Total {{ totalItems }} Employees)
+            </div>
+            <select
+              v-model="itemsPerPage"
+              class="h-8 px-2 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
+              @change="page = 1; fetchEmployeeData();"
+            >
+              <option :value="10">10 per page</option>
+              <option :value="25">25 per page</option>
+              <option :value="50">50 per page</option>
+              <option :value="100">100 per page</option>
+              <option :value="250">250 per page</option>
+              <option :value="500">500 per page</option>
+              <option :value="1000">1000 per page</option>
+            </select>
           </div>
+
           <button
-            class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-slate-800  hover:bg-white dark:bg-slate-900 :bg-zinc-950 disabled:opacity-50 transition-colors shadow-sm text-slate-700 dark:text-slate-200 "
+            class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-white dark:bg-slate-900 disabled:opacity-50 transition-colors shadow-sm text-slate-700 dark:text-slate-200"
             :disabled="page >= totalPages || loading"
             @click="page++"
           >
@@ -284,6 +367,24 @@
           v-model="showAddDialog"
           :employee="selectedEmployee"
           @success="fetchEmployeeData"
+        />
+
+        <!-- Deletion Progress Modal -->
+        <DeleteProgressModal
+          :show="deleteProgress.show"
+          :title="deleteProgress.title"
+          :current="deleteProgress.current"
+          :total="deleteProgress.total"
+          :status-text="deleteProgress.statusText"
+        />
+
+        <!-- Bulk Assign Progress Modal -->
+        <DeleteProgressModal
+          :show="bulkAssignProgress.show"
+          :title="bulkAssignProgress.title"
+          :current="bulkAssignProgress.current"
+          :total="bulkAssignProgress.total"
+          :status-text="bulkAssignProgress.statusText"
         />
 
         <!-- Delete Confirmation Dialog -->
@@ -347,6 +448,100 @@
           :search="search"
           @close="showExportDialog = false"
         />
+
+        <!-- Bulk Import Dialog -->
+        <ImportEmployees
+          v-if="showImportDialog"
+          @close="showImportDialog = false; fetchEmployeeData()"
+        />
+
+        <!-- Bulk Assign Group, Role & Department Modal -->
+        <div
+          v-if="showBulkAssignModal"
+          class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+          @click.self="showBulkAssignModal = false"
+        >
+          <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col gap-4">
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+              <div>
+                <h3 class="text-base font-black text-slate-900 dark:text-white">
+                  Bulk Assign Group & Role
+                </h3>
+                <p class="text-xs text-slate-500">
+                  Applying changes to {{ selectedEmployeeIds.length }} selected employee(s)
+                </p>
+              </div>
+              <button
+                class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xl font-bold cursor-pointer"
+                @click="showBulkAssignModal = false"
+              >
+                &times;
+              </button>
+            </div>
+
+            <div class="flex flex-col gap-4">
+              <!-- Access Group / Clearance Level -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Access Group (Clearance Level)</label>
+                <select
+                  v-model="bulkAssignForm.accessLevelId"
+                  class="w-full h-10 px-3 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
+                >
+                  <option value="">
+                    -- No Change (Keep Existing) --
+                  </option>
+                  <option
+                    v-for="al in availableAccessLevels"
+                    :key="al.id"
+                    :value="al.id"
+                  >
+                    {{ al.groupName || al.name || al.title || al.accessLevelName || al.id }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- User Role -->
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">User Role</label>
+                <select
+                  v-model="bulkAssignForm.roleId"
+                  class="w-full h-10 px-3 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
+                >
+                  <option value="">
+                    -- No Change (Keep Existing) --
+                  </option>
+                  <option
+                    v-for="role in availableRoles"
+                    :key="role.id"
+                    :value="role.id"
+                  >
+                    {{ role.roleName || role.name || role.title || role.roleConfiguratorName || role.id }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 border-t border-slate-100 dark:border-slate-800 pt-4 mt-2">
+              <button
+                class="px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer"
+                @click="showBulkAssignModal = false"
+              >
+                Cancel
+              </button>
+              <button
+                :disabled="isAssigning"
+                class="px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-xl transition-colors flex items-center gap-2 cursor-pointer"
+                @click="executeBulkAssign"
+              >
+                <Loader2
+                  v-if="isAssigning"
+                  class="w-4 h-4 animate-spin"
+                />
+                Apply Changes
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -355,12 +550,15 @@
 <script setup>
 import { ref, reactive, computed, onMounted, watch, inject } from "vue";
 import { useRouter } from "vue-router";
-import { Plus, Search, Filter, FileDown, Trash2, MessageCircle, Loader2, Fingerprint, Scan, CreditCard, Smartphone } from "lucide-vue-next";
+import { Plus, Search, Filter, FileDown, FileUp, Trash2, MessageCircle, Loader2, Fingerprint, Scan, CreditCard, Smartphone, ShieldCheck } from "lucide-vue-next";
 import { authService } from "@/services/authService";
 import { currentUserTenant } from "@/utils/currentUserTenant";
+import mqttService from "@/services/mqttService";
+import DeleteProgressModal from "@/components/common/modals/DeleteProgressModal.vue";
 import AddEmployeeDialog from "./addEmployeeDialog.vue";
 import FilterComponent from "@/components/common/filters/payrollfilter.vue";
 import ExportEmployees from "./report/exportEmployees.vue";
+import ImportEmployees from "./report/importEmployees.vue";
 import ValueHeader from "@/components/common/ValueHeader.vue";
 
 // Dependencies
@@ -375,14 +573,575 @@ const loading = ref(true);
 const search = ref("");
 const page = ref(1);
 const totalItems = ref(0);
-const itemsPerPage = 10;
+const itemsPerPage = ref(100);
 const showAddDialog = ref(false);
 const selectedEmployee = ref(null);
 const deleteDialog = ref(false);
 const employeeToDelete = ref(null);
 const deleting = ref(false);
 
+const deleteProgress = reactive({
+  show: false,
+  title: "Deleting Employees...",
+  current: 0,
+  total: 0,
+  statusText: "",
+});
+
+const bulkAssignProgress = reactive({
+  show: false,
+  title: "Assigning Group & Role...",
+  current: 0,
+  total: 0,
+  statusText: "",
+});
+
 const showExportDialog = ref(false);
+const showImportDialog = ref(false);
+const selectedEmployeeIds = ref([]);
+
+const showBulkAssignModal = ref(false);
+const isAssigning = ref(false);
+const availableAccessLevels = ref([]);
+const availableDepartments = ref([]);
+const availableRoles = ref([]);
+
+const bulkAssignForm = reactive({
+  accessLevelId: "",
+  departmentId: "",
+  roleId: "",
+});
+
+const openBulkAssignModal = async () => {
+  showBulkAssignModal.value = true;
+  bulkAssignForm.accessLevelId = "";
+  bulkAssignForm.departmentId = "";
+  bulkAssignForm.roleId = "";
+
+  // Fetch access levels from accesslevels and accesslevel
+  try {
+    let alRes = await fetch(`${import.meta.env.VITE_API_URL}/items/accesslevels?filter[tenant][tenantId][_eq]=${tenantId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!alRes.ok) {
+      alRes = await fetch(`${import.meta.env.VITE_API_URL}/items/accesslevel?filter[tenant][tenantId][_eq]=${tenantId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    }
+    if (!alRes.ok) {
+      alRes = await fetch(`${import.meta.env.VITE_API_URL}/items/accesslevels`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    }
+    if (alRes.ok) {
+      const data = await alRes.json();
+      availableAccessLevels.value = data.data || [];
+    }
+  } catch (e) {
+    console.warn("Failed to fetch access levels:", e);
+  }
+
+  // Fetch roles
+  try {
+    let roleRes = await fetch(`${import.meta.env.VITE_API_URL}/items/roleConfigurator?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][_and][1][accessType][_eq]=accessEasy`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!roleRes.ok) {
+      roleRes = await fetch(`${import.meta.env.VITE_API_URL}/items/accesseasyRole`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    }
+    if (roleRes.ok) {
+      const data = await roleRes.json();
+      availableRoles.value = data.data || [];
+    }
+
+    if (!availableRoles.value || availableRoles.value.length === 0) {
+      let sysRoleRes = await fetch(`${import.meta.env.VITE_API_URL}/roles?fields=id,name`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (sysRoleRes.ok) {
+        const sysData = await sysRoleRes.json();
+        availableRoles.value = (sysData.data || []).map(r => ({ id: r.id, name: r.name }));
+      }
+    }
+  } catch (e) {
+    console.warn("Failed to fetch roles:", e);
+  }
+};
+
+const syncEmployeesHardwareAccess = async (employeeIds, accessLevelId) => {
+  if (!employeeIds || employeeIds.length === 0 || !accessLevelId) return;
+
+  try {
+    // 1. Fetch access level doors (use in-memory item first, or filter query to avoid 403 single-item restriction)
+    let groupItem = availableAccessLevels.value.find((al) => String(al.id) === String(accessLevelId));
+
+    if (!groupItem || (!groupItem.assignDoorsGroup && !groupItem.doors)) {
+      let groupRes = await fetch(`${import.meta.env.VITE_API_URL}/items/accesslevels?filter[id][_eq]=${accessLevelId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!groupRes.ok) {
+        groupRes = await fetch(`${import.meta.env.VITE_API_URL}/items/accesslevel?filter[id][_eq]=${accessLevelId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
+      if (groupRes.ok) {
+        const groupData = await groupRes.json();
+        groupItem = groupData.data?.[0];
+      }
+    }
+
+    if (!groupItem) {
+      console.warn("Could not load access level details for ID:", accessLevelId);
+      return;
+    }
+
+    const rawDoors = groupItem.assignDoorsGroup || groupItem.doors || [];
+    const doorIds = rawDoors.map((d) => (typeof d === "object" ? d.id : d)).filter(Boolean);
+    if (doorIds.length === 0) {
+      console.warn("No doors linked to access level:", accessLevelId);
+      return;
+    }
+
+    // 2. Fetch doors
+    const doorsRes = await fetch(`${import.meta.env.VITE_API_URL}/items/doors?filter[id][_in]=${doorIds.join(',')}&fields=deviceUuid,uniqueId,doorNumber`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (!doorsRes.ok) return;
+    const doorsData = await doorsRes.json();
+
+    const deviceDoorMasks = {};
+    const deviceDoorLists = {};
+    (doorsData.data || []).forEach(d => {
+      const uuid = d.deviceUuid || d.uniqueId;
+      if (uuid) {
+        const doorNum = parseInt(d.doorNumber || 1, 10);
+        const doorBitmask = 1 << (doorNum - 1);
+        if (!deviceDoorMasks[uuid]) deviceDoorMasks[uuid] = 0;
+        deviceDoorMasks[uuid] |= doorBitmask;
+
+        if (!deviceDoorLists[uuid]) deviceDoorLists[uuid] = [];
+        const doorIndexStr = doorNum.toString().padStart(2, '0');
+        if (!deviceDoorLists[uuid].includes(doorIndexStr)) {
+          deviceDoorLists[uuid].push(doorIndexStr);
+        }
+      }
+    });
+
+    const uuids = Object.keys(deviceDoorMasks);
+    if (uuids.length === 0) return;
+
+    // Fetch controller types
+    let controllerTypes = {};
+    const ctrlRes = await fetch(`${import.meta.env.VITE_API_URL}/items/controllers?filter[sn][_in]=${uuids.join(',')}&fields=sn,controllerType`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (ctrlRes.ok) {
+      const ctrlData = await ctrlRes.json();
+      (ctrlData.data || []).forEach(c => { controllerTypes[c.sn] = c.controllerType; });
+    }
+
+    // 3. Collect cards for selected employees from cardManagement & personalModule in query chunks of 100 IDs
+    const cardList = [];
+    const ID_CHUNK_SIZE = 100;
+
+    for (let i = 0; i < employeeIds.length; i += ID_CHUNK_SIZE) {
+      const chunkIds = employeeIds.slice(i, i + ID_CHUNK_SIZE);
+      const idString = chunkIds.join(",");
+
+      try {
+        const cmRes = await fetch(
+          `${import.meta.env.VITE_API_URL}/items/cardManagement?filter[_or][0][employeeId][id][_in]=${idString}&filter[_or][1][employeeId][_in]=${idString}&fields=id,rfidCard,employeeId&limit=-1`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (cmRes.ok) {
+          const cmJson = await cmRes.json();
+          (cmJson.data || []).forEach(c => {
+            const empIdVal = typeof c.employeeId === 'object' ? String(c.employeeId?.id || '') : String(c.employeeId || '');
+            const rfidStr = String(c.rfidCard || '').trim();
+            if (rfidStr && !cardList.some(item => item.rfidCard === rfidStr)) {
+              const empObj = items.value.find(itemObj => String(itemObj.id) === empIdVal);
+              const name = `${empObj?.assignedUser?.first_name || ''} ${empObj?.assignedUser?.last_name || ''}`.trim() || 'Employee';
+              cardList.push({ rfidCard: rfidStr, employeeId: empIdVal, name });
+            }
+          });
+        }
+      } catch (e) {
+        console.warn('[MQTT Hardware Sync] Error fetching cardManagement chunk:', e);
+      }
+
+      // Fallback: Check if rfid is attached directly to personalModule employee records in DB
+      try {
+        const pmFetchRes = await fetch(
+          `${import.meta.env.VITE_API_URL}/items/personalModule?filter[id][_in]=${idString}&fields=id,rfid,assignedUser.first_name,assignedUser.last_name&limit=-1`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (pmFetchRes.ok) {
+          const pmJson = await pmFetchRes.json();
+          (pmJson.data || []).forEach((empObj) => {
+            const rfidVal = String(empObj.rfid || empObj.rfidCard || '').trim();
+            if (rfidVal && !cardList.some((item) => item.rfidCard === rfidVal)) {
+              const name = `${empObj.assignedUser?.first_name || ''} ${empObj.assignedUser?.last_name || ''}`.trim() || 'Employee';
+              cardList.push({ rfidCard: rfidVal, employeeId: String(empObj.id), name });
+            }
+          });
+        }
+      } catch (e) {
+        console.warn('[MQTT Hardware Sync] Error fetching personalModule fallback chunk:', e);
+      }
+    }
+
+    console.log(`[MQTT Hardware Sync] Found ${cardList.length} card(s) for ${employeeIds.length} employee(s):`, cardList.map(c => c.rfidCard));
+
+    if (cardList.length === 0) {
+      console.warn("No RFID cards found in cardManagement for selected employees:", employeeIds);
+      return;
+    }
+
+    // 4. Send insertPermission payload to Knative MQTT per controller
+    for (const [uuid, bitmask] of Object.entries(deviceDoorMasks)) {
+      const type = controllerTypes[uuid] || 1;
+      const indexData = type !== 1 ? deviceDoorLists[uuid] : bitmask.toString(16).padStart(2, '0').toUpperCase();
+
+      const payloadData = [];
+      cardList.forEach(c => {
+        if (!c.rfidCard) return;
+        const name = c.name || 'Employee';
+
+        if (Array.isArray(indexData)) {
+          indexData.forEach(idx => {
+            payloadData.push({
+              id: String(c.rfidCard),
+              type: 200,
+              code: String(c.rfidCard),
+              index: idx,
+              time: { type: 0 },
+              extra: { name }
+            });
+          });
+        } else {
+          payloadData.push({
+            id: String(c.rfidCard),
+            type: 200,
+            code: String(c.rfidCard),
+            index: indexData,
+            time: { type: 0 },
+            extra: { name }
+          });
+        }
+      });
+
+      if (payloadData.length > 0) {
+        console.log(`[MQTT Hardware Sync] Sending ${payloadData.length} permission items in chunks to controller ${uuid}...`);
+        const MQTT_CHUNK_SIZE = 40; // ~2 KB payload per MQTT packet to prevent hardware RX buffer truncation
+        for (let pIdx = 0; pIdx < payloadData.length; pIdx += MQTT_CHUNK_SIZE) {
+          const chunkData = payloadData.slice(pIdx, pIdx + MQTT_CHUNK_SIZE);
+          await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-mqtt`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ action: "insertPermission", uuid: uuid, data: chunkData })
+          }).catch((knErr) => console.warn('[Knative device-mqtt] Chunk send notice:', knErr));
+          if (pIdx + MQTT_CHUNK_SIZE < payloadData.length) {
+            await new Promise((r) => setTimeout(r, 50));
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Hardware MQTT sync error in bulk assign:", err);
+  }
+};
+
+const executeBulkAssign = async () => {
+  if (!bulkAssignForm.accessLevelId && !bulkAssignForm.roleId) {
+    messageHandler.showError("Please select at least one field (Access Group or Role) to update.");
+    return;
+  }
+
+  isAssigning.value = true;
+  showBulkAssignModal.value = false;
+
+  const idsToUpdate = [...selectedEmployeeIds.value];
+  bulkAssignProgress.show = true;
+  bulkAssignProgress.title = "Assigning Group & Role...";
+  bulkAssignProgress.total = idsToUpdate.length;
+  bulkAssignProgress.current = 0;
+  bulkAssignProgress.statusText = "Initializing batch updates...";
+
+  try {
+    // Batch update assignedAccessLevel on personalModule (Directus Bulk PATCH - 1 request instead of N)
+    if (bulkAssignForm.accessLevelId && idsToUpdate.length > 0) {
+      const chunkSize = 50;
+      for (let i = 0; i < idsToUpdate.length; i += chunkSize) {
+        const chunk = idsToUpdate.slice(i, i + chunkSize);
+        bulkAssignProgress.current = Math.min(i + chunkSize, idsToUpdate.length);
+        bulkAssignProgress.statusText = `Updating Access Group for batch ${Math.floor(i / chunkSize) + 1} (${bulkAssignProgress.current} of ${idsToUpdate.length})...`;
+
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule`, {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            keys: chunk,
+            data: { assignedAccessLevel: bulkAssignForm.accessLevelId }
+          })
+        });
+        if (!res.ok) {
+          console.warn("Bulk patch personalModule chunk error:", await res.text());
+        }
+      }
+    }
+
+    // Batch update accesseasyRole on users (Directus Bulk PATCH - 1 request instead of N)
+    if (bulkAssignForm.roleId && idsToUpdate.length > 0) {
+      bulkAssignProgress.statusText = "Fetching user account mappings...";
+      const userIdsToUpdate = [];
+      const fetchChunkSize = 100;
+      for (let i = 0; i < idsToUpdate.length; i += fetchChunkSize) {
+        const chunk = idsToUpdate.slice(i, i + fetchChunkSize);
+        const idString = chunk.join(",");
+        try {
+          const fetchUsersRes = await fetch(
+            `${import.meta.env.VITE_API_URL}/items/personalModule?filter[id][_in]=${idString}&fields=assignedUser.id&limit=-1`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          if (fetchUsersRes.ok) {
+            const fetchUsersData = await fetchUsersRes.json();
+            (fetchUsersData.data || []).forEach(emp => {
+              const uId = typeof emp.assignedUser === "object" ? emp.assignedUser?.id : emp.assignedUser;
+              if (uId) userIdsToUpdate.push(uId);
+            });
+          }
+        } catch (e) {
+          console.warn("Error pre-fetching assignedUser IDs for bulk assign:", e);
+        }
+      }
+
+      if (userIdsToUpdate.length > 0) {
+        const patchChunkSize = 50;
+        for (let i = 0; i < userIdsToUpdate.length; i += patchChunkSize) {
+          const chunk = userIdsToUpdate.slice(i, i + patchChunkSize);
+          bulkAssignProgress.statusText = `Updating User Role for batch ${Math.floor(i / patchChunkSize) + 1} (${Math.min(i + patchChunkSize, userIdsToUpdate.length)} of ${userIdsToUpdate.length})...`;
+
+          const res = await fetch(`${import.meta.env.VITE_API_URL}/users`, {
+            method: "PATCH",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              keys: chunk,
+              data: { accesseasyRole: bulkAssignForm.roleId }
+            })
+          });
+          if (!res.ok) {
+            console.warn("Bulk patch users chunk error:", await res.text());
+          }
+        }
+      }
+    }
+
+    const updatedCount = idsToUpdate.length;
+
+    if (bulkAssignForm.accessLevelId) {
+      bulkAssignProgress.statusText = "Syncing RFID permissions to hardware controllers over MQTT...";
+      await syncEmployeesHardwareAccess(idsToUpdate, bulkAssignForm.accessLevelId);
+    }
+
+    messageHandler.showSuccess(`Successfully updated Group & Role for ${updatedCount} employee(s)`);
+    selectedEmployeeIds.value = [];
+    fetchEmployeeData();
+  } catch (err) {
+    console.error("Bulk assign error:", err);
+    messageHandler.showError(err.message || "Failed to update selected employees");
+  } finally {
+    isAssigning.value = false;
+    bulkAssignProgress.show = false;
+  }
+};
+
+const isSelectAll = computed(() => {
+  return items.value.length > 0 && selectedEmployeeIds.value.length === items.value.length;
+});
+
+const toggleSelectAll = (e) => {
+  if (e.target.checked) {
+    selectedEmployeeIds.value = items.value.map((emp) => emp.id);
+  } else {
+    selectedEmployeeIds.value = [];
+  }
+};
+
+const selectAllTenantEmployees = async () => {
+  try {
+    const activeToken = authService.getToken();
+    const filterParams = await buildFilterParams();
+    const queryParams = new URLSearchParams({
+      limit: -1,
+      fields: "id",
+      ...filterParams
+    });
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule?${queryParams.toString()}`, {
+      headers: { Authorization: `Bearer ${activeToken}` }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const allIds = (data.data || []).map((e) => e.id);
+      selectedEmployeeIds.value = allIds;
+      messageHandler.showSuccess(`Selected all ${allIds.length} employee(s) in this tenant`);
+    }
+  } catch (err) {
+    messageHandler.showError("Failed to select all tenant employees");
+  }
+};
+
+const bulkDeleteEmployees = async () => {
+  if (selectedEmployeeIds.value.length === 0) return;
+  if (!confirm(`Are you sure you want to delete ${selectedEmployeeIds.value.length} selected employee(s) and their linked accounts & RFID cards for THIS TENANT?`)) return;
+
+  const idsToDelete = [...selectedEmployeeIds.value];
+  deleteProgress.show = true;
+  deleteProgress.title = "Deleting Employees & Access Credentials...";
+  deleteProgress.total = idsToDelete.length;
+  deleteProgress.current = 0;
+  deleteProgress.statusText = "Initializing fast batch deletion...";
+
+  deleting.value = true;
+  try {
+    const activeToken = authService.getToken();
+    const BATCH_SIZE = 50;
+
+    for (let i = 0; i < idsToDelete.length; i += BATCH_SIZE) {
+      const chunkEmpIds = idsToDelete.slice(i, i + BATCH_SIZE);
+      const chunkEmpObjects = items.value.filter((emp) => chunkEmpIds.includes(emp.id));
+
+      deleteProgress.current = Math.min(i + chunkEmpIds.length, idsToDelete.length);
+      deleteProgress.statusText = `Deleting batch ${Math.floor(i / BATCH_SIZE) + 1} (${deleteProgress.current} of ${idsToDelete.length})...`;
+
+      const idString = chunkEmpIds.join(",");
+
+      // Step 1: Collect RFID cards for this batch & delete cardManagement records
+      let rfidCardsToRemove = [];
+      try {
+        const cardRes = await fetch(
+          `${import.meta.env.VITE_API_URL}/items/cardManagement?filter[_or][0][employeeId][id][_in]=${idString}&filter[_or][1][employeeId][_in]=${idString}&fields=id,rfidCard&limit=-1`,
+          { headers: { Authorization: `Bearer ${activeToken}` } }
+        );
+        if (cardRes.ok) {
+          const cardData = await cardRes.json();
+          const cardRecords = cardData.data || [];
+          rfidCardsToRemove = [...new Set(cardRecords.map((c) => String(c.rfidCard)).filter((c) => c && c !== "null"))];
+
+          const cardRecordIds = cardRecords.map((c) => c.id);
+          if (cardRecordIds.length > 0) {
+            await fetch(`${import.meta.env.VITE_API_URL}/items/cardManagement`, {
+              method: "DELETE",
+              headers: { Authorization: `Bearer ${activeToken}`, "Content-Type": "application/json" },
+              body: JSON.stringify(cardRecordIds)
+            });
+          }
+        }
+      } catch (e) {
+        console.warn("[Batch Delete] Error cleaning cardManagement:", e);
+      }
+
+      // Step 2: Batched Hardware MQTT Wipe (1 command per controller for all cards in chunk)
+      if (rfidCardsToRemove.length > 0) {
+        try {
+          const doorFilter = tenantId ? `filter[tenant][tenantId][_eq]=${tenantId}&` : '';
+          const doorsRes = await fetch(`${import.meta.env.VITE_API_URL}/items/doors?${doorFilter}fields=deviceUuid,uniqueId`, {
+            headers: { Authorization: `Bearer ${activeToken}` }
+          });
+          if (doorsRes.ok) {
+            const doorsData = await doorsRes.json();
+            const uuids = [...new Set((doorsData.data || []).map((d) => d.deviceUuid || d.uniqueId).filter(Boolean))];
+            const validNumericIds = rfidCardsToRemove.map(String).filter((id) => /^\d+$/.test(id));
+            if (uuids.length > 0 && validNumericIds.length > 0) {
+              for (const uuid of uuids) {
+                await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-mqtt`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    action: "delPermission",
+                    uuid: uuid,
+                    data: validNumericIds
+                  })
+                }).catch((knErr) => console.warn('[Knative device-mqtt] Error:', knErr));
+              }
+            }
+          }
+        } catch (e) {
+          console.warn('[Batch Delete] MQTT Wipe notice:', e);
+        }
+      }
+
+      // Step 3: Delete userFingers for chunk
+      try {
+        const fingerRes = await fetch(`${import.meta.env.VITE_API_URL}/items/userFingers?filter[assignedTo][id][_in]=${idString}&fields=id`, {
+          headers: { Authorization: `Bearer ${activeToken}` }
+        });
+        if (fingerRes.ok) {
+          const fingerData = await fingerRes.json();
+          const fingerIds = (fingerData.data || []).map((f) => f.id);
+          if (fingerIds.length > 0) {
+            await fetch(`${import.meta.env.VITE_API_URL}/items/userFingers`, {
+              method: "DELETE",
+              headers: { Authorization: `Bearer ${activeToken}`, "Content-Type": "application/json" },
+              body: JSON.stringify(fingerIds)
+            });
+          }
+        }
+      } catch (e) {}
+
+      // Step 4: Bulk Delete linked Directus user accounts (fetching assignedUser IDs directly from DB BEFORE deleting personalModule)
+      try {
+        const userFetchRes = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule?filter[id][_in]=${idString}&fields=assignedUser.id&limit=-1`, {
+          headers: { Authorization: `Bearer ${activeToken}` }
+        });
+        if (userFetchRes.ok) {
+          const userFetchData = await userFetchRes.json();
+          const userIdsToDelete = (userFetchData.data || [])
+            .map((emp) => typeof emp.assignedUser === "object" ? emp.assignedUser?.id : emp.assignedUser)
+            .filter(Boolean);
+
+          if (userIdsToDelete.length > 0) {
+            await fetch(`${import.meta.env.VITE_API_URL}/users`, {
+              method: "DELETE",
+              headers: { Authorization: `Bearer ${activeToken}`, "Content-Type": "application/json" },
+              body: JSON.stringify(userIdsToDelete)
+            });
+          }
+        }
+      } catch (uErr) {
+        console.warn("[Batch Delete] Bulk user delete notice:", uErr);
+      }
+
+      // Step 5: Bulk Delete personalModule employee records
+      try {
+        await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${activeToken}`, "Content-Type": "application/json" },
+          body: JSON.stringify(chunkEmpIds)
+        });
+      } catch (e) {
+        console.warn("[Batch Delete] Bulk personalModule delete notice:", e);
+      }
+    }
+
+    messageHandler.showSuccess(`Successfully deleted ${idsToDelete.length} employee(s) and wiped hardware RFID permissions in batch`);
+    selectedEmployeeIds.value = [];
+    fetchEmployeeData();
+  } catch (err) {
+    console.error("Bulk delete error:", err);
+    messageHandler.showError("Error deleting selected employees");
+  } finally {
+    deleting.value = false;
+    deleteProgress.show = false;
+  }
+};
 const showFilters = ref(false);
 const filters = reactive({
   branch: "",
@@ -422,7 +1181,7 @@ const messageHandler = inject('messageHandler', defaultMessageHandler);
 
 // Permissions
 const isAdmin = computed(() => userRole === "Admin" || userRole === "Dealer");
-const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage));
+const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value));
 
 let searchTimeout = null;
 const debouncedSearch = () => {
@@ -461,7 +1220,48 @@ const deleteEmployee = async () => {
   deleting.value = true;
   try {
     const emp = employeeToDelete.value;
-    // Step 1: Delete the personalModule record
+
+    // Step 1: Delete all linked cards in cardManagement
+    try {
+      const cardRes = await fetch(`${import.meta.env.VITE_API_URL}/items/cardManagement?filter[employeeId][id][_eq]=${emp.id}&fields=id,rfidCard`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (cardRes.ok) {
+        const cardData = await cardRes.json();
+        if (cardData.data && cardData.data.length > 0) {
+          for (const card of cardData.data) {
+            await fetch(`${import.meta.env.VITE_API_URL}/items/cardManagement/${card.id}`, {
+              method: 'DELETE',
+              headers: { Authorization: `Bearer ${token}` }
+            });
+          }
+        }
+      }
+    } catch (cardErr) {
+      console.warn('Error deleting linked RFID cards:', cardErr);
+    }
+
+    // Step 2: Delete linked userFingers
+    try {
+      const fingerRes = await fetch(`${import.meta.env.VITE_API_URL}/items/userFingers?filter[assignedTo][id][_eq]=${emp.id}&fields=id`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (fingerRes.ok) {
+        const fingerData = await fingerRes.json();
+        if (fingerData.data && fingerData.data.length > 0) {
+          for (const finger of fingerData.data) {
+            await fetch(`${import.meta.env.VITE_API_URL}/items/userFingers/${finger.id}`, {
+              method: 'DELETE',
+              headers: { Authorization: `Bearer ${token}` }
+            });
+          }
+        }
+      }
+    } catch (fingerErr) {
+      console.warn('Error deleting linked userFingers:', fingerErr);
+    }
+
+    // Step 3: Delete the personalModule record
     const pmRes = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule/${emp.id}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` }
@@ -469,14 +1269,16 @@ const deleteEmployee = async () => {
     if (!pmRes.ok && pmRes.status !== 204) {
       throw new Error('Failed to delete employee record');
     }
-    // Step 2: Delete the Directus user account if linked
+
+    // Step 4: Delete the Directus user account if linked
     if (emp.assignedUser?.id) {
       await fetch(`${import.meta.env.VITE_API_URL}/users/${emp.assignedUser.id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` }
       });
     }
-    messageHandler.showSuccess('Employee deleted successfully');
+
+    messageHandler.showSuccess('Employee and all linked RFID cards deleted successfully');
     deleteDialog.value = false;
     employeeToDelete.value = null;
     fetchEmployeeData();
@@ -488,17 +1290,45 @@ const deleteEmployee = async () => {
   }
 };
 
-const buildFilterParams = () => {
+const buildFilterParams = async () => {
   const params = {};
   if (isAdmin.value) {
     params["filter[assignedUser][tenant][tenantId][_eq]"] = tenantId;
   }
-  // Simplified search
+  
   if (search.value) {
-    params["filter[_or][0][employeeId][_eq]"] = search.value;
-    params["filter[_or][1][assignedUser][first_name][_icontains]"] = search.value;
-    params["filter[_or][2][assignedUser][email][_icontains]"] = search.value;
+    const q = search.value.trim();
+    const activeToken = authService.getToken();
+
+    // Query cardManagement to search across assigned RFID card numbers
+    let matchedEmpIdsFromCards = [];
+    try {
+      const cardRes = await fetch(
+        `${import.meta.env.VITE_API_URL}/items/cardManagement?filter[rfidCard][_icontains]=${encodeURIComponent(q)}&fields=employeeId&limit=100`,
+        { headers: { Authorization: `Bearer ${activeToken}` } }
+      );
+      if (cardRes.ok) {
+        const cardData = await cardRes.json();
+        matchedEmpIdsFromCards = (cardData.data || [])
+          .map(c => (typeof c.employeeId === 'object' ? c.employeeId?.id : c.employeeId))
+          .filter(Boolean);
+      }
+    } catch (e) {
+      console.warn("RFID card search query failed:", e);
+    }
+
+    let idx = 0;
+    params[`filter[_or][${idx++}][employeeId][_icontains]`] = q;
+    params[`filter[_or][${idx++}][assignedUser][first_name][_icontains]`] = q;
+    params[`filter[_or][${idx++}][assignedUser][last_name][_icontains]`] = q;
+    params[`filter[_or][${idx++}][assignedUser][email][_icontains]`] = q;
+    params[`filter[_or][${idx++}][assignedUser][phone][_icontains]`] = q;
+
+    if (matchedEmpIdsFromCards.length > 0) {
+      params[`filter[_or][${idx++}][id][_in]`] = [...new Set(matchedEmpIdsFromCards)].join(',');
+    }
   }
+
   if (filters.branch) {
     params["filter[branch][id][_eq]"] = filters.branch;
   }
@@ -509,17 +1339,18 @@ const buildFilterParams = () => {
 };
 
 const fetchEmployeeData = async () => {
-  if (!token || !tenantId) return;
+  const activeToken = authService.getToken();
+  if (!activeToken) return;
 
   try {
     loading.value = true;
-    const filterParams = buildFilterParams();
+    const filterParams = await buildFilterParams();
     
     // First figure out total counts
     const countParams = { "aggregate[count]": "id", ...filterParams };
     const countQs = new URLSearchParams(countParams).toString();
     const countRes = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule?${countQs}`, {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${activeToken}` }
     });
     if (countRes.ok) {
       const countData = await countRes.json();
@@ -529,7 +1360,7 @@ const fetchEmployeeData = async () => {
     // Now fetch actual paginated data
     const queryParams = new URLSearchParams({
       page: page.value,
-      limit: itemsPerPage,
+      limit: itemsPerPage.value,
       ...filterParams
     });
     
@@ -546,7 +1377,7 @@ const fetchEmployeeData = async () => {
     ].map(f => `fields[]=${f}`).join('&');
 
     const res = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule?${queryParams.toString()}&${fields}`, {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${activeToken}` }
     });
 
     if (res.ok) {
@@ -594,14 +1425,14 @@ const fetchBiometricAndCredentialStatus = async (employeeIds) => {
 
   // Fetch RFID cards from cardManagement
   try {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/cardManagement?filter[employeeId][id][_in]=${idString}&fields=id,rfidCard,type,employeeId.id`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/cardManagement?filter[employeeId][_in]=${idString}&fields=id,rfidCard,type,employeeId`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     if (res.ok) {
       const data = await res.json();
       const map = {};
       (data.data || []).forEach(c => {
-        const empId = c.employeeId?.id;
+        const empId = typeof c.employeeId === 'object' ? c.employeeId?.id : c.employeeId;
         if (empId && c.rfidCard) {
           map[empId] = true;
         }

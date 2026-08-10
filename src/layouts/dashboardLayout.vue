@@ -1,5 +1,6 @@
 <template>
   <div class="flex h-screen bg-slate-100 dark:bg-[#0b0f19] overflow-hidden text-slate-900 dark:text-white font-sans transition-colors duration-300">
+    <AlarmBanner />
     <div class="flex w-full h-full overflow-hidden">
       <!-- Sidebar -->
       <component :is="activeSidebar" />
@@ -223,6 +224,7 @@ import { onClickOutside } from '@vueuse/core';
 import { Building, Shield, MapPin, ChevronDown, ChevronRight, Search, Bell, Sun, Moon, User, Settings, Lock, LogOut, HelpCircle, AlertCircle, Clock, X, AlertTriangle, CheckCheck } from 'lucide-vue-next';
 import SecuritySidebar from '@/components/layout/SecuritySidebar.vue';
 import WorkforceSidebar from '@/components/layout/WorkforceSidebar.vue';
+import AlarmBanner from '@/components/AlarmBanner.vue';
 
 import { authService } from '@/services/authService';
 import { patrolService } from '@/services/patrolService';

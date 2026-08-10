@@ -779,8 +779,8 @@ const handleSubmit = async () => {
 
     // Validate RFID Card format and uniqueness if entered
     if (formData.value.rfidCard) {
-      if (!/^\d{7}$/.test(formData.value.rfidCard)) {
-        throw new Error("RFID Card number must be exactly 7 digits.");
+      if (!/^\d+$/.test(formData.value.rfidCard)) {
+        throw new Error("RFID Card number must contain digits only.");
       }
       if (formData.value.rfidCard !== originalCardNumber.value) {
         const cardCheckRes = await fetch(`${import.meta.env.VITE_API_URL}/items/cardManagement?filter[rfidCard][_eq]=${formData.value.rfidCard}`, {

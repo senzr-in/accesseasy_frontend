@@ -160,7 +160,7 @@ import { computed, ref } from 'vue';
 import { useRouter, RouterLink } from 'vue-router';
 import {
   LayoutDashboard, Users, Shield, ShieldCheck, MapPin, 
-  Settings, LogOut, ChevronLeft, ChevronRight, ClipboardList, Building2, Server, Activity, FileText
+  Settings, LogOut, ChevronLeft, ChevronRight, ClipboardList, Building2, Server, Activity, FileText, Clock
 } from 'lucide-vue-next';
 import { authService } from '@/services/authService';
 
@@ -183,7 +183,6 @@ const userInitials = computed(() => userName.value.charAt(0).toUpperCase());
 const dailyOperationsNav = computed(() => {
   const items = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, exact: true },
-    { name: 'Employee Dashboard', href: '/dashboard/employee-dashboard', icon: LayoutDashboard },
     { name: 'Doors', href: '/dashboard/access-control/doors', icon: MapPin },
     { name: 'Groups', href: '/dashboard/easy-access/configurators/access-levels', icon: Shield },
     { name: 'Guards', href: '/dashboard/guards', icon: ShieldCheck },

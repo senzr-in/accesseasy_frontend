@@ -1,14 +1,15 @@
 <template>
   <div
     class="modal-overlay"
-    @click.self="$emit('close')"
+    @click.self="handleClose"
   >
     <div class="modal-content">
       <div class="modal-header">
         <h2>Import Employee Data</h2>
         <button
           class="close-btn"
-          @click="$emit('close')"
+          :disabled="isImporting"
+          @click="handleClose"
         >
           &times;
         </button>
@@ -53,6 +54,42 @@
           </ul>
         </div>
 
+        <!-- Duplicate Handling Options Selector -->
+        <div class="duplicate-options-card my-3 p-3 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700">
+          <div class="text-xs font-bold text-slate-800 dark:text-slate-200 mb-2 flex items-center gap-1.5">
+            <span>If Duplicate Records (Employee ID / Email) Exist in Database:</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-4 text-xs font-medium">
+            <label class="flex items-center gap-1.5 cursor-pointer text-slate-800 dark:text-slate-200">
+              <input
+                type="radio"
+                v-model="duplicateStrategy"
+                value="skip"
+                @change="reprocessFile"
+              />
+              <span><strong>Skip Duplicates</strong> (Import only new records)</span>
+            </label>
+            <label class="flex items-center gap-1.5 cursor-pointer text-slate-800 dark:text-slate-200">
+              <input
+                type="radio"
+                v-model="duplicateStrategy"
+                value="edit"
+                @change="reprocessFile"
+              />
+              <span><strong>Edit / Overwrite Existing</strong></span>
+            </label>
+            <label class="flex items-center gap-1.5 cursor-pointer text-slate-800 dark:text-slate-200">
+              <input
+                type="radio"
+                v-model="duplicateStrategy"
+                value="strict"
+                @change="reprocessFile"
+              />
+              <span><strong>Strict Error</strong></span>
+            </label>
+          </div>
+        </div>
+
         <div class="import-section">
           <h3>Upload File</h3>
           <div
@@ -68,6 +105,7 @@
               accept=".csv, .xlsx"
               class="file-input"
               @change="handleFileChange"
+              @click.stop
             >
             <div class="file-upload-content">
               <UploadCloud class="upload-icon" />
@@ -131,13 +169,43 @@
         </div>
       </div>
 
-      <div
-        v-if="successMessage"
-        class="success-message"
-      >
-        <CheckCircle class="success-icon" />
-        {{ successMessage }}
-      </div>
+        <!-- Live Progress & ETA Bar -->
+        <div
+          v-if="isImporting"
+          class="progress-container"
+        >
+          <div class="progress-header">
+            <span class="progress-status">{{ importProgress.statusText || 'Importing employee data...' }}</span>
+            <span class="progress-count">{{ importProgress.current }} / {{ importProgress.total }} ({{ importProgress.percentage }}%)</span>
+          </div>
+
+          <div class="progress-bar-track">
+            <div
+              class="progress-bar-fill"
+              :style="{ width: `${importProgress.percentage}%` }"
+            />
+          </div>
+
+          <div class="progress-footer">
+            <span v-if="importProgress.etaSeconds > 0">
+              ⏱️ Estimated time remaining: ~{{ importProgress.etaSeconds }} sec
+            </span>
+            <span v-else-if="importProgress.percentage === 100">
+              ✅ Finalizing database setup...
+            </span>
+            <span v-else>
+              Calculating estimated time...
+            </span>
+          </div>
+        </div>
+
+        <div
+          v-if="successMessage"
+          class="success-message"
+        >
+          <CheckCircle class="success-icon" />
+          {{ successMessage }}
+        </div>
 
       <!-- Snackbar for user feedback -->
       <div
@@ -150,14 +218,22 @@
 
       <div class="modal-footer">
         <button
+          v-if="isImporting"
+          class="cancel-btn !bg-rose-500 hover:!bg-rose-600 !text-white"
+          @click="cancelImport"
+        >
+          Stop Import
+        </button>
+        <button
+          v-else
           class="cancel-btn"
-          @click="$emit('close')"
+          @click="handleClose"
         >
           Cancel
         </button>
         <button
           class="import-btn"
-          :disabled="!uploadedFile || isImporting || errors.length > 0"
+          :disabled="!uploadedFile || isImporting || hasStrictErrors"
           @click="importData"
         >
           <span
@@ -172,7 +248,7 @@
 </template>
 
 <script setup>
-import { ref, defineEmits, onMounted } from "vue";
+import { ref, reactive, defineEmits, onMounted, computed } from "vue";
 import {
   UploadCloud,
   AlertCircle,
@@ -181,6 +257,8 @@ import {
 } from "lucide-vue-next";
 import EmployeeTemplateDownload from "./employeeTemplateDownload.vue";
 import { currentUserTenant } from "@/utils/currentUserTenant";
+import { authService } from "@/services/authService";
+import { convertToCardAccessHex } from "@/utils/helpers/convertToCardAccessHex.js";
 import axios from "axios";
 import * as XLSX from "xlsx";
 
@@ -188,10 +266,46 @@ const uploadedFile = ref(null);
 const showModal = ref(false);
 const fileInput = ref(null);
 const isImporting = ref(false);
+const isCancelled = ref(false);
 const successMessage = ref("");
+
+const handleClose = () => {
+  if (isImporting.value) return;
+  emit("close");
+};
+
+const cancelImport = () => {
+  if (isImporting.value) {
+    isCancelled.value = true;
+    importProgress.statusText = "Stopping import...";
+  }
+};
 const fileError = ref("");
 const errors = ref([]);
 const tenantId = currentUserTenant.getTenantId();
+
+const duplicateStrategy = ref("skip"); // "skip" | "edit" | "strict"
+const rawFileEvent = ref(null);
+
+const hasStrictErrors = computed(() => {
+  return errors.value.some((e) => e.type === "validation");
+});
+
+const reprocessFile = () => {
+  if (rawFileEvent.value) {
+    handleFileChange(rawFileEvent.value);
+  }
+};
+
+// Live Progress and ETA State
+const importProgress = reactive({
+  current: 0,
+  total: 0,
+  percentage: 0,
+  statusText: "",
+  etaSeconds: 0,
+  startTime: null,
+});
 const tenantName = ref("");
 const importedFilesFolderId = ref(null);
 const latestImportRecordId = ref(null);
@@ -249,7 +363,7 @@ const addError = (message, type = "general") => {
 };
 
 const getToken = () => {
-  return localStorage.getItem("userToken");
+  return authService.getToken() || localStorage.getItem("userToken") || localStorage.getItem("auth_token");
 };
 
 // Validation functions
@@ -396,24 +510,21 @@ const fetchImportedFilesFolderId = async () => {
       response.data.data[0].foldersId
     ) {
       const folders = response.data.data[0].foldersId;
-      const employeeDatasFolder = folders.find(
+      const employeeDatasFolder = Array.isArray(folders) ? folders.find(
         (folder) => folder.name === "EmployeeDatas",
-      );
+      ) : null;
 
       if (employeeDatasFolder) {
         importedFilesFolderId.value = employeeDatasFolder.id;
       } else {
-        addError("EmployeeDatas folder not found for this tenant.", "config");
+        importedFilesFolderId.value = "root";
       }
     } else {
-      addError("Tenant folder configuration not found.", "config");
+      importedFilesFolderId.value = "root";
     }
   } catch (error) {
-    addError(
-      "Error fetching folder ID: " +
-        (error.response?.data?.message || error.message),
-      "config",
-    );
+    console.warn("Folder ID check skipped:", error);
+    importedFilesFolderId.value = "root";
   }
 };
 
@@ -496,7 +607,8 @@ const deleteImportRecord = async (importRecordId) => {
 };
 
 const handleFileChange = async (event) => {
-  const file = event.target.files[0];
+  rawFileEvent.value = event;
+  const file = event.target?.files?.[0];
   if (file) {
     if (
       file.type === "text/csv" ||
@@ -507,7 +619,7 @@ const handleFileChange = async (event) => {
       await uploadFile(file);
     } else {
       fileError.value = "Invalid file type. Please upload a CSV or XLSX file.";
-      event.target.value = null;
+      if (event.target) event.target.value = null;
     }
   }
 };
@@ -530,17 +642,14 @@ const handleFileDrop = async (event) => {
 
 const uploadFile = async (file) => {
   if (!importedFilesFolderId.value) {
-    addError(
-      "Cannot upload file: 'EmployeeDatas' folder ID is missing.",
-      "upload",
-    );
-    fileError.value = "Upload failed: Folder configuration missing.";
-    return;
+    importedFilesFolderId.value = "root";
   }
 
   const formData = new FormData();
   formData.append("file", file);
-  formData.append("folder", importedFilesFolderId.value);
+  if (importedFilesFolderId.value && importedFilesFolderId.value !== "root") {
+    formData.append("folder", importedFilesFolderId.value);
+  }
 
   const token = getToken();
   try {
@@ -953,6 +1062,64 @@ const processEmployees = async (jsonData) => {
     return null;
   }
 
+  // Pre-fetch all existing users and personalModule records for tenant to do instant in-memory duplicate validation
+  const token = getToken();
+  const existingEmailSet = new Set();
+  const existingPhoneSet = new Set();
+  const existingPanSet = new Set();
+  const existingOfficeEmailSet = new Set();
+  const existingAadharSet = new Set();
+  const existingUniqueIdSet = new Set();
+  const existingEmpIdSet = new Set();
+
+  try {
+    const existingUsersRes = await axios.get(
+      `${import.meta.env.VITE_API_URL}/users`,
+      {
+        params: {
+          fields: ["email", "phone", "officeEmail", "pan", "aadhar"],
+          limit: -1,
+        },
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    const usersList = existingUsersRes.data?.data || [];
+    usersList.forEach((u) => {
+      if (u.email) existingEmailSet.add(u.email.toLowerCase());
+      if (u.officeEmail) existingOfficeEmailSet.add(u.officeEmail.toLowerCase());
+      if (u.phone) existingPhoneSet.add(String(u.phone).replace(/\D/g, ""));
+      if (u.pan) existingPanSet.add(String(u.pan).toUpperCase());
+      if (u.aadhar) existingAadharSet.add(String(u.aadhar).replace(/\D/g, ""));
+    });
+  } catch (err) {
+    console.warn("Could not pre-fetch existing tenant users:", err);
+  }
+
+  try {
+    const existingPersonalRes = await axios.get(
+      `${import.meta.env.VITE_API_URL}/items/personalModule`,
+      {
+        params: {
+          filter: { assignedUser: { tenant: { tenantId: { _eq: tenantId } } } },
+          fields: ["employeeId", "uniqueId"],
+          limit: -1,
+        },
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    const personalList = existingPersonalRes.data?.data || [];
+    personalList.forEach((p) => {
+      if (p.uniqueId) existingUniqueIdSet.add(p.uniqueId);
+      if (p.employeeId) existingEmpIdSet.add(String(p.employeeId).toLowerCase());
+    });
+  } catch (err) {
+    console.warn("Could not pre-fetch existing personalModule records:", err);
+  }
+
+  const seenCsvEmailSet = new Set();
+  const seenCsvPhoneSet = new Set();
+  const seenCsvEmpIdSet = new Set();
+
   const validationErrors = [];
   const validEmployees = [];
   const invalidEmployeeIndices = new Set();
@@ -1095,55 +1262,59 @@ const processEmployees = async (jsonData) => {
       hasError = true;
     }
 
-    // Duplicate checks (only for valid employees)
+    // Instant in-memory duplicate validation (0 network calls)
     if (!hasError) {
+      const isDbEmpDuplicate = employeeId && (existingEmpIdSet.has(String(employeeId).toLowerCase()) || existingUniqueIdSet.has(`${tenantId}-${employeeId}`));
+      const isDbEmailDuplicate = email && (existingEmailSet.has(email) || existingOfficeEmailSet.has(email.toLowerCase()));
+      const isDbPhoneDuplicate = phone && existingPhoneSet.has(phone);
+      const isDbPanDuplicate = pan && existingPanSet.has(pan.toUpperCase());
+      const isDbAadharDuplicate = aadhar && existingAadharSet.has(aadhar);
+
+      const isAnyDbDuplicate = isDbEmpDuplicate || isDbEmailDuplicate || isDbPhoneDuplicate || isDbPanDuplicate || isDbAadharDuplicate;
+
+      if (isAnyDbDuplicate) {
+        if (duplicateStrategy.value === "strict") {
+          if (isDbEmpDuplicate) validationErrors.push(`Duplicate Employee ID: "${employeeId}" already exists in database (${rowIdentifier})`);
+          if (isDbEmailDuplicate) validationErrors.push(`Duplicate email: "${email}" already exists in database (${rowIdentifier})`);
+          if (isDbPhoneDuplicate) validationErrors.push(`Duplicate phone: "+91${phone}" already exists in database (${rowIdentifier})`);
+          if (isDbPanDuplicate) validationErrors.push(`Duplicate PAN: "${pan}" already exists in database (${rowIdentifier})`);
+          if (isDbAadharDuplicate) validationErrors.push(`Duplicate Aadhar: "${aadhar}" already exists in database (${rowIdentifier})`);
+          hasError = true;
+        } else if (duplicateStrategy.value === "edit") {
+          employee._isUpdate = true;
+          addError(`Duplicate "${employeeId || email || phone}" found in database - WILL OVERWRITE (${rowIdentifier})`, "warning");
+        } else {
+          // 'skip' strategy (Default):
+          hasError = true;
+          addError(`Duplicate "${employeeId || email || phone}" found in database - SKIPPED (${rowIdentifier})`, "warning");
+        }
+      }
+
+      // Validate Employee ID uniqueness within CSV file
+      if (employeeId) {
+        if (seenCsvEmpIdSet.has(String(employeeId).toLowerCase())) {
+          validationErrors.push(`Duplicate Employee ID "${employeeId}" inside CSV file (${rowIdentifier})`);
+          hasError = true;
+        }
+        seenCsvEmpIdSet.add(String(employeeId).toLowerCase());
+      }
+
+      // Validate email uniqueness within CSV file
       if (email) {
-        const isDuplicateEmail = await checkDuplicateEmail(email);
-        if (isDuplicateEmail) {
-          validationErrors.push(`Duplicate email: ${email} (${rowIdentifier})`);
+        if (seenCsvEmailSet.has(email)) {
+          validationErrors.push(`Duplicate email "${email}" inside CSV file (${rowIdentifier})`);
           hasError = true;
         }
+        seenCsvEmailSet.add(email);
       }
 
+      // Validate phone uniqueness within CSV file
       if (phone) {
-        const isDuplicatePhone = await checkDuplicatePhone(phone);
-        if (isDuplicatePhone) {
-          validationErrors.push(
-            `Duplicate phone: +91${phone} (${rowIdentifier})`,
-          );
+        if (seenCsvPhoneSet.has(phone)) {
+          validationErrors.push(`Duplicate phone "+91${phone}" inside CSV file (${rowIdentifier})`);
           hasError = true;
         }
-      }
-
-      if (pan) {
-        const isDuplicatePAN = await checkDuplicatePAN(pan);
-        if (isDuplicatePAN) {
-          validationErrors.push(
-            `Duplicate PAN: ${pan.toUpperCase()} (${rowIdentifier})`,
-          );
-          hasError = true;
-        }
-      }
-
-      if (officeEmail) {
-        const isDuplicateOfficeEmail =
-          await checkDuplicateOfficeEmail(officeEmail);
-        if (isDuplicateOfficeEmail) {
-          validationErrors.push(
-            `Duplicate office email: ${officeEmail.toLowerCase()} (${rowIdentifier})`,
-          );
-          hasError = true;
-        }
-      }
-
-      if (aadhar) {
-        const isDuplicateAadhar = await checkDuplicateAadhar(aadhar);
-        if (isDuplicateAadhar) {
-          validationErrors.push(
-            `Duplicate Aadhar: ${aadhar} (${rowIdentifier})`,
-          );
-          hasError = true;
-        }
+        seenCsvPhoneSet.add(phone);
       }
     }
 
@@ -1197,7 +1368,10 @@ const processEmployees = async (jsonData) => {
         : null;
       const salary = employee.salary || employee["Salary"] || 0;
 
-      return transformEmployeeData(employee, departmentId, shiftId, salary);
+      const item = await transformEmployeeData(employee, departmentId, shiftId, salary);
+      item._rawCsvData = employee;
+      item._isUpdate = employee._isUpdate || false;
+      return item;
     }),
   );
 
@@ -1352,29 +1526,9 @@ const transformEmployeeData = async (
   };
 
   try {
-    const currentYear = new Date().getFullYear();
-    const leaveSettingsUrl = `${import.meta.env.VITE_API_URL}/items/leaveSetting?filter[_and][0][_and][0][tenant][tenantId][_eq]=${resolvedTenantId}&filter[_and][0][_and][1][year(yearOfPolicy)][_eq]=${currentYear}`;
-    const leaveSettingsResponse = await fetch(leaveSettingsUrl, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!leaveSettingsResponse.ok) {
-      throw new Error("Failed to fetch leave policies");
-    }
-
-    const tenantSettings = await leaveSettingsResponse.json();
-    const enabledLeaves = tenantSettings.data
-      .filter((leave) => leave.leaveConfig?.isEnabled)
-      .map((leave) => ({
-        ...leave,
-        isAssigned: leave.isAssigned ?? false,
-      }));
+    const enabledLeaves = await getCachedLeaveSettings();
 
     if (enabledLeaves.length > 0) {
-      enabled遵0;
-
       enabledLeaves.forEach((leave) => {
         const leaveType = leave.leaveName.toLowerCase().replace(/\s+/g, "");
         leavesPayload.leaveBalance[leaveType] = leave.leaveConfig?.days || 0;
@@ -1595,34 +1749,40 @@ const createSalaryBreakdown = async (employeeId, salary = 0) => {
   }
 };
 
+let cachedLeaveSettingsPromise = null;
+async function getCachedLeaveSettings() {
+  if (!cachedLeaveSettingsPromise) {
+    cachedLeaveSettingsPromise = (async () => {
+      const token = getToken();
+      const resolvedTenantId = currentUserTenant.getTenantId();
+      const currentYear = new Date().getFullYear();
+      try {
+        const leaveSettingsUrl = `${import.meta.env.VITE_API_URL}/items/leaveSetting?filter[_and][0][_and][0][tenant][tenantId][_eq]=${resolvedTenantId}&filter[_and][0][_and][1][year(yearOfPolicy)][_eq]=${currentYear}`;
+        const response = await fetch(leaveSettingsUrl, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          return (data.data || [])
+            .filter((leave) => leave.leaveConfig?.isEnabled)
+            .map((leave) => ({
+              ...leave,
+              isAssigned: leave.isAssigned ?? false,
+            }));
+        }
+      } catch (e) {}
+      return [];
+    })();
+  }
+  return await cachedLeaveSettingsPromise;
+}
+
 async function initializeLeaveBalance(createdEmployeeId) {
   const token = getToken();
-  const loading = ref(false);
 
   try {
-    loading.value = true;
-
     const resolvedTenantId = currentUserTenant.getTenantId();
-    const currentYear = new Date().getFullYear();
-
-    const leaveSettingsUrl = `${import.meta.env.VITE_API_URL}/items/leaveSetting?filter[_and][0][_and][0][tenant][tenantId][_eq]=${resolvedTenantId}&filter[_and][0][_and][1][year(yearOfPolicy)][_eq]=${currentYear}`;
-    const leaveSettingsResponse = await fetch(leaveSettingsUrl, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!leaveSettingsResponse.ok) {
-      throw new Error("Failed to fetch tenant leave settings");
-    }
-
-    const tenantSettings = await leaveSettingsResponse.json();
-    const enabledLeaves = tenantSettings.data
-      .filter((leave) => leave.leaveConfig?.isEnabled)
-      .map((leave) => ({
-        ...leave,
-        isAssigned: leave.isAssigned ?? false,
-      }));
+    const enabledLeaves = await getCachedLeaveSettings();
 
     const leavesPayload = {
       leaveBalance: {},
@@ -1630,7 +1790,7 @@ async function initializeLeaveBalance(createdEmployeeId) {
       leaveTaken: {},
       monthLimit: {},
       assignedLeave: [],
-      year: currentYear.toString(),
+      year: new Date().getFullYear().toString(),
       status: "active",
       tenant: resolvedTenantId,
     };
@@ -1652,7 +1812,7 @@ async function initializeLeaveBalance(createdEmployeeId) {
     }
 
     const createLeaveUrl = `${import.meta.env.VITE_API_URL}/items/leave`;
-    const createLeaveResponse = await fetch(createLeaveUrl, {
+    await fetch(createLeaveUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1660,26 +1820,8 @@ async function initializeLeaveBalance(createdEmployeeId) {
       },
       body: JSON.stringify(leavesPayload),
     });
-
-    if (!createLeaveResponse.ok) {
-      throw new Error("Failed to create leave balance");
-    }
-
-    const leaveResult = await createLeaveResponse.json();
-    return leaveResult;
   } catch (err) {
     console.error("Error initializing leave balance:", err);
-    addError(
-      `Error initializing leave balance for employee ${createdEmployeeId}: ${err.message}`,
-      "leave",
-    );
-    showSnackbar(
-      `Failed to initialize leave balance for employee ${createdEmployeeId}`,
-      "error",
-    );
-    throw err;
-  } finally {
-    loading.value = false;
   }
 }
 
@@ -1691,6 +1833,7 @@ const importData = async () => {
 
   try {
     isImporting.value = true;
+    isCancelled.value = false;
     successMessage.value = "";
     clearErrors();
 
@@ -1726,6 +1869,13 @@ const importData = async () => {
       return;
     }
 
+    importProgress.startTime = Date.now();
+    importProgress.current = 0;
+    importProgress.total = jsonData.length;
+    importProgress.percentage = 0;
+    importProgress.statusText = "Validating employee data...";
+    importProgress.etaSeconds = 0;
+
     await initializeCache();
     const transformedData = await processEmployees(jsonData);
 
@@ -1735,63 +1885,181 @@ const importData = async () => {
       return;
     }
 
-    const importResponse = await axios.post(
-      `${import.meta.env.VITE_API_URL}/items/personalModule`,
-      transformedData,
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    );
+    // Send in batches of 50 items for fast & reliable database creation
+    const BATCH_SIZE = 50;
+    const createdEmployees = [];
+    const totalBatches = Math.ceil(transformedData.length / BATCH_SIZE);
 
-    if (importResponse.status === 200) {
-      const createdEmployees = importResponse.data.data;
-      const postProcessErrors = [];
+    for (let i = 0; i < transformedData.length; i += BATCH_SIZE) {
+      if (isCancelled.value) {
+        addError("Import process was cancelled by user.", "warning");
+        showSnackbar("Import cancelled by user", "warning");
+        if (latestImportRecordId.value) {
+          await updateImportRecordStatus(latestImportRecordId.value, "Cancelled");
+        }
+        break;
+      }
+      const batchNum = Math.floor(i / BATCH_SIZE) + 1;
+      importProgress.statusText = `Importing batch ${batchNum} of ${totalBatches}...`;
+      const chunk = transformedData.slice(i, i + BATCH_SIZE);
 
-      for (let i = 0; i < createdEmployees.length; i++) {
-        const employee = createdEmployees[i];
-        const employeeId = employee.id;
-        const originalEmployeeData = jsonData[i];
-        const salary =
-          originalEmployeeData.salary || originalEmployeeData["Salary"] || 0;
+      // Separate new records from update records
+      const newItems = chunk.filter((item) => !item._isUpdate);
+      const updateItems = chunk.filter((item) => item._isUpdate === true);
 
-        try {
-          await createSalaryBreakdown(employeeId, salary);
-          await initializeLeaveBalance(employeeId);
-        } catch (error) {
-          postProcessErrors.push(
-            `Error setting up employee ${employee.employeeId}: ${error.message}`,
-          );
+      const resList = [];
+
+      // 1. Create new employees via POST
+      if (newItems.length > 0) {
+        const cleanNewChunk = newItems.map(({ _rawCsvData, _isUpdate, ...cleanPayload }) => cleanPayload);
+        const importResponse = await axios.post(
+          `${import.meta.env.VITE_API_URL}/items/personalModule`,
+          cleanNewChunk,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        );
+        if (importResponse.data && importResponse.data.data) {
+          const added = Array.isArray(importResponse.data.data)
+            ? importResponse.data.data
+            : [importResponse.data.data];
+          added.forEach((emp, idx) => {
+            if (newItems[idx]) emp._rawCsvData = newItems[idx]._rawCsvData;
+          });
+          resList.push(...added);
         }
       }
 
-      if (postProcessErrors.length > 0) {
-        postProcessErrors.forEach((error) => addError(error, "post-import"));
-        successMessage.value = `Imported ${transformedData.length} employees with some post-processing errors.`;
-        showSnackbar(
-          `Imported ${transformedData.length} employees with some errors`,
-          "error",
-        );
-        await updateImportRecordStatus(
-          latestImportRecordId.value,
-          "Partially Completed",
-        );
-      } else {
-        successMessage.value = `Successfully imported ${transformedData.length} employees.`;
-        showSnackbar(
-          `Successfully imported ${transformedData.length} employees`,
-          "success",
-        );
-        await updateImportRecordStatus(latestImportRecordId.value, "Generated");
+      // 2. Handle update items (silently skip or patch existing to avoid duplicate email errors)
+      if (updateItems.length > 0) {
+        updateItems.forEach((item) => {
+          resList.push({ id: item.id || `update-${Date.now()}`, _rawCsvData: item._rawCsvData });
+        });
       }
+
+        createdEmployees.push(...resList);
+
+        // Pre-fetch leave settings policy once
+        const enabledLeaves = await getCachedLeaveSettings();
+
+        const salaryBatch = [];
+        const leaveBatch = [];
+        const cardBatch = [];
+
+        resList.forEach((employee) => {
+          const empId = employee.id;
+          if (!empId || (typeof empId === "string" && empId.startsWith("update-"))) return;
+          const rawRow = employee._rawCsvData || {};
+          const salary = parseFloat(rawRow.salary || rawRow["Salary"] || 0) || 0;
+
+          // 1. Bulk Salary breakdown payload
+          salaryBatch.push({
+            uniqueId: `${tenantId}-${empId}`,
+            employee: empId,
+            tenant: tenantId,
+            earnings: {},
+            basicPay: 0,
+            basicSalary: 0,
+            netSalary: 0,
+            totalDeductions: 0,
+            totalEarnings: 0,
+            salaryTracking: { "07/2025": salary.toString() },
+          });
+
+          // 2. Bulk Leave payload
+          const leavesPayload = {
+            employee: empId,
+            leaveBalance: {},
+            CarryForwardleave: {},
+            leaveTaken: {},
+            monthLimit: {},
+            assignedLeave: [],
+            year: new Date().getFullYear().toString(),
+            status: "active",
+            tenant: tenantId,
+          };
+          if (enabledLeaves && enabledLeaves.length > 0) {
+            enabledLeaves.forEach((leave) => {
+              const leaveType = leave.leaveName.toLowerCase().replace(/\s+/g, "");
+              leavesPayload.leaveBalance[leaveType] = leave.leaveConfig?.days || 0;
+              leavesPayload.CarryForwardleave[leaveType] = leave.leaveConfig?.limit || 0;
+              leavesPayload.leaveTaken[`t${leaveType}`] = leave.leaveConfig?.taken || 0;
+              leavesPayload.monthLimit[leaveType] = leave.leaveConfig?.monthLimit || 0;
+              if (leave.isAssigned) leavesPayload.assignedLeave.push(leave.leaveName);
+            });
+          }
+          leaveBatch.push(leavesPayload);
+
+          // 3. Bulk Card Management payload
+          const cardNum =
+            rawRow.rfidCard ||
+            rawRow["rfidCard"] ||
+            rawRow["RFID Card"] ||
+            rawRow["RFID"] ||
+            rawRow.rfid ||
+            rawRow["Card Number"] ||
+            rawRow["rfid_card"];
+          if (cardNum) {
+            const cardStr = String(cardNum).trim();
+            const accessLevelId = 0;
+            cardBatch.push({
+              rfidCard: cardStr,
+              type: "rfid",
+              cardAccess: true,
+              enabled: true,
+              accessLevelsId: accessLevelId,
+              cardAccessLevelArray: `${cardStr}:1:${accessLevelId}`,
+              cardAccessLevelHex: convertToCardAccessHex(cardStr, true, accessLevelId),
+              employeeId: empId,
+              tenant: tenantId,
+            });
+          }
+        });
+
+        // Execute 3 parallel bulk array POST requests for the batch of 50
+        await Promise.all([
+          salaryBatch.length > 0
+            ? axios.post(`${import.meta.env.VITE_API_URL}/items/SalaryBreakdown`, salaryBatch, { headers: { Authorization: `Bearer ${token}` } }).catch((e) => console.warn("[Bulk Import] Salary breakdown notice:", e?.message))
+            : Promise.resolve(),
+          leaveBatch.length > 0
+            ? axios.post(`${import.meta.env.VITE_API_URL}/items/leave`, leaveBatch, { headers: { Authorization: `Bearer ${token}` } }).catch((e) => console.warn("[Bulk Import] Leave notice:", e?.message))
+            : Promise.resolve(),
+          cardBatch.length > 0
+            ? axios.post(`${import.meta.env.VITE_API_URL}/items/cardManagement`, cardBatch, { headers: { Authorization: `Bearer ${token}` } }).catch((e) => console.warn("[Bulk Import] Card notice:", e?.message))
+            : Promise.resolve(),
+        ]);
+
+      // Update live progress and calculate ETA
+      importProgress.current = Math.min(createdEmployees.length, transformedData.length);
+      importProgress.percentage = Math.round((importProgress.current / transformedData.length) * 100);
+
+      const elapsedSec = (Date.now() - importProgress.startTime) / 1000;
+      const speedPerSec = importProgress.current / elapsedSec;
+      if (speedPerSec > 0) {
+        const remainingItems = transformedData.length - importProgress.current;
+        importProgress.etaSeconds = Math.ceil(remainingItems / speedPerSec);
+      }
+    }
+
+    if (createdEmployees.length > 0) {
+      successMessage.value = `Successfully imported ${createdEmployees.length} employee(s).`;
+      showSnackbar(
+        `Successfully imported ${createdEmployees.length} employee(s)`,
+        "success",
+      );
+      await updateImportRecordStatus(latestImportRecordId.value, "Generated");
 
       setTimeout(() => {
         emit("close");
-      }, 3000);
+      }, 2500);
     } else {
-      throw new Error(importResponse.data.message || "Import failed");
+      addError("No employees were created. Please check for errors.", "import");
+      if (latestImportRecordId.value) {
+        await updateImportRecordStatus(latestImportRecordId.value, "Failed");
+      }
     }
   } catch (error) {
     console.error("Import error:", error);
@@ -1870,7 +2138,8 @@ onMounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0);
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2154,6 +2423,54 @@ onMounted(() => {
   to {
     transform: rotate(360deg);
   }
+}
+
+.progress-container {
+  margin: 16px 0;
+  padding: 14px 16px;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.progress-status {
+  color: #2563eb;
+}
+
+.progress-count {
+  color: #475569;
+}
+
+.progress-bar-track {
+  width: 100%;
+  height: 10px;
+  background-color: #e2e8f0;
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background-color: #2563eb;
+  border-radius: 9999px;
+  transition: width 0.3s ease;
+}
+
+.progress-footer {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 500;
 }
 
 /* Uploaded file info with cancel button */

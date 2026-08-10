@@ -21,7 +21,7 @@
           >
         </div>
         <button 
-          class="flex items-center justify-center gap-2 h-10 px-5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-black text-[10px] uppercase tracking-widest transition-all shadow-md active:scale-95"
+          class="flex items-center justify-center gap-2 h-10 px-5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-black text-[10px] uppercase tracking-widest transition-all shadow-md active:scale-95 cursor-pointer"
           @click="openCreateDialog"
         >
           <Plus class="h-4 w-4" /> ADD RULE
@@ -31,8 +31,8 @@
 
     <!-- Empty State -->
     <div
-      v-if="filtered.length === 0"
-      class="border-dashed border-2 border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 dark:bg-slate-900/20 rounded-2xl"
+      v-if="filtered.length === 0 && !isLoading"
+      class="border-dashed border-2 border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 rounded-2xl"
     >
       <div class="flex flex-col items-center justify-center p-16 text-center space-y-4">
         <div class="p-4 rounded-full bg-cyan-50 dark:bg-cyan-500/5 border border-cyan-100 dark:border-cyan-500/10">
@@ -47,7 +47,7 @@
           </p>
         </div>
         <button 
-          class="h-9 px-4 rounded-lg border border-cyan-200 dark:border-cyan-500/20 text-cyan-600 dark:text-cyan-500 text-xs font-black uppercase tracking-widest hover:bg-cyan-50 dark:hover:bg-cyan-500/10 transition-colors" 
+          class="h-9 px-4 rounded-lg border border-cyan-200 dark:border-cyan-500/20 text-cyan-600 dark:text-cyan-500 text-xs font-black uppercase tracking-widest hover:bg-cyan-50 dark:hover:bg-cyan-500/10 transition-colors cursor-pointer" 
           @click="openCreateDialog"
         >
           Create First Rule
@@ -57,27 +57,24 @@
 
     <!-- Data Table -->
     <div
-      v-else
+      v-else-if="!isLoading"
       class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden flex flex-col"
     >
       <div class="overflow-x-auto">
         <table class="w-full text-left whitespace-nowrap">
-          <thead class="bg-slate-50 dark:bg-slate-900/50 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800">
+          <thead class="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800">
             <tr>
               <th class="h-12 px-6 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                 Rule Name
               </th>
               <th class="h-12 px-6 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-                Zone
+                Anti-Passback Mode
               </th>
               <th class="h-12 px-6 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                 Group
               </th>
               <th class="h-12 px-6 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                 Schedule
-              </th>
-              <th class="h-12 px-6 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-                Priority
               </th>
               <th class="h-12 px-6 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                 Status
@@ -91,7 +88,7 @@
             <tr
               v-for="rule in filtered"
               :key="rule.id"
-              class="hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-slate-800/50 transition-colors group"
+              class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group"
             >
               <td class="px-6 py-4">
                 <div class="flex items-center gap-3">
@@ -103,13 +100,18 @@
                       {{ rule.name }}
                     </p>
                     <p class="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
-                      {{ rule.id }}
+                      ID: {{ rule.id }}
                     </p>
                   </div>
                 </div>
               </td>
-              <td class="px-6 py-4 text-slate-600 dark:text-slate-400 font-bold text-sm">
-                {{ rule.zone }}
+              <td class="px-6 py-4">
+                <span
+                  class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border"
+                  :class="rule.priority === 'High' ? 'bg-rose-50 text-rose-600 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20' : 'bg-cyan-50 text-cyan-600 border-cyan-200 dark:bg-cyan-500/10 dark:text-cyan-400 dark:border-cyan-500/20'"
+                >
+                  {{ rule.antiPassbackMode || 'PREVENT' }}
+                </span>
               </td>
               <td class="px-6 py-4">
                 <div class="flex items-center gap-2 text-sm font-bold text-slate-600 dark:text-slate-300">
@@ -124,17 +126,9 @@
                 </div>
               </td>
               <td class="px-6 py-4">
-                <span
-                  class="inline-flex items-center px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border"
-                  :class="getPriorityClass(rule.priority)"
-                >
-                  {{ rule.priority }}
-                </span>
-              </td>
-              <td class="px-6 py-4">
                 <div 
                   class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-[10px] font-black uppercase tracking-widest border"
-                  :class="rule.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : 'bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'"
+                  :class="rule.status === 'Active' ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'"
                 >
                   <span
                     class="w-1.5 h-1.5 rounded-full"
@@ -144,11 +138,8 @@
                 </div>
               </td>
               <td class="px-6 py-4 text-right">
-                <button class="h-8 w-8 inline-flex items-center justify-center rounded-lg text-slate-400 hover:text-cyan-600 hover:bg-cyan-50 dark:hover:bg-cyan-500/10 transition-colors">
-                  <Settings class="w-4 h-4" />
-                </button>
                 <button
-                  class="h-8 w-8 inline-flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors ml-1"
+                  class="h-8 w-8 inline-flex items-center justify-center rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors cursor-pointer"
                   @click="handleDelete(rule.id)"
                 >
                   <Trash2 class="w-4 h-4" />
@@ -159,38 +150,106 @@
         </table>
       </div>
       
-      <div class="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 dark:bg-slate-900/50 text-center">
+      <div class="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 text-center">
         <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
           Showing {{ filtered.length }} of {{ rules.length }} rules
         </span>
+      </div>
+    </div>
+
+    <!-- Create Rule Modal -->
+    <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+      <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 max-w-md w-full p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-200">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+          <div class="flex items-center gap-3">
+            <div class="p-2 rounded-xl bg-cyan-50 dark:bg-cyan-500/10 text-cyan-600 dark:text-cyan-400">
+              <ShieldCheck class="w-5 h-5" />
+            </div>
+            <div>
+              <h2 class="text-lg font-black text-slate-900 dark:text-white">Create Access Rule</h2>
+              <p class="text-xs font-medium text-slate-400">Configure Anti-Passback & Access Policy</p>
+            </div>
+          </div>
+          <button @click="showModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
+            <X class="w-5 h-5" />
+          </button>
+        </div>
+
+        <form @submit.prevent="saveRule" class="space-y-4">
+          <div>
+            <label class="block text-xs font-black uppercase tracking-wider text-slate-500 mb-1.5">Rule / Zone Name *</label>
+            <input
+              v-model="form.zoneName"
+              type="text"
+              required
+              placeholder="e.g. Main Lobby APB Rule"
+              class="w-full h-10 px-3.5 text-sm rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+            />
+          </div>
+
+          <div>
+            <label class="block text-xs font-black uppercase tracking-wider text-slate-500 mb-1.5">Anti-Passback Mode *</label>
+            <select
+              v-model="form.antiPassbackMode"
+              class="w-full h-10 px-3.5 text-sm rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
+            >
+              <option value="PREVENT">Prevent Double Entry (Strict APB)</option>
+              <option value="WARN">Warning Log Only</option>
+              <option value="NONE">Disabled</option>
+            </select>
+          </div>
+
+          <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+            <button
+              type="button"
+              @click="showModal = false"
+              class="h-10 px-4 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 text-xs font-black uppercase tracking-wider hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              :disabled="isSaving"
+              class="h-10 px-5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-black uppercase tracking-widest transition-all shadow-md active:scale-95 disabled:opacity-50 cursor-pointer"
+            >
+              {{ isSaving ? 'Saving...' : 'Save Rule' }}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
-import { Search, Plus, ShieldCheck, ShieldAlert, Users, Clock, Settings, Trash2, Loader2 } from "lucide-vue-next";
+import { ref, computed, reactive, onMounted } from "vue";
+import { Search, Plus, ShieldCheck, ShieldAlert, Users, Clock, Trash2, X } from "lucide-vue-next";
 import { antipassbackService } from "@/services/antipassbackService";
 
 const rules = ref([]);
 const isLoading = ref(true);
 const search = ref("");
+const showModal = ref(false);
+const isSaving = ref(false);
+
+const form = reactive({
+  zoneName: "",
+  antiPassbackMode: "PREVENT"
+});
 
 const fetchRules = async () => {
   isLoading.value = true;
   try {
     const data = await antipassbackService.fetchZones();
-    // Mapping backend 'Anti-passback Zones' to the 'Rules' UI format
-    rules.value = data.map(item => ({
+    rules.value = (data || []).map(item => ({
       id: item.id,
       name: item.zoneName || `AP Zone ${item.id}`,
-      zone: item.zone?.zoneName || "Global",
-      group: "All Employees", // Mocked as the backend might not have this link clearly
-      schedule: "24/7 Access", // Mocked
+      antiPassbackMode: item.antiPassbackMode || "PREVENT",
+      group: "All Employees",
+      schedule: "24/7 Access",
       priority: item.antiPassbackMode === 'PREVENT' ? 'High' : 'Normal',
       status: 'Active'
-    })) || [];
+    }));
   } catch (error) {
     console.error("Error fetching rules:", error);
   } finally {
@@ -200,35 +259,44 @@ const fetchRules = async () => {
 
 const filtered = computed(() => {
   return rules.value.filter(r => 
-      r.name.toLowerCase().includes(search.value.toLowerCase()) || 
-      r.zone.toLowerCase().includes(search.value.toLowerCase())
+      r.name.toLowerCase().includes(search.value.toLowerCase())
   );
 });
 
-const getPriorityClass = (priority) => {
-    switch(priority) {
-        case 'High': return 'bg-rose-50 text-rose-600 border-rose-200 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20';
-        case 'Normal': return 'bg-cyan-50 text-cyan-600 border-cyan-200 dark:bg-cyan-500/10 dark:text-cyan-400 dark:border-cyan-500/20';
-        case 'Low': return 'bg-slate-100 dark:bg-slate-950 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700';
-        default: return 'bg-slate-100 dark:bg-slate-950 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700';
-    }
-}
-
 const openCreateDialog = () => {
-    alert("Create Rule dialog triggered");
+  form.zoneName = "";
+  form.antiPassbackMode = "PREVENT";
+  showModal.value = true;
+};
+
+const saveRule = async () => {
+  isSaving.value = true;
+  try {
+    await antipassbackService.createZone({
+      zoneName: form.zoneName,
+      antiPassbackMode: form.antiPassbackMode
+    });
+    showModal.value = false;
+    await fetchRules();
+  } catch (error) {
+    console.error("Error saving rule:", error);
+    alert("Failed to save rule: " + (error.message || error));
+  } finally {
+    isSaving.value = false;
+  }
 };
 
 const handleDelete = async (id) => {
-    if(confirm("Are you sure you want to delete this rule?")) {
-        try {
-          await antipassbackService.deleteZone(id);
-          fetchRules();
-        } catch (error) {
-          console.error("Error deleting rule:", error);
-          alert("Failed to delete rule");
-        }
+  if (confirm("Are you sure you want to delete this rule?")) {
+    try {
+      await antipassbackService.deleteZone(id);
+      fetchRules();
+    } catch (error) {
+      console.error("Error deleting rule:", error);
+      alert("Failed to delete rule");
     }
-}
+  }
+};
 
 onMounted(() => {
   fetchRules();
