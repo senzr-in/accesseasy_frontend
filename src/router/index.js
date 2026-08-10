@@ -98,6 +98,9 @@ if (appMode === 'security') {
     { path: "my-attendance", name: "MyAttendance", component: () => import("@/pages/myAttendance/index.vue"), meta: { roles: ["Admin", "Manager", "Employee"] } },
     { path: "my-logs", name: "MyLogs", component: () => import("@/pages/myLogs/index.vue"), meta: { roles: ["Admin", "Manager", "Employee"] } },
     { path: "profile", name: "Profile", component: () => import("@/pages/profile/index.vue"), meta: { roles: ["Admin", "Manager", "Employee"] } },
+    { path: "devices/cameras", name: "CameraDeviceManager", component: () => import("@/pages/devicesManager/camera/CameraDeviceManager.vue"), meta: { roles: ["Admin", "Manager"] } },
+    { path: "monitoring/camera-logs", name: "CameraLogsView", component: () => import("@/pages/monitoring/CameraLogsView.vue"), meta: { roles: ["Admin", "Manager", "Guard"] } },
+    { path: "easy-access/employee-logs", name: "EmployeeLogsView", component: () => import("@/pages/employee/EmployeeLogsView.vue"), meta: { roles: ["Admin", "Manager"] } },
     { path: "report-automation", name: "ReportAutomation", component: () => import("@/pages/reportAutomation/index.vue"), meta: { roles: ["Admin"] } }
   ];
 }

@@ -7,3 +7,7 @@ service-account.json
 decoded-service-account.json
 encoded-service-account.json
 gcloud-service-key.json
+dist/
+*.txt
+backup_sidebar.vue
+

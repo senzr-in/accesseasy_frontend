@@ -1,11 +1,11 @@
 <template>
   <aside 
-    class="relative flex flex-col h-screen bg-white dark:bg-[#0b0f19] border-r border-slate-200 dark:border-white/5 shrink-0 z-20 transition-all duration-300 ease-in-out"
+    class="relative flex flex-col h-screen bg-white dark:bg-[#0b0f19] border-r border-slate-200 dark:border-white/5 shrink-0 z-20 transition-all duration-300 ease-in-out font-sans"
     :class="isCollapsed ? 'w-20' : 'w-60'"
   >
     <!-- Toggle Button -->
     <button 
-      class="absolute -right-3 top-5 w-6 h-6 bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-full flex items-center justify-center shadow-sm text-slate-400 hover:text-blue-600 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-slate-800/50 transition-colors z-50 focus:outline-none" 
+      class="absolute -right-3 top-5 w-6 h-6 bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-full flex items-center justify-center shadow-sm text-slate-400 hover:text-blue-600 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors z-50 focus:outline-none" 
       @click="toggleSidebar"
     >
       <ChevronRight
@@ -45,6 +45,7 @@
         <span class="text-[10px] font-medium text-slate-400 mt-0.5">Workforce Platform</span>
       </div>
     </div>
+
     <!-- Navigation -->
     <nav
       class="flex-1 overflow-y-auto custom-scrollbar py-4 space-y-5"
@@ -67,7 +68,7 @@
             :class="[
               (item.exact ? $route.path === item.href : $route.path.startsWith(item.href))
                 ? 'bg-blue-50 dark:bg-blue-600/10 text-blue-600 dark:text-blue-500 font-semibold'
-                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-slate-800/50 hover:text-blue-600 dark:hover:text-slate-200',
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-blue-600 dark:hover:text-slate-200',
               isCollapsed ? 'justify-center py-3' : 'gap-2.5 px-3 py-2'
             ]"
             :title="isCollapsed ? item.name : ''"
@@ -76,7 +77,7 @@
             <component
               :is="item.icon"
               class="w-4 h-4 shrink-0 transition-colors"
-              :class="(item.exact ? $route.path === item.href : $route.path.startsWith(item.href)) ? 'text-blue-600 dark:text-blue-500' : 'text-slate-400 dark:text-slate-500 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-slate-300'"
+              :class="(item.exact ? $route.path === item.href : $route.path.startsWith(item.href)) ? 'text-blue-600 dark:text-blue-500' : 'text-slate-400 dark:text-slate-500 group-hover:text-blue-600 dark:group-hover:text-slate-300'"
             />
             <span
               v-if="!isCollapsed"
@@ -87,7 +88,7 @@
       </div>
 
       <!-- Site Setup -->
-      <div v-if="siteSetupNav.length > 0">
+      <div>
         <p
           v-if="!isCollapsed"
           class="px-2 mb-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400 whitespace-nowrap"
@@ -103,7 +104,7 @@
             :class="[
               (item.exact ? $route.path === item.href : $route.path.startsWith(item.href))
                 ? 'bg-blue-50 dark:bg-blue-600/10 text-blue-600 dark:text-blue-500 font-semibold'
-                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-slate-800/50 hover:text-blue-600 dark:hover:text-slate-200',
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/50 hover:text-blue-600 dark:hover:text-slate-200',
               isCollapsed ? 'justify-center py-3' : 'gap-2.5 px-3 py-2'
             ]"
             :title="isCollapsed ? item.name : ''"
@@ -112,7 +113,7 @@
             <component
               :is="item.icon"
               class="w-4 h-4 shrink-0 transition-colors"
-              :class="(item.exact ? $route.path === item.href : $route.path.startsWith(item.href)) ? 'text-blue-600 dark:text-blue-500' : 'text-slate-400 dark:text-slate-500 dark:text-slate-400 group-hover:text-blue-600 dark:group-hover:text-slate-300'"
+              :class="(item.exact ? $route.path === item.href : $route.path.startsWith(item.href)) ? 'text-blue-600 dark:text-blue-500' : 'text-slate-400 dark:text-slate-500 group-hover:text-blue-600 dark:group-hover:text-slate-300'"
             />
             <span
               v-if="!isCollapsed"
@@ -128,10 +129,9 @@
       class="shrink-0 border-t border-slate-100 dark:border-white/5 space-y-1"
       :class="isCollapsed ? 'p-2' : 'p-3'"
     >
-
       <!-- User row -->
       <button
-        class="flex items-center w-full rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-slate-800/50 transition-colors text-left group"
+        class="flex items-center w-full rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors text-left group"
         :class="isCollapsed ? 'justify-center py-3' : 'gap-2.5 px-3 py-2'"
         :title="isCollapsed ? 'Sign Out' : ''"
         @click="handleSignOut"
@@ -157,10 +157,10 @@
 
 <script setup>
 import { computed, ref } from 'vue';
-import { useRouter, RouterLink } from 'vue-router';
+import { useRouter } from 'vue-router';
 import {
   LayoutDashboard, Users, Shield, ShieldCheck, MapPin, 
-  Settings, LogOut, ChevronLeft, ChevronRight, ClipboardList, Building2, Server, Activity, FileText, Clock
+  Settings, LogOut, ChevronLeft, ChevronRight, ClipboardList, Server, Activity, FileText, Camera, Video
 } from 'lucide-vue-next';
 import { authService } from '@/services/authService';
 
@@ -179,60 +179,27 @@ const userName = computed(() => {
 const userRole = computed(() => authService.getUserRole() || 'Employee');
 const userInitials = computed(() => userName.value.charAt(0).toUpperCase());
 
-// Nav items (Workforce specific)
-const dailyOperationsNav = computed(() => {
-  const items = [
-    { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, exact: true },
-    { name: 'Doors', href: '/dashboard/access-control/doors', icon: MapPin },
-    { name: 'Groups', href: '/dashboard/easy-access/configurators/access-levels', icon: Shield },
-    { name: 'Guards', href: '/dashboard/guards', icon: ShieldCheck },
-    { name: 'Employees', href: '/dashboard/easy-access/employees', icon: Users },
-    { name: 'Scheduled Reports', href: '/dashboard/report-automation', icon: ClipboardList }
-  ];
-  return items;
-});
+// Unrestricted Workforce Navigation Items
+const dailyOperationsNav = [
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, exact: true },
+  { name: 'Doors', href: '/dashboard/access-control/doors', icon: MapPin },
+  { name: 'Groups', href: '/dashboard/easy-access/configurators/access-levels', icon: Shield },
+  { name: 'Guards', href: '/dashboard/guards', icon: ShieldCheck },
+  { name: 'Employees', href: '/dashboard/easy-access/employees', icon: Users },
+  { name: 'Employee Logs', href: '/dashboard/easy-access/employee-logs', icon: FileText },
+  { name: 'Face Biometrics', href: '/dashboard/easy-access/biometrics/face', icon: Camera },
+  { name: 'Scheduled Reports', href: '/dashboard/report-automation', icon: ClipboardList }
+];
 
-const siteSetupNav = computed(() => {
-  if (userRole.value === 'Admin' || userRole.value === 'Manager') {
-    return [
-      { name: 'Settings', href: '/dashboard/settings', icon: Settings },
-      { name: 'Devices', href: '/dashboard/settings/devices', icon: Server },
-      { name: 'AI Cam Events', href: '/dashboard/settings/ai-events', icon: Activity },
-      { name: 'Event Logs', href: '/dashboard/settings/logs', icon: FileText }
-    ];
-  }
-  return [];
-});
+const siteSetupNav = [
+  { name: 'Settings', href: '/dashboard/settings', icon: Settings },
+  { name: 'Devices', href: '/dashboard/settings/devices', icon: Server },
+  { name: 'Camera Devices', href: '/dashboard/devices/cameras', icon: Video },
+  { name: 'Camera AI Logs', href: '/dashboard/monitoring/camera-logs', icon: Activity },
+  { name: 'Event Logs', href: '/dashboard/settings/logs', icon: FileText }
+];
 
-// Sign out
 const handleSignOut = async () => {
-  if (userRole.value === 'Employee') {
-    try {
-      const token = authService.getToken();
-      const apiUrl = import.meta.env.VITE_API_URL;
-      if (token && rawUser?.id) {
-        const qrRes = await fetch(
-          `${apiUrl}/items/qrgenerate?filter[qraccess][_eq]=true&fields=id,employeeId&limit=10`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        if (qrRes.ok) {
-          const qrData = await qrRes.json();
-          const revokePromises = qrData.data
-            ?.filter(q => q.employeeId === rawUser.id || q.employeeId?.assignedUser === rawUser.id)
-            ?.map(q =>
-              fetch(`${apiUrl}/items/qrgenerate/${q.id}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                body: JSON.stringify({ qraccess: false })
-              })
-            ) || [];
-          await Promise.allSettled(revokePromises);
-        }
-      }
-    } catch (e) {
-      console.warn('QR revocation on logout failed silently.', e);
-    }
-  }
   authService.logout();
   router.push('/login');
 };
