@@ -1,5 +1,5 @@
 <template>
-  <div class="h-full w-full bg-[#F8FAFC] dark:bg-[#0b0f19] text-slate-800 dark:text-slate-100 p-6 overflow-y-auto selection:bg-indigo-500/20 font-sans">
+  <div class="h-full w-full bg-[#F8FAFC] dark:bg-[#0b0f19] text-slate-800 dark:text-slate-100 p-6 overflow-y-auto selection:bg-indigo-500/20 font-sans relative">
     <canvas ref="canvasRef" class="hidden"></canvas>
 
     <!-- Header -->
@@ -118,7 +118,7 @@
             <div class="relative">
               <div class="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-white/10 overflow-hidden flex items-center justify-center text-indigo-700 dark:text-indigo-400 font-bold text-xl shadow-inner">
                 <img v-if="person.avatar" :src="person.avatar" :alt="person.name" class="w-full h-full object-cover" />
-                <span v-else>{{ person.name.slice(0, 2).toUpperCase() }}</span>
+                <span v-else>{{ (person.name || 'EP').slice(0, 2).toUpperCase() }}</span>
               </div>
               <span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white dark:border-slate-900"></span>
             </div>
@@ -181,9 +181,12 @@
       </div>
     </div>
 
-    <!-- ── GUIDED REAL WEBCAM ENROLLMENT WIZARD DIALOG ── -->
-    <v-dialog v-model="showWizard" max-width="740px" persistent>
-      <div class="bg-white dark:bg-[#151c2c] rounded-3xl shadow-2xl border border-slate-200 dark:border-white/10 overflow-hidden text-slate-900 dark:text-white font-sans">
+    <!-- ── NATIVE BULLETPROOF NATIVE MODAL OVERLAY ── -->
+    <div
+      v-if="showWizard"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/65 backdrop-blur-sm p-4 overflow-y-auto font-sans"
+    >
+      <div class="bg-white dark:bg-[#151c2c] rounded-3xl shadow-2xl border border-slate-200 dark:border-white/10 overflow-hidden text-slate-900 dark:text-white max-w-[740px] w-full my-auto transition-all transform">
         
         <!-- Header -->
         <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-white/10 bg-gradient-to-r from-indigo-50 to-slate-50 dark:from-white/5 dark:to-white/5">
@@ -200,12 +203,12 @@
               </p>
             </div>
           </div>
-          <button @click="closeWizard" class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition">
+          <button @click="closeWizard" class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-white/10 rounded-xl transition">
             ✕
           </button>
         </div>
 
-        <!-- Step Indicator (Clickable to switch stages anytime) -->
+        <!-- Step Indicator -->
         <div class="flex items-center gap-0 px-6 pt-4 cursor-pointer">
           <div
             v-for="(label, i) in ['Details', 'Capture Poses', 'Review']"
@@ -357,31 +360,31 @@
                   <div class="relative flex items-center justify-center select-none" style="perspective: 600px;">
                     <div
                       class="transition-transform duration-500 ease-out"
-                      :style="{ transform: `rotateY(${currentPose?.rotateY}deg) rotateX(${currentPose?.rotateX}deg)` }"
+                      :style="{ transform: `rotateY(${currentPose?.rotateY || 0}deg) rotateX(${currentPose?.rotateX || 0}deg)` }"
                     >
                       <div
                         :class="[
                           'rounded-full p-1 relative transition-all duration-300',
-                          capturedPoses[currentPoseIndex] ? 'shadow-[0_0_24px_rgba(34,197,94,0.4)]' : 'shadow-[0_0_20px_rgba(99,102,241,0.3)]'
+                          isCurrentPoseCaptured ? 'shadow-[0_0_24px_rgba(34,197,94,0.4)]' : 'shadow-[0_0_20px_rgba(99,102,241,0.3)]'
                         ]"
                       >
                         <svg viewBox="0 0 120 140" class="w-24 h-28" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <ellipse
                             cx="60" cy="65" rx="44" ry="55"
-                            :fill="capturedPoses[currentPoseIndex] ? '#dcfce7' : '#eef2ff'"
-                            :stroke="capturedPoses[currentPoseIndex] ? '#22c55e' : '#6366f1'"
+                            :fill="isCurrentPoseCaptured ? '#dcfce7' : '#eef2ff'"
+                            :stroke="isCurrentPoseCaptured ? '#22c55e' : '#6366f1'"
                             stroke-width="3"
                           />
-                          <ellipse cx="44" cy="58" rx="6" ry="7" :fill="capturedPoses[currentPoseIndex] ? '#22c55e' : '#6366f1'" opacity="0.7" />
-                          <ellipse cx="76" cy="58" rx="6" ry="7" :fill="capturedPoses[currentPoseIndex] ? '#22c55e' : '#6366f1'" opacity="0.7" />
-                          <path d="M60 68 L56 80 Q60 84 64 80 L60 68Z" :fill="capturedPoses[currentPoseIndex] ? '#16a34a' : '#4f46e5'" opacity="0.35" />
+                          <ellipse cx="44" cy="58" rx="6" ry="7" :fill="isCurrentPoseCaptured ? '#22c55e' : '#6366f1'" opacity="0.7" />
+                          <ellipse cx="76" cy="58" rx="6" ry="7" :fill="isCurrentPoseCaptured ? '#22c55e' : '#6366f1'" opacity="0.7" />
+                          <path d="M60 68 L56 80 Q60 84 64 80 L60 68Z" :fill="isCurrentPoseCaptured ? '#16a34a' : '#4f46e5'" opacity="0.35" />
                           <path
-                            :d="capturedPoses[currentPoseIndex] ? 'M46 96 Q60 108 74 96' : 'M46 93 Q60 100 74 93'"
-                            :stroke="capturedPoses[currentPoseIndex] ? '#22c55e' : '#6366f1'"
+                            :d="isCurrentPoseCaptured ? 'M46 96 Q60 108 74 96' : 'M46 93 Q60 100 74 93'"
+                            :stroke="isCurrentPoseCaptured ? '#22c55e' : '#6366f1'"
                             stroke-width="3" stroke-linecap="round" fill="none"
                           />
                         </svg>
-                        <span v-if="capturedPoses[currentPoseIndex]" class="absolute -top-1 -right-1 bg-emerald-500 text-white rounded-full p-0.5 text-xs">✓</span>
+                        <span v-if="isCurrentPoseCaptured" class="absolute -top-1 -right-1 bg-emerald-500 text-white rounded-full p-0.5 text-xs">✓</span>
                       </div>
                     </div>
                   </div>
@@ -538,7 +541,7 @@
 
         </div>
       </div>
-    </v-dialog>
+    </div>
   </div>
 </template>
 
@@ -583,21 +586,22 @@ const people = ref([]);
 const unknownFaces = ref([]);
 
 const tabDefs = computed(() => [
-  { id: 'all', label: `All (${people.value.length})`, icon: '👥', color: 'bg-indigo-600' },
-  { id: 'employee', label: `Employees (${people.value.filter(p => p.type === 'employee').length})`, icon: '👤', color: 'bg-emerald-600' },
-  { id: 'vip', label: `VIP (${people.value.filter(p => p.type === 'vip').length})`, icon: '⭐', color: 'bg-amber-600' },
-  { id: 'blacklist', label: `Blacklist (${people.value.filter(p => p.type === 'blacklist').length})`, icon: '🚨', color: 'bg-rose-600' },
-  { id: 'unknown', label: `Unknown (${unknownFaces.value.length})`, icon: '🛡️', color: 'bg-purple-600' }
+  { id: 'all', label: `All (${(people.value || []).length})`, icon: '👥', color: 'bg-indigo-600' },
+  { id: 'employee', label: `Employees (${(people.value || []).filter(p => p.type === 'employee').length})`, icon: '👤', color: 'bg-emerald-600' },
+  { id: 'vip', label: `VIP (${(people.value || []).filter(p => p.type === 'vip').length})`, icon: '⭐', color: 'bg-amber-600' },
+  { id: 'blacklist', label: `Blacklist (${(people.value || []).filter(p => p.type === 'blacklist').length})`, icon: '🚨', color: 'bg-rose-600' },
+  { id: 'unknown', label: `Unknown (${(unknownFaces.value || []).length})`, icon: '🛡️', color: 'bg-purple-600' }
 ]);
 
-const currentPose = computed(() => POSES[currentPoseIndex.value]);
-const capturedCount = computed(() => capturedPoses.value.filter(Boolean).length);
-const progressPct = computed(() => Math.round((capturedCount.value / POSES.value.length) * 100));
+const currentPose = computed(() => POSES[currentPoseIndex.value] || POSES[0]);
+const capturedCount = computed(() => (capturedPoses.value || []).filter(Boolean).length);
+const progressPct = computed(() => Math.round((capturedCount.value / (POSES.length || 1)) * 100));
 const stageIndex = computed(() => wizardStage.value === 'details' ? 0 : wizardStage.value === 'capture' ? 1 : 2);
+const isCurrentPoseCaptured = computed(() => Boolean(capturedPoses.value && capturedPoses.value[currentPoseIndex.value]));
 
 const filteredPeople = computed(() => {
-  return people.value.filter(p => {
-    const q = searchQuery.value.toLowerCase();
+  return (people.value || []).filter(p => {
+    const q = (searchQuery.value || '').toLowerCase();
     const matches = (p.name || '').toLowerCase().includes(q) || (p.department || '').toLowerCase().includes(q) || (p.employeeId || '').toLowerCase().includes(q);
     if (!matches) return false;
     if (activeTab.value === 'all') return true;
@@ -620,7 +624,7 @@ const goToNextStage = () => {
   if (!formName.value || !formName.value.trim()) {
     formName.value = 'Subject Profile';
   }
-  // Synchronously switch to stage 2
+  // Synchronously switch stage
   wizardStage.value = 'capture';
   
   // Asynchronously request camera stream
@@ -666,11 +670,15 @@ const startWebcam = async () => {
 
 const stopWebcam = () => {
   if (mediaStream.value) {
-    mediaStream.value.getTracks().forEach(track => track.stop());
+    try {
+      mediaStream.value.getTracks().forEach(track => track.stop());
+    } catch (e) {}
     mediaStream.value = null;
   }
   if (videoRef.value) {
-    videoRef.value.srcObject = null;
+    try {
+      videoRef.value.srcObject = null;
+    } catch (e) {}
   }
 };
 
@@ -810,7 +818,7 @@ const handleSubmitEnrollment = async () => {
   const token = authService.getToken();
   const headers = { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) };
 
-  const validImages = capturedPoses.value.filter(Boolean);
+  const validImages = (capturedPoses.value || []).filter(Boolean);
   const payload = {
     name: formName.value,
     role_department: formDept.value,
@@ -880,7 +888,7 @@ const handleDeletePerson = async (id, name) => {
   } catch (e) {
     console.warn('API delete error:', e);
   }
-  people.value = people.value.filter(p => p.id !== id);
+  people.value = (people.value || []).filter(p => p.id !== id);
 };
 
 onMounted(() => {
