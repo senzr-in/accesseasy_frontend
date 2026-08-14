@@ -504,7 +504,6 @@
         </div>
       </div>
     </div>
-
   </div>
 
   <!-- ── QR Print/Download Modal ── -->

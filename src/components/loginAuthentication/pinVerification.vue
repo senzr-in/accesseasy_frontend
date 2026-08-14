@@ -1,348 +1,385 @@
 <template>
-  <div class="flex min-h-screen w-full bg-[#f8fafc] dark:bg-[#020617] text-slate-900 dark:text-slate-100 flex-col lg:flex-row relative overflow-hidden font-sans">
-    <!-- Left Side: Marketing Content (Same as Login) -->
-    <div class="flex-1 flex flex-col justify-center px-6 py-8 lg:px-14 lg:py-6 bg-white dark:bg-slate-900/10 dark:bg-black/20 backdrop-blur-md border-r border-slate-200 dark:border-white/10 relative overflow-hidden border-b lg:border-b-0">
-      <!-- Grid Background Pattern -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 min-h-screen w-full bg-[#030614] text-slate-100 relative overflow-x-hidden font-sans selection:bg-blue-500 selection:text-white">
+    <!-- Left Side: Marketing & Skyscraper Hero Section -->
+    <div class="w-full h-full flex flex-col justify-between px-6 py-8 lg:px-12 lg:py-10 relative z-20 overflow-hidden border-r border-slate-800/60 shadow-[10px_0_35px_rgba(0,0,0,0.35)] min-h-[500px]">
+      <!-- Photorealistic Skyscraper Office Background Image with Network Overlay -->
       <div 
-        class="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none"
-        style="background-image: radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0); background-size: 24px 24px;"
+        class="absolute inset-0 bg-cover bg-center transition-transform duration-10000 hover:scale-105 pointer-events-none z-0"
+        :style="{ backgroundImage: `url(${loginHeroBg})` }"
+      />
+      <!-- Subtle Dark Blue Overlay Gradient for Text Contrast (Low Opacity) -->
+      <div class="absolute inset-0 bg-gradient-to-br from-[#04081c]/50 via-[#071133]/30 to-[#030614]/60 pointer-events-none z-0" />
+
+      <!-- Tech Grid Pattern -->
+      <div 
+        class="absolute inset-0 opacity-[0.08] pointer-events-none z-0"
+        style="background-image: radial-gradient(circle at 2px 2px, rgba(59, 130, 246, 0.9) 1px, transparent 0); background-size: 30px 30px;"
       />
 
-      <div class="max-w-xl relative z-10 animate-fade-in-left">
-        <div class="flex items-center gap-3 mb-6">
-          <div class="h-10 w-10 rounded-xl bg-blue-600/20 flex items-center justify-center border border-blue-600/20 shadow-xl shadow-blue-600/10">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="w-6 h-6 text-blue-600"
-            >
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-            </svg>
+      <!-- Floating Tech Mesh Nodes Animation -->
+      <div class="absolute inset-0 pointer-events-none overflow-hidden z-0">
+        <div class="node-particle node-1" />
+        <div class="node-particle node-2" />
+        <div class="node-particle node-3" />
+      </div>
+
+      <!-- Top Header / Logo -->
+      <div class="relative z-10 animate-fade-in-down">
+        <div class="flex items-center gap-3.5 mb-2">
+          <!-- Hex Shield Icon -->
+          <div class="h-11 w-11 rounded-xl bg-gradient-to-br from-blue-500/30 to-blue-700/20 flex items-center justify-center border border-blue-400/40 shadow-[0_0_20px_rgba(59,130,246,0.3)] backdrop-blur-md group cursor-pointer hover:border-blue-300 transition-all duration-300">
+            <Shield class="w-6 h-6 text-blue-400 group-hover:scale-110 transition-transform duration-300" />
           </div>
           <div class="flex flex-col">
-            <span class="text-base font-black tracking-tight uppercase leading-none text-slate-900 dark:text-white">AccessEasy</span>
-            <span class="text-[9px] font-black text-blue-600 tracking-[0.4em] uppercase mt-0.5">Universal OS</span>
+            <span class="text-2xl font-bold tracking-tight text-white drop-shadow-md">AccessEasy</span>
+            <span class="text-[11px] font-medium text-slate-300 tracking-wider">Secure. Manage. Empower.</span>
           </div>
         </div>
+      </div>
 
-        <h1 class="text-3xl lg:text-4xl font-black tracking-tight leading-[1] mb-4 text-slate-900 dark:text-white">
-          Secure. Intelligent. <br>
-          <span class="text-blue-600">Frictionless</span> Access.
+      <!-- Hero Body Content -->
+      <div class="max-w-xl relative z-10 my-auto py-6">
+        <!-- Animated Pill Badge -->
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-600/30 border border-blue-400/40 text-blue-200 text-xs font-semibold tracking-wide mb-6 backdrop-blur-md shadow-[0_0_15px_rgba(59,130,246,0.3)]">
+          <span class="h-2 w-2 rounded-full bg-blue-400 animate-ping" />
+          <span>Universal Security Verification</span>
+        </div>
+
+        <!-- Headline -->
+        <h1 class="text-3xl lg:text-4xl xl:text-5xl font-bold tracking-tight leading-[1.15] mb-4 text-white drop-shadow-xl">
+          Smart Access.<br>
+          Stronger Security.<br>
+          Empowered Workforce.
         </h1>
 
-        <p class="text-[12px] text-slate-500 dark:text-slate-400 font-bold mb-8 leading-relaxed max-w-sm uppercase tracking-wide">
-          Manage identity and physical security with the industry's most advanced platform.
+        <p class="text-xs lg:text-sm text-slate-100 font-normal leading-relaxed mb-6 max-w-lg drop-shadow-md">
+          The all-in-one platform for access control, workforce management, and real-time intelligence.
         </p>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-5 mb-8">
+        <!-- 4 Feature Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
           <div
-            v-for="(h, i) in highlights"
-            :key="i"
-            class="flex items-center gap-3 group"
+            v-for="(feature, idx) in features"
+            :key="idx"
+            class="flex items-start gap-3 p-3 rounded-2xl bg-slate-900/60 border border-blue-500/30 backdrop-blur-md hover:bg-slate-900/80 hover:border-blue-400/60 shadow-md hover:shadow-blue-500/25 transition-all duration-300 group hover:-translate-y-0.5"
           >
-            <div class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-md group-hover:scale-110 group-hover:border-blue-500/50 transition-all duration-300">
+            <div class="h-9 w-9 shrink-0 flex items-center justify-center rounded-xl bg-gradient-to-br from-blue-900/60 to-slate-900/80 border border-blue-400/30 text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.3)] group-hover:scale-105 transition-all duration-300">
               <component
-                :is="h.icon"
-                class="h-4 w-4 text-blue-600"
+                :is="feature.icon"
+                class="h-4.5 w-4.5"
               />
             </div>
             <div>
-              <h3 class="font-black text-[10px] tracking-[0.05em] uppercase text-slate-900 dark:text-white">
-                {{ h.text }}
+              <h3 class="font-bold text-xs text-white tracking-wide mb-0.5 group-hover:text-blue-300 transition-colors">
+                {{ feature.title }}
               </h3>
-              <p class="text-[9px] font-bold text-slate-500 dark:text-slate-400 leading-snug mt-0.5 uppercase tracking-widest">
-                {{ h.sub }}
+              <p class="text-[10px] lg:text-[11px] text-slate-200 leading-snug opacity-90">
+                {{ feature.desc }}
               </p>
             </div>
           </div>
         </div>
+      </div>
 
-        <div class="pt-6 border-t border-slate-200 dark:border-white/5">
-          <p class="text-[8px] font-black tracking-[0.3em] text-slate-400 dark:text-slate-600 dark:text-slate-300 mb-4 uppercase">
-            Infrastructure Partners
-          </p>
-          <div class="flex flex-wrap gap-x-6 gap-y-3">
-            <div
-              v-for="(ind, i) in industries"
-              :key="i"
-              class="flex items-center gap-2 opacity-50 hover:opacity-100 transition-all duration-300 cursor-default group"
-            >
+      <!-- Bottom Hardware Authentication Methods Badges Bar -->
+      <div class="relative z-10 pt-4 border-t border-slate-700/60">
+        <p class="text-[11px] font-bold tracking-wider text-slate-300 uppercase mb-3 drop-shadow flex items-center gap-2">
+          <ShieldCheck class="w-4 h-4 text-cyan-400" />
+          <span>Supported Access & Authentication Modalities</span>
+        </p>
+
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+          <div
+            v-for="(auth, i) in authMethods"
+            :key="i"
+            class="p-2.5 rounded-xl bg-slate-900/70 border border-blue-500/30 backdrop-blur-md shadow-md hover:border-cyan-400/70 hover:bg-slate-900/90 shadow-[0_0_15px_rgba(6,182,212,0.15)] transition-all duration-300 flex flex-col items-center justify-center text-center group cursor-default"
+          >
+            <div class="h-9 w-9 rounded-lg bg-cyan-950/60 border border-cyan-500/30 flex items-center justify-center mb-1.5 group-hover:scale-110 group-hover:border-cyan-400/80 transition-all duration-300">
               <component
-                :is="ind.icon"
-                class="h-4 w-4 group-hover:text-blue-600 transition-colors"
+                :is="auth.icon"
+                class="w-5 h-5 text-cyan-400"
               />
-              <span class="text-[9px] font-black tracking-widest uppercase">{{ ind.name }}</span>
             </div>
+            <span class="text-xs font-bold text-white tracking-wide leading-tight group-hover:text-cyan-300 transition-colors">
+              {{ auth.name }}
+            </span>
+            <span class="text-[9px] text-slate-300 font-medium tracking-tight mt-0.5 opacity-90">
+              {{ auth.sub }}
+            </span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Right Side: PIN/OTP Form Container -->
-    <div class="flex-1 flex items-center justify-center p-4 lg:p-10 relative overflow-hidden bg-slate-50 dark:bg-slate-900/50 dark:bg-transparent">
-      <!-- Glow effect -->
-      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-blue-600/5 rounded-full blur-[100px] pointer-events-none" />
+    <!-- Right Side: Real White Marble Luxury PIN Form Section -->
+    <div class="w-full h-full flex items-center justify-center p-4 sm:p-6 lg:p-8 relative overflow-hidden bg-[#e5e9f0] min-h-screen z-10">
+      <!-- Background Ambient Glow & Sparks -->
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-blue-400/15 rounded-full blur-[140px] pointer-events-none" />
 
-      <div class="w-full max-w-[420px] rounded-[2rem] bg-white dark:bg-slate-900/90 dark:bg-[#0a0e1a]/80 backdrop-blur-xl p-8 pb-14 shadow-2xl border border-slate-200 dark:border-white/10 relative z-10 animate-fade-in-up">
-        <!-- Form Header -->
-        <div class="text-center mb-6">
-          <div class="mx-auto mb-4 h-12 w-12 flex items-center justify-center rounded-[1rem] bg-blue-600 text-white shadow-lg shadow-blue-600/30 border border-blue-500/20">
-            <Lock
+      <!-- Main Marble Card Container -->
+      <div 
+        class="w-full max-w-[450px] rounded-[2.5rem] p-8 lg:p-10 shadow-[0_30px_70px_-10px_rgba(0,0,0,0.25),0_0_35px_rgba(255,255,255,0.8)] border border-white/90 relative z-10 animate-fade-in-up text-slate-900 overflow-hidden bg-cover bg-center"
+        :style="{ backgroundImage: `url(${marbleBg})` }"
+      >
+        <!-- Light Translucent White Wash for Polished Marble Texture Visibility -->
+        <div class="absolute inset-0 bg-white/40 pointer-events-none z-0" />
+
+        <div class="relative z-10">
+          <!-- Form Header -->
+          <div class="text-center mb-6">
+            <div class="mx-auto mb-4 h-12 w-12 flex items-center justify-center rounded-[1rem] bg-blue-600 text-white shadow-lg shadow-blue-600/30 border border-blue-500/20">
+              <Lock
+                v-if="currentStep === STEP.ENTER_PIN"
+                class="h-5 w-5"
+              />
+              <ShieldCheck
+                v-else-if="currentStep === STEP.VERIFY_OTP"
+                class="h-5 w-5"
+              />
+              <KeyRound
+                v-else
+                class="h-5 w-5"
+              />
+            </div>
+            <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight uppercase mb-1">
+              {{ pageHeader }}
+            </h2>
+            <p class="text-[9px] text-blue-600 font-black tracking-[0.4em] uppercase">
+              {{ pageTitle }}
+            </p>
+          </div>
+
+          <!-- Alerts -->
+          <div
+            v-if="error"
+            class="mb-4 p-3 rounded-xl bg-rose-50 dark:bg-rose-900/10 border border-rose-100 dark:border-rose-900/30 flex items-start gap-3 animate-shake"
+          >
+            <AlertCircle class="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+            <p class="text-[11px] text-rose-800 dark:text-rose-300 leading-relaxed font-semibold uppercase tracking-wider">
+              {{ error }}
+            </p>
+          </div>
+
+          <div
+            v-if="successMessage"
+            class="mb-4 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/30 flex items-start gap-3"
+          >
+            <CheckCircle class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+            <p class="text-[11px] text-emerald-800 dark:text-emerald-300 leading-relaxed font-semibold uppercase tracking-wider">
+              {{ successMessage }}
+            </p>
+          </div>
+
+          <!-- Dynamic Form Content -->
+          <div class="space-y-6">
+            <!-- STEP 1: ENTER PIN -->
+            <div
               v-if="currentStep === STEP.ENTER_PIN"
-              class="h-5 w-5"
-            />
-            <ShieldCheck
-              v-else-if="currentStep === STEP.VERIFY_OTP"
-              class="h-5 w-5"
-            />
-            <KeyRound
-              v-else
-              class="h-5 w-5"
-            />
-          </div>
-          <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight uppercase mb-1">
-            {{ pageHeader }}
-          </h2>
-          <p class="text-[9px] text-blue-600 font-black tracking-[0.4em] uppercase">
-            {{ pageTitle }}
-          </p>
-        </div>
-
-        <!-- Alerts -->
-        <div
-          v-if="error"
-          class="mb-4 p-3 rounded-xl bg-rose-50 dark:bg-rose-900/10 border border-rose-100 dark:border-rose-900/30 flex items-start gap-3 animate-shake"
-        >
-          <AlertCircle class="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-          <p class="text-[11px] text-rose-800 dark:text-rose-300 leading-relaxed font-semibold uppercase tracking-wider">
-            {{ error }}
-          </p>
-        </div>
-
-        <div
-          v-if="successMessage"
-          class="mb-4 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/30 flex items-start gap-3"
-        >
-          <CheckCircle class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-          <p class="text-[11px] text-emerald-800 dark:text-emerald-300 leading-relaxed font-semibold uppercase tracking-wider">
-            {{ successMessage }}
-          </p>
-        </div>
-
-        <!-- Dynamic Form Content -->
-        <div class="space-y-6">
-          <!-- STEP 1: ENTER PIN -->
-          <div
-            v-if="currentStep === STEP.ENTER_PIN"
-            class="space-y-6"
-          >
-            <div
-              v-if="!maxAttemptsReached"
-              class="space-y-2"
+              class="space-y-6"
             >
-              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Enter 4-Digit PIN</label>
-              <div class="flex justify-center gap-3 relative">
-                <input
-                  v-for="(digit, index) in 4"
-                  :key="`enterpin-${index}`"
-                  ref="pinFields"
-                  v-model="pinDigits[index]"
-                  maxlength="1"
-                  :type="showPin ? 'text' : 'password'"
-                  class="w-14 h-16 text-center rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none text-2xl font-black text-slate-900 dark:text-white shadow-sm"
-                  @input="handlePinDigitInput(index)"
-                  @keydown="handlePinKeydown($event, index)"
-                  @paste="handlePinPaste($event, index)"
-                >
-                <button 
-                  class="absolute -right-2 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-blue-600 transition-colors"
-                  @click="showPin = !showPin"
-                >
-                  <Eye
-                    v-if="!showPin"
-                    class="h-4 w-4"
-                  />
-                  <EyeOff
-                    v-else
-                    class="h-4 w-4"
-                  />
-                </button>
+              <div
+                v-if="!maxAttemptsReached"
+                class="space-y-2"
+              >
+                <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Enter 4-Digit PIN</label>
+                <div class="flex justify-center gap-3 relative">
+                  <input
+                    v-for="(digit, index) in 4"
+                    :key="`enterpin-${index}`"
+                    ref="pinFields"
+                    v-model="pinDigits[index]"
+                    maxlength="1"
+                    :type="showPin ? 'text' : 'password'"
+                    class="w-14 h-16 text-center rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none text-2xl font-black text-slate-900 dark:text-white shadow-sm"
+                    @input="handlePinDigitInput(index)"
+                    @keydown="handlePinKeydown($event, index)"
+                    @paste="handlePinPaste($event, index)"
+                  >
+                  <button 
+                    class="absolute -right-2 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-blue-600 transition-colors"
+                    @click="showPin = !showPin"
+                  >
+                    <Eye
+                      v-if="!showPin"
+                      class="h-4 w-4"
+                    />
+                    <EyeOff
+                      v-else
+                      class="h-4 w-4"
+                    />
+                  </button>
+                </div>
               </div>
-            </div>
 
-            <!-- Max Attempts -->
-            <div
-              v-else
-              class="text-center p-6 rounded-2xl bg-rose-50 dark:bg-rose-900/10 border border-rose-100 dark:border-rose-900/20"
-            >
-              <Lock class="w-8 h-8 text-rose-600 mx-auto mb-3" />
-              <h3 class="text-xs font-black text-rose-600 uppercase tracking-widest mb-1">
-                Max Attempts Reached
-              </h3>
-              <p class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-4">
-                Please reset your PIN to continue
-              </p>
-              <button 
-                class="w-full h-10 rounded-xl text-[10px] font-black uppercase tracking-widest bg-rose-600 text-white shadow-lg shadow-rose-600/20"
-                @click="startForgotPinFlow"
+              <!-- Max Attempts -->
+              <div
+                v-else
+                class="text-center p-6 rounded-2xl bg-rose-50 dark:bg-rose-900/10 border border-rose-100 dark:border-rose-900/20"
               >
-                Reset PIN Now
-              </button>
-            </div>
-
-            <button
-              v-if="!maxAttemptsReached"
-              :disabled="loading || !isValidPin"
-              class="w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 transition-all disabled:opacity-70 disabled:cursor-not-allowed group"
-              @click="handlePinAction"
-            >
-              <span v-if="loading">Verifying...</span>
-              <template v-else>
-                Unlock Account
-                <ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </template>
-            </button>
-
-            <div
-              v-if="!maxAttemptsReached"
-              class="flex flex-col items-center gap-3"
-            >
-              <button
-                class="text-[10px] font-black text-blue-600 hover:text-blue-700 uppercase tracking-widest transition-colors"
-                @click="startForgotPinFlow"
-              >
-                Forgot your PIN?
-              </button>
-              <button
-                class="text-[10px] font-bold text-slate-400 hover:text-slate-600 dark:text-slate-300 uppercase tracking-widest transition-colors"
-                @click="goToAlternateLogin"
-              >
-                Switch Account
-              </button>
-            </div>
-          </div>
-
-          <!-- STEP 2: VERIFY OTP -->
-          <div
-            v-else-if="currentStep === STEP.VERIFY_OTP"
-            class="space-y-6"
-          >
-            <div class="space-y-2">
-              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Enter 6-Digit OTP</label>
-              <div class="flex justify-between gap-2">
-                <input
-                  v-for="(digit, index) in 6"
-                  :key="index"
-                  ref="otpFields"
-                  v-model="otpDigits[index]"
-                  maxlength="1"
-                  type="text"
-                  class="w-12 h-14 text-center rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none text-xl font-black text-slate-900 dark:text-white shadow-sm"
-                  @input="handleOtpInput(index)"
-                  @keydown="handleOtpKeydown($event, index)"
-                  @paste="handleOtpPaste($event, index)"
-                >
-              </div>
-              <div class="flex items-center justify-between px-1">
-                <p class="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                  Didn't receive code?
+                <Lock class="w-8 h-8 text-rose-600 mx-auto mb-3" />
+                <h3 class="text-xs font-black text-rose-600 uppercase tracking-widest mb-1">
+                  Max Attempts Reached
+                </h3>
+                <p class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-4">
+                  Please reset your PIN to continue
                 </p>
-                <button
-                  class="text-[9px] font-black text-blue-600 uppercase tracking-widest"
-                  @click="resendOtp"
-                >
-                  Resend
-                </button>
-              </div>
-            </div>
-
-            <button
-              :disabled="loading || !isValidOtp"
-              class="w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 transition-all disabled:opacity-70 disabled:cursor-not-allowed group"
-              @click="verifyForgotPinOtp"
-            >
-              <span v-if="loading">Processing...</span>
-              <template v-else>
-                Verify OTP
-                <ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </template>
-            </button>
-          </div>
-
-          <!-- STEP 3: CREATE/CONFIRM PIN -->
-          <div
-            v-else
-            class="space-y-6"
-          >
-            <div class="space-y-2">
-              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">
-                {{ isConfirmingPin ? "Confirm Your PIN" : "Setup New PIN" }}
-              </label>
-              <div class="flex justify-center gap-3 relative">
-                <input
-                  v-for="(digit, index) in 4"
-                  :key="`newpin-${index}`"
-                  ref="newPinFields"
-                  v-model="newPinDigits[index]"
-                  maxlength="1"
-                  :type="showPin ? 'text' : 'password'"
-                  class="w-14 h-16 text-center rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none text-2xl font-black text-slate-900 dark:text-white shadow-sm"
-                  @input="handleNewPinDigitInput(index)"
-                  @keydown="handleNewPinKeydown($event, index)"
-                  @paste="handleNewPinPaste($event, index)"
-                >
                 <button 
-                  class="absolute -right-2 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-blue-600 transition-colors"
-                  @click="showPin = !showPin"
+                  class="w-full h-10 rounded-xl text-[10px] font-black uppercase tracking-widest bg-rose-600 text-white shadow-lg shadow-rose-600/20"
+                  @click="startForgotPinFlow"
                 >
-                  <Eye
-                    v-if="!showPin"
-                    class="h-4 w-4"
-                  />
-                  <EyeOff
-                    v-else
-                    class="h-4 w-4"
-                  />
+                  Reset PIN Now
+                </button>
+              </div>
+
+              <button
+                v-if="!maxAttemptsReached"
+                :disabled="loading || !isValidPin"
+                class="w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 transition-all disabled:opacity-70 disabled:cursor-not-allowed group"
+                @click="handlePinAction"
+              >
+                <span v-if="loading">Verifying...</span>
+                <template v-else>
+                  Unlock Account
+                  <ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </template>
+              </button>
+
+              <div
+                v-if="!maxAttemptsReached"
+                class="flex flex-col items-center gap-3"
+              >
+                <button
+                  class="text-[10px] font-black text-blue-600 hover:text-blue-700 uppercase tracking-widest transition-colors"
+                  @click="startForgotPinFlow"
+                >
+                  Forgot your PIN?
+                </button>
+                <button
+                  class="text-[10px] font-bold text-slate-400 hover:text-slate-600 dark:text-slate-300 uppercase tracking-widest transition-colors"
+                  @click="goToAlternateLogin"
+                >
+                  Switch Account
                 </button>
               </div>
             </div>
 
-            <button
-              :disabled="loading || !isValidNewPin"
-              class="w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 transition-all disabled:opacity-70 disabled:cursor-not-allowed group"
-              @click="handleNewPinAction"
+            <!-- STEP 2: VERIFY OTP -->
+            <div
+              v-else-if="currentStep === STEP.VERIFY_OTP"
+              class="space-y-6"
             >
-              <span v-if="loading">Processing...</span>
-              <template v-else>
-                {{ isConfirmingPin ? "Confirm & Secure" : "Set Unified PIN" }}
-                <ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </template>
-            </button>
+              <div class="space-y-2">
+                <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Enter 6-Digit OTP</label>
+                <div class="flex justify-between gap-2">
+                  <input
+                    v-for="(digit, index) in 6"
+                    :key="index"
+                    ref="otpFields"
+                    v-model="otpDigits[index]"
+                    maxlength="1"
+                    type="text"
+                    class="w-12 h-14 text-center rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none text-xl font-black text-slate-900 dark:text-white shadow-sm"
+                    @input="handleOtpInput(index)"
+                    @keydown="handleOtpKeydown($event, index)"
+                    @paste="handleOtpPaste($event, index)"
+                  >
+                </div>
+                <div class="flex items-center justify-between px-1">
+                  <p class="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                    Didn't receive code?
+                  </p>
+                  <button
+                    class="text-[9px] font-black text-blue-600 uppercase tracking-widest"
+                    @click="resendOtp"
+                  >
+                    Resend
+                  </button>
+                </div>
+              </div>
+
+              <button
+                :disabled="loading || !isValidOtp"
+                class="w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 transition-all disabled:opacity-70 disabled:cursor-not-allowed group"
+                @click="verifyForgotPinOtp"
+              >
+                <span v-if="loading">Processing...</span>
+                <template v-else>
+                  Verify OTP
+                  <ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </template>
+              </button>
+            </div>
+
+            <!-- STEP 3: CREATE/CONFIRM PIN -->
+            <div
+              v-else
+              class="space-y-6"
+            >
+              <div class="space-y-2">
+                <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">
+                  {{ isConfirmingPin ? "Confirm Your PIN" : "Setup New PIN" }}
+                </label>
+                <div class="flex justify-center gap-3 relative">
+                  <input
+                    v-for="(digit, index) in 4"
+                    :key="`newpin-${index}`"
+                    ref="newPinFields"
+                    v-model="newPinDigits[index]"
+                    maxlength="1"
+                    :type="showPin ? 'text' : 'password'"
+                    class="w-14 h-16 text-center rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none text-2xl font-black text-slate-900 dark:text-white shadow-sm"
+                    @input="handleNewPinDigitInput(index)"
+                    @keydown="handleNewPinKeydown($event, index)"
+                    @paste="handleNewPinPaste($event, index)"
+                  >
+                  <button 
+                    class="absolute -right-2 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-blue-600 transition-colors"
+                    @click="showPin = !showPin"
+                  >
+                    <Eye
+                      v-if="!showPin"
+                      class="h-4 w-4"
+                    />
+                    <EyeOff
+                      v-else
+                      class="h-4 w-4"
+                    />
+                  </button>
+                </div>
+              </div>
+
+              <button
+                :disabled="loading || !isValidNewPin"
+                class="w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 transition-all disabled:opacity-70 disabled:cursor-not-allowed group"
+                @click="handleNewPinAction"
+              >
+                <span v-if="loading">Processing...</span>
+                <template v-else>
+                  {{ isConfirmingPin ? "Confirm & Secure" : "Set Unified PIN" }}
+                  <ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </template>
+              </button>
+            </div>
+
+            <!-- Global Footer Back Link -->
+            <div
+              v-if="currentStep !== STEP.ENTER_PIN"
+              class="text-center"
+            >
+              <button
+                class="text-[10px] font-black text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:text-slate-200 uppercase tracking-widest transition-colors flex items-center justify-center gap-2 mx-auto"
+                @click="resetToPinEntry"
+              >
+                <ArrowLeft class="h-3 w-3" />
+                Back to PIN Entry
+              </button>
+            </div>
           </div>
 
-          <!-- Global Footer Back Link -->
-          <div
-            v-if="currentStep !== STEP.ENTER_PIN"
-            class="text-center"
-          >
-            <button
-              class="text-[10px] font-black text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:text-slate-200 uppercase tracking-widest transition-colors flex items-center justify-center gap-2 mx-auto"
-              @click="resetToPinEntry"
-            >
-              <ArrowLeft class="h-3 w-3" />
-              Back to PIN Entry
-            </button>
+          <div class="mt-6 text-center text-[9px] font-black tracking-[0.3em] text-slate-400 uppercase flex items-center justify-center gap-2">
+            <div class="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
+            Encrypted Security Node
           </div>
-        </div>
-
-        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 text-[8px] font-black tracking-[0.4em] text-slate-400 uppercase flex items-center gap-2">
-          <div class="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
-          Encrypted Security Node
         </div>
       </div>
     </div>
@@ -358,11 +395,15 @@ import { useRoute, useRouter } from "vue-router";
 import crypto from "crypto-js";
 import { authService } from "@/services/authService";
 import { 
-  Lock, ShieldCheck, KeyRound, AlertCircle, CheckCircle, Eye, EyeOff,
-  ArrowRight, ArrowLeft, Zap, BarChart3, Cpu, Building2, Factory,
-  Warehouse, GraduationCap, HeartPulse, Globe
+  Lock, Shield, ShieldCheck, KeyRound, AlertCircle, CheckCircle, Eye, EyeOff,
+  ArrowRight, ArrowLeft, Zap, BarChart3, Layers, Globe,
+  ScanFace, Fingerprint, Radio, Nfc, Bluetooth
 } from "lucide-vue-next";
 import BaseButton from "@/components/common/buttons/BaseButton.vue";
+
+// Directly import image assets for Vite bundling
+import loginHeroBg from "@/assets/images/login_hero_bg.png";
+import marbleBg from "@/assets/images/marble_bg.png";
 
 // PROPS
 const props = defineProps({
@@ -414,20 +455,19 @@ const successTimeout = ref(null);
 const isFirstTime = ref(false);
 const maxAttemptsReached = ref(false);
 
-const highlights = [
-  { icon: Zap, text: "Real-time security", sub: "Instant threat detection." },
-  { icon: ShieldCheck, text: "Multi-factor auth", sub: "Layered protection." },
-  { icon: BarChart3, text: "Audit intelligence", sub: "Complete access logs." },
-  { icon: Cpu, text: "Edge computing", sub: "Lightning-fast responses." },
+const features = [
+  { icon: Zap, title: "Real-time Access Control", desc: "Monitor and manage access in real-time across all your locations." },
+  { icon: BarChart3, title: "Workforce Intelligence", desc: "Gain actionable insights into your workforce and operations." },
+  { icon: ShieldCheck, title: "Secure & Reliable", desc: "Enterprise-grade security with 99.9% uptime you can trust." },
+  { icon: Layers, title: "Scalable & Flexible", desc: "Built to scale with your organization and adapt to your needs." }
 ];
 
-const industries = [
-  { icon: Building2, name: "Corporate" },
-  { icon: Factory, name: "Industrial" },
-  { icon: Warehouse, name: "Logistics" },
-  { icon: GraduationCap, name: "Education" },
-  { icon: HeartPulse, name: "Healthcare" },
-  { icon: Globe, name: "Critical Infra" },
+const authMethods = [
+  { name: "Face AI", sub: "3D Recognition", icon: ScanFace },
+  { name: "Fingerprint", sub: "Biometric Sensor", icon: Fingerprint },
+  { name: "RFID Card", sub: "13.56MHz Smart", icon: Radio },
+  { name: "NFC Mobile", sub: "Instant Tap & Go", icon: Nfc },
+  { name: "Bluetooth", sub: "BLE Touchless", icon: Bluetooth }
 ];
 
 // COMPUTED

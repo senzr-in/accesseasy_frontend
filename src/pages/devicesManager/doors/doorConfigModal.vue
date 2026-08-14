@@ -1,5 +1,8 @@
 <template>
-  <div v-if="modelValue" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+  <div
+    v-if="modelValue"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+  >
     <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh]">
       <!-- Header -->
       <div class="p-5 border-b border-slate-100 dark:border-zinc-800 flex items-center justify-between bg-slate-50/50 dark:bg-zinc-900/50">
@@ -18,7 +21,11 @@
                 v-model="targetUuid"
                 class="font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-slate-100 dark:bg-zinc-800 px-2 py-0.5 rounded border border-slate-200 dark:border-zinc-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 max-w-[280px]"
               >
-                <option v-for="c in registeredControllers" :key="c.sn" :value="c.sn">
+                <option
+                  v-for="c in registeredControllers"
+                  :key="c.sn"
+                  :value="c.sn"
+                >
                   {{ c.controllerName || 'Controller' }} ({{ c.sn }})
                 </option>
               </select>
@@ -28,7 +35,7 @@
                 type="text"
                 placeholder="Enter Gateway UUID..."
                 class="font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-slate-100 dark:bg-zinc-800 px-2 py-0.5 rounded border border-slate-200 dark:border-zinc-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 w-72"
-              />
+              >
             </div>
           </div>
         </div>
@@ -38,10 +45,16 @@
             :disabled="fetchingConfig"
             @click="fetchConfig"
           >
-            <RefreshCw class="w-3.5 h-3.5" :class="{ 'animate-spin': fetchingConfig }" />
+            <RefreshCw
+              class="w-3.5 h-3.5"
+              :class="{ 'animate-spin': fetchingConfig }"
+            />
             <span>Query Config</span>
           </button>
-          <button class="h-8 w-8 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 flex items-center justify-center text-slate-400 cursor-pointer" @click="close">
+          <button
+            class="h-8 w-8 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 flex items-center justify-center text-slate-400 cursor-pointer"
+            @click="close"
+          >
             <X class="w-4 h-4" />
           </button>
         </div>
@@ -60,7 +73,10 @@
           :class="activeTab === tab.key ? 'border-indigo-600 text-indigo-600 dark:text-indigo-400 bg-white dark:bg-zinc-900 rounded-t-xl' : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'"
           @click="activeTab = tab.key"
         >
-          <component :is="tab.icon" class="w-3.5 h-3.5" />
+          <component
+            :is="tab.icon"
+            class="w-3.5 h-3.5"
+          />
           <span>{{ tab.label }}</span>
         </button>
       </div>
@@ -77,7 +93,10 @@
         </div>
 
         <!-- 1. 4-Door Configuration Grid (childInfo) -->
-        <div v-if="activeTab === 'childInfo'" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div
+          v-if="activeTab === 'childInfo'"
+          class="grid grid-cols-1 md:grid-cols-2 gap-4"
+        >
           <div
             v-for="(door, idx) in doorsConfig"
             :key="door.doorIndex"
@@ -112,14 +131,14 @@
                   min="1"
                   max="255"
                   class="w-full accent-indigo-600 h-1.5 bg-slate-200 dark:bg-zinc-700 rounded-lg cursor-pointer"
-                />
+                >
                 <input
                   v-model.number="door.timing"
                   type="number"
                   min="1"
                   max="255"
                   class="w-16 h-8 px-2 text-center text-xs font-mono font-bold bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                />
+                >
               </div>
             </div>
 
@@ -133,8 +152,12 @@
                 v-model.number="door.buzzer"
                 class="w-full h-9 px-3 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 text-slate-900 dark:text-white"
               >
-                <option :value="0">0 - Disabled (Silent Swipe)</option>
-                <option :value="1">1 - Enabled (Beep Prompt on Swipe & Unlock)</option>
+                <option :value="0">
+                  0 - Disabled (Silent Swipe)
+                </option>
+                <option :value="1">
+                  1 - Enabled (Beep Prompt on Swipe & Unlock)
+                </option>
               </select>
             </div>
 
@@ -148,16 +171,25 @@
                 v-model.number="door.sensor"
                 class="w-full h-9 px-3 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 text-slate-900 dark:text-white"
               >
-                <option :value="0">0 - Normal Close (NC Magnetic Sensor)</option>
-                <option :value="1">1 - Normal Open (NO Switch Contact)</option>
-                <option :value="2">2 - Sensor Monitored Disabled</option>
+                <option :value="0">
+                  0 - Normal Close (NC Magnetic Sensor)
+                </option>
+                <option :value="1">
+                  1 - Normal Open (NO Switch Contact)
+                </option>
+                <option :value="2">
+                  2 - Sensor Monitored Disabled
+                </option>
               </select>
             </div>
           </div>
         </div>
 
         <!-- 2. MQTT Broker Settings (mqttInfo) -->
-        <div v-else-if="activeTab === 'mqttInfo'" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div
+          v-else-if="activeTab === 'mqttInfo'"
+          class="grid grid-cols-1 md:grid-cols-2 gap-4"
+        >
           <div class="space-y-1.5">
             <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">MQTT Broker Address (mqttAddr)</label>
             <input
@@ -165,7 +197,7 @@
               type="text"
               placeholder="mqtt.fieldseasy.com:1883"
               class="w-full h-9 px-3 text-xs font-mono bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 text-slate-900 dark:text-white"
-            />
+            >
           </div>
           <div class="space-y-1.5">
             <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Client / Device Name (mqttName)</label>
@@ -174,7 +206,7 @@
               type="text"
               placeholder="iot-device"
               class="w-full h-9 px-3 text-xs font-mono bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 text-slate-900 dark:text-white"
-            />
+            >
           </div>
           <div class="space-y-1.5">
             <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">MQTT Password (password)</label>
@@ -183,7 +215,7 @@
               type="password"
               placeholder="Senzr123"
               class="w-full h-9 px-3 text-xs font-mono bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 text-slate-900 dark:text-white"
-            />
+            >
           </div>
           <div class="space-y-1.5">
             <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Topic Prefix (prefix)</label>
@@ -192,7 +224,7 @@
               type="text"
               placeholder="access_device/v1"
               class="w-full h-9 px-3 text-xs font-mono bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 text-slate-900 dark:text-white"
-            />
+            >
           </div>
           <div class="space-y-1.5">
             <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Online Check Heartbeat (onlinecheck)</label>
@@ -200,8 +232,12 @@
               v-model.number="mqttConfig.onlinecheck"
               class="w-full h-9 px-3 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 text-slate-900 dark:text-white"
             >
-              <option :value="1">1 - Enabled (Send Ping Heartbeat)</option>
-              <option :value="0">0 - Disabled</option>
+              <option :value="1">
+                1 - Enabled (Send Ping Heartbeat)
+              </option>
+              <option :value="0">
+                0 - Disabled
+              </option>
             </select>
           </div>
           <div class="space-y-1.5">
@@ -210,14 +246,21 @@
               v-model.number="mqttConfig.reporttimely"
               class="w-full h-9 px-3 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 text-slate-900 dark:text-white"
             >
-              <option :value="1">1 - Enabled (Real-Time Swipes)</option>
-              <option :value="0">0 - Disabled</option>
+              <option :value="1">
+                1 - Enabled (Real-Time Swipes)
+              </option>
+              <option :value="0">
+                0 - Disabled
+              </option>
             </select>
           </div>
         </div>
 
         <!-- 3. Network TCP/IP Settings (netInfo) -->
-        <div v-else-if="activeTab === 'netInfo'" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div
+          v-else-if="activeTab === 'netInfo'"
+          class="grid grid-cols-1 md:grid-cols-2 gap-4"
+        >
           <div class="space-y-1.5">
             <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Controller Static IP Address (ip)</label>
             <input
@@ -225,7 +268,7 @@
               type="text"
               placeholder="192.168.1.105"
               class="w-full h-9 px-3 text-xs font-mono bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 text-slate-900 dark:text-white"
-            />
+            >
           </div>
           <div class="space-y-1.5">
             <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Subnet Mask (subnet)</label>
@@ -234,7 +277,7 @@
               type="text"
               placeholder="255.255.255.0"
               class="w-full h-9 px-3 text-xs font-mono bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 text-slate-900 dark:text-white"
-            />
+            >
           </div>
           <div class="space-y-1.5">
             <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">Default Gateway (gateway)</label>
@@ -243,7 +286,7 @@
               type="text"
               placeholder="192.168.1.1"
               class="w-full h-9 px-3 text-xs font-mono bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 text-slate-900 dark:text-white"
-            />
+            >
           </div>
           <div class="space-y-1.5">
             <label class="text-xs font-semibold text-slate-700 dark:text-slate-300">DNS Server (dns)</label>
@@ -252,7 +295,7 @@
               type="text"
               placeholder="8.8.8.8"
               class="w-full h-9 px-3 text-xs font-mono bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 text-slate-900 dark:text-white"
-            />
+            >
           </div>
         </div>
       </div>
@@ -274,8 +317,14 @@
             :disabled="savingConfig"
             @click="saveConfig"
           >
-            <Loader2 v-if="savingConfig" class="w-3.5 h-3.5 animate-spin" />
-            <Save v-else class="w-3.5 h-3.5" />
+            <Loader2
+              v-if="savingConfig"
+              class="w-3.5 h-3.5 animate-spin"
+            />
+            <Save
+              v-else
+              class="w-3.5 h-3.5"
+            />
             <span>Apply {{ activeTab }} Config</span>
           </button>
         </div>

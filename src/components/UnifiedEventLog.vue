@@ -6,7 +6,10 @@
       </h3>
     </div>
     
-    <div v-if="events.length === 0" class="text-xs text-slate-500 dark:text-slate-400 italic py-4 text-center">
+    <div
+      v-if="events.length === 0"
+      class="text-xs text-slate-500 dark:text-slate-400 italic py-4 text-center"
+    >
       No recent access events.
     </div>
     
@@ -19,12 +22,44 @@
       >
         <!-- Profile / Status Icon -->
         <div class="flex-shrink-0 mt-1">
-          <div v-if="event.swipeDetails && event.swipeDetails.profilePic" class="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-600">
-            <img :src="event.swipeDetails.profilePic" alt="Profile" class="w-full h-full object-cover" />
+          <div
+            v-if="event.swipeDetails && event.swipeDetails.profilePic"
+            class="w-12 h-12 rounded-full overflow-hidden border-2 border-gray-600"
+          >
+            <img
+              :src="event.swipeDetails.profilePic"
+              alt="Profile"
+              class="w-full h-full object-cover"
+            >
           </div>
-          <div v-else class="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center border-2 border-gray-600">
-            <svg v-if="event.alertLevel === 'error'" class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-            <svg v-else class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+          <div
+            v-else
+            class="w-12 h-12 rounded-full bg-gray-700 flex items-center justify-center border-2 border-gray-600"
+          >
+            <svg
+              v-if="event.alertLevel === 'error'"
+              class="w-6 h-6 text-red-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+            /></svg>
+            <svg
+              v-else
+              class="w-6 h-6 text-blue-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            ><path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+            /></svg>
           </div>
         </div>
 
@@ -55,20 +90,51 @@
         </div>
 
         <!-- Camera Snapshot Thumbnail -->
-        <div class="flex-shrink-0 cursor-pointer ml-2" @click="expandImage(event.cameraDetails?.snapshotUrl)">
-          <div v-if="event.cameraDetails && event.cameraDetails.snapshotUrl" class="w-16 h-16 rounded-lg bg-slate-100 dark:bg-slate-800 overflow-hidden border border-[#E5E1D8]/80 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/30 transition-colors">
-            <img :src="event.cameraDetails.snapshotUrl" alt="Camera Snapshot" class="w-full h-full object-cover" />
+        <div
+          class="flex-shrink-0 cursor-pointer ml-2"
+          @click="expandImage(event.cameraDetails?.snapshotUrl)"
+        >
+          <div
+            v-if="event.cameraDetails && event.cameraDetails.snapshotUrl"
+            class="w-16 h-16 rounded-lg bg-slate-100 dark:bg-slate-800 overflow-hidden border border-[#E5E1D8]/80 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/30 transition-colors"
+          >
+            <img
+              :src="event.cameraDetails.snapshotUrl"
+              alt="Camera Snapshot"
+              class="w-full h-full object-cover"
+            >
           </div>
         </div>
       </div>
     </div>
 
     <!-- Image Modal -->
-    <div v-if="expandedImage" class="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-4" @click="expandedImage = null">
+    <div
+      v-if="expandedImage"
+      class="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-4"
+      @click="expandedImage = null"
+    >
       <div class="relative max-w-4xl w-full">
-        <img :src="expandedImage" class="w-full h-auto rounded-lg shadow-2xl border border-gray-700" @click.stop />
-        <button @click="expandedImage = null" class="absolute top-4 right-4 bg-gray-900 bg-opacity-75 text-white rounded-full p-2 hover:bg-opacity-100">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        <img
+          :src="expandedImage"
+          class="w-full h-auto rounded-lg shadow-2xl border border-gray-700"
+          @click.stop
+        >
+        <button
+          class="absolute top-4 right-4 bg-gray-900 bg-opacity-75 text-white rounded-full p-2 hover:bg-opacity-100"
+          @click="expandedImage = null"
+        >
+          <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          ><path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"
+          /></svg>
         </button>
       </div>
     </div>

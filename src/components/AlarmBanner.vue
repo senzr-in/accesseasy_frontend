@@ -1,5 +1,8 @@
 <template>
-  <div v-if="activeAlarms && activeAlarms.length > 0" class="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] w-full max-w-2xl px-4 pointer-events-none">
+  <div
+    v-if="activeAlarms && activeAlarms.length > 0"
+    class="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] w-full max-w-2xl px-4 pointer-events-none"
+  >
     <div class="flex flex-col gap-2.5">
       <div
         v-for="alarm in activeAlarms"
@@ -12,14 +15,26 @@
             class="h-11 w-11 rounded-xl flex items-center justify-center shrink-0 animate-pulse font-bold text-lg shadow-inner"
             :class="iconBgClass(alarm)"
           >
-            <Flame v-if="alarm.type === 1 || alarm.title.includes('FIRE')" class="w-6 h-6 text-white" />
-            <ShieldAlert v-else-if="alarm.type === 6 || alarm.title.includes('TAMPER')" class="w-6 h-6 text-white" />
-            <AlertTriangle v-else class="w-6 h-6 text-white" />
+            <Flame
+              v-if="alarm.type === 1 || alarm.title.includes('FIRE')"
+              class="w-6 h-6 text-white"
+            />
+            <ShieldAlert
+              v-else-if="alarm.type === 6 || alarm.title.includes('TAMPER')"
+              class="w-6 h-6 text-white"
+            />
+            <AlertTriangle
+              v-else
+              class="w-6 h-6 text-white"
+            />
           </div>
 
           <div class="flex flex-col min-w-0">
             <div class="flex items-center gap-2">
-              <span class="text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded-full font-mono shadow-xs" :class="badgeClass(alarm)">
+              <span
+                class="text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded-full font-mono shadow-xs"
+                :class="badgeClass(alarm)"
+              >
                 {{ alarm.severity.toUpperCase() }}
               </span>
               <span class="text-[11px] font-mono text-slate-500 dark:text-slate-400">

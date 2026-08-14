@@ -146,7 +146,10 @@
     </div>
 
     <!-- Create Schedule Modal -->
-    <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+    <div
+      v-if="showModal"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4"
+    >
       <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 max-w-md w-full p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-200">
         <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
           <div class="flex items-center gap-3">
@@ -154,16 +157,26 @@
               <CalendarClock class="w-5 h-5" />
             </div>
             <div>
-              <h2 class="text-lg font-black text-slate-900 dark:text-white">Create Schedule</h2>
-              <p class="text-xs font-medium text-slate-400">Define access time window</p>
+              <h2 class="text-lg font-black text-slate-900 dark:text-white">
+                Create Schedule
+              </h2>
+              <p class="text-xs font-medium text-slate-400">
+                Define access time window
+              </p>
             </div>
           </div>
-          <button @click="showModal = false" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer">
+          <button
+            class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+            @click="showModal = false"
+          >
             <X class="w-5 h-5" />
           </button>
         </div>
 
-        <form @submit.prevent="saveSchedule" class="space-y-4">
+        <form
+          class="space-y-4"
+          @submit.prevent="saveSchedule"
+        >
           <div>
             <label class="block text-xs font-black uppercase tracking-wider text-slate-500 mb-1.5">Schedule Name *</label>
             <input
@@ -172,7 +185,7 @@
               required
               placeholder="e.g. 24/7 Access or Day Shift"
               class="w-full h-10 px-3.5 text-sm rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
-            />
+            >
           </div>
 
           <div class="grid grid-cols-2 gap-3">
@@ -183,7 +196,7 @@
                 type="time"
                 required
                 class="w-full h-10 px-3.5 text-sm rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
-              />
+              >
             </div>
             <div>
               <label class="block text-xs font-black uppercase tracking-wider text-slate-500 mb-1.5">End Time *</label>
@@ -192,15 +205,15 @@
                 type="time"
                 required
                 class="w-full h-10 px-3.5 text-sm rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-cyan-500/50"
-              />
+              >
             </div>
           </div>
 
           <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
             <button
               type="button"
-              @click="showModal = false"
               class="h-10 px-4 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 text-xs font-black uppercase tracking-wider hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              @click="showModal = false"
             >
               Cancel
             </button>

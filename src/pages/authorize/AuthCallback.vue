@@ -85,12 +85,22 @@ onMounted(async () => {
   try {
     statusMessage.value = `Completing ${connectorType || "Google"} authentication...`;
 
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "456615098701-cihaj0btvoe011ba92r7hpbemkse5vm3.apps.googleusercontent.com";
+    const redirectUri = `${window.location.origin}/auth/callback`;
+
     const payload = {
       tenantId: storedTenantId === "new" ? "" : storedTenantId,
       code: code,
       type: connectorType || "google",
       action: "token",
+      redirect_uri: redirectUri,
+      redirectUri: redirectUri,
+      redirect_url: redirectUri,
+      redirectUrl: redirectUri,
+      client_id: clientId,
+      clientId: clientId,
     };
+
 
     const apiUrl = `${import.meta.env.VITE_KN_API_URL}/google-accesseasy`;
 

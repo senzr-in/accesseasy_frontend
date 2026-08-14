@@ -1,6 +1,5 @@
 <template>
   <div class="event-logs-container">
-
     <!-- ── Tab Bar ─────────────────────────────────────────────────────────── -->
     <div class="tab-bar mb-4">
       <button
@@ -11,7 +10,10 @@
         @click="activeTab = tab.key"
       >
         {{ tab.label }}
-        <span v-if="tab.key === 'face' && faceEvents.length" class="tab-badge">
+        <span
+          v-if="tab.key === 'face' && faceEvents.length"
+          class="tab-badge"
+        >
           {{ faceEvents.length }}
         </span>
       </button>
@@ -73,20 +75,39 @@
 
     <!-- ── Tab: Face Recognition Events ─────────────────────────────────── -->
     <div v-if="activeTab === 'face'">
-      <div v-if="faceLoading" class="face-loading">
-        <v-progress-circular indeterminate color="amber" />
-        <p class="mt-3 text-sm text-zinc-500">Loading face recognition events…</p>
+      <div
+        v-if="faceLoading"
+        class="face-loading"
+      >
+        <v-progress-circular
+          indeterminate
+          color="amber"
+        />
+        <p class="mt-3 text-sm text-zinc-500">
+          Loading face recognition events…
+        </p>
       </div>
 
-      <div v-else-if="filteredFaceEvents.length === 0" class="face-empty">
+      <div
+        v-else-if="filteredFaceEvents.length === 0"
+        class="face-empty"
+      >
         <span class="text-4xl">🤖</span>
-        <p class="mt-2 text-zinc-500">No face recognition events found.</p>
-        <button class="mt-3 text-amber-500 text-sm font-bold hover:underline" @click="fetchFaceEvents">
+        <p class="mt-2 text-zinc-500">
+          No face recognition events found.
+        </p>
+        <button
+          class="mt-3 text-amber-500 text-sm font-bold hover:underline"
+          @click="fetchFaceEvents"
+        >
           Reload
         </button>
       </div>
 
-      <div v-else class="face-grid">
+      <div
+        v-else
+        class="face-grid"
+      >
         <div
           v-for="ev in filteredFaceEvents"
           :key="ev.event_id"
@@ -101,18 +122,26 @@
               alt="Face capture"
               class="face-img"
             >
-            <div v-else class="face-img-placeholder">
+            <div
+              v-else
+              class="face-img-placeholder"
+            >
               <span class="text-3xl">👤</span>
             </div>
             <!-- Identity badge -->
-            <span class="identity-badge" :class="ev.is_registered ? 'badge-registered' : 'badge-visitor'">
+            <span
+              class="identity-badge"
+              :class="ev.is_registered ? 'badge-registered' : 'badge-visitor'"
+            >
               {{ ev.is_registered ? '✅ Registered' : '🔶 Visitor' }}
             </span>
           </div>
 
           <!-- Card Body -->
           <div class="face-card-body">
-            <div class="face-name">{{ ev.person_name }}</div>
+            <div class="face-name">
+              {{ ev.person_name }}
+            </div>
 
             <div class="face-meta">
               <span class="meta-item">
@@ -132,7 +161,10 @@
                   :style="{ width: `${Math.round(ev.similarity_score * 100)}%`, background: scoreColor(ev.similarity_score) }"
                 />
               </div>
-              <span class="score-pct" :style="{ color: scoreColor(ev.similarity_score) }">
+              <span
+                class="score-pct"
+                :style="{ color: scoreColor(ev.similarity_score) }"
+              >
                 {{ Math.round(ev.similarity_score * 100) }}%
               </span>
             </div>
@@ -147,12 +179,21 @@
                 <span class="stat-val">{{ ev.duration_seconds }}s</span>
                 <span class="stat-lbl">Duration</span>
               </div>
-              <div v-if="ev.person_id" class="stat-item">
+              <div
+                v-if="ev.person_id"
+                class="stat-item"
+              >
                 <span class="stat-val">#{{ ev.person_id }}</span>
                 <span class="stat-lbl">Person ID</span>
               </div>
-              <div v-if="ev.cluster_id" class="stat-item">
-                <span class="stat-val" :title="ev.cluster_id">#{{ ev.cluster_id.slice(0, 6) }}</span>
+              <div
+                v-if="ev.cluster_id"
+                class="stat-item"
+              >
+                <span
+                  class="stat-val"
+                  :title="ev.cluster_id"
+                >#{{ ev.cluster_id.slice(0, 6) }}</span>
                 <span class="stat-lbl">Cluster ID</span>
               </div>
             </div>

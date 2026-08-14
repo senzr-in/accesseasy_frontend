@@ -18,15 +18,15 @@
 
       <div class="flex items-center gap-3">
         <button
-          @click="fetchCameras"
           :disabled="loading"
           class="px-3.5 py-2 bg-white dark:bg-[#151c2c] hover:bg-slate-50 text-slate-700 dark:text-slate-200 rounded-xl text-xs transition font-bold border border-slate-200 dark:border-white/10 shadow-sm flex items-center gap-2"
+          @click="fetchCameras"
         >
           <span :class="{ 'animate-spin': loading }">🔄</span> Refresh
         </button>
         <button
-          @click="showAddModal = true"
           class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-md shadow-indigo-600/20 transition flex items-center gap-2"
+          @click="showAddModal = true"
         >
           <span>➕</span> Connect New Camera
         </button>
@@ -38,7 +38,9 @@
       <div class="p-4 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-[#151c2c] flex items-center justify-between">
         <div>
           <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Cameras</span>
-          <h3 class="text-2xl font-black text-slate-900 dark:text-white mt-1">{{ cameras.length }}</h3>
+          <h3 class="text-2xl font-black text-slate-900 dark:text-white mt-1">
+            {{ cameras.length }}
+          </h3>
         </div>
         <span class="text-2xl">📹</span>
       </div>
@@ -50,7 +52,7 @@
             {{ cameras.filter(c => c.status === 'online').length }}
           </h3>
         </div>
-        <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
       </div>
 
       <div class="p-4 rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-[#151c2c] flex items-center justify-between">
@@ -64,12 +66,18 @@
       </div>
     </div>
 
-    <div v-if="cameras.length === 0" class="text-center py-12 text-slate-400 text-xs italic bg-white dark:bg-[#151c2c] rounded-2xl border border-slate-200/80 dark:border-white/10 p-8">
+    <div
+      v-if="cameras.length === 0"
+      class="text-center py-12 text-slate-400 text-xs italic bg-white dark:bg-[#151c2c] rounded-2xl border border-slate-200/80 dark:border-white/10 p-8"
+    >
       No camera devices configured yet. Click "Connect New Camera" to add RTSP/ONVIF streams.
     </div>
 
     <!-- Camera Devices Grid -->
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+    <div
+      v-else
+      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
+    >
       <div
         v-for="cam in cameras"
         :key="cam.id"
@@ -81,7 +89,7 @@
             :src="cam.preview || 'https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&w=500&q=80'"
             :alt="cam.name"
             class="w-full h-full object-cover opacity-80 group-hover:scale-105 transition duration-300"
-          />
+          >
           <div class="absolute top-3 left-3 px-2.5 py-1 bg-black/60 backdrop-blur-sm rounded-lg text-xs font-bold text-white flex items-center gap-1.5">
             <span>{{ cam.protocol === 'frigate' ? '🤖' : '📡' }}</span>
             <span>{{ cam.name }}</span>
@@ -100,8 +108,8 @@
           </div>
 
           <button
-            @click="previewStream(cam)"
             class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white font-bold text-xs gap-2 transition"
+            @click="previewStream(cam)"
           >
             <span>▶</span> Preview Live Stream
           </button>
@@ -122,8 +130,8 @@
           <div class="flex items-center justify-between text-xs pt-2 border-t border-slate-100 dark:border-white/10">
             <span class="text-slate-400 font-mono text-[10px] truncate max-w-[200px]">{{ cam.rtspUrl }}</span>
             <button
-              @click="deleteCamera(cam.id)"
               class="text-rose-500 hover:text-rose-700 text-xs font-bold"
+              @click="deleteCamera(cam.id)"
             >
               Delete
             </button>
@@ -139,17 +147,35 @@
     />
 
     <!-- Stream Preview Dialog -->
-    <v-dialog v-model="showPreviewModal" max-width="800px">
-      <div v-if="selectedCam" class="bg-slate-900 text-white rounded-3xl p-6 overflow-hidden">
+    <v-dialog
+      v-model="showPreviewModal"
+      max-width="800px"
+    >
+      <div
+        v-if="selectedCam"
+        class="bg-slate-900 text-white rounded-3xl p-6 overflow-hidden"
+      >
         <div class="flex items-center justify-between mb-4">
           <div>
-            <h3 class="text-lg font-bold">{{ selectedCam.name }}</h3>
-            <p class="text-xs text-slate-400 font-mono">{{ selectedCam.rtspUrl }}</p>
+            <h3 class="text-lg font-bold">
+              {{ selectedCam.name }}
+            </h3>
+            <p class="text-xs text-slate-400 font-mono">
+              {{ selectedCam.rtspUrl }}
+            </p>
           </div>
-          <button @click="showPreviewModal = false" class="text-slate-400 hover:text-white text-xl">✕</button>
+          <button
+            class="text-slate-400 hover:text-white text-xl"
+            @click="showPreviewModal = false"
+          >
+            ✕
+          </button>
         </div>
         <div class="relative aspect-video rounded-2xl overflow-hidden bg-black border border-slate-800 flex items-center justify-center">
-          <img :src="selectedCam.preview || 'https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&w=800&q=80'" class="w-full h-full object-cover" />
+          <img
+            :src="selectedCam.preview || 'https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&w=800&q=80'"
+            class="w-full h-full object-cover"
+          >
           <div class="absolute top-4 left-4 px-3 py-1 bg-emerald-500 text-white rounded text-xs font-bold font-mono">
             LIVE WEBRTC STREAM 30 FPS
           </div>

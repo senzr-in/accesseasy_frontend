@@ -205,10 +205,18 @@
                   v-model="formData.doorIndex"
                   class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground"
                 >
-                  <option value="01">Door Relay 01</option>
-                  <option value="02">Door Relay 02</option>
-                  <option value="03">Door Relay 03</option>
-                  <option value="04">Door Relay 04</option>
+                  <option value="01">
+                    Door Relay 01
+                  </option>
+                  <option value="02">
+                    Door Relay 02
+                  </option>
+                  <option value="03">
+                    Door Relay 03
+                  </option>
+                  <option value="04">
+                    Door Relay 04
+                  </option>
                 </select>
               </div>
 

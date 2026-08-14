@@ -384,8 +384,14 @@
                       class="schedule-select h-10 px-2 text-xs font-medium border rounded-lg bg-white text-slate-800"
                       title="Access Level Schedule ID (0 = 24/7, 1..255 = Shift)"
                     >
-                      <option :value="0">0 (24/7 Access)</option>
-                      <option v-for="id in [1,2,3,4,5,10,20,50,100]" :key="id" :value="id">
+                      <option :value="0">
+                        0 (24/7 Access)
+                      </option>
+                      <option
+                        v-for="id in [1,2,3,4,5,10,20,50,100]"
+                        :key="id"
+                        :value="id"
+                      >
                         Shift ID {{ id }}
                       </option>
                     </select>

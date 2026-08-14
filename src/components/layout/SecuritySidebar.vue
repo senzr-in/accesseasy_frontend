@@ -211,7 +211,7 @@ import { useRouter, RouterLink } from 'vue-router';
 import {
   Home, Users, Shield, Lock, Map as MapIcon, BarChart2,
   MapPin, CheckCircle, Settings, HelpCircle, LogOut,
-  ChevronLeft, ChevronRight, Cpu
+  ChevronLeft, ChevronRight, Cpu, Fingerprint
 } from 'lucide-vue-next';
 import { authService } from '@/services/authService';
 
@@ -231,8 +231,8 @@ const userRole = computed(() => authService.getUserRole() || 'Employee');
 
 const operationsNav = [
   { name: 'Visitor Management', href: '/dashboard/visitors', icon: Users },
-  { name: 'Guard Operations', href: '/dashboard/guards', icon: Shield },
-  { name: 'Patrol Monitoring', href: '/dashboard/patrols', icon: MapIcon }
+  { name: 'Patrol Monitoring', href: '/dashboard/patrols', icon: MapIcon },
+  { name: 'Biometrics Hub', href: '/dashboard/easy-access/biometrics', icon: Fingerprint }
 ];
 
 const analyticsNav = [

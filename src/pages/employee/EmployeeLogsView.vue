@@ -18,15 +18,15 @@
 
       <div class="flex items-center gap-3">
         <button
-          @click="fetchLogs"
           :disabled="loading"
           class="px-3.5 py-2 bg-white dark:bg-[#151c2c] hover:bg-slate-50 text-slate-700 dark:text-slate-200 rounded-xl text-xs transition font-bold border border-slate-200 dark:border-white/10 shadow-sm flex items-center gap-2"
+          @click="fetchLogs"
         >
           <span :class="{ 'animate-spin': loading }">🔄</span> Refresh
         </button>
         <button
-          @click="exportCsv"
           class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-md shadow-emerald-600/20 transition flex items-center gap-2"
+          @click="exportCsv"
         >
           <span>📥</span> Export CSV Log Report
         </button>
@@ -41,21 +41,41 @@
           type="text"
           placeholder="Search by employee name, card #, or door..."
           class="w-full pl-9 pr-4 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-emerald-500 font-medium"
-        />
+        >
         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">🔍</span>
       </div>
 
       <div class="flex items-center gap-3 w-full sm:w-auto">
-        <select v-model="statusFilter" class="px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold">
-          <option value="all">All Authorization Statuses</option>
-          <option value="GRANTED">Access Granted</option>
-          <option value="DENIED">Access Denied</option>
+        <select
+          v-model="statusFilter"
+          class="px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold"
+        >
+          <option value="all">
+            All Authorization Statuses
+          </option>
+          <option value="GRANTED">
+            Access Granted
+          </option>
+          <option value="DENIED">
+            Access Denied
+          </option>
         </select>
-        <select v-model="doorFilter" class="px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold">
-          <option value="all">All Doors & Checkpoints</option>
-          <option value="Door 1">Door 1 - Main Entrance</option>
-          <option value="Door 2">Door 2 - Lobby West</option>
-          <option value="Server Room Door">Server Room Door</option>
+        <select
+          v-model="doorFilter"
+          class="px-3.5 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold"
+        >
+          <option value="all">
+            All Doors & Checkpoints
+          </option>
+          <option value="Door 1">
+            Door 1 - Main Entrance
+          </option>
+          <option value="Door 2">
+            Door 2 - Lobby West
+          </option>
+          <option value="Server Room Door">
+            Server Room Door
+          </option>
         </select>
       </div>
     </div>
@@ -66,29 +86,52 @@
         <table class="w-full text-left border-collapse whitespace-nowrap">
           <thead class="bg-slate-50 dark:bg-white/5 border-b border-slate-200/80 dark:border-white/10">
             <tr>
-              <th class="px-5 py-3.5 text-xs font-black text-slate-500 uppercase tracking-wider">Employee / Cardholder</th>
-              <th class="px-5 py-3.5 text-xs font-black text-slate-500 uppercase tracking-wider">Card / Badge ID</th>
-              <th class="px-5 py-3.5 text-xs font-black text-slate-500 uppercase tracking-wider">Door / Terminal</th>
-              <th class="px-5 py-3.5 text-xs font-black text-slate-500 uppercase tracking-wider">Timestamp</th>
-              <th class="px-5 py-3.5 text-xs font-black text-slate-500 uppercase tracking-wider">Status</th>
-              <th class="px-5 py-3.5 text-xs font-black text-slate-500 uppercase tracking-wider text-right">Actions</th>
+              <th class="px-5 py-3.5 text-xs font-black text-slate-500 uppercase tracking-wider">
+                Employee / Cardholder
+              </th>
+              <th class="px-5 py-3.5 text-xs font-black text-slate-500 uppercase tracking-wider">
+                Card / Badge ID
+              </th>
+              <th class="px-5 py-3.5 text-xs font-black text-slate-500 uppercase tracking-wider">
+                Door / Terminal
+              </th>
+              <th class="px-5 py-3.5 text-xs font-black text-slate-500 uppercase tracking-wider">
+                Timestamp
+              </th>
+              <th class="px-5 py-3.5 text-xs font-black text-slate-500 uppercase tracking-wider">
+                Status
+              </th>
+              <th class="px-5 py-3.5 text-xs font-black text-slate-500 uppercase tracking-wider text-right">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 dark:divide-white/10 text-xs">
             <tr v-if="filteredLogs.length === 0">
-              <td colspan="6" class="px-5 py-12 text-center text-slate-400 italic">
+              <td
+                colspan="6"
+                class="px-5 py-12 text-center text-slate-400 italic"
+              >
                 No access logs found matching filter criteria.
               </td>
             </tr>
-            <tr v-for="log in filteredLogs" :key="log.id" class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition">
+            <tr
+              v-for="log in filteredLogs"
+              :key="log.id"
+              class="hover:bg-slate-50/50 dark:hover:bg-white/5 transition"
+            >
               <td class="px-5 py-3.5">
                 <div class="flex items-center gap-3">
                   <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-200 font-bold flex items-center justify-center text-xs">
                     {{ log.initials }}
                   </div>
                   <div>
-                    <h4 class="font-bold text-slate-900 dark:text-white">{{ log.employeeName }}</h4>
-                    <p class="text-[10px] text-slate-400 font-medium">{{ log.department }}</p>
+                    <h4 class="font-bold text-slate-900 dark:text-white">
+                      {{ log.employeeName }}
+                    </h4>
+                    <p class="text-[10px] text-slate-400 font-medium">
+                      {{ log.department }}
+                    </p>
                   </div>
                 </div>
               </td>
@@ -110,7 +153,10 @@
                 </span>
               </td>
               <td class="px-5 py-3.5 text-right font-bold">
-                <button @click="viewDetails(log)" class="text-indigo-600 dark:text-indigo-400 hover:underline">
+                <button
+                  class="text-indigo-600 dark:text-indigo-400 hover:underline"
+                  @click="viewDetails(log)"
+                >
                   Details
                 </button>
               </td>

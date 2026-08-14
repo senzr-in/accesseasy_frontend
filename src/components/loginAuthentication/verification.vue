@@ -1,197 +1,237 @@
 <template>
-  <div class="flex min-h-screen w-full bg-[#f8fafc] dark:bg-[#020617] text-slate-900 dark:text-slate-100 flex-col lg:flex-row relative overflow-hidden font-sans">
-    <!-- Left Side: Marketing Content (Same as Login) -->
-    <div class="flex-1 flex flex-col justify-center px-6 py-8 lg:px-14 lg:py-6 bg-white dark:bg-slate-900/10 dark:bg-black/20 backdrop-blur-md border-r border-slate-200 dark:border-white/10 relative overflow-hidden">
-      <!-- Grid Background Pattern -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 min-h-screen w-full bg-[#030614] text-slate-100 relative overflow-x-hidden font-sans selection:bg-blue-500 selection:text-white">
+    <!-- Left Side: Marketing & Skyscraper Hero Section -->
+    <div class="w-full h-full flex flex-col justify-between px-6 py-8 lg:px-12 lg:py-10 relative z-20 overflow-hidden border-r border-slate-800/60 shadow-[10px_0_35px_rgba(0,0,0,0.35)] min-h-[500px]">
+      <!-- Photorealistic Skyscraper Office Background Image with Network Overlay -->
       <div 
-        class="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none"
-        style="background-image: radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0); background-size: 24px 24px;"
+        class="absolute inset-0 bg-cover bg-center transition-transform duration-10000 hover:scale-105 pointer-events-none z-0"
+        :style="{ backgroundImage: `url(${loginHeroBg})` }"
+      />
+      <!-- Subtle Dark Blue Overlay Gradient for Text Contrast (Low Opacity) -->
+      <div class="absolute inset-0 bg-gradient-to-br from-[#04081c]/50 via-[#071133]/30 to-[#030614]/60 pointer-events-none z-0" />
+
+      <!-- Tech Grid Pattern -->
+      <div 
+        class="absolute inset-0 opacity-[0.08] pointer-events-none z-0"
+        style="background-image: radial-gradient(circle at 2px 2px, rgba(59, 130, 246, 0.9) 1px, transparent 0); background-size: 30px 30px;"
       />
 
-      <div class="max-w-xl relative z-10 animate-fade-in-left">
-        <div class="flex items-center gap-3 mb-6">
-          <div class="h-10 w-10 rounded-xl bg-blue-600/20 flex items-center justify-center border border-blue-600/20 shadow-xl shadow-blue-600/10">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="w-6 h-6 text-blue-600"
-            >
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-            </svg>
+      <!-- Floating Tech Mesh Nodes Animation -->
+      <div class="absolute inset-0 pointer-events-none overflow-hidden z-0">
+        <div class="node-particle node-1" />
+        <div class="node-particle node-2" />
+        <div class="node-particle node-3" />
+      </div>
+
+      <!-- Top Header / Logo -->
+      <div class="relative z-10 animate-fade-in-down">
+        <div class="flex items-center gap-3.5 mb-2">
+          <!-- Hex Shield Icon -->
+          <div class="h-11 w-11 rounded-xl bg-gradient-to-br from-blue-500/30 to-blue-700/20 flex items-center justify-center border border-blue-400/40 shadow-[0_0_20px_rgba(59,130,246,0.3)] backdrop-blur-md group cursor-pointer hover:border-blue-300 transition-all duration-300">
+            <Shield class="w-6 h-6 text-blue-400 group-hover:scale-110 transition-transform duration-300" />
           </div>
           <div class="flex flex-col">
-            <span class="text-base font-black tracking-tight uppercase leading-none text-slate-900 dark:text-white">AccessEasy</span>
-            <span class="text-[9px] font-black text-blue-600 tracking-[0.4em] uppercase mt-0.5">Universal OS</span>
+            <span class="text-2xl font-bold tracking-tight text-white drop-shadow-md">AccessEasy</span>
+            <span class="text-[11px] font-medium text-slate-300 tracking-wider">Secure. Manage. Empower.</span>
           </div>
         </div>
+      </div>
 
-        <h1 class="text-3xl lg:text-4xl font-black tracking-tight leading-[1] mb-4 text-slate-900 dark:text-white">
-          Secure your infrastructure. <br>
-          <span class="text-blue-600">Empower</span> your workforce.
+      <!-- Hero Body Content -->
+      <div class="max-w-xl relative z-10 my-auto py-6">
+        <!-- Animated Pill Badge -->
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-600/30 border border-blue-400/40 text-blue-200 text-xs font-semibold tracking-wide mb-6 backdrop-blur-md shadow-[0_0_15px_rgba(59,130,246,0.3)]">
+          <span class="h-2 w-2 rounded-full bg-blue-400 animate-ping" />
+          <span>OTP Identity Verification</span>
+        </div>
+
+        <!-- Headline -->
+        <h1 class="text-3xl lg:text-4xl xl:text-5xl font-bold tracking-tight leading-[1.15] mb-4 text-white drop-shadow-xl">
+          Smart Access.<br>
+          Stronger Security.<br>
+          Empowered Workforce.
         </h1>
 
-        <p class="text-[12px] text-slate-500 dark:text-slate-400 font-bold mb-8 leading-relaxed max-w-sm uppercase tracking-wide">
-          The ultimate platform for real-time access control and workforce intelligence.
+        <p class="text-xs lg:text-sm text-slate-100 font-normal leading-relaxed mb-6 max-w-lg drop-shadow-md">
+          The all-in-one platform for access control, workforce management, and real-time intelligence.
         </p>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-5 mb-8">
+        <!-- 4 Feature Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
           <div
-            v-for="(h, i) in highlights"
-            :key="i"
-            class="flex items-center gap-3 group"
+            v-for="(feature, idx) in features"
+            :key="idx"
+            class="flex items-start gap-3 p-3 rounded-2xl bg-slate-900/60 border border-blue-500/30 backdrop-blur-md hover:bg-slate-900/80 hover:border-blue-400/60 shadow-md hover:shadow-blue-500/25 transition-all duration-300 group hover:-translate-y-0.5"
           >
-            <div class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-md group-hover:scale-110 group-hover:border-blue-500/50 transition-all duration-300">
+            <div class="h-9 w-9 shrink-0 flex items-center justify-center rounded-xl bg-gradient-to-br from-blue-900/60 to-slate-900/80 border border-blue-400/30 text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.3)] group-hover:scale-105 transition-all duration-300">
               <component
-                :is="h.icon"
-                class="h-4 w-4 text-blue-600"
+                :is="feature.icon"
+                class="h-4.5 w-4.5"
               />
             </div>
             <div>
-              <h3 class="font-black text-[10px] tracking-[0.05em] uppercase text-slate-900 dark:text-white">
-                {{ h.text }}
+              <h3 class="font-bold text-xs text-white tracking-wide mb-0.5 group-hover:text-blue-300 transition-colors">
+                {{ feature.title }}
               </h3>
-              <p class="text-[9px] font-bold text-slate-500 dark:text-slate-400 leading-snug mt-0.5 uppercase tracking-widest">
-                {{ h.sub }}
+              <p class="text-[10px] lg:text-[11px] text-slate-200 leading-snug opacity-90">
+                {{ feature.desc }}
               </p>
             </div>
           </div>
         </div>
+      </div>
 
-        <div class="pt-6 border-t border-slate-200 dark:border-white/5">
-          <p class="text-[8px] font-black tracking-[0.3em] text-slate-400 dark:text-slate-600 dark:text-slate-300 mb-4 uppercase">
-            Trusted Enterprise Networks
-          </p>
-          <div class="flex flex-wrap gap-x-6 gap-y-3">
-            <div
-              v-for="(ind, i) in industries"
-              :key="i"
-              class="flex items-center gap-2 opacity-50 hover:opacity-100 transition-all duration-300 cursor-default group"
-            >
+      <!-- Bottom Hardware Authentication Methods Badges Bar -->
+      <div class="relative z-10 pt-4 border-t border-slate-700/60">
+        <p class="text-[11px] font-bold tracking-wider text-slate-300 uppercase mb-3 drop-shadow flex items-center gap-2">
+          <ShieldCheck class="w-4 h-4 text-cyan-400" />
+          <span>Supported Access & Authentication Modalities</span>
+        </p>
+
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+          <div
+            v-for="(auth, i) in authMethods"
+            :key="i"
+            class="p-2.5 rounded-xl bg-slate-900/70 border border-blue-500/30 backdrop-blur-md shadow-md hover:border-cyan-400/70 hover:bg-slate-900/90 shadow-[0_0_15px_rgba(6,182,212,0.15)] transition-all duration-300 flex flex-col items-center justify-center text-center group cursor-default"
+          >
+            <div class="h-9 w-9 rounded-lg bg-cyan-950/60 border border-cyan-500/30 flex items-center justify-center mb-1.5 group-hover:scale-110 group-hover:border-cyan-400/80 transition-all duration-300">
               <component
-                :is="ind.icon"
-                class="h-4 w-4 group-hover:text-blue-600 transition-colors"
+                :is="auth.icon"
+                class="w-5 h-5 text-cyan-400"
               />
-              <span class="text-[9px] font-black tracking-widest uppercase">{{ ind.name }}</span>
             </div>
+            <span class="text-xs font-bold text-white tracking-wide leading-tight group-hover:text-cyan-300 transition-colors">
+              {{ auth.name }}
+            </span>
+            <span class="text-[9px] text-slate-300 font-medium tracking-tight mt-0.5 opacity-90">
+              {{ auth.sub }}
+            </span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Right Side: OTP Verification Form -->
-    <div class="flex-1 flex items-center justify-center p-4 lg:p-10 relative overflow-hidden bg-slate-50 dark:bg-slate-900/50 dark:bg-transparent">
-      <!-- Glow effect -->
-      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-blue-600/5 rounded-full blur-[100px] pointer-events-none" />
+    <!-- Right Side: Real White Marble Luxury OTP Form Section -->
+    <div class="w-full h-full flex items-center justify-center p-4 sm:p-6 lg:p-8 relative overflow-hidden bg-[#e5e9f0] min-h-screen z-10">
+      <!-- Background Ambient Glow & Sparks -->
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-blue-400/15 rounded-full blur-[140px] pointer-events-none" />
 
-      <div class="w-full max-w-[420px] rounded-[2rem] bg-white dark:bg-slate-900/90 dark:bg-[#0a0e1a]/80 backdrop-blur-xl p-8 shadow-2xl border border-slate-200 dark:border-white/10 relative z-10 animate-fade-in-up">
-        <div class="text-center mb-6">
-          <div class="mx-auto mb-4 h-12 w-12 flex items-center justify-center rounded-[1rem] bg-blue-600 text-white shadow-lg shadow-blue-600/30 border border-blue-500/20">
-            <ShieldCheck class="h-5 w-5" />
-          </div>
-          <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight uppercase mb-1">
-            Verify Identity
-          </h2>
-          <p class="text-[9px] text-blue-600 font-black tracking-[0.4em] uppercase">
-            Verification code sent to {{ displayContact }}
-          </p>
-        </div>
+      <!-- Main Marble Card Container -->
+      <div 
+        class="w-full max-w-[450px] rounded-[2.5rem] p-8 lg:p-10 shadow-[0_30px_70px_-10px_rgba(0,0,0,0.25),0_0_35px_rgba(255,255,255,0.8)] border border-white/90 relative z-10 animate-fade-in-up text-slate-900 overflow-hidden bg-cover bg-center"
+        :style="{ backgroundImage: `url(${marbleBg})` }"
+      >
+        <!-- Light Translucent White Wash for Polished Marble Texture Visibility -->
+        <div class="absolute inset-0 bg-white/40 pointer-events-none z-0" />
 
-        <!-- Alerts -->
-        <div
-          v-if="error"
-          class="mb-4 p-3 rounded-xl bg-rose-50 dark:bg-rose-900/10 border border-rose-100 dark:border-rose-900/30 flex items-start gap-3 animate-shake"
-        >
-          <AlertCircle class="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-          <p class="text-[11px] text-rose-800 dark:text-rose-300 leading-relaxed font-semibold uppercase tracking-wider">
-            {{ error }}
-          </p>
-        </div>
-
-        <div
-          v-if="success"
-          class="mb-4 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/30 flex items-start gap-3"
-        >
-          <CheckCircle class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-          <p class="text-[11px] text-emerald-800 dark:text-emerald-300 leading-relaxed font-semibold uppercase tracking-wider">
-            {{ success }}
-          </p>
-        </div>
-
-        <div class="space-y-6">
-          <div class="space-y-2">
-            <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Verification Code</label>
-            <div class="flex justify-between gap-2">
-              <input
-                v-for="(digit, index) in 6"
-                :key="index"
-                ref="otpFields"
-                v-model="otpDigits[index]"
-                maxlength="1"
-                type="text"
-                class="w-12 h-14 text-center rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none text-xl font-black text-slate-900 dark:text-white shadow-sm"
-                @input="handleInput(index)"
-                @keydown="handleKeydown($event, index)"
-                @paste="handlePaste($event, index)"
-              >
+        <div class="relative z-10">
+          <div class="text-center mb-6">
+            <div class="relative inline-flex items-center justify-center mb-3">
+              <div class="absolute inset-0 rounded-full bg-blue-500/20 animate-ping opacity-60 duration-1000 scale-125" />
+              <div class="relative h-16 w-16 rounded-full bg-gradient-to-br from-blue-50 via-white to-blue-100 border border-blue-300 flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.3)]">
+                <ShieldCheck class="w-8 h-8 text-blue-600" />
+              </div>
             </div>
-            
-            <div class="flex items-center justify-between px-1 mt-2">
-              <p class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                Didn't receive code?
-              </p>
-              <button 
-                v-if="timer <= 0" 
-                :disabled="resendLoading" 
-                class="text-[10px] font-black text-blue-600 hover:text-blue-700 uppercase tracking-[0.1em] transition-colors disabled:opacity-50"
-                @click="resendOtp"
-              >
-                {{ resendLoading ? 'Sending...' : 'Resend Now' }}
-              </button>
-              <span
-                v-else
-                class="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em]"
-              >
-                Retry in {{ timer }}s
-              </span>
-            </div>
+            <h2 class="text-2xl font-black text-slate-900 tracking-tight mb-1">
+              Verify Code
+            </h2>
+            <p class="text-xs text-slate-600 font-semibold">
+              Enter 6-digit OTP sent to {{ displayContact }}
+            </p>
           </div>
 
-          <button
-            :disabled="loading || !isValidOtp"
-            class="w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 transition-all disabled:opacity-70 disabled:cursor-not-allowed group"
-            @click="verifyCode"
+          <!-- Alerts -->
+          <div
+            v-if="error"
+            class="mb-4 p-3 rounded-xl bg-rose-50 dark:bg-rose-900/10 border border-rose-100 dark:border-rose-900/30 flex items-start gap-3 animate-shake"
           >
-            <span v-if="loading">Verifying...</span>
-            <template v-else>
-              Verify & Continue
-              <ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </template>
-          </button>
-
-          <div class="flex items-center justify-between gap-4 py-2 opacity-50">
-            <div class="h-[1px] flex-1 bg-slate-300 dark:bg-slate-700" />
-            <span class="text-[9px] font-black tracking-[0.3em] text-slate-500 dark:text-slate-400 uppercase">OR</span>
-            <div class="h-[1px] flex-1 bg-slate-300 dark:bg-slate-700" />
+            <AlertCircle class="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+            <p class="text-[11px] text-rose-800 dark:text-rose-300 leading-relaxed font-semibold uppercase tracking-wider">
+              {{ error }}
+            </p>
           </div>
 
-          <p class="text-center text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-            <router-link
-              to="/login"
-              class="text-blue-600 hover:text-blue-700 underline underline-offset-4 cursor-pointer"
-            >
-              Back to Login
-            </router-link>
-          </p>
-        </div>
+          <div
+            v-if="success"
+            class="mb-4 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/30 flex items-start gap-3"
+          >
+            <CheckCircle class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+            <p class="text-[11px] text-emerald-800 dark:text-emerald-300 leading-relaxed font-semibold uppercase tracking-wider">
+              {{ success }}
+            </p>
+          </div>
 
-        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 text-[8px] font-black tracking-[0.4em] text-slate-400 uppercase flex items-center gap-2">
-          <div class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          Secure Session Active
+          <div class="space-y-6">
+            <div class="space-y-2">
+              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Verification Code</label>
+              <div class="flex justify-between gap-2">
+                <input
+                  v-for="(digit, index) in 6"
+                  :key="index"
+                  ref="otpFields"
+                  v-model="otpDigits[index]"
+                  maxlength="1"
+                  type="text"
+                  class="w-12 h-14 text-center rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none text-xl font-black text-slate-900 dark:text-white shadow-sm"
+                  @input="handleInput(index)"
+                  @keydown="handleKeydown($event, index)"
+                  @paste="handlePaste($event, index)"
+                >
+              </div>
+            
+              <div class="flex items-center justify-between px-1 mt-2">
+                <p class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  Didn't receive code?
+                </p>
+                <button 
+                  v-if="timer <= 0" 
+                  :disabled="resendLoading" 
+                  class="text-[10px] font-black text-blue-600 hover:text-blue-700 uppercase tracking-[0.1em] transition-colors disabled:opacity-50"
+                  @click="resendOtp"
+                >
+                  {{ resendLoading ? 'Sending...' : 'Resend Now' }}
+                </button>
+                <span
+                  v-else
+                  class="text-[10px] font-black text-slate-400 uppercase tracking-[0.1em]"
+                >
+                  Retry in {{ timer }}s
+                </span>
+              </div>
+            </div>
+
+            <button
+              :disabled="loading || !isValidOtp"
+              class="w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 transition-all disabled:opacity-70 disabled:cursor-not-allowed group"
+              @click="verifyCode"
+            >
+              <span v-if="loading">Verifying...</span>
+              <template v-else>
+                Verify & Continue
+                <ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </template>
+            </button>
+
+            <div class="flex items-center justify-between gap-4 py-2 opacity-50">
+              <div class="h-[1px] flex-1 bg-slate-300 dark:bg-slate-700" />
+              <span class="text-[9px] font-black tracking-[0.3em] text-slate-500 dark:text-slate-400 uppercase">OR</span>
+              <div class="h-[1px] flex-1 bg-slate-300 dark:bg-slate-700" />
+            </div>
+
+            <p class="text-center text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              <router-link
+                to="/login"
+                class="text-blue-600 hover:text-blue-700 underline underline-offset-4 cursor-pointer"
+              >
+                Back to Login
+              </router-link>
+            </p>
+          </div>
+
+          <div class="mt-6 text-center text-[9px] font-black tracking-[0.3em] text-slate-400 uppercase flex items-center justify-center gap-2">
+            <div class="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            Secure Session Active
+          </div>
         </div>
       </div>
     </div>

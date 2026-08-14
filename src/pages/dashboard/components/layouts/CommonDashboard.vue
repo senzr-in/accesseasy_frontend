@@ -39,58 +39,65 @@
       <div class="rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-[#151c2c] p-4 shadow-sm relative overflow-hidden">
         <div class="flex items-center justify-between">
           <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Cameras Online</span>
-          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
         </div>
         <div class="mt-2 flex items-baseline gap-2">
           <span class="text-3xl font-black text-slate-900 dark:text-white">{{ cameraStats.online }} / {{ cameraStats.total }}</span>
           <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">{{ cameraStats.onlinePct }}% Online</span>
         </div>
-        <p class="text-[11px] text-slate-400 mt-1">RTSP & Frigate MQTT Active</p>
+        <p class="text-[11px] text-slate-400 mt-1">
+          RTSP & Frigate MQTT Active
+        </p>
       </div>
 
       <!-- Online Doors -->
       <div class="rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-[#151c2c] p-4 shadow-sm">
         <div class="flex items-center justify-between">
           <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Access Doors</span>
-          <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-blue-500" />
         </div>
         <div class="mt-2 flex items-baseline gap-2">
           <span class="text-3xl font-black text-slate-900 dark:text-white">{{ doorStats.online }} / {{ doorStats.total }}</span>
           <span class="text-xs font-bold text-blue-600 dark:text-blue-400">100% Operational</span>
         </div>
-        <p class="text-[11px] text-slate-400 mt-1">MQTT Door Gateways Active</p>
+        <p class="text-[11px] text-slate-400 mt-1">
+          MQTT Door Gateways Active
+        </p>
       </div>
 
       <!-- On-Site Employees -->
       <div class="rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-[#151c2c] p-4 shadow-sm">
         <div class="flex items-center justify-between">
           <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">On-Site Staff</span>
-          <span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-purple-500" />
         </div>
         <div class="mt-2 flex items-baseline gap-2">
           <span class="text-3xl font-black text-slate-900 dark:text-white">{{ onSiteCount }}</span>
           <span class="text-xs font-bold text-purple-600 dark:text-purple-400">Checked In</span>
         </div>
-        <p class="text-[11px] text-slate-400 mt-1">Real-time attendance active</p>
+        <p class="text-[11px] text-slate-400 mt-1">
+          Real-time attendance active
+        </p>
       </div>
 
       <!-- Daily Swipes -->
       <div class="rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-[#151c2c] p-4 shadow-sm">
         <div class="flex items-center justify-between">
           <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Today's Swipes</span>
-          <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-amber-500" />
         </div>
         <div class="mt-2 flex items-baseline gap-2">
           <span class="text-3xl font-black text-slate-900 dark:text-white">{{ swipeLogs.length * 42 + 104 }}</span>
           <span class="text-xs font-bold text-emerald-600 dark:text-emerald-400">Pass Granted</span>
         </div>
-        <p class="text-[11px] text-slate-400 mt-1">RFID & Biometric authorization</p>
+        <p class="text-[11px] text-slate-400 mt-1">
+          RFID & Biometric authorization
+        </p>
       </div>
     </div>
 
     <!-- Main Split Overview Panels -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      
       <!-- Panel 1: Camera AI & CCTV Vision Stream -->
       <div class="rounded-2xl border border-slate-200/80 dark:border-white/10 bg-white dark:bg-[#151c2c] p-5 shadow-sm flex flex-col justify-between">
         <div>
@@ -116,7 +123,7 @@
                 src="https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&w=400&q=80"
                 alt="Main Entrance"
                 class="w-full h-full object-cover opacity-80 group-hover:scale-105 transition duration-300"
-              />
+              >
               <div class="absolute top-2 left-2 px-2 py-0.5 bg-black/60 backdrop-blur-sm rounded text-[10px] font-bold text-white">
                 Cam 01: Main Entrance
               </div>
@@ -130,7 +137,7 @@
                 src="https://images.unsplash.com/photo-1541888946425-d0fbb186a5b3?auto=format&fit=crop&w=400&q=80"
                 alt="Lobby West"
                 class="w-full h-full object-cover opacity-80 group-hover:scale-105 transition duration-300"
-              />
+              >
               <div class="absolute top-2 left-2 px-2 py-0.5 bg-black/60 backdrop-blur-sm rounded text-[10px] font-bold text-white">
                 Cam 02: Lobby West
               </div>
@@ -203,8 +210,12 @@
                   {{ log.initials }}
                 </div>
                 <div>
-                  <h4 class="text-xs font-bold text-slate-900 dark:text-white">{{ log.name }}</h4>
-                  <p class="text-[10px] text-slate-400">{{ log.card }} &bull; {{ log.door }}</p>
+                  <h4 class="text-xs font-bold text-slate-900 dark:text-white">
+                    {{ log.name }}
+                  </h4>
+                  <p class="text-[10px] text-slate-400">
+                    {{ log.card }} &bull; {{ log.door }}
+                  </p>
                 </div>
               </div>
               <div class="text-right">
@@ -214,7 +225,9 @@
                 >
                   {{ log.status }}
                 </span>
-                <p class="text-[10px] text-slate-400 mt-0.5">{{ log.time }}</p>
+                <p class="text-[10px] text-slate-400 mt-0.5">
+                  {{ log.time }}
+                </p>
               </div>
             </div>
           </div>
@@ -230,7 +243,6 @@
           </router-link>
         </div>
       </div>
-
     </div>
   </div>
 </template>

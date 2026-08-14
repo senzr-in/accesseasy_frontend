@@ -69,7 +69,7 @@
                   type="text"
                   placeholder="Floor 1, Building A"
                   class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground placeholder:text-zinc-500"
-                />
+                >
               </div>
               
               <!-- Controller Dropdown -->
@@ -109,9 +109,15 @@
                   v-model.number="formData.antiPassbackMode"
                   class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground"
                 >
-                  <option :value="0">Disabled</option>
-                  <option :value="1">Prevent Double Entry (Strict APB)</option>
-                  <option :value="2">Warning Log Only</option>
+                  <option :value="0">
+                    Disabled
+                  </option>
+                  <option :value="1">
+                    Prevent Double Entry (Strict APB)
+                  </option>
+                  <option :value="2">
+                    Warning Log Only
+                  </option>
                 </select>
               </div>
 
@@ -122,10 +128,18 @@
                   v-model.number="formData.interlockMode"
                   class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground"
                 >
-                  <option :value="0">Disabled (No Interlock)</option>
-                  <option :value="1">Door 1 & 2 Interlock</option>
-                  <option :value="2">Door 1, 2 & 3 Interlock</option>
-                  <option :value="4">All Doors Interlock</option>
+                  <option :value="0">
+                    Disabled (No Interlock)
+                  </option>
+                  <option :value="1">
+                    Door 1 & 2 Interlock
+                  </option>
+                  <option :value="2">
+                    Door 1, 2 & 3 Interlock
+                  </option>
+                  <option :value="4">
+                    All Doors Interlock
+                  </option>
                 </select>
               </div>
 
@@ -139,7 +153,7 @@
                   max="60"
                   placeholder="5"
                   class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground"
-                />
+                >
               </div>
 
               <!-- Door Sensor -->
@@ -149,8 +163,12 @@
                   v-model.number="formData.sensorMode"
                   class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground"
                 >
-                  <option :value="1">Enabled (Monitor Open/Close)</option>
-                  <option :value="0">Disabled</option>
+                  <option :value="1">
+                    Enabled (Monitor Open/Close)
+                  </option>
+                  <option :value="0">
+                    Disabled
+                  </option>
                 </select>
               </div>
             </div>

@@ -62,29 +62,29 @@
           <div class="flex flex-wrap items-center gap-4 text-xs font-medium">
             <label class="flex items-center gap-1.5 cursor-pointer text-slate-800 dark:text-slate-200">
               <input
-                type="radio"
                 v-model="duplicateStrategy"
+                type="radio"
                 value="skip"
                 @change="reprocessFile"
-              />
+              >
               <span><strong>Skip Duplicates</strong> (Import only new records)</span>
             </label>
             <label class="flex items-center gap-1.5 cursor-pointer text-slate-800 dark:text-slate-200">
               <input
-                type="radio"
                 v-model="duplicateStrategy"
+                type="radio"
                 value="edit"
                 @change="reprocessFile"
-              />
+              >
               <span><strong>Edit / Overwrite Existing</strong></span>
             </label>
             <label class="flex items-center gap-1.5 cursor-pointer text-slate-800 dark:text-slate-200">
               <input
-                type="radio"
                 v-model="duplicateStrategy"
+                type="radio"
                 value="strict"
                 @change="reprocessFile"
-              />
+              >
               <span><strong>Strict Error</strong></span>
             </label>
           </div>
@@ -169,43 +169,43 @@
         </div>
       </div>
 
-        <!-- Live Progress & ETA Bar -->
-        <div
-          v-if="isImporting"
-          class="progress-container"
-        >
-          <div class="progress-header">
-            <span class="progress-status">{{ importProgress.statusText || 'Importing employee data...' }}</span>
-            <span class="progress-count">{{ importProgress.current }} / {{ importProgress.total }} ({{ importProgress.percentage }}%)</span>
-          </div>
-
-          <div class="progress-bar-track">
-            <div
-              class="progress-bar-fill"
-              :style="{ width: `${importProgress.percentage}%` }"
-            />
-          </div>
-
-          <div class="progress-footer">
-            <span v-if="importProgress.etaSeconds > 0">
-              ⏱️ Estimated time remaining: ~{{ importProgress.etaSeconds }} sec
-            </span>
-            <span v-else-if="importProgress.percentage === 100">
-              ✅ Finalizing database setup...
-            </span>
-            <span v-else>
-              Calculating estimated time...
-            </span>
-          </div>
+      <!-- Live Progress & ETA Bar -->
+      <div
+        v-if="isImporting"
+        class="progress-container"
+      >
+        <div class="progress-header">
+          <span class="progress-status">{{ importProgress.statusText || 'Importing employee data...' }}</span>
+          <span class="progress-count">{{ importProgress.current }} / {{ importProgress.total }} ({{ importProgress.percentage }}%)</span>
         </div>
 
-        <div
-          v-if="successMessage"
-          class="success-message"
-        >
-          <CheckCircle class="success-icon" />
-          {{ successMessage }}
+        <div class="progress-bar-track">
+          <div
+            class="progress-bar-fill"
+            :style="{ width: `${importProgress.percentage}%` }"
+          />
         </div>
+
+        <div class="progress-footer">
+          <span v-if="importProgress.etaSeconds > 0">
+            ⏱️ Estimated time remaining: ~{{ importProgress.etaSeconds }} sec
+          </span>
+          <span v-else-if="importProgress.percentage === 100">
+            ✅ Finalizing database setup...
+          </span>
+          <span v-else>
+            Calculating estimated time...
+          </span>
+        </div>
+      </div>
+
+      <div
+        v-if="successMessage"
+        class="success-message"
+      >
+        <CheckCircle class="success-icon" />
+        {{ successMessage }}
+      </div>
 
       <!-- Snackbar for user feedback -->
       <div

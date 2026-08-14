@@ -272,6 +272,12 @@ const routes = [
         name: "Reports",
         component: () => import("@/pages/reports/index.vue"),
         meta: { roles: ["Admin", "Manager"] }
+      },
+      {
+        path: "easy-access/biometrics",
+        name: "BiometricsHub",
+        component: () => import("@/pages/biometrics/index.vue"),
+        meta: { roles: ["Admin", "Manager", "Employee", "Guard"] }
       }
     ]
   },

@@ -1,6 +1,5 @@
 <template>
   <div class="h-full bg-[#f8fafc] dark:bg-[#0b0f19] text-slate-900 dark:text-slate-50 p-6 pb-8 font-sans overflow-y-auto custom-scrollbar">
-    
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
       <div>
@@ -13,8 +12,8 @@
       </div>
       <div class="flex items-center gap-3">
         <button
-          @click="openEnrollWizard"
           class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs shadow-md shadow-indigo-600/20 transition flex items-center gap-2"
+          @click="openEnrollWizard"
         >
           <span>✨</span> Enroll 5-Pose AI Profile
         </button>
@@ -27,13 +26,13 @@
         <button
           v-for="tab in tabs"
           :key="tab.id"
-          @click="activeTab = tab.id"
           :class="[
             'flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition',
             activeTab === tab.id
               ? `${tab.bg} text-white shadow-sm`
               : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
           ]"
+          @click="activeTab = tab.id"
         >
           <span>{{ tab.icon }}</span>
           <span>{{ tab.label }}</span>
@@ -46,18 +45,27 @@
           type="text"
           placeholder="Search by name, ID, department..."
           class="w-full pl-9 pr-4 py-2 bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-2xl text-xs text-slate-800 dark:text-slate-200 focus:outline-none focus:border-indigo-500 font-medium shadow-sm"
-        />
+        >
         <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">🔍</span>
       </div>
     </div>
 
     <!-- Tab 1: Unknown Subject Audits -->
-    <div v-if="activeTab === 'unknown'" class="space-y-4">
+    <div
+      v-if="activeTab === 'unknown'"
+      class="space-y-4"
+    >
       <div class="bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 rounded-2xl p-4 flex items-center gap-3">
-        <div class="p-2.5 bg-purple-100 dark:bg-purple-500/20 text-purple-600 rounded-xl text-xl">🛡️</div>
+        <div class="p-2.5 bg-purple-100 dark:bg-purple-500/20 text-purple-600 rounded-xl text-xl">
+          🛡️
+        </div>
         <div>
-          <h3 class="text-sm font-bold text-slate-900 dark:text-white">Unrecognized Subject Audits</h3>
-          <p class="text-xs text-slate-500 dark:text-slate-400">Captured face crops from CCTV streams requiring profile enrollment.</p>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-white">
+            Unrecognized Subject Audits
+          </h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">
+            Captured face crops from CCTV streams requiring profile enrollment.
+          </p>
         </div>
       </div>
 
@@ -68,7 +76,11 @@
           class="bg-white dark:bg-[#151c2c] border border-slate-200/80 dark:border-white/10 rounded-2xl p-4 shadow-sm hover:shadow-md transition space-y-3"
         >
           <div class="relative aspect-video rounded-xl overflow-hidden bg-slate-900 border border-slate-700">
-            <img :src="unk.snapshot" alt="Unknown" class="w-full h-full object-cover" />
+            <img
+              :src="unk.snapshot"
+              alt="Unknown"
+              class="w-full h-full object-cover"
+            >
             <div class="absolute top-2 left-2 px-2 py-0.5 bg-rose-500 text-white font-mono text-[10px] font-bold rounded">
               UNKNOWN {{ unk.confidence }}
             </div>
@@ -78,8 +90,8 @@
             <span>{{ unk.time }}</span>
           </div>
           <button
-            @click="promoteUnknown(unk)"
             class="w-full py-2 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 text-indigo-700 dark:text-indigo-400 font-bold text-xs rounded-xl border border-indigo-200 dark:border-indigo-500/20 transition flex items-center justify-center gap-1.5"
+            @click="promoteUnknown(unk)"
           >
             <span>➕</span> Promote to Profile
           </button>
@@ -88,7 +100,10 @@
     </div>
 
     <!-- Tab 2: Enrolled Profiles Grid (Employees, VIP, Blacklist) -->
-    <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div
+      v-else
+      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+    >
       <div
         v-for="person in filteredPeople"
         :key="person.id"
@@ -98,10 +113,15 @@
           <div class="flex items-start justify-between">
             <div class="relative">
               <div class="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-white/10 overflow-hidden flex items-center justify-center text-indigo-700 dark:text-indigo-400 font-bold text-xl">
-                <img v-if="person.avatar" :src="person.avatar" :alt="person.name" class="w-full h-full object-cover" />
+                <img
+                  v-if="person.avatar"
+                  :src="person.avatar"
+                  :alt="person.name"
+                  class="w-full h-full object-cover"
+                >
                 <span v-else>{{ person.name.slice(0, 2).toUpperCase() }}</span>
               </div>
-              <span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white dark:border-slate-900"></span>
+              <span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white dark:border-slate-900" />
             </div>
 
             <div class="flex flex-col items-end gap-1">
@@ -123,16 +143,24 @@
             <h3 class="text-base font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 transition">
               {{ person.name }}
             </h3>
-            <p class="text-xs text-slate-500 font-medium">{{ person.department }}</p>
+            <p class="text-xs text-slate-500 font-medium">
+              {{ person.department }}
+            </p>
           </div>
 
           <div class="space-y-1.5 pt-2 border-t border-slate-100 dark:border-white/10 text-xs text-slate-500">
             <div class="flex justify-between items-center">
               <span>Pose Vectors:</span>
-              <span v-if="person.multiPoseEnrolled" class="text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded font-mono font-bold text-[10px]">
+              <span
+                v-if="person.multiPoseEnrolled"
+                class="text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-2 py-0.5 rounded font-mono font-bold text-[10px]"
+              >
                 5 Poses (Multi-Vector)
               </span>
-              <span v-else class="text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 px-2 py-0.5 rounded font-mono font-bold text-[10px]">
+              <span
+                v-else
+                class="text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-500/10 px-2 py-0.5 rounded font-mono font-bold text-[10px]"
+              >
                 1 Pose
               </span>
             </div>
@@ -147,7 +175,10 @@
           <span class="text-[11px] text-indigo-600 dark:text-indigo-400 font-bold flex items-center gap-1">
             <span>✓</span> AI Active Model
           </span>
-          <button @click="deletePerson(person.id)" class="text-slate-400 hover:text-rose-600 text-xs font-bold">
+          <button
+            class="text-slate-400 hover:text-rose-600 text-xs font-bold"
+            @click="deletePerson(person.id)"
+          >
             Remove
           </button>
         </div>
@@ -155,9 +186,12 @@
     </div>
 
     <!-- ── GUIDED 5-POSE ENROLLMENT WIZARD MODAL ── -->
-    <v-dialog v-model="showWizard" max-width="720px" persistent>
+    <v-dialog
+      v-model="showWizard"
+      max-width="720px"
+      persistent
+    >
       <div class="bg-white dark:bg-[#151c2c] rounded-3xl overflow-hidden shadow-2xl border border-slate-200 dark:border-white/10 text-slate-900 dark:text-white font-sans">
-        
         <!-- Header -->
         <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-white/10 bg-slate-50 dark:bg-white/5">
           <div class="flex items-center gap-3">
@@ -173,42 +207,80 @@
               </p>
             </div>
           </div>
-          <button @click="closeWizard" class="text-slate-400 hover:text-slate-600">✕</button>
+          <button
+            class="text-slate-400 hover:text-slate-600"
+            @click="closeWizard"
+          >
+            ✕
+          </button>
         </div>
 
         <!-- Stage 1: Profile Form -->
-        <div v-if="wizardStage === 'details'" class="p-6 space-y-4">
+        <div
+          v-if="wizardStage === 'details'"
+          class="p-6 space-y-4"
+        >
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Full Name *</label>
-              <input v-model="form.name" type="text" placeholder="e.g. Kavin Kumar" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium" />
+              <input
+                v-model="form.name"
+                type="text"
+                placeholder="e.g. Kavin Kumar"
+                class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium"
+              >
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Department</label>
-              <input v-model="form.department" type="text" placeholder="e.g. Engineering" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium" />
+              <input
+                v-model="form.department"
+                type="text"
+                placeholder="e.g. Engineering"
+                class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium"
+              >
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Watchlist Category</label>
-              <select v-model="form.type" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold">
-                <option value="employee">Employee</option>
-                <option value="vip">VIP Guest</option>
-                <option value="blacklist">Blacklist Watch</option>
+              <select
+                v-model="form.type"
+                class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold"
+              >
+                <option value="employee">
+                  Employee
+                </option>
+                <option value="vip">
+                  VIP Guest
+                </option>
+                <option value="blacklist">
+                  Blacklist Watch
+                </option>
               </select>
             </div>
             <div>
               <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Employee / Subject ID</label>
-              <input v-model="form.employeeId" type="text" placeholder="EMP-1042" class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium" />
+              <input
+                v-model="form.employeeId"
+                type="text"
+                placeholder="EMP-1042"
+                class="w-full px-3.5 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-medium"
+              >
             </div>
           </div>
 
           <!-- Guided Pose Plan Box -->
           <div class="p-4 bg-indigo-50 dark:bg-indigo-500/10 rounded-2xl border border-indigo-100 dark:border-indigo-500/20">
-            <p class="text-xs font-bold text-indigo-800 dark:text-indigo-300 mb-2">📸 Guided 5-Pose AI Vector Capture:</p>
+            <p class="text-xs font-bold text-indigo-800 dark:text-indigo-300 mb-2">
+              📸 Guided 5-Pose AI Vector Capture:
+            </p>
             <div class="grid grid-cols-5 gap-2 text-center text-[10px]">
-              <div v-for="(p, i) in POSES" :key="i" class="p-1.5 bg-white dark:bg-slate-900 rounded-lg border border-indigo-100 dark:border-white/10">
+              <div
+                v-for="(p, i) in POSES"
+                :key="i"
+                class="p-1.5 bg-white dark:bg-slate-900 rounded-lg border border-indigo-100 dark:border-white/10"
+              >
                 <div class="w-6 h-6 mx-auto rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center text-[10px] mb-1">
                   {{ i + 1 }}
                 </div>
@@ -218,14 +290,20 @@
           </div>
 
           <div class="pt-2 flex justify-end">
-            <button @click="startCaptureStage" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md transition">
+            <button
+              class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md transition"
+              @click="startCaptureStage"
+            >
               Next: Start Pose Capture &rarr;
             </button>
           </div>
         </div>
 
         <!-- Stage 2: Interactive Camera Pose Capture -->
-        <div v-else-if="wizardStage === 'capture'" class="p-6 space-y-4">
+        <div
+          v-else-if="wizardStage === 'capture'"
+          class="p-6 space-y-4"
+        >
           <!-- Progress bar -->
           <div class="space-y-1">
             <div class="flex justify-between text-xs text-slate-500 font-semibold">
@@ -233,7 +311,10 @@
               <span>{{ capturedCount * 20 }}%</span>
             </div>
             <div class="h-2 bg-slate-100 dark:bg-white/10 rounded-full overflow-hidden">
-              <div class="h-full bg-gradient-to-r from-indigo-500 to-emerald-500 transition-all duration-300" :style="{ width: `${capturedCount * 20}%` }"></div>
+              <div
+                class="h-full bg-gradient-to-r from-indigo-500 to-emerald-500 transition-all duration-300"
+                :style="{ width: `${capturedCount * 20}%` }"
+              />
             </div>
           </div>
 
@@ -244,20 +325,29 @@
                 <span class="text-3xl">👤</span>
               </div>
               <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400">{{ POSES[currentPoseIndex]?.label }}</span>
-              <p class="text-[11px] font-medium text-slate-600 dark:text-slate-300">{{ POSES[currentPoseIndex]?.tip }}</p>
+              <p class="text-[11px] font-medium text-slate-600 dark:text-slate-300">
+                {{ POSES[currentPoseIndex]?.tip }}
+              </p>
             </div>
 
             <!-- Center: Live WebRTC Camera Stream Frame -->
             <div class="col-span-2 relative aspect-video bg-slate-900 rounded-2xl overflow-hidden border border-slate-700 flex items-center justify-center">
-              <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80" alt="Live Camera" class="w-full h-full object-cover" />
+              <img
+                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80"
+                alt="Live Camera"
+                class="w-full h-full object-cover"
+              >
               
               <!-- Face Oval Guide Overlay -->
               <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div class="w-32 h-40 border-2 border-dashed border-indigo-400 rounded-full animate-pulse"></div>
+                <div class="w-32 h-40 border-2 border-dashed border-indigo-400 rounded-full animate-pulse" />
               </div>
 
               <!-- Quality Score Badge -->
-              <div v-if="qualityScore" class="absolute top-3 left-3 px-3 py-1 bg-emerald-500 text-white rounded text-xs font-bold font-mono">
+              <div
+                v-if="qualityScore"
+                class="absolute top-3 left-3 px-3 py-1 bg-emerald-500 text-white rounded text-xs font-bold font-mono"
+              >
                 Quality Score: {{ qualityScore }} (Pass)
               </div>
             </div>
@@ -272,14 +362,18 @@
                 class="w-10 h-10 rounded-lg border-2 flex items-center justify-center text-xs font-bold overflow-hidden"
                 :class="img ? 'border-emerald-500 bg-emerald-50' : 'border-dashed border-slate-300 text-slate-400'"
               >
-                <img v-if="img" :src="img" class="w-full h-full object-cover" />
+                <img
+                  v-if="img"
+                  :src="img"
+                  class="w-full h-full object-cover"
+                >
                 <span v-else>{{ idx + 1 }}</span>
               </div>
             </div>
 
             <button
-              @click="capturePose"
               class="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center gap-2"
+              @click="capturePose"
             >
               <span>📸</span> Capture Pose {{ currentPoseIndex + 1 }}
             </button>
@@ -287,28 +381,46 @@
         </div>
 
         <!-- Stage 3: Review & Commit -->
-        <div v-else class="p-6 space-y-4 text-center">
+        <div
+          v-else
+          class="p-6 space-y-4 text-center"
+        >
           <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center text-2xl">
             ✓
           </div>
-          <h3 class="text-base font-bold">5 Pose Vectors Captured Successfully!</h3>
-          <p class="text-xs text-slate-500">Ready to commit '{{ form.name }}' into the AI Vision facial model database.</p>
+          <h3 class="text-base font-bold">
+            5 Pose Vectors Captured Successfully!
+          </h3>
+          <p class="text-xs text-slate-500">
+            Ready to commit '{{ form.name }}' into the AI Vision facial model database.
+          </p>
 
           <div class="flex justify-center gap-2 py-2">
-            <img v-for="(img, i) in capturedPoses" :key="i" :src="img" class="w-14 h-14 rounded-xl border border-emerald-500 object-cover" />
+            <img
+              v-for="(img, i) in capturedPoses"
+              :key="i"
+              :src="img"
+              class="w-14 h-14 rounded-xl border border-emerald-500 object-cover"
+            >
           </div>
 
           <div class="pt-2 flex justify-center gap-3">
-            <button @click="wizardStage = 'capture'" class="px-4 py-2 text-slate-600 text-xs font-bold">Back</button>
-            <button @click="commitEnrollment" class="px-6 py-2.5 bg-indigo-600 text-white font-bold text-xs rounded-xl shadow-md">
+            <button
+              class="px-4 py-2 text-slate-600 text-xs font-bold"
+              @click="wizardStage = 'capture'"
+            >
+              Back
+            </button>
+            <button
+              class="px-6 py-2.5 bg-indigo-600 text-white font-bold text-xs rounded-xl shadow-md"
+              @click="commitEnrollment"
+            >
               Commit Profile to AI Model
             </button>
           </div>
         </div>
-
       </div>
     </v-dialog>
-
   </div>
 </template>
 

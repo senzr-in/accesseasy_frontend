@@ -1,7 +1,7 @@
 <template>
-  <CommonDashboard v-if="appMode === 'common' || appMode === 'unified'" />
+  <WorkforceDashboard v-if="appMode === 'workforce' || appMode === 'common' || appMode === 'unified'" />
   <AdminDashboard v-else-if="appMode === 'security'" />
-  <CommonDashboard v-else />
+  <WorkforceDashboard v-else />
 </template>
 
 <script setup>

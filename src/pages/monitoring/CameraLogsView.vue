@@ -18,26 +18,41 @@
 
       <div class="flex items-center gap-3">
         <button
-          @click="fetchCameraLogs"
           :disabled="loading"
           class="px-3.5 py-2 bg-white dark:bg-[#151c2c] hover:bg-slate-50 text-slate-700 dark:text-slate-200 rounded-xl text-xs transition font-bold border border-slate-200 dark:border-white/10 shadow-sm flex items-center gap-2"
+          @click="fetchCameraLogs"
         >
           <span :class="{ 'animate-spin': loading }">🔄</span> Refresh
         </button>
-        <select v-model="selectedIdentityFilter" class="px-3.5 py-2 bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold shadow-sm">
-          <option value="all">All Identity Types</option>
-          <option value="registered">Registered Subjects</option>
-          <option value="visitor">Visitors / Unknowns</option>
+        <select
+          v-model="selectedIdentityFilter"
+          class="px-3.5 py-2 bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold shadow-sm"
+        >
+          <option value="all">
+            All Identity Types
+          </option>
+          <option value="registered">
+            Registered Subjects
+          </option>
+          <option value="visitor">
+            Visitors / Unknowns
+          </option>
         </select>
       </div>
     </div>
 
-    <div v-if="filteredEvents.length === 0" class="text-center py-12 text-slate-400 text-xs italic bg-white dark:bg-[#151c2c] rounded-2xl border border-slate-200/80 dark:border-white/10 p-8">
+    <div
+      v-if="filteredEvents.length === 0"
+      class="text-center py-12 text-slate-400 text-xs italic bg-white dark:bg-[#151c2c] rounded-2xl border border-slate-200/80 dark:border-white/10 p-8"
+    >
       No camera AI vision logs found matching filter criteria.
     </div>
 
     <!-- Visual AI Event Grid -->
-    <div v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    <div
+      v-else
+      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+    >
       <div
         v-for="ev in filteredEvents"
         :key="ev.id"
@@ -45,7 +60,11 @@
       >
         <!-- Snapshot Thumbnail -->
         <div class="relative aspect-video bg-slate-900 overflow-hidden">
-          <img :src="ev.snapshot" :alt="ev.personName" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+          <img
+            :src="ev.snapshot"
+            :alt="ev.personName"
+            class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+          >
           <div class="absolute top-2 left-2 px-2 py-0.5 bg-black/60 backdrop-blur-sm text-white font-bold text-[10px] rounded">
             {{ ev.cameraName }}
           </div>
@@ -60,7 +79,9 @@
         <!-- Details Footer -->
         <div class="p-4 space-y-2">
           <div class="flex items-center justify-between">
-            <h4 class="text-xs font-bold text-slate-900 dark:text-white truncate">{{ ev.personName }}</h4>
+            <h4 class="text-xs font-bold text-slate-900 dark:text-white truncate">
+              {{ ev.personName }}
+            </h4>
             <span class="text-[10px] text-slate-400 font-mono">{{ ev.timestamp }}</span>
           </div>
           <div class="flex items-center justify-between text-[11px] text-slate-500">
@@ -69,7 +90,10 @@
           </div>
           <div class="pt-2 border-t border-slate-100 dark:border-white/10 flex justify-between items-center text-xs">
             <span class="text-slate-400 text-[10px]">{{ ev.location }}</span>
-            <button @click="inspectEvent(ev)" class="text-indigo-600 dark:text-indigo-400 font-bold hover:underline">
+            <button
+              class="text-indigo-600 dark:text-indigo-400 font-bold hover:underline"
+              @click="inspectEvent(ev)"
+            >
               Inspect Clip &rarr;
             </button>
           </div>
@@ -78,17 +102,35 @@
     </div>
 
     <!-- Clip Modal -->
-    <v-dialog v-model="showClipModal" max-width="700px">
-      <div v-if="selectedEvent" class="bg-slate-900 text-white rounded-3xl p-6 overflow-hidden">
+    <v-dialog
+      v-model="showClipModal"
+      max-width="700px"
+    >
+      <div
+        v-if="selectedEvent"
+        class="bg-slate-900 text-white rounded-3xl p-6 overflow-hidden"
+      >
         <div class="flex items-center justify-between mb-4">
           <div>
-            <h3 class="text-base font-bold">{{ selectedEvent.personName }}</h3>
-            <p class="text-xs text-slate-400 font-mono">{{ selectedEvent.cameraName }} &bull; {{ selectedEvent.timestamp }}</p>
+            <h3 class="text-base font-bold">
+              {{ selectedEvent.personName }}
+            </h3>
+            <p class="text-xs text-slate-400 font-mono">
+              {{ selectedEvent.cameraName }} &bull; {{ selectedEvent.timestamp }}
+            </p>
           </div>
-          <button @click="showClipModal = false" class="text-slate-400 hover:text-white text-xl">✕</button>
+          <button
+            class="text-slate-400 hover:text-white text-xl"
+            @click="showClipModal = false"
+          >
+            ✕
+          </button>
         </div>
         <div class="relative aspect-video rounded-2xl overflow-hidden bg-black border border-slate-800 flex items-center justify-center">
-          <img :src="selectedEvent.snapshot" class="w-full h-full object-cover" />
+          <img
+            :src="selectedEvent.snapshot"
+            class="w-full h-full object-cover"
+          >
           <div class="absolute bottom-4 left-4 px-3 py-1 bg-black/70 text-white rounded text-xs font-mono font-bold">
             PLAYING H.264 RECORDED CLIP
           </div>

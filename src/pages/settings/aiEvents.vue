@@ -3,9 +3,6 @@
     <!-- Value Header -->
     <ValueHeader
       title="Camera Events"
-      value-statement="Get notified before security becomes a problem."
-      :benefits="['AI object detection', 'Real-time timeline', 'Link camera controllers', 'Class filters']"
-      value-badge="Respond instantly to security incidents."
       action-text="Refresh Feed"
       :action-icon="RefreshCcw"
       theme-color="indigo"

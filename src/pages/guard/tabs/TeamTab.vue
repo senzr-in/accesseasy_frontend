@@ -3,9 +3,6 @@
     <!-- Value Header -->
     <ValueHeader
       title="Guard Management"
-      value-statement="Manage every security guard digitally."
-      :benefits="['Force tracking', 'Duty assignment', 'Status overview', 'Access permissions']"
-      value-badge="Better accountability with less manual supervision."
       action-text="Add Guard"
       :action-icon="UserPlus"
       theme-color="indigo"

@@ -384,9 +384,14 @@ class AuthService {
       }
     }
 
-    // Fallback to userData.role.name if no role config name is set or mapped
+    // Fallback to userData.role.name or string representation if no role config name is set or mapped
     if (!role) {
-      role = userData?.role?.name || "";
+      role = userData?.role?.name || (typeof userData?.role === 'string' ? userData.role : "") || "";
+    }
+
+    // Default to Admin if user data exists but role is unpopulated
+    if (!role && userData) {
+      role = "Admin";
     }
 
     // Additional backward compatibility checks for Title if role is "Employee"

@@ -1,5 +1,8 @@
 <template>
-  <div v-if="modelValue" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+  <div
+    v-if="modelValue"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+  >
     <div class="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col">
       <!-- Header -->
       <div class="p-5 border-b border-slate-100 dark:border-zinc-800 flex items-center justify-between">
@@ -16,7 +19,10 @@
             </p>
           </div>
         </div>
-        <button class="h-8 w-8 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 flex items-center justify-center text-slate-400" @click="close">
+        <button
+          class="h-8 w-8 rounded-lg hover:bg-slate-100 dark:hover:bg-zinc-800 flex items-center justify-center text-slate-400"
+          @click="close"
+        >
           <X class="w-4 h-4" />
         </button>
       </div>
@@ -54,7 +60,7 @@
             class="w-full h-8 px-3 text-xs font-bold bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 text-slate-900 dark:text-white"
             placeholder="1 - 255"
             @focus="controlMode = 'pulse'"
-          />
+          >
         </div>
 
         <!-- Action Mode Selection -->
@@ -101,7 +107,10 @@
           :disabled="sendingCommand"
           @click="executeControl"
         >
-          <Loader2 v-if="sendingCommand" class="w-3.5 h-3.5 animate-spin" />
+          <Loader2
+            v-if="sendingCommand"
+            class="w-3.5 h-3.5 animate-spin"
+          />
           <span>Send Command</span>
         </button>
       </div>

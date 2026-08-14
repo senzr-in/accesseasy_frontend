@@ -20,9 +20,6 @@
       <!-- Business Value Header -->
       <ValueHeader
         title="Employee Directory"
-        value-statement="Track employee movement securely."
-        :benefits="['Secure employee access', 'Biometric status', 'Complete attendance history', 'Clearance levels']"
-        value-badge="Secure employee access with complete attendance history."
         :action-text="isAdmin ? 'Add Employee' : ''"
         :action-icon="Plus"
         theme-color="slate"
@@ -343,13 +340,27 @@
               class="h-8 px-2 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
               @change="page = 1; fetchEmployeeData();"
             >
-              <option :value="10">10 per page</option>
-              <option :value="25">25 per page</option>
-              <option :value="50">50 per page</option>
-              <option :value="100">100 per page</option>
-              <option :value="250">250 per page</option>
-              <option :value="500">500 per page</option>
-              <option :value="1000">1000 per page</option>
+              <option :value="10">
+                10 per page
+              </option>
+              <option :value="25">
+                25 per page
+              </option>
+              <option :value="50">
+                50 per page
+              </option>
+              <option :value="100">
+                100 per page
+              </option>
+              <option :value="250">
+                250 per page
+              </option>
+              <option :value="500">
+                500 per page
+              </option>
+              <option :value="1000">
+                1000 per page
+              </option>
             </select>
           </div>
 
@@ -827,14 +838,15 @@ const syncEmployeesHardwareAccess = async (employeeIds, accessLevelId) => {
             code: String(c.rfidCard),
             index: indexData,
             time: { type: 0 },
-            extra: { name }
+            extra: { name },
+            buzzer_timing: 50
           });
         }
       });
 
       if (payloadData.length > 0) {
         console.log(`[MQTT Hardware Sync] Sending ${payloadData.length} permission items in chunks to controller ${uuid}...`);
-        const MQTT_CHUNK_SIZE = 40; // ~2 KB payload per MQTT packet to prevent hardware RX buffer truncation
+        const MQTT_CHUNK_SIZE = 100; // ~3 KB payload per MQTT packet to prevent hardware RX buffer truncation
         for (let pIdx = 0; pIdx < payloadData.length; pIdx += MQTT_CHUNK_SIZE) {
           const chunkData = payloadData.slice(pIdx, pIdx + MQTT_CHUNK_SIZE);
           await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-mqtt`, {

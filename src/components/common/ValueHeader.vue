@@ -1,14 +1,17 @@
 <template>
-  <div class="relative bg-white dark:bg-slate-900/60 dark:bg-zinc-950/40 backdrop-blur-md border border-slate-200 dark:border-slate-800/50 dark:border-zinc-800/80 shadow-sm rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 overflow-hidden transition-all duration-300 hover:shadow-md animate-in fade-in slide-in-from-top-4 duration-500 w-full shrink-0">
+  <div class="relative bg-white dark:bg-slate-900/60 dark:bg-zinc-950/40 backdrop-blur-md border border-slate-200 dark:border-slate-800/50 dark:border-zinc-800/80 shadow-sm rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 overflow-hidden transition-all duration-300 hover:shadow-md animate-in fade-in slide-in-from-top-4 duration-500 w-full shrink-0">
     <!-- Ambient Glow Background -->
     <div :class="['absolute -right-24 -top-24 w-64 h-64 rounded-full blur-3xl pointer-events-none opacity-10 dark:opacity-20 transition-all duration-500', glowColorClass]" />
 
-    <div class="flex-grow space-y-3 relative z-10">
+    <div class="flex-grow relative z-10">
       <div>
-        <h1 class="text-2xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+        <h1 class="text-xl md:text-2xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
           {{ title }}
         </h1>
-        <p class="text-sm font-semibold text-slate-500 dark:text-zinc-400 mt-1">
+        <p
+          v-if="valueStatement"
+          class="text-sm font-semibold text-slate-500 dark:text-zinc-400 mt-1"
+        >
           {{ valueStatement }}
         </p>
       </div>
@@ -16,7 +19,7 @@
       <!-- Benefits Chips -->
       <div
         v-if="benefits && benefits.length"
-        class="flex flex-wrap gap-2 pt-1"
+        class="flex flex-wrap gap-2 pt-2"
       >
         <span
           v-for="benefit in benefits"
@@ -30,7 +33,10 @@
     </div>
 
     <!-- Value Badge & Action Button -->
-    <div class="flex flex-col sm:flex-row sm:items-center md:flex-col md:items-end gap-4 shrink-0 relative z-10">
+    <div
+      v-if="valueBadge || actionText"
+      class="flex flex-col sm:flex-row sm:items-center md:flex-col md:items-end gap-3 shrink-0 relative z-10"
+    >
       <!-- Value Badge -->
       <div
         v-if="valueBadge"
@@ -43,7 +49,7 @@
       <!-- Main Action Button -->
       <button
         v-if="actionText"
-        :class="['h-11 px-5 rounded-xl text-white text-xs font-black uppercase tracking-widest transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-md w-full sm:w-auto hover:opacity-90', buttonBgClass]"
+        :class="['h-10 px-5 rounded-xl text-white text-xs font-black uppercase tracking-widest transition-all active:scale-[0.98] flex items-center justify-center gap-2 shadow-md w-full sm:w-auto hover:opacity-90 cursor-pointer', buttonBgClass]"
         @click="$emit('action')"
       >
         <component
@@ -62,7 +68,7 @@ import { computed } from 'vue';
 
 const props = defineProps({
   title: { type: String, required: true },
-  valueStatement: { type: String, required: true },
+  valueStatement: { type: String, default: '' },
   benefits: { type: Array, default: () => [] },
   actionText: { type: String, default: '' },
   actionIcon: { type: [Object, Function], default: null },

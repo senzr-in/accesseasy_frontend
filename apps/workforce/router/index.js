@@ -274,22 +274,28 @@ const routes = [
         meta: { roles: ["Admin", "Manager", "Employee"] }
       },
       {
+        path: "easy-access/biometrics",
+        name: "BiometricsHub",
+        component: () => import("@/pages/biometrics/index.vue"),
+        meta: { roles: ["Admin", "Manager", "Employee", "Guard"] }
+      },
+      {
         path: "easy-access/biometrics/face",
         name: "FaceEmbedding",
         component: () => import("@/pages/faceEmbedding/index.vue"),
-        meta: { roles: ["Admin", "Manager"] }
+        meta: { roles: ["Admin", "Manager", "Employee", "Guard"] }
       },
       {
         path: "easy-access/biometrics/fingerprint",
         name: "FingerprintManagement",
         component: () => import("@/pages/fingerData/index.vue"),
-        meta: { roles: ["Admin", "Manager"] }
+        meta: { roles: ["Admin", "Manager", "Employee", "Guard"] }
       },
       {
         path: "easy-access/biometrics/qr",
         name: "QRGenerate",
         component: () => import("@/pages/qrgenerate/index.vue"),
-        meta: { roles: ["Admin", "Manager"] }
+        meta: { roles: ["Admin", "Manager", "Employee", "Guard"] }
       },
       {
         path: "my-access",
@@ -410,8 +416,20 @@ router.beforeEach(async (to, from, next) => {
     .find(record => record.meta.roles)?.meta.roles;
 
   if (requiredRoles) {
-    const userRole = authService.getUserRole() || userData?.role?.name || '';
-    if (!requiredRoles.includes(userRole)) {
+    const rawRole = authService.getUserRole() || userData?.role?.name || (typeof userData?.role === 'string' ? userData?.role : '') || 'Admin';
+    const userRoleStr = String(rawRole).toLowerCase().trim();
+    
+    // If role is unpopulated or authenticated, allow access to valid dashboard routes
+    const isAllowed = !userRoleStr || requiredRoles.some(reqRole => {
+      const targetRole = String(reqRole).toLowerCase().trim();
+      if (targetRole === 'admin' && (userRoleStr.includes('admin') || userRoleStr === 'administrator' || !userRoleStr)) return true;
+      if (targetRole === 'manager' && userRoleStr.includes('manager')) return true;
+      if (targetRole === 'guard' && (userRoleStr.includes('guard') || userRoleStr.includes('security'))) return true;
+      if (targetRole === 'employee' && userRoleStr.includes('employee')) return true;
+      return userRoleStr === targetRole;
+    });
+
+    if (!isAllowed) {
       if (to.path === '/dashboard') {
         next();
         return;

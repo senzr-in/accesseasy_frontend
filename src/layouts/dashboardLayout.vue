@@ -23,16 +23,23 @@
               >
             </div>
           </div>
-          <div v-else class="flex-1 flex flex-col justify-center min-w-0 pl-2 pr-4" id="header-title-slot"></div>
+          <div
+            v-else
+            id="header-title-slot"
+            class="flex-1 flex flex-col justify-center min-w-0 pl-2 pr-4"
+          />
 
           <!-- Right side: Actions & Profile -->
           <div class="flex items-center gap-4 pl-4 border-l border-slate-100 dark:border-white/5">
-
             <!-- Notifications Dropdown -->
-            <div v-if="route.path === '/dashboard' || route.path === '/dashboard/'" class="relative" ref="notificationsDropdownRef">
+            <div
+              v-if="route.path === '/dashboard' || route.path === '/dashboard/'"
+              ref="notificationsDropdownRef"
+              class="relative"
+            >
               <button
-                @click="isNotificationsOpen = !isNotificationsOpen"
                 class="relative w-10 h-10 rounded-xl bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 flex items-center justify-center hover:bg-slate-50 dark:hover:bg-white/5 transition-colors shadow-sm text-slate-500 dark:text-slate-400 group"
+                @click="isNotificationsOpen = !isNotificationsOpen"
               >
                 <Bell class="w-5 h-5 group-hover:scale-110 transition-transform" />
                 <span
@@ -59,13 +66,17 @@
                   <!-- Header -->
                   <div class="px-4 py-2.5 border-b border-slate-100 dark:border-white/5 flex items-center justify-between">
                     <div>
-                      <p class="text-xs font-bold text-slate-900 dark:text-white">Live Alerts</p>
-                      <p class="text-[10px] font-semibold text-slate-400 dark:text-slate-500 mt-0.5">Real-time security warnings</p>
+                      <p class="text-xs font-bold text-slate-900 dark:text-white">
+                        Live Alerts
+                      </p>
+                      <p class="text-[10px] font-semibold text-slate-400 dark:text-slate-500 mt-0.5">
+                        Real-time security warnings
+                      </p>
                     </div>
                     <button
                       v-if="activeAlertsCount > 0"
-                      @click="resolveAllAlerts"
                       class="text-[9px] font-bold text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 uppercase tracking-wider"
+                      @click="resolveAllAlerts"
                     >
                       Clear All
                     </button>
@@ -76,16 +87,22 @@
                     <div
                       v-for="alert in activeAlertsList"
                       :key="alert.id"
-                      @click="openAlertDetails(alert)"
                       class="p-3.5 flex gap-3 hover:bg-slate-50 dark:hover:bg-white/[0.02] cursor-pointer transition-colors relative group"
+                      @click="openAlertDetails(alert)"
                     >
                       <!-- Icon -->
                       <div
                         class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5"
                         :class="alert.type?.toLowerCase() === 'sos' ? 'bg-red-500/10 text-red-600' : 'bg-amber-500/10 text-amber-600'"
                       >
-                        <AlertCircle v-if="alert.type?.toLowerCase() === 'sos'" class="w-4 h-4 animate-pulse" />
-                        <Clock v-else class="w-4 h-4" />
+                        <AlertCircle
+                          v-if="alert.type?.toLowerCase() === 'sos'"
+                          class="w-4 h-4 animate-pulse"
+                        />
+                        <Clock
+                          v-else
+                          class="w-4 h-4"
+                        />
                       </div>
 
                       <!-- Details -->
@@ -95,8 +112,8 @@
                         </p>
                         <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
                           {{ alert.type?.toLowerCase() === 'sos'
-                              ? `Guard ${alert.guard_name || 'Unknown'} triggered an SOS in Zone: ${alert.zone_name || 'Unknown'}`
-                              : `Scheduled patrol in Zone: ${alert.zone_name || 'Unknown'} was missed.`
+                            ? `Guard ${alert.guard_name || 'Unknown'} triggered an SOS in Zone: ${alert.zone_name || 'Unknown'}`
+                            : `Scheduled patrol in Zone: ${alert.zone_name || 'Unknown'} was missed.`
                           }}
                         </p>
                         <p class="text-[9px] text-slate-400 dark:text-slate-500 mt-1.5 font-semibold">
@@ -106,9 +123,9 @@
 
                       <!-- Action: Resolve -->
                       <button
-                        @click.stop="resolveAlert(alert.id)"
                         class="absolute right-3.5 top-3.5 w-6 h-6 rounded-md border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 hover:border-rose-100 dark:hover:border-rose-900/30 transition-all opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
                         title="Dismiss Alert"
+                        @click.stop="resolveAlert(alert.id)"
                       >
                         <X class="w-3.5 h-3.5" />
                       </button>
@@ -120,14 +137,17 @@
                       class="py-12 px-4 text-center"
                     >
                       <Bell class="w-8 h-8 text-slate-200 dark:text-slate-800 mx-auto mb-2.5" />
-                      <p class="text-xs font-bold text-slate-400 dark:text-slate-600">No active alerts</p>
-                      <p class="text-[10px] text-slate-400 dark:text-slate-600 mt-0.5">Everything is working normally</p>
+                      <p class="text-xs font-bold text-slate-400 dark:text-slate-600">
+                        No active alerts
+                      </p>
+                      <p class="text-[10px] text-slate-400 dark:text-slate-600 mt-0.5">
+                        Everything is working normally
+                      </p>
                     </div>
                   </div>
                 </div>
               </transition>
             </div>
-
           </div>
         </header>
 
@@ -151,8 +171,14 @@
             class="px-6 py-5 flex items-center gap-3 border-b"
             :class="selectedAlertForDetail.type?.toLowerCase() === 'sos' ? 'bg-red-505/10 bg-red-500/10 border-red-500/20 text-red-700 dark:text-red-400' : 'bg-amber-500/10 border-amber-500/20 text-amber-700 dark:text-amber-400'"
           >
-            <AlertTriangle v-if="selectedAlertForDetail.type?.toLowerCase() === 'sos'" class="w-6 h-6 animate-pulse" />
-            <Clock v-else class="w-6 h-6" />
+            <AlertTriangle
+              v-if="selectedAlertForDetail.type?.toLowerCase() === 'sos'"
+              class="w-6 h-6 animate-pulse"
+            />
+            <Clock
+              v-else
+              class="w-6 h-6"
+            />
             <div>
               <h3 class="text-sm font-black uppercase tracking-wider leading-none">
                 {{ selectedAlertForDetail.type?.toLowerCase() === 'sos' ? 'SOS Emergency Alert' : 'Missed Patrol Alert' }}
@@ -188,10 +214,12 @@
 
             <!-- Description -->
             <div class="bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 rounded-xl p-4 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
-              <p class="font-bold text-slate-800 dark:text-slate-200 mb-1">Alert Description:</p>
+              <p class="font-bold text-slate-800 dark:text-slate-200 mb-1">
+                Alert Description:
+              </p>
               {{ selectedAlertForDetail.type?.toLowerCase() === 'sos'
-                  ? `Guard ${selectedAlertForDetail.guard_name || 'Unknown'} triggered a panic alarm (SOS) from the guard mobile application. Please dispatch support immediately to ${selectedAlertForDetail.zone_name || 'the designated zone'}.`
-                  : `The scheduled patrol round for ${selectedAlertForDetail.zone_name || 'the designated zone'} was missed by the assigned guard. No check-ins were registered.`
+                ? `Guard ${selectedAlertForDetail.guard_name || 'Unknown'} triggered a panic alarm (SOS) from the guard mobile application. Please dispatch support immediately to ${selectedAlertForDetail.zone_name || 'the designated zone'}.`
+                : `The scheduled patrol round for ${selectedAlertForDetail.zone_name || 'the designated zone'} was missed by the assigned guard. No check-ins were registered.`
               }}
             </div>
           </div>
@@ -199,14 +227,14 @@
           <!-- Footer Actions -->
           <div class="px-6 py-4 bg-slate-50 dark:bg-white/[0.02] border-t border-slate-100 dark:border-white/5 flex justify-end gap-2.5">
             <button
-              @click="selectedAlertForDetail = null"
               class="h-9 px-4 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-bold transition-all text-slate-700 dark:text-slate-300"
+              @click="selectedAlertForDetail = null"
             >
               Close
             </button>
             <button
-              @click="resolveAlertFromDetail(selectedAlertForDetail.id)"
               class="h-9 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-md shadow-red-500/10"
+              @click="resolveAlertFromDetail(selectedAlertForDetail.id)"
             >
               <CheckCheck class="w-4 h-4" /> Resolve & Dismiss
             </button>
@@ -489,6 +517,7 @@ const currentPageTitle = computed(() => {
   if (path.includes('/dashboard/easy-access/biometrics/face')) return 'Face Enrollment';
   if (path.includes('/dashboard/easy-access/biometrics/fingerprint')) return 'Fingerprint';
   if (path.includes('/dashboard/easy-access/biometrics/qr')) return 'QR Generation';
+  if (path.includes('/dashboard/easy-access/biometrics')) return 'Biometrics Hub';
   if (path.includes('/dashboard/guards')) return 'Guards';
   if (path.includes('/dashboard/patrols')) return 'Patrol Command';
   if (path.includes('/dashboard/incidents')) return 'Incident Management';

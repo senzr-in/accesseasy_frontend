@@ -108,14 +108,17 @@
             </div>
 
             <!-- Custom Hours Inputs -->
-            <div v-if="formData.validHours === 'custom'" class="grid grid-cols-2 gap-3 pt-1">
+            <div
+              v-if="formData.validHours === 'custom'"
+              class="grid grid-cols-2 gap-3 pt-1"
+            >
               <div>
                 <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1 block">Start Time</label>
                 <input 
                   v-model="formData.startTime" 
                   type="time"
                   class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 text-foreground"
-                />
+                >
               </div>
               <div>
                 <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-1 block">End Time</label>
@@ -123,7 +126,7 @@
                   v-model="formData.endTime" 
                   type="time"
                   class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 text-foreground"
-                />
+                >
               </div>
             </div>
           </div>

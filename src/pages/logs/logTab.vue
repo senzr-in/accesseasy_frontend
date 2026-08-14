@@ -4,24 +4,52 @@
     <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-sm overflow-hidden flex flex-col flex-1 min-h-0">
       <!-- Toolbar -->
       <div class="border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 p-4 flex flex-col sm:flex-row gap-4 items-center justify-between">
-        <div class="relative w-full sm:w-80">
-          <Search class="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
-          <input
-            v-model="searchQuery"
-            type="search"
-            placeholder="Search logs by employee or ID..."
-            class="w-full pl-9 h-10 rounded-lg text-sm bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-900 dark:text-white shadow-sm"
-            @input="debouncedSearch"
+        <div class="flex items-center gap-3 w-full sm:w-auto flex-1">
+          <div class="relative w-full sm:w-80">
+            <Search class="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+            <input
+              v-model="searchQuery"
+              type="search"
+              placeholder="Search logs by employee, ID, or door..."
+              class="w-full pl-9 h-10 rounded-lg text-sm bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-slate-900 dark:text-white shadow-sm"
+              @input="debouncedSearch"
+            >
+          </div>
+          <!-- Active Door Filter Badge -->
+          <div
+            v-if="activeDoorFilter"
+            class="flex items-center gap-2 px-3 py-2 bg-purple-500/10 border border-purple-500/20 rounded-lg text-xs font-semibold text-purple-600 dark:text-purple-400 shrink-0"
           >
+            <DoorOpen class="w-4 h-4" />
+            <span>Door: <strong>{{ activeDoorFilter }}</strong></span>
+            <button
+              title="Clear Door Filter"
+              class="ml-1 p-0.5 hover:bg-purple-500/20 rounded-full transition-colors"
+              @click="clearDoorFilter"
+            >
+              <X class="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
         <div class="flex items-center gap-2">
           <button
             class="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800"
-            @click="fetchLogs"
             title="Refresh logs"
+            @click="fetchLogs"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-5 w-5"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
             </svg>
           </button>
         </div>
@@ -42,6 +70,9 @@
                 Date & Time
               </th>
               <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                Door
+              </th>
+              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                 Action
               </th>
               <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest">
@@ -55,7 +86,7 @@
           <tbody class="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-950">
             <tr v-if="loading">
               <td
-                colspan="6"
+                colspan="7"
                 class="h-64 text-center"
               >
                 <Loader2 class="w-8 h-8 animate-spin mx-auto text-blue-500" />
@@ -63,7 +94,7 @@
             </tr>
             <tr v-else-if="items.length === 0">
               <td
-                colspan="6"
+                colspan="7"
                 class="h-64 text-center text-slate-500 dark:text-slate-400"
               >
                 <div class="flex flex-col items-center justify-center space-y-3">
@@ -111,6 +142,12 @@
                   <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
                     {{ formatTime(log.timeStamp, log.date_created) }}
                   </span>
+                </div>
+              </td>
+              <td class="px-5 py-3">
+                <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 py-0.5">
+                  <DoorOpen class="w-3.5 h-3.5 text-purple-500 shrink-0" />
+                  <span>{{ getDoorDisplayName(log) }}</span>
                 </div>
               </td>
               <td class="px-5 py-3">
@@ -173,26 +210,231 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { 
   Activity, Search, User, 
   LogIn, LogOut, Loader2, Fingerprint, 
-  Smartphone, MapPin, ScanFace, CheckCircle2, XCircle, HelpCircle 
+  Smartphone, MapPin, ScanFace, CheckCircle2, XCircle, HelpCircle, DoorOpen, X, Edit2 
 } from "lucide-vue-next";
 import { authService } from "@/services/authService";
 import { currentUserTenant } from "@/utils/currentUserTenant";
 
+const route = useRoute();
+const router = useRouter();
+
 const items = ref([]);
 const loading = ref(false);
 const searchQuery = ref("");
+const activeDoorFilter = ref("");
 const page = ref(1);
 const limit = 25;
 const totalItems = ref(0);
+
+const doorsList = ref([]);
+const doorsById = ref({});
+const doorsByDevUuid = ref({});
+const doorsByNum = ref({});
+const doorsByDevAndNum = ref({});
+
+const fetchDoors = async () => {
+  if (!token) token = authService.getToken();
+  const tId = await currentUserTenant.getTenantIdAsync();
+  if (!tId) return;
+  try {
+    const params = new URLSearchParams({
+      "filter[_or][0][tenant][tenantId][_eq]": tId,
+      "filter[_or][1][tenant][_eq]": tId,
+      "limit": "100"
+    });
+    ["id", "doorNumber", "doorName", "status", "uniqueId", "deviceUuid", "doorsConfigure"].forEach(f => {
+      params.append("fields[]", f);
+    });
+
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/doors?${params.toString()}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      doorsList.value = data.data || [];
+      const dById = {};
+      const dByDev = {};
+      const dByNum = {};
+      const dByDevAndNum = {};
+
+      doorsList.value.forEach(d => {
+        if (d.id) dById[d.id] = d;
+        if (d.uniqueId) dById[d.uniqueId] = d;
+        if (d.doorNumber !== undefined && d.doorNumber !== null) {
+          const numStr = String(parseInt(d.doorNumber, 10));
+          const numPadded = String(d.doorNumber).padStart(2, '0');
+          dByNum[d.doorNumber] = d;
+          dByNum[numStr] = d;
+          dByNum[numPadded] = d;
+        }
+
+        const devIds = [];
+        if (d.deviceUuid) devIds.push(String(d.deviceUuid).trim());
+        if (d.uniqueId) devIds.push(String(d.uniqueId).trim());
+        if (d.doorsConfigure) {
+          if (typeof d.doorsConfigure === 'string') {
+            devIds.push(d.doorsConfigure.trim());
+          } else if (typeof d.doorsConfigure === 'object') {
+            if (d.doorsConfigure.deviceId) {
+              if (typeof d.doorsConfigure.deviceId === 'string') devIds.push(d.doorsConfigure.deviceId.trim());
+              else if (typeof d.doorsConfigure.deviceId === 'object') {
+                if (d.doorsConfigure.deviceId.uuid) devIds.push(String(d.doorsConfigure.deviceId.uuid).trim());
+                if (d.doorsConfigure.deviceId.deviceUuid) devIds.push(String(d.doorsConfigure.deviceId.deviceUuid).trim());
+                if (d.doorsConfigure.deviceId.id) devIds.push(String(d.doorsConfigure.deviceId.id).trim());
+              }
+            }
+          }
+        }
+        
+        devIds.forEach(devId => {
+          if (!dByDev[devId] || d.doorNumber == '1' || d.doorNumber == '01') {
+            dByDev[devId] = d;
+          }
+          if (d.doorNumber !== undefined && d.doorNumber !== null) {
+            const numStr = String(parseInt(d.doorNumber, 10));
+            const numPadded = String(d.doorNumber).padStart(2, '0');
+            dByDevAndNum[`${devId}_${d.doorNumber}`] = d;
+            dByDevAndNum[`${devId}_${numStr}`] = d;
+            dByDevAndNum[`${devId}_${numPadded}`] = d;
+          }
+        });
+      });
+      doorsById.value = dById;
+      doorsByDevUuid.value = dByDev;
+      doorsByNum.value = dByNum;
+      doorsByDevAndNum.value = dByDevAndNum;
+    }
+  } catch (err) {
+    console.error("Fetch doors lookup error:", err);
+  }
+};
+
+const getDoorDisplayName = (log) => {
+  if (!log) return "—";
+
+  // 1. Relational door object (non-null object with doorName / id / doorNumber)
+  if (log.door && typeof log.door === 'object') {
+    if (log.door.doorName) return log.door.doorName;
+    if (log.door.id && doorsById.value[log.door.id]) return doorsById.value[log.door.id].doorName;
+    if (log.door.uniqueId && doorsById.value[log.door.uniqueId]) return doorsById.value[log.door.uniqueId].doorName;
+    if (log.door.doorNumber) {
+      const devId = log.sn;
+      if (devId && doorsByDevAndNum.value[`${devId}_${log.door.doorNumber}`]) {
+        return doorsByDevAndNum.value[`${devId}_${log.door.doorNumber}`].doorName;
+      }
+      if (doorsByNum.value[log.door.doorNumber]) return doorsByNum.value[log.door.doorNumber].doorName;
+    }
+  }
+  
+  // 2. Direct doorName string on log
+  if (log.doorName && typeof log.doorName === 'string') return log.doorName;
+
+  // 3. Primitive door ID lookup (when log.door is primitive string/number)
+  if (log.door && (typeof log.door === 'string' || typeof log.door === 'number')) {
+    if (doorsById.value[log.door]) {
+      return doorsById.value[log.door].doorName;
+    }
+  }
+
+  // 4. Scoped Device SN + Door Number / Index matching
+  const devId = log.sn;
+  const doorNum = (log.door && (typeof log.door === 'string' || typeof log.door === 'number'))
+    ? log.door
+    : (log.doorNumber ?? log.doorIndex ?? log.doorNo ?? log.reader ?? null);
+
+  if (doorNum !== undefined && doorNum !== null && doorNum !== "") {
+    const numRaw = String(doorNum).trim();
+    const cleanNum = String(parseInt(numRaw, 10));
+    const paddedNum = numRaw.padStart(2, '0');
+
+    // Scoped device lookup first
+    if (devId) {
+      if (doorsByDevAndNum.value[`${devId}_${numRaw}`]) return doorsByDevAndNum.value[`${devId}_${numRaw}`].doorName;
+      if (doorsByDevAndNum.value[`${devId}_${cleanNum}`]) return doorsByDevAndNum.value[`${devId}_${cleanNum}`].doorName;
+      if (doorsByDevAndNum.value[`${devId}_${paddedNum}`]) return doorsByDevAndNum.value[`${devId}_${paddedNum}`].doorName;
+      if (doorsByDevUuid.value[devId]) return doorsByDevUuid.value[devId].doorName;
+    }
+
+    // Fallback: global doorNumber match
+    if (doorsByNum.value[numRaw]) return doorsByNum.value[numRaw].doorName;
+    if (doorsByNum.value[cleanNum]) return doorsByNum.value[cleanNum].doorName;
+    if (doorsByNum.value[paddedNum]) return doorsByNum.value[paddedNum].doorName;
+  }
+
+  // 5. Active URL filter fallback
+  if (route.query.doorName) {
+    return route.query.doorName;
+  }
+
+  return "—";
+};
+
+const editingLogId = ref(null);
+const savingDoorLogId = ref(null);
+
+const getLogDoorValue = (log) => {
+  if (!log) return "";
+  if (log.door && typeof log.door === 'object') return log.door.id || "";
+  if (log.door) return log.door;
+  return "";
+};
+
+const onDoorSelectChange = async (log, event) => {
+  const newDoorId = event.target.value;
+  if (!newDoorId) {
+    editingLogId.value = null;
+    return;
+  }
+  await updateLogDoor(log, newDoorId);
+};
+
+const updateLogDoor = async (log, newDoorId) => {
+  savingDoorLogId.value = log.id;
+  editingLogId.value = null;
+  try {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/logs/${log.id}`, {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ door: newDoorId })
+    });
+
+    if (res.ok) {
+      const updatedData = await res.json();
+      const selectedDoorObj = doorsById.value[newDoorId] || doorsList.value.find(d => String(d.id) === String(newDoorId));
+      log.door = selectedDoorObj || newDoorId;
+      if (updatedData.data?.door) {
+        log.door = updatedData.data.door;
+      }
+    } else {
+      console.error("Failed to update door for log:", res.status, await res.text());
+    }
+  } catch (err) {
+    console.error("Error updating log door:", err);
+  } finally {
+    savingDoorLogId.value = null;
+  }
+};
 
 let token = authService.getToken();
 let tenantId = currentUserTenant.getTenantId();
 let userRole = currentUserTenant.getRole();
 
 const totalPages = computed(() => Math.ceil(totalItems.value / limit));
+
+const clearDoorFilter = () => {
+  activeDoorFilter.value = "";
+  searchQuery.value = "";
+  router.replace({ path: route.path, query: {} });
+  page.value = 1;
+  fetchLogs();
+};
 
 let searchTimeout = null;
 const debouncedSearch = () => {
@@ -222,6 +464,20 @@ const aggregateCount = async () => {
        params.append("filter[_and][2][_or][0][employeeId][employeeId][_icontains]", searchQuery.value);
        params.append("filter[_and][2][_or][1][employeeId][assignedUser][first_name][_icontains]", searchQuery.value);
        params.append("filter[_and][2][_or][2][employeeId][assignedUser][last_name][_icontains]", searchQuery.value);
+       params.append("filter[_and][2][_or][3][name][_icontains]", searchQuery.value);
+       params.append("filter[_and][2][_or][4][door][doorName][_icontains]", searchQuery.value);
+    } else if (route.query.doorId || route.query.doorName || route.query.deviceUuid) {
+       let idx = 0;
+       if (route.query.doorId) {
+         params.append(`filter[_and][2][_or][${idx++}][door][id][_eq]`, route.query.doorId);
+         params.append(`filter[_and][2][_or][${idx++}][door][_eq]`, route.query.doorId);
+       }
+       if (route.query.doorName) {
+         params.append(`filter[_and][2][_or][${idx++}][door][doorName][_icontains]`, route.query.doorName);
+       }
+       if (route.query.deviceUuid) {
+         params.append(`filter[_and][2][_or][${idx++}][deviceUuid][_eq]`, route.query.deviceUuid);
+       }
     }
 
     const res = await fetch(`${import.meta.env.VITE_API_URL}/items/logs?${params.toString()}`, {
@@ -230,7 +486,7 @@ const aggregateCount = async () => {
     const data = await res.json();
     totalItems.value = data?.data?.[0]?.count?.id || 0;
   } catch (err) {
-    console.error(err);
+    console.error("Aggregate count error:", err);
   }
 };
 
@@ -255,7 +511,8 @@ const fetchLogs = async () => {
       "employeeId.assignedUser.id", "employeeId.assignedUser.first_name", 
       "employeeId.assignedUser.last_name", "employeeId.assignedUser.avatar.id",
       "mode", "timeStamp", "date", "id", "ValidLogs", "date_created",
-      "name", "rfid"
+      "name", "rfid", "sn",
+      "door.id", "door.doorNumber", "door.doorName"
     ];
 
     fields.forEach(f => params.append("fields[]", f));
@@ -264,6 +521,20 @@ const fetchLogs = async () => {
        params.append("filter[_and][2][_or][0][employeeId][employeeId][_icontains]", searchQuery.value);
        params.append("filter[_and][2][_or][1][employeeId][assignedUser][first_name][_icontains]", searchQuery.value);
        params.append("filter[_and][2][_or][2][employeeId][assignedUser][last_name][_icontains]", searchQuery.value);
+       params.append("filter[_and][2][_or][3][name][_icontains]", searchQuery.value);
+       params.append("filter[_and][2][_or][4][door][doorName][_icontains]", searchQuery.value);
+    } else if (route.query.doorId || route.query.doorName || route.query.deviceUuid) {
+       let idx = 0;
+       if (route.query.doorId) {
+         params.append(`filter[_and][2][_or][${idx++}][door][id][_eq]`, route.query.doorId);
+         params.append(`filter[_and][2][_or][${idx++}][door][_eq]`, route.query.doorId);
+       }
+       if (route.query.doorName) {
+         params.append(`filter[_and][2][_or][${idx++}][door][doorName][_icontains]`, route.query.doorName);
+       }
+       if (route.query.deviceUuid) {
+         params.append(`filter[_and][2][_or][${idx++}][deviceUuid][_eq]`, route.query.deviceUuid);
+       }
     }
 
     const response = await fetch(`${import.meta.env.VITE_API_URL}/items/logs?${params.toString()}`, {
@@ -304,6 +575,8 @@ const fetchLogs = async () => {
         }
         return logItem;
       }));
+    } else {
+      console.error("Fetch logs failed:", response.status, await response.text());
     }
   } catch (error) {
     console.error("Fetch logs error:", error);
@@ -375,6 +648,12 @@ onMounted(async () => {
   token = authService.getToken();
   tenantId = currentUserTenant.getTenantId();
   userRole = currentUserTenant.getRole();
+  await fetchDoors();
+  if (route.query.doorName || route.query.doorNumber || route.query.search || route.query.doorId) {
+    const doorName = route.query.doorName || "";
+    const doorNum = route.query.doorNumber ? `#${route.query.doorNumber}` : "";
+    activeDoorFilter.value = doorName ? `${doorName} ${doorNum}`.trim() : (route.query.search || "");
+  }
   fetchLogs();
   
   pollInterval = setInterval(() => {
@@ -407,7 +686,8 @@ const fetchLogsInBackground = async () => {
       "employeeId.assignedUser.id", "employeeId.assignedUser.first_name", 
       "employeeId.assignedUser.last_name", "employeeId.assignedUser.avatar.id",
       "mode", "timeStamp", "date", "id", "ValidLogs", "date_created",
-      "name", "rfid"
+      "name", "rfid", "sn",
+      "door.id", "door.doorNumber", "door.doorName"
     ];
 
     fields.forEach(f => params.append("fields[]", f));
@@ -456,3 +736,4 @@ onUnmounted(() => {
   if (pollInterval) clearInterval(pollInterval);
 });
 </script>
+

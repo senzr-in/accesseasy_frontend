@@ -1,250 +1,290 @@
 <template>
-  <div class="flex min-h-screen w-full bg-[#f8fafc] dark:bg-[#020617] text-slate-900 dark:text-slate-100 flex-col lg:flex-row relative overflow-hidden font-sans">
-    <!-- Left Side: Marketing Content -->
-    <div class="flex-1 flex flex-col justify-center px-6 py-8 lg:px-14 lg:py-6 bg-white dark:bg-slate-900/10 dark:bg-black/20 backdrop-blur-md border-r border-slate-200 dark:border-white/10 relative overflow-hidden border-b lg:border-b-0">
-      <!-- Grid Background Pattern -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 min-h-screen w-full bg-[#030614] text-slate-100 relative overflow-x-hidden font-sans selection:bg-blue-500 selection:text-white">
+    <!-- Left Side: Marketing & Skyscraper Hero Section -->
+    <div class="w-full h-full flex flex-col justify-between px-6 py-8 lg:px-12 lg:py-10 relative z-20 overflow-hidden border-r border-slate-800/60 shadow-[10px_0_35px_rgba(0,0,0,0.35)] min-h-[500px]">
+      <!-- Photorealistic Skyscraper Office Background Image with Network Overlay -->
       <div 
-        class="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none"
-        style="background-image: radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0); background-size: 24px 24px;"
+        class="absolute inset-0 bg-cover bg-center transition-transform duration-10000 hover:scale-105 pointer-events-none z-0"
+        :style="{ backgroundImage: `url(${loginHeroBg})` }"
+      />
+      <!-- Subtle Dark Blue Overlay Gradient for Text Contrast (Low Opacity) -->
+      <div class="absolute inset-0 bg-gradient-to-br from-[#04081c]/50 via-[#071133]/30 to-[#030614]/60 pointer-events-none z-0" />
+
+      <!-- Tech Grid Pattern -->
+      <div 
+        class="absolute inset-0 opacity-[0.08] pointer-events-none z-0"
+        style="background-image: radial-gradient(circle at 2px 2px, rgba(59, 130, 246, 0.9) 1px, transparent 0); background-size: 30px 30px;"
       />
 
-      <div class="max-w-xl relative z-10 animate-fade-in-left">
-        <div class="flex items-center gap-3 mb-6">
-          <div class="h-10 w-10 rounded-xl bg-blue-600/20 flex items-center justify-center border border-blue-600/20 shadow-xl shadow-blue-600/10">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="w-6 h-6 text-blue-600"
-            >
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-            </svg>
+      <!-- Floating Tech Mesh Nodes Animation -->
+      <div class="absolute inset-0 pointer-events-none overflow-hidden z-0">
+        <div class="node-particle node-1" />
+        <div class="node-particle node-2" />
+        <div class="node-particle node-3" />
+      </div>
+
+      <!-- Top Header / Logo -->
+      <div class="relative z-10 animate-fade-in-down">
+        <div class="flex items-center gap-3.5 mb-2">
+          <!-- Hex Shield Icon -->
+          <div class="h-11 w-11 rounded-xl bg-gradient-to-br from-blue-500/30 to-blue-700/20 flex items-center justify-center border border-blue-400/40 shadow-[0_0_20px_rgba(59,130,246,0.3)] backdrop-blur-md group cursor-pointer hover:border-blue-300 transition-all duration-300">
+            <Shield class="w-6 h-6 text-blue-400 group-hover:scale-110 transition-transform duration-300" />
           </div>
           <div class="flex flex-col">
-            <span class="text-base font-black tracking-tight uppercase leading-none text-slate-900 dark:text-white">AccessEasy</span>
-            <span class="text-[9px] font-black text-blue-600 tracking-[0.4em] uppercase mt-0.5">Scale Globally</span>
+            <span class="text-2xl font-bold tracking-tight text-white drop-shadow-md">AccessEasy</span>
+            <span class="text-[11px] font-medium text-slate-300 tracking-wider">Secure. Manage. Empower.</span>
           </div>
         </div>
+      </div>
 
-        <h1 class="text-3xl lg:text-4xl font-black tracking-tight leading-[1] mb-4 text-slate-900 dark:text-white">
-          Build your secure <br>
-          <span class="text-blue-600">Enterprise</span> Network.
+      <!-- Hero Body Content -->
+      <div class="max-w-xl relative z-10 my-auto py-6">
+        <!-- Animated Pill Badge -->
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-600/30 border border-blue-400/40 text-blue-200 text-xs font-semibold tracking-wide mb-6 backdrop-blur-md shadow-[0_0_15px_rgba(59,130,246,0.3)]">
+          <span class="h-2 w-2 rounded-full bg-blue-400 animate-ping" />
+          <span>Scale Globally</span>
+        </div>
+
+        <!-- Headline -->
+        <h1 class="text-3xl lg:text-4xl xl:text-5xl font-bold tracking-tight leading-[1.15] mb-4 text-white drop-shadow-xl">
+          Build your secure<br>
+          Enterprise Network.<br>
+          Empowered Workforce.
         </h1>
 
-        <p class="text-[12px] text-slate-500 dark:text-slate-400 font-bold mb-8 leading-relaxed max-w-sm uppercase tracking-wide">
-          Join the elite organizations using AccessEasy for unified infrastructure security.
+        <p class="text-xs lg:text-sm text-slate-100 font-normal leading-relaxed mb-6 max-w-lg drop-shadow-md">
+          The all-in-one platform for access control, workforce management, and real-time intelligence.
         </p>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-5 mb-8">
+        <!-- 4 Feature Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
           <div
-            v-for="(h, i) in highlights"
-            :key="i"
-            class="flex items-center gap-3 group"
+            v-for="(feature, idx) in features"
+            :key="idx"
+            class="flex items-start gap-3 p-3 rounded-2xl bg-slate-900/60 border border-blue-500/30 backdrop-blur-md hover:bg-slate-900/80 hover:border-blue-400/60 shadow-md hover:shadow-blue-500/25 transition-all duration-300 group hover:-translate-y-0.5"
           >
-            <div class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-md group-hover:scale-110 group-hover:border-blue-500/50 transition-all duration-300">
+            <div class="h-9 w-9 shrink-0 flex items-center justify-center rounded-xl bg-gradient-to-br from-blue-900/60 to-slate-900/80 border border-blue-400/30 text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.3)] group-hover:scale-105 transition-all duration-300">
               <component
-                :is="h.icon"
-                class="h-4 w-4 text-blue-600"
+                :is="feature.icon"
+                class="h-4.5 w-4.5"
               />
             </div>
             <div>
-              <h3 class="font-black text-[10px] tracking-[0.05em] uppercase text-slate-900 dark:text-white">
-                {{ h.text }}
+              <h3 class="font-bold text-xs text-white tracking-wide mb-0.5 group-hover:text-blue-300 transition-colors">
+                {{ feature.title }}
               </h3>
-              <p class="text-[9px] font-bold text-slate-500 dark:text-slate-400 leading-snug mt-0.5 uppercase tracking-widest">
-                {{ h.sub }}
+              <p class="text-[10px] lg:text-[11px] text-slate-200 leading-snug opacity-90">
+                {{ feature.desc }}
               </p>
             </div>
           </div>
         </div>
+      </div>
 
-        <div class="pt-6 border-t border-slate-200 dark:border-white/5">
-          <p class="text-[8px] font-black tracking-[0.3em] text-slate-400 dark:text-slate-600 dark:text-slate-300 mb-4 uppercase">
-            Industry Standards
-          </p>
-          <div class="flex flex-wrap gap-x-6 gap-y-3">
-            <div
-              v-for="(ind, i) in industries"
-              :key="i"
-              class="flex items-center gap-2 opacity-50 hover:opacity-100 transition-all duration-300 cursor-default group"
-            >
+      <!-- Bottom Hardware Authentication Methods Badges Bar -->
+      <div class="relative z-10 pt-4 border-t border-slate-700/60">
+        <p class="text-[11px] font-bold tracking-wider text-slate-300 uppercase mb-3 drop-shadow flex items-center gap-2">
+          <ShieldCheck class="w-4 h-4 text-cyan-400" />
+          <span>Supported Access & Authentication Modalities</span>
+        </p>
+
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+          <div
+            v-for="(auth, i) in authMethods"
+            :key="i"
+            class="p-2.5 rounded-xl bg-slate-900/70 border border-blue-500/30 backdrop-blur-md shadow-md hover:border-cyan-400/70 hover:bg-slate-900/90 shadow-[0_0_15px_rgba(6,182,212,0.15)] transition-all duration-300 flex flex-col items-center justify-center text-center group cursor-default"
+          >
+            <div class="h-9 w-9 rounded-lg bg-cyan-950/60 border border-cyan-500/30 flex items-center justify-center mb-1.5 group-hover:scale-110 group-hover:border-cyan-400/80 transition-all duration-300">
               <component
-                :is="ind.icon"
-                class="h-4 w-4 group-hover:text-blue-600 transition-colors"
+                :is="auth.icon"
+                class="w-5 h-5 text-cyan-400"
               />
-              <span class="text-[9px] font-black tracking-widest uppercase">{{ ind.name }}</span>
             </div>
+            <span class="text-xs font-bold text-white tracking-wide leading-tight group-hover:text-cyan-300 transition-colors">
+              {{ auth.name }}
+            </span>
+            <span class="text-[9px] text-slate-300 font-medium tracking-tight mt-0.5 opacity-90">
+              {{ auth.sub }}
+            </span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Right Side: Registration Form -->
-    <div class="flex-1 flex items-center justify-center p-4 lg:p-10 relative overflow-hidden bg-slate-50 dark:bg-slate-900/50 dark:bg-transparent">
-      <!-- Glow effect -->
-      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-blue-600/5 rounded-full blur-[100px] pointer-events-none" />
+    <!-- Right Side: Real White Marble Luxury Registration Form Section -->
+    <div class="w-full h-full flex items-center justify-center p-4 sm:p-6 lg:p-8 relative overflow-hidden bg-[#e5e9f0] min-h-screen z-10">
+      <!-- Background Ambient Glow & Sparks -->
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-blue-400/15 rounded-full blur-[140px] pointer-events-none" />
 
-      <div class="w-full max-w-[480px] rounded-[2rem] bg-white dark:bg-slate-900/90 dark:bg-[#0a0e1a]/80 backdrop-blur-xl p-8 shadow-2xl border border-slate-200 dark:border-white/10 relative z-10 animate-fade-in-up">
-        <div class="text-center mb-8">
-          <div class="mx-auto mb-4 h-12 w-12 flex items-center justify-center rounded-[1rem] bg-blue-600 text-white shadow-lg shadow-blue-600/30 border border-blue-500/20">
-            <UserPlus class="h-5 w-5" />
+      <!-- Main Marble Card Container -->
+      <div 
+        class="w-full max-w-[480px] rounded-[2.5rem] p-8 lg:p-10 shadow-[0_30px_70px_-10px_rgba(0,0,0,0.25),0_0_35px_rgba(255,255,255,0.8)] border border-white/90 relative z-10 animate-fade-in-up text-slate-900 overflow-hidden bg-cover bg-center"
+        :style="{ backgroundImage: `url(${marbleBg})` }"
+      >
+        <!-- Light Translucent White Wash for Polished Marble Texture Visibility -->
+        <div class="absolute inset-0 bg-white/40 pointer-events-none z-0" />
+
+        <div class="relative z-10">
+          <div class="text-center mb-6">
+            <div class="relative inline-flex items-center justify-center mb-3">
+              <div class="absolute inset-0 rounded-full bg-blue-500/20 animate-ping opacity-60 duration-1000 scale-125" />
+              <div class="relative h-16 w-16 rounded-full bg-gradient-to-br from-blue-50 via-white to-blue-100 border border-blue-300 flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.3)]">
+                <UserPlus class="w-8 h-8 text-blue-600" />
+              </div>
+            </div>
+            <h2 class="text-2xl font-black text-slate-900 tracking-tight mb-1">
+              Create Account
+            </h2>
+            <p class="text-xs text-slate-600 font-semibold">
+              Join the next-gen security platform
+            </p>
           </div>
-          <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight uppercase mb-1">
-            Create Account
-          </h2>
-          <p class="text-[9px] text-blue-600 font-black tracking-[0.4em] uppercase text-center w-full">
-            Join the next-gen security platform
-          </p>
-        </div>
 
-        <form
-          class="space-y-5"
-          @submit.prevent="handleRegistration"
-        >
-          <!-- Personal Info Grid -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="space-y-1.5">
-              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Full Name</label>
-              <div class="relative group">
-                <input
-                  v-model="fullName"
-                  type="text"
-                  required
-                  placeholder="John Doe"
-                  class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
-                >
-                <User class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+          <form
+            class="space-y-5"
+            @submit.prevent="handleRegistration"
+          >
+            <!-- Personal Info Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="space-y-1.5">
+                <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Full Name</label>
+                <div class="relative group">
+                  <input
+                    v-model="fullName"
+                    type="text"
+                    required
+                    placeholder="John Doe"
+                    class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
+                  >
+                  <User class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+                </div>
               </div>
-            </div>
 
-            <div class="space-y-1.5">
-              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Phone Number</label>
-              <div class="relative group">
-                <input
-                  v-model="mobileNumber"
-                  type="text"
-                  inputmode="numeric"
-                  required
-                  placeholder="10-digit number"
-                  maxlength="10"
-                  class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
-                  @input="mobileNumber = $event.target.value.replace(/\D/g, '')"
-                >
-                <Phone class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+              <div class="space-y-1.5">
+                <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Phone Number</label>
+                <div class="relative group">
+                  <input
+                    v-model="mobileNumber"
+                    type="text"
+                    inputmode="numeric"
+                    required
+                    placeholder="10-digit number"
+                    maxlength="10"
+                    class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
+                    @input="mobileNumber = $event.target.value.replace(/\D/g, '')"
+                  >
+                  <Phone class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+                </div>
               </div>
-            </div>
             
-            <div class="space-y-1.5">
-              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Work Email</label>
-              <div class="relative group">
-                <input
-                  v-model="email"
-                  type="email"
-                  required
-                  placeholder="name@company.com"
-                  class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
-                  @input="email = email.toLowerCase()"
-                >
-                <Mail class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+              <div class="space-y-1.5">
+                <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Work Email</label>
+                <div class="relative group">
+                  <input
+                    v-model="email"
+                    type="email"
+                    required
+                    placeholder="name@company.com"
+                    class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
+                    @input="email = email.toLowerCase()"
+                  >
+                  <Mail class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+                </div>
+              </div>
+
+              <div class="space-y-1.5">
+                <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Employee ID</label>
+                <div class="relative group">
+                  <input
+                    v-model="employeeId"
+                    type="text"
+                    required
+                    placeholder="EMP-001"
+                    class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
+                  >
+                  <IdCard class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+                </div>
               </div>
             </div>
 
+            <!-- Company info -->
             <div class="space-y-1.5">
-              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Employee ID</label>
+              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Company Name</label>
               <div class="relative group">
                 <input
-                  v-model="employeeId"
+                  v-model="companyName"
                   type="text"
                   required
-                  placeholder="EMP-001"
+                  placeholder="Acme Corporation"
                   class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
                 >
-                <IdCard class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+                <Building2 class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
               </div>
             </div>
-          </div>
 
-          <!-- Company info -->
-          <div class="space-y-1.5">
-            <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Company Name</label>
-            <div class="relative group">
-              <input
-                v-model="companyName"
-                type="text"
-                required
-                placeholder="Acme Corporation"
-                class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
-              >
-              <Building2 class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+            <button
+              type="submit"
+              :disabled="isLoading || !isFormValid"
+              class="w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 transition-all disabled:opacity-70 disabled:cursor-not-allowed group mt-2"
+            >
+              <span v-if="isLoading">Processing...</span>
+              <template v-else>
+                Launch my account
+                <ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </template>
+            </button>
+
+            <div class="flex items-center justify-between gap-4 py-2 opacity-50">
+              <div class="h-[1px] flex-1 bg-slate-300 dark:bg-slate-700" />
+              <span class="text-[9px] font-black tracking-[0.3em] text-slate-500 dark:text-slate-400 uppercase">OR</span>
+              <div class="h-[1px] flex-1 bg-slate-300 dark:bg-slate-700" />
             </div>
-          </div>
 
-          <button
-            type="submit"
-            :disabled="isLoading || !isFormValid"
-            class="w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 transition-all disabled:opacity-70 disabled:cursor-not-allowed group mt-2"
-          >
-            <span v-if="isLoading">Processing...</span>
-            <template v-else>
-              Launch my account
-              <ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </template>
-          </button>
-
-          <div class="flex items-center justify-between gap-4 py-2 opacity-50">
-            <div class="h-[1px] flex-1 bg-slate-300 dark:bg-slate-700" />
-            <span class="text-[9px] font-black tracking-[0.3em] text-slate-500 dark:text-slate-400 uppercase">OR</span>
-            <div class="h-[1px] flex-1 bg-slate-300 dark:bg-slate-700" />
-          </div>
-
-          <button
-            type="button"
-            class="w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.1em] flex items-center justify-center gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 hover:border-blue-500/50 hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-slate-800 text-slate-700 dark:text-white shadow-sm transition-all group"
-            @click="signupWithGoogle"
-          >
-            <svg
-              class="w-4 h-4"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
+            <button
+              type="button"
+              class="w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.1em] flex items-center justify-center gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 hover:border-blue-500/50 hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-slate-800 text-slate-700 dark:text-white shadow-sm transition-all group"
+              @click="signupWithGoogle"
             >
-              <path
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                fill="#4285F4"
-              />
-              <path
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                fill="#34A853"
-              />
-              <path
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                fill="#FBBC05"
-              />
-              <path
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                fill="#EA4335"
-              />
-            </svg>
-            Sign up with Google
-          </button>
+              <svg
+                class="w-4 h-4"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  fill="#4285F4"
+                />
+                <path
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  fill="#34A853"
+                />
+                <path
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                  fill="#FBBC05"
+                />
+                <path
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                  fill="#EA4335"
+                />
+              </svg>
+              Sign up with Google
+            </button>
 
-          <p class="text-center text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider pt-2">
-            Already have an account? 
-            <router-link
-              to="/login"
-              class="text-blue-600 hover:text-blue-700 underline underline-offset-4 cursor-pointer"
-            >
-              Sign In
-            </router-link>
-          </p>
-        </form>
+            <p class="text-center text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider pt-2">
+              Already have an account? 
+              <router-link
+                to="/login"
+                class="text-blue-600 hover:text-blue-700 underline underline-offset-4 cursor-pointer"
+              >
+                Sign In
+              </router-link>
+            </p>
+          </form>
 
-        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 text-[8px] font-black tracking-[0.4em] text-slate-400 uppercase flex items-center gap-2">
-          <div class="h-1.5 w-1.5 rounded-full bg-blue-500" />
-          Join 500+ Enterprises
+          <div class="mt-6 text-center text-[9px] font-black tracking-[0.3em] text-slate-400 uppercase flex items-center justify-center gap-2">
+            <div class="h-1.5 w-1.5 rounded-full bg-blue-500" />
+            Join 500+ Enterprises
+          </div>
         </div>
       </div>
     </div>
@@ -304,9 +344,13 @@ import axios from "axios";
 import { 
   UserPlus, User, Mail, Phone, Building2, MapPin, 
   ArrowRight, CheckCircle, AlertCircle, Info, X,
-  IdCard, Zap, ShieldCheck, BarChart3, Cpu,
-  Factory, Warehouse, GraduationCap, HeartPulse, Globe
+  IdCard, Zap, Shield, ShieldCheck, BarChart3, Layers, Globe,
+  ScanFace, Fingerprint, Radio, Nfc, Bluetooth
 } from "lucide-vue-next";
+
+// Directly import image assets for Vite bundling
+import loginHeroBg from "@/assets/images/login_hero_bg.png";
+import marbleBg from "@/assets/images/marble_bg.png";
 
 const router = useRouter();
 
@@ -334,20 +378,19 @@ const toasts = ref([]);
 let emailToastId = null;
 let phoneToastId = null;
 
-const highlights = [
-  { icon: Zap, text: "Rapid deployment", sub: "Live in under 24 hours." },
-  { icon: ShieldCheck, text: "Enterprise grade", sub: "Military-level encryption." },
-  { icon: BarChart3, text: "Scalable logs", sub: "Billions of events tracked." },
-  { icon: Cpu, text: "Native hardware", sub: "Deep device integration." },
+const features = [
+  { icon: Zap, title: "Real-time Access Control", desc: "Monitor and manage access in real-time across all your locations." },
+  { icon: BarChart3, title: "Workforce Intelligence", desc: "Gain actionable insights into your workforce and operations." },
+  { icon: ShieldCheck, title: "Secure & Reliable", desc: "Enterprise-grade security with 99.9% uptime you can trust." },
+  { icon: Layers, title: "Scalable & Flexible", desc: "Built to scale with your organization and adapt to your needs." }
 ];
 
-const industries = [
-  { icon: Building2, name: "Corporate" },
-  { icon: Factory, name: "Industrial" },
-  { icon: Warehouse, name: "Logistics" },
-  { icon: GraduationCap, name: "Education" },
-  { icon: HeartPulse, name: "Healthcare" },
-  { icon: Globe, name: "Critical Infra" },
+const authMethods = [
+  { name: "Face AI", sub: "3D Recognition", icon: ScanFace },
+  { name: "Fingerprint", sub: "Biometric Sensor", icon: Fingerprint },
+  { name: "RFID Card", sub: "13.56MHz Smart", icon: Radio },
+  { name: "NFC Mobile", sub: "Instant Tap & Go", icon: Nfc },
+  { name: "Bluetooth", sub: "BLE Touchless", icon: Bluetooth }
 ];
 
 const addToast = (message, type = "info", duration = 5000) => {
@@ -555,26 +598,50 @@ async function handleRegistration() {
 async function signupWithGoogle() {
   try {
     sessionStorage.setItem("connector_type", "google");
+    sessionStorage.setItem("tenant_id", "new");
     isLoading.value = true;
-    
-    const response = await fetch(`${import.meta.env.VITE_KN_API_URL}/google-accesseasy`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: "google" }),
-    });
 
-    const data = await response.json();
-    if (data.success && data.url) {
-      window.location.href = data.url;
-    } else {
-      throw new Error(data.error || "Failed to initialize Google signup");
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "456615098701-cihaj0btvoe011ba92r7hpbemkse5vm3.apps.googleusercontent.com";
+    const redirectUri = `${window.location.origin}/auth/callback`;
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_KN_API_URL}/google-accesseasy`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "google",
+          redirect_uri: redirectUri,
+          redirectUri: redirectUri,
+          redirect_url: redirectUri,
+          client_id: clientId,
+          clientId: clientId,
+          action: "signup",
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success && data.url) {
+        window.location.href = data.url;
+        return;
+      }
+    } catch (apiErr) {
+      console.warn("Backend google-accesseasy endpoint unavailable, falling back to direct OAuth URL:", apiErr);
     }
+
+    const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(
+      clientId
+    )}&redirect_uri=${encodeURIComponent(
+      redirectUri
+    )}&response_type=code&scope=openid%20email%20profile&access_type=offline&prompt=consent`;
+
+    window.location.href = googleAuthUrl;
   } catch (error) {
     console.error("Google signup error:", error);
     showError(error.message || "Failed to connect to Google");
     isLoading.value = false;
   }
 }
+
 </script>
 
 <style scoped>

@@ -10,4 +10,5 @@ gcloud-service-key.json
 dist/
 *.txt
 backup_sidebar.vue
+*.timestamp-*.mjs
 

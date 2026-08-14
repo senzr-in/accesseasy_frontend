@@ -147,6 +147,14 @@
                     <span>Control Door</span>
                   </button>
                   <button
+                    title="View Door Event Logs"
+                    class="h-7 px-3 text-[10px] font-black uppercase tracking-widest bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/20 rounded-md transition-all shadow-sm flex items-center gap-1.5"
+                    @click="viewDoorLogs(door)"
+                  >
+                    <FileText class="w-3.5 h-3.5" />
+                    <span>Logs</span>
+                  </button>
+                  <button
                     class="h-7 px-3 text-[10px] font-black uppercase tracking-widest bg-transparent border border-slate-200 dark:border-zinc-700 rounded-md hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 transition-colors shadow-sm"
                     @click="editItem(door)"
                   >
@@ -208,8 +216,14 @@
       />
 
       <!-- Toast Banner Notification -->
-      <div v-if="toastMessage" class="fixed top-5 right-5 z-50 flex items-center gap-3 px-4 py-3 bg-slate-900 text-white rounded-xl shadow-xl border border-slate-800 animate-in slide-in-from-top-2 duration-300">
-        <div class="w-2 h-2 rounded-full" :class="toastType === 'success' ? 'bg-emerald-400' : 'bg-rose-400'" />
+      <div
+        v-if="toastMessage"
+        class="fixed top-5 right-5 z-50 flex items-center gap-3 px-4 py-3 bg-slate-900 text-white rounded-xl shadow-xl border border-slate-800 animate-in slide-in-from-top-2 duration-300"
+      >
+        <div
+          class="w-2 h-2 rounded-full"
+          :class="toastType === 'success' ? 'bg-emerald-400' : 'bg-rose-400'"
+        />
         <span class="text-xs font-bold">{{ toastMessage }}</span>
       </div>
     </div>
@@ -218,14 +232,28 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from "vue";
-import { Plus, Search, DoorOpen, Trash2, Loader2, SlidersHorizontal } from "lucide-vue-next";
+import { useRouter } from "vue-router";
+import { Plus, Search, DoorOpen, Trash2, Loader2, SlidersHorizontal, FileText } from "lucide-vue-next";
 import { authService } from "@/services/authService";
 import { currentUserTenant } from "@/utils/currentUserTenant";
 import DoorRegistrationDialog from "./doorRegistrationDialog.vue";
 import DoorControlModal from "./doorControlModal.vue";
 import DoorConfigModal from "./doorConfigModal.vue";
 
+const router = useRouter();
 const showConfigModal = ref(false);
+
+const viewDoorLogs = (door) => {
+  router.push({
+    path: "/dashboard/settings/logs",
+    query: {
+      doorId: door.id,
+      doorName: door.doorName || "",
+      doorNumber: door.doorNumber || "",
+      deviceUuid: door.deviceUuid || ""
+    }
+  });
+};
 
 // Accessors
 const token = authService.getToken();
