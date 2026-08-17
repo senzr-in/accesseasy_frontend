@@ -1,6 +1,9 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { authService } from "@/services/authService";
 
+// Landing
+import AegisLanding from "@/pages/landing/AegisLanding.vue";
+
 // Auth
 import Login from "@/components/loginAuthentication/login.vue";
 import Register from "@/components/loginAuthentication/register.vue";
@@ -49,7 +52,16 @@ const getRoleHome = () => {
 const routes = [
   {
     path: "/",
-    redirect: getRoleHome,
+    name: "Landing",
+    component: AegisLanding,
+    beforeEnter: (to, from, next) => {
+      // If already authenticated, skip the landing page and go to the appropriate home
+      if (authService.isAuthenticated()) {
+        next(getRoleHome());
+      } else {
+        next();
+      }
+    },
   },
   {
     path: "/dealer-dashboard",
