@@ -1069,9 +1069,9 @@ const pricingAssurances = [
 
 .ag-wrap {
   width: 100%;
-  max-width: 1280px;
+  max-width: 1760px;
   margin: 0 auto;
-  padding-inline: clamp(20px, 4vw, 48px);
+  padding-inline: clamp(24px, 4vw, 64px);
 }
 
 .ag-break { display: block; }
@@ -1318,88 +1318,86 @@ const pricingAssurances = [
 .ag-hero {
   position: relative;
   width: 100%;
-  min-height: max(580px, calc(100svh - 70px));
+  min-height: calc(100vh - 70px);
   display: flex;
   align-items: center;
-  padding-top: clamp(76px, 9vh, 96px);
-  padding-bottom: clamp(32px, 4.5vh, 56px);
-  background: #FFFFFF;
+  padding-top: clamp(84px, 10vh, 104px);
+  padding-bottom: clamp(40px, 6vh, 64px);
+  background: radial-gradient(circle at 85% 25%, rgba(239, 246, 255, 0.8) 0%, rgba(255, 255, 255, 1) 70%);
   box-sizing: border-box;
 }
 
 .ag-hero__inner {
   width: 100%;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3rem;
   align-items: center;
-  justify-content: space-between;
-  gap: clamp(24px, 3.5vw, 48px);
 }
 
 @media (min-width: 1024px) {
   .ag-hero__inner {
-    flex-direction: row;
+    grid-template-columns: 1fr 1.3fr;
+    gap: clamp(3rem, 5vw, 6rem);
     align-items: center;
   }
 }
 
-/* Hero Content (Left column ~45%) */
+/* Hero Content (Left column) */
 .ag-hero__content {
-  flex: 0 1 45%;
   width: 100%;
-  max-width: 640px;
+  max-width: 680px;
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
 .ag-hero__h1 {
-  font-size: clamp(2.1rem, 3.8vw, 3.25rem);
+  font-size: clamp(2.5rem, 4.3vw, 4.35rem);
   font-weight: 900;
-  line-height: 1.14;
-  letter-spacing: -0.035em;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
   color: #0A1628;
-  margin-bottom: clamp(10px, 1.5vh, 18px);
+  margin-bottom: clamp(14px, 2vh, 22px);
 }
 
 .ag-hero__h1--blue { color: #1B4FD8; display: block; }
 
 .ag-hero__sub {
-  font-size: clamp(0.9375rem, 1.1vw, 1.0625rem);
+  font-size: clamp(1.05rem, 1.3vw, 1.25rem);
   color: #475569;
-  line-height: 1.6;
-  margin-bottom: clamp(16px, 2.2vh, 26px);
-  max-width: 540px;
+  line-height: 1.65;
+  margin-bottom: clamp(20px, 2.8vh, 32px);
+  max-width: 580px;
 }
 
 .ag-hero__btns {
   display: flex;
   flex-wrap: wrap;
-  gap: clamp(8px, 1.2vw, 14px);
-  margin-bottom: clamp(14px, 2vh, 22px);
+  gap: clamp(10px, 1.4vw, 16px);
+  margin-bottom: clamp(16px, 2.2vh, 26px);
 }
 
 .ag-hero__trust {
   display: flex;
   flex-wrap: wrap;
-  gap: clamp(10px, 1.4vw, 18px);
+  gap: clamp(12px, 1.6vw, 22px);
 }
 
 .ag-hero__trust-item {
   display: flex;
   align-items: center;
-  gap: 0.375rem;
-  font-size: clamp(0.75rem, 0.9vw, 0.8125rem);
-  font-weight: 500;
+  gap: 0.45rem;
+  font-size: clamp(0.8125rem, 0.95vw, 0.875rem);
+  font-weight: 600;
   color: #64748B;
 }
 
-/* Hero Visual (Right column ~55%) */
+/* Hero Visual (Right column) */
 .ag-hero__visual {
   position: relative;
-  flex: 0 1 55%;
   width: 100%;
-  max-width: 100%;
+  max-width: 860px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1411,10 +1409,8 @@ const pricingAssurances = [
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 100%;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.04), 0 20px 50px rgba(10,22,40,0.12);
-  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  box-shadow: 0 20px 50px -10px rgba(10,22,40,0.14), 0 0 0 1px #E2E8F0;
   overflow: hidden;
   background: #fff;
 }
@@ -1424,7 +1420,7 @@ const pricingAssurances = [
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 9px 14px;
+  padding: 11px 16px;
   background: #F8FAFC;
   border-bottom: 1px solid #E2E8F0;
 }
@@ -1465,40 +1461,40 @@ const pricingAssurances = [
 /* Dashboard shell */
 .ag-db {
   display: flex;
-  height: clamp(270px, 33vh, 360px);
+  height: clamp(400px, 48vh, 520px);
   overflow: hidden;
 }
-@media (max-width: 640px) { .ag-db { height: 250px; } }
+@media (max-width: 640px) { .ag-db { height: 320px; } }
 
 /* DB Sidebar */
 .ag-db__sidebar {
-  width: 130px;
+  width: 160px;
   background: #0F172A;
   display: flex;
   flex-direction: column;
-  padding: 14px 0;
+  padding: 16px 0;
   flex-shrink: 0;
 }
 .ag-db__logo {
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 4px 14px 14px;
+  gap: 8px;
+  padding: 4px 16px 16px;
   border-bottom: 1px solid rgba(255,255,255,0.07);
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
-.ag-db__logo span { font-size: 0.8rem; font-weight: 800; color: white; letter-spacing: 0.05em; }
+.ag-db__logo span { font-size: 0.9rem; font-weight: 800; color: white; letter-spacing: 0.05em; }
 
-.ag-db__sidenav { list-style: none; flex: 1; padding: 0 8px; }
+.ag-db__sidenav { list-style: none; flex: 1; padding: 0 10px; }
 .ag-db__sidenav-item {
   display: flex;
   align-items: center;
-  gap: 7px;
-  font-size: 0.7rem;
+  gap: 9px;
+  font-size: 0.78rem;
   font-weight: 500;
   color: #94A3B8;
-  padding: 6px 10px;
-  border-radius: 6px;
+  padding: 7px 12px;
+  border-radius: 7px;
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -1506,15 +1502,15 @@ const pricingAssurances = [
   background: rgba(27,79,216,0.2);
   color: #93C5FD;
 }
-.ag-db__sidenav-icon { font-size: 0.75rem; opacity: 0.7; }
+.ag-db__sidenav-icon { font-size: 0.8rem; opacity: 0.7; }
 
 /* DB Main */
 .ag-db__main {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 12px;
+  gap: 12px;
+  padding: 16px 18px;
   overflow: hidden;
   background: #F8FAFC;
 }
@@ -1524,28 +1520,28 @@ const pricingAssurances = [
   justify-content: space-between;
   padding: 2px 0;
 }
-.ag-db__title { font-size: 0.8rem; font-weight: 700; color: #0A1628; }
+.ag-db__title { font-size: 0.92rem; font-weight: 700; color: #0A1628; }
 .ag-db__topbar-right { display: flex; align-items: center; gap: 8px; }
-.ag-db__bell { font-size: 0.75rem; }
+.ag-db__bell { font-size: 0.85rem; }
 .ag-db__avatar {
-  width: 24px; height: 24px;
+  width: 28px; height: 28px;
   border-radius: 50%;
   background: #1B4FD8;
   display: flex; align-items: center; justify-content: center;
-  font-size: 0.55rem; font-weight: 700; color: white;
+  font-size: 0.65rem; font-weight: 700; color: white;
 }
 
 /* KPI cards */
-.ag-db__kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.ag-db__kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .ag-db__kpi {
   background: white;
   border: 1px solid #E2E8F0;
-  border-radius: 8px;
-  padding: 7px 8px;
+  border-radius: 10px;
+  padding: 10px 12px;
 }
-.ag-db__kpi-num { font-size: 1.05rem; font-weight: 800; color: #0A1628; line-height: 1.1; }
-.ag-db__kpi-lbl { font-size: 0.58rem; color: #64748B; margin-top: 2px; }
-.ag-db__kpi-tag { font-size: 0.52rem; font-weight: 600; border-radius: 4px; padding: 2px 4px; margin-top: 4px; display: inline-block; }
+.ag-db__kpi-num { font-size: 1.35rem; font-weight: 800; color: #0A1628; line-height: 1.1; }
+.ag-db__kpi-lbl { font-size: 0.68rem; color: #64748B; margin-top: 3px; font-weight: 600; }
+.ag-db__kpi-tag { font-size: 0.6rem; font-weight: 600; border-radius: 5px; padding: 2px 6px; margin-top: 4px; display: inline-block; }
 .ag-db__kpi-tag--neutral { background: #F1F5F9; color: #475569; }
 .ag-db__kpi-tag--blue { background: #EFF6FF; color: #1B4FD8; }
 .ag-db__kpi-tag--green { background: #ECFDF5; color: #059669; }
@@ -1555,34 +1551,35 @@ const pricingAssurances = [
 .ag-db__map {
   background: white;
   border: 1px solid #E2E8F0;
-  border-radius: 8px;
-  padding: 8px;
+  border-radius: 10px;
+  padding: 10px 12px;
   flex: 1;
   overflow: hidden;
   position: relative;
+  min-height: 120px;
 }
 .ag-db__map-header {
-  font-size: 0.65rem;
+  font-size: 0.72rem;
   font-weight: 600;
   color: #475569;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 .ag-db__live-pill {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 0.5rem;
+  font-size: 0.55rem;
   font-weight: 700;
   color: #059669;
   background: #ECFDF5;
-  padding: 2px 6px;
-  border-radius: 4px;
+  padding: 2px 8px;
+  border-radius: 5px;
 }
 .ag-db__live-pill span {
-  width: 5px; height: 5px;
+  width: 6px; height: 6px;
   border-radius: 50%;
   background: #059669;
   animation: livePulse 1.5s ease-in-out infinite;
@@ -1590,9 +1587,9 @@ const pricingAssurances = [
 
 .ag-db__map-area {
   position: relative;
-  height: calc(100% - 22px);
+  height: calc(100% - 24px);
   background: #EFF6FF;
-  border-radius: 6px;
+  border-radius: 8px;
   overflow: hidden;
 }
 .ag-db__map-grid {
@@ -1603,58 +1600,59 @@ const pricingAssurances = [
 }
 .ag-db__guard-dot {
   position: absolute;
-  width: 9px; height: 9px;
+  width: 10px; height: 10px;
   border-radius: 50%;
   transform: translate(-50%, -50%);
 }
-.ag-db__guard-dot--blue { background: #1B4FD8; box-shadow: 0 0 0 3px rgba(27,79,216,0.2); }
-.ag-db__guard-dot--orange { background: #F59E0B; box-shadow: 0 0 0 3px rgba(245,158,11,0.2); }
+.ag-db__guard-dot--blue { background: #1B4FD8; box-shadow: 0 0 0 4px rgba(27,79,216,0.22); }
+.ag-db__guard-dot--orange { background: #F59E0B; box-shadow: 0 0 0 4px rgba(245,158,11,0.22); }
 
 /* Bottom row */
-.ag-db__bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.ag-db__bottom { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .ag-db__compliance, .ag-db__top-guard {
   background: white;
   border: 1px solid #E2E8F0;
-  border-radius: 8px;
-  padding: 8px;
+  border-radius: 10px;
+  padding: 10px 12px;
 }
-.ag-db__compliance-hdr { font-size: 0.6rem; font-weight: 600; color: #475569; margin-bottom: 4px; }
-.ag-db__compliance-row { display: flex; align-items: center; gap: 6px; }
-.ag-db__bar-wrap { flex: 1; height: 5px; background: #E2E8F0; border-radius: 3px; overflow: hidden; }
+.ag-db__compliance-hdr { font-size: 0.68rem; font-weight: 600; color: #475569; margin-bottom: 5px; }
+.ag-db__compliance-row { display: flex; align-items: center; gap: 8px; }
+.ag-db__bar-wrap { flex: 1; height: 6px; background: #E2E8F0; border-radius: 3px; overflow: hidden; }
 .ag-db__bar-fill { height: 100%; background: #1B4FD8; border-radius: 3px; }
-.ag-db__compliance-pct { font-size: 0.65rem; font-weight: 700; color: #1B4FD8; }
-.ag-db__guard-row { display: flex; align-items: center; gap: 6px; }
-.ag-db__guard-av { width: 22px; height: 22px; border-radius: 50%; background: #1B4FD8; color: white; font-size: 0.45rem; font-weight: 700; display: flex; align-items: center; justify-content: center; }
-.ag-db__guard-name { font-size: 0.6rem; font-weight: 600; color: #0A1628; }
-.ag-db__guard-score { font-size: 0.5rem; color: #059669; font-weight: 600; }
+.ag-db__compliance-pct { font-size: 0.75rem; font-weight: 700; color: #1B4FD8; }
+.ag-db__guard-row { display: flex; align-items: center; gap: 8px; }
+.ag-db__guard-av { width: 24px; height: 24px; border-radius: 50%; background: #1B4FD8; color: white; font-size: 0.5rem; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.ag-db__guard-name { font-size: 0.68rem; font-weight: 600; color: #0A1628; }
+.ag-db__guard-score { font-size: 0.55rem; color: #059669; font-weight: 600; }
 
 /* Mini chart */
 .ag-db__chart {
   background: white;
   border: 1px solid #E2E8F0;
-  border-radius: 8px;
-  padding: 8px;
+  border-radius: 10px;
+  padding: 10px 12px;
 }
-.ag-db__chart-lbl { font-size: 0.6rem; font-weight: 600; color: #475569; margin-bottom: 6px; }
-.ag-db__chart-bars { display: flex; align-items: flex-end; gap: 4px; height: 32px; }
-.ag-db__chart-bar-wrap { display: flex; flex-direction: column; align-items: center; gap: 3px; flex: 1; height: 100%; justify-content: flex-end; }
-.ag-db__chart-bar { width: 100%; border-radius: 2px 2px 0 0; background: #BFDBFE; min-height: 4px; max-height: 28px; }
+.ag-db__chart-lbl { font-size: 0.68rem; font-weight: 600; color: #475569; margin-bottom: 8px; }
+.ag-db__chart-bars { display: flex; align-items: flex-end; gap: 6px; height: 42px; }
+.ag-db__chart-bar-wrap { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; height: 100%; justify-content: flex-end; }
+.ag-db__chart-bar { width: 100%; border-radius: 2px 2px 0 0; background: #BFDBFE; min-height: 4px; max-height: 38px; }
 .ag-db__chart-bar:nth-child(4n+1) { background: #1B4FD8; }
-.ag-db__chart-day { font-size: 0.48rem; color: #94A3B8; }
+.ag-db__chart-day { font-size: 0.55rem; color: #94A3B8; }
 
 /* ── Phone mockup ── */
 .ag-hero__phone {
   position: absolute;
-  right: -2%;
-  bottom: -5%;
-  z-index: 5;
-  width: clamp(125px, 25%, 155px);
+  right: -24px;
+  bottom: -24px;
+  z-index: 10;
+  width: clamp(210px, 30%, 265px);
+  filter: drop-shadow(0 25px 50px rgba(10,22,40,0.25));
 }
 @media (max-width: 767px) {
   .ag-hero__phone {
-    right: 2%;
-    bottom: -5%;
-    width: clamp(115px, 30%, 140px);
+    right: -10px;
+    bottom: -15px;
+    width: clamp(150px, 38%, 180px);
   }
 }
 .ag-phone {

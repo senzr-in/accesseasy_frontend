@@ -65,30 +65,28 @@
         <span class="text-[11px] font-black text-white tracking-wide uppercase">Web Control Center</span>
       </div>
 
-      <!-- Central Frosted Cyber Hexagon Card -->
-      <div class="relative w-full max-w-[420px] p-8 rounded-[2.25rem] bg-slate-950/85 border border-cyan-500/50 backdrop-blur-xl shadow-[0_0_50px_rgba(6,182,212,0.35)] text-center z-10 transition-all duration-500 hover:scale-[1.01] hover:border-cyan-400">
-        
-        <!-- Glowing Hexagon Ring / Corner Accent Nodes -->
-        <div class="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-cyan-400 rounded-tl-lg" />
-        <div class="absolute -top-1 -right-1 w-4 h-4 border-t-2 border-r-2 border-cyan-400 rounded-tr-lg" />
-        <div class="absolute -bottom-1 -left-1 w-4 h-4 border-b-2 border-l-2 border-cyan-400 rounded-bl-lg" />
-        <div class="absolute -bottom-1 -right-1 w-4 h-4 border-b-2 border-r-2 border-cyan-400 rounded-br-lg" />
+      <!-- Details Highlight Text (No Center Box) -->
+      <div class="relative w-full max-w-[460px] px-6 text-center z-10 select-none pointer-events-none">
         
         <!-- Shield Brand Crest Logo -->
-        <div class="flex items-center justify-center gap-2 mb-4 select-none">
-          <Shield class="w-6 h-6 text-blue-400 drop-shadow-[0_0_8px_rgba(96,165,250,0.5)]" />
-          <span class="text-xl font-black text-white tracking-tight">AccessEasy <span class="text-cyan-400 uppercase">PATROL</span></span>
+        <div class="flex items-center justify-center gap-2 mb-3">
+          <Shield class="w-6 h-6 text-cyan-400 drop-shadow-[0_0_12px_rgba(34,211,238,0.7)]" />
+          <span class="text-lg sm:text-xl font-black text-white tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
+            AccessEasy <span class="text-cyan-400 uppercase">PATROL</span>
+          </span>
         </div>
         
         <!-- Centered Bold Headline -->
-        <h1 class="text-2xl lg:text-3xl font-black tracking-tight text-white leading-tight mb-4">
+        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white leading-tight mb-3.5 drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)]">
           One Platform.<br>
           Every Patrol.<br>
-          <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400">Real-Time Security.</span>
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-400 drop-shadow-[0_0_30px_rgba(34,211,238,0.5)]">
+            Real-Time Security.
+          </span>
         </h1>
         
-        <!-- Centered Subtext description -->
-        <p class="text-xs text-slate-300 leading-relaxed font-semibold opacity-95">
+        <!-- Centered Highlight Description Text -->
+        <p class="text-xs sm:text-[13px] text-slate-200/95 leading-relaxed font-semibold max-w-[390px] mx-auto drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)]">
           Your total control solution from the guards' mobile app and immediate verified checkpoints to live GPS tracking, comprehensive multi-site oversight, and secure cloud command.
         </p>
       </div>
@@ -123,7 +121,7 @@
 
       <!-- Large Ambient Glowing Spheres & Pulses -->
       <div class="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-cyan-400/25 rounded-full blur-[140px] pointer-events-none animate-pulse-slow" />
-      <div class="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-[550px] h-[550px] bg-blue-500/20 rounded-full blur-[160px] pointer-events-none animate-pulse-slow delay-1000" />
+      <div class="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-[550px] h-[550px] bg-blue-500/20 rounded-full blur-[160px] pointer-events-none animate-pulse-slow" style="animation-delay: 1s;" />
       <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-300/20 rounded-full blur-[180px] pointer-events-none" />
 
       <!-- Concentric Security Radar Rings Expanding Outward -->
@@ -144,7 +142,7 @@
       <!-- Widget 1: Top-Left Live Patrol System Badge -->
       <div class="hidden xl:flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white/85 border border-white/90 backdrop-blur-xl shadow-[0_15px_35px_rgba(0,0,0,0.08)] absolute top-12 left-8 z-20 animate-float-slow group hover:scale-105 transition-transform cursor-default select-none">
         <div class="h-9 w-9 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-600 shadow-sm">
-          <Radio class="w-4.5 h-4.5 animate-pulse text-emerald-500" />
+          <Radio class="w-[18px] h-[18px] animate-pulse text-emerald-500" />
         </div>
         <div>
           <div class="flex items-center gap-1.5">
@@ -158,7 +156,7 @@
       <!-- Widget 2: Top-Right Encrypted Command Link Badge -->
       <div class="hidden xl:flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white/85 border border-white/90 backdrop-blur-xl shadow-[0_15px_35px_rgba(0,0,0,0.08)] absolute top-16 right-8 z-20 animate-float-delayed group hover:scale-105 transition-transform cursor-default select-none">
         <div class="h-9 w-9 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-600 shadow-sm">
-          <ShieldCheck class="w-4.5 h-4.5 text-blue-600" />
+          <ShieldCheck class="w-[18px] h-[18px] text-blue-600" />
         </div>
         <div>
           <span class="text-[10px] font-black tracking-wider text-slate-800 uppercase block">Security Link</span>
@@ -169,7 +167,7 @@
       <!-- Widget 3: Bottom-Left Guard Verification Modality Badge -->
       <div class="hidden xl:flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white/85 border border-white/90 backdrop-blur-xl shadow-[0_15px_35px_rgba(0,0,0,0.08)] absolute bottom-16 left-10 z-20 animate-float-slow group hover:scale-105 transition-transform cursor-default select-none">
         <div class="h-9 w-9 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-600 shadow-sm">
-          <ScanFace class="w-4.5 h-4.5 text-cyan-600" />
+          <ScanFace class="w-[18px] h-[18px] text-cyan-600" />
         </div>
         <div>
           <span class="text-[10px] font-black tracking-wider text-slate-800 uppercase block">Guard Modalities</span>
@@ -180,7 +178,7 @@
       <!-- Widget 4: Bottom-Right Incident Status Badge -->
       <div class="hidden xl:flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white/85 border border-white/90 backdrop-blur-xl shadow-[0_15px_35px_rgba(0,0,0,0.08)] absolute bottom-20 right-10 z-20 animate-float-delayed group hover:scale-105 transition-transform cursor-default select-none">
         <div class="h-9 w-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-600 shadow-sm">
-          <Zap class="w-4.5 h-4.5 text-amber-500" />
+          <Zap class="w-[18px] h-[18px] text-amber-500" />
         </div>
         <div>
           <span class="text-[10px] font-black tracking-wider text-slate-800 uppercase block">Incident Monitor</span>
@@ -280,6 +278,7 @@
                 <input
                   v-model="password"
                   :type="showPassword ? 'text' : 'password'"
+                  required
                   class="w-full h-12 pl-10 pr-10 rounded-xl bg-slate-100/80 border border-slate-300/80 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 shadow-inner transition-all outline-none text-sm font-semibold text-slate-900 placeholder:text-slate-400"
                   placeholder="Enter your password"
                 />
@@ -411,29 +410,7 @@ const rememberMe = ref(false);
 const loading = ref(false);
 const errorMessage = ref("");
 
-// 4 Feature Highlights matching user reference labels
-const features = [
-  {
-    icon: Globe,
-    title: "Multi-Site Fleet",
-    desc: "Manage security tours across diverse geographical sites & physical facilities."
-  },
-  {
-    icon: Smartphone,
-    title: "Verified Tour",
-    desc: "Guards scan NFC/QR checkpoints, receive route assignments, and log shifts."
-  },
-  {
-    icon: AlertTriangle,
-    title: "Critical Alerts",
-    desc: "Guards trigger real-time emergency SOS and capture photo evidence on duty."
-  },
-  {
-    icon: Building2,
-    title: "Web Control Center",
-    desc: "Real-time updates, active guard location maps, and complete patrol audit logs."
-  }
-];
+// Feature highlights are rendered directly in the template as static badges.
 
 // Security Guard Modalities & Mobile App Badges
 const authMethods = [
@@ -473,10 +450,16 @@ function setTab(tab) {
 }
 
 function handleForgotPassword() {
+  const rawVal = inputIdentifier.value.trim();
+  const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawVal);
   if (activeTab.value === "email_phone" && isPurePhone.value) {
+    // Phone: send OTP as the reset mechanism
     onPhoneSubmit();
+  } else if (activeTab.value === "email_phone" && isEmail) {
+    // Email: trigger email OTP flow for password reset
+    onEmailSubmit();
   } else {
-    alert("Please contact your administrator or use the registered Email OTP to reset your password.");
+    errorMessage.value = "Enter your registered email or phone number above, then click Forgot Password.";
   }
 }
 
@@ -486,57 +469,60 @@ async function handleSubmit() {
     errorMessage.value = "Please enter your Email, Phone number, or Guard ID.";
     return;
   }
+  if (!password.value.trim()) {
+    errorMessage.value = "Please enter your password.";
+    return;
+  }
 
-  loading.value = true;
-  try {
-    const rawVal = inputIdentifier.value.trim();
-    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawVal);
-    const isPhone = /^\d{10}$/.test(rawVal.replace(/\D/g, ""));
-    const digits = rawVal.replace(/\D/g, "");
+  const rawVal = inputIdentifier.value.trim();
+  const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawVal);
+  const isPhone = /^\d{10}$/.test(rawVal.replace(/\D/g, ""));
 
-    // Save identifier in storage
-    if (isPhone) {
-      localStorage.setItem("userPhone", digits);
-    } else if (isEmail) {
-      localStorage.setItem("email", rawVal);
-    }
-
-    // Direct password / credential authentication straight to Dashboard
-    if (password.value || activeTab.value === "employee_id") {
-      localStorage.setItem("pinVerifiedInSession", "true");
-      router.push({ name: "DashboardHome" });
-      return;
-    }
-
-    // Direct login verification without separate page redirects
-    if (isPhone) {
-      const fullPhoneNumber = "+91" + digits;
-      const phoneExists = await authService.checkPhoneExists(fullPhoneNumber);
-      if (!phoneExists) {
-        errorMessage.value = "This phone number is not registered. Please sign up first.";
-        return;
-      }
-      const isResigned = await authService.checkUserResigned(fullPhoneNumber);
-      if (isResigned) {
-        errorMessage.value = "Resigned Employee has No access. Please contact your Company Admin.";
-        return;
-      }
-      localStorage.setItem("pinVerifiedInSession", "true");
-      router.push({ name: "DashboardHome" });
-    } else if (isEmail) {
-      const emailExists = await authService.checkEmailExists(rawVal);
-      if (!emailExists) {
-        errorMessage.value = "This email is not registered. Please sign up first.";
-        return;
-      }
-      localStorage.setItem("pinVerifiedInSession", "true");
-      router.push({ name: "DashboardHome" });
+  if (isPhone) {
+    await onPhoneSubmit();
+  } else if (isEmail) {
+    await onEmailSubmit();
+  } else {
+    // Guard ID or unrecognised input
+    if (activeTab.value === "employee_id") {
+      errorMessage.value = "Guard ID login is not yet supported. Please log in with your registered phone number or email instead.";
     } else {
       errorMessage.value = "Please enter a valid 10-digit mobile number or email address.";
     }
-  } catch (error) {
-    console.error("Error during login:", error);
-    errorMessage.value = error.response?.data?.message || error.message || "An error occurred. Please try again.";
+  }
+}
+
+async function onEmailSubmit() {
+  errorMessage.value = "";
+  const emailVal = inputIdentifier.value.trim();
+
+  loading.value = true;
+  try {
+    const emailExists = await authService.checkEmailExists(emailVal);
+    if (!emailExists) {
+      errorMessage.value = "This email is not registered. Please sign up first.";
+      return;
+    }
+
+    const isResigned = await authService.checkUserResignedByEmail(emailVal);
+    if (isResigned) {
+      errorMessage.value = "Resigned Employee has No access. Please contact your Company Admin.";
+      return;
+    }
+
+    const data = await authService.generateEmailOtp(emailVal);
+    if (!data?.success && !data?.otp_session_uuid) {
+      throw new Error(data?.message || "Could not start email session. Try again.");
+    }
+
+    localStorage.setItem("email", emailVal);
+    if (data?.otp_session_uuid) {
+      localStorage.setItem("emailSessionUuid", data.otp_session_uuid);
+    }
+    router.push({ name: "EmailVerification", params: { email: emailVal } });
+  } catch (err) {
+    console.error("Error during email login:", err);
+    errorMessage.value = err?.response?.data?.message || err?.message || "Something went wrong. Please try again.";
   } finally {
     loading.value = false;
   }
@@ -624,10 +610,9 @@ async function proceedToOtpVerification(fullPhoneNumber) {
 }
 
 async function loginWithGoogle() {
+  sessionStorage.setItem("connector_type", "google");
+  loading.value = true;
   try {
-    sessionStorage.setItem("connector_type", "google");
-    loading.value = true;
-    
     const response = await fetch(`${import.meta.env.VITE_KN_API_URL}/google-accesseasy`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -637,13 +622,19 @@ async function loginWithGoogle() {
     const data = await response.json();
     if (data.success && data.url) {
       window.location.href = data.url;
+      // loading stays true intentionally during redirect;
+      // it resets only if redirect fails (caught below)
     } else {
       throw new Error(data.error || "Failed to initialize Google login");
     }
   } catch (error) {
     console.error("Google login error:", error);
     errorMessage.value = error.message || "Failed to connect to Google";
-    loading.value = false;
+  } finally {
+    // Only reset loading if we didn't navigate away
+    if (document.visibilityState !== "hidden") {
+      loading.value = false;
+    }
   }
 }
 
