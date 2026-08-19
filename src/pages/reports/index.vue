@@ -509,6 +509,7 @@ import {
   BookOpen, Clock, Activity, Cpu, FileText, User, Loader2, Sparkles, X
 } from 'lucide-vue-next';
 import { authService } from '@/services/authService';
+import { deviceRegistry } from '@/services/deviceRegistry';
 import VueApexCharts from 'vue3-apexcharts';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -586,15 +587,21 @@ const fetchData = async () => {
       }));
     }
     else if (activeTab.value === 'ai') {
-      const res = await authService.protectedApi.get(`/items/frigateEvents?sort=-start_time&limit=50&filter[snapshot_file][_nnull]=true`);
-      rawData.value = res.data.data.map(item => ({
-        ref: `AI-${item.id}`,
-        date: formatDate(item.start_time),
-        _timestamp: new Date(item.start_time).getTime() || 0,
-        type: item.label.toUpperCase(),
-        source: item.camera || 'Unknown Camera',
-        status: 'Auto-Logged'
-      }));
+      await deviceRegistry.loadDevices();
+      const allowedCameras = deviceRegistry.getRegisteredCameraList();
+      if (allowedCameras.length === 0) {
+        rawData.value = [];
+      } else {
+        const res = await authService.protectedApi.get(`/items/frigateEvents?sort=-start_time&limit=50&filter[snapshot_file][_nnull]=true&filter[camera][_in]=${allowedCameras.join(',')}`);
+        rawData.value = (res.data.data || []).map(item => ({
+          ref: `AI-${item.id}`,
+          date: formatDate(item.start_time),
+          _timestamp: new Date(item.start_time).getTime() || 0,
+          type: item.label.toUpperCase(),
+          source: item.camera || 'Unknown Camera',
+          status: 'Auto-Logged'
+        }));
+      }
     }
   } catch (error) {
     console.error(`Error fetching data for ${activeTab.value}:`, error);

@@ -95,11 +95,11 @@ onMounted(async () => {
       action: "token",
       redirect_uri: redirectUri,
       redirectUri: redirectUri,
-      redirect_url: redirectUri,
-      redirectUrl: redirectUri,
       client_id: clientId,
       clientId: clientId,
     };
+
+
 
 
     const apiUrl = `${import.meta.env.VITE_KN_API_URL}/google-accesseasy`;

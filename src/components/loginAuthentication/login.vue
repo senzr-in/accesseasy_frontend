@@ -613,6 +613,36 @@ async function loginWithGoogle() {
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "456615098701-cihaj0btvoe011ba92r7hpbemkse5vm3.apps.googleusercontent.com";
     const redirectUri = `${window.location.origin}/auth/callback`;
 
+    try {
+      const response = await fetch(`${import.meta.env.VITE_KN_API_URL}/google-accesseasy`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "google",
+          redirect_uri: redirectUri,
+          redirectUri: redirectUri,
+          client_id: clientId,
+          clientId: clientId,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success && data.url) {
+        let targetUrl = data.url;
+        try {
+          const parsedUrl = new URL(targetUrl);
+          parsedUrl.searchParams.set("redirect_uri", redirectUri);
+          targetUrl = parsedUrl.toString();
+        } catch (e) {
+          console.warn("Could not set redirect_uri on data.url:", e);
+        }
+        window.location.href = targetUrl;
+        return;
+      }
+    } catch (apiErr) {
+      console.warn("Backend google-accesseasy endpoint error, falling back to direct OAuth URL:", apiErr);
+    }
+
     const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(
       clientId
     )}&redirect_uri=${encodeURIComponent(

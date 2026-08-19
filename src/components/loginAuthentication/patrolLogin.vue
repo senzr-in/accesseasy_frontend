@@ -1,306 +1,122 @@
 <template>
-  <div class="grid grid-cols-1 lg:grid-cols-12 min-h-screen w-full bg-[#030614] text-slate-100 relative overflow-x-hidden font-sans selection:bg-blue-500 selection:text-white">
-    <!-- Left Side: Interactive Security Operations Platform Showcase (7 Cols on desktop) -->
-    <div class="lg:col-span-7 xl:col-span-7 w-full h-full flex flex-col justify-between p-6 lg:p-8 relative z-20 overflow-hidden bg-[#040817] border-r border-slate-800/80 shadow-[15px_0_40px_rgba(0,0,0,0.4)] min-h-screen">
-      <!-- Ambient Glow Blobs & World Grid Overlay -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 min-h-screen w-full bg-[#030614] text-slate-100 relative overflow-x-hidden font-sans selection:bg-blue-500 selection:text-white">
+    <!-- Left Side: Marketing & Skyscraper Patrol Hero Section -->
+    <div class="w-full h-full flex flex-col justify-between px-6 py-8 lg:px-12 lg:py-10 relative z-20 overflow-hidden border-r border-slate-800/60 shadow-[10px_0_35px_rgba(0,0,0,0.35)] min-h-[500px]">
+      <!-- Custom Generated High-Tech Patrol Cyber Security Hero Background Image -->
       <div 
-        class="absolute inset-0 opacity-[0.12] pointer-events-none z-0"
-        style="background-image: radial-gradient(circle at 2px 2px, rgba(59, 130, 246, 0.6) 1px, transparent 0); background-size: 32px 32px;"
+        class="absolute inset-0 bg-cover bg-center transition-transform duration-10000 hover:scale-105 pointer-events-none z-0"
+        :style="{ backgroundImage: `url(${patrolBgImage})` }"
       />
-      <div class="absolute -top-32 -left-32 w-96 h-96 bg-blue-600/20 rounded-full blur-[140px] pointer-events-none z-0" />
-      <div class="absolute -bottom-32 left-1/3 w-[500px] h-[500px] bg-cyan-600/15 rounded-full blur-[160px] pointer-events-none z-0" />
+      <!-- Subtle Dark Tactical Cyan-Blue Overlay Gradient for Text Contrast -->
+      <div class="absolute inset-0 bg-gradient-to-br from-[#020514]/75 via-[#071330]/50 to-[#020514]/80 pointer-events-none z-0" />
 
-      <div class="relative z-10 max-w-5xl mx-auto w-full flex flex-col h-full justify-between gap-6">
-        <!-- Top Brand Header -->
-        <div class="flex items-center gap-3.5 animate-fade-in-down">
-          <div class="h-11 w-11 rounded-xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 flex items-center justify-center shadow-[0_0_25px_rgba(59,130,246,0.4)] border border-blue-400/40">
-            <Shield class="w-6 h-6 text-white" />
+      <!-- Tactical Radar Grid & Circular Sweep Animation -->
+      <div class="absolute inset-0 pointer-events-none z-0 opacity-20 overflow-hidden">
+        <div class="radar-circle radar-circle-1" />
+        <div class="radar-circle radar-circle-2" />
+        <div class="radar-sweep" />
+      </div>
+
+      <!-- Tech Grid Pattern -->
+      <div 
+        class="absolute inset-0 opacity-[0.10] pointer-events-none z-0"
+        style="background-image: radial-gradient(circle at 2px 2px, rgba(6, 182, 212, 0.9) 1px, transparent 0); background-size: 32px 32px;"
+      />
+
+      <!-- Floating Tech Mesh Nodes Animation -->
+      <div class="absolute inset-0 pointer-events-none overflow-hidden z-0">
+        <div class="node-particle node-1" />
+        <div class="node-particle node-2" />
+        <div class="node-particle node-3" />
+      </div>
+
+      <!-- Top Header / Logo -->
+      <div class="relative z-10 animate-fade-in-down">
+        <div class="flex items-center gap-3.5 mb-2">
+          <!-- Hex Shield Icon -->
+          <div class="h-11 w-11 rounded-xl bg-gradient-to-br from-blue-500/30 to-blue-700/20 flex items-center justify-center border border-blue-400/40 shadow-[0_0_20px_rgba(59,130,246,0.3)] backdrop-blur-md group cursor-pointer hover:border-blue-300 transition-all duration-300">
+            <Shield class="w-6 h-6 text-blue-400 group-hover:scale-110 transition-transform duration-300" />
           </div>
           <div class="flex flex-col">
-            <div class="flex items-center gap-2">
-              <span class="text-2xl font-black tracking-tight text-white uppercase">AccessEasy</span>
-              <span class="text-2xl font-black tracking-tight text-cyan-400 uppercase">PATROL</span>
+            <div class="flex items-center gap-1.5">
+              <span class="text-2xl font-black tracking-tight text-white drop-shadow-md">AccessEasy</span>
+              <span class="text-2xl font-black tracking-tight text-cyan-400 drop-shadow-md uppercase">PATROL</span>
             </div>
-            <div class="flex items-center gap-2 mt-0.5">
-              <div class="h-[1px] w-5 bg-cyan-500/60" />
-              <span class="text-[10px] font-extrabold text-slate-300 tracking-[0.25em] uppercase">SECURITY OPERATIONS PLATFORM</span>
-            </div>
+            <span class="text-[11px] font-medium text-slate-300 tracking-wider">Guard Mobile App • Tour Verification • Real-Time Security</span>
           </div>
+        </div>
+      </div>
+
+      <!-- Hero Body Content -->
+      <div class="max-w-xl relative z-10 my-auto py-6">
+        <!-- Animated Pill Badge -->
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-600/30 border border-blue-400/40 text-cyan-200 text-xs font-semibold tracking-wide mb-6 backdrop-blur-md shadow-[0_0_15px_rgba(59,130,246,0.3)]">
+          <span class="h-2 w-2 rounded-full bg-cyan-400 animate-ping" />
+          <span>Security Operations & Guard Patrol Platform</span>
         </div>
 
         <!-- Headline -->
-        <div class="animate-fade-in-down">
-          <h1 class="text-3xl xl:text-4xl font-black tracking-tight text-white leading-tight">
-            One platform. <br>
-            <span class="text-cyan-400">Every patrol.</span>
-          </h1>
-          <p class="text-slate-300 text-xs mt-1.5 font-medium max-w-xl">
-            Connect your security command center with the guards operating on the ground in real-time.
-          </p>
-        </div>
+        <h1 class="text-3xl lg:text-4xl xl:text-5xl font-bold tracking-tight leading-[1.15] mb-4 text-white drop-shadow-xl">
+          One Platform.<br>
+          Every Patrol.<br>
+          Real-Time Security.
+        </h1>
 
-        <!-- Main Showcase Grid: Previews (Left) + Workflow Pipeline (Right) -->
-        <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-stretch my-auto">
-          <!-- Left Sub-Column (7 cols): Web Command Center & Guard Mobile App Previews -->
-          <div class="sm:col-span-7 space-y-3.5 flex flex-col justify-between">
-            <!-- 1. Web Command Center Card -->
-            <div class="rounded-2xl bg-slate-900/90 border border-slate-700/80 backdrop-blur-xl p-3.5 shadow-2xl relative overflow-hidden group hover:border-cyan-500/50 transition-all duration-300">
-              <div class="flex items-center justify-between mb-2.5 pb-2 border-b border-slate-800">
-                <div class="flex items-center gap-2">
-                  <span class="h-2 w-2 rounded-full bg-cyan-400 animate-ping" />
-                  <span class="text-[10px] font-black tracking-widest text-slate-200 uppercase">WEB COMMAND CENTER</span>
-                </div>
-                <div class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[9px] font-bold">
-                  <span class="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                  <span>LIVE All systems operational</span>
-                </div>
-              </div>
+        <p class="text-xs lg:text-sm text-slate-100 font-normal leading-relaxed mb-6 max-w-lg drop-shadow-md">
+          Connect your security command center with the guards operating on the ground. Manage multi-site tours, NFC/QR checkpoints, and live GPS tracking.
+        </p>
 
-              <!-- Stat Boxes Grid -->
-              <div class="grid grid-cols-4 gap-1.5 mb-2.5">
-                <div class="p-1.5 rounded-xl bg-slate-950/70 border border-slate-800 text-center">
-                  <Shield class="w-3.5 h-3.5 text-blue-400 mx-auto mb-0.5" />
-                  <span class="text-sm font-black text-white leading-none block">12</span>
-                  <span class="text-[7.5px] font-bold text-slate-400 uppercase tracking-tighter block mt-0.5">PATROLS ACTIVE</span>
-                </div>
-                <div class="p-1.5 rounded-xl bg-slate-950/70 border border-slate-800 text-center">
-                  <Users class="w-3.5 h-3.5 text-emerald-400 mx-auto mb-0.5" />
-                  <span class="text-sm font-black text-white leading-none block">24</span>
-                  <span class="text-[7.5px] font-bold text-slate-400 uppercase tracking-tighter block mt-0.5">GUARDS ONLINE</span>
-                </div>
-                <div class="p-1.5 rounded-xl bg-slate-950/70 border border-slate-800 text-center">
-                  <ShieldCheck class="w-3.5 h-3.5 text-amber-400 mx-auto mb-0.5" />
-                  <span class="text-sm font-black text-white leading-none block">86</span>
-                  <span class="text-[7.5px] font-bold text-slate-400 uppercase tracking-tighter block mt-0.5">CHECKPOINTS</span>
-                </div>
-                <div class="p-1.5 rounded-xl bg-slate-950/70 border border-slate-800 text-center">
-                  <AlertTriangle class="w-3.5 h-3.5 text-rose-400 mx-auto mb-0.5" />
-                  <span class="text-sm font-black text-white leading-none block">03</span>
-                  <span class="text-[7.5px] font-bold text-slate-400 uppercase tracking-tighter block mt-0.5">INCIDENTS</span>
-                </div>
-              </div>
-
-              <!-- Interactive Live Map Preview Graphic -->
-              <div class="h-24 rounded-xl bg-slate-950/90 border border-slate-800 relative overflow-hidden flex items-center justify-center">
-                <div 
-                  class="absolute inset-0 opacity-25 pointer-events-none"
-                  style="background-image: radial-gradient(circle at 1px 1px, #06b6d4 1px, transparent 0); background-size: 16px 16px;"
-                />
-                <!-- Map Node Path SVG -->
-                <svg
-                  class="w-full h-full absolute inset-0 text-cyan-500/70"
-                  viewBox="0 0 300 100"
-                  fill="none"
-                >
-                  <path
-                    d="M20 70 Q 70 20, 120 60 T 220 30 T 280 50"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-dasharray="4 4"
-                  />
-                  <circle
-                    cx="20"
-                    cy="70"
-                    r="5"
-                    fill="#06b6d4"
-                  />
-                  <circle
-                    cx="120"
-                    cy="60"
-                    r="5"
-                    fill="#06b6d4"
-                  />
-                  <circle
-                    cx="220"
-                    cy="30"
-                    r="5"
-                    fill="#06b6d4"
-                  />
-                  <circle
-                    cx="280"
-                    cy="50"
-                    r="5"
-                    fill="#10b981"
-                  />
-                </svg>
-                <!-- Live Route Pulsing Location Badge -->
-                <div class="absolute bottom-2 left-2.5 flex items-center gap-2 px-2 py-0.5 rounded-lg bg-slate-900/90 border border-cyan-500/40 text-[9px] font-bold text-cyan-300 backdrop-blur-md">
-                  <span class="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-ping" />
-                  <span>Route 87 • Main Gate Checkpoint CP-07</span>
-                </div>
-              </div>
+        <!-- 4 Feature Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+          <div
+            v-for="(feature, idx) in features"
+            :key="idx"
+            class="flex items-start gap-3 p-3 rounded-2xl bg-slate-900/60 border border-blue-500/30 backdrop-blur-md hover:bg-slate-900/80 hover:border-blue-400/60 shadow-md hover:shadow-blue-500/25 transition-all duration-300 group hover:-translate-y-0.5"
+          >
+            <div class="h-9 w-9 shrink-0 flex items-center justify-center rounded-xl bg-gradient-to-br from-blue-900/60 to-slate-900/80 border border-blue-400/30 text-cyan-400 shadow-[0_0_15px_rgba(59,130,246,0.3)] group-hover:scale-105 transition-all duration-300">
+              <component :is="feature.icon" class="h-4.5 w-4.5" />
             </div>
-
-            <!-- 2. Guard Mobile App Card -->
-            <div class="rounded-2xl bg-slate-900/90 border border-slate-700/80 backdrop-blur-xl p-3 shadow-2xl relative overflow-hidden flex items-center gap-3 group hover:border-cyan-500/50 transition-all duration-300">
-              <!-- Smartphone Device Mockup -->
-              <div class="w-32 shrink-0 rounded-2xl bg-slate-950 border-2 border-slate-700 p-2 shadow-inner">
-                <div class="h-1.5 w-8 bg-slate-800 rounded-full mx-auto mb-1.5" />
-                <div class="space-y-1 text-left">
-                  <div class="flex items-center justify-between text-[7.5px] text-slate-400 font-bold">
-                    <span>Active Patrol</span>
-                    <span class="text-cyan-400">LIVE</span>
-                  </div>
-                  <div class="text-[8.5px] font-black text-white">
-                    NIGHT PATROL
-                  </div>
-                  <!-- Radial Progress Mock -->
-                  <div class="py-0.5 text-center">
-                    <div class="inline-flex items-center justify-center h-8 w-8 rounded-full border-2 border-cyan-400 border-t-emerald-400 text-[9px] font-black text-cyan-300">
-                      65%
-                    </div>
-                  </div>
-                  <div class="p-1 rounded bg-slate-900 text-[7px] text-slate-300 font-medium">
-                    Next: <span class="font-bold text-white">CP-07 Main Gate</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Guard App Quick Features List -->
-              <div class="space-y-1 flex-1">
-                <span class="text-[9.5px] font-black tracking-wider text-slate-300 uppercase block mb-1">GUARD MOBILE APP</span>
-                <div class="flex items-center gap-2 p-1.5 rounded-lg bg-slate-950/60 border border-slate-800 text-[9.5px] font-bold text-slate-200">
-                  <Smartphone class="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                  <span>View Routes & Schedules</span>
-                </div>
-                <div class="flex items-center gap-2 p-1.5 rounded-lg bg-slate-950/60 border border-slate-800 text-[9.5px] font-bold text-slate-200">
-                  <QrCode class="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span>Scan QR & NFC Checkpoints</span>
-                </div>
-                <div class="flex items-center gap-2 p-1.5 rounded-lg bg-slate-950/60 border border-slate-800 text-[9.5px] font-bold text-slate-200">
-                  <AlertTriangle class="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                  <span>Report Incidents with Photos</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Right Sub-Column (5 cols): Vertical Workflow Flowchart Pipeline -->
-          <div class="sm:col-span-5 rounded-2xl bg-slate-900/90 border border-slate-700/80 backdrop-blur-xl p-3.5 shadow-2xl flex flex-col justify-between relative overflow-hidden">
-            <span class="text-[9.5px] font-black tracking-widest text-cyan-400 uppercase block mb-2 pb-1.5 border-b border-slate-800">SECURITY WORKFLOW</span>
-
-            <div class="space-y-2.5 relative z-10 my-auto">
-              <!-- Step 1: Multi-Site Operations -->
-              <div class="flex items-start gap-2.5 relative group">
-                <div class="h-7 w-7 rounded-lg bg-blue-500/10 border border-blue-400/40 text-blue-400 flex items-center justify-center shrink-0 shadow-md group-hover:scale-110 transition-transform">
-                  <Globe class="w-3.5 h-3.5" />
-                </div>
-                <div>
-                  <h4 class="text-[10px] font-bold text-white uppercase tracking-wide">
-                    Multi-Site Operations
-                  </h4>
-                  <p class="text-[8.5px] text-slate-400 leading-tight">
-                    Manage physical sites globally.
-                  </p>
-                </div>
-              </div>
-
-              <!-- Step 2: Patrol Assignment -->
-              <div class="flex items-start gap-2.5 relative group">
-                <div class="h-7 w-7 rounded-lg bg-cyan-500/10 border border-cyan-400/40 text-cyan-400 flex items-center justify-center shrink-0 shadow-md group-hover:scale-110 transition-transform">
-                  <ClipboardList class="w-3.5 h-3.5" />
-                </div>
-                <div>
-                  <h4 class="text-[10px] font-bold text-white uppercase tracking-wide">
-                    Patrol Assignment
-                  </h4>
-                  <p class="text-[8.5px] text-slate-400 leading-tight">
-                    Assign routes & schedules.
-                  </p>
-                </div>
-              </div>
-
-              <!-- Step 3: Guard Mobile App -->
-              <div class="flex items-start gap-2.5 relative group">
-                <div class="h-7 w-7 rounded-lg bg-emerald-500/10 border border-emerald-400/40 text-emerald-400 flex items-center justify-center shrink-0 shadow-md group-hover:scale-110 transition-transform">
-                  <Smartphone class="w-3.5 h-3.5" />
-                </div>
-                <div>
-                  <h4 class="text-[10px] font-bold text-white uppercase tracking-wide">
-                    Guard Mobile App
-                  </h4>
-                  <p class="text-[8.5px] text-slate-400 leading-tight">
-                    Guards receive & start tours.
-                  </p>
-                </div>
-              </div>
-
-              <!-- Step 4: Checkpoint Verification -->
-              <div class="flex items-start gap-2.5 relative group">
-                <div class="h-7 w-7 rounded-lg bg-purple-500/10 border border-purple-400/40 text-purple-400 flex items-center justify-center shrink-0 shadow-md group-hover:scale-110 transition-transform">
-                  <QrCode class="w-3.5 h-3.5" />
-                </div>
-                <div>
-                  <h4 class="text-[10px] font-bold text-white uppercase tracking-wide">
-                    Checkpoint Scan
-                  </h4>
-                  <p class="text-[8.5px] text-slate-400 leading-tight">
-                    Scan QR & NFC badges.
-                  </p>
-                </div>
-              </div>
-
-              <!-- Step 5: Incident Reporting -->
-              <div class="flex items-start gap-2.5 relative group">
-                <div class="h-7 w-7 rounded-lg bg-amber-500/10 border border-amber-400/40 text-amber-400 flex items-center justify-center shrink-0 shadow-md group-hover:scale-110 transition-transform">
-                  <AlertTriangle class="w-3.5 h-3.5" />
-                </div>
-                <div>
-                  <h4 class="text-[10px] font-bold text-white uppercase tracking-wide">
-                    Incident Logging
-                  </h4>
-                  <p class="text-[8.5px] text-slate-400 leading-tight">
-                    Report with photo evidence.
-                  </p>
-                </div>
-              </div>
-
-              <!-- Step 6: Command Center Visibility -->
-              <div class="flex items-start gap-2.5 relative group">
-                <div class="h-7 w-7 rounded-lg bg-cyan-500/10 border border-cyan-400/40 text-cyan-400 flex items-center justify-center shrink-0 shadow-md group-hover:scale-110 transition-transform">
-                  <Building2 class="w-3.5 h-3.5" />
-                </div>
-                <div>
-                  <h4 class="text-[10px] font-bold text-white uppercase tracking-wide">
-                    Command Center
-                  </h4>
-                  <p class="text-[8.5px] text-slate-400 leading-tight">
-                    Real-time total visibility.
-                  </p>
-                </div>
-              </div>
+            <div>
+              <h3 class="font-bold text-xs text-white tracking-wide mb-0.5 group-hover:text-cyan-300 transition-colors">
+                {{ feature.title }}
+              </h3>
+              <p class="text-[10px] lg:text-[11px] text-slate-200 leading-snug opacity-90">
+                {{ feature.desc }}
+              </p>
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Bottom Security Capabilities Navigation Bar -->
-        <div class="pt-3 border-t border-slate-800/80 animate-fade-in-up">
-          <p class="text-[9.5px] font-black tracking-widest text-slate-300 uppercase mb-2 flex items-center gap-1.5">
-            <ShieldCheck class="w-3.5 h-3.5 text-cyan-400" />
-            <span>PLATFORM CAPABILITIES & COMPLIANCE</span>
-          </p>
+      <!-- Bottom Hardware Authentication & Patrol Modalities Badges Bar -->
+      <div class="relative z-10 pt-4 border-t border-slate-700/60">
+        <p class="text-[11px] font-bold tracking-wider text-slate-300 uppercase mb-3 drop-shadow flex items-center gap-2">
+          <ShieldCheck class="w-4 h-4 text-cyan-400" />
+          <span>Supported Patrol & Security Modalities</span>
+        </p>
 
-          <div class="grid grid-cols-2 sm:grid-cols-4 xl:grid-cols-7 gap-1.5">
-            <div 
-              v-for="(item, idx) in bottomCapabilities" 
-              :key="idx"
-              class="p-2 rounded-xl bg-slate-900/70 border border-slate-800 flex flex-col items-center justify-center text-center group hover:border-cyan-500/50 hover:bg-slate-900 transition-all duration-300"
-            >
-              <component
-                :is="item.icon"
-                class="w-3.5 h-3.5 text-cyan-400 mb-1 group-hover:scale-110 transition-transform"
-              />
-              <span class="text-[8.5px] font-bold text-slate-200 leading-tight group-hover:text-cyan-300 transition-colors">
-                {{ item.title }}
-              </span>
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+          <div
+            v-for="(auth, i) in authMethods"
+            :key="i"
+            class="p-2.5 rounded-xl bg-slate-900/70 border border-blue-500/30 backdrop-blur-md shadow-md hover:border-cyan-400/70 hover:bg-slate-900/90 shadow-[0_0_15px_rgba(6,182,212,0.15)] transition-all duration-300 flex flex-col items-center justify-center text-center group cursor-default"
+          >
+            <div class="h-9 w-9 rounded-lg bg-cyan-950/60 border border-cyan-500/30 flex items-center justify-center mb-1.5 group-hover:scale-110 group-hover:border-cyan-400/80 transition-all duration-300">
+              <component :is="auth.icon" class="w-5 h-5 text-cyan-400" />
             </div>
+            <span class="text-xs font-bold text-white tracking-wide leading-tight group-hover:text-cyan-300 transition-colors">
+              {{ auth.name }}
+            </span>
+            <span class="text-[9px] text-slate-300 font-medium tracking-tight mt-0.5 opacity-90">
+              {{ auth.sub }}
+            </span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Right Side: Real White Marble Luxury Login Card Section (5 Cols on desktop) -->
-    <div class="lg:col-span-5 xl:col-span-5 w-full h-full flex items-center justify-center p-4 sm:p-6 lg:p-8 relative overflow-hidden bg-gradient-to-br from-[#dbe4f0] via-[#e8eff8] to-[#d2dceb] min-h-screen z-10">
+    <!-- Right Side: Real White Marble Luxury Login Card Section -->
+    <div class="w-full h-full flex items-center justify-center p-4 sm:p-6 lg:p-8 relative overflow-hidden bg-gradient-to-br from-[#dbe4f0] via-[#e8eff8] to-[#d2dceb] min-h-screen z-10">
       <!-- Subtle Security Tech Grid Background Pattern -->
       <div 
         class="absolute inset-0 opacity-[0.22] pointer-events-none"
@@ -308,9 +124,9 @@
       />
 
       <!-- Large Ambient Glowing Spheres & Pulses -->
-      <div class="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[450px] h-[450px] bg-cyan-400/25 rounded-full blur-[140px] pointer-events-none animate-pulse-slow" />
-      <div class="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-[500px] h-[500px] bg-blue-500/20 rounded-full blur-[160px] pointer-events-none animate-pulse-slow delay-1000" />
-      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-indigo-300/20 rounded-full blur-[180px] pointer-events-none" />
+      <div class="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-cyan-400/25 rounded-full blur-[140px] pointer-events-none animate-pulse-slow" />
+      <div class="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-[550px] h-[550px] bg-blue-500/20 rounded-full blur-[160px] pointer-events-none animate-pulse-slow delay-1000" />
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-300/20 rounded-full blur-[180px] pointer-events-none" />
 
       <!-- Concentric Security Radar Rings Expanding Outward -->
       <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0">
@@ -328,58 +144,58 @@
 
       <!-- Floating Glassmorphic Live Security Status Widgets -->
       <!-- Widget 1: Top-Left Live Patrol System Badge -->
-      <div class="hidden 2xl:flex items-center gap-3 px-3.5 py-2 rounded-2xl bg-white/85 border border-white/90 backdrop-blur-xl shadow-[0_15px_35px_rgba(0,0,0,0.08)] absolute top-10 left-6 z-20 animate-float-slow group hover:scale-105 transition-transform cursor-default select-none">
-        <div class="h-8 w-8 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-600 shadow-sm">
-          <Radio class="w-4 h-4 animate-pulse text-emerald-500" />
+      <div class="hidden xl:flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white/85 border border-white/90 backdrop-blur-xl shadow-[0_15px_35px_rgba(0,0,0,0.08)] absolute top-12 left-8 z-20 animate-float-slow group hover:scale-105 transition-transform cursor-default select-none">
+        <div class="h-9 w-9 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-600 shadow-sm">
+          <Radio class="w-4.5 h-4.5 animate-pulse text-emerald-500" />
         </div>
         <div>
           <div class="flex items-center gap-1.5">
             <span class="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
-            <span class="text-[9.5px] font-black tracking-wider text-slate-800 uppercase">Live Patrol System</span>
+            <span class="text-[10px] font-black tracking-wider text-slate-800 uppercase">Live Patrol System</span>
           </div>
-          <span class="text-[10.5px] font-extrabold text-emerald-600">12 Guard Routes Active</span>
+          <span class="text-[11px] font-extrabold text-emerald-600">12 Guard Routes Active</span>
         </div>
       </div>
 
       <!-- Widget 2: Top-Right Encrypted Command Link Badge -->
-      <div class="hidden 2xl:flex items-center gap-3 px-3.5 py-2 rounded-2xl bg-white/85 border border-white/90 backdrop-blur-xl shadow-[0_15px_35px_rgba(0,0,0,0.08)] absolute top-12 right-6 z-20 animate-float-delayed group hover:scale-105 transition-transform cursor-default select-none">
-        <div class="h-8 w-8 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-600 shadow-sm">
-          <ShieldCheck class="w-4 h-4 text-blue-600" />
+      <div class="hidden xl:flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white/85 border border-white/90 backdrop-blur-xl shadow-[0_15px_35px_rgba(0,0,0,0.08)] absolute top-16 right-8 z-20 animate-float-delayed group hover:scale-105 transition-transform cursor-default select-none">
+        <div class="h-9 w-9 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-600 shadow-sm">
+          <ShieldCheck class="w-4.5 h-4.5 text-blue-600" />
         </div>
         <div>
-          <span class="text-[9.5px] font-black tracking-wider text-slate-800 uppercase block">Security Link</span>
-          <span class="text-[10.5px] font-extrabold text-blue-600">256-Bit Encrypted</span>
+          <span class="text-[10px] font-black tracking-wider text-slate-800 uppercase block">Security Link</span>
+          <span class="text-[11px] font-extrabold text-blue-600">256-Bit Encrypted</span>
         </div>
       </div>
 
       <!-- Widget 3: Bottom-Left Guard Verification Modality Badge -->
-      <div class="hidden 2xl:flex items-center gap-3 px-3.5 py-2 rounded-2xl bg-white/85 border border-white/90 backdrop-blur-xl shadow-[0_15px_35px_rgba(0,0,0,0.08)] absolute bottom-12 left-6 z-20 animate-float-slow group hover:scale-105 transition-transform cursor-default select-none">
-        <div class="h-8 w-8 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-600 shadow-sm">
-          <ScanFace class="w-4 h-4 text-cyan-600" />
+      <div class="hidden xl:flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white/85 border border-white/90 backdrop-blur-xl shadow-[0_15px_35px_rgba(0,0,0,0.08)] absolute bottom-16 left-10 z-20 animate-float-slow group hover:scale-105 transition-transform cursor-default select-none">
+        <div class="h-9 w-9 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-600 shadow-sm">
+          <ScanFace class="w-4.5 h-4.5 text-cyan-600" />
         </div>
         <div>
-          <span class="text-[9.5px] font-black tracking-wider text-slate-800 uppercase block">Guard Modalities</span>
-          <span class="text-[10.5px] font-extrabold text-slate-700">NFC, QR & Face AI</span>
+          <span class="text-[10px] font-black tracking-wider text-slate-800 uppercase block">Guard Modalities</span>
+          <span class="text-[11px] font-extrabold text-slate-700">NFC, QR & Face AI</span>
         </div>
       </div>
 
       <!-- Widget 4: Bottom-Right Incident Status Badge -->
-      <div class="hidden 2xl:flex items-center gap-3 px-3.5 py-2 rounded-2xl bg-white/85 border border-white/90 backdrop-blur-xl shadow-[0_15px_35px_rgba(0,0,0,0.08)] absolute bottom-14 right-6 z-20 animate-float-delayed group hover:scale-105 transition-transform cursor-default select-none">
-        <div class="h-8 w-8 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-600 shadow-sm">
-          <Zap class="w-4 h-4 text-amber-500" />
+      <div class="hidden xl:flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white/85 border border-white/90 backdrop-blur-xl shadow-[0_15px_35px_rgba(0,0,0,0.08)] absolute bottom-20 right-10 z-20 animate-float-delayed group hover:scale-105 transition-transform cursor-default select-none">
+        <div class="h-9 w-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-600 shadow-sm">
+          <Zap class="w-4.5 h-4.5 text-amber-500" />
         </div>
         <div>
-          <span class="text-[9.5px] font-black tracking-wider text-slate-800 uppercase block">Incident Monitor</span>
+          <span class="text-[10px] font-black tracking-wider text-slate-800 uppercase block">Incident Monitor</span>
           <div class="flex items-center gap-1">
-            <CheckCircle2 class="w-3 h-3 text-emerald-500" />
-            <span class="text-[10.5px] font-extrabold text-emerald-600">All Checkpoints Clear</span>
+            <CheckCircle2 class="w-3.5 h-3.5 text-emerald-500" />
+            <span class="text-[11px] font-extrabold text-emerald-600">All Checkpoints Clear</span>
           </div>
         </div>
       </div>
 
       <!-- Main Marble Card Container -->
       <div 
-        class="w-full max-w-[430px] rounded-[2.5rem] p-7 lg:p-9 shadow-[0_30px_70px_-10px_rgba(0,0,0,0.25),0_0_35px_rgba(255,255,255,0.8)] border border-white/90 relative z-10 animate-fade-in-up text-slate-900 overflow-hidden bg-cover bg-center"
+        class="w-full max-w-[450px] rounded-[2.5rem] p-8 lg:p-10 shadow-[0_30px_70px_-10px_rgba(0,0,0,0.25),0_0_35px_rgba(255,255,255,0.8)] border border-white/90 relative z-10 animate-fade-in-up text-slate-900 overflow-hidden bg-cover bg-center"
         :style="{ backgroundImage: `url(${marbleBg})` }"
       >
         <!-- Light Translucent White Wash for Polished Marble Texture Visibility -->
@@ -387,15 +203,15 @@
 
         <div class="relative z-10">
           <!-- Top Shield Crest Icon with Glowing Aura Ring -->
-          <div class="text-center mb-5">
-            <div class="relative inline-flex items-center justify-center mb-2.5">
+          <div class="text-center mb-6">
+            <div class="relative inline-flex items-center justify-center mb-3">
               <div class="absolute inset-0 rounded-full bg-blue-500/20 animate-ping opacity-60 duration-1000 scale-125" />
-              <div class="relative h-14 w-14 rounded-full bg-gradient-to-br from-blue-50 via-white to-blue-100 border border-blue-300 flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.3)]">
-                <ShieldCheck class="w-7 h-7 text-blue-600" />
+              <div class="relative h-16 w-16 rounded-full bg-gradient-to-br from-blue-50 via-white to-blue-100 border border-blue-300 flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.3)]">
+                <ShieldCheck class="w-8 h-8 text-blue-600" />
               </div>
             </div>
 
-            <h2 class="text-2xl lg:text-3xl font-black tracking-tight text-slate-900 mb-0.5">
+            <h2 class="text-2xl lg:text-3xl font-black tracking-tight text-slate-900 mb-1">
               Patrol Command Login
             </h2>
             <p class="text-xs text-slate-600 font-semibold">
@@ -404,11 +220,11 @@
           </div>
 
           <!-- Mode Selector Switcher (3D Metallic Brushed Pill Tabs) -->
-          <div class="p-1.5 bg-slate-300/70 rounded-xl mb-5 border border-slate-400/50 flex relative shadow-inner">
+          <div class="p-1.5 bg-slate-300/70 rounded-xl mb-6 border border-slate-400/50 flex relative shadow-inner">
             <button
               type="button"
               :class="[
-                'flex-1 py-2 px-3 flex items-center justify-center gap-2 text-xs font-extrabold rounded-lg transition-all duration-300 z-10',
+                'flex-1 py-2.5 px-3 flex items-center justify-center gap-2 text-xs font-extrabold rounded-lg transition-all duration-300 z-10',
                 activeTab === 'email_phone' 
                   ? 'bg-gradient-to-r from-slate-100 via-slate-200 to-slate-300 text-blue-900 border border-blue-500/60 shadow-[inset_0_1px_2px_rgba(255,255,255,0.95),0_4px_12px_rgba(59,130,246,0.3)]' 
                   : 'text-slate-600 hover:text-slate-900'
@@ -421,7 +237,7 @@
             <button
               type="button"
               :class="[
-                'flex-1 py-2 px-3 flex items-center justify-center gap-2 text-xs font-extrabold rounded-lg transition-all duration-300 z-10',
+                'flex-1 py-2.5 px-3 flex items-center justify-center gap-2 text-xs font-extrabold rounded-lg transition-all duration-300 z-10',
                 activeTab === 'employee_id' 
                   ? 'bg-gradient-to-r from-slate-100 via-slate-200 to-slate-300 text-blue-900 border border-blue-500/60 shadow-[inset_0_1px_2px_rgba(255,255,255,0.95),0_4px_12px_rgba(59,130,246,0.3)]' 
                   : 'text-slate-600 hover:text-slate-900'
@@ -433,38 +249,29 @@
             </button>
           </div>
 
-          <form
-            class="space-y-3.5"
-            @submit.prevent="handleSubmit"
-          >
+          <form @submit.prevent="handleSubmit" class="space-y-4">
             <!-- Email / Phone or Guard ID Input Field -->
-            <div class="space-y-1">
+            <div class="space-y-1.5">
               <label class="block text-xs font-bold text-slate-800">
                 {{ activeTab === 'email_phone' ? 'Email or Phone Number' : 'Guard ID' }}
               </label>
               <div class="relative group">
                 <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-cyan-600 transition-colors">
-                  <User
-                    v-if="activeTab === 'email_phone'"
-                    class="w-4 h-4"
-                  />
-                  <CreditCard
-                    v-else
-                    class="w-4 h-4"
-                  />
+                  <User v-if="activeTab === 'email_phone'" class="w-4 h-4" />
+                  <CreditCard v-else class="w-4 h-4" />
                 </div>
                 <input
                   v-model="inputIdentifier"
                   :type="activeTab === 'email_phone' && isPurePhone ? 'tel' : 'text'"
                   required
-                  class="w-full h-11 pl-10 pr-4 rounded-xl bg-slate-50/90 border-2 border-cyan-400 focus:border-blue-500 focus:ring-4 focus:ring-cyan-400/30 shadow-[0_0_18px_rgba(6,182,212,0.35)] transition-all outline-none text-sm font-semibold text-slate-900 placeholder:text-slate-400"
+                  class="w-full h-12 pl-10 pr-4 rounded-xl bg-slate-50/90 border-2 border-cyan-400 focus:border-blue-500 focus:ring-4 focus:ring-cyan-400/30 shadow-[0_0_18px_rgba(6,182,212,0.35)] transition-all outline-none text-sm font-semibold text-slate-900 placeholder:text-slate-400"
                   :placeholder="activeTab === 'email_phone' ? 'Enter email or phone number' : 'Enter guard ID (e.g. GRD-1024)'"
-                >
+                />
               </div>
             </div>
 
             <!-- Password Input Field -->
-            <div class="space-y-1">
+            <div class="space-y-1.5">
               <label class="block text-xs font-bold text-slate-800">
                 Password
               </label>
@@ -475,43 +282,34 @@
                 <input
                   v-model="password"
                   :type="showPassword ? 'text' : 'password'"
-                  class="w-full h-11 pl-10 pr-10 rounded-xl bg-slate-50/90 border-2 border-cyan-400 focus:border-blue-500 focus:ring-4 focus:ring-cyan-400/30 shadow-[0_0_18px_rgba(6,182,212,0.35)] transition-all outline-none text-sm font-semibold text-slate-900 placeholder:text-slate-400"
+                  class="w-full h-12 pl-10 pr-10 rounded-xl bg-slate-50/90 border-2 border-cyan-400 focus:border-blue-500 focus:ring-4 focus:ring-cyan-400/30 shadow-[0_0_18px_rgba(6,182,212,0.35)] transition-all outline-none text-sm font-semibold text-slate-900 placeholder:text-slate-400"
                   placeholder="Enter your password"
-                >
+                />
                 <button
                   type="button"
                   class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors p-1"
                   @click="showPassword = !showPassword"
                 >
-                  <Eye
-                    v-if="!showPassword"
-                    class="w-4 h-4"
-                  />
-                  <EyeOff
-                    v-else
-                    class="w-4 h-4"
-                  />
+                  <Eye v-if="!showPassword" class="w-4 h-4" />
+                  <EyeOff v-else class="w-4 h-4" />
                 </button>
               </div>
             </div>
 
             <!-- Error Feedback Banner -->
-            <div
-              v-if="errorMessage"
-              class="p-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 text-xs font-medium flex items-center gap-2"
-            >
+            <div v-if="errorMessage" class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 text-xs font-medium flex items-center gap-2">
               <AlertCircle class="w-4 h-4 shrink-0" />
               <span>{{ errorMessage }}</span>
             </div>
 
             <!-- Remember me & Forgot Password Row -->
-            <div class="flex items-center justify-between pt-0.5">
+            <div class="flex items-center justify-between pt-1">
               <label class="flex items-center gap-2 cursor-pointer group select-none">
                 <input
                   v-model="rememberMe"
                   type="checkbox"
                   class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500/30 transition cursor-pointer"
-                >
+                />
                 <span class="text-xs font-semibold text-slate-700 group-hover:text-slate-900 transition-colors">
                   Remember me
                 </span>
@@ -529,7 +327,7 @@
             <button
               type="submit"
               :disabled="loading"
-              class="w-full h-11 mt-1 rounded-xl text-xs font-black tracking-wider uppercase flex items-center justify-center gap-2 bg-gradient-to-r from-[#002884] via-[#0052cc] to-[#0070f3] hover:from-[#001f66] hover:to-[#0052cc] text-white border-t border-white/50 shadow-[0_10px_30px_rgba(0,82,204,0.5),0_0_20px_rgba(0,102,255,0.35)] hover:shadow-[0_12px_35px_rgba(0,82,204,0.65)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed group relative overflow-hidden"
+              class="w-full h-12 mt-2 rounded-xl text-xs font-black tracking-wider uppercase flex items-center justify-center gap-2 bg-gradient-to-r from-[#002884] via-[#0052cc] to-[#0070f3] hover:from-[#001f66] hover:to-[#0052cc] text-white border-t border-white/50 shadow-[0_10px_30px_rgba(0,82,204,0.5),0_0_20px_rgba(0,102,255,0.35)] hover:shadow-[0_12px_35px_rgba(0,82,204,0.65)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed group relative overflow-hidden"
             >
               <!-- Button Gloss Sweep Effect -->
               <div class="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-12 -translate-x-full group-hover:translate-x-[300%] transition-transform duration-1000" />
@@ -542,7 +340,7 @@
             </button>
 
             <!-- OR Divider -->
-            <div class="flex items-center justify-center gap-3 py-1">
+            <div class="flex items-center justify-center gap-3 py-2">
               <div class="h-[1px] flex-1 bg-slate-300" />
               <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">OR</span>
               <div class="h-[1px] flex-1 bg-slate-300" />
@@ -551,37 +349,21 @@
             <!-- Google OAuth Button -->
             <button
               type="button"
-              class="w-full h-11 rounded-xl text-xs font-bold flex items-center justify-center gap-3 bg-gradient-to-b from-white to-slate-100 border border-slate-300/80 hover:bg-slate-50 text-slate-800 shadow-sm hover:scale-[1.01] active:scale-[0.99] transition-all duration-300"
+              class="w-full h-12 rounded-xl text-xs font-bold flex items-center justify-center gap-3 bg-gradient-to-b from-white to-slate-100 border border-slate-300/80 hover:bg-slate-50 text-slate-800 shadow-sm hover:scale-[1.01] active:scale-[0.99] transition-all duration-300"
               @click="loginWithGoogle"
             >
-              <svg
-                class="w-4 h-4"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                  fill="#4285F4"
-                />
-                <path
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                  fill="#34A853"
-                />
-                <path
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                  fill="#FBBC05"
-                />
-                <path
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                  fill="#EA4335"
-                />
+              <svg class="w-4 h-4" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
               </svg>
               <span>Sign in with Google</span>
             </button>
           </form>
 
           <!-- Footer Sign Up Link -->
-          <p class="text-center text-xs font-semibold text-slate-600 mt-5">
+          <p class="text-center text-xs font-semibold text-slate-600 mt-6">
             Don't have an account? 
             <a
               href="#"
@@ -605,11 +387,15 @@ import {
   Shield, ShieldCheck, Lock, Mail, User, CreditCard, Eye, EyeOff, 
   ArrowRight, IdCard, Radio, AlertCircle, BarChart3, Zap, CheckCircle2,
   ScanFace, Fingerprint, Nfc, Bluetooth, Smartphone, MapPin, Globe,
-  ClipboardList, QrCode, AlertTriangle, Building2, FileCheck, Users, Camera
+  ClipboardList, QrCode, AlertTriangle, Building2, FileCheck, Users
 } from "lucide-vue-next";
 
 // Directly import image assets so Vite bundles and displays them in dev and production
+import patrolHeroBg from "@/assets/images/patrol_hero_bg.png";
 import marbleBg from "@/assets/images/marble_bg.png";
+
+// Custom Generated High-Tech Patrol Cyber Security Hero Background Image
+const patrolBgImage = patrolHeroBg;
 
 const router = useRouter();
 const route = useRoute();
@@ -622,15 +408,37 @@ const rememberMe = ref(false);
 const loading = ref(false);
 const errorMessage = ref("");
 
-// Bottom Security Capabilities & Compliance Navigation Bar
-const bottomCapabilities = [
-  { title: "Multi-Site Ops", icon: Globe },
-  { title: "Real-Time Monitoring", icon: Radio },
-  { title: "Incident Management", icon: AlertTriangle },
-  { title: "QR / NFC Integration", icon: QrCode },
-  { title: "Reports & Analytics", icon: BarChart3 },
-  { title: "Secure & Reliable", icon: Lock },
-  { title: "Compliance & Audits", icon: FileCheck }
+// 4 Feature Highlights matching Workforce login structure but with Patrol operations focus
+const features = [
+  {
+    icon: Globe,
+    title: "Multi-Site Patrol Ops",
+    desc: "Manage security tours across diverse geographical sites & physical facilities."
+  },
+  {
+    icon: Smartphone,
+    title: "Guard Mobile Tour App",
+    desc: "Guards scan NFC/QR checkpoints, receive route assignments, and log shifts."
+  },
+  {
+    icon: AlertTriangle,
+    title: "Live Incident Reporting",
+    desc: "Guards trigger real-time emergency SOS and capture photo evidence on duty."
+  },
+  {
+    icon: Building2,
+    title: "Web Command Center",
+    desc: "Real-time updates, active guard location maps, and complete patrol audit logs."
+  }
+];
+
+// Security Guard Modalities & Mobile App Badges
+const authMethods = [
+  { name: "Guard App", sub: "Mobile Tour App", icon: Smartphone },
+  { name: "NFC Tag", sub: "Instant Tap Scan", icon: Nfc },
+  { name: "QR Route", sub: "Checkpoint Code", icon: QrCode },
+  { name: "Face AI", sub: "Guard Verification", icon: ScanFace },
+  { name: "Guard PIN", sub: "Passcode Sign-In", icon: IdCard }
 ];
 
 const isPurePhone = computed(() => {
@@ -815,6 +623,36 @@ async function loginWithGoogle() {
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "456615098701-cihaj0btvoe011ba92r7hpbemkse5vm3.apps.googleusercontent.com";
     const redirectUri = `${window.location.origin}/auth/callback`;
 
+    try {
+      const response = await fetch(`${import.meta.env.VITE_KN_API_URL}/google-accesseasy`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "google",
+          redirect_uri: redirectUri,
+          redirectUri: redirectUri,
+          client_id: clientId,
+          clientId: clientId,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success && data.url) {
+        let targetUrl = data.url;
+        try {
+          const parsedUrl = new URL(targetUrl);
+          parsedUrl.searchParams.set("redirect_uri", redirectUri);
+          targetUrl = parsedUrl.toString();
+        } catch (e) {
+          console.warn("Could not set redirect_uri on data.url:", e);
+        }
+        window.location.href = targetUrl;
+        return;
+      }
+    } catch (apiErr) {
+      console.warn("Backend google-accesseasy endpoint error, falling back to direct OAuth URL:", apiErr);
+    }
+
     const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${encodeURIComponent(
       clientId
     )}&redirect_uri=${encodeURIComponent(
@@ -828,7 +666,6 @@ async function loginWithGoogle() {
     loading.value = false;
   }
 }
-
 
 
 function goToRegister() {
@@ -855,6 +692,36 @@ function goToRegister() {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* Tactical Radar Sweep Animation */
+.radar-circle {
+  position: absolute;
+  top: 30%;
+  left: 30%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px solid rgba(6, 182, 212, 0.4);
+  box-shadow: 0 0 15px rgba(6, 182, 212, 0.2);
+}
+.radar-circle-1 { width: 300px; height: 300px; }
+.radar-circle-2 { width: 550px; height: 550px; }
+
+.radar-sweep {
+  position: absolute;
+  top: 30%;
+  left: 30%;
+  width: 550px;
+  height: 550px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, rgba(6, 182, 212, 0.3) 0deg, transparent 60deg, transparent 360deg);
+  animation: radarRotate 10s linear infinite;
+}
+
+@keyframes radarRotate {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
 /* Concentric Security Radar Rings for Right Panel */
 .right-radar-ring {
   position: absolute;
@@ -865,8 +732,8 @@ function goToRegister() {
   border: 1.5px dashed rgba(59, 130, 246, 0.25);
   animation: pulseRing 8s ease-in-out infinite alternate;
 }
-.right-radar-ring.ring-1 { width: 480px; height: 480px; animation-delay: 0s; }
-.right-radar-ring.ring-2 { width: 620px; height: 620px; animation-delay: -2.5s; }
+.right-radar-ring.ring-1 { width: 520px; height: 520px; animation-delay: 0s; }
+.right-radar-ring.ring-2 { width: 680px; height: 680px; animation-delay: -2.5s; }
 .right-radar-ring.ring-3 { width: 780px; height: 780px; animation-delay: -5s; }
 
 @keyframes pulseRing {
@@ -900,6 +767,23 @@ function goToRegister() {
 @keyframes pulseSlow {
   0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.2; }
   100% { transform: translate(-50%, -50%) scale(1.15); opacity: 0.35; }
+}
+
+/* Floating Tech Node Particles */
+.node-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.8) 0%, rgba(59, 130, 246, 0) 70%);
+  animation: floatNodes 12s ease-in-out infinite alternate;
+}
+.node-1 { width: 140px; height: 140px; top: 15%; left: 10%; animation-delay: 0s; }
+.node-2 { width: 200px; height: 200px; bottom: 20%; right: 15%; animation-delay: -4s; }
+.node-3 { width: 100px; height: 100px; top: 55%; left: 35%; animation-delay: -7s; }
+
+@keyframes floatNodes {
+  0% { transform: translate(0, 0) scale(1); opacity: 0.35; }
+  50% { transform: translate(30px, -40px) scale(1.2); opacity: 0.7; }
+  100% { transform: translate(-25px, 25px) scale(0.85); opacity: 0.35; }
 }
 
 /* Spark animations */

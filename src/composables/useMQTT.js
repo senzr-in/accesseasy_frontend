@@ -16,6 +16,7 @@
 import { ref, onMounted, onUnmounted } from 'vue';
 import { mqttService } from '@/services/mqttService';
 import { correlationEngine } from '@/services/correlationEngine';
+import { deviceRegistry } from '@/services/deviceRegistry';
 
 const MAX_EVENTS = 50;
 
@@ -62,6 +63,11 @@ function handleAlarmEvent(topic, payload) {
   let msg;
   try { msg = JSON.parse(payload.toString()); }
   catch { return; }
+
+  // Only allow registered devices
+  if (!deviceRegistry.isDeviceRegistered(msg.uuid)) {
+    return;
+  }
 
   // Check MD5 signature verification if sign present
   if (msg.sign && !mqttService.verifyMD5Signature(msg)) {
@@ -128,6 +134,11 @@ function handleFrigateEvent(_topic, payload) {
 
   const { type, after } = msg;
   if (!after) return;
+
+  // Only allow registered cameras
+  if (!deviceRegistry.isCameraRegistered(after.camera)) {
+    return;
+  }
 
   const label = after.label;
   console.debug(`[useMQTT] ▶ frigate/events  type=${type}  label=${label}  camera=${after.camera}`);
@@ -199,6 +210,9 @@ function handleFrigateEvent(_topic, payload) {
 
 function handlePersonCount(topic, payload) {
   const camera = cameraFrom(topic);
+  if (!deviceRegistry.isCameraRegistered(camera)) {
+    return;
+  }
   const count  = parseInt(payload.toString(), 10);
   console.debug(`[useMQTT] person count  camera=${camera}  count=${count}`);
   personCounts.value = { ...personCounts.value, [camera]: isNaN(count) ? 0 : count };
@@ -206,6 +220,9 @@ function handlePersonCount(topic, payload) {
 
 function handlePersonSnapshot(topic, payload) {
   const camera = cameraFrom(topic);
+  if (!deviceRegistry.isCameraRegistered(camera)) {
+    return;
+  }
   console.debug(`[useMQTT] person snapshot received  camera=${camera}  bytes=${payload.byteLength}`);
   const blob = new Blob([payload], { type: 'image/jpeg' });
   // Revoke the old URL to avoid memory leaks
@@ -215,6 +232,9 @@ function handlePersonSnapshot(topic, payload) {
 
 function handleLPSnapshotFile(topic, payload) {
   const camera   = cameraFrom(topic);
+  if (!deviceRegistry.isCameraRegistered(camera)) {
+    return;
+  }
   const filename = payload.toString();
   console.debug(`[useMQTT] LP snapshot file  camera=${camera}  file=${filename}`);
   const idx = lpEvents.value.findIndex(e => e.camera === camera);
@@ -253,6 +273,11 @@ function handleSwipeEvent(topic, payload) {
     return;
   }
 
+  // Only allow registered devices
+  if (!deviceRegistry.isDeviceRegistered(msg.uuid)) {
+    return;
+  }
+
   // Normalize timestamp: if seconds (10 digits < 1e11), convert to ms for JS Date
   const timeVal = msg.time;
   const timestampMs = (timeVal && timeVal < 1e11) ? timeVal * 1000 : (timeVal || Date.now());
@@ -288,6 +313,7 @@ function handleSwipeEvent(topic, payload) {
 
 function _subscribe() {
   console.log('[useMQTT] Subscribing handlers + connecting MQTT service');
+  deviceRegistry.loadDevices();
   _statusUnsub   = mqttService.onStatus(s => { mqttStatus.value = s; });
   _eventUnsub    = mqttService.on('frigate/events',                           handleFrigateEvent);
   _swipeUnsub    = mqttService.on('access_device/v1/event/#',                 handleSwipeEvent);

@@ -328,6 +328,7 @@ import {
   Eye, EyeOff
 } from 'lucide-vue-next';
 import { authService } from "@/services/authService";
+import { deviceRegistry } from "@/services/deviceRegistry";
 import ValueHeader from "@/components/common/ValueHeader.vue";
 
 const token = authService.getToken();
@@ -521,18 +522,32 @@ const fetchEvents = async (silent = false) => {
   if (!token) return;
   if (!silent) loading.value = true;
   try {
-    const allowedCameras = linkedControllers.value
+    // 1. Gather all allowed camera identifiers from registered devices & linked controllers
+    await deviceRegistry.loadDevices();
+    const registeredCameras = deviceRegistry.getRegisteredCameraList();
+
+    const controllerCameras = linkedControllers.value
       .map(c => c.linkedCamera)
       .filter(Boolean);
+
+    const allowedCameras = [...new Set([...registeredCameras, ...controllerCameras])];
+
+    // If no devices or cameras are added for this tenant, IGNORE all events
+    if (allowedCameras.length === 0) {
+      events.value = [];
+      if (selectedEvent.value) {
+        selectedEvent.value = null;
+        isModalOpen.value = false;
+      }
+      return;
+    }
 
     const url = new URL(`${apiUrl}/items/frigateEvents`);
     url.searchParams.append('sort', '-start_time');
     url.searchParams.append('limit', '2000');
     
-    // Filter by allowed cameras if linked controllers exist for this tenant
-    if (allowedCameras.length > 0) {
-      url.searchParams.append('filter[camera][_in]', allowedCameras.join(','));
-    }
+    // Strictly filter by allowed cameras only
+    url.searchParams.append('filter[camera][_in]', allowedCameras.join(','));
 
     // Add filter logic
     if (selectedLabel.value !== 'all') {

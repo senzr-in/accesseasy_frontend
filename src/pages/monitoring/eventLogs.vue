@@ -281,6 +281,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import VideoPlayer from '@/components/VideoPlayer.vue';
 import { useCameraData } from '@/composables/useCameraData.js';
 import { useMQTT } from '@/composables/useMQTT.js';
+import { deviceRegistry } from '@/services/deviceRegistry';
 
 // ─── Tab State ────────────────────────────────────────────────────────────────
 const activeTab = ref('face');
@@ -289,7 +290,7 @@ const tabs = [
   { key: 'ai',   label: '📹 AI Camera Events' },
 ];
 
-// ─── AI / Camera Event Logs (existing logic) ──────────────────────────────────
+// ─── AI / Camera Event Logs ───────────────────────────────────────────────────
 const videoDialog = ref(false);
 const selectedEvent = ref(null);
 const selectedLocationFilter = ref(null);
@@ -304,16 +305,6 @@ const headers = [
   { title: 'Location', key: 'locationName' },
   { title: 'Severity', key: 'severity' },
   { title: 'Actions', key: 'actions', sortable: false },
-];
-
-const eventTypes = [
-  { type: 'Unauthorized Entry', severity: 'High' },
-  { type: 'Loitering Detected', severity: 'Medium' },
-  { type: 'Tailgating Detected', severity: 'High' },
-  { type: 'Object Left Behind', severity: 'Low' },
-  { type: 'Crowd Density High', severity: 'Medium' },
-  { type: 'Face Recognition Failed', severity: 'Medium' },
-  { type: 'Suspicious Activity', severity: 'High' },
 ];
 
 const liveSwipeList = computed(() =>
@@ -331,27 +322,7 @@ const liveSwipeList = computed(() =>
 );
 
 const events = computed(() => {
-  const generatedEvents = [];
-  let eventId = 1;
-  cameras.value.forEach((camera, index) => {
-    const numEvents = Math.floor(Math.random() * 2) + 1;
-    for (let i = 0; i < numEvents; i++) {
-      const eventType = eventTypes[Math.floor(Math.random() * eventTypes.length)];
-      const timeOffset = (index * 3600000) + (i * 1800000);
-      generatedEvents.push({
-        id: `gen-${eventId++}`,
-        timestamp: new Date(Date.now() - timeOffset).toISOString(),
-        type: eventType.type,
-        cameraName: camera.name,
-        locationId: camera.locationId,
-        locationName: camera.locationName,
-        severity: eventType.severity,
-        snapshotUrl: `https://via.placeholder.com/160x90?text=${encodeURIComponent(camera.name)}`,
-        videoUrl: camera.videoUrl || 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
-      });
-    }
-  });
-  return [...liveSwipeList.value, ...generatedEvents].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+  return [...liveSwipeList.value].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 });
 
 const filteredEvents = computed(() => {
@@ -386,8 +357,8 @@ const faceCameraFilter   = ref(null);
 
 /** Unique camera names found in returned face events for filter dropdown */
 const faceEventCameras = computed(() => {
-  const cameras = [...new Set(faceEvents.value.map(e => e.camera))];
-  return [null, ...cameras];  // null = "All Cameras"
+  const cams = [...new Set(faceEvents.value.map(e => e.camera).filter(Boolean))];
+  return [null, ...cams];  // null = "All Cameras"
 });
 
 const filteredFaceEvents = computed(() => {
@@ -405,14 +376,31 @@ const filteredFaceEvents = computed(() => {
 const fetchFaceEvents = async () => {
   faceLoading.value = true;
   try {
+    await deviceRegistry.loadDevices();
+    const allowedCameras = deviceRegistry.getRegisteredCameraList();
+
+    if (allowedCameras.length === 0) {
+      faceEvents.value = [];
+      faceLoading.value = false;
+      return;
+    }
+
     const params = new URLSearchParams({ limit: 50 });
-    if (faceCameraFilter.value) params.set('camera', faceCameraFilter.value);
+    if (faceCameraFilter.value) {
+      if (!allowedCameras.includes(faceCameraFilter.value.toLowerCase())) {
+        faceEvents.value = [];
+        faceLoading.value = false;
+        return;
+      }
+      params.set('camera', faceCameraFilter.value);
+    }
 
     const res = await fetch(`${FRIGATE_KN_URL}/events?${params}`);
     if (!res.ok) throw new Error(`Knative returned HTTP ${res.status}`);
 
     const json = await res.json();
-    faceEvents.value = json.data || [];
+    const data = json.data || [];
+    faceEvents.value = data.filter(e => e.camera && allowedCameras.includes(e.camera.toLowerCase()));
   } catch (err) {
     console.error('[eventLogs] fetchFaceEvents error:', err.message);
   } finally {
@@ -445,20 +433,24 @@ onMounted(async () => {
   // Poll for new live events every 5 seconds
   pollInterval = setInterval(async () => {
     if (activeTab.value === 'face') {
-      // Background fetch without showing full page loading spinner every time
+      const allowedCameras = deviceRegistry.getRegisteredCameraList();
+      if (allowedCameras.length === 0) {
+        faceEvents.value = [];
+        return;
+      }
       const params = new URLSearchParams({ limit: 50 });
       if (faceCameraFilter.value) params.set('camera', faceCameraFilter.value);
       try {
         const res = await fetch(`${FRIGATE_KN_URL}/events?${params}`);
         if (res.ok) {
           const json = await res.json();
-          faceEvents.value = json.data || [];
+          const data = json.data || [];
+          faceEvents.value = data.filter(e => e.camera && allowedCameras.includes(e.camera.toLowerCase()));
         }
       } catch (e) {
         // silently ignore polling errors to avoid console spam
       }
     } else {
-      // In the AI tab, if locations or AI events need fetching, do it here
       await fetchLocations();
     }
   }, 5000);

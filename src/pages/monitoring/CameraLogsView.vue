@@ -143,6 +143,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { authService } from '@/services/authService';
+import { deviceRegistry } from '@/services/deviceRegistry';
+import { currentUserTenant } from '@/utils/currentUserTenant';
 
 const selectedIdentityFilter = ref('all');
 const showClipModal = ref(false);
@@ -157,9 +159,27 @@ const fetchCameraLogs = async () => {
   loading.value = true;
   const token = authService.getToken();
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  const tenantId = currentUserTenant.getTenantId() || authService.getTenantId();
 
   try {
-    const res = await fetch(`${apiUrl}/items/face_logs?sort=-timestamp&limit=40`, { headers });
+    await deviceRegistry.loadDevices();
+    const allowedCameras = deviceRegistry.getRegisteredCameraList();
+
+    if (allowedCameras.length === 0) {
+      events.value = [];
+      loading.value = false;
+      return;
+    }
+
+    const url = new URL(`${apiUrl}/items/face_logs`);
+    url.searchParams.append('sort', '-timestamp');
+    url.searchParams.append('limit', '40');
+    if (tenantId) {
+      url.searchParams.append('filter[tenant][_eq]', tenantId);
+    }
+    url.searchParams.append('filter[camera_name][_in]', allowedCameras.join(','));
+
+    const res = await fetch(url.toString(), { headers });
     if (res.ok) {
       const data = await res.json();
       const list = data.data || data;
@@ -178,17 +198,13 @@ const fetchCameraLogs = async () => {
         return;
       }
     }
+    events.value = [];
   } catch (e) {
-    console.warn('[CameraLogs] Directus API fetch failed, loading default events:', e);
+    console.warn('[CameraLogs] Directus API fetch failed:', e);
+    events.value = [];
+  } finally {
+    loading.value = false;
   }
-
-  // Fallback initial dataset
-  events.value = [
-    { id: '1', cameraName: 'Main Gate Cam 01', personName: 'Kavin Kumar', confidence: '98.4%', isRegistered: true, location: 'Main Entrance', timestamp: '10:14:02 AM', snapshot: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80' },
-    { id: '2', cameraName: 'Lobby West Dome Cam', personName: 'Dr. Aris Thorne', confidence: '96.1%', isRegistered: true, location: 'Lobby West', timestamp: '10:12:45 AM', snapshot: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80' },
-    { id: '3', cameraName: 'Server Room AI Cam', personName: 'Unknown Visitor', confidence: '72.0%', isRegistered: false, location: 'Server Room', timestamp: '10:09:30 AM', snapshot: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80' }
-  ];
-  loading.value = false;
 };
 
 const filteredEvents = computed(() => {
