@@ -4,8 +4,8 @@
     <nav class="patrol-nav" :class="{ 'patrol-nav--scrolled': scrolled }">
       <div class="patrol-nav__inner">
         <div class="patrol-nav__brand">
-          <div class="patrol-nav__icon">
-            <Shield class="w-5 h-5 text-cyan-400" />
+          <div class="patrol-nav__icon p-1">
+            <img :src="logoPatrol" class="w-full h-full object-contain" alt="AccessEasy Patrol" />
           </div>
           <div>
             <span class="patrol-nav__logo-text">AccessEasy</span>
@@ -423,8 +423,8 @@
       <div class="patrol-footer__inner">
         <div class="patrol-footer__brand">
           <div class="patrol-nav__brand mb-3">
-            <div class="patrol-nav__icon">
-              <Shield class="w-5 h-5 text-cyan-400" />
+            <div class="patrol-nav__icon p-1">
+              <img :src="logoPatrol" class="w-full h-full object-contain" alt="AccessEasy Patrol" />
             </div>
             <div>
               <span class="patrol-nav__logo-text">AccessEasy</span>
@@ -487,6 +487,7 @@ import {
 import heroBg from '@/assets/images/patrol_hero_bg.png';
 import infographicHero from '@/assets/images/patrol_infographic_hero.png';
 import posterBg from '@/assets/images/patrol_guard_poster.png';
+import logoPatrol from '@/assets/images/logoPatrol.png';
 
 const router = useRouter();
 const scrolled = ref(false);

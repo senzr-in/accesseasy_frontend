@@ -8,10 +8,7 @@
       <div class="ag-wrap ag-nav__inner">
         <!-- Brand -->
         <a href="#" class="ag-brand" @click.prevent>
-          <svg class="ag-brand__shield" width="26" height="30" viewBox="0 0 26 30" fill="none" aria-hidden="true">
-            <path d="M13 0L0.5 5V15C0.5 22.5 6.1 29.4 13 30C19.9 29.4 25.5 22.5 25.5 15V5L13 0Z" fill="#1B4FD8"/>
-            <path d="M9 15.5L11.8 18.3L17.5 11.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+          <img :src="logoPatrol" class="w-8 h-8 object-contain" alt="AccessEasy Patrol Logo" />
           <span class="ag-brand__name">AccessEasy <span style="color:#1B4FD8; font-weight:900;">PATROL</span></span>
         </a>
 
@@ -59,6 +56,12 @@
          2. HERO
     ══════════════════════════════════════════════════════════ -->
     <section class="ag-hero">
+      <!-- Ambient Smooth Dynamic Background Glows & Tech Grid -->
+      <div class="ag-hero__ambient ag-hero__ambient--1" />
+      <div class="ag-hero__ambient ag-hero__ambient--2" />
+      <div class="ag-hero__ambient ag-hero__ambient--3" />
+      <div class="ag-hero__grid-pattern" />
+
       <div class="ag-wrap ag-hero__inner">
 
         <!-- LEFT: content -->
@@ -696,8 +699,8 @@
           <div class="ag-price-card ag-reveal">
             <div class="ag-price-card__label">Per Site</div>
             <div class="ag-price-card__price">
-              <span class="ag-price-card__currency">$</span>
-              <span class="ag-price-card__amount">19.5</span>
+              <span class="ag-price-card__currency">₹</span>
+              <span class="ag-price-card__amount">1,999</span>
               <span class="ag-price-card__period">/ site / month</span>
             </div>
             <p class="ag-price-card__desc">Ideal for growing agencies managing multiple locations independently.</p>
@@ -710,23 +713,22 @@
             <button class="ag-btn ag-btn--outline ag-btn--full ag-btn--lg" @click="goToLogin">Get Started</button>
           </div>
 
-          <!-- Unlimited (popular) -->
+          <!-- Custom plan -->
           <div class="ag-price-card ag-price-card--popular ag-reveal" style="--delay:80ms">
-            <div class="ag-price-card__badge">BEST VALUE</div>
-            <div class="ag-price-card__label">Unlimited</div>
+            <div class="ag-price-card__badge">ENTERPRISE</div>
+            <div class="ag-price-card__label">Custom</div>
             <div class="ag-price-card__price">
-              <span class="ag-price-card__currency">$</span>
-              <span class="ag-price-card__amount">499</span>
-              <span class="ag-price-card__period">/ month</span>
+              <span class="ag-price-card__amount">Custom</span>
+              <span class="ag-price-card__period">/ tailored plan</span>
             </div>
-            <p class="ag-price-card__desc">Everything you need to run your entire security operation from a single platform.</p>
+            <p class="ag-price-card__desc">For larger security teams and enterprise agencies with specialized requirements.</p>
             <ul class="ag-price-card__features">
-              <li v-for="f in unlimitedFeatures" :key="f">
+              <li v-for="f in customFeatures" :key="f">
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="8" fill="rgba(255,255,255,0.2)"/><path d="M5 8l2.5 2.5L11 5.5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 {{ f }}
               </li>
             </ul>
-            <button class="ag-btn ag-btn--white ag-btn--full ag-btn--lg" @click="goToLogin">Get Started</button>
+            <button class="ag-btn ag-btn--white ag-btn--full ag-btn--lg" @click="goToLogin">Contact Sales</button>
           </div>
         </div>
 
@@ -774,7 +776,7 @@
         <!-- Brand col -->
         <div class="ag-footer__brand">
           <a href="#" class="ag-brand" @click.prevent>
-            <svg width="22" height="26" viewBox="0 0 26 30" fill="none"><path d="M13 0L0.5 5V15C0.5 22.5 6.1 29.4 13 30C19.9 29.4 25.5 22.5 25.5 15V5L13 0Z" fill="#1B4FD8"/><path d="M9 15.5L11.8 18.3L17.5 11.5" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <img :src="logoPatrol" class="w-7 h-7 object-contain" alt="AccessEasy Patrol Logo" />
             <span class="ag-brand__name">AccessEasy <span style="color:#1B4FD8; font-weight:900;">PATROL</span></span>
           </a>
           <p class="ag-footer__tagline">
@@ -830,6 +832,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
+import logoPatrol from '@/assets/images/logoPatrol.png';
 
 const router = useRouter();
 const rootRef = ref(null);
@@ -1031,7 +1034,7 @@ const reliabilityItems = [
 ];
 
 const perSiteFeatures = ['Unlimited Patrols', 'Unlimited Guards', 'Unlimited Events', 'All Core Features', 'Email & Chat Support'];
-const unlimitedFeatures = ['Unlimited Sites', 'Unlimited Patrols', 'Unlimited Guards', 'Unlimited Events', 'Priority Support', 'Dedicated Success Manager'];
+const customFeatures = ['Custom Sites & Scale', 'Unlimited Patrols & Guards', 'Custom Integrations & APIs', 'Dedicated Success Manager', '24/7 Priority Support', 'Custom SLAs & Security'];
 
 const pricingAssurances = [
   {
@@ -1323,8 +1326,58 @@ const pricingAssurances = [
   align-items: center;
   padding-top: clamp(84px, 10vh, 104px);
   padding-bottom: clamp(40px, 6vh, 64px);
-  background: radial-gradient(circle at 85% 25%, rgba(239, 246, 255, 0.8) 0%, rgba(255, 255, 255, 1) 70%);
+  background: 
+    radial-gradient(ellipse 70% 60% at 85% 25%, rgba(59, 130, 246, 0.16) 0%, transparent 70%),
+    radial-gradient(ellipse 55% 45% at 15% 45%, rgba(14, 165, 233, 0.14) 0%, transparent 65%),
+    radial-gradient(ellipse 45% 35% at 50% 85%, rgba(99, 102, 241, 0.09) 0%, transparent 60%),
+    linear-gradient(180deg, #F8FAFC 0%, #EFF6FF 50%, #F1F5F9 100%);
   box-sizing: border-box;
+  overflow: hidden;
+}
+
+.ag-hero__ambient {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(80px);
+  z-index: 0;
+}
+.ag-hero__ambient--1 {
+  width: 520px;
+  height: 520px;
+  top: 8%;
+  right: 4%;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.24) 0%, rgba(37, 99, 235, 0) 70%);
+  animation: ambientFloat 14s ease-in-out infinite alternate;
+}
+.ag-hero__ambient--2 {
+  width: 440px;
+  height: 440px;
+  bottom: 4%;
+  left: 4%;
+  background: radial-gradient(circle, rgba(14, 165, 233, 0.18) 0%, rgba(56, 189, 248, 0) 70%);
+  animation: ambientFloat 12s ease-in-out infinite alternate-reverse;
+}
+.ag-hero__ambient--3 {
+  width: 380px;
+  height: 380px;
+  top: 35%;
+  left: 42%;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.14) 0%, rgba(129, 140, 248, 0) 70%);
+}
+.ag-hero__grid-pattern {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at 1px 1px, rgba(37, 99, 235, 0.08) 1px, transparent 0);
+  background-size: 32px 32px;
+  mask-image: radial-gradient(ellipse 85% 85% at 50% 50%, black 40%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 85% 85% at 50% 50%, black 40%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+@keyframes ambientFloat {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(30px, -25px) scale(1.08); }
 }
 
 .ag-hero__inner {
@@ -1333,6 +1386,8 @@ const pricingAssurances = [
   grid-template-columns: 1fr;
   gap: 3rem;
   align-items: center;
+  position: relative;
+  z-index: 1;
 }
 
 @media (min-width: 1024px) {
@@ -1350,6 +1405,8 @@ const pricingAssurances = [
   display: flex;
   flex-direction: column;
   justify-content: center;
+  position: relative;
+  z-index: 2;
 }
 
 .ag-hero__h1 {
@@ -1402,6 +1459,7 @@ const pricingAssurances = [
   align-items: center;
   justify-content: center;
   margin: 0 auto;
+  z-index: 2;
 }
 
 /* ── Browser / Dashboard mockup ── */
@@ -1410,7 +1468,7 @@ const pricingAssurances = [
   z-index: 1;
   width: 100%;
   border-radius: 16px;
-  box-shadow: 0 20px 50px -10px rgba(10,22,40,0.14), 0 0 0 1px #E2E8F0;
+  box-shadow: 0 25px 60px -15px rgba(27, 79, 216, 0.16), 0 10px 30px -10px rgba(10, 22, 40, 0.12), 0 0 0 1px rgba(226, 232, 240, 0.9);
   overflow: hidden;
   background: #fff;
 }
@@ -2238,7 +2296,7 @@ const pricingAssurances = [
   display: grid;
   grid-template-columns: 1fr;
   gap: 1.5rem;
-  max-width: 1100px;
+  max-width: 1000px;
   margin: 0 auto 3rem;
 }
 @media (min-width: 768px) { .ag-pricing__grid { grid-template-columns: repeat(2, 1fr); gap: 1.25rem; } }

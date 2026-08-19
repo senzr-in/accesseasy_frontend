@@ -1,1 +1,0 @@
-import{C as e}from"./CheckpointLibrary-Dz0bMJzm.js";import{b as o,d as r,l as s,o as a}from"./index-DubWs-iX.js";const t={class:"h-full w-full p-6"},l={class:"h-full w-full rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm"},f={__name:"index",setup(d){return(c,n)=>(a(),o("div",t,[r("div",l,[s(e)])]))}};export{f as default};

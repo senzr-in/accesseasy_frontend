@@ -1,250 +1,360 @@
 <template>
-  <div class="flex min-h-screen w-full bg-[#f8fafc] dark:bg-[#020617] text-slate-900 dark:text-slate-100 flex-col lg:flex-row relative overflow-hidden font-sans">
-    <!-- Left Side: Marketing Content -->
-    <div class="flex-1 flex flex-col justify-center px-6 py-8 lg:px-14 lg:py-6 bg-white dark:bg-slate-900/10 dark:bg-black/20 backdrop-blur-md border-r border-slate-200 dark:border-white/10 relative overflow-hidden border-b lg:border-b-0">
-      <!-- Grid Background Pattern -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 min-h-screen w-full bg-[#030614] text-slate-100 relative overflow-x-hidden font-sans selection:bg-blue-500 selection:text-white">
+    <!-- Left Side: Marketing & AccessEasy PATROL Hero Section -->
+    <div class="w-full h-full min-h-[600px] lg:min-h-screen flex flex-col justify-center items-center p-6 relative z-20 overflow-hidden border-r border-slate-800/60 bg-[#050C16]">
+      
+      <!-- High-Tech AccessEasy PATROL Left Panel Circuit Background Image -->
       <div 
-        class="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none"
-        style="background-image: radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0); background-size: 24px 24px;"
+        class="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-60 pointer-events-none z-0"
+        :style="{ backgroundImage: `url(${patrolBgImage})` }"
       />
 
-      <div class="max-w-xl relative z-10 animate-fade-in-left">
-        <div class="flex items-center gap-3 mb-6">
-          <div class="h-10 w-10 rounded-xl bg-blue-600/20 flex items-center justify-center border border-blue-600/20 shadow-xl shadow-blue-600/10">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="w-6 h-6 text-blue-600"
-            >
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-            </svg>
-          </div>
-          <div class="flex flex-col">
-            <span class="text-base font-black tracking-tight uppercase leading-none text-slate-900 dark:text-white">AccessEasy</span>
-            <span class="text-[9px] font-black text-blue-600 tracking-[0.4em] uppercase mt-0.5">Scale Globally</span>
-          </div>
-        </div>
+      <!-- Custom Radar Sweep & Glowing Effects to match reference theme -->
+      <div class="absolute inset-0 pointer-events-none z-0 opacity-10 overflow-hidden">
+        <div class="radar-circle radar-circle-1" />
+        <div class="radar-circle radar-circle-2" />
+        <div class="radar-sweep" />
+      </div>
 
-        <h1 class="text-3xl lg:text-4xl font-black tracking-tight leading-[1] mb-4 text-slate-900 dark:text-white">
-          Build your secure <br>
-          <span class="text-blue-600">Enterprise</span> Network.
+      <!-- 4 Diagram Labels Positioned Next to Isometric Graphics -->
+      <!-- Top Left: Multi-Site Fleet -->
+      <div class="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-950/80 border border-cyan-500/30 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.4)] absolute top-[14%] left-[6%] z-10 hover:border-cyan-400 transition-all duration-300">
+        <Building2 class="w-4 h-4 text-cyan-400" />
+        <span class="text-[11px] font-black text-white tracking-wide uppercase">Multi-Site Fleet</span>
+      </div>
+
+      <!-- Top Right: Verified Tour -->
+      <div class="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-950/80 border border-cyan-500/30 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.4)] absolute top-[14%] right-[6%] z-10 hover:border-cyan-400 transition-all duration-300">
+        <Smartphone class="w-4 h-4 text-cyan-400" />
+        <span class="text-[11px] font-black text-white tracking-wide uppercase">Verified Tour</span>
+      </div>
+
+      <!-- Bottom Left: Critical Alerts -->
+      <div class="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-950/80 border border-cyan-500/30 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.4)] absolute bottom-[22%] left-[6%] z-10 hover:border-cyan-400 transition-all duration-300">
+        <AlertTriangle class="w-4 h-4 text-cyan-400" />
+        <span class="text-[11px] font-black text-white tracking-wide uppercase">Critical Alerts</span>
+      </div>
+
+      <!-- Bottom Right: Web Control Center -->
+      <div class="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-950/80 border border-cyan-500/30 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.4)] absolute bottom-[22%] right-[6%] z-10 hover:border-cyan-400 transition-all duration-300">
+        <Globe class="w-4 h-4 text-cyan-400" />
+        <span class="text-[11px] font-black text-white tracking-wide uppercase">Web Control Center</span>
+      </div>
+
+      <!-- Details Highlight Text -->
+      <div class="relative w-full max-w-[460px] px-6 text-center z-10 select-none pointer-events-none">
+        
+        <!-- Shield Brand Crest Logo -->
+        <div class="flex items-center justify-center gap-3 mb-3.5">
+          <div class="h-11 w-11 rounded-2xl bg-slate-900/90 border border-cyan-400/50 p-2 flex items-center justify-center shadow-[0_0_20px_rgba(34,211,238,0.4)]">
+            <img :src="logoImg" class="w-full h-full object-contain filter drop-shadow-[0_0_10px_rgba(34,211,238,0.8)] brightness-105 contrast-110" alt="AccessEasy Patrol Logo" />
+          </div>
+          <span class="text-xl sm:text-2xl font-black text-white tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
+            AccessEasy <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-sky-300 uppercase">PATROL</span>
+          </span>
+        </div>
+        
+        <!-- Centered Bold Headline -->
+        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white leading-tight mb-3.5 drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)]">
+          One Platform.<br>
+          Every Patrol.<br>
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-400 drop-shadow-[0_0_30px_rgba(34,211,238,0.5)]">
+            Real-Time Security.
+          </span>
         </h1>
-
-        <p class="text-[12px] text-slate-500 dark:text-slate-400 font-bold mb-8 leading-relaxed max-w-sm uppercase tracking-wide">
-          Join the elite organizations using AccessEasy for unified infrastructure security.
+        
+        <!-- Centered Highlight Description Text -->
+        <p class="text-xs sm:text-[13px] text-slate-200/95 leading-relaxed font-semibold max-w-[390px] mx-auto drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)]">
+          Your total control solution from the guards' mobile app and immediate verified checkpoints to live GPS tracking, comprehensive multi-site oversight, and secure cloud command.
         </p>
+      </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-5 mb-8">
-          <div
-            v-for="(h, i) in highlights"
-            :key="i"
-            class="flex items-center gap-3 group"
-          >
-            <div class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-md group-hover:scale-110 group-hover:border-blue-500/50 transition-all duration-300">
-              <component
-                :is="h.icon"
-                class="h-4 w-4 text-blue-600"
-              />
-            </div>
-            <div>
-              <h3 class="font-black text-[10px] tracking-[0.05em] uppercase text-slate-900 dark:text-white">
-                {{ h.text }}
-              </h3>
-              <p class="text-[9px] font-bold text-slate-500 dark:text-slate-400 leading-snug mt-0.5 uppercase tracking-widest">
-                {{ h.sub }}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div class="pt-6 border-t border-slate-200 dark:border-white/5">
-          <p class="text-[8px] font-black tracking-[0.3em] text-slate-400 dark:text-slate-600 dark:text-slate-300 mb-4 uppercase">
-            Industry Standards
-          </p>
-          <div class="flex flex-wrap gap-x-6 gap-y-3">
-            <div
-              v-for="(ind, i) in industries"
+      <!-- Bottom Security Modality Horizontal Dock -->
+      <div class="absolute bottom-6 left-1/2 -translate-x-1/2 w-full max-w-[90%] z-10 select-none">
+        <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-2.5 shadow-[0_15px_35px_rgba(0,0,0,0.5)] backdrop-blur-md">
+          <div class="grid grid-cols-5 gap-2">
+            <div 
+              v-for="(auth, i) in authMethods" 
               :key="i"
-              class="flex items-center gap-2 opacity-50 hover:opacity-100 transition-all duration-300 cursor-default group"
+              class="flex flex-col items-center justify-center p-2 rounded-xl bg-slate-900/40 border border-blue-500/10 hover:border-cyan-400/50 hover:bg-slate-900/60 transition-all duration-300 text-center cursor-default group"
             >
-              <component
-                :is="ind.icon"
-                class="h-4 w-4 group-hover:text-blue-600 transition-colors"
-              />
-              <span class="text-[9px] font-black tracking-widest uppercase">{{ ind.name }}</span>
+              <div class="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mb-1 group-hover:scale-105 transition-transform">
+                <component :is="auth.icon" class="w-4 h-4 text-cyan-400" />
+              </div>
+              <span class="text-[10px] font-black text-white leading-tight block">{{ auth.name }}</span>
+              <span class="text-[8px] text-slate-400 mt-0.5 block leading-tight font-medium">{{ auth.sub }}</span>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Right Side: Registration Form -->
-    <div class="flex-1 flex items-center justify-center p-4 lg:p-10 relative overflow-hidden bg-slate-50 dark:bg-slate-900/50 dark:bg-transparent">
-      <!-- Glow effect -->
-      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-blue-600/5 rounded-full blur-[100px] pointer-events-none" />
+    <!-- Right Side: Real White Marble Luxury Register Card Section -->
+    <div class="w-full h-full flex items-center justify-center p-4 sm:p-6 lg:p-8 relative overflow-hidden bg-gradient-to-br from-[#dbe4f0] via-[#e8eff8] to-[#d2dceb] min-h-screen z-10">
+      <!-- Subtle Security Tech Grid Background Pattern -->
+      <div 
+        class="absolute inset-0 opacity-[0.22] pointer-events-none"
+        style="background-image: radial-gradient(circle at 2px 2px, rgba(59, 130, 246, 0.35) 1px, transparent 0); background-size: 28px 28px;"
+      />
 
-      <div class="w-full max-w-[480px] rounded-[2rem] bg-white dark:bg-slate-900/90 dark:bg-[#0a0e1a]/80 backdrop-blur-xl p-8 shadow-2xl border border-slate-200 dark:border-white/10 relative z-10 animate-fade-in-up">
-        <div class="text-center mb-8">
-          <div class="mx-auto mb-4 h-12 w-12 flex items-center justify-center rounded-[1rem] bg-blue-600 text-white shadow-lg shadow-blue-600/30 border border-blue-500/20">
-            <UserPlus class="h-5 w-5" />
-          </div>
-          <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight uppercase mb-1">
-            Create Account
-          </h2>
-          <p class="text-[9px] text-blue-600 font-black tracking-[0.4em] uppercase text-center w-full">
-            Join the next-gen security platform
-          </p>
+      <!-- Large Ambient Glowing Spheres & Pulses -->
+      <div class="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-cyan-400/25 rounded-full blur-[140px] pointer-events-none animate-pulse-slow" />
+      <div class="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-[550px] h-[550px] bg-blue-500/20 rounded-full blur-[160px] pointer-events-none animate-pulse-slow" style="animation-delay: 1s;" />
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-300/20 rounded-full blur-[180px] pointer-events-none" />
+
+      <!-- Concentric Security Radar Rings Expanding Outward -->
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0">
+        <div class="right-radar-ring ring-1" />
+        <div class="right-radar-ring ring-2" />
+        <div class="right-radar-ring ring-3" />
+      </div>
+
+      <!-- Floating Animated Light Sparks & Orbs -->
+      <div class="spark spark-1" />
+      <div class="spark spark-2" />
+      <div class="spark spark-3" />
+      <div class="spark spark-4" />
+      <div class="spark spark-5" />
+
+      <!-- Floating Glassmorphic Live Security Status Widgets -->
+      <!-- Widget 1: Top-Left Live Patrol System Badge -->
+      <div class="hidden xl:flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white/85 border border-white/90 backdrop-blur-xl shadow-[0_15px_35px_rgba(0,0,0,0.08)] absolute top-10 left-8 z-20 animate-float-slow group hover:scale-105 transition-transform cursor-default select-none">
+        <div class="h-9 w-9 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-600 shadow-sm">
+          <Radio class="w-[18px] h-[18px] animate-pulse text-emerald-500" />
         </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <span class="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
+            <span class="text-[10px] font-black tracking-wider text-slate-800 uppercase">Live Patrol System</span>
+          </div>
+          <span class="text-[11px] font-extrabold text-emerald-600">12 Guard Routes Active</span>
+        </div>
+      </div>
 
-        <form
-          class="space-y-5"
-          @submit.prevent="handleRegistration"
-        >
-          <!-- Personal Info Grid -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="space-y-1.5">
-              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Full Name</label>
-              <div class="relative group">
-                <input
-                  v-model="fullName"
-                  type="text"
-                  required
-                  placeholder="John Doe"
-                  class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
-                >
-                <User class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+      <!-- Widget 2: Top-Right Encrypted Command Link Badge -->
+      <div class="hidden xl:flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white/85 border border-white/90 backdrop-blur-xl shadow-[0_15px_35px_rgba(0,0,0,0.08)] absolute top-12 right-8 z-20 animate-float-delayed group hover:scale-105 transition-transform cursor-default select-none">
+        <div class="h-9 w-9 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-600 shadow-sm">
+          <ShieldCheck class="w-[18px] h-[18px] text-blue-600" />
+        </div>
+        <div>
+          <span class="text-[10px] font-black tracking-wider text-slate-800 uppercase block">Enterprise Cloud</span>
+          <span class="text-[11px] font-extrabold text-blue-600">SOC 2 Type II Certified</span>
+        </div>
+      </div>
+
+      <!-- Widget 3: Bottom-Left Guard Verification Modality Badge -->
+      <div class="hidden xl:flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white/85 border border-white/90 backdrop-blur-xl shadow-[0_15px_35px_rgba(0,0,0,0.08)] absolute bottom-12 left-8 z-20 animate-float-slow group hover:scale-105 transition-transform cursor-default select-none">
+        <div class="h-9 w-9 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-600 shadow-sm">
+          <ScanFace class="w-[18px] h-[18px] text-cyan-600" />
+        </div>
+        <div>
+          <span class="text-[10px] font-black tracking-wider text-slate-800 uppercase block">Guard Modalities</span>
+          <span class="text-[11px] font-extrabold text-slate-700">NFC, QR & Face AI</span>
+        </div>
+      </div>
+
+      <!-- Widget 4: Bottom-Right Incident Status Badge -->
+      <div class="hidden xl:flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white/85 border border-white/90 backdrop-blur-xl shadow-[0_15px_35px_rgba(0,0,0,0.08)] absolute bottom-14 right-8 z-20 animate-float-delayed group hover:scale-105 transition-transform cursor-default select-none">
+        <div class="h-9 w-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-600 shadow-sm">
+          <Zap class="w-[18px] h-[18px] text-amber-500" />
+        </div>
+        <div>
+          <span class="text-[10px] font-black tracking-wider text-slate-800 uppercase block">Instant Deployment</span>
+          <div class="flex items-center gap-1">
+            <CheckCircle2 class="w-3.5 h-3.5 text-emerald-500" />
+            <span class="text-[11px] font-extrabold text-emerald-600">14-Day Free Trial</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Marble Card Container -->
+      <div 
+        class="w-full max-w-[480px] rounded-[2.5rem] p-6 sm:p-8 shadow-[0_30px_70px_-10px_rgba(0,0,0,0.25),0_0_35px_rgba(255,255,255,0.8)] border border-white/90 relative z-10 animate-fade-in-up text-slate-900 overflow-hidden bg-cover bg-center my-4"
+        :style="{ backgroundImage: `url(${marbleBg})` }"
+      >
+        <!-- Light Translucent White Wash for Polished Marble Texture Visibility -->
+        <div class="absolute inset-0 bg-white/40 pointer-events-none z-0" />
+
+        <div class="relative z-10">
+          <!-- Top Shield Crest Icon with Smooth Luminous Glass Aura -->
+          <div class="text-center mb-5">
+            <div class="relative inline-flex items-center justify-center mb-3 group">
+              <!-- Soft Ambient Cyan/Blue Halo -->
+              <div class="absolute -inset-2 rounded-full bg-gradient-to-tr from-blue-500/20 via-cyan-400/20 to-sky-400/20 blur-lg group-hover:opacity-100 transition duration-500 animate-pulse-slow" />
+              
+              <!-- Smooth Pearl White Luxury Glass Emblem Container -->
+              <div class="relative h-18 w-18 sm:h-22 sm:w-22 rounded-full bg-gradient-to-b from-white via-[#f6f9ff] to-[#e8f0fe] border-2 border-blue-200/90 p-2.5 flex items-center justify-center shadow-[0_12px_28px_-4px_rgba(27,79,216,0.18),0_4px_12px_rgba(0,0,0,0.06),inset_0_2px_4px_rgba(255,255,255,1)] ring-4 ring-blue-500/10">
+                <!-- 3D High-Def Patrol Logo with Crisp Floating Depth -->
+                <img 
+                  :src="logoImg" 
+                  class="w-full h-full object-contain relative z-10 filter drop-shadow-[0_5px_12px_rgba(20,40,100,0.25)] drop-shadow-[0_1px_3px_rgba(37,99,235,0.2)] transition-transform duration-300 group-hover:scale-105" 
+                  alt="AccessEasy Patrol" 
+                />
               </div>
             </div>
 
-            <div class="space-y-1.5">
-              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Phone Number</label>
-              <div class="relative group">
-                <input
-                  v-model="mobileNumber"
-                  type="text"
-                  inputmode="numeric"
-                  required
-                  placeholder="10-digit number"
-                  maxlength="10"
-                  class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
-                  @input="mobileNumber = $event.target.value.replace(/\D/g, '')"
-                >
-                <Phone class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
-              </div>
-            </div>
-            
-            <div class="space-y-1.5">
-              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Work Email</label>
-              <div class="relative group">
-                <input
-                  v-model="email"
-                  type="email"
-                  required
-                  placeholder="name@company.com"
-                  class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
-                  @input="email = email.toLowerCase()"
-                >
-                <Mail class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
-              </div>
-            </div>
-
-            <div class="space-y-1.5">
-              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Employee ID</label>
-              <div class="relative group">
-                <input
-                  v-model="employeeId"
-                  type="text"
-                  required
-                  placeholder="EMP-001"
-                  class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
-                >
-                <IdCard class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
-              </div>
-            </div>
+            <h2 class="text-2xl font-black tracking-tight text-slate-900 mb-0.5">
+              Create Patrol Account
+            </h2>
+            <p class="text-xs text-slate-600 font-semibold">
+              Deploy your Patrol & Security Operations Center
+            </p>
           </div>
 
-          <!-- Company info -->
-          <div class="space-y-1.5">
-            <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Company Name</label>
-            <div class="relative group">
-              <input
-                v-model="companyName"
-                type="text"
-                required
-                placeholder="Acme Corporation"
-                class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
+          <form
+            class="space-y-3.5"
+            @submit.prevent="handleRegistration"
+          >
+            <!-- Personal Info Grid: Full Name & Phone Number -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="space-y-1">
+                <label class="block text-xs font-bold text-slate-800">
+                  Full Name
+                </label>
+                <div class="relative group">
+                  <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                    <User class="w-4 h-4" />
+                  </div>
+                  <input
+                    v-model="fullName"
+                    type="text"
+                    required
+                    placeholder="John Doe"
+                    class="w-full h-11 pl-10 pr-3 rounded-xl bg-slate-100/80 border border-slate-300/80 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 shadow-inner transition-all outline-none text-xs font-bold text-slate-900 placeholder:text-slate-400"
+                  />
+                </div>
+              </div>
+
+              <div class="space-y-1">
+                <label class="block text-xs font-bold text-slate-800">
+                  Phone Number
+                </label>
+                <div class="relative group">
+                  <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                    <Phone class="w-4 h-4" />
+                  </div>
+                  <input
+                    v-model="mobileNumber"
+                    type="tel"
+                    inputmode="numeric"
+                    required
+                    placeholder="10-digit number"
+                    maxlength="10"
+                    class="w-full h-11 pl-10 pr-3 rounded-xl bg-slate-100/80 border border-slate-300/80 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 shadow-inner transition-all outline-none text-xs font-bold text-slate-900 placeholder:text-slate-400"
+                    @input="mobileNumber = $event.target.value.replace(/\D/g, '')"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Email & Employee ID Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="space-y-1">
+                <label class="block text-xs font-bold text-slate-800">
+                  Work Email
+                </label>
+                <div class="relative group">
+                  <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                    <Mail class="w-4 h-4" />
+                  </div>
+                  <input
+                    v-model="email"
+                    type="email"
+                    required
+                    placeholder="name@company.com"
+                    class="w-full h-11 pl-10 pr-3 rounded-xl bg-slate-100/80 border border-slate-300/80 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 shadow-inner transition-all outline-none text-xs font-bold text-slate-900 placeholder:text-slate-400"
+                    @input="email = email.toLowerCase()"
+                  />
+                </div>
+              </div>
+
+              <div class="space-y-1">
+                <label class="block text-xs font-bold text-slate-800">
+                  Employee ID
+                </label>
+                <div class="relative group">
+                  <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                    <IdCard class="w-4 h-4" />
+                  </div>
+                  <input
+                    v-model="employeeId"
+                    type="text"
+                    required
+                    placeholder="EMP-001"
+                    class="w-full h-11 pl-10 pr-3 rounded-xl bg-slate-100/80 border border-slate-300/80 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 shadow-inner transition-all outline-none text-xs font-bold text-slate-900 placeholder:text-slate-400"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Company Name -->
+            <div class="space-y-1">
+              <label class="block text-xs font-bold text-slate-800">
+                Company Name
+              </label>
+              <div class="relative group">
+                <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors">
+                  <Building2 class="w-4 h-4" />
+                </div>
+                <input
+                  v-model="companyName"
+                  type="text"
+                  required
+                  placeholder="Acme Security Solutions"
+                  class="w-full h-11 pl-10 pr-3 rounded-xl bg-slate-100/80 border border-slate-300/80 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 shadow-inner transition-all outline-none text-xs font-bold text-slate-900 placeholder:text-slate-400"
+                />
+              </div>
+            </div>
+
+            <!-- Primary Action Button -->
+            <button
+              type="submit"
+              :disabled="isLoading || !isFormValid"
+              class="w-full h-12 mt-2 rounded-xl text-xs font-black tracking-wider uppercase flex items-center justify-center gap-2 bg-gradient-to-r from-[#002884] via-[#0052cc] to-[#0070f3] hover:from-[#001f66] hover:to-[#0052cc] text-white border-t border-white/50 shadow-[0_10px_30px_rgba(0,82,204,0.5),0_0_20px_rgba(0,102,255,0.35)] hover:shadow-[0_12px_35px_rgba(0,82,204,0.65)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed group relative overflow-hidden"
+            >
+              <!-- Button Gloss Sweep Effect -->
+              <div class="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-12 -translate-x-full group-hover:translate-x-[300%] transition-transform duration-1000" />
+              
+              <span v-if="isLoading">Processing...</span>
+              <template v-else>
+                <span>Launch Patrol Account</span>
+                <ArrowRight class="w-4 h-4 transition-transform group-hover:translate-x-1.5 duration-300" />
+              </template>
+            </button>
+
+            <!-- OR Divider -->
+            <div class="flex items-center justify-center gap-3 py-1">
+              <div class="h-[1px] flex-1 bg-slate-300" />
+              <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">OR</span>
+              <div class="h-[1px] flex-1 bg-slate-300" />
+            </div>
+
+            <!-- Google OAuth Button -->
+            <button
+              type="button"
+              class="w-full h-11 rounded-xl text-xs font-bold flex items-center justify-center gap-3 bg-gradient-to-b from-white to-slate-100 border border-slate-300/80 hover:bg-slate-50 text-slate-800 shadow-sm hover:scale-[1.01] active:scale-[0.99] transition-all duration-300"
+              @click="signupWithGoogle"
+            >
+              <svg class="w-4 h-4" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+              </svg>
+              <span>Sign up with Google</span>
+            </button>
+
+            <!-- Sign In Link -->
+            <p class="text-center text-xs font-semibold text-slate-600 pt-1">
+              Already have an account? 
+              <router-link
+                to="/login"
+                class="text-blue-600 hover:text-blue-700 font-bold underline underline-offset-4 ml-1 cursor-pointer transition-colors"
               >
-              <Building2 class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            :disabled="isLoading || !isFormValid"
-            class="w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 transition-all disabled:opacity-70 disabled:cursor-not-allowed group mt-2"
-          >
-            <span v-if="isLoading">Processing...</span>
-            <template v-else>
-              Launch my account
-              <ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-1" />
-            </template>
-          </button>
-
-          <div class="flex items-center justify-between gap-4 py-2 opacity-50">
-            <div class="h-[1px] flex-1 bg-slate-300 dark:bg-slate-700" />
-            <span class="text-[9px] font-black tracking-[0.3em] text-slate-500 dark:text-slate-400 uppercase">OR</span>
-            <div class="h-[1px] flex-1 bg-slate-300 dark:bg-slate-700" />
-          </div>
-
-          <button
-            type="button"
-            class="w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.1em] flex items-center justify-center gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 hover:border-blue-500/50 hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-slate-800 text-slate-700 dark:text-white shadow-sm transition-all group"
-            @click="signupWithGoogle"
-          >
-            <svg
-              class="w-4 h-4"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                fill="#4285F4"
-              />
-              <path
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                fill="#34A853"
-              />
-              <path
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                fill="#FBBC05"
-              />
-              <path
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                fill="#EA4335"
-              />
-            </svg>
-            Sign up with Google
-          </button>
-
-          <p class="text-center text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider pt-2">
-            Already have an account? 
-            <router-link
-              to="/login"
-              class="text-blue-600 hover:text-blue-700 underline underline-offset-4 cursor-pointer"
-            >
-              Sign In
-            </router-link>
-          </p>
-        </form>
-
-        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 text-[8px] font-black tracking-[0.4em] text-slate-400 uppercase flex items-center gap-2">
-          <div class="h-1.5 w-1.5 rounded-full bg-blue-500" />
-          Join 500+ Enterprises
+                Sign In
+              </router-link>
+            </p>
+          </form>
         </div>
       </div>
     </div>
@@ -255,11 +365,11 @@
         <div 
           v-for="toast in toasts" 
           :key="toast.id"
-          class="pointer-events-auto min-w-[320px] p-4 rounded-2xl bg-white dark:bg-slate-900/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200 dark:border-white/10 shadow-2xl flex items-start gap-3 animate-fade-in-up"
+          class="pointer-events-auto min-w-[320px] p-4 rounded-2xl bg-white/95 backdrop-blur-xl border border-slate-200/90 shadow-2xl flex items-start gap-3 animate-fade-in-up"
         >
           <div
             :class="[
-              'mt-0.5 p-1 rounded-lg',
+              'mt-0.5 p-1.5 rounded-xl',
               toast.type === 'success' ? 'bg-emerald-100 text-emerald-600' : 
               toast.type === 'error' ? 'bg-rose-100 text-rose-600' : 'bg-blue-100 text-blue-600'
             ]"
@@ -278,15 +388,15 @@
             />
           </div>
           <div class="flex-1">
-            <p class="text-[11px] font-black uppercase tracking-wider text-slate-900 dark:text-white leading-tight">
+            <p class="text-[11px] font-black uppercase tracking-wider text-slate-900 leading-tight">
               {{ toast.type === 'success' ? 'Success' : toast.type === 'error' ? 'Notice' : 'Information' }}
             </p>
-            <p class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-1">
+            <p class="text-[10px] font-bold text-slate-600 uppercase tracking-widest mt-1">
               {{ toast.message }}
             </p>
           </div>
           <button
-            class="text-slate-400 hover:text-slate-600 dark:text-slate-300"
+            class="text-slate-400 hover:text-slate-600 transition-colors"
             @click="removeToast(toast.id)"
           >
             <X class="w-4 h-4" />
@@ -302,11 +412,18 @@ import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
 import { 
-  UserPlus, User, Mail, Phone, Building2, MapPin, 
-  ArrowRight, CheckCircle, AlertCircle, Info, X,
-  IdCard, Zap, ShieldCheck, BarChart3, Cpu,
-  Factory, Warehouse, GraduationCap, HeartPulse, Globe
+  Building2, Smartphone, AlertTriangle, Globe, Radio, ShieldCheck,
+  ScanFace, Zap, CheckCircle2, User, Phone, Mail, IdCard, ArrowRight,
+  CheckCircle, AlertCircle, Info, X, Nfc, QrCode
 } from "lucide-vue-next";
+
+// Directly import image assets so Vite bundles and displays them in dev and production
+import patrolHeroBg from "@/assets/images/patrol_hero_bg.png";
+import marbleBg from "@/assets/images/marble_bg.png";
+import logoImg from "@/assets/images/logoPatrol.png";
+
+// Custom Generated High-Tech Patrol Cyber Security Hero Background Image
+const patrolBgImage = patrolHeroBg;
 
 const router = useRouter();
 
@@ -324,31 +441,16 @@ const fullName = ref("");
 const email = ref("");
 const mobileNumber = ref("");
 const employeeId = ref("");
-const emailError = ref("");
-const phoneError = ref("");
-const year = ref(new Date().getFullYear());
-
-const isEmailValid = ref(false);
-const isPhoneValid = ref(false);
 
 const toasts = ref([]);
-let emailToastId = null;
-let phoneToastId = null;
 
-const highlights = [
-  { icon: Zap, text: "Rapid deployment", sub: "Live in under 24 hours." },
-  { icon: ShieldCheck, text: "Enterprise grade", sub: "Military-level encryption." },
-  { icon: BarChart3, text: "Scalable logs", sub: "Billions of events tracked." },
-  { icon: Cpu, text: "Native hardware", sub: "Deep device integration." },
-];
-
-const industries = [
-  { icon: Building2, name: "Corporate" },
-  { icon: Factory, name: "Industrial" },
-  { icon: Warehouse, name: "Logistics" },
-  { icon: GraduationCap, name: "Education" },
-  { icon: HeartPulse, name: "Healthcare" },
-  { icon: Globe, name: "Critical Infra" },
+// Security Guard Modalities & Mobile App Badges
+const authMethods = [
+  { name: "Guard App", sub: "Mobile Tour App", icon: Smartphone },
+  { name: "NFC Tag", sub: "Instant Tap Scan", icon: Nfc },
+  { name: "QR Route", sub: "Checkpoint Code", icon: QrCode },
+  { name: "Face AI", sub: "Guard Verification", icon: ScanFace },
+  { name: "Guard PIN", sub: "Passcode Sign-In", icon: IdCard }
 ];
 
 const addToast = (message, type = "info", duration = 5000) => {
@@ -579,21 +681,8 @@ async function signupWithGoogle() {
 </script>
 
 <style scoped>
-.animate-fade-in-left {
-  animation: fadeInLeft 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
 .animate-fade-in-up {
   animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.animate-shake {
-  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
-}
-
-@keyframes fadeInLeft {
-  from { opacity: 0; transform: translateX(-30px); }
-  to { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes fadeInUp {
@@ -601,53 +690,105 @@ async function signupWithGoogle() {
   to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes shake {
-  10%, 90% { transform: translate3d(-1px, 0, 0); }
-  20%, 80% { transform: translate3d(2px, 0, 0); }
-  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-  40%, 60% { transform: translate3d(4px, 0, 0); }
+/* Tactical Radar Sweep Animation */
+.radar-circle {
+  position: absolute;
+  top: 30%;
+  left: 30%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px solid rgba(6, 182, 212, 0.4);
+  box-shadow: 0 0 15px rgba(6, 182, 212, 0.2);
+}
+.radar-circle-1 { width: 300px; height: 300px; }
+.radar-circle-2 { width: 550px; height: 550px; }
+
+.radar-sweep {
+  position: absolute;
+  top: 30%;
+  left: 30%;
+  width: 550px;
+  height: 550px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, rgba(6, 182, 212, 0.3) 0deg, transparent 60deg, transparent 360deg);
+  animation: radarRotate 10s linear infinite;
 }
 
-/* Custom Scrollbar for form */
-.flex-1 {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(0,0,0,0.1) transparent;
+@keyframes radarRotate {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
-.flex-1::-webkit-scrollbar {
+/* Concentric Security Radar Rings for Right Panel */
+.right-radar-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1.5px dashed rgba(59, 130, 246, 0.25);
+  animation: pulseRing 8s ease-in-out infinite alternate;
+}
+.right-radar-ring.ring-1 { width: 520px; height: 520px; animation-delay: 0s; }
+.right-radar-ring.ring-2 { width: 680px; height: 680px; animation-delay: -2.5s; }
+.right-radar-ring.ring-3 { width: 780px; height: 780px; animation-delay: -5s; }
+
+@keyframes pulseRing {
+  0% { transform: translate(-50%, -50%) scale(0.96); opacity: 0.2; }
+  50% { transform: translate(-50%, -50%) scale(1.03); opacity: 0.45; }
+  100% { transform: translate(-50%, -50%) scale(0.98); opacity: 0.25; }
+}
+
+/* Floating Glassmorphic Status Badges Animations */
+.animate-float-slow {
+  animation: floatWidgetSlow 6s ease-in-out infinite alternate;
+}
+.animate-float-delayed {
+  animation: floatWidgetDelayed 7s ease-in-out infinite alternate;
+}
+
+@keyframes floatWidgetSlow {
+  0% { transform: translateY(0px) rotate(0deg); }
+  100% { transform: translateY(-12px) rotate(0.5deg); }
+}
+
+@keyframes floatWidgetDelayed {
+  0% { transform: translateY(0px) rotate(0deg); }
+  100% { transform: translateY(14px) rotate(-0.5deg); }
+}
+
+.animate-pulse-slow {
+  animation: pulseSlow 8s ease-in-out infinite alternate;
+}
+
+@keyframes pulseSlow {
+  0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.2; }
+  100% { transform: translate(-50%, -50%) scale(1.15); opacity: 0.35; }
+}
+
+/* Spark animations */
+.spark {
+  position: absolute;
   width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(96, 165, 250, 0.8);
+  box-shadow: 0 0 10px rgba(96, 165, 250, 0.8);
+  animation: sparkFloat 8s ease-in-out infinite;
+}
+.spark-1 { top: 15%; right: 12%; animation-delay: 0s; }
+.spark-2 { bottom: 20%; left: 10%; animation-delay: 2.5s; }
+.spark-3 { top: 70%; right: 25%; animation-delay: 5s; }
+.spark-4 { top: 35%; left: 15%; animation-delay: 1.8s; }
+.spark-5 { bottom: 35%; right: 20%; animation-delay: 3.8s; }
+
+@keyframes sparkFloat {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.2; }
+  50% { transform: translateY(-30px) scale(1.5); opacity: 0.9; }
 }
 
-.flex-1::-webkit-scrollbar-thumb {
-  background: rgba(0,0,0,0.1);
-  border-radius: 10px;
-}
-
-.progress-bar-fill {
-  height: 100%;
-  background: #10b981;
-  border-radius: 3px;
-}
-
-/* Toast Styles */
-.toast-container {
-  position: fixed;
-  top: 4rem;
-  right: 1rem;
-  z-index: 9999;
-  pointer-events: none;
-}
-
-.toast-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.toast-list > * {
-  pointer-events: auto;
-}
-
+/* Toast animations */
 .toast-enter-active,
 .toast-leave-active {
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -661,14 +802,5 @@ async function signupWithGoogle() {
 .toast-leave-to {
   opacity: 0;
   transform: scale(0.9);
-}
-
-/* Mobile Responsiveness */
-@media (max-width: 960px) {
-  .toast-container {
-    top: 1rem;
-    left: 1rem;
-    right: 1rem;
-  }
 }
 </style>

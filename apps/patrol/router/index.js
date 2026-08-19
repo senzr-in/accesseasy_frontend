@@ -196,6 +196,18 @@ const routes = [
         meta: { roles: ["Admin"] }
       },
       {
+        path: "sites",
+        name: "Sites",
+        component: () => import("@/pages/sites/index.vue"),
+        meta: { roles: ["Admin", "Manager"] }
+      },
+      {
+        path: "sites/:id",
+        name: "SiteDetail",
+        component: () => import("@/pages/sites/SiteDetail.vue"),
+        meta: { roles: ["Admin", "Manager"] }
+      },
+      {
         path: "settings/checkpoints",
         name: "SettingsCheckpoints",
         component: () => import("@/pages/settings/checkpoints/index.vue"),

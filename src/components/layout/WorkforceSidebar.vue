@@ -23,19 +23,8 @@
       class="flex items-center h-14 border-b border-slate-100 dark:border-white/5 shrink-0 overflow-hidden transition-all duration-300"
       :class="isCollapsed ? 'justify-center px-0' : 'gap-3 px-5'"
     >
-      <div class="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center shadow-sm shrink-0">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="w-4 h-4 text-white"
-        >
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-        </svg>
+      <div class="w-9 h-9 rounded-xl bg-blue-600/10 dark:bg-white/5 border border-blue-500/20 dark:border-white/10 flex items-center justify-center shadow-sm shrink-0 p-1.5">
+        <img :src="logoPatrol" class="w-full h-full object-contain filter drop-shadow-[0_2px_6px_rgba(27,79,216,0.25)]" alt="AccessEasy Patrol" />
       </div>
       <div
         v-if="!isCollapsed"
@@ -177,6 +166,7 @@ import {
   Settings, LogOut, ChevronLeft, ChevronRight, ClipboardList, Building2
 } from 'lucide-vue-next';
 import { authService } from '@/services/authService';
+import logoPatrol from '@/assets/images/logoPatrol.png';
 
 const router = useRouter();
 const rawUser = authService.getUserData();

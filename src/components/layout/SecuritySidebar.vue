@@ -23,15 +23,18 @@
       class="flex items-center h-16 border-b border-slate-100 dark:border-white/5 shrink-0 overflow-hidden transition-all duration-300"
       :class="isCollapsed ? 'justify-center px-0' : 'gap-3 px-5'"
     >
-      <div class="w-8 h-8 rounded-[10px] bg-indigo-600 flex items-center justify-center shadow-md shadow-indigo-600/20 shrink-0">
-        <Shield class="w-4 h-4 text-white" />
+      <div class="w-10 h-10 rounded-xl bg-blue-600/10 dark:bg-white/5 border border-blue-500/20 dark:border-white/10 flex items-center justify-center shadow-sm shrink-0 p-1.5">
+        <img :src="logoPatrol" class="w-full h-full object-contain filter drop-shadow-[0_2px_6px_rgba(27,79,216,0.25)]" alt="AccessEasy Patrol" />
       </div>
       <div
         v-if="!isCollapsed"
         class="flex flex-col leading-none whitespace-nowrap"
       >
-        <span class="text-sm font-bold text-slate-900 dark:text-white tracking-tight">AccessEasy</span>
-        <span class="text-[10px] font-semibold text-slate-400 dark:text-slate-500 dark:text-slate-400 mt-0.5">{{ appMode === 'patrol' ? 'Patrol Platform' : 'Security Platform' }}</span>
+        <div class="flex items-center gap-1">
+          <span class="text-sm font-black text-slate-900 dark:text-white tracking-tight">AccessEasy</span>
+          <span class="text-sm font-black text-blue-600 dark:text-blue-400 tracking-tight uppercase">PATROL</span>
+        </div>
+        <span class="text-[10px] font-semibold text-slate-400 dark:text-slate-500 mt-0.5">{{ appMode === 'patrol' ? 'Patrol Platform' : 'Security Platform' }}</span>
       </div>
     </div>
     
@@ -99,13 +102,13 @@
         </div>
       </div>
 
-      <!-- SETUP -->
+      <!-- MANAGEMENT -->
       <div v-if="setupNav.length > 0">
         <p
           v-if="!isCollapsed"
           class="px-2 mb-2 text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 whitespace-nowrap"
         >
-          Setup
+          Management
         </p>
         <div class="space-y-1">
           <router-link
@@ -257,9 +260,10 @@ import {
   Home, Users, Shield, Lock, Map as MapIcon, BarChart2,
   MapPin, CheckCircle, Settings, HelpCircle, LogOut,
   ChevronLeft, ChevronRight, Cpu, Clock, AlertTriangle, Globe, FileText,
-  ShieldAlert, AlertCircle
+  ShieldAlert, AlertCircle, Building2, QrCode, Activity
 } from 'lucide-vue-next';
 import { authService } from '@/services/authService';
+import logoPatrol from '@/assets/images/logoPatrol.png';
 
 const router = useRouter();
 const appMode = import.meta.env.VITE_APP_MODE || 'workforce';
@@ -312,10 +316,9 @@ const userRole = computed(() => authService.getUserRole() || 'Employee');
 const operationsNav = computed(() => {
   if (appMode === 'patrol') {
     return [
-      { name: 'Patrol Management', href: '/dashboard/patrols', icon: ShieldAlert },
-      { name: 'Guard Management', href: '/dashboard/guards', icon: Users },
-      { name: 'Incidents', href: '/dashboard/incidents', icon: AlertCircle },
-      { name: 'Zones', href: '/dashboard/settings/zones', icon: MapIcon }
+      { name: 'Patrol Command', href: '/dashboard/patrols', icon: ShieldAlert },
+      { name: 'Live Monitoring', href: '/dashboard/monitoring', icon: Activity },
+      { name: 'Incidents', href: '/dashboard/incidents', icon: AlertCircle }
     ];
   }
   return [
@@ -325,26 +328,20 @@ const operationsNav = computed(() => {
   ];
 });
 
-const analyticsNav = [
-  { name: 'Reports', href: '/dashboard/reports', icon: BarChart2 }
-];
-
 const setupNav = computed(() => {
-  return []; // Temporarily disabled
-  /*
-  if (userRole.value === 'Admin' || userRole.value === 'Manager') {
+  if (appMode === 'patrol') {
     return [
+      { name: 'Sites', href: '/dashboard/sites', icon: Building2 },
+      { name: 'Zones', href: '/dashboard/settings/zones', icon: MapIcon },
+      { name: 'Checkpoints', href: '/dashboard/settings/checkpoints', icon: QrCode },
       { name: 'Guards', href: '/dashboard/guards', icon: Users },
-      { name: 'Roles', href: '/dashboard/settings/roles', icon: Lock },
-      { name: 'Shifts', href: '/dashboard/settings/shifts', icon: Clock },
-      { name: 'Permissions', href: '/dashboard/settings/permissions', icon: Shield },
-      { name: 'Guard Zones', href: '/dashboard/settings/zones', icon: MapPin },
-      { name: 'Gate Access Points', href: '/dashboard/access-control/doors', icon: CheckCircle },
-      { name: 'Patrol Checkpoints', href: '/dashboard/settings/checkpoints', icon: Settings },
+      { name: 'Shifts', href: '/dashboard/settings/shifts', icon: Clock }
     ];
   }
   return [];
-  */
 });
 
+const analyticsNav = [
+  { name: 'Reports', href: '/dashboard/reports', icon: BarChart2 }
+];
 </script>

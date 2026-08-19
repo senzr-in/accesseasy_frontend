@@ -265,15 +265,17 @@ class AuthService {
   }
 
   setToken(token) {
+    if (!token) return;
     Cookies.set("userToken", token, { expires: 1 });
     sessionStorage.setItem("userToken", token);
+    localStorage.setItem("userToken", token);
     this.protectedApi.defaults.headers.common["Authorization"] =
       `Bearer ${token}`;
     this.updateLastActivity();
   }
 
   getToken() {
-    return Cookies.get("userToken") || sessionStorage.getItem("userToken");
+    return Cookies.get("userToken") || sessionStorage.getItem("userToken") || localStorage.getItem("userToken");
   }
 
   setPhone(phone) {

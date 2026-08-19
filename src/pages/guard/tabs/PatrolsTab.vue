@@ -587,10 +587,36 @@ const toggleOverflowMenu = () => {
   showOverflowMenu.value = !showOverflowMenu.value;
 };
 
-const dismissAlert = async (alertId) => {
+const getDismissedAlertIds = () => {
   try {
-    await patrolService.updateAlertStatus(alertId, 'resolved');
-    activeAlerts.value = activeAlerts.value.filter(a => a.id !== alertId);
+    const raw = localStorage.getItem('accesseasy_dismissed_alerts');
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+};
+
+const saveDismissedAlertId = (alertId) => {
+  try {
+    const dismissed = getDismissedAlertIds();
+    const idToSave = alertId || 'dummy_unknown_alert';
+    if (!dismissed.includes(idToSave)) {
+      dismissed.push(idToSave);
+      localStorage.setItem('accesseasy_dismissed_alerts', JSON.stringify(dismissed));
+    }
+  } catch (e) {}
+};
+
+const dismissAlert = async (alertId) => {
+  saveDismissedAlertId(alertId);
+  activeAlerts.value = activeAlerts.value.filter(a => a.id && a.id !== alertId);
+  if (activeAlerts.value.length === 0 || !alertId) {
+    activeAlerts.value = [];
+  }
+  try {
+    if (alertId) {
+      await patrolService.updateAlertStatus(alertId, 'resolved');
+    }
   } catch (error) {
     console.error("Failed to dismiss alert:", error);
   }
@@ -807,8 +833,9 @@ async function load() {
     checkpointMap.value = cpMap;
     allPatrols.value = todayPatrols;
     checkpointGroups.value = groups;
-    // Keep only active/unresolved alerts
-    activeAlerts.value = alerts.filter(a => a.status !== 'resolved');
+    // Keep only active/unresolved alerts that haven't been dismissed
+    const dismissedIds = new Set(getDismissedAlertIds());
+    activeAlerts.value = (alerts || []).filter(a => a && a.status !== 'resolved' && !dismissedIds.has(a.id));
   } catch (e) { console.error(e); }
 
   try {

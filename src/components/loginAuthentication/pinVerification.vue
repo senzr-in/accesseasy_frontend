@@ -1,348 +1,432 @@
 <template>
-  <div class="flex min-h-screen w-full bg-[#f8fafc] dark:bg-[#020617] text-slate-900 dark:text-slate-100 flex-col lg:flex-row relative overflow-hidden font-sans">
-    <!-- Left Side: Marketing Content (Same as Login) -->
-    <div class="flex-1 flex flex-col justify-center px-6 py-8 lg:px-14 lg:py-6 bg-white dark:bg-slate-900/10 dark:bg-black/20 backdrop-blur-md border-r border-slate-200 dark:border-white/10 relative overflow-hidden border-b lg:border-b-0">
-      <!-- Grid Background Pattern -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 min-h-screen w-full bg-[#030614] text-slate-100 relative overflow-x-hidden font-sans selection:bg-blue-500 selection:text-white">
+    <!-- Left Side: Marketing & AccessEasy PATROL Hero Section -->
+    <div class="w-full h-full min-h-[600px] lg:min-h-screen flex flex-col justify-center items-center p-6 relative z-20 overflow-hidden border-r border-slate-800/60 bg-[#050C16]">
+      
+      <!-- High-Tech AccessEasy PATROL Left Panel Circuit Background Image -->
       <div 
-        class="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none"
-        style="background-image: radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0); background-size: 24px 24px;"
+        class="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-60 pointer-events-none z-0"
+        :style="{ backgroundImage: `url(${patrolBgImage})` }"
       />
 
-      <div class="max-w-xl relative z-10 animate-fade-in-left">
-        <div class="flex items-center gap-3 mb-6">
-          <div class="h-10 w-10 rounded-xl bg-blue-600/20 flex items-center justify-center border border-blue-600/20 shadow-xl shadow-blue-600/10">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="w-6 h-6 text-blue-600"
-            >
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-            </svg>
-          </div>
-          <div class="flex flex-col">
-            <span class="text-base font-black tracking-tight uppercase leading-none text-slate-900 dark:text-white">AccessEasy</span>
-            <span class="text-[9px] font-black text-blue-600 tracking-[0.4em] uppercase mt-0.5">Universal OS</span>
-          </div>
-        </div>
+      <!-- Custom Radar Sweep & Glowing Effects to match reference theme -->
+      <div class="absolute inset-0 pointer-events-none z-0 opacity-10 overflow-hidden">
+        <div class="radar-circle radar-circle-1" />
+        <div class="radar-circle radar-circle-2" />
+        <div class="radar-sweep" />
+      </div>
 
-        <h1 class="text-3xl lg:text-4xl font-black tracking-tight leading-[1] mb-4 text-slate-900 dark:text-white">
-          Secure. Intelligent. <br>
-          <span class="text-blue-600">Frictionless</span> Access.
+      <!-- 4 Diagram Labels Positioned Next to Isometric Graphics -->
+      <!-- Top Left: Multi-Site Fleet -->
+      <div class="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-950/80 border border-cyan-500/30 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.4)] absolute top-[14%] left-[6%] z-10 hover:border-cyan-400 transition-all duration-300">
+        <Building2 class="w-4 h-4 text-cyan-400" />
+        <span class="text-[11px] font-black text-white tracking-wide uppercase">Multi-Site Fleet</span>
+      </div>
+
+      <!-- Top Right: Verified Tour -->
+      <div class="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-950/80 border border-cyan-500/30 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.4)] absolute top-[14%] right-[6%] z-10 hover:border-cyan-400 transition-all duration-300">
+        <Smartphone class="w-4 h-4 text-cyan-400" />
+        <span class="text-[11px] font-black text-white tracking-wide uppercase">Verified Tour</span>
+      </div>
+
+      <!-- Bottom Left: Critical Alerts -->
+      <div class="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-950/80 border border-cyan-500/30 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.4)] absolute bottom-[22%] left-[6%] z-10 hover:border-cyan-400 transition-all duration-300">
+        <AlertTriangle class="w-4 h-4 text-cyan-400" />
+        <span class="text-[11px] font-black text-white tracking-wide uppercase">Critical Alerts</span>
+      </div>
+
+      <!-- Bottom Right: Web Control Center -->
+      <div class="hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-950/80 border border-cyan-500/30 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.4)] absolute bottom-[22%] right-[6%] z-10 hover:border-cyan-400 transition-all duration-300">
+        <Globe class="w-4 h-4 text-cyan-400" />
+        <span class="text-[11px] font-black text-white tracking-wide uppercase">Web Control Center</span>
+      </div>
+
+      <!-- Details Highlight Text -->
+      <div class="relative w-full max-w-[460px] px-6 text-center z-10 select-none pointer-events-none">
+        
+        <!-- Shield Brand Crest Logo -->
+        <div class="flex items-center justify-center gap-2.5 mb-3">
+          <img :src="logoImg" class="w-8 h-8 object-contain drop-shadow-[0_0_14px_rgba(34,211,238,0.7)]" alt="AccessEasy Patrol Logo" />
+          <span class="text-lg sm:text-xl font-black text-white tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]">
+            AccessEasy <span class="text-cyan-400 uppercase">PATROL</span>
+          </span>
+        </div>
+        
+        <!-- Centered Bold Headline -->
+        <h1 class="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-white leading-tight mb-3.5 drop-shadow-[0_4px_24px_rgba(0,0,0,0.95)]">
+          One Platform.<br>
+          Every Patrol.<br>
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-sky-300 to-blue-400 drop-shadow-[0_0_30px_rgba(34,211,238,0.5)]">
+            Real-Time Security.
+          </span>
         </h1>
-
-        <p class="text-[12px] text-slate-500 dark:text-slate-400 font-bold mb-8 leading-relaxed max-w-sm uppercase tracking-wide">
-          Manage identity and physical security with the industry's most advanced platform.
+        
+        <!-- Centered Highlight Description Text -->
+        <p class="text-xs sm:text-[13px] text-slate-200/95 leading-relaxed font-semibold max-w-[390px] mx-auto drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)]">
+          Your total control solution from the guards' mobile app and immediate verified checkpoints to live GPS tracking, comprehensive multi-site oversight, and secure cloud command.
         </p>
+      </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-5 mb-8">
-          <div
-            v-for="(h, i) in highlights"
-            :key="i"
-            class="flex items-center gap-3 group"
-          >
-            <div class="h-8 w-8 flex-shrink-0 flex items-center justify-center rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 shadow-md group-hover:scale-110 group-hover:border-blue-500/50 transition-all duration-300">
-              <component
-                :is="h.icon"
-                class="h-4 w-4 text-blue-600"
-              />
-            </div>
-            <div>
-              <h3 class="font-black text-[10px] tracking-[0.05em] uppercase text-slate-900 dark:text-white">
-                {{ h.text }}
-              </h3>
-              <p class="text-[9px] font-bold text-slate-500 dark:text-slate-400 leading-snug mt-0.5 uppercase tracking-widest">
-                {{ h.sub }}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div class="pt-6 border-t border-slate-200 dark:border-white/5">
-          <p class="text-[8px] font-black tracking-[0.3em] text-slate-400 dark:text-slate-600 dark:text-slate-300 mb-4 uppercase">
-            Infrastructure Partners
-          </p>
-          <div class="flex flex-wrap gap-x-6 gap-y-3">
-            <div
-              v-for="(ind, i) in industries"
+      <!-- Bottom Security Modality Horizontal Dock -->
+      <div class="absolute bottom-6 left-1/2 -translate-x-1/2 w-full max-w-[90%] z-10 select-none">
+        <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-2.5 shadow-[0_15px_35px_rgba(0,0,0,0.5)] backdrop-blur-md">
+          <div class="grid grid-cols-5 gap-2">
+            <div 
+              v-for="(auth, i) in authMethods" 
               :key="i"
-              class="flex items-center gap-2 opacity-50 hover:opacity-100 transition-all duration-300 cursor-default group"
+              class="flex flex-col items-center justify-center p-2 rounded-xl bg-slate-900/40 border border-blue-500/10 hover:border-cyan-400/50 hover:bg-slate-900/60 transition-all duration-300 text-center cursor-default group"
             >
-              <component
-                :is="ind.icon"
-                class="h-4 w-4 group-hover:text-blue-600 transition-colors"
-              />
-              <span class="text-[9px] font-black tracking-widest uppercase">{{ ind.name }}</span>
+              <div class="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center mb-1 group-hover:scale-105 transition-transform">
+                <component :is="auth.icon" class="w-4 h-4 text-cyan-400" />
+              </div>
+              <span class="text-[10px] font-black text-white leading-tight block">{{ auth.name }}</span>
+              <span class="text-[8px] text-slate-400 mt-0.5 block leading-tight font-medium">{{ auth.sub }}</span>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Right Side: PIN/OTP Form Container -->
-    <div class="flex-1 flex items-center justify-center p-4 lg:p-10 relative overflow-hidden bg-slate-50 dark:bg-slate-900/50 dark:bg-transparent">
-      <!-- Glow effect -->
-      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-blue-600/5 rounded-full blur-[100px] pointer-events-none" />
+    <!-- Right Side: Real White Marble Luxury Card Section -->
+    <div class="w-full h-full flex items-center justify-center p-4 sm:p-6 lg:p-8 relative overflow-hidden bg-gradient-to-br from-[#dbe4f0] via-[#e8eff8] to-[#d2dceb] min-h-screen z-10">
+      <!-- Subtle Security Tech Grid Background Pattern -->
+      <div 
+        class="absolute inset-0 opacity-[0.22] pointer-events-none"
+        style="background-image: radial-gradient(circle at 2px 2px, rgba(59, 130, 246, 0.35) 1px, transparent 0); background-size: 28px 28px;"
+      />
 
-      <div class="w-full max-w-[420px] rounded-[2rem] bg-white dark:bg-slate-900/90 dark:bg-[#0a0e1a]/80 backdrop-blur-xl p-8 pb-14 shadow-2xl border border-slate-200 dark:border-white/10 relative z-10 animate-fade-in-up">
-        <!-- Form Header -->
-        <div class="text-center mb-6">
-          <div class="mx-auto mb-4 h-12 w-12 flex items-center justify-center rounded-[1rem] bg-blue-600 text-white shadow-lg shadow-blue-600/30 border border-blue-500/20">
-            <Lock
+      <!-- Large Ambient Glowing Spheres & Pulses -->
+      <div class="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-cyan-400/25 rounded-full blur-[140px] pointer-events-none animate-pulse-slow" />
+      <div class="absolute bottom-1/4 right-1/4 translate-x-1/2 translate-y-1/2 w-[550px] h-[550px] bg-blue-500/20 rounded-full blur-[160px] pointer-events-none animate-pulse-slow" style="animation-delay: 1s;" />
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-300/20 rounded-full blur-[180px] pointer-events-none" />
+
+      <!-- Concentric Security Radar Rings Expanding Outward -->
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none z-0">
+        <div class="right-radar-ring ring-1" />
+        <div class="right-radar-ring ring-2" />
+        <div class="right-radar-ring ring-3" />
+      </div>
+
+      <!-- Floating Animated Light Sparks & Orbs -->
+      <div class="spark spark-1" />
+      <div class="spark spark-2" />
+      <div class="spark spark-3" />
+      <div class="spark spark-4" />
+      <div class="spark spark-5" />
+
+      <!-- Floating Glassmorphic Live Security Status Widgets -->
+      <!-- Widget 1: Top-Left Live Patrol System Badge -->
+      <div class="hidden xl:flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white/85 border border-white/90 backdrop-blur-xl shadow-[0_15px_35px_rgba(0,0,0,0.08)] absolute top-12 left-8 z-20 animate-float-slow group hover:scale-105 transition-transform cursor-default select-none">
+        <div class="h-9 w-9 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-600 shadow-sm">
+          <Radio class="w-[18px] h-[18px] animate-pulse text-emerald-500" />
+        </div>
+        <div>
+          <div class="flex items-center gap-1.5">
+            <span class="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
+            <span class="text-[10px] font-black tracking-wider text-slate-800 uppercase">PIN Authentication</span>
+          </div>
+          <span class="text-[11px] font-extrabold text-emerald-600">Encrypted Guard Node</span>
+        </div>
+      </div>
+
+      <!-- Widget 2: Top-Right Encrypted Command Link Badge -->
+      <div class="hidden xl:flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white/85 border border-white/90 backdrop-blur-xl shadow-[0_15px_35px_rgba(0,0,0,0.08)] absolute top-16 right-8 z-20 animate-float-delayed group hover:scale-105 transition-transform cursor-default select-none">
+        <div class="h-9 w-9 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-600 shadow-sm">
+          <ShieldCheck class="w-[18px] h-[18px] text-blue-600" />
+        </div>
+        <div>
+          <span class="text-[10px] font-black tracking-wider text-slate-800 uppercase block">Security Link</span>
+          <span class="text-[11px] font-extrabold text-blue-600">256-Bit Encrypted</span>
+        </div>
+      </div>
+
+      <!-- Widget 3: Bottom-Left Guard Verification Modality Badge -->
+      <div class="hidden xl:flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white/85 border border-white/90 backdrop-blur-xl shadow-[0_15px_35px_rgba(0,0,0,0.08)] absolute bottom-16 left-10 z-20 animate-float-slow group hover:scale-105 transition-transform cursor-default select-none">
+        <div class="h-9 w-9 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-600 shadow-sm">
+          <ScanFace class="w-[18px] h-[18px] text-cyan-600" />
+        </div>
+        <div>
+          <span class="text-[10px] font-black tracking-wider text-slate-800 uppercase block">Guard Modalities</span>
+          <span class="text-[11px] font-extrabold text-slate-700">NFC, QR & Face AI</span>
+        </div>
+      </div>
+
+      <!-- Widget 4: Bottom-Right Incident Status Badge -->
+      <div class="hidden xl:flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white/85 border border-white/90 backdrop-blur-xl shadow-[0_15px_35px_rgba(0,0,0,0.08)] absolute bottom-20 right-10 z-20 animate-float-delayed group hover:scale-105 transition-transform cursor-default select-none">
+        <div class="h-9 w-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-600 shadow-sm">
+          <Zap class="w-[18px] h-[18px] text-amber-500" />
+        </div>
+        <div>
+          <span class="text-[10px] font-black tracking-wider text-slate-800 uppercase block">Access Status</span>
+          <div class="flex items-center gap-1">
+            <CheckCircle2 class="w-3.5 h-3.5 text-emerald-500" />
+            <span class="text-[11px] font-extrabold text-emerald-600">Verification Active</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Marble Card Container -->
+      <div 
+        class="w-full max-w-[450px] rounded-[2.5rem] p-8 lg:p-10 shadow-[0_30px_70px_-10px_rgba(0,0,0,0.25),0_0_35px_rgba(255,255,255,0.8)] border border-white/90 relative z-10 animate-fade-in-up text-slate-900 overflow-hidden bg-cover bg-center login-card"
+        :style="{ backgroundImage: `url(${marbleBg})` }"
+      >
+        <!-- Light Translucent White Wash for Polished Marble Texture Visibility -->
+        <div class="absolute inset-0 bg-white/40 pointer-events-none z-0" />
+
+        <div class="relative z-10">
+          <!-- Top Shield Crest Icon with Smooth Luminous Glass Aura -->
+          <div class="text-center mb-6">
+            <div class="relative inline-flex items-center justify-center mb-3 group">
+              <!-- Soft Ambient Cyan/Blue Halo -->
+              <div class="absolute -inset-2 rounded-full bg-gradient-to-tr from-blue-500/20 via-cyan-400/20 to-sky-400/20 blur-lg group-hover:opacity-100 transition duration-500 animate-pulse-slow" />
+              
+              <!-- Smooth Pearl White Luxury Glass Emblem Container -->
+              <div class="relative h-20 w-20 sm:h-22 sm:w-22 rounded-full bg-gradient-to-b from-white via-[#f6f9ff] to-[#e8f0fe] border-2 border-blue-200/90 p-3 flex items-center justify-center shadow-[0_12px_28px_-4px_rgba(27,79,216,0.18),0_4px_12px_rgba(0,0,0,0.06),inset_0_2px_4px_rgba(255,255,255,1)] ring-4 ring-blue-500/10">
+                <!-- 3D High-Def Patrol Logo with Crisp Floating Depth -->
+                <img 
+                  :src="logoImg" 
+                  class="w-full h-full object-contain relative z-10 filter drop-shadow-[0_5px_12px_rgba(20,40,100,0.25)] drop-shadow-[0_1px_3px_rgba(37,99,235,0.2)] transition-transform duration-300 group-hover:scale-105" 
+                  alt="AccessEasy Patrol" 
+                />
+              </div>
+            </div>
+
+            <h2 class="text-2xl lg:text-3xl font-black tracking-tight text-slate-900 mb-1">
+              {{ pageHeader }}
+            </h2>
+            <p class="text-xs text-slate-600 font-semibold">
+              {{ pageTitle }}
+            </p>
+          </div>
+
+          <!-- Error Alert Banner -->
+          <div
+            v-if="error"
+            class="mb-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 text-xs font-medium flex items-center gap-2 animate-shake"
+          >
+            <AlertCircle class="w-4 h-4 shrink-0" />
+            <span>{{ error }}</span>
+          </div>
+
+          <!-- Success Alert Banner -->
+          <div
+            v-if="successMessage"
+            class="mb-4 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 text-xs font-medium flex items-center gap-2"
+          >
+            <CheckCircle2 class="w-4 h-4 shrink-0" />
+            <span>{{ successMessage }}</span>
+          </div>
+
+          <!-- Form Content -->
+          <div class="space-y-6">
+            <!-- STEP 1: ENTER PIN -->
+            <div
               v-if="currentStep === STEP.ENTER_PIN"
-              class="h-5 w-5"
-            />
-            <ShieldCheck
-              v-else-if="currentStep === STEP.VERIFY_OTP"
-              class="h-5 w-5"
-            />
-            <KeyRound
-              v-else
-              class="h-5 w-5"
-            />
-          </div>
-          <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight uppercase mb-1">
-            {{ pageHeader }}
-          </h2>
-          <p class="text-[9px] text-blue-600 font-black tracking-[0.4em] uppercase">
-            {{ pageTitle }}
-          </p>
-        </div>
-
-        <!-- Alerts -->
-        <div
-          v-if="error"
-          class="mb-4 p-3 rounded-xl bg-rose-50 dark:bg-rose-900/10 border border-rose-100 dark:border-rose-900/30 flex items-start gap-3 animate-shake"
-        >
-          <AlertCircle class="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-          <p class="text-[11px] text-rose-800 dark:text-rose-300 leading-relaxed font-semibold uppercase tracking-wider">
-            {{ error }}
-          </p>
-        </div>
-
-        <div
-          v-if="successMessage"
-          class="mb-4 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-900/30 flex items-start gap-3"
-        >
-          <CheckCircle class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-          <p class="text-[11px] text-emerald-800 dark:text-emerald-300 leading-relaxed font-semibold uppercase tracking-wider">
-            {{ successMessage }}
-          </p>
-        </div>
-
-        <!-- Dynamic Form Content -->
-        <div class="space-y-6">
-          <!-- STEP 1: ENTER PIN -->
-          <div
-            v-if="currentStep === STEP.ENTER_PIN"
-            class="space-y-6"
-          >
-            <div
-              v-if="!maxAttemptsReached"
-              class="space-y-2"
+              class="space-y-5"
             >
-              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Enter 4-Digit PIN</label>
-              <div class="flex justify-center gap-3 relative">
-                <input
-                  v-for="(digit, index) in 4"
-                  :key="`enterpin-${index}`"
-                  ref="pinFields"
-                  v-model="pinDigits[index]"
-                  maxlength="1"
-                  :type="showPin ? 'text' : 'password'"
-                  class="w-14 h-16 text-center rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none text-2xl font-black text-slate-900 dark:text-white shadow-sm"
-                  @input="handlePinDigitInput(index)"
-                  @keydown="handlePinKeydown($event, index)"
-                  @paste="handlePinPaste($event, index)"
-                >
-                <button 
-                  class="absolute -right-2 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-blue-600 transition-colors"
-                  @click="showPin = !showPin"
-                >
-                  <Eye
-                    v-if="!showPin"
-                    class="h-4 w-4"
+              <div
+                v-if="!maxAttemptsReached"
+                class="space-y-2"
+              >
+                <label class="block text-xs font-bold text-slate-800 text-center">
+                  Enter 4-Digit Security PIN
+                </label>
+                <div class="flex justify-center gap-3 relative my-2">
+                  <input
+                    v-for="(digit, index) in 4"
+                    :key="`enterpin-${index}`"
+                    ref="pinFields"
+                    v-model="pinDigits[index]"
+                    maxlength="1"
+                    :type="showPin ? 'text' : 'password'"
+                    class="w-13 sm:w-14 h-16 text-center rounded-xl bg-slate-100/90 border border-slate-300/80 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/20 shadow-inner transition-all outline-none text-2xl font-black text-slate-900"
+                    @input="handlePinDigitInput(index)"
+                    @keydown="handlePinKeydown($event, index)"
+                    @paste="handlePinPaste($event, index)"
                   />
-                  <EyeOff
-                    v-else
-                    class="h-4 w-4"
-                  />
-                </button>
+                  <button 
+                    class="absolute -right-2 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-blue-600 transition-colors cursor-pointer"
+                    @click="showPin = !showPin"
+                  >
+                    <Eye v-if="!showPin" class="h-4 w-4" />
+                    <EyeOff v-else class="h-4 w-4" />
+                  </button>
+                </div>
               </div>
-            </div>
 
-            <!-- Max Attempts -->
-            <div
-              v-else
-              class="text-center p-6 rounded-2xl bg-rose-50 dark:bg-rose-900/10 border border-rose-100 dark:border-rose-900/20"
-            >
-              <Lock class="w-8 h-8 text-rose-600 mx-auto mb-3" />
-              <h3 class="text-xs font-black text-rose-600 uppercase tracking-widest mb-1">
-                Max Attempts Reached
-              </h3>
-              <p class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-4">
-                Please reset your PIN to continue
-              </p>
-              <button 
-                class="w-full h-10 rounded-xl text-[10px] font-black uppercase tracking-widest bg-rose-600 text-white shadow-lg shadow-rose-600/20"
-                @click="startForgotPinFlow"
+              <!-- Max Attempts Warning Box -->
+              <div
+                v-else
+                class="text-center p-6 rounded-2xl bg-rose-500/10 border border-rose-500/20"
               >
-                Reset PIN Now
-              </button>
-            </div>
-
-            <button
-              v-if="!maxAttemptsReached"
-              :disabled="loading || !isValidPin"
-              class="w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 transition-all disabled:opacity-70 disabled:cursor-not-allowed group"
-              @click="handlePinAction"
-            >
-              <span v-if="loading">Verifying...</span>
-              <template v-else>
-                Unlock Account
-                <ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </template>
-            </button>
-
-            <div
-              v-if="!maxAttemptsReached"
-              class="flex flex-col items-center gap-3"
-            >
-              <button
-                class="text-[10px] font-black text-blue-600 hover:text-blue-700 uppercase tracking-widest transition-colors"
-                @click="startForgotPinFlow"
-              >
-                Forgot your PIN?
-              </button>
-              <button
-                class="text-[10px] font-bold text-slate-400 hover:text-slate-600 dark:text-slate-300 uppercase tracking-widest transition-colors"
-                @click="goToAlternateLogin"
-              >
-                Switch Account
-              </button>
-            </div>
-          </div>
-
-          <!-- STEP 2: VERIFY OTP -->
-          <div
-            v-else-if="currentStep === STEP.VERIFY_OTP"
-            class="space-y-6"
-          >
-            <div class="space-y-2">
-              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Enter 6-Digit OTP</label>
-              <div class="flex justify-between gap-2">
-                <input
-                  v-for="(digit, index) in 6"
-                  :key="index"
-                  ref="otpFields"
-                  v-model="otpDigits[index]"
-                  maxlength="1"
-                  type="text"
-                  class="w-12 h-14 text-center rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none text-xl font-black text-slate-900 dark:text-white shadow-sm"
-                  @input="handleOtpInput(index)"
-                  @keydown="handleOtpKeydown($event, index)"
-                  @paste="handleOtpPaste($event, index)"
-                >
-              </div>
-              <div class="flex items-center justify-between px-1">
-                <p class="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                  Didn't receive code?
+                <Lock class="w-8 h-8 text-rose-600 mx-auto mb-3" />
+                <h3 class="text-xs font-black text-rose-600 uppercase tracking-widest mb-1">
+                  Max Attempts Reached
+                </h3>
+                <p class="text-[11px] text-slate-600 font-bold uppercase tracking-wider mb-4">
+                  Please reset your PIN to continue
                 </p>
-                <button
-                  class="text-[9px] font-black text-blue-600 uppercase tracking-widest"
-                  @click="resendOtp"
-                >
-                  Resend
-                </button>
-              </div>
-            </div>
-
-            <button
-              :disabled="loading || !isValidOtp"
-              class="w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 transition-all disabled:opacity-70 disabled:cursor-not-allowed group"
-              @click="verifyForgotPinOtp"
-            >
-              <span v-if="loading">Processing...</span>
-              <template v-else>
-                Verify OTP
-                <ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </template>
-            </button>
-          </div>
-
-          <!-- STEP 3: CREATE/CONFIRM PIN -->
-          <div
-            v-else
-            class="space-y-6"
-          >
-            <div class="space-y-2">
-              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">
-                {{ isConfirmingPin ? "Confirm Your PIN" : "Setup New PIN" }}
-              </label>
-              <div class="flex justify-center gap-3 relative">
-                <input
-                  v-for="(digit, index) in 4"
-                  :key="`newpin-${index}`"
-                  ref="newPinFields"
-                  v-model="newPinDigits[index]"
-                  maxlength="1"
-                  :type="showPin ? 'text' : 'password'"
-                  class="w-14 h-16 text-center rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none text-2xl font-black text-slate-900 dark:text-white shadow-sm"
-                  @input="handleNewPinDigitInput(index)"
-                  @keydown="handleNewPinKeydown($event, index)"
-                  @paste="handleNewPinPaste($event, index)"
-                >
                 <button 
-                  class="absolute -right-2 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-blue-600 transition-colors"
-                  @click="showPin = !showPin"
+                  class="w-full h-10 rounded-xl text-xs font-black uppercase tracking-widest bg-rose-600 hover:bg-rose-700 text-white shadow-lg shadow-rose-600/20 transition-colors cursor-pointer"
+                  @click="startForgotPinFlow"
                 >
-                  <Eye
-                    v-if="!showPin"
-                    class="h-4 w-4"
-                  />
-                  <EyeOff
-                    v-else
-                    class="h-4 w-4"
-                  />
+                  Reset PIN Now
+                </button>
+              </div>
+
+              <button
+                v-if="!maxAttemptsReached"
+                :disabled="loading || !isValidPin"
+                class="w-full h-12 rounded-xl text-xs font-black tracking-wider uppercase flex items-center justify-center gap-2 bg-gradient-to-r from-[#002884] via-[#0052cc] to-[#0070f3] hover:from-[#001f66] hover:to-[#0052cc] text-white border-t border-white/50 shadow-[0_10px_30px_rgba(0,82,204,0.5),0_0_20px_rgba(0,102,255,0.35)] hover:shadow-[0_12px_35px_rgba(0,82,204,0.65)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed group relative overflow-hidden cursor-pointer"
+                @click="handlePinAction"
+              >
+                <div class="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-12 -translate-x-full group-hover:translate-x-[300%] transition-transform duration-1000" />
+                <span v-if="loading">Verifying...</span>
+                <template v-else>
+                  <span>Unlock Account</span>
+                  <ArrowRight class="w-4 h-4 transition-transform group-hover:translate-x-1.5 duration-300" />
+                </template>
+              </button>
+
+              <div
+                v-if="!maxAttemptsReached"
+                class="flex flex-col items-center gap-2.5 pt-1"
+              >
+                <button
+                  class="text-xs font-bold text-blue-600 hover:text-blue-700 underline underline-offset-4 flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  @click="startForgotPinFlow"
+                >
+                  <KeyRound class="w-3.5 h-3.5" />
+                  <span>Forgot your PIN? Reset via OTP</span>
+                </button>
+                <button
+                  class="text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors cursor-pointer"
+                  @click="goToAlternateLogin"
+                >
+                  Switch Account
                 </button>
               </div>
             </div>
 
-            <button
-              :disabled="loading || !isValidNewPin"
-              class="w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 transition-all disabled:opacity-70 disabled:cursor-not-allowed group"
-              @click="handleNewPinAction"
+            <!-- STEP 2: VERIFY OTP -->
+            <div
+              v-else-if="currentStep === STEP.VERIFY_OTP"
+              class="space-y-5"
             >
-              <span v-if="loading">Processing...</span>
-              <template v-else>
-                {{ isConfirmingPin ? "Confirm & Secure" : "Set Unified PIN" }}
-                <ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-1" />
-              </template>
-            </button>
-          </div>
+              <div class="space-y-2">
+                <label class="block text-xs font-bold text-slate-800 text-center">
+                  Enter 6-Digit OTP
+                </label>
+                <div class="flex justify-between gap-2 my-2">
+                  <input
+                    v-for="(digit, index) in 6"
+                    :key="index"
+                    ref="otpFields"
+                    v-model="otpDigits[index]"
+                    maxlength="1"
+                    type="text"
+                    inputmode="numeric"
+                    class="w-11 sm:w-12 h-14 text-center rounded-xl bg-slate-100/90 border border-slate-300/80 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/20 shadow-inner transition-all outline-none text-xl font-black text-slate-900"
+                    @input="handleOtpInput(index)"
+                    @keydown="handleOtpKeydown($event, index)"
+                    @paste="handleOtpPaste($event, index)"
+                  />
+                </div>
+                <div class="flex items-center justify-between px-1 text-xs">
+                  <span class="font-semibold text-slate-600">Didn't receive code?</span>
+                  <button
+                    class="font-bold text-blue-600 hover:text-blue-700 underline underline-offset-4 uppercase tracking-wider transition-colors cursor-pointer"
+                    @click="resendOtp"
+                  >
+                    Resend
+                  </button>
+                </div>
+              </div>
 
-          <!-- Global Footer Back Link -->
-          <div
-            v-if="currentStep !== STEP.ENTER_PIN"
-            class="text-center"
-          >
-            <button
-              class="text-[10px] font-black text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:text-slate-200 uppercase tracking-widest transition-colors flex items-center justify-center gap-2 mx-auto"
-              @click="resetToPinEntry"
+              <button
+                :disabled="loading || !isValidOtp"
+                class="w-full h-12 rounded-xl text-xs font-black tracking-wider uppercase flex items-center justify-center gap-2 bg-gradient-to-r from-[#002884] via-[#0052cc] to-[#0070f3] hover:from-[#001f66] hover:to-[#0052cc] text-white border-t border-white/50 shadow-[0_10px_30px_rgba(0,82,204,0.5),0_0_20px_rgba(0,102,255,0.35)] hover:shadow-[0_12px_35px_rgba(0,82,204,0.65)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed group relative overflow-hidden cursor-pointer"
+                @click="verifyForgotPinOtp"
+              >
+                <div class="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-12 -translate-x-full group-hover:translate-x-[300%] transition-transform duration-1000" />
+                <span v-if="loading">Processing...</span>
+                <template v-else>
+                  <span>Verify OTP</span>
+                  <ArrowRight class="w-4 h-4 transition-transform group-hover:translate-x-1.5 duration-300" />
+                </template>
+              </button>
+            </div>
+
+            <!-- STEP 3: CREATE/CONFIRM PIN -->
+            <div
+              v-else
+              class="space-y-5"
             >
-              <ArrowLeft class="h-3 w-3" />
-              Back to PIN Entry
-            </button>
-          </div>
-        </div>
+              <div class="space-y-2">
+                <label class="block text-xs font-bold text-slate-800 text-center">
+                  {{ isConfirmingPin ? "Confirm Your PIN" : "Setup New 4-Digit PIN" }}
+                </label>
+                <div class="flex justify-center gap-3 relative my-2">
+                  <input
+                    v-for="(digit, index) in 4"
+                    :key="`newpin-${index}`"
+                    ref="newPinFields"
+                    v-model="newPinDigits[index]"
+                    maxlength="1"
+                    :type="showPin ? 'text' : 'password'"
+                    class="w-13 sm:w-14 h-16 text-center rounded-xl bg-slate-100/90 border border-slate-300/80 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/20 shadow-inner transition-all outline-none text-2xl font-black text-slate-900"
+                    @input="handleNewPinDigitInput(index)"
+                    @keydown="handleNewPinKeydown($event, index)"
+                    @paste="handleNewPinPaste($event, index)"
+                  />
+                  <button 
+                    class="absolute -right-2 top-1/2 -translate-y-1/2 p-2 text-slate-400 hover:text-blue-600 transition-colors cursor-pointer"
+                    @click="showPin = !showPin"
+                  >
+                    <Eye v-if="!showPin" class="h-4 w-4" />
+                    <EyeOff v-else class="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
 
-        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 text-[8px] font-black tracking-[0.4em] text-slate-400 uppercase flex items-center gap-2">
-          <div class="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
-          Encrypted Security Node
+              <button
+                :disabled="loading || !isValidNewPin"
+                class="w-full h-12 rounded-xl text-xs font-black tracking-wider uppercase flex items-center justify-center gap-2 bg-gradient-to-r from-[#002884] via-[#0052cc] to-[#0070f3] hover:from-[#001f66] hover:to-[#0052cc] text-white border-t border-white/50 shadow-[0_10px_30px_rgba(0,82,204,0.5),0_0_20px_rgba(0,102,255,0.35)] hover:shadow-[0_12px_35px_rgba(0,82,204,0.65)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed group relative overflow-hidden cursor-pointer"
+                @click="handleNewPinAction"
+              >
+                <div class="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-12 -translate-x-full group-hover:translate-x-[300%] transition-transform duration-1000" />
+                <span v-if="loading">Processing...</span>
+                <template v-else>
+                  <span>{{ isConfirmingPin ? "Confirm & Secure" : "Set Unified PIN" }}</span>
+                  <ArrowRight class="w-4 h-4 transition-transform group-hover:translate-x-1.5 duration-300" />
+                </template>
+              </button>
+
+              <div class="flex flex-col items-center gap-2 pt-1">
+                <button
+                  class="text-xs font-bold text-blue-600 hover:text-blue-700 underline underline-offset-4 flex items-center gap-1.5 transition-colors cursor-pointer"
+                  @click="startForgotPinFlow"
+                >
+                  <KeyRound class="w-3.5 h-3.5" />
+                  <span>Forgot PIN? Send Reset OTP</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Global Footer Back Link -->
+            <div
+              v-if="currentStep !== STEP.ENTER_PIN"
+              class="text-center pt-2"
+            >
+              <button
+                class="text-xs font-bold text-slate-600 hover:text-slate-900 transition-colors flex items-center justify-center gap-2 mx-auto cursor-pointer"
+                @click="resetToPinEntry"
+              >
+                <ArrowLeft class="h-3.5 w-3.5" />
+                <span>Back to PIN Entry</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -358,11 +442,18 @@ import { useRoute, useRouter } from "vue-router";
 import crypto from "crypto-js";
 import { authService } from "@/services/authService";
 import { 
-  Lock, ShieldCheck, KeyRound, AlertCircle, CheckCircle, Eye, EyeOff,
-  ArrowRight, ArrowLeft, Zap, BarChart3, Cpu, Building2, Factory,
-  Warehouse, GraduationCap, HeartPulse, Globe
+  Lock, ShieldCheck, KeyRound, AlertCircle, CheckCircle2, Eye, EyeOff,
+  ArrowRight, ArrowLeft, Zap, Building2, Smartphone, Globe, Radio,
+  ScanFace, AlertTriangle, Nfc, QrCode, IdCard
 } from "lucide-vue-next";
-import BaseButton from "@/components/common/buttons/BaseButton.vue";
+
+// Directly import image assets so Vite bundles and displays them in dev and production
+import patrolHeroBg from "@/assets/images/patrol_hero_bg.png";
+import marbleBg from "@/assets/images/marble_bg.png";
+import logoImg from "@/assets/images/logoPatrol.png";
+
+// Custom Generated High-Tech Patrol Cyber Security Hero Background Image
+const patrolBgImage = patrolHeroBg;
 
 // PROPS
 const props = defineProps({
@@ -402,32 +493,21 @@ const displayPhone = ref("");
 const userId = ref(null);
 const userPin = ref(null);
 const showPin = ref(false);
-const focusedIndex = ref(-1);
-const otpFocusedIndex = ref(-1);
-const newPinFocusedIndex = ref(-1);
 const pinFields = ref([]);
 const otpFields = ref([]);
 const newPinFields = ref([]);
-const year = ref(new Date().getFullYear());
 const errorTimeout = ref(null);
 const successTimeout = ref(null);
 const isFirstTime = ref(false);
 const maxAttemptsReached = ref(false);
 
-const highlights = [
-  { icon: Zap, text: "Real-time security", sub: "Instant threat detection." },
-  { icon: ShieldCheck, text: "Multi-factor auth", sub: "Layered protection." },
-  { icon: BarChart3, text: "Audit intelligence", sub: "Complete access logs." },
-  { icon: Cpu, text: "Edge computing", sub: "Lightning-fast responses." },
-];
-
-const industries = [
-  { icon: Building2, name: "Corporate" },
-  { icon: Factory, name: "Industrial" },
-  { icon: Warehouse, name: "Logistics" },
-  { icon: GraduationCap, name: "Education" },
-  { icon: HeartPulse, name: "Healthcare" },
-  { icon: Globe, name: "Critical Infra" },
+// Security Guard Modalities & Mobile App Badges
+const authMethods = [
+  { name: "Guard App", sub: "Mobile Tour App", icon: Smartphone },
+  { name: "NFC Tag", sub: "Instant Tap Scan", icon: Nfc },
+  { name: "QR Route", sub: "Checkpoint Code", icon: QrCode },
+  { name: "Face AI", sub: "Guard Verification", icon: ScanFace },
+  { name: "Guard PIN", sub: "Passcode Sign-In", icon: IdCard }
 ];
 
 // COMPUTED
@@ -457,7 +537,6 @@ const pageHeader = computed(() =>
           ? "Set Up Your PIN"
           : "Create Your PIN",
 );
-const visibleSteps = computed(() => [STEP.VERIFY_OTP, STEP.CREATE_PIN]);
 const contactType = computed(() => (userEmail.value ? "Email" : "Phone"));
 const userContact = computed(() => userEmail.value || userPhone.value);
 const displayContact = computed(() =>
@@ -473,6 +552,8 @@ function handlePinDigitInput(index) {
 
   if (pinDigits.value[index] && index < 3) {
     nextTick(() => pinFields.value[index + 1]?.focus());
+  } else if (index === 3 && isValidPin.value && !maxAttemptsReached.value) {
+    handlePinAction();
   }
 }
 
@@ -591,7 +672,7 @@ function handleNewPinKeydown(event, index) {
 }
 
 /* ------------------------------------------------------------------ */
-/* SCROLL TO CARD (used after every button click)                     */
+/* SCROLL TO CARD                                                     */
 /* ------------------------------------------------------------------ */
 function scrollToCard() {
   nextTick(() => {
@@ -601,21 +682,19 @@ function scrollToCard() {
 }
 
 /* ------------------------------------------------------------------ */
-/* UTILS (unchanged)                                                 */
+/* UTILS                                                              */
 /* ------------------------------------------------------------------ */
 function formatPhoneForAPI(phone) {
   if (!phone) return "";
-  let clean = phone.replace(/\D/g, "");
-  if (clean.startsWith("91") && clean.length === 12) clean = clean.slice(2);
-  return clean.length === 10 ? `+91${clean}` : `+91${clean}`;
+  const digits = phone.replace(/\D/g, "").slice(-10);
+  return `+91${digits}`;
 }
 function formatPhoneForDisplay(phone) {
   if (!phone) return "";
-  let clean = phone.replace(/\D/g, "");
-  if (clean.startsWith("91") && clean.length === 12) clean = clean.slice(2);
-  return clean.length === 10
-    ? `+91 ${clean.slice(0, 5)} ${clean.slice(5)}`
-    : `+91 ${clean}`;
+  const digits = phone.replace(/\D/g, "").slice(-10);
+  return digits.length === 10
+    ? `+91 ${digits.slice(0, 5)} ${digits.slice(5)}`
+    : (phone.startsWith("+91") ? phone : `+91 ${phone}`);
 }
 function prepareForgotPinPayload() {
   return props.contactType === "email"
@@ -679,18 +758,6 @@ function setErrorMessage(msg) {
 function goToAlternateLogin() {
   router.push("/alternate-login");
 }
-function goBack() {
-  if (currentStep.value === STEP.CREATE_PIN && isConfirmingPin.value) {
-    isConfirmingPin.value = false;
-    newPinDigits.value = Array(4).fill("");
-  } else if (currentStep.value === STEP.CREATE_PIN) {
-    currentStep.value = STEP.VERIFY_OTP;
-    otpDigits.value = Array(6).fill("");
-    nextTick(() => otpFields.value[0]?.focus());
-  } else if (currentStep.value === STEP.VERIFY_OTP) {
-    resetToPinEntry();
-  }
-}
 function resetPinOnlyMode() {
   maxAttemptsReached.value = false;
   attempts.value = 0;
@@ -698,20 +765,19 @@ function resetPinOnlyMode() {
 }
 
 /* ------------------------------------------------------------------ */
-/* API FLOWS (loading flag is set before each request)                */
+/* API FLOWS                                                          */
 /* ------------------------------------------------------------------ */
 async function startForgotPinFlow() {
   loading.value = true;
   try {
     if (props.contactType === "email") {
-      userEmail.value = props.contactValue;
+      userEmail.value = props.contactValue || localStorage.getItem("email") || "";
       userPhone.value = "";
       displayPhone.value = "";
     } else {
-      userPhone.value = props.contactValue;
-      displayPhone.value = formatPhoneForDisplay(
-        userPhone.value.replace("+91", ""),
-      );
+      const rawPhone = props.contactValue || localStorage.getItem("userPhone") || "";
+      userPhone.value = rawPhone;
+      displayPhone.value = formatPhoneForDisplay(rawPhone);
     }
     await authService.forgotPin(prepareForgotPinPayload());
     currentStep.value = STEP.VERIFY_OTP;
@@ -804,14 +870,21 @@ async function handleNewPinAction() {
       return;
     }
     await savePin(newPinDigits.value.join(""));
-    const userData =
-      props.contactType === "email"
-        ? await authService.getUserByEmail(userEmail.value)
-        : await authService.getUserByPhone(userPhone.value);
-    authService.setUserData(userData);
+    try {
+      const fullPhone = formatPhoneForAPI(userPhone.value || props.contactValue);
+      const userData =
+        props.contactType === "email"
+          ? await authService.getUserByEmail(userEmail.value)
+          : await authService.getUserByPhone(fullPhone);
+      if (userData) {
+        authService.setUserData(userData);
+      }
+    } catch (err) {
+      console.warn("Could not reload user data:", err);
+    }
     authService.setPinVerified(true);
     setSuccessMessage(`PIN created successfully! Redirecting...`);
-    setTimeout(() => router.push("/taskManagement/taskcomponents"), 2000);
+    setTimeout(() => router.push("/taskManagement/taskcomponents"), 1500);
   } catch (e) {
     setErrorMessage(e.message || "Failed to create PIN");
   } finally {
@@ -837,14 +910,14 @@ async function checkUserPin() {
   try {
     let user;
     if (props.contactType === "email") {
-      userEmail.value = props.contactValue;
+      userEmail.value = props.contactValue || localStorage.getItem("email") || "";
       user = await authService.getUserByEmail(userEmail.value);
     } else {
-      userPhone.value = props.contactValue;
-      displayPhone.value = formatPhoneForDisplay(
-        userPhone.value.replace("+91", ""),
-      );
-      user = await authService.getUserByPhone(userPhone.value);
+      const rawPhone = props.contactValue || localStorage.getItem("userPhone") || "";
+      userPhone.value = rawPhone;
+      const fullPhone = formatPhoneForAPI(rawPhone);
+      displayPhone.value = formatPhoneForDisplay(rawPhone);
+      user = await authService.getUserByPhone(fullPhone);
     }
     if (user) {
       userId.value = user.id;
@@ -853,7 +926,15 @@ async function checkUserPin() {
     }
     return false;
   } catch (e) {
-    console.error(e);
+    console.error("checkUserPin error:", e);
+    try {
+      const storedUser = authService.getUserData();
+      if (storedUser) {
+        userId.value = storedUser.id;
+        userPin.value = storedUser.userPin;
+        return !!storedUser.userPin;
+      }
+    } catch (err) {}
     return false;
   }
 }
@@ -879,7 +960,7 @@ async function verifyPin() {
     if (currentPin.value === dbPin) {
       setSuccessMessage("PIN verified successfully");
       authService.setPinVerified(true);
-      setTimeout(() => router.push("/taskManagement/taskcomponents"), 1500);
+      setTimeout(() => router.push("/taskManagement/taskcomponents"), 1200);
       return;
     }
 
@@ -901,13 +982,21 @@ async function verifyPin() {
 }
 
 async function savePin(pin) {
+  if (!userId.value) {
+    const u = authService.getUserData();
+    if (u?.id) userId.value = u.id;
+  }
   if (!userId.value) throw new Error("User ID not found");
   const encrypted = encryptData(pin);
-  const { status } = await authService.protectedApi.patch(
-    `/users/${userId.value}`,
-    { userPin: encrypted },
-  );
-  if (status !== 200) throw new Error("Failed to save PIN");
+  try {
+    await authService.setPin(userId.value, encrypted);
+  } catch (err) {
+    const { status } = await authService.protectedApi.patch(
+      `/users/${userId.value}`,
+      { userPin: encrypted },
+    );
+    if (status !== 200 && status !== 204) throw new Error("Failed to save PIN");
+  }
 }
 
 /* ------------------------------------------------------------------ */
@@ -945,21 +1034,12 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.animate-fade-in-left {
-  animation: fadeInLeft 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
 .animate-fade-in-up {
   animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 .animate-shake {
   animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
-}
-
-@keyframes fadeInLeft {
-  from { opacity: 0; transform: translateX(-30px); }
-  to { opacity: 1; transform: translateX(0); }
 }
 
 @keyframes fadeInUp {
@@ -972,5 +1052,103 @@ onBeforeUnmount(() => {
   20%, 80% { transform: translate3d(2px, 0, 0); }
   30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
   40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
+/* Tactical Radar Sweep Animation */
+.radar-circle {
+  position: absolute;
+  top: 30%;
+  left: 30%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px solid rgba(6, 182, 212, 0.4);
+  box-shadow: 0 0 15px rgba(6, 182, 212, 0.2);
+}
+.radar-circle-1 { width: 300px; height: 300px; }
+.radar-circle-2 { width: 550px; height: 550px; }
+
+.radar-sweep {
+  position: absolute;
+  top: 30%;
+  left: 30%;
+  width: 550px;
+  height: 550px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, rgba(6, 182, 212, 0.3) 0deg, transparent 60deg, transparent 360deg);
+  animation: radarRotate 10s linear infinite;
+}
+
+@keyframes radarRotate {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Concentric Security Radar Rings for Right Panel */
+.right-radar-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1.5px dashed rgba(59, 130, 246, 0.25);
+  animation: pulseRing 8s ease-in-out infinite alternate;
+}
+.right-radar-ring.ring-1 { width: 520px; height: 520px; animation-delay: 0s; }
+.right-radar-ring.ring-2 { width: 680px; height: 680px; animation-delay: -2.5s; }
+.right-radar-ring.ring-3 { width: 780px; height: 780px; animation-delay: -5s; }
+
+@keyframes pulseRing {
+  0% { transform: translate(-50%, -50%) scale(0.96); opacity: 0.2; }
+  50% { transform: translate(-50%, -50%) scale(1.03); opacity: 0.45; }
+  100% { transform: translate(-50%, -50%) scale(0.98); opacity: 0.25; }
+}
+
+/* Floating Glassmorphic Status Badges Animations */
+.animate-float-slow {
+  animation: floatWidgetSlow 6s ease-in-out infinite alternate;
+}
+.animate-float-delayed {
+  animation: floatWidgetDelayed 7s ease-in-out infinite alternate;
+}
+
+@keyframes floatWidgetSlow {
+  0% { transform: translateY(0px) rotate(0deg); }
+  100% { transform: translateY(-12px) rotate(0.5deg); }
+}
+
+@keyframes floatWidgetDelayed {
+  0% { transform: translateY(0px) rotate(0deg); }
+  100% { transform: translateY(14px) rotate(-0.5deg); }
+}
+
+.animate-pulse-slow {
+  animation: pulseSlow 8s ease-in-out infinite alternate;
+}
+
+@keyframes pulseSlow {
+  0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.2; }
+  100% { transform: translate(-50%, -50%) scale(1.15); opacity: 0.35; }
+}
+
+/* Spark animations */
+.spark {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(96, 165, 250, 0.8);
+  box-shadow: 0 0 10px rgba(96, 165, 250, 0.8);
+  animation: sparkFloat 8s ease-in-out infinite;
+}
+.spark-1 { top: 15%; right: 12%; animation-delay: 0s; }
+.spark-2 { bottom: 20%; left: 10%; animation-delay: 2.5s; }
+.spark-3 { top: 70%; right: 25%; animation-delay: 5s; }
+.spark-4 { top: 35%; left: 15%; animation-delay: 1.8s; }
+.spark-5 { bottom: 35%; right: 20%; animation-delay: 3.8s; }
+
+@keyframes sparkFloat {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 0.2; }
+  50% { transform: translateY(-30px) scale(1.5); opacity: 0.9; }
 }
 </style>

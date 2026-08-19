@@ -1,0 +1,1 @@
+import{C as e}from"./CheckpointLibrary-BQdD8Jcg.js";import{b as o,d as r,l as s,o as a}from"./index-CHU1e0vF.js";const t={class:"h-full w-full p-6"},l={class:"h-full w-full rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm"},f={__name:"index",setup(d){return(c,n)=>(a(),o("div",t,[r("div",l,[s(e)])]))}};export{f as default};

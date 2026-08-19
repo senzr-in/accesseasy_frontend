@@ -248,10 +248,31 @@ const activeAlertsList = ref([]);
 const activeAlertsCount = computed(() => activeAlertsList.value.length);
 const hasSeenAlerts = ref(false);
 
+const getDismissedAlertIds = () => {
+  try {
+    const raw = localStorage.getItem('accesseasy_dismissed_alerts');
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+};
+
+const saveDismissedAlertId = (alertId) => {
+  try {
+    const dismissed = getDismissedAlertIds();
+    const idToSave = alertId || 'dummy_unknown_alert';
+    if (!dismissed.includes(idToSave)) {
+      dismissed.push(idToSave);
+      localStorage.setItem('accesseasy_dismissed_alerts', JSON.stringify(dismissed));
+    }
+  } catch (e) {}
+};
+
 const fetchAlerts = async () => {
   try {
     const alerts = await patrolService.getAlerts();
-    const unresolved = (alerts || []).filter(a => a.status !== 'resolved');
+    const dismissedIds = new Set(getDismissedAlertIds());
+    const unresolved = (alerts || []).filter(a => a && a.status !== 'resolved' && !dismissedIds.has(a.id));
     
     // Reset seen state if a new alert arrives
     const currentIds = new Set(activeAlertsList.value.map(a => a.id));
@@ -273,9 +294,10 @@ watch(isNotificationsOpen, (isOpen) => {
 });
 
 const resolveAlert = async (alertId) => {
+  saveDismissedAlertId(alertId);
+  activeAlertsList.value = activeAlertsList.value.filter(a => a.id && a.id !== alertId);
   try {
-    await patrolService.updateAlertStatus(alertId, 'resolved');
-    activeAlertsList.value = activeAlertsList.value.filter(a => a.id !== alertId);
+    if (alertId) await patrolService.updateAlertStatus(alertId, 'resolved');
   } catch (error) {
     console.error("Failed to resolve alert from navbar:", error);
   }
