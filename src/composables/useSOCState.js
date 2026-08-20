@@ -1,11 +1,12 @@
 import { ref } from 'vue';
 import { authService } from '@/services/authService';
 import { currentUserTenant } from '@/utils/currentUserTenant';
-import { mqttService } from '@/services/mqttService';
+import { useMQTT } from '@/composables/useMQTT';
 
 export function useSOCState() {
   const isMusterMode = ref(false);
   const loading = ref(false);
+  const { deviceOnlineMap, activeAlarms } = useMQTT();
 
   const kpiData = ref({
     employeesInside: 0,
@@ -82,7 +83,11 @@ export function useSOCState() {
         });
         const controllers = ctrlRes.data?.data || [];
         totalCameras = controllers.length;
-        onlineCameras = controllers.filter(c => c.status === 'online' || c.status === 'active').length;
+        onlineCameras = controllers.filter(c => {
+          const rt = deviceOnlineMap.value[c.sn];
+          if (rt && rt.status) return rt.status === 'online';
+          return c.status === 'online' || c.status === 'active';
+        }).length;
         offlineCameras = totalCameras - onlineCameras;
         allowedCameras = controllers.map(c => c.linkedCamera).filter(Boolean);
         registeredCameras.value = controllers;

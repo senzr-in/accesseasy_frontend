@@ -364,6 +364,8 @@ class AuthService {
 
   getUserRole() {
     const userData = this.getUserData();
+    const appMode = import.meta.env.VITE_APP_MODE || '';
+
     // Check accesseasyRole first (Directus field), then roleConfig (Knative auth-service response field)
     const roleConfigName = userData?.accesseasyRole?.roleName || userData?.roleConfig?.roleName || "";
     let role = "";
@@ -372,7 +374,7 @@ class AuthService {
       const lowercaseName = roleConfigName.toLowerCase();
       if (lowercaseName.includes("admin")) {
         role = "Admin";
-      } else if (lowercaseName.includes("guard") || lowercaseName.includes("security")) {
+      } else if (appMode !== 'workforce' && (lowercaseName.includes("guard") || lowercaseName.includes("security"))) {
         role = "Guard";
       } else if (lowercaseName.includes("employee")) {
         role = "Employee";
@@ -394,8 +396,8 @@ class AuthService {
       role = "Admin";
     }
 
-    // Additional backward compatibility checks for Title if role is "Employee"
-    if (role === 'Employee') {
+    // Additional backward compatibility checks for Title if role is "Employee" (only for security/patrol app)
+    if (appMode !== 'workforce' && role === 'Employee') {
       const isGuardTitle = userData?.title?.toLowerCase() === 'guard' || userData?.title?.toLowerCase() === 'security';
       if (isGuardTitle) {
         role = 'Guard';

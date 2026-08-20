@@ -55,6 +55,8 @@ const BROKER_URLS = [
 const TOPICS = [
   'access_device/v1/event/#',
   'access_device/v1/cmd/#',
+  'access_device/v1/status/#',
+  'accesseasy/tenant/+/guards/#',
   'frigate/events',
   'frigate/+/person',
   'frigate/+/person/snapshot',
@@ -217,13 +219,110 @@ class MQTTService {
     return this.publishCommand(uuid, 'remoteControl', dataPayload);
   }
 
-  /** Assign card permissions with optional accessLevel / Shift Schedule ID (0 = 24/7, 1..255 = Shift ID). */
-  sendInsertPermission(uuid, cardNo, doorIndices = ['01'], accessLevel = 0) {
+  /**
+   * Permission Type Spec:
+   *  - QR Code: 100 (Transparent), 101 (Static), 103 (Dynamic)
+   *  - Card: 200 (Standard card), 201 (CPU encryption card), 202 (Sector encryption card)
+   *  - Face: 300 (Facial Data)
+   *  - Password: 400 (Password 6~10 chars)
+   *  - Fingerprint: 500 (Fingerprint data)
+   *  - Bluetooth: 600 (Bluetooth certificate)
+   *  - License Plate: 700 (License Plate)
+   *  - Open Button: 800 (Door opening button)
+   */
+
+  /** Assign card permissions (200: Standard, 201: CPU encrypted, 202: Sector encrypted). */
+  sendInsertPermission(uuid, cardNo, doorIndices = ['01'], accessLevel = 0, cardType = 200) {
     const schedId = Number(accessLevel) || 0;
     const dataPayload = doorIndices.map(idx => ({
       id: String(cardNo),
-      type: 200,
+      type: Number(cardType) || 200,
       code: String(cardNo),
+      index: typeof idx === 'string' ? idx : String(idx),
+      accessLevel: schedId,
+      time: schedId === 0 ? { type: 0 } : { type: 1, scheduleId: schedId }
+    }));
+    return this.publishCommand(uuid, 'insertPermission', dataPayload);
+  }
+
+  /** Assign QR Code permissions (100: Transparent, 101: Static, 103: Dynamic). */
+  sendInsertQRAccess(uuid, qrCode, doorIndices = ['01'], qrType = 103, expirationMinutes = 60) {
+    const expireTimestamp = Math.floor(Date.now() / 1000) + (expirationMinutes * 60);
+    const dataPayload = doorIndices.map(idx => ({
+      id: String(qrCode),
+      type: Number(qrType) || 103,
+      code: String(qrCode),
+      index: typeof idx === 'string' ? idx : String(idx),
+      accessLevel: 0,
+      expireTime: expireTimestamp,
+      time: { type: 0 }
+    }));
+    return this.publishCommand(uuid, 'insertPermission', dataPayload);
+  }
+
+  /** Assign Face Recognition Biometric permissions (Type 300: Facial Data). */
+  sendInsertFacePermission(uuid, personId, faceData, doorIndices = ['01'], accessLevel = 0) {
+    const schedId = Number(accessLevel) || 0;
+    const dataPayload = doorIndices.map(idx => ({
+      id: String(personId),
+      type: 300,
+      code: String(faceData),
+      index: typeof idx === 'string' ? idx : String(idx),
+      accessLevel: schedId,
+      time: schedId === 0 ? { type: 0 } : { type: 1, scheduleId: schedId }
+    }));
+    return this.publishCommand(uuid, 'insertPermission', dataPayload);
+  }
+
+  /** Assign Password / Keypad permissions (Type 400: Password data, 6~10 characters). */
+  sendInsertPasswordPermission(uuid, personId, password, doorIndices = ['01'], accessLevel = 0) {
+    const schedId = Number(accessLevel) || 0;
+    const dataPayload = doorIndices.map(idx => ({
+      id: String(personId),
+      type: 400,
+      code: String(password),
+      index: typeof idx === 'string' ? idx : String(idx),
+      accessLevel: schedId,
+      time: schedId === 0 ? { type: 0 } : { type: 1, scheduleId: schedId }
+    }));
+    return this.publishCommand(uuid, 'insertPermission', dataPayload);
+  }
+
+  /** Assign Fingerprint Biometric permissions (Type 500: Fingerprint data). */
+  sendInsertFingerprintPermission(uuid, personId, fingerprintData, doorIndices = ['01'], accessLevel = 0) {
+    const schedId = Number(accessLevel) || 0;
+    const dataPayload = doorIndices.map(idx => ({
+      id: String(personId),
+      type: 500,
+      code: String(fingerprintData),
+      index: typeof idx === 'string' ? idx : String(idx),
+      accessLevel: schedId,
+      time: schedId === 0 ? { type: 0 } : { type: 1, scheduleId: schedId }
+    }));
+    return this.publishCommand(uuid, 'insertPermission', dataPayload);
+  }
+
+  /** Assign Bluetooth Certificate permissions (Type 600: Bluetooth certificate). */
+  sendInsertBluetoothPermission(uuid, personId, certData, doorIndices = ['01'], accessLevel = 0) {
+    const schedId = Number(accessLevel) || 0;
+    const dataPayload = doorIndices.map(idx => ({
+      id: String(personId),
+      type: 600,
+      code: String(certData),
+      index: typeof idx === 'string' ? idx : String(idx),
+      accessLevel: schedId,
+      time: schedId === 0 ? { type: 0 } : { type: 1, scheduleId: schedId }
+    }));
+    return this.publishCommand(uuid, 'insertPermission', dataPayload);
+  }
+
+  /** Assign Vehicle License Plate permissions (Type 700: License Plate). */
+  sendInsertPlatePermission(uuid, plateNumber, doorIndices = ['01'], accessLevel = 0) {
+    const schedId = Number(accessLevel) || 0;
+    const dataPayload = doorIndices.map(idx => ({
+      id: String(plateNumber),
+      type: 700,
+      code: String(plateNumber),
       index: typeof idx === 'string' ? idx : String(idx),
       accessLevel: schedId,
       time: schedId === 0 ? { type: 0 } : { type: 1, scheduleId: schedId }
@@ -251,24 +350,89 @@ class MQTTService {
     return this.publishCommand(uuid, 'setConfig', { childInfo: childInfoArray });
   }
 
-  /** Delete a specific card permission from gateway controller. */
-  sendDeletePermission(uuid, cardNo) {
-    return this.publishCommand(uuid, 'deletePermission', [{ id: String(cardNo), code: String(cardNo) }]);
+  /** Delete a specific permission from gateway controller (supports delPermission & deletePermission). */
+  sendDeletePermission(uuid, permissionId) {
+    const idStr = String(permissionId);
+    return this.publishCommand(uuid, 'delPermission', [idStr]);
   }
 
-  /** Clear all cards database from gateway controller. */
+  /** Clear all permission records from gateway controller whitelist. */
+  sendClearPermissions(uuid) {
+    return this.publishCommand(uuid, 'clearPermission', {});
+  }
+
+  /** Alias for clear all cards. */
   sendClearCards(uuid) {
-    return this.publishCommand(uuid, 'clearCardDatabase', {});
+    return this.sendClearPermissions(uuid);
   }
 
-  /** Remote reboot gateway controller. */
-  sendReboot(uuid) {
-    return this.publishCommand(uuid, 'reboot', {});
+  /** Query active permissions stored in controller flash (paginated). */
+  sendGetPermissions(uuid, page = 0, size = 50) {
+    return this.publishCommand(uuid, 'getPermission', { page, size });
   }
 
-  /** Request full system and door configuration from gateway controller. */
-  sendGetConfig(uuid) {
-    return this.publishCommand(uuid, 'getConfig', '');
+  // ── Dedicated Facial Image Database Management ───────────────────────────────
+
+  /** Upload Base64 Face Photo to terminal recognition database (Section 4.1). */
+  sendInsertFace(uuid, personId, base64Image, doorIndex = '01', name = '') {
+    const dataPayload = {
+      code: String(personId),
+      index: typeof doorIndex === 'string' ? doorIndex : String(doorIndex),
+      data: base64Image.startsWith('data:') ? base64Image : `data:image/jpeg;base64,${base64Image}`,
+      extra: name ? { name: String(name) } : {}
+    };
+    return this.publishCommand(uuid, 'insertFace', dataPayload);
+  }
+
+  /** Delete face template from terminal database (Section 4.2). */
+  sendDelFace(uuid, personId) {
+    return this.publishCommand(uuid, 'delFace', { code: String(personId) });
+  }
+
+  /** Clear all face records from terminal database (Section 4.3). */
+  sendClearFaces(uuid) {
+    return this.publishCommand(uuid, 'clearFace', {});
+  }
+
+  // ── Extended Remote Hardware Controls ────────────────────────────────────────
+
+  /** Activate / Enable device to accept scans (Command 2). */
+  sendDeviceEnable(uuid) {
+    return this.publishCommand(uuid, 'remoteControl', { command: 2 });
+  }
+
+  /** Disable device from responding to scans (Command 3). */
+  sendDeviceDisable(uuid) {
+    return this.publishCommand(uuid, 'remoteControl', { command: 3 });
+  }
+
+  /** Factory reset controller board (Command 4). */
+  sendFactoryReset(uuid) {
+    return this.publishCommand(uuid, 'remoteControl', { command: 4 });
+  }
+
+  /** Show LCD Screen Prompt and play audio WAV prompt on device (Command 5). */
+  sendScreenPrompt(uuid, message, timeoutSeconds = 8, wavFileName = '') {
+    const dataPayload = {
+      command: 5,
+      extra: {
+        msg: String(message),
+        msgTimeout: Number(timeoutSeconds) || 8,
+        ...(wavFileName ? { wavFileName: String(wavFileName) } : {})
+      }
+    };
+    return this.publishCommand(uuid, 'remoteControl', dataPayload);
+  }
+
+  /** Trigger Over-The-Air (OTA) Firmware Upgrade (Section 7). */
+  sendUpgradeFirmware(uuid, firmwareUrl, md5Hash, type = 0, subDeviceExtra = null) {
+    const dataPayload = {
+      type: Number(type) || 0,
+      url: String(firmwareUrl),
+      md5: String(md5Hash),
+      ...(subDeviceExtra ? { extra: subDeviceExtra } : {})
+    };
+    return this.publishCommand(uuid, 'upgradeFirmware', dataPayload);
   }
 
   // ── Batch Card Sync Protocol Engine ──────────────────────────────────────────

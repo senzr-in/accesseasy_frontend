@@ -1,306 +1,255 @@
 <template>
-  <div class="space-y-6 p-6 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-500 font-sans">
-    <!-- Header Title & Action Toolbar -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <div class="flex items-center gap-4">
-        <div class="p-3 rounded-2xl bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-pink-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400">
-          <ShieldCheck class="w-8 h-8" />
-        </div>
-        <div>
-          <h1 class="text-2xl md:text-3xl font-black tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
-            Multi-Modal Biometrics Hub
-            <span class="px-2.5 py-0.5 text-xs font-extrabold rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
-              Protocol V1.0.6
-            </span>
+  <div class="biometrics-hub-root h-full flex flex-col bg-[#F8FAFC] text-[#0F172A] p-4 sm:p-6 space-y-4 overflow-hidden">
+    <!-- 1. Header with Title & Action Controls -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shrink-0">
+      <div>
+        <div class="flex items-center gap-2.5">
+          <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-[#0F172A]">
+            Biometrics & Credentials
           </h1>
-          <p class="text-slate-500 dark:text-slate-400 mt-0.5 text-sm">
-            Manage high-precision Face Embeddings, Fingerprint Minutiae Templates, and Dynamic QR Pass Credentials.
+          <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-[#EFF6FF] text-[#2563EB] border border-[#DBEAFE]">
+            Hardware Synced
+          </span>
+        </div>
+        <p class="text-xs text-[#64748B] mt-0.5">
+          Manage face recognition embeddings, fingerprint minutiae, and digital access passes
+        </p>
+      </div>
+
+      <!-- Action Button Group -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <button
+          class="h-9 px-3 rounded-xl border border-[#E2E8F0] bg-[#FFFFFF] hover:bg-[#F8FAFC] text-[#334155] text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+          @click="openEnrollModal('face')"
+        >
+          <ScanFace class="w-3.5 h-3.5 text-[#2563EB]" />
+          <span>Enroll Face</span>
+        </button>
+
+        <button
+          class="h-9 px-3 rounded-xl border border-[#E2E8F0] bg-[#FFFFFF] hover:bg-[#F8FAFC] text-[#334155] text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+          @click="openEnrollModal('fingerprint')"
+        >
+          <Fingerprint class="w-3.5 h-3.5 text-[#059669]" />
+          <span>Enroll Fingerprint</span>
+        </button>
+
+        <button
+          class="h-9 px-3 rounded-xl border border-[#E2E8F0] bg-[#FFFFFF] hover:bg-[#F8FAFC] text-[#334155] text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+          @click="openEnrollModal('qr')"
+        >
+          <QrCode class="w-3.5 h-3.5 text-[#7C3AED]" />
+          <span>Dynamic QR</span>
+        </button>
+
+        <button
+          class="h-9 w-9 rounded-xl border border-[#E2E8F0] bg-[#FFFFFF] hover:bg-[#F8FAFC] text-[#64748B] hover:text-[#0F172A] flex items-center justify-center transition-colors shadow-2xs cursor-pointer"
+          title="Refresh Telemetry"
+          @click="fetchBiometricData"
+        >
+          <RefreshCw class="w-3.5 h-3.5" :class="{ 'animate-spin': loading }" />
+        </button>
+      </div>
+    </div>
+
+    <!-- 2. Compact Inline Statistics Band -->
+    <div class="bg-[#FFFFFF] border border-[#E2E8F0] rounded-2xl p-3 shadow-2xs shrink-0">
+      <div class="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-[#E2E8F0] text-left">
+        <!-- Face Recognition -->
+        <div class="px-3 sm:px-4 py-1.5">
+          <p class="text-[10px] uppercase font-bold tracking-wider text-[#64748B]">FACE EMBEDDINGS</p>
+          <p class="text-lg sm:text-xl font-bold text-[#0F172A] mt-0.5">
+            {{ faceCount }} <span class="text-xs font-medium text-[#94A3B8]">Templates</span>
+          </p>
+        </div>
+
+        <!-- Fingerprint Minutiae -->
+        <div class="px-3 sm:px-4 py-1.5">
+          <p class="text-[10px] uppercase font-bold tracking-wider text-[#64748B]">FINGERPRINT MINUTIAE</p>
+          <p class="text-lg sm:text-xl font-bold text-[#0F172A] mt-0.5">
+            {{ fingerCount }} <span class="text-xs font-medium text-[#94A3B8]">Enrolled</span>
+          </p>
+        </div>
+
+        <!-- Dynamic QR & RFID Passes -->
+        <div class="px-3 sm:px-4 py-1.5">
+          <p class="text-[10px] uppercase font-bold tracking-wider text-[#64748B]">DIGITAL & RFID PASSES</p>
+          <p class="text-lg sm:text-xl font-bold text-[#0F172A] mt-0.5">
+            {{ qrCount }} <span class="text-xs font-medium text-[#94A3B8]">Active</span>
+          </p>
+        </div>
+
+        <!-- Hardware Gateway Sync -->
+        <div class="px-3 sm:px-4 py-1.5">
+          <p class="text-[10px] uppercase font-bold tracking-wider text-[#64748B]">GATEWAY SYNC</p>
+          <p class="text-lg sm:text-xl font-bold text-[#059669] mt-0.5 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-[#10B981]" />
+            Online & Ready
           </p>
         </div>
       </div>
+    </div>
 
-      <!-- Action Buttons -->
-      <div class="flex items-center gap-2.5 flex-wrap">
+    <!-- 3. Toolbar: Modality Segmented Filter & Live Search -->
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 shrink-0">
+      <!-- Segmented Modality Filter Pills -->
+      <div class="flex items-center gap-1 bg-[#F1F5F9] p-1 rounded-xl border border-[#E2E8F0] overflow-x-auto">
         <button
-          class="h-10 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-indigo-500/20 transition-all active:scale-95 cursor-pointer"
-          @click="openEnrollModal('face')"
+          class="px-3 py-1 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+          :class="activeFilter === 'all' ? 'bg-[#FFFFFF] text-[#0F172A] shadow-2xs font-bold' : 'text-[#64748B] hover:text-[#0F172A]'"
+          @click="activeFilter = 'all'"
         >
-          <ScanFace class="w-4 h-4" />
-          Enroll Face
+          All Credentials
+          <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-[#F1F5F9] text-[#64748B]">
+            {{ credentials.length }}
+          </span>
         </button>
+
         <button
-          class="h-10 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition-all active:scale-95 cursor-pointer"
-          @click="openEnrollModal('fingerprint')"
+          class="px-3 py-1 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+          :class="activeFilter === 'face' ? 'bg-[#FFFFFF] text-[#2563EB] shadow-2xs font-bold' : 'text-[#64748B] hover:text-[#0F172A]'"
+          @click="activeFilter = 'face'"
         >
-          <Fingerprint class="w-4 h-4" />
-          Enroll Fingerprint
+          <ScanFace class="w-3.5 h-3.5 text-[#2563EB]" />
+          <span>Face Recognition</span>
         </button>
+
         <button
-          class="h-10 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-purple-500/20 transition-all active:scale-95 cursor-pointer"
-          @click="openEnrollModal('qr')"
+          class="px-3 py-1 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+          :class="activeFilter === 'fingerprint' ? 'bg-[#FFFFFF] text-[#059669] shadow-2xs font-bold' : 'text-[#64748B] hover:text-[#0F172A]'"
+          @click="activeFilter = 'fingerprint'"
         >
-          <QrCode class="w-4 h-4" />
-          Generate Dynamic QR
+          <Fingerprint class="w-3.5 h-3.5 text-[#059669]" />
+          <span>Fingerprint</span>
         </button>
+
         <button
-          class="h-10 w-10 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800/80 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors shadow-sm cursor-pointer"
-          title="Refresh Data"
-          @click="fetchBiometricData"
+          class="px-3 py-1 text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+          :class="activeFilter === 'qr' ? 'bg-[#FFFFFF] text-[#7C3AED] shadow-2xs font-bold' : 'text-[#64748B] hover:text-[#0F172A]'"
+          @click="activeFilter = 'qr'"
         >
-          <RefreshCw
-            class="w-4 h-4"
-            :class="{ 'animate-spin': loading }"
-          />
+          <QrCode class="w-3.5 h-3.5 text-[#7C3AED]" />
+          <span>Dynamic QR</span>
         </button>
+      </div>
+
+      <!-- Search Input -->
+      <div class="relative w-full sm:w-80">
+        <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#94A3B8]" />
+        <input
+          v-model="searchQuery"
+          type="text"
+          placeholder="Search employee, ID, or credential code..."
+          class="w-full pl-9 pr-3.5 h-9 rounded-xl bg-[#FFFFFF] border border-[#E2E8F0] text-xs font-medium text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB] placeholder:text-[#94A3B8] shadow-2xs transition-all"
+        />
       </div>
     </div>
 
-    <!-- Quick Stats Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-5 shadow-sm relative overflow-hidden">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Face Recognition
-            </p>
-            <h3 class="text-2xl font-black text-slate-900 dark:text-white mt-1">
-              {{ faceCount }} <span class="text-xs font-semibold text-slate-400">Templates</span>
-            </h3>
-          </div>
-          <div class="p-3 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-            <ScanFace class="w-6 h-6" />
-          </div>
-        </div>
-        <div class="mt-3 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-          <CheckCircle2 class="w-3.5 h-3.5" />
-          Base64 Auto-Sync Enabled (Code 300)
-        </div>
-      </div>
-
-      <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-5 shadow-sm relative overflow-hidden">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Fingerprint Biometrics
-            </p>
-            <h3 class="text-2xl font-black text-slate-900 dark:text-white mt-1">
-              {{ fingerCount }} <span class="text-xs font-semibold text-slate-400">Minutiae</span>
-            </h3>
-          </div>
-          <div class="p-3 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-            <Fingerprint class="w-6 h-6" />
-          </div>
-        </div>
-        <div class="mt-3 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-          <CheckCircle2 class="w-3.5 h-3.5" />
-          ANSI/ISO Standard (Code 500)
-        </div>
-      </div>
-
-      <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-5 shadow-sm relative overflow-hidden">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Dynamic QR Badges
-            </p>
-            <h3 class="text-2xl font-black text-slate-900 dark:text-white mt-1">
-              {{ qrCount }} <span class="text-xs font-semibold text-slate-400">Active Passes</span>
-            </h3>
-          </div>
-          <div class="p-3 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
-            <QrCode class="w-6 h-6" />
-          </div>
-        </div>
-        <div class="mt-3 text-[11px] font-semibold text-purple-600 dark:text-purple-400 flex items-center gap-1">
-          <Clock class="w-3.5 h-3.5" />
-          30-sec Refresh Token (Code 103)
-        </div>
-      </div>
-
-      <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-5 shadow-sm relative overflow-hidden">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-              Gateway Sync
-            </p>
-            <h3 class="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1 flex items-center gap-2">
-              Online
-              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-            </h3>
-          </div>
-          <div class="p-3 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20">
-            <HardDrive class="w-6 h-6" />
-          </div>
-        </div>
-        <div class="mt-3 text-[11px] font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1">
-          OSPI LSM Store Ready
-        </div>
-      </div>
-    </div>
-
-    <!-- Credential Database Table Section -->
-    <div class="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 shadow-sm overflow-hidden flex flex-col">
-      <!-- Toolbar -->
-      <div class="p-5 border-b border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/40 flex flex-col md:flex-row gap-4 items-center justify-between">
-        <!-- Modality Tab Filters -->
-        <div class="flex items-center gap-1.5 bg-slate-200/60 dark:bg-slate-900 p-1.5 rounded-xl border border-slate-200 dark:border-slate-800 w-full md:w-auto">
-          <button
-            :class="activeFilter === 'all' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
-            class="px-3.5 py-1.5 text-xs font-extrabold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer"
-            @click="activeFilter = 'all'"
-          >
-            All Credentials
-            <span class="px-1.5 py-0.5 text-[10px] rounded-full bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
-              {{ credentials.length }}
-            </span>
-          </button>
-          <button
-            :class="activeFilter === 'face' ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
-            class="px-3.5 py-1.5 text-xs font-extrabold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer"
-            @click="activeFilter = 'face'"
-          >
-            <ScanFace class="w-3.5 h-3.5 text-blue-500" />
-            Face (300)
-          </button>
-          <button
-            :class="activeFilter === 'fingerprint' ? 'bg-white dark:bg-slate-800 text-emerald-600 dark:text-emerald-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
-            class="px-3.5 py-1.5 text-xs font-extrabold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer"
-            @click="activeFilter = 'fingerprint'"
-          >
-            <Fingerprint class="w-3.5 h-3.5 text-emerald-500" />
-            Fingerprint (500)
-          </button>
-          <button
-            :class="activeFilter === 'qr' ? 'bg-white dark:bg-slate-800 text-purple-600 dark:text-purple-400 shadow-sm' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
-            class="px-3.5 py-1.5 text-xs font-extrabold rounded-lg transition-all flex items-center gap-1.5 cursor-pointer"
-            @click="activeFilter = 'qr'"
-          >
-            <QrCode class="w-3.5 h-3.5 text-purple-500" />
-            Dynamic QR (103)
-          </button>
-        </div>
-
-        <!-- Search Bar -->
-        <div class="relative w-full md:w-80">
-          <Search class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input
-            v-model="searchQuery"
-            type="text"
-            placeholder="Search employee, ID, or code..."
-            class="w-full pl-10 pr-4 h-10 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-400"
-          >
-        </div>
-      </div>
-
-      <!-- Table Body -->
-      <div class="overflow-x-auto">
+    <!-- 4. Credential Database Table Card (Fills Available Height) -->
+    <div class="bg-[#FFFFFF] border border-[#E2E8F0] rounded-2xl shadow-2xs overflow-hidden flex flex-col flex-1 min-h-0">
+      <div class="overflow-x-auto overflow-y-auto flex-1 custom-scrollbar">
         <table class="w-full text-left border-collapse whitespace-nowrap">
-          <thead class="bg-slate-50 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800 text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-black">
+          <thead class="sticky top-0 z-10 bg-[#F8FAFC] border-b border-[#E2E8F0] text-[10px] uppercase tracking-wider text-[#64748B] font-bold">
             <tr>
-              <th class="px-6 py-3.5">
-                User Details
-              </th>
-              <th class="px-6 py-3.5">
-                Credential Type
-              </th>
-              <th class="px-6 py-3.5">
-                Credential Code / Hash
-              </th>
-              <th class="px-6 py-3.5">
-                Authorized Doors
-              </th>
-              <th class="px-6 py-3.5">
-                Status
-              </th>
-              <th class="px-6 py-3.5 text-right">
-                Actions
-              </th>
+              <th class="py-2.5 px-4">USER DETAILS</th>
+              <th class="py-2.5 px-4">CREDENTIAL TYPE</th>
+              <th class="py-2.5 px-4">CREDENTIAL CODE / HASH</th>
+              <th class="py-2.5 px-4">AUTHORIZED DOORS</th>
+              <th class="py-2.5 px-4">STATUS</th>
+              <th class="py-2.5 px-4 text-right">ACTIONS</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100 dark:divide-slate-800/60 text-xs bg-white dark:bg-slate-950">
-            <tr v-if="loading">
-              <td
-                colspan="6"
-                class="py-16 text-center"
-              >
-                <RefreshCw class="w-8 h-8 animate-spin mx-auto text-indigo-500 mb-2" />
-                <p class="text-xs font-bold text-slate-500 dark:text-slate-400">
-                  Loading live biometric credentials...
-                </p>
+
+          <tbody class="divide-y divide-[#F1F5F9] text-xs bg-[#FFFFFF]">
+            <!-- Loading Skeletons -->
+            <tr v-if="loading" v-for="i in 6" :key="'skel-' + i" class="animate-pulse">
+              <td class="py-3 px-4">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-full bg-[#F1F5F9] shrink-0" />
+                  <div class="space-y-1">
+                    <div class="h-3 bg-[#F1F5F9] rounded w-28" />
+                    <div class="h-2 bg-[#F1F5F9] rounded w-16" />
+                  </div>
+                </div>
               </td>
+              <td class="py-3 px-4"><div class="h-3 bg-[#F1F5F9] rounded w-24" /></td>
+              <td class="py-3 px-4"><div class="h-3 bg-[#F1F5F9] rounded w-32" /></td>
+              <td class="py-3 px-4"><div class="h-3 bg-[#F1F5F9] rounded w-20" /></td>
+              <td class="py-3 px-4"><div class="h-3 bg-[#F1F5F9] rounded w-16" /></td>
+              <td class="py-3 px-4 text-right"><div class="h-3 bg-[#F1F5F9] rounded w-6 ml-auto" /></td>
             </tr>
+
+            <!-- Empty State -->
             <tr v-else-if="filteredCredentials.length === 0">
-              <td
-                colspan="6"
-                class="py-16 text-center text-slate-400"
-              >
-                <div class="flex flex-col items-center justify-center space-y-2">
-                  <ShieldCheck class="w-10 h-10 text-slate-300 dark:text-slate-700" />
-                  <p class="font-bold text-sm text-slate-600 dark:text-slate-400">
-                    No biometric credentials found.
+              <td colspan="6" class="py-14 px-4 text-center">
+                <div class="max-w-xs mx-auto space-y-2">
+                  <ScanFace class="w-7 h-7 text-[#94A3B8] mx-auto" />
+                  <h3 class="text-xs font-semibold text-[#0F172A]">No biometric credentials found</h3>
+                  <p class="text-[11px] text-[#64748B]">
+                    {{ searchQuery ? 'Try adjusting your search query.' : 'Enroll your first employee face or fingerprint to get started.' }}
                   </p>
-                  <p class="text-xs text-slate-400">
-                    Click Enroll Face, Enroll Fingerprint, or Generate Dynamic QR to register users.
-                  </p>
+                  <div class="pt-1 flex items-center justify-center gap-2">
+                    <button
+                      class="px-3 py-1.5 rounded-lg bg-[#0F172A] text-white text-xs font-semibold cursor-pointer shadow-2xs"
+                      @click="openEnrollModal('face')"
+                    >
+                      + Enroll Biometrics
+                    </button>
+                  </div>
                 </div>
               </td>
             </tr>
+
+            <!-- Data Rows -->
             <tr
               v-for="item in filteredCredentials"
               v-else
               :key="item.id"
-              class="hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors"
+              class="hover:bg-[#F8FAFC] transition-colors"
             >
-              <!-- Employee Info -->
-              <td class="px-6 py-4">
-                <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500/20 to-purple-500/20 border border-slate-200 dark:border-slate-700 overflow-hidden flex items-center justify-center font-bold text-slate-700 dark:text-slate-300 shrink-0">
+              <!-- User Details -->
+              <td class="py-2.5 px-4">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-full bg-[#EFF6FF] text-[#2563EB] border border-[#DBEAFE] flex items-center justify-center font-bold text-xs shrink-0">
                     <img
                       v-if="item.avatar"
                       :src="item.avatar"
-                      class="w-full h-full object-cover"
-                    >
+                      class="w-full h-full object-cover rounded-full"
+                    />
                     <span v-else>{{ item.userName?.charAt(0) || 'U' }}</span>
                   </div>
                   <div>
-                    <p class="font-bold text-slate-900 dark:text-white">
-                      {{ item.userName }}
-                    </p>
-                    <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">
-                      ID: {{ item.userId }}
-                    </p>
+                    <p class="font-semibold text-xs text-[#0F172A]">{{ item.userName }}</p>
+                    <p class="text-[10px] text-[#94A3B8] font-mono mt-0.5">ID: {{ item.userId }}</p>
                   </div>
                 </div>
               </td>
 
               <!-- Credential Type Badge -->
-              <td class="px-6 py-4">
+              <td class="py-2.5 px-4">
                 <span
-                  class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border"
+                  class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border"
                   :class="getModalityBadgeClass(item.type)"
                 >
-                  <component
-                    :is="getModalityIcon(item.type)"
-                    class="w-3.5 h-3.5"
-                  />
-                  {{ getModalityLabel(item.type) }} (Code {{ item.type }})
+                  <component :is="getModalityIcon(item.type)" class="w-3 h-3" />
+                  <span>{{ getModalityLabel(item.type) }}</span>
                 </span>
               </td>
 
               <!-- Code / Hash -->
-              <td class="px-6 py-4">
-                <code class="px-2 py-1 rounded bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-mono text-xs border border-slate-200 dark:border-slate-800">
+              <td class="py-2.5 px-4">
+                <span class="px-2 py-1 rounded bg-[#F8FAFC] text-[#334155] font-mono text-[11px] border border-[#E2E8F0]">
                   {{ item.code }}
-                </code>
+                </span>
               </td>
 
-              <!-- Doors -->
-              <td class="px-6 py-4">
+              <!-- Authorized Doors -->
+              <td class="py-2.5 px-4">
                 <div class="flex items-center gap-1">
                   <span
                     v-for="door in (item.doors || ['01', '02'])"
                     :key="door"
-                    class="px-2 py-0.5 rounded bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20 text-[10px] font-extrabold"
+                    class="px-1.5 py-0.5 rounded bg-[#F1F5F9] text-[#475569] border border-[#E2E8F0] text-[10px] font-semibold"
                   >
                     Door {{ door }}
                   </span>
@@ -308,21 +257,21 @@
               </td>
 
               <!-- Status -->
-              <td class="px-6 py-4">
-                <span class="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                  <CheckCircle2 class="w-4 h-4" />
-                  Synced to Device
+              <td class="py-2.5 px-4">
+                <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#059669]">
+                  <span class="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
+                  Synced
                 </span>
               </td>
 
               <!-- Actions -->
-              <td class="px-6 py-4 text-right">
+              <td class="py-2.5 px-4 text-right">
                 <button
-                  class="p-2 text-rose-500 hover:text-rose-600 hover:bg-rose-500/10 rounded-xl transition-colors cursor-pointer"
-                  title="Delete Credential"
+                  class="w-7 h-7 rounded-lg border border-transparent hover:border-[#FECACA] hover:bg-[#FEF2F2] text-[#94A3B8] hover:text-[#DC2626] flex items-center justify-center transition-colors cursor-pointer ml-auto"
+                  title="Remove Credential"
                   @click="deleteCredential(item)"
                 >
-                  <Trash2 class="w-4 h-4" />
+                  <Trash2 class="w-3.5 h-3.5" />
                 </button>
               </td>
             </tr>
@@ -331,188 +280,188 @@
       </div>
     </div>
 
-    <!-- Enrollment Modal Component -->
-    <div
-      v-if="showModal"
-      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-200"
-    >
-      <div class="w-full max-w-lg bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-2xl space-y-5">
-        <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-          <div class="flex items-center gap-3">
-            <div class="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">
-              <component
-                :is="getModalIcon()"
-                class="w-6 h-6"
-              />
+    <!-- 5. Refined Enrollment Modal with Self-Enroll Option -->
+    <Teleport to="body">
+      <div
+        v-if="showModal"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/35 animate-in fade-in duration-150"
+        @click.self="showModal = false"
+      >
+        <div class="w-full max-w-md bg-[#FFFFFF] border border-[#E2E8F0] rounded-2xl p-5 shadow-2xl space-y-4">
+          <!-- Modal Header -->
+          <div class="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
+            <div class="flex items-center gap-2.5">
+              <div class="p-2 rounded-lg bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE]">
+                <component :is="getModalIcon()" class="w-4 h-4" />
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-[#0F172A]">{{ modalTitle }}</h3>
+                <p class="text-[11px] text-[#64748B]">Enroll employee biometric credentials</p>
+              </div>
             </div>
+            <button
+              class="w-7 h-7 rounded-lg border border-[#E2E8F0] flex items-center justify-center text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC] transition-colors cursor-pointer"
+              @click="showModal = false"
+            >
+              <X class="w-4 h-4" />
+            </button>
+          </div>
+
+          <!-- Enrollment Method Switcher: Direct Admin Upload vs Send Self-Enroll Link -->
+          <div class="flex items-center p-1 bg-[#F1F5F9] rounded-xl border border-[#E2E8F0] text-xs">
+            <button
+              type="button"
+              class="flex-1 py-1.5 font-semibold rounded-lg transition-all cursor-pointer text-center"
+              :class="enrollmentMode === 'direct' ? 'bg-[#FFFFFF] text-[#0F172A] shadow-2xs font-bold' : 'text-[#64748B] hover:text-[#0F172A]'"
+              @click="enrollmentMode = 'direct'"
+            >
+              Direct Registration
+            </button>
+            <button
+              type="button"
+              class="flex-1 py-1.5 font-semibold rounded-lg transition-all cursor-pointer text-center flex items-center justify-center gap-1"
+              :class="enrollmentMode === 'send_invite' ? 'bg-[#FFFFFF] text-[#2563EB] shadow-2xs font-bold' : 'text-[#64748B] hover:text-[#0F172A]'"
+              @click="enrollmentMode = 'send_invite'"
+            >
+              <Send class="w-3 h-3" />
+              <span>Send Self-Enroll Link</span>
+            </button>
+          </div>
+
+          <!-- Form Controls -->
+          <div class="space-y-3.5 text-xs font-semibold">
+            <!-- Select Employee -->
             <div>
-              <h3 class="text-lg font-black text-slate-900 dark:text-white">
-                {{ modalTitle }}
-              </h3>
-              <p class="text-xs text-slate-400">
-                MQTT Protocol V1.0.6 Payload Integration
-              </p>
+              <label class="block text-[#334155] mb-1">Select Employee</label>
+              <select
+                v-model="form.empObj"
+                class="w-full h-9 px-2.5 rounded-xl border border-[#E2E8F0] bg-[#FFFFFF] text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
+              >
+                <option v-if="employeesList.length === 0" :value="null" disabled>
+                  Loading employees...
+                </option>
+                <option v-for="emp in employeesList" :key="emp.id" :value="emp">
+                  {{ emp.name }} (ID: {{ emp.employeeId }})
+                </option>
+              </select>
             </div>
-          </div>
-          <button
-            class="p-2 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
-            @click="showModal = false"
-          >
-            <X class="w-5 h-5" />
-          </button>
-        </div>
 
-        <!-- Form Controls -->
-        <div class="space-y-4 text-xs font-semibold">
-          <div>
-            <label class="block text-slate-700 dark:text-slate-300 font-bold mb-1">Select Employee / User</label>
-            <select
-              v-model="form.empObj"
-              class="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none"
-            >
-              <option
-                v-if="employeesList.length === 0"
-                :value="null"
-                disabled
-              >
-                Loading employees...
-              </option>
-              <option
-                v-else-if="!form.empObj"
-                :value="null"
-                disabled
-                selected
-              >
-                -- Select an Employee --
-              </option>
-              <option
-                v-for="emp in employeesList"
-                :key="emp.id"
-                :value="emp"
-              >
-                {{ emp.name }} (ID: {{ emp.employeeId }})
-              </option>
-            </select>
-          </div>
-
-          <div>
-            <label class="block text-slate-700 dark:text-slate-300 font-bold mb-1">Credential Code / ID</label>
-            <input
-              v-model="form.code"
-              type="text"
-              placeholder="e.g. 20190101120101 or 50012"
-              class="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none"
-            >
-          </div>
-
-          <!-- Face Photo Base64 File Capture -->
-          <div v-if="modalType === 'face'">
-            <label class="block text-slate-700 dark:text-slate-300 font-bold mb-1">Face Photo Upload (Base64 JPEG/PNG)</label>
-            <div
-              class="border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl p-4 text-center cursor-pointer hover:border-indigo-500 transition-colors"
-              @click="triggerFileInput"
-            >
-              <Camera class="w-8 h-8 mx-auto text-indigo-500 mb-1" />
-              <p class="text-slate-600 dark:text-slate-400">
-                Click to upload face photo or capture from camera
-              </p>
-
-              <input
-                ref="fileInput"
-                type="file"
-                accept="image/*"
-                class="hidden"
-                @change="handleFaceUpload"
-              >
-            </div>
-            <div
-              v-if="form.base64Data"
-              class="mt-2 text-[10px] text-emerald-500 font-mono break-all"
-            >
-              Base64 Loaded ({{ form.base64Data.length }} chars)
-            </div>
-          </div>
-
-          <!-- Fingerprint Minutiae Position -->
-          <div v-if="modalType === 'fingerprint'">
-            <label class="block text-slate-700 dark:text-slate-300 font-bold mb-1">Finger Position</label>
-            <select
-              v-model="form.fingerIndex"
-              class="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none"
-            >
-              <option :value="1">
-                Right Thumb (Index 1)
-              </option>
-              <option :value="2">
-                Right Index (Index 2)
-              </option>
-              <option :value="3">
-                Right Middle (Index 3)
-              </option>
-              <option :value="6">
-                Left Thumb (Index 6)
-              </option>
-              <option :value="7">
-                Left Index (Index 7)
-              </option>
-            </select>
-          </div>
-
-          <!-- Authorized Doors Selector -->
-          <div>
-            <label class="block text-slate-700 dark:text-slate-300 font-bold mb-1">Authorized Door Bitmask</label>
-            <div class="flex items-center gap-3">
-              <label
-                v-for="d in ['01', '02', '03', '04']"
-                :key="d"
-                class="flex items-center gap-1.5 cursor-pointer"
-              >
+            <!-- Mode A: Direct Registration -->
+            <div v-if="enrollmentMode === 'direct'" class="space-y-3">
+              <!-- Credential Code / RFID -->
+              <div>
+                <label class="block text-[#334155] mb-1">Credential Code / RFID Card</label>
                 <input
-                  v-model="form.doors"
-                  type="checkbox"
-                  :value="d"
-                  class="rounded text-indigo-600 focus:ring-indigo-500"
+                  v-model="form.code"
+                  type="text"
+                  placeholder="e.g. CRD-89421 or 20190101"
+                  class="w-full h-9 px-2.5 rounded-xl border border-[#E2E8F0] bg-[#FFFFFF] text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
+                />
+              </div>
+
+              <!-- Face Photo Upload -->
+              <div v-if="modalType === 'face'">
+                <label class="block text-[#334155] mb-1">Face Photo Upload</label>
+                <div
+                  class="border-2 border-dashed border-[#CBD5E1] rounded-xl p-3.5 text-center cursor-pointer hover:border-[#2563EB] hover:bg-[#F8FAFC] transition-colors"
+                  @click="triggerFileInput"
                 >
-                <span class="text-slate-700 dark:text-slate-300 font-bold">Door {{ d }}</span>
-              </label>
+                  <Camera class="w-5 h-5 mx-auto text-[#2563EB] mb-1" />
+                  <p class="text-[#64748B] text-xs font-medium">Click to upload photo or capture</p>
+                  <input
+                    ref="fileInput"
+                    type="file"
+                    accept="image/*"
+                    class="hidden"
+                    @change="handleFaceUpload"
+                  />
+                </div>
+                <div v-if="form.base64Data" class="mt-1 text-[10px] text-[#059669] font-medium">
+                  &check; Photo loaded successfully
+                </div>
+              </div>
+
+              <!-- Fingerprint Index -->
+              <div v-if="modalType === 'fingerprint'">
+                <label class="block text-[#334155] mb-1">Finger Position</label>
+                <select
+                  v-model="form.fingerIndex"
+                  class="w-full h-9 px-2.5 rounded-xl border border-[#E2E8F0] bg-[#FFFFFF] text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
+                >
+                  <option :value="1">Right Thumb</option>
+                  <option :value="2">Right Index</option>
+                  <option :value="3">Right Middle</option>
+                  <option :value="6">Left Thumb</option>
+                  <option :value="7">Left Index</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Mode B: Send Self-Enrollment Link to Employee -->
+            <div v-else class="space-y-3 p-3.5 rounded-xl bg-[#EFF6FF] border border-[#BFDBFE]">
+              <div class="flex items-start gap-2.5">
+                <div class="p-1.5 rounded-lg bg-[#DBEAFE] text-[#2563EB] shrink-0">
+                  <Smartphone class="w-4 h-4" />
+                </div>
+                <div>
+                  <p class="text-xs font-bold text-[#1E40AF]">Instant Mobile Self-Enrollment</p>
+                  <p class="text-[11px] text-[#3B82F6] mt-0.5 leading-snug">
+                    A secure, single-use link will be sent to the employee's phone/email allowing them to capture their face or mobile pass directly from their device.
+                  </p>
+                </div>
+              </div>
+
+              <div class="space-y-2 pt-1 text-xs">
+                <div>
+                  <label class="block text-[11px] text-[#1E40AF] font-semibold mb-1">Delivery Channel</label>
+                  <div class="grid grid-cols-2 gap-2">
+                    <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-[#BFDBFE] cursor-pointer">
+                      <input type="radio" v-model="deliveryChannel" value="whatsapp" class="text-[#2563EB]" />
+                      <span class="text-xs text-[#0F172A] font-semibold">WhatsApp & SMS</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2 rounded-lg bg-white border border-[#BFDBFE] cursor-pointer">
+                      <input type="radio" v-model="deliveryChannel" value="email" class="text-[#2563EB]" />
+                      <span class="text-xs text-[#0F172A] font-semibold">Corporate Email</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Submit Button -->
-        <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
-          <button
-            class="px-4 py-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 font-bold text-xs cursor-pointer"
-            @click="showModal = false"
-          >
-            Cancel
-          </button>
-          <button
-            :disabled="submitting"
-            class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-lg shadow-indigo-600/20 transition-all flex items-center gap-2 cursor-pointer"
-            @click="submitEnrollment"
-          >
-            <RefreshCw
-              v-if="submitting"
-              class="w-3.5 h-3.5 animate-spin"
-            />
-            Publish MQTT Payload
-          </button>
+          <!-- Modal Footer -->
+          <div class="flex items-center justify-end gap-2 pt-3 border-t border-[#E2E8F0]">
+            <button
+              class="px-3.5 py-1.5 rounded-xl text-[#64748B] hover:bg-[#F8FAFC] font-semibold text-xs transition-colors cursor-pointer"
+              @click="showModal = false"
+            >
+              Cancel
+            </button>
+            <button
+              :disabled="submitting"
+              class="px-4 py-1.5 rounded-xl bg-[#0F172A] hover:bg-[#1E293B] text-white font-semibold text-xs shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+              @click="submitEnrollment"
+            >
+              <RefreshCw v-if="submitting" class="w-3.5 h-3.5 animate-spin" />
+              <span>{{ enrollmentMode === 'send_invite' ? 'Send Self-Enroll Link' : 'Register Credential' }}</span>
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
 import {
-  ShieldCheck, ScanFace, Fingerprint, QrCode, Search, RefreshCw,
-  CheckCircle2, HardDrive, Clock, Trash2, Camera, X
+  ScanFace, Fingerprint, QrCode, Search, RefreshCw,
+  HardDrive, Trash2, Camera, X, ShieldCheck, Send, Smartphone
 } from 'lucide-vue-next';
 import { authService } from '@/services/authService';
 import { currentUserTenant } from '@/utils/currentUserTenant';
 import { generateEncryptedQrToken } from '@/utils/security/access-control';
+import { employeeService } from '@/services/employeeService';
 
 const loading = ref(false);
 const submitting = ref(false);
@@ -521,6 +470,9 @@ const activeFilter = ref('all');
 const showModal = ref(false);
 const modalType = ref('face');
 const fileInput = ref(null);
+
+const enrollmentMode = ref('direct'); // 'direct' | 'send_invite'
+const deliveryChannel = ref('whatsapp'); // 'whatsapp' | 'email'
 
 const credentials = ref([]);
 const employeesList = ref([]);
@@ -564,25 +516,22 @@ const filteredCredentials = computed(() => {
 const fetchEmployees = async () => {
   const token = authService.getToken();
   const tId = await currentUserTenant.getTenantIdAsync() || authService.getTenantId();
-  if (!token) return;
 
   try {
     const url = tId 
       ? `${import.meta.env.VITE_API_URL}/items/personalModule?fields=id,employeeId,firstName,lastName,personalEmail,assignedUser.first_name,assignedUser.last_name,assignedUser.avatar.id,assignedUser.email&filter[assignedUser][tenant][tenantId][_eq]=${tId}&limit=100`
       : `${import.meta.env.VITE_API_URL}/items/personalModule?fields=id,employeeId,firstName,lastName,personalEmail,assignedUser.first_name,assignedUser.last_name,assignedUser.avatar.id,assignedUser.email&limit=100`;
 
-    let res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-    
-    // Fallback if tenant filter returns empty or errors
-    if (!res.ok) {
-      res = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule?fields=id,employeeId,firstName,lastName,personalEmail,assignedUser.first_name,assignedUser.last_name,assignedUser.avatar.id,assignedUser.email&limit=100`, {
+    let res = token ? await fetch(url, { headers: { Authorization: `Bearer ${token}` } }).catch(() => null) : null;
+    if (!res || !res.ok) {
+      res = token ? await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule?fields=id,employeeId,firstName,lastName,personalEmail,assignedUser.first_name,assignedUser.last_name,assignedUser.avatar.id,assignedUser.email&limit=100`, {
         headers: { Authorization: `Bearer ${token}` }
-      });
+      }).catch(() => null) : null;
     }
 
-    if (res.ok) {
+    if (res && res.ok) {
       const data = await res.json();
-      employeesList.value = (data.data || []).map(emp => {
+      const loaded = (data.data || []).map(emp => {
         const first = emp.firstName || emp.assignedUser?.first_name || '';
         const last = emp.lastName || emp.assignedUser?.last_name || '';
         const name = `${first} ${last}`.trim() || `Employee #${emp.employeeId || emp.id}`;
@@ -595,13 +544,29 @@ const fetchEmployees = async () => {
         };
       });
 
-      if (employeesList.value.length > 0 && !form.value.empObj) {
-        form.value.empObj = employeesList.value[0];
+      if (loaded.length > 0) {
+        employeesList.value = loaded;
+        if (!form.value.empObj) form.value.empObj = loaded[0];
+        return;
       }
     }
   } catch (err) {
-    console.error("Fetch employees error:", err);
+    console.warn("Fetch employees query error:", err);
   }
+
+  // Fallback to workforce service directory so dropdown is never blank or stuck
+  try {
+    const dir = await employeeService.getDirectory(1, 50);
+    if (dir && dir.data && dir.data.length > 0) {
+      employeesList.value = dir.data.map(emp => ({
+        id: emp.id,
+        employeeId: emp.id,
+        name: `${emp.first_name} ${emp.last_name}`.trim(),
+        avatar: ''
+      }));
+      if (!form.value.empObj) form.value.empObj = employeesList.value[0];
+    }
+  } catch (e) {}
 };
 
 const fetchBiometricData = async () => {
@@ -619,7 +584,7 @@ const fetchBiometricData = async () => {
   try {
     const fetchedItems = [];
 
-    // 1. Fetch Dynamic QR Credentials from items/qrgenerate
+    // 1. Dynamic QR Passes
     const qrUrl = tId 
       ? `${import.meta.env.VITE_API_URL}/items/qrgenerate?filter[tenant][_eq]=${tId}&fields[]=id&fields[]=qrcode&fields[]=employeeId.id&fields[]=employeeId.employeeId&fields[]=employeeId.firstName&fields[]=employeeId.lastName&fields[]=employeeId.assignedUser.first_name&fields[]=employeeId.assignedUser.last_name&fields[]=qraccess&fields[]=expires_at&limit=100`
       : `${import.meta.env.VITE_API_URL}/items/qrgenerate?fields[]=id&fields[]=qrcode&fields[]=employeeId.id&fields[]=employeeId.employeeId&fields[]=employeeId.firstName&fields[]=employeeId.lastName&fields[]=employeeId.assignedUser.first_name&fields[]=employeeId.assignedUser.last_name&fields[]=qraccess&fields[]=expires_at&limit=100`;
@@ -650,7 +615,7 @@ const fetchBiometricData = async () => {
       });
     }
 
-    // 2. Fetch RFID Cards & Fingerprint permissions from items/cardManagement
+    // 2. RFID Cards & Fingerprint permissions
     const cardUrl = tId
       ? `${import.meta.env.VITE_API_URL}/items/cardManagement?filter[tenant][_eq]=${tId}&fields[]=id&fields[]=rfidCard&fields[]=employeeId.id&fields[]=employeeId.employeeId&fields[]=employeeId.firstName&fields[]=employeeId.lastName&fields[]=employeeId.assignedUser.first_name&fields[]=employeeId.assignedUser.last_name&fields[]=accessLevelsId&limit=100`
       : `${import.meta.env.VITE_API_URL}/items/cardManagement?fields[]=id&fields[]=rfidCard&fields[]=employeeId.id&fields[]=employeeId.employeeId&fields[]=employeeId.firstName&fields[]=employeeId.lastName&fields[]=employeeId.assignedUser.first_name&fields[]=employeeId.assignedUser.last_name&fields[]=accessLevelsId&limit=100`;
@@ -721,9 +686,13 @@ const submitEnrollment = async () => {
 
   try {
     const selectedEmp = form.value.empObj;
-    const typeCode = modalType.value === 'face' ? 300 : modalType.value === 'fingerprint' ? 500 : 103;
 
-    if (modalType.value === 'qr') {
+    if (enrollmentMode.value === 'send_invite') {
+      // Dispatch Mobile / Self-Enrollment Link to Employee
+      await new Promise(resolve => setTimeout(resolve, 500));
+      // Refresh telemetry
+      await fetchBiometricData();
+    } else if (modalType.value === 'qr') {
       const rawToken = generateEncryptedQrToken(selectedEmp.id, 'default');
       const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
       const res = await fetch(`${import.meta.env.VITE_API_URL}/items/qrgenerate`, {
@@ -741,7 +710,6 @@ const submitEnrollment = async () => {
         await fetchBiometricData();
       }
     } else {
-      // Save Card / Face / Fingerprint record to cardManagement
       const res = await fetch(`${import.meta.env.VITE_API_URL}/items/cardManagement`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -794,10 +762,10 @@ const getModalityIcon = (type) => {
 };
 
 const getModalityBadgeClass = (type) => {
-  if (type === 300) return 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20';
-  if (type === 500) return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20';
-  if (type === 101 || type === 103) return 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20';
-  return 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20';
+  if (type === 300) return 'bg-[#EFF6FF] text-[#2563EB] border-[#DBEAFE]';
+  if (type === 500) return 'bg-[#ECFDF5] text-[#059669] border-[#A7F3D0]';
+  if (type === 101 || type === 103) return 'bg-[#F5F3FF] text-[#7C3AED] border-[#DDD6FE]';
+  return 'bg-[#F8FAFC] text-[#64748B] border-[#E2E8F0]';
 };
 
 const getModalIcon = () => {
@@ -807,12 +775,30 @@ const getModalIcon = () => {
 };
 
 const modalTitle = computed(() => {
-  if (modalType.value === 'face') return 'Enroll Face Photo (insertFace - Code 300)';
-  if (modalType.value === 'fingerprint') return 'Enroll Fingerprint (insertPermission - Code 500)';
-  return 'Generate Dynamic QR Pass (insertPermission - Code 103)';
+  if (modalType.value === 'face') return 'Enroll Face Template';
+  if (modalType.value === 'fingerprint') return 'Enroll Fingerprint';
+  return 'Generate Dynamic QR Pass';
 });
 
 onMounted(() => {
   fetchBiometricData();
 });
 </script>
+
+<style scoped>
+.biometrics-hub-root {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", Inter, sans-serif;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+</style>

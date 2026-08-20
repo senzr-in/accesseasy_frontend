@@ -519,6 +519,10 @@ const generateNewQr = async () => {
     activeQrToken.value = rawToken;
     activeQrType.value = qrType;
 
+    // Dispatch QR token to physical hardware controller if device UUID is linked
+    if (employee.value && employee.value.deviceUuid) {
+      mqttService.sendInsertQRAccess(employee.value.deviceUuid, rawToken, ['01', '02', '03', '04'], 60);
+    }
   } catch (err) {
     console.error("Error creating QR code", err);
   } finally {

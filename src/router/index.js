@@ -36,16 +36,17 @@ import BranchAddForm from "@/pages/settings/configuration/branch/branchAddForm.v
 import BranchEditForm from "@/pages/settings/configuration/branch/branchEditForm.vue";
 import AppearanceSettings from "@/pages/settings/appearance.vue";
 
+const appMode = import.meta.env.VITE_APP_MODE || 'workforce';
+
 const getRoleHome = () => {
   if (!authService.isAuthenticated()) return "/login";
   const role = authService.getUserRole();
   if (role === "esslAdmin") return "/dealer-dashboard";
-  if (role === "Guard") return "/dashboard/patrols";    // Security App home
-  if (role === "Employee") return "/dashboard/my-access";  // Workforce App home
+  if (appMode === "workforce") return "/dashboard";
+  if (role === "Guard") return "/dashboard/patrols"; // Security App home
+  if (role === "Employee") return "/dashboard/my-access"; // Workforce App home
   return "/dashboard"; // Admin & Manager → Command Center
 };
-
-const appMode = import.meta.env.VITE_APP_MODE || 'workforce';
 
 let dashboardChildren = [];
 

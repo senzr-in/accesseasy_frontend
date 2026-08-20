@@ -39,6 +39,7 @@
                 Location
               </th>
               <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest whitespace-nowrap">
+
                 Status
               </th>
               <th class="h-10 px-5 font-black text-[10px] text-slate-500 uppercase tracking-widest text-right whitespace-nowrap">
@@ -119,19 +120,36 @@
                 <span class="text-[12px] font-semibold text-slate-500">{{ door.location || '—' }}</span>
               </td>
 
-              <!-- Status -->
+              <!-- Status & Sensor Live State -->
               <td class="px-5 py-3">
-                <span
-                  :class="[
-                    'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold border',
-                    door.status === 'active'
-                      ? 'bg-green-500/10 text-green-700 border-green-500/20 dark:text-green-400'
-                      : 'bg-gray-500/10 text-gray-600 border-gray-500/20'
-                  ]"
-                >
-                  <span :class="['w-1.5 h-1.5 rounded-full', door.status === 'active' ? 'bg-green-500' : 'bg-gray-400']" />
-                  {{ door.status || 'unknown' }}
-                </span>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <!-- Controller Connectivity Status -->
+                  <span
+                    :class="[
+                      'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold border',
+                      getDeviceOnline(door)
+                        ? 'bg-emerald-500/10 text-emerald-700 border-emerald-500/20 dark:text-emerald-400'
+                        : 'bg-zinc-500/10 text-zinc-600 border-zinc-500/20 dark:text-zinc-400'
+                    ]"
+                    :title="door.deviceUuid ? `Controller UUID: ${door.deviceUuid}` : 'No hardware linked'"
+                  >
+                    <span :class="['w-1.5 h-1.5 rounded-full', getDeviceOnline(door) ? 'bg-emerald-500 animate-pulse' : 'bg-zinc-400']" />
+                    {{ getDeviceOnline(door) ? 'Online' : (door.status || 'Offline') }}
+                  </span>
+
+                  <!-- Live Door Sensor State Indicator -->
+                  <span
+                    v-if="door.deviceUuid"
+                    :class="[
+                      'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-mono font-bold border',
+                      getDoorSensorState(door).badgeClass
+                    ]"
+                    :title="`Sensor status: ${getDoorSensorState(door).label}`"
+                  >
+                    <span>{{ getDoorSensorState(door).icon }}</span>
+                    <span>{{ getDoorSensorState(door).label }}</span>
+                  </span>
+                </div>
               </td>
 
               <!-- Actions -->
@@ -140,7 +158,7 @@
                   <button
                     v-if="door.deviceUuid"
                     title="Control Door & Open Duration"
-                    class="h-7 px-3 text-[10px] font-black uppercase tracking-widest bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/20 rounded-md transition-all shadow-sm flex items-center gap-1.5"
+                    class="h-7 px-3 text-[10px] font-black uppercase tracking-widest bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/20 rounded-md transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
                     @click="openControlModal(door)"
                   >
                     <DoorOpen class="w-3.5 h-3.5" />
@@ -148,21 +166,21 @@
                   </button>
                   <button
                     title="View Door Event Logs"
-                    class="h-7 px-3 text-[10px] font-black uppercase tracking-widest bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/20 rounded-md transition-all shadow-sm flex items-center gap-1.5"
+                    class="h-7 px-3 text-[10px] font-black uppercase tracking-widest bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-400 border border-purple-500/20 rounded-md transition-all shadow-sm flex items-center gap-1.5 cursor-pointer"
                     @click="viewDoorLogs(door)"
                   >
                     <FileText class="w-3.5 h-3.5" />
                     <span>Logs</span>
                   </button>
                   <button
-                    class="h-7 px-3 text-[10px] font-black uppercase tracking-widest bg-transparent border border-slate-200 dark:border-zinc-700 rounded-md hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 transition-colors shadow-sm"
+                    class="h-7 px-3 text-[10px] font-black uppercase tracking-widest bg-transparent border border-slate-200 dark:border-zinc-700 rounded-md hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 transition-colors shadow-sm cursor-pointer"
                     @click="editItem(door)"
                   >
                     Edit
                   </button>
                   <button
                     title="Delete Door"
-                    class="h-7 w-7 p-0 flex items-center justify-center rounded-md border border-rose-200 dark:border-rose-900/50 bg-transparent text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors shadow-sm"
+                    class="h-7 w-7 p-0 flex items-center justify-center rounded-md border border-rose-200 dark:border-rose-900/50 bg-transparent text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors shadow-sm cursor-pointer"
                     @click="deleteItem(door)"
                   >
                     <Trash2 class="h-3.5 w-3.5" />
@@ -236,12 +254,49 @@ import { useRouter } from "vue-router";
 import { Plus, Search, DoorOpen, Trash2, Loader2, SlidersHorizontal, FileText } from "lucide-vue-next";
 import { authService } from "@/services/authService";
 import { currentUserTenant } from "@/utils/currentUserTenant";
+import { useMQTT } from "@/composables/useMQTT";
 import DoorRegistrationDialog from "./doorRegistrationDialog.vue";
 import DoorControlModal from "./doorControlModal.vue";
 import DoorConfigModal from "./doorConfigModal.vue";
 
 const router = useRouter();
 const showConfigModal = ref(false);
+const { deviceOnlineMap, doorSensorStates } = useMQTT();
+
+const getDeviceOnline = (door) => {
+  if (!door || !door.deviceUuid) return door?.status === 'active';
+  const info = deviceOnlineMap.value[door.deviceUuid];
+  if (info && info.status) return info.status === 'online';
+  return door.status === 'active';
+};
+
+const getDoorSensorState = (door) => {
+  if (!door || !door.deviceUuid) {
+    return { label: 'Unknown', icon: '❓', badgeClass: 'bg-zinc-500/10 text-zinc-500 border-zinc-500/20' };
+  }
+  const rawNum = parseInt(door.relayNumber || door.channel || door.doorNumber || 1, 10);
+  const doorNum = ((rawNum - 1) % 4) + 1;
+  const doorBitmask = 1 << (doorNum - 1);
+  const doorIdx = doorBitmask.toString(16).padStart(2, '0');
+  const sensorKey = `${door.deviceUuid}_${doorIdx}`;
+
+  const sensorInfo = doorSensorStates.value[sensorKey] || doorSensorStates.value[doorIdx];
+  if (!sensorInfo) {
+    return { label: 'Closed', icon: '🔒', badgeClass: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' };
+  }
+
+  switch (sensorInfo.state) {
+    case 'open':
+      return { label: 'Open', icon: '🚪', badgeClass: 'bg-amber-500/10 text-amber-600 border-amber-500/20' };
+    case 'forced':
+      return { label: 'Forced Open', icon: '🚨', badgeClass: 'bg-rose-500/10 text-rose-600 border-rose-500/20 animate-pulse' };
+    case 'timeout':
+      return { label: 'Left Open', icon: '⌛', badgeClass: 'bg-amber-500/10 text-amber-600 border-amber-500/20' };
+    case 'closed':
+    default:
+      return { label: 'Closed', icon: '🔒', badgeClass: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' };
+  }
+};
 
 const viewDoorLogs = (door) => {
   router.push({
@@ -257,8 +312,6 @@ const viewDoorLogs = (door) => {
 
 // Accessors
 const token = authService.getToken();
-
-// State
 const items = ref([]);
 const loading = ref(false);
 const searchQuery = ref("");

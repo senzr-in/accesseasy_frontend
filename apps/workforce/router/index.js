@@ -40,9 +40,8 @@ import AppearanceSettings from "@/pages/settings/appearance.vue";
 const getRoleHome = () => {
   if (!authService.isAuthenticated()) return "/login";
   const role = authService.getUserRole();
-  if (role === "esslAdmin")  return "/dealer-dashboard";
-  if (role === "Employee")   return "/dashboard/my-access";
-  return "/dashboard"; // Admin & Manager → SOC Command Center
+  if (role === "esslAdmin") return "/dealer-dashboard";
+  return "/dashboard";
 };
 
 const routes = [

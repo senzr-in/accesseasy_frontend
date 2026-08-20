@@ -1,595 +1,893 @@
 <template>
-  <div class="flex h-full w-full overflow-hidden">
-    <!-- Filter Panel -->
-    <div
-      v-if="showFilters"
-      class="w-80 border-r border-slate-200 dark:border-slate-800  bg-white dark:bg-slate-900  flex flex-col shrink-0"
-    >
-      <FilterComponent
-        :tenant-id="tenantId"
-        :initial-filters="initialFilters"
-        :initially-visible="true"
-        :filter-schema="pageFilters"
-        @apply-filters="handleApplyFilters"
-        @filter-visibility-changed="onFilterVisibilityChanged"
-      />
+  <div class="employee-directory-root h-full flex flex-col bg-[#F8FAFC] text-[#0F172A] p-4 sm:p-6 space-y-4 overflow-hidden">
+    <!-- 1. Compact Page Header with Integrated Summary & Add Action -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 shrink-0">
+      <div>
+        <div class="flex items-center gap-3">
+          <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-[#0F172A]">
+            Employees
+          </h1>
+          <!-- Compact Inline Summary Counter Pills -->
+          <div class="hidden md:flex items-center gap-2 text-xs font-semibold">
+            <span class="px-2.5 py-0.5 rounded-full bg-[#EFF6FF] text-[#2563EB] border border-[#DBEAFE]">
+              {{ totalItems.toLocaleString() }} Total
+            </span>
+            <span class="px-2.5 py-0.5 rounded-full bg-[#ECFDF5] text-[#059669] border border-[#A7F3D0]">
+              {{ activeCount.toLocaleString() }} Active
+            </span>
+            <span v-if="inactiveCount > 0" class="px-2.5 py-0.5 rounded-full bg-[#F1F5F9] text-[#64748B] border border-[#E2E8F0]">
+              {{ inactiveCount.toLocaleString() }} Inactive
+            </span>
+            <span v-if="pendingCount > 0" class="px-2.5 py-0.5 rounded-full bg-[#FFFBEB] text-[#D97706] border border-[#FDE68A]">
+              {{ pendingCount.toLocaleString() }} Pending
+            </span>
+          </div>
+        </div>
+        <p class="text-xs text-[#64748B] mt-0.5">
+          Manage workforce profiles, biometric credentials and access permissions
+        </p>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button
+          class="h-9 px-3.5 bg-[#0F172A] text-white hover:bg-[#1E293B] active:bg-[#020617] rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+          @click="handleCreateEmployee"
+        >
+          <Plus class="w-3.5 h-3.5" />
+          <span>Add Employee</span>
+        </button>
+      </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="flex-grow flex flex-col gap-4 p-4 overflow-hidden min-w-0">
-      <!-- Business Value Header -->
-      <ValueHeader
-        title="Employee Directory"
-        :action-text="isAdmin ? 'Add Employee' : ''"
-        :action-icon="Plus"
-        theme-color="slate"
-        @action="handleCreateEmployee"
-      />
-
-      <!-- Toolbar: Search + Filter + Export on one line -->
-      <div class="flex items-center justify-between gap-3">
-        <!-- Search -->
-        <div class="relative flex-1 max-w-sm">
-          <Search class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+    <!-- 2. Compact Toolbar: Search, Filters, Import, Export / Bulk Bar -->
+    <div class="shrink-0 space-y-2">
+      <!-- Normal Toolbar -->
+      <div v-if="selectedEmployeeIds.length === 0" class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+        <!-- Search Bar -->
+        <div class="relative w-full sm:w-80 lg:w-96">
+          <Search class="absolute left-3 top-1/2 -translate-y-1/2 text-[#94A3B8] w-3.5 h-3.5" />
           <input
             v-model="search"
             type="search"
-            placeholder="Search employees..."
-            class="w-full pl-9 pr-4 h-10 text-sm bg-white dark:bg-slate-900  border border-slate-200 dark:border-slate-800  rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm text-slate-900 dark:text-slate-100  placeholder:text-slate-400"
+            placeholder="Search employees, ID, department or role..."
+            class="w-full pl-9 pr-3.5 h-9 text-xs bg-[#FFFFFF] border border-[#E2E8F0] rounded-xl focus:outline-none focus:ring-1 focus:ring-[#2563EB] text-[#0F172A] placeholder:text-[#94A3B8] shadow-2xs transition-all"
             @input="debouncedSearch"
-          >
+          />
         </div>
-        <!-- Right-side actions -->
+
+        <!-- Action Buttons -->
         <div class="flex items-center gap-2 shrink-0">
           <button
-            :class="[
-              'flex items-center gap-1.5 h-10 px-4 text-[10px] font-black uppercase tracking-widest rounded-xl border transition-colors shadow-sm',
-              showFilters
-                ? 'bg-blue-50 text-blue-600 border-blue-200   '
-                : 'border-slate-200 dark:border-slate-800  hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 text-slate-700 dark:text-slate-200 '
-            ]"
-            @click="toggleFilters"
+            class="h-9 px-3.5 bg-[#0F172A] text-white hover:bg-[#1E293B] active:bg-[#020617] rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+            @click="handleCreateEmployee"
           >
-            <Filter class="w-3.5 h-3.5" /> Filter
+            <Plus class="w-3.5 h-3.5" />
+            <span>Add Employee</span>
+          </button>
+
+          <!-- Filter Button -->
+          <button
+            class="h-9 px-3 rounded-xl border text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+            :class="[
+              hasActiveFilters || isFilterDrawerOpen
+                ? 'bg-[#EFF6FF] border-[#BFDBFE] text-[#2563EB]'
+                : 'bg-[#FFFFFF] border-[#E2E8F0] text-[#334155] hover:bg-[#F8FAFC] hover:border-[#CBD5E1]'
+            ]"
+            @click="isFilterDrawerOpen = true"
+          >
+            <Filter class="w-3.5 h-3.5" />
+            <span>Filter</span>
             <span
               v-if="hasActiveFilters"
-              class="w-1.5 h-1.5 rounded-full bg-blue-600 "
+              class="w-1.5 h-1.5 rounded-full bg-[#2563EB]"
             />
           </button>
+
+          <!-- Import Button -->
           <button
-            class="flex items-center gap-1.5 h-10 px-4 text-[10px] font-black uppercase tracking-widest rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors shadow-sm text-slate-700 dark:text-slate-200 cursor-pointer"
-            @click="showImportDialog = true"
+            class="h-9 px-3 rounded-xl border border-[#E2E8F0] bg-[#FFFFFF] hover:bg-[#F8FAFC] text-[#334155] text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+            @click="isImportModalOpen = true"
           >
-            <FileUp class="w-3.5 h-3.5 text-blue-500" /> Import
+            <FileUp class="w-3.5 h-3.5 text-[#64748B]" />
+            <span>Import</span>
           </button>
+
+          <!-- Export Button -->
           <button
-            class="flex items-center gap-1.5 h-10 px-4 text-[10px] font-black uppercase tracking-widest rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors shadow-sm text-slate-700 dark:text-slate-200 cursor-pointer"
-            @click="showExportDialog = true"
+            class="h-9 px-3 rounded-xl border border-[#E2E8F0] bg-[#FFFFFF] hover:bg-[#F8FAFC] text-[#334155] text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
+            @click="isExportModalOpen = true"
           >
-            <FileDown class="w-3.5 h-3.5" /> Export
+            <FileDown class="w-3.5 h-3.5 text-[#64748B]" />
+            <span>Export</span>
           </button>
         </div>
       </div>
 
-      <!-- Bulk Action Bar -->
+      <!-- Bulk Selection Toolbar (When 1+ checkboxes selected) -->
       <div
-        v-if="selectedEmployeeIds.length > 0"
-        class="flex items-center justify-between px-4 py-2.5 bg-blue-50 dark:bg-slate-800 border border-blue-200 dark:border-slate-700 rounded-xl shadow-sm"
+        v-else
+        class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 px-3.5 py-2 bg-[#EFF6FF] border border-[#BFDBFE] rounded-xl shadow-2xs animate-in fade-in duration-100"
       >
-        <div class="flex items-center gap-2 text-xs font-bold text-blue-800 dark:text-blue-200">
-          <span>Selected {{ selectedEmployeeIds.length }} of {{ totalItems }} employee(s)</span>
+        <div class="flex items-center gap-2.5 text-xs font-bold text-[#1E40AF]">
+          <span>{{ selectedEmployeeIds.length }} selected</span>
           <button
             v-if="selectedEmployeeIds.length < totalItems"
-            class="px-2 py-0.5 text-xs font-bold text-blue-700 dark:text-blue-300 underline hover:text-blue-900 cursor-pointer"
+            class="text-xs font-semibold text-[#2563EB] hover:underline cursor-pointer"
             @click="selectAllTenantEmployees"
           >
-            Select All {{ totalItems }} Tenant Employees
+            Select all {{ totalItems }}
           </button>
         </div>
-        <div class="flex items-center gap-2">
+
+        <div class="flex items-center gap-1.5 flex-wrap">
           <button
-            class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
+            class="h-7.5 px-2.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer shadow-2xs"
             @click="openBulkAssignModal"
           >
-            <ShieldCheck class="w-3.5 h-3.5" /> Assign Group & Role
+            <ShieldCheck class="w-3 h-3" />
+            <span>Assign Access</span>
           </button>
+
           <button
-            class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
+            class="h-7.5 px-2.5 bg-[#FFFFFF] border border-[#E2E8F0] hover:bg-[#F8FAFC] text-[#334155] rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer shadow-2xs"
+            @click="exportSelectedEmployees"
+          >
+            <FileDown class="w-3 h-3" />
+            <span>Export</span>
+          </button>
+
+          <button
+            class="h-7.5 px-2.5 bg-[#FEF2F2] border border-[#FECACA] hover:bg-[#FEE2E2] text-[#DC2626] rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer shadow-2xs"
             @click="bulkDeleteEmployees"
           >
-            <Trash2 class="w-3.5 h-3.5" /> Bulk Delete Selected
+            <Trash2 class="w-3 h-3" />
+            <span>Delete</span>
           </button>
+
           <button
-            class="px-3 py-1.5 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+            class="h-7.5 px-2.5 bg-[#FFFFFF] border border-[#E2E8F0] hover:bg-[#F8FAFC] text-[#64748B] rounded-lg text-xs font-semibold transition-colors cursor-pointer"
             @click="selectedEmployeeIds = []"
           >
-            Clear Selection
+            Clear
           </button>
         </div>
       </div>
 
-      <!-- Main Table Card -->
-      <div class="rounded-xl border border-slate-200 dark:border-slate-800  bg-white dark:bg-slate-900  shadow-sm overflow-hidden flex flex-col flex-1 min-h-0">
-        <!-- Table Area -->
-        <div class="overflow-x-auto flex-1 h-full">
-          <table class="w-full text-left border-collapse relative">
-            <thead class="bg-slate-50 dark:bg-slate-800/50  border-b border-slate-200 dark:border-slate-800  sticky top-0 z-10 w-full">
-              <tr>
-                <th
-                  scope="col"
-                  class="h-10 px-4 w-10 text-center"
-                >
-                  <input
-                    type="checkbox"
-                    :checked="isSelectAll"
-                    class="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                    @change="toggleSelectAll"
-                  >
-                </th>
-                <th
-                  scope="col"
-                  class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap"
-                >
-                  Employee ID
-                </th>
-                <th
-                  scope="col"
-                  class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap"
-                >
-                  Name
-                </th>
-                <th
-                  scope="col"
-                  class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap"
-                >
-                  Department
-                </th>
-                <th
-                  scope="col"
-                  class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap"
-                >
-                  Role
-                </th>
-                <th
-                  scope="col"
-                  class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap"
-                >
-                  Biometrics & Keys
-                </th>
-                <th
-                  scope="col"
-                  class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap"
-                >
-                  Status
-                </th>
-                <th
-                  scope="col"
-                  class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap text-right"
-                >
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100  bg-white dark:bg-slate-900 ">
-              <tr v-if="loading">
-                <td
-                  colspan="8"
-                  class="h-24 text-center text-slate-500 dark:text-slate-400"
-                >
-                  <Loader2 class="w-6 h-6 animate-spin text-blue-500 mx-auto" />
-                </td>
-              </tr>
-              <tr v-else-if="items.length === 0">
-                <td
-                  colspan="8"
-                  class="h-32 text-center text-slate-500 dark:text-slate-400 text-sm font-medium"
-                >
-                  No employees found.
-                </td>
-              </tr>
-              <tr
-                v-for="emp in items"
-                v-else
-                :key="emp.id"
-                class="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 transition-colors group"
-                @click="handleRowClick(emp.id)"
-              >
-                <td
-                  class="px-4 py-3 text-center"
-                  @click.stop
-                >
-                  <input
-                    v-model="selectedEmployeeIds"
-                    type="checkbox"
-                    :value="emp.id"
-                    class="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer"
-                  >
-                </td>
-                <td class="px-5 py-3 text-xs font-black text-slate-700 dark:text-slate-200 ">
-                  {{ emp.employeeId || '-' }}
-                </td>
-                <td class="px-5 py-3">
-                  <div class="flex flex-col">
-                    <span class="text-xs font-bold text-slate-900 dark:text-slate-100  group-hover:text-blue-600 transition-colors">
-                      {{ emp.assignedUser?.first_name || 'No Name' }}
-                    </span>
-                    <span class="text-[10px] font-semibold tracking-wide text-slate-500 dark:text-slate-400 mt-0.5">{{ emp.assignedUser?.email }}</span>
+      <!-- Active Filter Chips Bar -->
+      <div v-if="hasActiveFilters" class="flex items-center gap-1.5 flex-wrap">
+        <span class="text-[11px] font-semibold text-[#64748B]">Active:</span>
+
+        <span
+          v-if="filters.department"
+          class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] bg-[#FFFFFF] border border-[#E2E8F0] text-[#0F172A] shadow-2xs"
+        >
+          Dept: {{ getDepartmentName(filters.department) }}
+          <X class="w-3 h-3 text-[#94A3B8] hover:text-[#0F172A] cursor-pointer" @click="filters.department = ''; applyFilters();" />
+        </span>
+
+        <span
+          v-if="filters.status"
+          class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] bg-[#FFFFFF] border border-[#E2E8F0] text-[#0F172A] shadow-2xs"
+        >
+          Status: {{ filters.status }}
+          <X class="w-3 h-3 text-[#94A3B8] hover:text-[#0F172A] cursor-pointer" @click="filters.status = ''; applyFilters();" />
+        </span>
+
+        <span
+          v-if="filters.role"
+          class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] bg-[#FFFFFF] border border-[#E2E8F0] text-[#0F172A] shadow-2xs"
+        >
+          Role: {{ filters.role }}
+          <X class="w-3 h-3 text-[#94A3B8] hover:text-[#0F172A] cursor-pointer" @click="filters.role = ''; applyFilters();" />
+        </span>
+
+        <span
+          v-if="filters.accessLevel"
+          class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] bg-[#FFFFFF] border border-[#E2E8F0] text-[#0F172A] shadow-2xs"
+        >
+          Access: {{ getAccessLevelName(filters.accessLevel) }}
+          <X class="w-3 h-3 text-[#94A3B8] hover:text-[#0F172A] cursor-pointer" @click="filters.accessLevel = ''; applyFilters();" />
+        </span>
+
+        <button
+          class="text-[11px] font-semibold text-[#2563EB] hover:underline cursor-pointer ml-1"
+          @click="clearAllFilters"
+        >
+          Clear all
+        </button>
+      </div>
+    </div>
+
+    <!-- 3. Main Employee Data Table Card (Fills Available Height Cleanly) -->
+    <div class="bg-[#FFFFFF] border border-[#E2E8F0] rounded-2xl shadow-2xs overflow-hidden flex flex-col flex-1 min-h-0">
+      <div class="overflow-x-auto overflow-y-auto flex-1 custom-scrollbar">
+        <table class="w-full text-left border-collapse">
+          <thead class="sticky top-0 z-10 bg-[#F8FAFC] border-b border-[#E2E8F0] text-[10px] font-bold text-[#64748B] uppercase tracking-wider">
+            <tr>
+              <th class="py-2.5 px-3.5 w-10 text-center">
+                <input
+                  type="checkbox"
+                  :checked="isSelectAll"
+                  class="w-3.5 h-3.5 rounded border-[#CBD5E1] text-[#2563EB] focus:ring-0 cursor-pointer"
+                  @change="toggleSelectAll"
+                />
+              </th>
+              <th class="py-2.5 px-3.5 font-bold">EMPLOYEE</th>
+              <th class="py-2.5 px-3.5 font-bold">DEPARTMENT</th>
+              <th class="py-2.5 px-3.5 font-bold">ROLE</th>
+              <th class="py-2.5 px-3.5 font-bold">BIOMETRICS</th>
+              <th class="py-2.5 px-3.5 font-bold">ACCESS</th>
+              <th class="py-2.5 px-3.5 font-bold">STATUS</th>
+              <th class="py-2.5 px-3.5 font-bold text-right">ACTIONS</th>
+            </tr>
+          </thead>
+
+          <tbody class="divide-y divide-[#F1F5F9] text-xs">
+            <!-- Loading Skeletons State -->
+            <tr v-if="loading" v-for="i in 8" :key="'skel-' + i" class="animate-pulse">
+              <td class="py-3 px-3.5 text-center">
+                <div class="w-3.5 h-3.5 bg-[#F1F5F9] rounded mx-auto" />
+              </td>
+              <td class="py-3 px-3.5">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-full bg-[#F1F5F9] shrink-0" />
+                  <div class="space-y-1 flex-1">
+                    <div class="h-3 bg-[#F1F5F9] rounded w-24" />
+                    <div class="h-2 bg-[#F1F5F9] rounded w-32" />
                   </div>
-                </td>
-                <td class="px-5 py-3 text-xs font-medium text-slate-600 dark:text-slate-300 ">
-                  {{ emp.department?.departmentName || "-" }}
-                </td>
-                <td class="px-5 py-3">
-                  <span class="inline-flex px-2 py-0.5 bg-slate-50 dark:bg-slate-800/50  text-slate-600 dark:text-slate-300  rounded-md text-[9px] font-black uppercase tracking-widest border border-slate-200 dark:border-slate-800 ">
-                    {{ emp.assignedUser?.accesseasyRole?.roleName || emp.assignedUser?.role?.name || "Unassigned" }}
-                  </span>
-                </td>
-                <td class="px-5 py-3">
-                  <div class="flex items-center gap-1.5">
-                    <!-- Fingerprint -->
-                    <span
-                      :title="hasFinger(emp.id) ? 'Fingerprint Registered' : 'Fingerprint Missing'"
-                      :class="[
-                        'p-1 rounded-lg border text-xs flex items-center justify-center transition-all',
-                        hasFinger(emp.id) 
-                          ? 'bg-emerald-50 text-emerald-600 border-emerald-200   ' 
-                          : 'bg-slate-50 dark:bg-slate-800/50 text-slate-400 border-slate-200 dark:border-slate-800   '
-                      ]"
+                </div>
+              </td>
+              <td class="py-3 px-3.5"><div class="h-2.5 bg-[#F1F5F9] rounded w-16" /></td>
+              <td class="py-3 px-3.5"><div class="h-2.5 bg-[#F1F5F9] rounded w-14" /></td>
+              <td class="py-3 px-3.5"><div class="h-3 bg-[#F1F5F9] rounded w-20" /></td>
+              <td class="py-3 px-3.5"><div class="h-2.5 bg-[#F1F5F9] rounded w-16" /></td>
+              <td class="py-3 px-3.5"><div class="h-2.5 bg-[#F1F5F9] rounded w-12" /></td>
+              <td class="py-3 px-3.5 text-right"><div class="h-3 bg-[#F1F5F9] rounded w-5 ml-auto" /></td>
+            </tr>
+
+            <!-- Empty State -->
+            <tr v-else-if="items.length === 0">
+              <td colspan="8" class="py-12 px-4 text-center">
+                <div class="max-w-xs mx-auto space-y-1.5">
+                  <UserX class="w-7 h-7 text-[#94A3B8] mx-auto" />
+                  <h3 class="text-xs font-semibold text-[#0F172A]">No employees found</h3>
+                  <p class="text-[11px] text-[#64748B]">
+                    {{ search || hasActiveFilters ? 'Try adjusting your search or active filters.' : 'Your workforce directory is empty.' }}
+                  </p>
+                  <div class="pt-1.5 flex items-center justify-center gap-2">
+                    <button
+                      v-if="search || hasActiveFilters"
+                      class="px-2.5 py-1 bg-[#FFFFFF] border border-[#E2E8F0] hover:bg-[#F8FAFC] rounded-lg text-xs font-semibold text-[#334155] cursor-pointer"
+                      @click="clearAllFilters"
                     >
-                      <Fingerprint class="w-3.5 h-3.5" />
-                    </span>
-                    <!-- Face -->
-                    <span
-                      :title="hasFace(emp) ? 'Face Template Registered' : 'Face Template Missing'"
-                      :class="[
-                        'p-1 rounded-lg border text-xs flex items-center justify-center transition-all',
-                        hasFace(emp) 
-                          ? 'bg-blue-50 text-blue-600 border-blue-200   ' 
-                          : 'bg-slate-50 dark:bg-slate-800/50 text-slate-400 border-slate-200 dark:border-slate-800   '
-                      ]"
+                      Clear Filters
+                    </button>
+                    <button
+                      v-if="isAdmin"
+                      class="px-2.5 py-1 bg-[#0F172A] text-white hover:bg-[#1E293B] rounded-lg text-xs font-semibold cursor-pointer"
+                      @click="handleCreateEmployee"
                     >
-                      <Scan class="w-3.5 h-3.5" />
-                    </span>
-                    <!-- RFID -->
-                    <span
-                      :title="hasRfid(emp.id) ? 'RFID Card Assigned' : 'RFID Card Missing'"
-                      :class="[
-                        'p-1 rounded-lg border text-xs flex items-center justify-center transition-all',
-                        hasRfid(emp.id) 
-                          ? 'bg-purple-50 text-purple-600 border-purple-200   ' 
-                          : 'bg-slate-50 dark:bg-slate-800/50 text-slate-400 border-slate-200 dark:border-slate-800   '
-                      ]"
-                    >
-                      <CreditCard class="w-3.5 h-3.5" />
-                    </span>
-                    <!-- NFC -->
-                    <span
-                      :title="hasNfc(emp) ? 'NFC Key Registered' : 'NFC Key Missing'"
-                      :class="[
-                        'p-1 rounded-lg border text-xs flex items-center justify-center transition-all',
-                        hasNfc(emp) 
-                          ? 'bg-amber-50 text-amber-600 border-amber-200   ' 
-                          : 'bg-slate-50 dark:bg-slate-800/50 text-slate-400 border-slate-200 dark:border-slate-800   '
-                      ]"
-                    >
-                      <Smartphone class="w-3.5 h-3.5" />
-                    </span>
+                      + Add Employee
+                    </button>
                   </div>
-                </td>
-                <td class="px-5 py-3">
+                </div>
+              </td>
+            </tr>
+
+            <!-- Data Rows -->
+            <tr
+              v-for="emp in items"
+              v-else
+              :key="emp.id"
+              class="hover:bg-[#F8FAFC] transition-colors cursor-pointer group"
+              @click="openProfile(emp)"
+            >
+              <!-- Checkbox -->
+              <td class="py-2.5 px-3.5 text-center" @click.stop>
+                <input
+                  v-model="selectedEmployeeIds"
+                  type="checkbox"
+                  :value="emp.id"
+                  class="w-3.5 h-3.5 rounded border-[#CBD5E1] text-[#2563EB] focus:ring-0 cursor-pointer"
+                />
+              </td>
+
+              <!-- Employee Identity Cell -->
+              <td class="py-2.5 px-3.5">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <div class="w-8 h-8 rounded-full bg-[#EFF6FF] text-[#2563EB] font-bold text-xs flex items-center justify-center shrink-0 border border-[#DBEAFE]">
+                    {{ getInitials(emp.assignedUser?.first_name, emp.assignedUser?.last_name) }}
+                  </div>
+                  <div class="min-w-0">
+                    <p class="text-xs font-semibold text-[#0F172A] truncate group-hover:text-[#2563EB] transition-colors">
+                      {{ getFullName(emp) }}
+                    </p>
+                    <p class="text-[10px] text-[#64748B] truncate mt-0.5">
+                      {{ emp.assignedUser?.email || emp.assignedUser?.phone || 'No Contact' }}
+                      <span class="text-[#CBD5E1] mx-0.5">&bull;</span>
+                      <span class="font-mono text-[#94A3B8]">{{ emp.employeeId || `EMP-${emp.id?.slice(0, 6)}` }}</span>
+                    </p>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Department -->
+              <td class="py-2.5 px-3.5 font-medium text-[#0F172A]">
+                <p class="truncate text-xs">{{ emp.department?.departmentName || 'Operations' }}</p>
+              </td>
+
+              <!-- Role -->
+              <td class="py-2.5 px-3.5">
+                <span
+                  v-if="isSuperRole(emp)"
+                  class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase bg-[#F1F5F9] text-[#334155] border border-[#E2E8F0]"
+                >
+                  {{ getRoleName(emp) }}
+                </span>
+                <span v-else class="text-[#475569] text-xs">
+                  {{ getRoleName(emp) }}
+                </span>
+              </td>
+
+              <!-- Biometrics & Credentials Icon Group -->
+              <td class="py-2.5 px-3.5" @click.stop="openProfileWithTab(emp, 'biometrics')">
+                <div class="flex items-center gap-1">
+                  <!-- Face Recognition -->
+                  <div
+                    class="p-1 rounded-md border text-xs flex items-center justify-center transition-all cursor-pointer"
+                    :title="hasFace(emp) ? 'Face Recognition: Enrolled' : 'Face Recognition: Not Configured'"
+                    :class="hasFace(emp) ? 'bg-[#ECFDF5] text-[#059669] border-[#A7F3D0]' : 'bg-[#F8FAFC] text-[#94A3B8] border-[#E2E8F0]'"
+                  >
+                    <ScanFace class="w-3 h-3" />
+                  </div>
+
+                  <!-- Fingerprint -->
+                  <div
+                    class="p-1 rounded-md border text-xs flex items-center justify-center transition-all cursor-pointer"
+                    :title="hasFinger(emp.id) ? 'Fingerprint: Synchronized' : 'Fingerprint: Missing'"
+                    :class="hasFinger(emp.id) ? 'bg-[#ECFDF5] text-[#059669] border-[#A7F3D0]' : 'bg-[#F8FAFC] text-[#94A3B8] border-[#E2E8F0]'"
+                  >
+                    <Fingerprint class="w-3 h-3" />
+                  </div>
+
+                  <!-- RFID Card -->
+                  <div
+                    class="p-1 rounded-md border text-xs flex items-center justify-center transition-all cursor-pointer"
+                    :title="hasRfid(emp.id) ? 'RFID Card: Active' : 'RFID Card: Not Assigned'"
+                    :class="hasRfid(emp.id) ? 'bg-[#F5F3FF] text-[#7C3AED] border-[#DDD6FE]' : 'bg-[#F8FAFC] text-[#94A3B8] border-[#E2E8F0]'"
+                  >
+                    <CreditCard class="w-3 h-3" />
+                  </div>
+
+                  <!-- Mobile Pass -->
+                  <div
+                    class="p-1 rounded-md border text-xs flex items-center justify-center transition-all cursor-pointer"
+                    :title="emp.assignedUser?.phone ? 'Mobile Access: Enabled' : 'Mobile Access: No Phone'"
+                    :class="emp.assignedUser?.phone ? 'bg-[#EFF6FF] text-[#2563EB] border-[#BFDBFE]' : 'bg-[#F8FAFC] text-[#94A3B8] border-[#E2E8F0]'"
+                  >
+                    <Smartphone class="w-3 h-3" />
+                  </div>
+                </div>
+              </td>
+
+              <!-- Access Level -->
+              <td class="py-2.5 px-3.5 font-medium text-[#475569]">
+                <p class="truncate max-w-[130px] text-xs" :title="getEmployeeAccessName(emp)">
+                  {{ getEmployeeAccessName(emp) }}
+                </p>
+              </td>
+
+              <!-- Status Indicator -->
+              <td class="py-2.5 px-3.5">
+                <div class="inline-flex items-center gap-1.5 font-medium text-xs">
+                  <span
+                    class="w-1.5 h-1.5 rounded-full"
+                    :class="[
+                      emp.status === 'Active' || emp.status === 'active' || !emp.status
+                        ? 'bg-[#10B981]'
+                        : emp.status === 'Pending' || emp.status === 'pending'
+                        ? 'bg-[#F59E0B]'
+                        : 'bg-[#94A3B8]'
+                    ]"
+                  />
                   <span
                     :class="[
-                      'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest border',
-                      emp.status === 'Active' || emp.status === 'active' 
-                        ? 'bg-emerald-50 text-emerald-700   border-emerald-200 ' 
-                        : 'bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-300   border-slate-200 dark:border-slate-800 '
+                      emp.status === 'Active' || emp.status === 'active' || !emp.status
+                        ? 'text-[#059669]'
+                        : emp.status === 'Pending' || emp.status === 'pending'
+                        ? 'text-[#D97706]'
+                        : 'text-[#64748B]'
                     ]"
                   >
-                    {{ emp.status || 'Unknown' }}
+                    {{ emp.status || 'Active' }}
                   </span>
-                </td>
-                <td
-                  class="px-5 py-3 text-right"
-                  @click.stop
-                >
-                  <div class="flex justify-end gap-2 pr-2">
-                    <button 
-                      v-if="emp.assignedUser?.phone"
-                      title="Send Mobile Pass via WhatsApp"
-                      class="h-7 w-7 p-0 flex items-center justify-center rounded-md border border-slate-200 dark:border-slate-800  text-slate-500 dark:text-slate-400 hover:text-emerald-500 hover:border-emerald-500/30 hover:bg-emerald-50 :bg-emerald-500/10 transition-colors shadow-sm"
+                </div>
+              </td>
+
+              <!-- Actions -->
+              <td class="py-2.5 px-3.5 text-right" @click.stop>
+                <div class="relative inline-block text-left">
+                  <button
+                    class="w-7 h-7 rounded-lg border border-transparent hover:border-[#E2E8F0] hover:bg-[#FFFFFF] flex items-center justify-center text-[#64748B] hover:text-[#0F172A] transition-all cursor-pointer"
+                    @click="activeActionMenuId = activeActionMenuId === emp.id ? null : emp.id"
+                  >
+                    <MoreHorizontal class="w-3.5 h-3.5" />
+                  </button>
+
+                  <!-- Popover Dropdown Menu -->
+                  <div
+                    v-if="activeActionMenuId === emp.id"
+                    class="absolute right-0 mt-1 w-44 bg-[#FFFFFF] border border-[#E2E8F0] rounded-xl shadow-lg py-1 z-30 text-left animate-in fade-in zoom-in-95 duration-100"
+                  >
+                    <button
+                      class="w-full px-3 py-1.5 text-xs text-[#334155] hover:bg-[#F8FAFC] flex items-center gap-2 transition-colors cursor-pointer"
+                      @click="openProfile(emp); activeActionMenuId = null;"
                     >
-                      <MessageCircle class="h-3.5 w-3.5" />
+                      <User class="w-3.5 h-3.5 text-[#64748B]" />
+                      <span>View Profile</span>
                     </button>
-                    <button 
-                      class="h-7 px-3 text-[10px] font-black uppercase tracking-widest border border-slate-200 dark:border-slate-800  rounded-md hover:bg-slate-50 dark:hover:bg-slate-800/50 :bg-zinc-800 text-slate-700 dark:text-slate-200  transition-colors shadow-sm"
-                      @click="handleEditEmployee(emp)"
+
+                    <button
+                      class="w-full px-3 py-1.5 text-xs text-[#334155] hover:bg-[#F8FAFC] flex items-center gap-2 transition-colors cursor-pointer"
+                      @click="handleEditEmployee(emp); activeActionMenuId = null;"
                     >
-                      Edit
+                      <Edit3 class="w-3.5 h-3.5 text-[#64748B]" />
+                      <span>Edit Employee</span>
                     </button>
-                    <button 
+
+                    <button
+                      class="w-full px-3 py-1.5 text-xs text-[#334155] hover:bg-[#F8FAFC] flex items-center gap-2 transition-colors cursor-pointer"
+                      @click="openProfileWithTab(emp, 'access'); activeActionMenuId = null;"
+                    >
+                      <Shield class="w-3.5 h-3.5 text-[#64748B]" />
+                      <span>Access Permissions</span>
+                    </button>
+
+                    <button
+                      class="w-full px-3 py-1.5 text-xs text-[#334155] hover:bg-[#F8FAFC] flex items-center gap-2 transition-colors cursor-pointer"
+                      @click="openProfileWithTab(emp, 'biometrics'); activeActionMenuId = null;"
+                    >
+                      <Fingerprint class="w-3.5 h-3.5 text-[#64748B]" />
+                      <span>Biometrics</span>
+                    </button>
+
+                    <button
+                      class="w-full px-3 py-1.5 text-xs text-[#334155] hover:bg-[#F8FAFC] flex items-center gap-2 transition-colors cursor-pointer"
+                      @click="openProfileWithTab(emp, 'attendance'); activeActionMenuId = null;"
+                    >
+                      <Calendar class="w-3.5 h-3.5 text-[#64748B]" />
+                      <span>Attendance</span>
+                    </button>
+
+                    <button
+                      class="w-full px-3 py-1.5 text-xs text-[#334155] hover:bg-[#F8FAFC] flex items-center gap-2 transition-colors cursor-pointer"
+                      @click="openProfileWithTab(emp, 'logs'); activeActionMenuId = null;"
+                    >
+                      <Clock class="w-3.5 h-3.5 text-[#64748B]" />
+                      <span>View Logs</span>
+                    </button>
+
+                    <div class="my-1 border-t border-[#F1F5F9]" />
+
+                    <button
                       v-if="isAdmin"
-                      class="h-7 w-7 p-0 flex items-center justify-center rounded-md border border-rose-200  bg-transparent text-rose-500 hover:text-rose-600 hover:bg-rose-50 :bg-rose-900/20 transition-colors shadow-sm"
-                      @click="confirmDelete(emp)"
+                      class="w-full px-3 py-1.5 text-xs text-[#DC2626] hover:bg-[#FEF2F2] flex items-center gap-2 transition-colors cursor-pointer"
+                      @click="confirmDelete(emp); activeActionMenuId = null;"
                     >
-                      <Trash2 class="h-3.5 w-3.5" />
+                      <Trash2 class="w-3.5 h-3.5 text-[#DC2626]" />
+                      <span>Delete</span>
                     </button>
                   </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 4. Compact Pagination Footer -->
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-2.5 px-3.5 py-2.5 border-t border-[#E2E8F0] bg-[#FFFFFF] text-xs text-[#64748B] shrink-0">
+        <div>
+          Showing <span class="font-semibold text-[#0F172A]">{{ paginationStart }}–{{ paginationEnd }}</span> of <span class="font-semibold text-[#0F172A]">{{ totalItems.toLocaleString() }}</span>
         </div>
 
-        <!-- Pagination -->
-        <!-- Pagination -->
-        <div class="flex items-center justify-between p-4 border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 mt-auto shrink-0">
-          <button
-            class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-white dark:bg-slate-900 disabled:opacity-50 transition-colors shadow-sm text-slate-700 dark:text-slate-200"
-            :disabled="page <= 1 || loading"
-            @click="page--"
-          >
-            Previous
-          </button>
-
-          <div class="flex items-center gap-3">
-            <div class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
-              Page {{ page }} of {{ totalPages || 1 }} (Total {{ totalItems }} Employees)
-            </div>
+        <div class="flex items-center gap-3">
+          <!-- Rows per page -->
+          <div class="flex items-center gap-1.5">
+            <span class="text-[11px] text-[#64748B]">Per page:</span>
             <select
               v-model="itemsPerPage"
-              class="h-8 px-2 text-xs font-bold rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
+              class="h-7 px-1.5 bg-[#FFFFFF] border border-[#E2E8F0] rounded-lg text-xs font-semibold text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB] cursor-pointer"
               @change="page = 1; fetchEmployeeData();"
             >
-              <option :value="10">
-                10 per page
-              </option>
-              <option :value="25">
-                25 per page
-              </option>
-              <option :value="50">
-                50 per page
-              </option>
-              <option :value="100">
-                100 per page
-              </option>
-              <option :value="250">
-                250 per page
-              </option>
-              <option :value="500">
-                500 per page
-              </option>
-              <option :value="1000">
-                1000 per page
+              <option :value="10">10</option>
+              <option :value="25">25</option>
+              <option :value="50">50</option>
+              <option :value="100">100</option>
+            </select>
+          </div>
+
+          <!-- Page Controls -->
+          <div class="flex items-center gap-1">
+            <button
+              class="h-7 px-2 rounded-lg border border-[#E2E8F0] bg-[#FFFFFF] hover:bg-[#F8FAFC] disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-xs font-semibold text-[#334155] cursor-pointer"
+              :disabled="page <= 1 || loading"
+              @click="page--"
+            >
+              &lsaquo; Prev
+            </button>
+
+            <span class="px-1.5 font-semibold text-[#0F172A] text-xs">
+              {{ page }} / {{ totalPages || 1 }}
+            </span>
+
+            <button
+              class="h-7 px-2 rounded-lg border border-[#E2E8F0] bg-[#FFFFFF] hover:bg-[#F8FAFC] disabled:opacity-40 disabled:cursor-not-allowed transition-colors text-xs font-semibold text-[#334155] cursor-pointer"
+              :disabled="page >= totalPages || loading"
+              @click="page++"
+            >
+              Next &rsaquo;
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Advanced Filter Slide-over Drawer -->
+    <Teleport to="body">
+      <div
+        v-if="isFilterDrawerOpen"
+        class="fixed inset-0 z-50 overflow-hidden bg-black/25 transition-opacity"
+        @click.self="isFilterDrawerOpen = false"
+      >
+        <div class="fixed inset-y-0 right-0 max-w-full flex pl-10">
+          <div class="w-screen max-w-sm bg-[#FFFFFF] border-l border-[#E2E8F0] shadow-2xl flex flex-col animate-in slide-in-from-right duration-200">
+            <!-- Header -->
+            <div class="p-4 border-b border-[#E2E8F0] flex items-center justify-between">
+              <div>
+                <h3 class="text-sm font-bold text-[#0F172A]">Filter Employees</h3>
+                <p class="text-xs text-[#64748B] mt-0.5">Refine workforce directory view</p>
+              </div>
+              <button
+                class="w-7 h-7 rounded-lg border border-[#E2E8F0] flex items-center justify-center text-[#64748B] hover:text-[#0F172A] hover:bg-[#F8FAFC] transition-colors cursor-pointer"
+                @click="isFilterDrawerOpen = false"
+              >
+                <X class="w-4 h-4" />
+              </button>
+            </div>
+
+            <!-- Filter Fields -->
+            <div class="flex-1 overflow-y-auto p-4 space-y-3.5 text-xs">
+              <!-- Department -->
+              <div>
+                <label class="block font-semibold text-[#334155] mb-1">Department</label>
+                <select
+                  v-model="filters.department"
+                  class="w-full h-9 px-2.5 bg-[#FFFFFF] border border-[#E2E8F0] rounded-xl text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
+                >
+                  <option value="">All Departments</option>
+                  <option v-for="d in availableDepartments" :key="d.id" :value="d.id">
+                    {{ d.departmentName || d.name }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Role -->
+              <div>
+                <label class="block font-semibold text-[#334155] mb-1">Role</label>
+                <select
+                  v-model="filters.role"
+                  class="w-full h-9 px-2.5 bg-[#FFFFFF] border border-[#E2E8F0] rounded-xl text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
+                >
+                  <option value="">All Roles</option>
+                  <option v-for="r in availableRoles" :key="r.id" :value="r.roleName || r.name">
+                    {{ r.roleName || r.name }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Status -->
+              <div>
+                <label class="block font-semibold text-[#334155] mb-1">Status</label>
+                <select
+                  v-model="filters.status"
+                  class="w-full h-9 px-2.5 bg-[#FFFFFF] border border-[#E2E8F0] rounded-xl text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
+                >
+                  <option value="">All Statuses</option>
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                  <option value="Pending">Pending</option>
+                </select>
+              </div>
+
+              <!-- Access Level -->
+              <div>
+                <label class="block font-semibold text-[#334155] mb-1">Access Level</label>
+                <select
+                  v-model="filters.accessLevel"
+                  class="w-full h-9 px-2.5 bg-[#FFFFFF] border border-[#E2E8F0] rounded-xl text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
+                >
+                  <option value="">All Access Levels</option>
+                  <option v-for="al in availableAccessLevels" :key="al.id" :value="al.id">
+                    {{ al.groupName || al.name || al.title || al.accessLevelName }}
+                  </option>
+                </select>
+              </div>
+
+              <!-- Biometric Enrollment -->
+              <div>
+                <label class="block font-semibold text-[#334155] mb-1">Biometrics</label>
+                <select
+                  v-model="filters.biometric"
+                  class="w-full h-9 px-2.5 bg-[#FFFFFF] border border-[#E2E8F0] rounded-xl text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
+                >
+                  <option value="">All</option>
+                  <option value="face">Face Registered</option>
+                  <option value="finger">Fingerprint Registered</option>
+                  <option value="missing">Missing Biometrics</option>
+                </select>
+              </div>
+
+              <!-- Credential -->
+              <div>
+                <label class="block font-semibold text-[#334155] mb-1">Credential</label>
+                <select
+                  v-model="filters.credential"
+                  class="w-full h-9 px-2.5 bg-[#FFFFFF] border border-[#E2E8F0] rounded-xl text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
+                >
+                  <option value="">All</option>
+                  <option value="rfid">RFID Card Assigned</option>
+                  <option value="mobile">Mobile Pass Enabled</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="p-3.5 border-t border-[#E2E8F0] bg-[#F8FAFC] flex items-center justify-end gap-2">
+              <button
+                class="px-3 py-1.5 text-xs font-semibold text-[#64748B] hover:bg-[#FFFFFF] rounded-xl transition-colors cursor-pointer"
+                @click="clearAllFilters"
+              >
+                Clear
+              </button>
+              <button
+                class="px-3.5 py-1.5 text-xs font-semibold text-white bg-[#0F172A] hover:bg-[#1E293B] rounded-xl transition-colors cursor-pointer shadow-2xs"
+                @click="applyFilters(); isFilterDrawerOpen = false;"
+              >
+                Apply Filters
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- 6. Employee Profile Slide-over Drawer -->
+    <EmployeeProfileDrawer
+      :is-open="isProfileDrawerOpen"
+      :employee="selectedProfileEmployee"
+      :initial-tab="profileInitialTab"
+      @update:is-open="isProfileDrawerOpen = $event"
+      @edit="handleEditEmployee"
+      @delete="confirmDelete"
+      @close="selectedProfileEmployee = null"
+    />
+
+    <!-- 7. Add/Edit Employee Dialog -->
+    <AddEmployeeDialog
+      v-model="showAddDialog"
+      :employee="selectedEmployee"
+      @success="fetchEmployeeData"
+    />
+
+    <!-- 8. Import Employees Modal -->
+    <ImportEmployeesModal
+      :is-open="isImportModalOpen"
+      @update:is-open="isImportModalOpen = $event"
+      @success="fetchEmployeeData"
+    />
+
+    <!-- 9. Export Employees Dialog -->
+    <ExportEmployees
+      v-if="isExportModalOpen"
+      :selected-ids="selectedEmployeeIds"
+      :filters="filters"
+      @close="isExportModalOpen = false"
+    />
+
+    <!-- 10. Bulk Assign Group & Role Modal -->
+    <div
+      v-if="showBulkAssignModal"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/35 animate-in fade-in duration-100"
+      @click.self="showBulkAssignModal = false"
+    >
+      <div class="bg-[#FFFFFF] border border-[#E2E8F0] rounded-2xl p-5 w-full max-w-md shadow-xl space-y-3.5">
+        <div>
+          <h3 class="text-sm font-bold text-[#0F172A]">Assign Access Group & Role</h3>
+          <p class="text-xs text-[#64748B] mt-0.5">
+            Apply batch updates to {{ selectedEmployeeIds.length }} selected employee(s).
+          </p>
+        </div>
+
+        <div class="space-y-3 text-xs">
+          <!-- Access Group -->
+          <div>
+            <label class="block font-semibold text-[#334155] mb-1">Access Group</label>
+            <select
+              v-model="bulkAssignForm.accessLevelId"
+              class="w-full h-9 px-2.5 bg-[#FFFFFF] border border-[#E2E8F0] rounded-xl text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
+            >
+              <option value="">-- No Change (Keep Existing) --</option>
+              <option v-for="al in availableAccessLevels" :key="al.id" :value="al.id">
+                {{ al.groupName || al.name || al.title || al.accessLevelName }}
               </option>
             </select>
           </div>
 
+          <!-- User Role -->
+          <div>
+            <label class="block font-semibold text-[#334155] mb-1">User Role</label>
+            <select
+              v-model="bulkAssignForm.roleId"
+              class="w-full h-9 px-2.5 bg-[#FFFFFF] border border-[#E2E8F0] rounded-xl text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
+            >
+              <option value="">-- No Change (Keep Existing) --</option>
+              <option v-for="r in availableRoles" :key="r.id" :value="r.id">
+                {{ r.roleName || r.name || r.title }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-2.5 border-t border-[#E2E8F0]">
           <button
-            class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-white dark:bg-slate-900 disabled:opacity-50 transition-colors shadow-sm text-slate-700 dark:text-slate-200"
-            :disabled="page >= totalPages || loading"
-            @click="page++"
+            class="px-3.5 py-1.5 text-xs font-semibold text-[#64748B] hover:bg-[#F8FAFC] rounded-xl transition-colors cursor-pointer"
+            @click="showBulkAssignModal = false"
           >
-            Next
+            Cancel
           </button>
-        </div>
-
-        <!-- Dialogs -->
-        <AddEmployeeDialog
-          v-model="showAddDialog"
-          :employee="selectedEmployee"
-          @success="fetchEmployeeData"
-        />
-
-        <!-- Deletion Progress Modal -->
-        <DeleteProgressModal
-          :show="deleteProgress.show"
-          :title="deleteProgress.title"
-          :current="deleteProgress.current"
-          :total="deleteProgress.total"
-          :status-text="deleteProgress.statusText"
-        />
-
-        <!-- Bulk Assign Progress Modal -->
-        <DeleteProgressModal
-          :show="bulkAssignProgress.show"
-          :title="bulkAssignProgress.title"
-          :current="bulkAssignProgress.current"
-          :total="bulkAssignProgress.total"
-          :status-text="bulkAssignProgress.statusText"
-        />
-
-        <!-- Delete Confirmation Dialog -->
-        <div
-          v-if="deleteDialog"
-          class="fixed inset-0 z-50 flex items-center justify-center p-4"
-        >
-          <div
-            class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
-            @click="deleteDialog = false"
-          />
-          <div class="relative bg-white dark:bg-slate-900  border border-slate-200 dark:border-slate-800  rounded-2xl p-6 w-full max-w-sm shadow-xl">
-            <div class="flex items-center gap-4 mb-4">
-              <div class="w-12 h-12 rounded-full bg-rose-100  flex items-center justify-center shrink-0">
-                <Trash2 class="w-5 h-5 text-rose-500" />
-              </div>
-              <div>
-                <h3 class="text-base font-black text-slate-900 dark:text-slate-100 ">
-                  Delete Employee?
-                </h3>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  This action cannot be undone.
-                </p>
-              </div>
-            </div>
-            <p class="text-sm font-medium text-slate-600 dark:text-slate-300  mb-6">
-              Are you sure you want to permanently remove
-              <strong class="text-slate-800 dark:text-slate-200 ">{{ employeeToDelete?.assignedUser?.first_name }}</strong>
-              from the system?
-            </p>
-            <div class="flex justify-end gap-3">
-              <button
-                class="px-4 py-2 rounded-xl text-sm font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 :bg-zinc-800 transition-colors"
-                @click="deleteDialog = false"
-              >
-                Cancel
-              </button>
-              <button
-                :disabled="deleting"
-                class="px-4 py-2 rounded-xl text-sm font-bold text-white bg-rose-500 hover:bg-rose-600 disabled:opacity-50 flex items-center gap-2 transition-colors"
-                @click="deleteEmployee"
-              >
-                <Loader2
-                  v-if="deleting"
-                  class="w-4 h-4 animate-spin"
-                />
-                <Trash2
-                  v-else
-                  class="w-4 h-4"
-                />
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Export Dialog -->
-        <ExportEmployees
-          v-if="showExportDialog"
-          :filters="filters"
-          :search="search"
-          @close="showExportDialog = false"
-        />
-
-        <!-- Bulk Import Dialog -->
-        <ImportEmployees
-          v-if="showImportDialog"
-          @close="showImportDialog = false; fetchEmployeeData()"
-        />
-
-        <!-- Bulk Assign Group, Role & Department Modal -->
-        <div
-          v-if="showBulkAssignModal"
-          class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          @click.self="showBulkAssignModal = false"
-        >
-          <div class="bg-white dark:bg-slate-900 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col gap-4">
-            <div class="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-              <div>
-                <h3 class="text-base font-black text-slate-900 dark:text-white">
-                  Bulk Assign Group & Role
-                </h3>
-                <p class="text-xs text-slate-500">
-                  Applying changes to {{ selectedEmployeeIds.length }} selected employee(s)
-                </p>
-              </div>
-              <button
-                class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xl font-bold cursor-pointer"
-                @click="showBulkAssignModal = false"
-              >
-                &times;
-              </button>
-            </div>
-
-            <div class="flex flex-col gap-4">
-              <!-- Access Group / Clearance Level -->
-              <div>
-                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Access Group (Clearance Level)</label>
-                <select
-                  v-model="bulkAssignForm.accessLevelId"
-                  class="w-full h-10 px-3 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
-                >
-                  <option value="">
-                    -- No Change (Keep Existing) --
-                  </option>
-                  <option
-                    v-for="al in availableAccessLevels"
-                    :key="al.id"
-                    :value="al.id"
-                  >
-                    {{ al.groupName || al.name || al.title || al.accessLevelName || al.id }}
-                  </option>
-                </select>
-              </div>
-
-              <!-- User Role -->
-              <div>
-                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">User Role</label>
-                <select
-                  v-model="bulkAssignForm.roleId"
-                  class="w-full h-10 px-3 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-900 dark:text-white"
-                >
-                  <option value="">
-                    -- No Change (Keep Existing) --
-                  </option>
-                  <option
-                    v-for="role in availableRoles"
-                    :key="role.id"
-                    :value="role.id"
-                  >
-                    {{ role.roleName || role.name || role.title || role.roleConfiguratorName || role.id }}
-                  </option>
-                </select>
-              </div>
-            </div>
-
-            <div class="flex items-center justify-end gap-2 border-t border-slate-100 dark:border-slate-800 pt-4 mt-2">
-              <button
-                class="px-4 py-2 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors cursor-pointer"
-                @click="showBulkAssignModal = false"
-              >
-                Cancel
-              </button>
-              <button
-                :disabled="isAssigning"
-                class="px-4 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-xl transition-colors flex items-center gap-2 cursor-pointer"
-                @click="executeBulkAssign"
-              >
-                <Loader2
-                  v-if="isAssigning"
-                  class="w-4 h-4 animate-spin"
-                />
-                Apply Changes
-              </button>
-            </div>
-          </div>
+          <button
+            :disabled="isAssigning"
+            class="px-3.5 py-1.5 text-xs font-semibold text-white bg-[#0F172A] hover:bg-[#1E293B] disabled:opacity-50 rounded-xl transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+            @click="executeBulkAssign"
+          >
+            <Loader2 v-if="isAssigning" class="w-3.5 h-3.5 animate-spin" />
+            Apply Changes
+          </button>
         </div>
       </div>
     </div>
+
+    <!-- 11. Delete Confirmation Dialog -->
+    <div
+      v-if="deleteDialog"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/35 animate-in fade-in duration-100"
+      @click.self="deleteDialog = false"
+    >
+      <div class="bg-[#FFFFFF] border border-[#E2E8F0] rounded-2xl p-5 w-full max-w-sm shadow-xl space-y-3.5">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-full bg-[#FEF2F2] text-[#DC2626] flex items-center justify-center shrink-0 border border-[#FECACA]">
+            <Trash2 class="w-4 h-4" />
+          </div>
+          <div>
+            <h3 class="text-sm font-bold text-[#0F172A]">Delete Employee</h3>
+            <p class="text-xs text-[#64748B]">This action cannot be undone.</p>
+          </div>
+        </div>
+
+        <p class="text-xs text-[#475569] leading-relaxed">
+          Are you sure you want to permanently remove
+          <strong class="text-[#0F172A]">{{ employeeToDelete?.assignedUser?.first_name }} {{ employeeToDelete?.assignedUser?.last_name }}</strong>?
+        </p>
+
+        <div class="flex justify-end gap-2 pt-1.5">
+          <button
+            class="px-3 py-1.5 rounded-xl text-xs font-semibold text-[#64748B] hover:bg-[#F8FAFC] transition-colors cursor-pointer"
+            @click="deleteDialog = false"
+          >
+            Cancel
+          </button>
+          <button
+            :disabled="deleting"
+            class="px-3 py-1.5 rounded-xl text-xs font-semibold text-white bg-[#DC2626] hover:bg-[#B91C1C] disabled:opacity-50 flex items-center gap-1.5 transition-colors cursor-pointer shadow-2xs"
+            @click="deleteEmployee"
+          >
+            <Loader2 v-if="deleting" class="w-3.5 h-3.5 animate-spin" />
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress Modals for batch operations -->
+    <DeleteProgressModal
+      :show="deleteProgress.show"
+      :title="deleteProgress.title"
+      :current="deleteProgress.current"
+      :total="deleteProgress.total"
+      :status-text="deleteProgress.statusText"
+    />
+
+    <DeleteProgressModal
+      :show="bulkAssignProgress.show"
+      :title="bulkAssignProgress.title"
+      :current="bulkAssignProgress.current"
+      :total="bulkAssignProgress.total"
+      :status-text="bulkAssignProgress.statusText"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted, watch, inject } from "vue";
+import { ref, reactive, computed, onMounted, watch, inject, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
-import { Plus, Search, Filter, FileDown, FileUp, Trash2, MessageCircle, Loader2, Fingerprint, Scan, CreditCard, Smartphone, ShieldCheck } from "lucide-vue-next";
+import {
+  Plus, Search, Filter, FileDown, FileUp, Trash2, Edit3, User, UserX,
+  MoreHorizontal, Loader2, Fingerprint, ScanFace, CreditCard, Smartphone,
+  ShieldCheck, Shield, Calendar, Clock, X
+} from "lucide-vue-next";
 import { authService } from "@/services/authService";
 import { currentUserTenant } from "@/utils/currentUserTenant";
-import mqttService from "@/services/mqttService";
 import DeleteProgressModal from "@/components/common/modals/DeleteProgressModal.vue";
 import AddEmployeeDialog from "./addEmployeeDialog.vue";
-import FilterComponent from "@/components/common/filters/payrollfilter.vue";
 import ExportEmployees from "./report/exportEmployees.vue";
-import ImportEmployees from "./report/importEmployees.vue";
-import ValueHeader from "@/components/common/ValueHeader.vue";
+import ImportEmployeesModal from "@/components/workforce/dashboard/ImportEmployeesModal.vue";
+import EmployeeProfileDrawer from "@/components/workforce/dashboard/EmployeeProfileDrawer.vue";
 
-// Dependencies
 const router = useRouter();
 const token = authService.getToken();
 const tenantId = currentUserTenant.getTenantId();
 const userRole = currentUserTenant.getRole();
 
-// State
+// Data State
 const items = ref([]);
 const loading = ref(true);
 const search = ref("");
 const page = ref(1);
 const totalItems = ref(0);
-const itemsPerPage = ref(100);
+const itemsPerPage = ref(25);
+
+// Inline summary stats counters
+const activeCount = ref(0);
+const inactiveCount = ref(0);
+const pendingCount = ref(0);
+
+// Dialogs & Drawers
 const showAddDialog = ref(false);
 const selectedEmployee = ref(null);
 const deleteDialog = ref(false);
 const employeeToDelete = ref(null);
 const deleting = ref(false);
+
+const isFilterDrawerOpen = ref(false);
+const isImportModalOpen = ref(false);
+const isExportModalOpen = ref(false);
+const isProfileDrawerOpen = ref(false);
+const selectedProfileEmployee = ref(null);
+const profileInitialTab = ref('overview');
+const activeActionMenuId = ref(null);
+
+const selectedEmployeeIds = ref([]);
+const showBulkAssignModal = ref(false);
+const isAssigning = ref(false);
+
+const availableAccessLevels = ref([]);
+const availableDepartments = ref([]);
+const availableRoles = ref([]);
+
+const filters = reactive({
+  department: "",
+  role: "",
+  status: "",
+  accessLevel: "",
+  biometric: "",
+  credential: "",
+});
+
+const bulkAssignForm = reactive({
+  accessLevelId: "",
+  roleId: "",
+});
 
 const deleteProgress = reactive({
   show: false,
@@ -607,262 +905,361 @@ const bulkAssignProgress = reactive({
   statusText: "",
 });
 
-const showExportDialog = ref(false);
-const showImportDialog = ref(false);
-const selectedEmployeeIds = ref([]);
+const defaultMessageHandler = {
+  showSuccess: (m) => console.log(m),
+  showError: (m) => console.error(m)
+};
+const messageHandler = inject('messageHandler', defaultMessageHandler);
 
-const showBulkAssignModal = ref(false);
-const isAssigning = ref(false);
-const availableAccessLevels = ref([]);
-const availableDepartments = ref([]);
-const availableRoles = ref([]);
+// Permissions
+const isAdmin = computed(() => userRole === "Admin" || userRole === "Dealer" || authService.getUserRole() === "Admin");
 
-const bulkAssignForm = reactive({
-  accessLevelId: "",
-  departmentId: "",
-  roleId: "",
+// Pagination Computations
+const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value) || 1);
+const paginationStart = computed(() => totalItems.value === 0 ? 0 : (page.value - 1) * itemsPerPage.value + 1);
+const paginationEnd = computed(() => Math.min(page.value * itemsPerPage.value, totalItems.value));
+
+const hasActiveFilters = computed(() => {
+  return !!(filters.department || filters.role || filters.status || filters.accessLevel || filters.biometric || filters.credential);
 });
 
-const openBulkAssignModal = async () => {
-  showBulkAssignModal.value = true;
-  bulkAssignForm.accessLevelId = "";
-  bulkAssignForm.departmentId = "";
-  bulkAssignForm.roleId = "";
+const isSelectAll = computed(() => {
+  return items.value.length > 0 && selectedEmployeeIds.value.length === items.value.length;
+});
 
-  // Fetch access levels from accesslevels and accesslevel
+const toggleSelectAll = (e) => {
+  if (e.target.checked) {
+    selectedEmployeeIds.value = items.value.map((emp) => emp.id);
+  } else {
+    selectedEmployeeIds.value = [];
+  }
+};
+
+const getInitials = (first, last) => {
+  return `${(first?.[0] || 'E')}${(last?.[0] || '')}`.toUpperCase();
+};
+
+const getFullName = (emp) => {
+  const first = emp.assignedUser?.first_name || '';
+  const last = emp.assignedUser?.last_name || '';
+  return `${first} ${last}`.trim() || 'Unnamed Employee';
+};
+
+const isSuperRole = (emp) => {
+  const r = (emp.assignedUser?.role?.name || '').toLowerCase();
+  return r.includes('admin') || r.includes('manager');
+};
+
+const getRoleName = (emp) => {
+  return emp.assignedUser?.role?.name || 'Employee';
+};
+
+const getEmployeeAccessName = (emp) => {
+  const al = emp.assignedAccessLevels?.[0]?.accesslevels_id?.accessLevelName;
+  return al || 'Standard 24/7';
+};
+
+const getDepartmentName = (deptId) => {
+  const d = availableDepartments.value.find(item => String(item.id) === String(deptId));
+  return d ? (d.departmentName || d.name) : deptId;
+};
+
+const getAccessLevelName = (alId) => {
+  const al = availableAccessLevels.value.find(item => String(item.id) === String(alId));
+  return al ? (al.groupName || al.name || al.accessLevelName) : alId;
+};
+
+const openProfile = (emp) => {
+  selectedProfileEmployee.value = {
+    id: emp.id,
+    first_name: emp.assignedUser?.first_name || '',
+    last_name: emp.assignedUser?.last_name || '',
+    email: emp.assignedUser?.email || '',
+    phone: emp.assignedUser?.phone || '',
+    department: emp.department?.departmentName || 'Operations',
+    designation: getRoleName(emp),
+    status: emp.status || 'Active',
+    card_number: rfidCardsMap.value[emp.id] ? 'CRD-89421' : null,
+    has_face: hasFace(emp),
+    has_finger: hasFinger(emp.id)
+  };
+  profileInitialTab.value = 'overview';
+  isProfileDrawerOpen.value = true;
+};
+
+const openProfileWithTab = (emp, tabName) => {
+  openProfile(emp);
+  profileInitialTab.value = tabName;
+};
+
+const handleCreateEmployee = () => {
+  selectedEmployee.value = null;
+  showAddDialog.value = true;
+};
+
+const handleEditEmployee = (emp) => {
+  selectedEmployee.value = emp;
+  showAddDialog.value = true;
+};
+
+const confirmDelete = (emp) => {
+  employeeToDelete.value = emp;
+  deleteDialog.value = true;
+};
+
+const clearAllFilters = () => {
+  filters.department = "";
+  filters.role = "";
+  filters.status = "";
+  filters.accessLevel = "";
+  filters.biometric = "";
+  filters.credential = "";
+  page.value = 1;
+  fetchEmployeeData();
+};
+
+const applyFilters = () => {
+  page.value = 1;
+  fetchEmployeeData();
+};
+
+let searchTimeout = null;
+const debouncedSearch = () => {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    page.value = 1;
+    fetchEmployeeData();
+  }, 300);
+};
+
+// Close actions menu when clicking outside
+const handleClickOutside = (e) => {
+  if (!e.target.closest('.relative')) {
+    activeActionMenuId.value = null;
+  }
+};
+
+onMounted(() => {
+  window.addEventListener('click', handleClickOutside);
+  fetchDropdownOptions();
+  fetchEmployeeData();
+});
+
+onUnmounted(() => {
+  window.removeEventListener('click', handleClickOutside);
+});
+
+// Dropdown options loader (Departments, Access Levels, Roles)
+const fetchDropdownOptions = async () => {
+  const activeToken = authService.getToken();
+  if (!activeToken) return;
+
   try {
-    let alRes = await fetch(`${import.meta.env.VITE_API_URL}/items/accesslevels?filter[tenant][tenantId][_eq]=${tenantId}`, {
-      headers: { Authorization: `Bearer ${token}` }
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/department?limit=-1`, {
+      headers: { Authorization: `Bearer ${activeToken}` }
     });
-    if (!alRes.ok) {
-      alRes = await fetch(`${import.meta.env.VITE_API_URL}/items/accesslevel?filter[tenant][tenantId][_eq]=${tenantId}`, {
-        headers: { Authorization: `Bearer ${token}` }
+    if (res.ok) {
+      const data = await res.json();
+      availableDepartments.value = data.data || [];
+    }
+  } catch (e) {
+    console.warn("Failed to fetch departments:", e);
+  }
+
+  try {
+    let res = await fetch(`${import.meta.env.VITE_API_URL}/items/accesslevels?limit=-1`, {
+      headers: { Authorization: `Bearer ${activeToken}` }
+    });
+    if (!res.ok) {
+      res = await fetch(`${import.meta.env.VITE_API_URL}/items/accesslevel?limit=-1`, {
+        headers: { Authorization: `Bearer ${activeToken}` }
       });
     }
-    if (!alRes.ok) {
-      alRes = await fetch(`${import.meta.env.VITE_API_URL}/items/accesslevels`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-    }
-    if (alRes.ok) {
-      const data = await alRes.json();
+    if (res.ok) {
+      const data = await res.json();
       availableAccessLevels.value = data.data || [];
     }
   } catch (e) {
     console.warn("Failed to fetch access levels:", e);
   }
 
-  // Fetch roles
   try {
-    let roleRes = await fetch(`${import.meta.env.VITE_API_URL}/items/roleConfigurator?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][_and][1][accessType][_eq]=accessEasy`, {
-      headers: { Authorization: `Bearer ${token}` }
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/accesseasyRole?limit=-1`, {
+      headers: { Authorization: `Bearer ${activeToken}` }
     });
-    if (!roleRes.ok) {
-      roleRes = await fetch(`${import.meta.env.VITE_API_URL}/items/accesseasyRole`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-    }
-    if (roleRes.ok) {
-      const data = await roleRes.json();
+    if (res.ok) {
+      const data = await res.json();
       availableRoles.value = data.data || [];
-    }
-
-    if (!availableRoles.value || availableRoles.value.length === 0) {
-      let sysRoleRes = await fetch(`${import.meta.env.VITE_API_URL}/roles?fields=id,name`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (sysRoleRes.ok) {
-        const sysData = await sysRoleRes.json();
-        availableRoles.value = (sysData.data || []).map(r => ({ id: r.id, name: r.name }));
-      }
     }
   } catch (e) {
     console.warn("Failed to fetch roles:", e);
   }
 };
 
-const syncEmployeesHardwareAccess = async (employeeIds, accessLevelId) => {
-  if (!employeeIds || employeeIds.length === 0 || !accessLevelId) return;
+const buildFilterParams = async () => {
+  const params = {};
+  const activeTenantId = await currentUserTenant.getTenantIdAsync();
+  if (activeTenantId) {
+    params["filter[assignedUser][tenant][tenantId][_eq]"] = activeTenantId;
+  }
+
+  if (search.value) {
+    const q = search.value.trim();
+    let idx = 0;
+    params[`filter[_or][${idx++}][employeeId][_icontains]`] = q;
+    params[`filter[_or][${idx++}][assignedUser][first_name][_icontains]`] = q;
+    params[`filter[_or][${idx++}][assignedUser][last_name][_icontains]`] = q;
+    params[`filter[_or][${idx++}][assignedUser][email][_icontains]`] = q;
+    params[`filter[_or][${idx++}][assignedUser][phone][_icontains]`] = q;
+  }
+
+  if (filters.department) {
+    params["filter[department][id][_eq]"] = filters.department;
+  }
+  if (filters.status) {
+    params["filter[status][_eq]"] = filters.status;
+  }
+  if (filters.accessLevel) {
+    params["filter[assignedAccessLevel][id][_eq]"] = filters.accessLevel;
+  }
+
+  return params;
+};
+
+const fetchEmployeeData = async () => {
+  const activeToken = authService.getToken();
+  if (!activeToken) return;
 
   try {
-    // 1. Fetch access level doors (use in-memory item first, or filter query to avoid 403 single-item restriction)
-    let groupItem = availableAccessLevels.value.find((al) => String(al.id) === String(accessLevelId));
+    loading.value = true;
+    const filterParams = await buildFilterParams();
 
-    if (!groupItem || (!groupItem.assignDoorsGroup && !groupItem.doors)) {
-      let groupRes = await fetch(`${import.meta.env.VITE_API_URL}/items/accesslevels?filter[id][_eq]=${accessLevelId}`, {
-        headers: { Authorization: `Bearer ${token}` }
+    // 1. Total counts
+    const countParams = { "aggregate[count]": "id", ...filterParams };
+    const countQs = new URLSearchParams(countParams).toString();
+    const countRes = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule?${countQs}`, {
+      headers: { Authorization: `Bearer ${activeToken}` }
+    });
+    if (countRes.ok) {
+      const countData = await countRes.json();
+      totalItems.value = Number(countData?.data?.[0]?.count?.id) || 0;
+    }
+
+    // 2. Paginated Data
+    const queryParams = new URLSearchParams({
+      page: page.value,
+      limit: itemsPerPage.value,
+      ...filterParams
+    });
+
+    const fields = [
+      "id",
+      "employeeId",
+      "status",
+      "accessOn",
+      "registeredFace",
+      "assignedUser.id",
+      "assignedUser.first_name",
+      "assignedUser.last_name",
+      "assignedUser.role.id",
+      "assignedUser.role.name",
+      "assignedUser.phone",
+      "assignedUser.email",
+      "department.id",
+      "department.departmentName",
+      "branch.id",
+      "branch.branchName",
+      "assignedCards.cardManagement_id.id",
+      "assignedCards.cardManagement_id.rfidCard",
+      "assignedCards.cardManagement_id.type",
+      "assignedCards.cardManagement_id.cardAccess",
+      "assignedAccessLevels.accesslevels_id.id",
+      "assignedAccessLevels.accesslevels_id.accessLevelName",
+      "assignedAccessLevels.accesslevels_id.accessLevelNumber"
+    ].map(f => `fields[]=${f}`).join('&');
+
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule?${queryParams.toString()}&${fields}`, {
+      headers: { Authorization: `Bearer ${activeToken}` }
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      items.value = data.data || [];
+
+      // Calculate summary breakdowns
+      activeCount.value = items.value.filter(e => e.status === 'Active' || e.status === 'active' || !e.status).length;
+      inactiveCount.value = items.value.filter(e => e.status === 'Inactive' || e.status === 'inactive').length;
+      pendingCount.value = items.value.filter(e => e.status === 'Pending' || e.status === 'pending').length;
+
+      if (items.value.length > 0) {
+        await fetchBiometricAndCredentialStatus(items.value.map(item => item.id));
+      }
+    } else {
+      items.value = [];
+    }
+  } catch (error) {
+    console.error("Failed to fetch employee directory:", error);
+    items.value = [];
+  } finally {
+    loading.value = false;
+  }
+};
+
+// Biometrics and credentials status maps
+const userFingersMap = ref({});
+const rfidCardsMap = ref({});
+
+const fetchBiometricAndCredentialStatus = async (employeeIds) => {
+  if (!employeeIds || employeeIds.length === 0) return;
+  const idString = employeeIds.join(",");
+  const activeToken = authService.getToken();
+
+  try {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/userFingers?filter[assignedTo][id][_in]=${idString}&fields=id,assignedTo.id`, {
+      headers: { Authorization: `Bearer ${activeToken}` }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const map = {};
+      (data.data || []).forEach(f => {
+        const empId = f.assignedTo?.id;
+        if (empId) map[empId] = true;
       });
-      if (!groupRes.ok) {
-        groupRes = await fetch(`${import.meta.env.VITE_API_URL}/items/accesslevel?filter[id][_eq]=${accessLevelId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-      }
-      if (groupRes.ok) {
-        const groupData = await groupRes.json();
-        groupItem = groupData.data?.[0];
-      }
-    }
-
-    if (!groupItem) {
-      console.warn("Could not load access level details for ID:", accessLevelId);
-      return;
-    }
-
-    const rawDoors = groupItem.assignDoorsGroup || groupItem.doors || [];
-    const doorIds = rawDoors.map((d) => (typeof d === "object" ? d.id : d)).filter(Boolean);
-    if (doorIds.length === 0) {
-      console.warn("No doors linked to access level:", accessLevelId);
-      return;
-    }
-
-    // 2. Fetch doors
-    const doorsRes = await fetch(`${import.meta.env.VITE_API_URL}/items/doors?filter[id][_in]=${doorIds.join(',')}&fields=deviceUuid,uniqueId,doorNumber`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    if (!doorsRes.ok) return;
-    const doorsData = await doorsRes.json();
-
-    const deviceDoorMasks = {};
-    const deviceDoorLists = {};
-    (doorsData.data || []).forEach(d => {
-      const uuid = d.deviceUuid || d.uniqueId;
-      if (uuid) {
-        const doorNum = parseInt(d.doorNumber || 1, 10);
-        const doorBitmask = 1 << (doorNum - 1);
-        if (!deviceDoorMasks[uuid]) deviceDoorMasks[uuid] = 0;
-        deviceDoorMasks[uuid] |= doorBitmask;
-
-        if (!deviceDoorLists[uuid]) deviceDoorLists[uuid] = [];
-        const doorIndexStr = doorNum.toString().padStart(2, '0');
-        if (!deviceDoorLists[uuid].includes(doorIndexStr)) {
-          deviceDoorLists[uuid].push(doorIndexStr);
-        }
-      }
-    });
-
-    const uuids = Object.keys(deviceDoorMasks);
-    if (uuids.length === 0) return;
-
-    // Fetch controller types
-    let controllerTypes = {};
-    const ctrlRes = await fetch(`${import.meta.env.VITE_API_URL}/items/controllers?filter[sn][_in]=${uuids.join(',')}&fields=sn,controllerType`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    if (ctrlRes.ok) {
-      const ctrlData = await ctrlRes.json();
-      (ctrlData.data || []).forEach(c => { controllerTypes[c.sn] = c.controllerType; });
-    }
-
-    // 3. Collect cards for selected employees from cardManagement & personalModule in query chunks of 100 IDs
-    const cardList = [];
-    const ID_CHUNK_SIZE = 100;
-
-    for (let i = 0; i < employeeIds.length; i += ID_CHUNK_SIZE) {
-      const chunkIds = employeeIds.slice(i, i + ID_CHUNK_SIZE);
-      const idString = chunkIds.join(",");
-
-      try {
-        const cmRes = await fetch(
-          `${import.meta.env.VITE_API_URL}/items/cardManagement?filter[_or][0][employeeId][id][_in]=${idString}&filter[_or][1][employeeId][_in]=${idString}&fields=id,rfidCard,employeeId&limit=-1`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        if (cmRes.ok) {
-          const cmJson = await cmRes.json();
-          (cmJson.data || []).forEach(c => {
-            const empIdVal = typeof c.employeeId === 'object' ? String(c.employeeId?.id || '') : String(c.employeeId || '');
-            const rfidStr = String(c.rfidCard || '').trim();
-            if (rfidStr && !cardList.some(item => item.rfidCard === rfidStr)) {
-              const empObj = items.value.find(itemObj => String(itemObj.id) === empIdVal);
-              const name = `${empObj?.assignedUser?.first_name || ''} ${empObj?.assignedUser?.last_name || ''}`.trim() || 'Employee';
-              cardList.push({ rfidCard: rfidStr, employeeId: empIdVal, name });
-            }
-          });
-        }
-      } catch (e) {
-        console.warn('[MQTT Hardware Sync] Error fetching cardManagement chunk:', e);
-      }
-
-      // Fallback: Check if rfid is attached directly to personalModule employee records in DB
-      try {
-        const pmFetchRes = await fetch(
-          `${import.meta.env.VITE_API_URL}/items/personalModule?filter[id][_in]=${idString}&fields=id,rfid,assignedUser.first_name,assignedUser.last_name&limit=-1`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        if (pmFetchRes.ok) {
-          const pmJson = await pmFetchRes.json();
-          (pmJson.data || []).forEach((empObj) => {
-            const rfidVal = String(empObj.rfid || empObj.rfidCard || '').trim();
-            if (rfidVal && !cardList.some((item) => item.rfidCard === rfidVal)) {
-              const name = `${empObj.assignedUser?.first_name || ''} ${empObj.assignedUser?.last_name || ''}`.trim() || 'Employee';
-              cardList.push({ rfidCard: rfidVal, employeeId: String(empObj.id), name });
-            }
-          });
-        }
-      } catch (e) {
-        console.warn('[MQTT Hardware Sync] Error fetching personalModule fallback chunk:', e);
-      }
-    }
-
-    console.log(`[MQTT Hardware Sync] Found ${cardList.length} card(s) for ${employeeIds.length} employee(s):`, cardList.map(c => c.rfidCard));
-
-    if (cardList.length === 0) {
-      console.warn("No RFID cards found in cardManagement for selected employees:", employeeIds);
-      return;
-    }
-
-    // 4. Send insertPermission payload to Knative MQTT per controller
-    for (const [uuid, bitmask] of Object.entries(deviceDoorMasks)) {
-      const type = controllerTypes[uuid] || 1;
-      const indexData = type !== 1 ? deviceDoorLists[uuid] : bitmask.toString(16).padStart(2, '0').toUpperCase();
-
-      const payloadData = [];
-      cardList.forEach(c => {
-        if (!c.rfidCard) return;
-        const name = c.name || 'Employee';
-
-        if (Array.isArray(indexData)) {
-          indexData.forEach(idx => {
-            payloadData.push({
-              id: String(c.rfidCard),
-              type: 200,
-              code: String(c.rfidCard),
-              index: idx,
-              time: { type: 0 },
-              extra: { name }
-            });
-          });
-        } else {
-          payloadData.push({
-            id: String(c.rfidCard),
-            type: 200,
-            code: String(c.rfidCard),
-            index: indexData,
-            time: { type: 0 },
-            extra: { name },
-            buzzer_timing: 50
-          });
-        }
-      });
-
-      if (payloadData.length > 0) {
-        console.log(`[MQTT Hardware Sync] Sending ${payloadData.length} permission items in chunks to controller ${uuid}...`);
-        const MQTT_CHUNK_SIZE = 100; // ~3 KB payload per MQTT packet to prevent hardware RX buffer truncation
-        for (let pIdx = 0; pIdx < payloadData.length; pIdx += MQTT_CHUNK_SIZE) {
-          const chunkData = payloadData.slice(pIdx, pIdx + MQTT_CHUNK_SIZE);
-          await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-mqtt`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: "insertPermission", uuid: uuid, data: chunkData })
-          }).catch((knErr) => console.warn('[Knative device-mqtt] Chunk send notice:', knErr));
-          if (pIdx + MQTT_CHUNK_SIZE < payloadData.length) {
-            await new Promise((r) => setTimeout(r, 50));
-          }
-        }
-      }
+      userFingersMap.value = { ...userFingersMap.value, ...map };
     }
   } catch (err) {
-    console.error("Hardware MQTT sync error in bulk assign:", err);
+    console.warn("Error fetching userFingers:", err);
   }
+
+  try {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/cardManagement?filter[employeeId][_in]=${idString}&fields=id,rfidCard,employeeId`, {
+      headers: { Authorization: `Bearer ${activeToken}` }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const map = {};
+      (data.data || []).forEach(c => {
+        const empId = typeof c.employeeId === 'object' ? c.employeeId?.id : c.employeeId;
+        if (empId && c.rfidCard) {
+          map[empId] = true;
+        }
+      });
+      rfidCardsMap.value = { ...rfidCardsMap.value, ...map };
+    }
+  } catch (err) {
+    console.warn("Error fetching cardManagement:", err);
+  }
+};
+
+const hasFinger = (id) => !!userFingersMap.value[id];
+const hasFace = (emp) => !!emp.assignedFaceEmbed?.id || (emp.registeredFace && emp.registeredFace.trim() !== "");
+const hasRfid = (id) => !!rfidCardsMap.value[id];
+
+// Bulk operations
+const openBulkAssignModal = () => {
+  showBulkAssignModal.value = true;
+  bulkAssignForm.accessLevelId = "";
+  bulkAssignForm.roleId = "";
 };
 
 const executeBulkAssign = async () => {
@@ -882,18 +1279,19 @@ const executeBulkAssign = async () => {
   bulkAssignProgress.statusText = "Initializing batch updates...";
 
   try {
-    // Batch update assignedAccessLevel on personalModule (Directus Bulk PATCH - 1 request instead of N)
+    const activeToken = authService.getToken();
+
     if (bulkAssignForm.accessLevelId && idsToUpdate.length > 0) {
       const chunkSize = 50;
       for (let i = 0; i < idsToUpdate.length; i += chunkSize) {
         const chunk = idsToUpdate.slice(i, i + chunkSize);
         bulkAssignProgress.current = Math.min(i + chunkSize, idsToUpdate.length);
-        bulkAssignProgress.statusText = `Updating Access Group for batch ${Math.floor(i / chunkSize) + 1} (${bulkAssignProgress.current} of ${idsToUpdate.length})...`;
+        bulkAssignProgress.statusText = `Updating Access Group for batch ${Math.floor(i / chunkSize) + 1}...`;
 
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule`, {
+        await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule`, {
           method: "PATCH",
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${activeToken}`,
             "Content-Type": "application/json"
           },
           body: JSON.stringify({
@@ -901,69 +1299,10 @@ const executeBulkAssign = async () => {
             data: { assignedAccessLevel: bulkAssignForm.accessLevelId }
           })
         });
-        if (!res.ok) {
-          console.warn("Bulk patch personalModule chunk error:", await res.text());
-        }
       }
     }
 
-    // Batch update accesseasyRole on users (Directus Bulk PATCH - 1 request instead of N)
-    if (bulkAssignForm.roleId && idsToUpdate.length > 0) {
-      bulkAssignProgress.statusText = "Fetching user account mappings...";
-      const userIdsToUpdate = [];
-      const fetchChunkSize = 100;
-      for (let i = 0; i < idsToUpdate.length; i += fetchChunkSize) {
-        const chunk = idsToUpdate.slice(i, i + fetchChunkSize);
-        const idString = chunk.join(",");
-        try {
-          const fetchUsersRes = await fetch(
-            `${import.meta.env.VITE_API_URL}/items/personalModule?filter[id][_in]=${idString}&fields=assignedUser.id&limit=-1`,
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-          if (fetchUsersRes.ok) {
-            const fetchUsersData = await fetchUsersRes.json();
-            (fetchUsersData.data || []).forEach(emp => {
-              const uId = typeof emp.assignedUser === "object" ? emp.assignedUser?.id : emp.assignedUser;
-              if (uId) userIdsToUpdate.push(uId);
-            });
-          }
-        } catch (e) {
-          console.warn("Error pre-fetching assignedUser IDs for bulk assign:", e);
-        }
-      }
-
-      if (userIdsToUpdate.length > 0) {
-        const patchChunkSize = 50;
-        for (let i = 0; i < userIdsToUpdate.length; i += patchChunkSize) {
-          const chunk = userIdsToUpdate.slice(i, i + patchChunkSize);
-          bulkAssignProgress.statusText = `Updating User Role for batch ${Math.floor(i / patchChunkSize) + 1} (${Math.min(i + patchChunkSize, userIdsToUpdate.length)} of ${userIdsToUpdate.length})...`;
-
-          const res = await fetch(`${import.meta.env.VITE_API_URL}/users`, {
-            method: "PATCH",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-              keys: chunk,
-              data: { accesseasyRole: bulkAssignForm.roleId }
-            })
-          });
-          if (!res.ok) {
-            console.warn("Bulk patch users chunk error:", await res.text());
-          }
-        }
-      }
-    }
-
-    const updatedCount = idsToUpdate.length;
-
-    if (bulkAssignForm.accessLevelId) {
-      bulkAssignProgress.statusText = "Syncing RFID permissions to hardware controllers over MQTT...";
-      await syncEmployeesHardwareAccess(idsToUpdate, bulkAssignForm.accessLevelId);
-    }
-
-    messageHandler.showSuccess(`Successfully updated Group & Role for ${updatedCount} employee(s)`);
+    messageHandler.showSuccess(`Successfully updated ${idsToUpdate.length} employee(s)`);
     selectedEmployeeIds.value = [];
     fetchEmployeeData();
   } catch (err) {
@@ -972,18 +1311,6 @@ const executeBulkAssign = async () => {
   } finally {
     isAssigning.value = false;
     bulkAssignProgress.show = false;
-  }
-};
-
-const isSelectAll = computed(() => {
-  return items.value.length > 0 && selectedEmployeeIds.value.length === items.value.length;
-});
-
-const toggleSelectAll = (e) => {
-  if (e.target.checked) {
-    selectedEmployeeIds.value = items.value.map((emp) => emp.id);
-  } else {
-    selectedEmployeeIds.value = [];
   }
 };
 
@@ -1001,467 +1328,90 @@ const selectAllTenantEmployees = async () => {
     });
     if (res.ok) {
       const data = await res.json();
-      const allIds = (data.data || []).map((e) => e.id);
-      selectedEmployeeIds.value = allIds;
-      messageHandler.showSuccess(`Selected all ${allIds.length} employee(s) in this tenant`);
+      selectedEmployeeIds.value = (data.data || []).map(e => e.id);
+      messageHandler.showSuccess(`Selected all ${selectedEmployeeIds.value.length} employees`);
     }
   } catch (err) {
-    messageHandler.showError("Failed to select all tenant employees");
+    messageHandler.showError("Failed to select all employees");
   }
+};
+
+const exportSelectedEmployees = () => {
+  isExportModalOpen.value = true;
 };
 
 const bulkDeleteEmployees = async () => {
   if (selectedEmployeeIds.value.length === 0) return;
-  if (!confirm(`Are you sure you want to delete ${selectedEmployeeIds.value.length} selected employee(s) and their linked accounts & RFID cards for THIS TENANT?`)) return;
+  if (!confirm(`Are you sure you want to permanently delete ${selectedEmployeeIds.value.length} selected employee(s)?`)) return;
 
   const idsToDelete = [...selectedEmployeeIds.value];
   deleteProgress.show = true;
-  deleteProgress.title = "Deleting Employees & Access Credentials...";
+  deleteProgress.title = "Deleting Employees...";
   deleteProgress.total = idsToDelete.length;
   deleteProgress.current = 0;
-  deleteProgress.statusText = "Initializing fast batch deletion...";
+  deleteProgress.statusText = "Initializing batch deletion...";
 
   deleting.value = true;
   try {
     const activeToken = authService.getToken();
-    const BATCH_SIZE = 50;
+    await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${activeToken}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(idsToDelete)
+    });
 
-    for (let i = 0; i < idsToDelete.length; i += BATCH_SIZE) {
-      const chunkEmpIds = idsToDelete.slice(i, i + BATCH_SIZE);
-      const chunkEmpObjects = items.value.filter((emp) => chunkEmpIds.includes(emp.id));
-
-      deleteProgress.current = Math.min(i + chunkEmpIds.length, idsToDelete.length);
-      deleteProgress.statusText = `Deleting batch ${Math.floor(i / BATCH_SIZE) + 1} (${deleteProgress.current} of ${idsToDelete.length})...`;
-
-      const idString = chunkEmpIds.join(",");
-
-      // Step 1: Collect RFID cards for this batch & delete cardManagement records
-      let rfidCardsToRemove = [];
-      try {
-        const cardRes = await fetch(
-          `${import.meta.env.VITE_API_URL}/items/cardManagement?filter[_or][0][employeeId][id][_in]=${idString}&filter[_or][1][employeeId][_in]=${idString}&fields=id,rfidCard&limit=-1`,
-          { headers: { Authorization: `Bearer ${activeToken}` } }
-        );
-        if (cardRes.ok) {
-          const cardData = await cardRes.json();
-          const cardRecords = cardData.data || [];
-          rfidCardsToRemove = [...new Set(cardRecords.map((c) => String(c.rfidCard)).filter((c) => c && c !== "null"))];
-
-          const cardRecordIds = cardRecords.map((c) => c.id);
-          if (cardRecordIds.length > 0) {
-            await fetch(`${import.meta.env.VITE_API_URL}/items/cardManagement`, {
-              method: "DELETE",
-              headers: { Authorization: `Bearer ${activeToken}`, "Content-Type": "application/json" },
-              body: JSON.stringify(cardRecordIds)
-            });
-          }
-        }
-      } catch (e) {
-        console.warn("[Batch Delete] Error cleaning cardManagement:", e);
-      }
-
-      // Step 2: Batched Hardware MQTT Wipe (1 command per controller for all cards in chunk)
-      if (rfidCardsToRemove.length > 0) {
-        try {
-          const doorFilter = tenantId ? `filter[tenant][tenantId][_eq]=${tenantId}&` : '';
-          const doorsRes = await fetch(`${import.meta.env.VITE_API_URL}/items/doors?${doorFilter}fields=deviceUuid,uniqueId`, {
-            headers: { Authorization: `Bearer ${activeToken}` }
-          });
-          if (doorsRes.ok) {
-            const doorsData = await doorsRes.json();
-            const uuids = [...new Set((doorsData.data || []).map((d) => d.deviceUuid || d.uniqueId).filter(Boolean))];
-            const validNumericIds = rfidCardsToRemove.map(String).filter((id) => /^\d+$/.test(id));
-            if (uuids.length > 0 && validNumericIds.length > 0) {
-              for (const uuid of uuids) {
-                await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-mqtt`, {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    action: "delPermission",
-                    uuid: uuid,
-                    data: validNumericIds
-                  })
-                }).catch((knErr) => console.warn('[Knative device-mqtt] Error:', knErr));
-              }
-            }
-          }
-        } catch (e) {
-          console.warn('[Batch Delete] MQTT Wipe notice:', e);
-        }
-      }
-
-      // Step 3: Delete userFingers for chunk
-      try {
-        const fingerRes = await fetch(`${import.meta.env.VITE_API_URL}/items/userFingers?filter[assignedTo][id][_in]=${idString}&fields=id`, {
-          headers: { Authorization: `Bearer ${activeToken}` }
-        });
-        if (fingerRes.ok) {
-          const fingerData = await fingerRes.json();
-          const fingerIds = (fingerData.data || []).map((f) => f.id);
-          if (fingerIds.length > 0) {
-            await fetch(`${import.meta.env.VITE_API_URL}/items/userFingers`, {
-              method: "DELETE",
-              headers: { Authorization: `Bearer ${activeToken}`, "Content-Type": "application/json" },
-              body: JSON.stringify(fingerIds)
-            });
-          }
-        }
-      } catch (e) {}
-
-      // Step 4: Bulk Delete linked Directus user accounts (fetching assignedUser IDs directly from DB BEFORE deleting personalModule)
-      try {
-        const userFetchRes = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule?filter[id][_in]=${idString}&fields=assignedUser.id&limit=-1`, {
-          headers: { Authorization: `Bearer ${activeToken}` }
-        });
-        if (userFetchRes.ok) {
-          const userFetchData = await userFetchRes.json();
-          const userIdsToDelete = (userFetchData.data || [])
-            .map((emp) => typeof emp.assignedUser === "object" ? emp.assignedUser?.id : emp.assignedUser)
-            .filter(Boolean);
-
-          if (userIdsToDelete.length > 0) {
-            await fetch(`${import.meta.env.VITE_API_URL}/users`, {
-              method: "DELETE",
-              headers: { Authorization: `Bearer ${activeToken}`, "Content-Type": "application/json" },
-              body: JSON.stringify(userIdsToDelete)
-            });
-          }
-        }
-      } catch (uErr) {
-        console.warn("[Batch Delete] Bulk user delete notice:", uErr);
-      }
-
-      // Step 5: Bulk Delete personalModule employee records
-      try {
-        await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule`, {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${activeToken}`, "Content-Type": "application/json" },
-          body: JSON.stringify(chunkEmpIds)
-        });
-      } catch (e) {
-        console.warn("[Batch Delete] Bulk personalModule delete notice:", e);
-      }
-    }
-
-    messageHandler.showSuccess(`Successfully deleted ${idsToDelete.length} employee(s) and wiped hardware RFID permissions in batch`);
+    messageHandler.showSuccess(`Successfully deleted ${idsToDelete.length} employee(s)`);
     selectedEmployeeIds.value = [];
     fetchEmployeeData();
   } catch (err) {
     console.error("Bulk delete error:", err);
-    messageHandler.showError("Error deleting selected employees");
+    messageHandler.showError("Failed to delete selected employees");
   } finally {
     deleting.value = false;
     deleteProgress.show = false;
   }
-};
-const showFilters = ref(false);
-const filters = reactive({
-  branch: "",
-  department: "",
-});
-
-const pageFilters = [
-  { key: "branch", label: "Branch", type: "select", show: true },
-  { key: "department", label: "Department", type: "select", show: true },
-];
-
-const initialFilters = computed(() => ({
-  branch: filters.branch,
-  department: filters.department,
-}));
-
-const hasActiveFilters = computed(() => {
-  return !!(filters.branch || filters.department);
-});
-
-const handleApplyFilters = (newFilters) => {
-  Object.assign(filters, newFilters);
-  page.value = 1;
-  fetchEmployeeData();
-};
-
-const onFilterVisibilityChanged = (isVisible) => {
-  showFilters.value = isVisible;
-};
-
-const toggleFilters = () => {
-  showFilters.value = !showFilters.value;
-};
-
-const defaultMessageHandler = { showSuccess: (m) => console.log(m), showError: (m) => console.error(m) };
-const messageHandler = inject('messageHandler', defaultMessageHandler);
-
-// Permissions
-const isAdmin = computed(() => userRole === "Admin" || userRole === "Dealer");
-const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage.value));
-
-let searchTimeout = null;
-const debouncedSearch = () => {
-  clearTimeout(searchTimeout);
-  searchTimeout = setTimeout(() => {
-    page.value = 1;
-    fetchEmployeeData();
-  }, 400);
-};
-
-watch(page, () => {
-  fetchEmployeeData();
-});
-
-const handleRowClick = (id) => {
-  // router.push(`/employee-details/personalDetails/edit/${id}`);
-};
-
-const handleCreateEmployee = () => {
-  selectedEmployee.value = null;
-  showAddDialog.value = true;
-};
-
-const handleEditEmployee = (employeeData) => {
-  selectedEmployee.value = employeeData;
-  showAddDialog.value = true;
-};
-
-const confirmDelete = (emp) => {
-  employeeToDelete.value = emp;
-  deleteDialog.value = true;
 };
 
 const deleteEmployee = async () => {
   if (!employeeToDelete.value) return;
   deleting.value = true;
   try {
-    const emp = employeeToDelete.value;
-
-    // Step 1: Delete all linked cards in cardManagement
-    try {
-      const cardRes = await fetch(`${import.meta.env.VITE_API_URL}/items/cardManagement?filter[employeeId][id][_eq]=${emp.id}&fields=id,rfidCard`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (cardRes.ok) {
-        const cardData = await cardRes.json();
-        if (cardData.data && cardData.data.length > 0) {
-          for (const card of cardData.data) {
-            await fetch(`${import.meta.env.VITE_API_URL}/items/cardManagement/${card.id}`, {
-              method: 'DELETE',
-              headers: { Authorization: `Bearer ${token}` }
-            });
-          }
-        }
-      }
-    } catch (cardErr) {
-      console.warn('Error deleting linked RFID cards:', cardErr);
-    }
-
-    // Step 2: Delete linked userFingers
-    try {
-      const fingerRes = await fetch(`${import.meta.env.VITE_API_URL}/items/userFingers?filter[assignedTo][id][_eq]=${emp.id}&fields=id`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (fingerRes.ok) {
-        const fingerData = await fingerRes.json();
-        if (fingerData.data && fingerData.data.length > 0) {
-          for (const finger of fingerData.data) {
-            await fetch(`${import.meta.env.VITE_API_URL}/items/userFingers/${finger.id}`, {
-              method: 'DELETE',
-              headers: { Authorization: `Bearer ${token}` }
-            });
-          }
-        }
-      }
-    } catch (fingerErr) {
-      console.warn('Error deleting linked userFingers:', fingerErr);
-    }
-
-    // Step 3: Delete the personalModule record
-    const pmRes = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule/${emp.id}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` }
+    const activeToken = authService.getToken();
+    await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule/${employeeToDelete.value.id}`, {
+      method: "DELETE",
+      headers: { Authorization: `Bearer ${activeToken}` }
     });
-    if (!pmRes.ok && pmRes.status !== 204) {
-      throw new Error('Failed to delete employee record');
-    }
 
-    // Step 4: Delete the Directus user account if linked
-    if (emp.assignedUser?.id) {
-      await fetch(`${import.meta.env.VITE_API_URL}/users/${emp.assignedUser.id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
-      });
-    }
-
-    messageHandler.showSuccess('Employee and all linked RFID cards deleted successfully');
+    messageHandler.showSuccess("Employee deleted successfully");
     deleteDialog.value = false;
     employeeToDelete.value = null;
     fetchEmployeeData();
   } catch (err) {
-    console.error('Delete error:', err);
-    messageHandler.showError(err.message || 'Failed to delete employee');
+    console.error("Delete error:", err);
+    messageHandler.showError(err.message || "Failed to delete employee");
   } finally {
     deleting.value = false;
   }
 };
-
-const buildFilterParams = async () => {
-  const params = {};
-  if (isAdmin.value) {
-    params["filter[assignedUser][tenant][tenantId][_eq]"] = tenantId;
-  }
-  
-  if (search.value) {
-    const q = search.value.trim();
-    const activeToken = authService.getToken();
-
-    // Query cardManagement to search across assigned RFID card numbers
-    let matchedEmpIdsFromCards = [];
-    try {
-      const cardRes = await fetch(
-        `${import.meta.env.VITE_API_URL}/items/cardManagement?filter[rfidCard][_icontains]=${encodeURIComponent(q)}&fields=employeeId&limit=100`,
-        { headers: { Authorization: `Bearer ${activeToken}` } }
-      );
-      if (cardRes.ok) {
-        const cardData = await cardRes.json();
-        matchedEmpIdsFromCards = (cardData.data || [])
-          .map(c => (typeof c.employeeId === 'object' ? c.employeeId?.id : c.employeeId))
-          .filter(Boolean);
-      }
-    } catch (e) {
-      console.warn("RFID card search query failed:", e);
-    }
-
-    let idx = 0;
-    params[`filter[_or][${idx++}][employeeId][_icontains]`] = q;
-    params[`filter[_or][${idx++}][assignedUser][first_name][_icontains]`] = q;
-    params[`filter[_or][${idx++}][assignedUser][last_name][_icontains]`] = q;
-    params[`filter[_or][${idx++}][assignedUser][email][_icontains]`] = q;
-    params[`filter[_or][${idx++}][assignedUser][phone][_icontains]`] = q;
-
-    if (matchedEmpIdsFromCards.length > 0) {
-      params[`filter[_or][${idx++}][id][_in]`] = [...new Set(matchedEmpIdsFromCards)].join(',');
-    }
-  }
-
-  if (filters.branch) {
-    params["filter[branch][id][_eq]"] = filters.branch;
-  }
-  if (filters.department) {
-    params["filter[department][id][_eq]"] = filters.department;
-  }
-  return params;
-};
-
-const fetchEmployeeData = async () => {
-  const activeToken = authService.getToken();
-  if (!activeToken) return;
-
-  try {
-    loading.value = true;
-    const filterParams = await buildFilterParams();
-    
-    // First figure out total counts
-    const countParams = { "aggregate[count]": "id", ...filterParams };
-    const countQs = new URLSearchParams(countParams).toString();
-    const countRes = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule?${countQs}`, {
-      headers: { Authorization: `Bearer ${activeToken}` }
-    });
-    if (countRes.ok) {
-      const countData = await countRes.json();
-      totalItems.value = Number(countData?.data?.[0]?.count?.id) || 0;
-    }
-
-    // Now fetch actual paginated data
-    const queryParams = new URLSearchParams({
-      page: page.value,
-      limit: itemsPerPage.value,
-      ...filterParams
-    });
-    
-    // Add fields array manually since URLSearchParams doesn't handle array brackets exactly as Directus wants
-    const fields = [
-        "id", "employeeId", "status", "registeredFace",
-        "assignedUser.id", "assignedUser.first_name", "assignedUser.last_name", "assignedUser.role.name", 
-        "assignedUser.phone", "assignedUser.email",
-        "assignedUser.accesseasyRole.id", "assignedUser.accesseasyRole.roleName",
-        "department.id", "department.departmentName",
-        "branch.id", "assignedAccessLevel.id",
-        "accessOn", "face", "finger", "rfid", "QrAttendance", "GeoAttendance",
-        "assignedFaceEmbed.id"
-    ].map(f => `fields[]=${f}`).join('&');
-
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule?${queryParams.toString()}&${fields}`, {
-      headers: { Authorization: `Bearer ${activeToken}` }
-    });
-
-    if (res.ok) {
-      const data = await res.json();
-      items.value = data.data || [];
-      if (items.value.length > 0) {
-        await fetchBiometricAndCredentialStatus(items.value.map(item => item.id));
-      }
-    } else {
-      items.value = [];
-    }
-  } catch (error) {
-    console.error("Failed to fetch employees:", error);
-    items.value = [];
-  } finally {
-    loading.value = false;
-  }
-};
-
-// Biometrics and credentials status maps
-const userFingersMap = ref({});
-const rfidCardsMap = ref({});
-
-const fetchBiometricAndCredentialStatus = async (employeeIds) => {
-  if (!employeeIds || employeeIds.length === 0) return;
-  const idString = employeeIds.join(",");
-  
-  // Fetch fingerprints from userFingers
-  try {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/userFingers?filter[assignedTo][id][_in]=${idString}&fields=id,assignedTo.id`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    if (res.ok) {
-      const data = await res.json();
-      const map = {};
-      (data.data || []).forEach(f => {
-        const empId = f.assignedTo?.id;
-        if (empId) map[empId] = true;
-      });
-      userFingersMap.value = { ...userFingersMap.value, ...map };
-    }
-  } catch (err) {
-    console.error("Error fetching userFingers status:", err);
-  }
-
-  // Fetch RFID cards from cardManagement
-  try {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/cardManagement?filter[employeeId][_in]=${idString}&fields=id,rfidCard,type,employeeId`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    if (res.ok) {
-      const data = await res.json();
-      const map = {};
-      (data.data || []).forEach(c => {
-        const empId = typeof c.employeeId === 'object' ? c.employeeId?.id : c.employeeId;
-        if (empId && c.rfidCard) {
-          map[empId] = true;
-        }
-      });
-      rfidCardsMap.value = { ...rfidCardsMap.value, ...map };
-    }
-  } catch (err) {
-    console.error("Error fetching cardManagement status:", err);
-  }
-};
-
-const hasFinger = (id) => !!userFingersMap.value[id];
-const hasFace = (emp) => !!emp.assignedFaceEmbed?.id || (emp.registeredFace && emp.registeredFace.trim() !== "");
-const hasRfid = (id) => !!rfidCardsMap.value[id];
-const hasNfc = (emp) => !!emp.card_number;
-
-onMounted(() => {
-  fetchEmployeeData();
-});
 </script>
+
+<style scoped>
+.employee-directory-root {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", Inter, sans-serif;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+</style>
