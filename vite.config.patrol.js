@@ -15,7 +15,11 @@ export default defineConfig(({ mode }) => {
       VITE_API_URL: JSON.stringify(env.VITE_API_URL),
       'import.meta.env.VITE_APP_MODE': JSON.stringify('patrol')
     },
-    build: { outDir: path.resolve(__dirname, 'dist/patrol'), emptyOutDir: true },
+    build: { 
+      outDir: path.resolve(__dirname, 'dist/patrol'), 
+      emptyOutDir: true,
+      chunkSizeWarningLimit: 1000
+    },
     server: { port: 5176, host: "0.0.0.0", watch: { usePolling: true } }
   };
 });

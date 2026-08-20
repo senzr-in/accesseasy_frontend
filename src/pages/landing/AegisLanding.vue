@@ -922,7 +922,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
-import logoPatrol from '@/assets/images/logoPatrol.png';
+import logoPatrol from '@/assets/images/logoPatrol.webp';
 
 const router = useRouter();
 const rootRef = ref(null);
@@ -944,15 +944,6 @@ function onScroll() {
 let observer;
 onMounted(() => {
   window.addEventListener('scroll', onScroll, { passive: true });
-
-  // Inject Google Fonts
-  if (!document.getElementById('aegis-fonts')) {
-    const link = document.createElement('link');
-    link.id = 'aegis-fonts';
-    link.rel = 'stylesheet';
-    link.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap';
-    document.head.appendChild(link);
-  }
 
   // Intersection observer for reveal animations
   observer = new IntersectionObserver((entries) => {
