@@ -1,27 +1,26 @@
 <template>
-  <div class="flex flex-col md:flex-row h-full bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-slate-100 dark:border-slate-800">
+  <div class="flex flex-col md:flex-row h-full bg-white dark:bg-slate-900 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm">
     
-    <!-- LEFT PANEL: Patrol List & Filters (45% width) -->
-    <div class="w-full md:w-[45%] flex flex-col border-r border-slate-100 dark:border-slate-800 h-full overflow-hidden">
-      <!-- Title & Filters Header -->
-      <div class="shrink-0 px-5 py-4 bg-slate-50 dark:bg-slate-800/20 border-b border-slate-100 dark:border-slate-800 space-y-3">
+    <!-- LEFT PANEL: Patrol Explorer & Queue (42% width) -->
+    <div class="w-full md:w-[42%] lg:w-[38%] flex flex-col border-r border-slate-200 dark:border-slate-800 h-full overflow-hidden bg-slate-50/50 dark:bg-slate-900/50">
+      
+      <!-- Toolbar Header -->
+      <div class="shrink-0 p-3.5 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 space-y-2.5">
+        <!-- Title & Count -->
         <div class="flex items-center justify-between">
-          <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100 uppercase tracking-wider flex items-center gap-2">
-            Patrol Logs
-          </h3>
           <div class="flex items-center gap-2">
+            <h3 class="text-xs font-black text-slate-900 dark:text-slate-100 uppercase tracking-wider">
+              Patrol Queue
+            </h3>
+            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+              {{ filteredPatrols.length }}
+            </span>
+          </div>
+
+          <!-- Zone Selector -->
+          <div class="flex items-center gap-1.5">
             <select 
-              class="text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 focus:outline-none focus:border-indigo-500 font-semibold text-slate-700 dark:text-slate-300"
-              :value="statusFilter"
-              @change="$emit('update:statusFilter', $event.target.value)"
-            >
-              <option value="all">All Status</option>
-              <option value="running">Running</option>
-              <option value="completed">Completed</option>
-              <option value="missed">Missed</option>
-            </select>
-            <select 
-              class="text-xs bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 focus:outline-none focus:border-indigo-500 font-semibold text-slate-700 dark:text-slate-300"
+              class="text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 font-semibold text-slate-700 dark:text-slate-300 cursor-pointer"
               :value="selectedZoneId || ''"
               @change="$emit('update:selectedZoneId', $event.target.value || null)"
             >
@@ -30,246 +29,325 @@
             </select>
           </div>
         </div>
-      </div>
 
-      <!-- Column Headers -->
-      <div class="grid grid-cols-[5fr_3fr_100px] gap-4 px-5 py-2 bg-slate-50/50 dark:bg-slate-800/30 border-b border-slate-100 dark:border-slate-800 shrink-0">
-        <div class="flex items-center gap-3">
-          <span class="w-9"></span> <!-- Spacer for avatar -->
-          <span class="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Patrol Name</span>
+        <!-- Search Bar -->
+        <div class="relative">
+          <Search class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Search patrol routes, guards..."
+            class="w-full text-xs font-medium pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+          />
         </div>
-        <span class="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest flex items-center">Guard Name</span>
-        <span class="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest text-right flex items-center justify-end">Status & Time</span>
       </div>
 
       <!-- Patrol List Body -->
-      <div class="flex-1 overflow-y-auto custom-scrollbar flex flex-col gap-1 p-2">
+      <div class="flex-1 overflow-y-auto custom-scrollbar p-2.5 space-y-2">
         <div
           v-for="patrol in filteredPatrols"
           :key="patrol.id"
-          class="py-1.5 px-3 rounded-xl border grid grid-cols-[5fr_3fr_100px] items-center gap-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-all border-l-4"
+          class="p-3 rounded-xl border transition-all cursor-pointer relative group"
           :class="[
             selectedPatrolId === patrol.id 
-              ? 'bg-indigo-50/20 dark:bg-indigo-900/10 border-l-indigo-600 border-t-transparent border-r-transparent border-b-transparent' 
-              : 'border-slate-100 dark:border-slate-800 border-l-transparent',
-            patrol.missedCheckpoints > 0 ? 'bg-rose-50/10' : ''
+              ? 'bg-white dark:bg-slate-800 border-indigo-500 shadow-md ring-1 ring-indigo-500/30' 
+              : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-sm'
           ]"
           @click="selectPatrol(patrol)"
         >
-          <!-- 1. Patrol Name Column -->
-          <div class="flex items-center gap-3 min-w-0">
-            <!-- Patrol Avatar -->
-            <div class="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-black shrink-0 border"
-                 :class="patrol.status === 'active' 
-                   ? 'bg-indigo-50 dark:bg-indigo-950 border-indigo-200 text-indigo-700 dark:text-indigo-400' 
-                   : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-750 text-slate-500 dark:text-slate-400'">
-              {{ getGroupName(patrol).charAt(0).toUpperCase() }}
-            </div>
-            
-            <div class="min-w-0">
-              <div class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate flex items-center gap-1.5">
-                {{ getGroupName(patrol) }}
+          <!-- Top Row: Route Name & Status -->
+          <div class="flex items-center justify-between gap-2 mb-1.5">
+            <div class="flex items-center gap-2 min-w-0">
+              <div class="w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black shrink-0 border"
+                   :class="patrol.status === 'active' 
+                     ? 'bg-indigo-600 text-white border-indigo-500 shadow-sm shadow-indigo-600/30' 
+                     : patrol.status === 'completed'
+                     ? 'bg-emerald-600 text-white border-emerald-500'
+                     : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700'">
+                {{ getGroupName(patrol).charAt(0).toUpperCase() }}
               </div>
-              
-              <!-- Progress Bar -->
-              <div class="flex items-center gap-1.5 mt-0.5">
-                <div class="w-16 bg-slate-100 dark:bg-slate-800 rounded-full h-1 shrink-0">
-                  <div
-                    class="h-1 rounded-full"
-                    :class="patrol.missedCheckpoints > 0 ? 'bg-rose-500' : patrol.status === 'active' ? 'bg-indigo-500' : 'bg-emerald-500'"
-                    :style="{ width: getProgressPct(patrol.id) + '%' }"
-                  />
-                </div>
-                <span class="text-[9px] font-bold text-slate-500 leading-none">
-                  {{ getScanned(patrol.id) }}/{{ getCpCount(patrol.id) }} CP
-                </span>
+              <div class="min-w-0">
+                <h4 class="text-xs font-bold text-slate-900 dark:text-white truncate">
+                  {{ getGroupName(patrol) }}
+                </h4>
+                <p v-if="patrol.zoneName" class="text-[10px] text-slate-400 truncate">
+                  {{ patrol.zoneName }}
+                </p>
               </div>
             </div>
-          </div>
 
-          <!-- 2. Guard Name Column -->
-          <div class="flex items-center gap-2 min-w-0">
-             <div class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black shrink-0 border"
-                  :class="patrol.status === 'active' 
-                    ? 'bg-indigo-50 dark:bg-indigo-950 border-indigo-200 text-indigo-700 dark:text-indigo-400' 
-                    : 'bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-750 text-slate-500'">
-               {{ patrol.guardName?.charAt(0) || '?' }}
-             </div>
-             <div class="text-xs text-slate-600 dark:text-slate-400 truncate font-semibold">
-               {{ patrol.guardName || 'Unassigned Guard' }}
-             </div>
-          </div>
-
-          <!-- 3. Status & Time Badge -->
-          <div class="text-right shrink-0">
+            <!-- Status Pill -->
             <span
-              class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full inline-block"
+              class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md shrink-0"
               :class="{
-                'bg-emerald-100 text-emerald-700': patrol.status === 'active' && !patrol.missedCheckpoints,
-                'bg-rose-100 text-rose-700': patrol.missedCheckpoints > 0,
-                'bg-amber-100 text-amber-700': patrol.status === 'delayed',
-                'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300': patrol.status === 'completed' && !patrol.missedCheckpoints,
-                'bg-indigo-50 text-indigo-600': patrol.status === 'scheduled'
+                'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400': patrol.status === 'active' && !patrol.missedCheckpoints,
+                'bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-500/10 dark:text-rose-400': patrol.missedCheckpoints > 0,
+                'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-400': patrol.status === 'delayed',
+                'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300': patrol.status === 'completed',
+                'bg-indigo-50 text-indigo-700 border border-indigo-200 dark:bg-indigo-500/10 dark:text-indigo-400': patrol.status === 'scheduled'
               }"
             >
               {{ getStatusLabel(patrol) }}
             </span>
-            <p class="text-[10px] font-mono text-slate-455 mt-0.5 leading-none">
-              {{ getDisplayTime(patrol) }}
-            </p>
+          </div>
+
+          <!-- Middle Row: Guard & Time -->
+          <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 my-2">
+            <div class="flex items-center gap-1.5 min-w-0">
+              <div class="w-5 h-5 rounded-full bg-slate-100 dark:bg-slate-800 text-[10px] font-bold flex items-center justify-center text-slate-600 dark:text-slate-300 shrink-0">
+                {{ patrol.guardName ? patrol.guardName.charAt(0).toUpperCase() : '?' }}
+              </div>
+              <span class="truncate font-semibold text-slate-700 dark:text-slate-300 text-[11px]">
+                {{ patrol.guardName || 'Unassigned' }}
+              </span>
+            </div>
+
+            <div class="flex items-center gap-1 text-[11px] font-mono text-slate-500 dark:text-slate-400 shrink-0">
+              <Clock class="w-3 h-3 text-slate-400" />
+              <span>{{ getDisplayTime(patrol) }}</span>
+            </div>
+          </div>
+
+          <!-- Bottom Row: Progress Bar -->
+          <div class="flex items-center gap-2 pt-1 border-t border-slate-100 dark:border-slate-800/80">
+            <div class="flex-1 bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+              <div
+                class="h-full rounded-full transition-all duration-300"
+                :class="patrol.missedCheckpoints > 0 ? 'bg-rose-500' : patrol.status === 'active' ? 'bg-indigo-600' : 'bg-emerald-500'"
+                :style="{ width: getProgressPct(patrol.id) + '%' }"
+              />
+            </div>
+            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 shrink-0">
+              {{ getScanned(patrol.id) }}/{{ getCpCount(patrol.id) }} CP
+            </span>
           </div>
         </div>
 
+        <!-- Empty Filter State -->
         <div
           v-if="filteredPatrols.length === 0"
-          class="flex flex-col items-center justify-center py-20 text-center text-slate-400"
+          class="flex flex-col items-center justify-center py-16 text-center text-slate-400 p-4"
         >
-          <Shield class="w-10 h-10 text-slate-200 dark:text-slate-800 mb-3" />
-          <p class="text-xs font-bold text-slate-500">No matching patrols found.</p>
+          <div class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 flex items-center justify-center mb-3">
+            <Shield class="w-6 h-6" />
+          </div>
+          <p class="text-xs font-bold text-slate-700 dark:text-slate-300">No matching patrols</p>
+          <p class="text-[11px] text-slate-400 mt-1 max-w-xs">Try selecting a different filter status or clearing the search query.</p>
         </div>
       </div>
     </div>
 
-    <!-- RIGHT PANEL: Live Monitor Details (55% width) -->
-    <div class="flex-1 flex flex-col h-full overflow-hidden bg-slate-50/30 dark:bg-slate-900/10">
+    <!-- RIGHT PANEL: Live Command Center / Monitor Details (58% width) -->
+    <div class="flex-1 flex flex-col h-full overflow-hidden bg-white dark:bg-slate-900">
       
-      <!-- Empty State -->
+      <!-- Empty State when no patrol is selected -->
       <div
         v-if="!selectedPatrolDetails"
-        class="flex-1 flex flex-col items-center justify-center text-center p-6"
+        class="flex-1 flex flex-col items-center justify-center text-center p-8 bg-slate-50/50 dark:bg-slate-900/20"
       >
-        <Activity class="w-12 h-12 text-slate-300 dark:text-slate-750 mb-3 animate-pulse" />
-        <h4 class="text-xs font-black uppercase tracking-wider text-slate-700 dark:text-slate-300">
-          Monitor Details
+        <div class="w-16 h-16 rounded-3xl bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-100 dark:border-indigo-500/20 flex items-center justify-center text-indigo-600 mb-4 shadow-sm">
+          <Activity class="w-8 h-8 animate-pulse" />
+        </div>
+        <h4 class="text-sm font-bold text-slate-900 dark:text-white">
+          Patrol Command Center
         </h4>
-        <p class="text-xs text-slate-450 mt-1 max-w-xs leading-relaxed">
-          Click any active or completed patrol round on the left to monitor live guard locations, routes, and timelines.
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1.5 max-w-sm leading-relaxed">
+          Select a patrol round from the queue to inspect live checkpoint milestones, guard vitals, and geographical route replay.
         </p>
+        <button
+          class="mt-4 btn-primary text-xs flex items-center gap-1.5 h-9 px-4 cursor-pointer"
+          @click="$router.push('/dashboard/patrols/create')"
+        >
+          <Plus class="w-3.5 h-3.5" />
+          <span>+ Create New Patrol</span>
+        </button>
       </div>
 
-      <!-- Loaded Details Dashboard -->
+      <!-- Loaded Details View -->
       <div v-else class="flex-1 flex flex-col overflow-hidden min-h-0">
         
-        <!-- Details Header -->
-        <div class="p-5 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-between items-center shrink-0">
+        <!-- Hero Header -->
+        <div class="p-4 bg-slate-50/80 dark:bg-slate-800/40 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
           <div class="flex items-center gap-3 min-w-0">
-            <div class="w-10 h-10 rounded-xl bg-indigo-500 text-white flex items-center justify-center text-base font-black shrink-0 border-4 border-indigo-100">
-              {{ activePatrol?.guardName?.charAt(0).toUpperCase() }}
+            <div class="w-11 h-11 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-base font-black shrink-0 shadow-md shadow-indigo-600/20">
+              {{ activePatrol?.guardName?.charAt(0).toUpperCase() || 'P' }}
             </div>
             <div>
-              <h4 class="text-sm font-bold text-slate-900 dark:text-slate-100 leading-none">
-                {{ activePatrol?.guardName }}
-              </h4>
-              <p class="text-[10px] font-semibold text-slate-455 mt-1">
-                {{ activePatrol ? getGroupName(activePatrol) : '' }}
+              <div class="flex items-center gap-2">
+                <h3 class="text-sm font-black text-slate-900 dark:text-white truncate">
+                  {{ activePatrol ? getGroupName(activePatrol) : 'Patrol Route' }}
+                </h3>
+                <span
+                  class="text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-md"
+                  :class="{
+                    'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300': activePatrol?.status === 'active',
+                    'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300': activePatrol?.status === 'completed',
+                    'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300': activePatrol?.status === 'scheduled',
+                    'bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300': activePatrol?.status === 'delayed' || activePatrol?.missedCheckpoints > 0
+                  }"
+                >
+                  {{ activePatrol ? getStatusLabel(activePatrol) : '' }}
+                </span>
+              </div>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-2">
+                <span>Guard: <strong>{{ activePatrol?.guardName || 'Unassigned' }}</strong></span>
+                <span v-if="activePatrol?.zoneName">· Zone: {{ activePatrol.zoneName }}</span>
               </p>
             </div>
           </div>
           
-          <div class="flex gap-2">
+          <div class="flex items-center gap-2">
             <button
-              class="w-8 h-8 rounded-full border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shadow-sm cursor-pointer"
+              class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
               title="Edit Patrol"
               @click="$emit('editPatrol', activePatrol)"
             >
-              <Pencil class="w-3.5 h-3.5" />
+              <Pencil class="w-3.5 h-3.5 text-slate-400" />
+              <span>Edit</span>
             </button>
             <button
-              class="w-8 h-8 rounded-full border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shadow-sm cursor-pointer"
+              class="h-8 px-3 rounded-lg border border-rose-200 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-100 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
               title="Delete Patrol"
               @click="$emit('deletePatrol', activePatrol)"
             >
-              <Trash2 class="w-3.5 h-3.5 text-rose-500" />
+              <Trash2 class="w-3.5 h-3.5" />
+              <span>Delete</span>
             </button>
           </div>
         </div>
 
-        <!-- Split Route Checkpoints and Location Map -->
-        <div class="flex-1 flex flex-col min-h-0 overflow-y-auto custom-scrollbar">
+        <!-- Scrollable Content: Vitals, Timeline, Map -->
+        <div class="flex-1 min-h-0 flex flex-col overflow-y-auto custom-scrollbar">
           
-          <!-- Checkpoints vertical checklist -->
-          <div class="p-5 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
-            <div class="flex items-center justify-between mb-4 mt-1 px-1">
-              <p class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">
-                Checkpoint Timeline & Compliance
+          <!-- Vitals Strip -->
+          <div class="grid grid-cols-3 gap-3 p-4 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
+            <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800">
+              <span class="text-[10px] font-bold uppercase text-slate-400">Completion</span>
+              <p class="text-base font-black text-slate-900 dark:text-white mt-0.5">
+                {{ activePatrol ? getProgressPct(activePatrol.id) : 0 }}%
               </p>
             </div>
-            
-            <!-- Column Headers -->
-            <div class="grid grid-cols-[2fr_1.5fr_1.5fr_1fr] gap-4 px-3 py-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg mb-3 mr-2">
-              <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-7">Checkpoint</span>
-              <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Completed Time</span>
-              <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Delayed Time</span>
-              <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">Status</span>
+            <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800">
+              <span class="text-[10px] font-bold uppercase text-slate-400">Checkpoints</span>
+              <p class="text-base font-black text-indigo-600 dark:text-indigo-400 mt-0.5">
+                {{ activePatrol ? getScanned(activePatrol.id) : 0 }} / {{ activePatrol ? getCpCount(activePatrol.id) : 0 }}
+              </p>
+            </div>
+            <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800">
+              <span class="text-[10px] font-bold uppercase text-slate-400">Scheduled Time</span>
+              <p class="text-base font-black text-slate-700 dark:text-slate-300 mt-0.5">
+                {{ activePatrol ? getDisplayTime(activePatrol) : '—' }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Checkpoints Timeline Section -->
+          <div class="p-4 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
+            <div class="flex items-center justify-between mb-3">
+              <h4 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
+                <MapPin class="w-3.5 h-3.5 text-indigo-500" />
+                Checkpoint Milestones
+              </h4>
+              <span class="text-[10px] font-bold text-slate-400">
+                {{ selectedPatrolDetails.checkpoints.length }} total
+              </span>
             </div>
             
-            <div class="space-y-3 relative before:absolute before:left-3 before:top-2 before:bottom-2 before:w-[2px] before:bg-slate-100 dark:before:bg-slate-800">
+            <!-- Checkpoints Table Header -->
+            <div class="grid grid-cols-[2.5fr_1.5fr_1.5fr_1fr] gap-3 px-3 py-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg text-[10px] font-black text-slate-400 uppercase tracking-wider mb-2">
+              <span>Checkpoint</span>
+              <span class="text-center">Scan Time</span>
+              <span class="text-center">Delay Status</span>
+              <span class="text-right">State</span>
+            </div>
+            
+            <!-- Checkpoints Rows -->
+            <div class="space-y-1.5">
               <div
                 v-for="(cp, idx) in selectedPatrolDetails.checkpoints"
-                :key="cp.checkpoint_id"
-                class="flex items-center gap-3 relative z-10 bg-white dark:bg-slate-900 pl-1 pr-2"
+                :key="cp.checkpoint_id || idx"
+                class="grid grid-cols-[2.5fr_1.5fr_1.5fr_1fr] gap-3 items-center p-2.5 rounded-xl border border-slate-100 dark:border-slate-800/80 hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors"
               >
-                <!-- Indicator node -->
-                <div class="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 border"
-                     :class="{
-                       'bg-emerald-500 border-emerald-500 text-white': ['scanned', 'completed'].includes(cp.status),
-                       'bg-rose-500 border-rose-500 text-white': cp.status === 'missed',
-                       'bg-amber-500 border-amber-500 text-white': cp.status === 'delayed',
-                       'bg-indigo-50 border-indigo-200 text-indigo-650 animate-pulse': cp.status === 'pending' && idx === getNextPendingIdx(activePatrol?.id),
-                       'bg-slate-50 dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-slate-700': cp.status === 'pending' && idx !== getNextPendingIdx(activePatrol?.id)
-                     }">
-                  <CheckCheck v-if="['scanned', 'completed'].includes(cp.status)" class="w-3 h-3" />
-                  <X v-else-if="cp.status === 'missed'" class="w-3 h-3" />
-                  <span v-else>{{ idx + 1 }}</span>
+                <!-- Checkpoint Name & Node -->
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <div 
+                    class="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 border"
+                    :class="{
+                      'bg-emerald-500 border-emerald-500 text-white': ['scanned', 'completed'].includes(cp.status),
+                      'bg-rose-500 border-rose-500 text-white': cp.status === 'missed',
+                      'bg-amber-500 border-amber-500 text-white': cp.status === 'delayed',
+                      'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-300 text-indigo-600': cp.status === 'pending'
+                    }"
+                  >
+                    <CheckCheck v-if="['scanned', 'completed'].includes(cp.status)" class="w-3.5 h-3.5" />
+                    <X v-else-if="cp.status === 'missed'" class="w-3.5 h-3.5" />
+                    <span v-else>{{ idx + 1 }}</span>
+                  </div>
+                  <div class="min-w-0">
+                    <p class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">
+                      {{ cp.name }}
+                    </p>
+                    <span v-if="cp.checkpoint_id" class="text-[9px] font-mono text-slate-400">
+                      {{ cp.checkpoint_id }}
+                    </span>
+                  </div>
                 </div>
                 
-                <div class="flex-1 min-w-0 grid grid-cols-[2fr_1.5fr_1.5fr_1fr] gap-4 items-center">
-                  <!-- Checkpoint Name -->
-                  <div>
-                    <span class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate block">
-                      {{ cp.name }}
-                    </span>
-                  </div>
-                  
-                  <!-- Completed Time -->
-                  <div class="text-center">
-                    <span class="text-[10px] font-mono" :class="cp.scanTime ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400 dark:text-slate-600'">
-                      {{ cp.scanTime || '—' }}
-                    </span>
-                  </div>
+                <!-- Scan Time -->
+                <div class="text-center text-xs font-mono font-semibold" :class="cp.scanTime ? 'text-slate-800 dark:text-slate-200' : 'text-slate-400'">
+                  {{ cp.scanTime || '—' }}
+                </div>
 
-                  <!-- Delayed Time -->
-                  <div class="text-center">
-                    <span class="text-[10px] font-mono" :class="cp.delayedTime ? 'text-amber-600 dark:text-amber-500' : 'text-slate-400 dark:text-slate-600'">
-                      {{ cp.delayedTime || '—' }}
-                    </span>
-                  </div>
+                <!-- Delay -->
+                <div class="text-center text-xs font-medium" :class="cp.delayedTime ? 'text-amber-600 dark:text-amber-400 font-bold' : 'text-slate-400'">
+                  {{ cp.delayedTime || 'On Schedule' }}
+                </div>
 
-                  <!-- Status -->
-                  <div class="text-right">
-                    <span class="text-[9px] font-bold inline-block px-1.5 py-0.5 rounded uppercase tracking-wider"
-                          :class="['scanned', 'completed'].includes(cp.status) ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : cp.status === 'missed' ? 'bg-rose-50 text-rose-600 border border-rose-100' : cp.status === 'delayed' ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'text-slate-400'">
-                      {{ cp.status === 'missed' ? 'Missed' : ['scanned', 'completed'].includes(cp.status) ? 'Completed' : cp.status === 'delayed' ? 'Delayed' : 'Pending' }}
-                    </span>
-                  </div>
+                <!-- Status Pill -->
+                <div class="text-right">
+                  <span 
+                    class="text-[9px] font-bold px-2 py-0.5 rounded-full uppercase"
+                    :class="{
+                      'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400': ['scanned', 'completed'].includes(cp.status),
+                      'bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400': cp.status === 'missed',
+                      'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400': cp.status === 'delayed',
+                      'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400': cp.status === 'pending'
+                    }"
+                  >
+                    {{ cp.status === 'missed' ? 'Missed' : ['scanned', 'completed'].includes(cp.status) ? 'Scanned' : cp.status === 'delayed' ? 'Delayed' : 'Pending' }}
+                  </span>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Embedded Location Map Replay (Vitals & path visualization) -->
-          <div class="flex-1 min-h-[350px] relative border-t border-slate-100 dark:border-slate-800 bg-slate-900">
-            <div v-if="loadingMap" class="absolute inset-0 flex items-center justify-center bg-slate-900/60 z-20">
-              <Loader2 class="w-8 h-8 animate-spin text-white" />
+          <!-- Route Map Replay Preview -->
+          <div class="p-4 bg-slate-50 dark:bg-slate-900/50 flex-1 min-h-[300px] flex flex-col">
+            <div class="flex items-center justify-between mb-3">
+              <h4 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
+                <Navigation class="w-3.5 h-3.5 text-indigo-500" />
+                Live Route & Geofence Preview
+              </h4>
+              <button
+                class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                @click="$emit('openMap', selectedPatrolDetails)"
+              >
+                Expand Full Map &rarr;
+              </button>
             </div>
             
-            <!-- Render the actual map component -->
-            <PatrolMapReplay
-              :patrol-details="selectedPatrolDetails"
-              hide-timeline
-              hide-controls
-              class="w-full h-full"
-            />
+            <div class="flex-1 min-h-[260px] rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 relative bg-slate-950">
+              <div v-if="loadingMap" class="absolute inset-0 flex items-center justify-center bg-slate-950/60 z-20">
+                <Loader2 class="w-7 h-7 animate-spin text-indigo-500" />
+              </div>
+              
+              <PatrolMapReplay
+                :patrol-details="selectedPatrolDetails"
+                hide-timeline
+                hide-controls
+                class="w-full h-full"
+              />
+            </div>
           </div>
 
         </div>
@@ -284,7 +362,10 @@
 <script setup>
 import { computed, ref, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import { Shield, MapPin, Navigation, ChevronDown, CheckCheck, X, AlertTriangle, Pencil, Trash2, Activity, Loader2 } from 'lucide-vue-next';
+import { 
+  Shield, MapPin, Navigation, CheckCheck, X, AlertTriangle, 
+  Pencil, Trash2, Activity, Loader2, Search, Clock, Plus
+} from 'lucide-vue-next';
 import { patrolService } from '@/services/patrolService';
 import { zoneService } from '@/services/zoneService';
 import { authService } from '@/services/authService';
@@ -302,8 +383,8 @@ const props = defineProps({
 const emit = defineEmits(['openMap', 'editPatrol', 'deletePatrol', 'update:selectedZoneId', 'update:statusFilter']);
 
 const route = useRoute();
-const showAllLive = ref(true);
 const zones = ref([]);
+const searchQuery = ref('');
 
 const selectedPatrolId = ref(null);
 const selectedPatrolDetails = ref(null);
@@ -326,28 +407,11 @@ const loadZones = async () => {
   } catch (e) { console.error(e); }
 };
 
-// Filter patrols (zone and status filters are handled by parent)
-const allPatrols = computed(() => {
-  return props.patrols;
-});
-
-// Auto-select patrol if passed in query
-watch(() => allPatrols.value, (newVals) => {
-  if (route.query.patrolId && !selectedPatrolId.value && newVals.length > 0) {
-    const pId = route.query.patrolId;
-    // Check if the specific patrol exists in the raw list
-    const p = newVals.find(x => String(x.id) === String(pId));
-    if (p) {
-      selectPatrol(p);
-    }
-  }
-}, { immediate: true, deep: true });
-
 // Consolidate repeating patrols into single rows for the UI
 const groupedPatrols = computed(() => {
   const groups = new Map();
 
-  allPatrols.value.forEach(p => {
+  props.patrols.forEach(p => {
     const gId = typeof p.groupId === 'object' && p.groupId ? p.groupId.id : (p.groupId || 'nogroup');
     const groupKey = `${p.zoneId}-${gId}-${p.date || ''}`;
     if (!groups.has(groupKey)) {
@@ -396,17 +460,40 @@ const groupedPatrols = computed(() => {
   return consolidated;
 });
 
-const runningPatrols = computed(() => groupedPatrols.value.filter(p => p.status === 'active'));
-
 const filteredPatrols = computed(() => {
-  const sorted = [...groupedPatrols.value].sort((a, b) => {
+  let list = [...groupedPatrols.value];
+  
+  // Search query filter
+  if (searchQuery.value.trim()) {
+    const q = searchQuery.value.toLowerCase();
+    list = list.filter(p => {
+      const name = getGroupName(p).toLowerCase();
+      const guard = (p.guardName || '').toLowerCase();
+      const zone = (p.zoneName || '').toLowerCase();
+      return name.includes(q) || guard.includes(q) || zone.includes(q);
+    });
+  }
+
+  return list.sort((a, b) => {
     const order = { active: 0, delayed: 1, scheduled: 2, completed: 3, missed: 4 };
     return (order[a.status] ?? 5) - (order[b.status] ?? 5);
   });
-  return sorted;
 });
 
+// Auto-select first patrol whenever patrols change or load
+watch(() => filteredPatrols.value, (newPatrols) => {
+  if (newPatrols && newPatrols.length > 0) {
+    if (!selectedPatrolId.value || !newPatrols.some(p => p.id === selectedPatrolId.value)) {
+      selectPatrol(newPatrols[0]);
+    }
+  } else {
+    selectedPatrolId.value = null;
+    selectedPatrolDetails.value = null;
+  }
+}, { immediate: true, deep: true });
+
 const selectPatrol = async (patrol) => {
+  if (!patrol) return;
   selectedPatrolId.value = patrol.id;
   loadingMap.value = true;
   try {
@@ -430,14 +517,14 @@ const selectPatrol = async (patrol) => {
            if (scanDate && !isNaN(scanDate)) {
              let diffMs = scanDate - pDate;
              let diffMins = Math.floor(diffMs / 60000);
-             delayText = diffMins > 0 ? `${diffMins} min` : 'On Time';
+             delayText = diffMins > 0 ? `${diffMins} min delay` : 'On Time';
            }
         } else if (c.status === 'missed' || c.status === 'pending') {
            let now = new Date();
            let diffMs = now - pDate;
            let diffMins = Math.floor(diffMs / 60000);
            if (diffMins > 0) {
-             delayText = `${diffMins} min`;
+             delayText = `${diffMins} min overdue`;
            }
         }
       }
@@ -458,9 +545,9 @@ const selectPatrol = async (patrol) => {
     });
 
     const realTrackingPoints = await patrolService.getTrackingPoints(patrol.id);
-    const generatedTracking = [...realTrackingPoints];
+    const generatedTracking = [...(realTrackingPoints || [])];
 
-    // INJECT LIVE GUARD LOCATION FROM USERS TABLE
+    // Fetch live guard coordinates if active
     if (patrol.status === 'active' || patrol.status === 'delayed' || patrol.status === 'scheduled') {
       try {
         const possibleGuardId = patrol.guardId || patrol.assigned_guard || patrol.user_created || (typeof patrol.guard === 'object' ? patrol.guard.id : patrol.guard);
@@ -475,7 +562,6 @@ const selectPatrol = async (patrol) => {
                  date_created: new Date().toISOString(),
                  isLive: true
                });
-               // Cache onto patrol object for map fallback center
                patrol.currentLat = parseFloat(user.currentLat);
                patrol.currentLng = parseFloat(user.currentLng);
              }
@@ -519,10 +605,6 @@ function getProgressPct(patrolId) {
   const total = getCpCount(patrolId);
   return total ? Math.round(getScanned(patrolId) / total * 100) : 0;
 }
-function getNextPendingIdx(patrolId) {
-  const cps = getCheckpoints(patrolId);
-  return cps.findIndex(c => c.status === 'pending');
-}
 function getStatusLabel(patrol) {
   if (patrol.missedCheckpoints > 0) return 'Missed';
   if (patrol.status === 'active') return 'Running';
@@ -547,7 +629,6 @@ function getDisplayTime(patrol) {
     dateObj = new Date(`${patrol.date}T${timeStr}`);
   }
 
-  // If we have a valid date and it's not today, append the short date
   if (dateObj && !isNaN(dateObj.getTime())) {
     const today = new Date();
     if (dateObj.toDateString() !== today.toDateString()) {
@@ -567,7 +648,7 @@ function getGroupName(patrol) {
     const group = props.checkpointGroups.find(g => g.id === gId);
     if (group && group.name) return group.name;
   }
-  return 'Standard Group';
+  return 'Standard Patrol';
 }
 
 onMounted(() => {

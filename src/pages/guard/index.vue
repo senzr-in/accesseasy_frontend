@@ -1,29 +1,27 @@
 <template>
-  <div class="h-full flex flex-col gap-3 overflow-hidden animate-in pb-6 bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 rounded-2xl px-4 pt-1 relative">
-    <!-- Header Teleport -->
-    <Teleport v-if="isMounted" to="#header-title-slot">
-      <div class="flex items-center justify-between w-full">
-        <div class="flex items-center gap-3">
-          <div>
-            <h1 class="text-lg font-bold text-slate-900 dark:text-slate-100 leading-tight">
-              Guard Management
-            </h1>
-            <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
-              Manage security personnel
-            </p>
-          </div>
-        </div>
-        
-        <div class="flex items-center">
-          <button
-            class="btn-primary text-xs flex items-center gap-1.5 h-9"
-            @click="openAddDialog"
-          >
-            <UserPlus class="w-4 h-4" /> Add Guard
-          </button>
+  <div class="h-full flex flex-col gap-3 overflow-hidden animate-in pb-6 bg-slate-50 dark:bg-slate-900/50 text-slate-900 dark:text-slate-100 rounded-2xl px-4 pt-3 relative">
+    <!-- Header -->
+    <div class="flex items-center justify-between w-full shrink-0">
+      <div class="flex items-center gap-3">
+        <div>
+          <h1 class="text-lg font-bold text-slate-900 dark:text-slate-100 leading-tight">
+            Guard Management
+          </h1>
+          <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+            Manage security personnel
+          </p>
         </div>
       </div>
-    </Teleport>
+      
+      <div class="flex items-center">
+        <button
+          class="btn-primary text-xs flex items-center gap-1.5 h-9"
+          @click="openAddDialog"
+        >
+          <UserPlus class="w-4 h-4" /> Add Guard
+        </button>
+      </div>
+    </div>
 
     <!-- Loading -->
     <div

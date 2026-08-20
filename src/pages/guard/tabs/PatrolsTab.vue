@@ -1,105 +1,48 @@
 <template>
   <div class="h-full flex flex-col gap-0 overflow-hidden animate-in">
-    <!-- Header Teleport -->
-    <Teleport v-if="isMounted" to="#header-title-slot">
-      <div class="flex items-center justify-between w-full">
-        <div class="flex items-center gap-3">
-          <div>
-            <h1 class="text-lg font-bold text-slate-900 dark:text-slate-100 leading-tight">
-              Patrol Management
-            </h1>
-            <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
-              Real-time overview of all patrol activities
-            </p>
-          </div>
-        </div>
-        
-        <div class="flex items-center gap-2">
-          <!-- Action buttons moved to KPI strip line -->
-        </div>
-      </div>
-    </Teleport>
-
-    <!-- Action buttons moved to KPI strip -->
-    <!-- SOS Alert Banner -->
-    <div
-      v-if="activeAlerts.length"
-      class="mb-3 shrink-0 bg-red-600 rounded-xl p-3 flex items-center justify-between shadow-lg shadow-red-600/20 animate-pulse border border-red-500"
-    >
+    <!-- Header with quick actions -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 shrink-0">
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 bg-white dark:bg-slate-900 rounded-lg flex items-center justify-center">
-          <AlertTriangle class="w-6 h-6 text-red-600" />
+        <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-600/20 shrink-0">
+          <ShieldCheck class="w-5 h-5" />
         </div>
         <div>
-          <h2 class="text-white font-black uppercase tracking-widest">
-            Emergency Alert Detected
-          </h2>
-          <p class="text-red-100 text-sm font-semibold">
-            Guard {{ activeAlerts[0].guard_name || 'Unknown' }} triggered an SOS in Zone: {{ activeAlerts[0].zone_name || 'Unknown' }}
+          <div class="flex items-center gap-2">
+            <h1 class="text-lg font-black text-slate-900 dark:text-slate-100 leading-tight">
+              Patrol Operations
+            </h1>
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              Live
+            </span>
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Real-time monitoring, route compliance, and checkpoint verification
           </p>
         </div>
       </div>
-      <button
-        class="bg-white dark:bg-slate-900 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-slate-800 px-4 py-2 rounded-lg text-sm font-bold transition-colors shadow-sm"
-        @click="dismissAlert(activeAlerts[0].id)"
-      >
-        Dismiss
-      </button>
-    </div>
 
-    <!-- KPI Strip and Action Buttons -->
-    <div class="flex flex-nowrap items-center gap-2 shrink-0 mb-3 overflow-x-auto custom-scrollbar pb-1">
-      <!-- Total -->
-      <div class="flex-1 min-w-[60px] ae-card py-1.5 px-2.5 flex items-center justify-center gap-1.5 border-l-4 border-l-slate-300 cursor-pointer hover:opacity-80 transition-opacity" @click="setFilter('all')">
-        <div class="min-w-0 text-center">
-          <p class="text-base font-bold text-slate-800 dark:text-slate-200 leading-none">{{ statistics.total }}</p>
-          <p class="text-[8px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-0.5 truncate">Total</p>
-        </div>
-      </div>
-      <!-- Running -->
-      <div class="flex-1 min-w-[60px] ae-card py-1.5 px-2.5 flex items-center justify-center gap-1.5 border-l-4 border-l-indigo-500 cursor-pointer hover:opacity-80 transition-opacity" @click="setFilter('running')">
-        <div class="min-w-0 text-center">
-          <p class="text-base font-bold text-indigo-700 leading-none">{{ statistics.running }}</p>
-          <p class="text-[8px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-0.5 truncate">Running</p>
-        </div>
-      </div>
-      <!-- Completed -->
-      <div class="flex-1 min-w-[60px] ae-card py-1.5 px-2.5 flex items-center justify-center gap-1.5 border-l-4 border-l-emerald-500 cursor-pointer hover:opacity-80 transition-opacity" @click="setFilter('completed')">
-        <div class="min-w-0 text-center">
-          <p class="text-base font-bold text-emerald-700 leading-none">{{ statistics.completed }}</p>
-          <p class="text-[8px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-0.5 truncate">Completed</p>
-        </div>
-      </div>
-      <!-- Missed -->
-      <div class="flex-1 min-w-[60px] ae-card py-1.5 px-2.5 flex items-center justify-center gap-1.5 border-l-4 border-l-rose-500 cursor-pointer hover:opacity-80 transition-opacity" @click="setFilter('missed')">
-        <div class="min-w-0 text-center">
-          <p class="text-base font-bold text-rose-700 leading-none">{{ statistics.missed }}</p>
-          <p class="text-[8px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-0.5 truncate">Missed</p>
-        </div>
-      </div>
-
-      <!-- Action Buttons -->
-      <div class="flex items-center gap-2 border-l border-slate-200 dark:border-slate-700 pl-2 ml-1">
+      <div class="flex items-center gap-2">
         <button
-          class="btn-primary text-xs flex items-center gap-1.5 h-[42px] whitespace-nowrap"
+          class="btn-primary text-xs flex items-center gap-1.5 h-10 px-4 whitespace-nowrap shadow-sm shadow-indigo-200 dark:shadow-none cursor-pointer"
           @click="$router.push('/dashboard/patrols/create')"
         >
           <PlusCircle class="w-4 h-4" />
-          Patrol Creator
+          <span>Patrol Creator</span>
         </button>
         <button
-          class="btn-secondary text-xs flex items-center gap-1.5 h-[42px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 whitespace-nowrap"
+          class="h-10 px-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap shadow-sm cursor-pointer"
           @click="$router.push('/dashboard/patrols/history')"
         >
           <HistoryIcon class="w-4 h-4 text-slate-400" />
-          History
+          <span>History</span>
         </button>
 
         <!-- Overflow Dropdown Menu -->
         <div class="relative">
           <button
             ref="overflowButtonRef"
-            class="w-[42px] h-[42px] flex items-center justify-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors relative z-[145] cursor-pointer"
+            class="w-10 h-10 flex items-center justify-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-sm cursor-pointer"
             @click="toggleOverflowMenu"
             title="More Options"
           >
@@ -115,29 +58,118 @@
             <div
               v-if="showOverflowMenu"
               :style="dropdownStyle"
-              class="w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-[150] overflow-hidden py-1 animate-in slide-in-from-top-1 duration-100"
+              class="w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-[150] overflow-hidden py-1.5 animate-in slide-in-from-top-1 duration-100"
             >
               <!-- Patrol Checkpoints -->
               <button
-                class="w-full px-4 py-2.5 text-left text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50 flex items-center gap-2 transition-colors cursor-pointer border-0 bg-transparent"
+                class="w-full px-4 py-2.5 text-left text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50 flex items-center gap-2.5 transition-colors cursor-pointer border-0 bg-transparent"
                 @click="$router.push('/dashboard/patrols/checkpoints'); showOverflowMenu = false;"
               >
-                <MapPin class="w-4 h-4 text-slate-400" />
-                Patrol Checkpoints
+                <MapPin class="w-4 h-4 text-indigo-500" />
+                <span>Patrol Checkpoints</span>
               </button>
               
               <!-- Download Checkpoint QR -->
               <button
-                class="w-full px-4 py-2.5 text-left text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50 flex items-center gap-2 transition-colors cursor-pointer border-0 bg-transparent"
+                class="w-full px-4 py-2.5 text-left text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50 flex items-center gap-2.5 transition-colors cursor-pointer border-0 bg-transparent"
                 :disabled="downloadingQRs"
                 @click="downloadCheckpointQRs(); showOverflowMenu = false;"
               >
                 <Loader2 v-if="downloadingQRs" class="w-4 h-4 animate-spin text-slate-400" />
-                <Download v-else class="w-4 h-4 text-slate-400" />
-                {{ downloadingQRs ? 'Downloading...' : 'Download Checkpoint QR' }}
+                <Download v-else class="w-4 h-4 text-emerald-500" />
+                <span>{{ downloadingQRs ? 'Downloading...' : 'Download Checkpoint QR' }}</span>
               </button>
             </div>
           </Teleport>
+        </div>
+      </div>
+    </div>
+
+    <!-- SOS Alert Banner -->
+    <div
+      v-if="activeAlerts.length"
+      class="mb-4 shrink-0 bg-red-600 rounded-2xl p-3.5 flex items-center justify-between shadow-lg shadow-red-600/20 animate-pulse border border-red-500"
+    >
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 bg-white dark:bg-slate-900 rounded-xl flex items-center justify-center">
+          <AlertTriangle class="w-6 h-6 text-red-600" />
+        </div>
+        <div>
+          <h2 class="text-white font-black uppercase tracking-widest">
+            Emergency Alert Detected
+          </h2>
+          <p class="text-red-100 text-sm font-semibold">
+            Guard {{ activeAlerts[0].guard_name || 'Unknown' }} triggered an SOS in Zone: {{ activeAlerts[0].zone_name || 'Unknown' }}
+          </p>
+        </div>
+      </div>
+      <button
+        class="bg-white dark:bg-slate-900 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-slate-800 px-4 py-2 rounded-xl text-sm font-bold transition-colors shadow-sm cursor-pointer"
+        @click="dismissAlert(activeAlerts[0].id)"
+      >
+        Dismiss
+      </button>
+    </div>
+
+    <!-- KPI Metric Cards Strip -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 shrink-0">
+      <!-- Total -->
+      <div 
+        class="bg-white dark:bg-slate-900 border rounded-2xl p-3.5 flex items-center justify-between cursor-pointer transition-all hover:shadow-md"
+        :class="statusFilter === 'all' ? 'border-slate-400 dark:border-slate-500 ring-2 ring-slate-400/20 shadow-sm' : 'border-slate-200 dark:border-slate-800'"
+        @click="setFilter('all')"
+      >
+        <div>
+          <span class="text-[10px] font-black uppercase tracking-wider text-slate-400">Total Patrols</span>
+          <p class="text-2xl font-black text-slate-900 dark:text-white mt-0.5 leading-none">{{ statistics.total }}</p>
+        </div>
+        <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center shrink-0">
+          <Activity class="w-5 h-5" />
+        </div>
+      </div>
+
+      <!-- Running -->
+      <div 
+        class="bg-white dark:bg-slate-900 border rounded-2xl p-3.5 flex items-center justify-between cursor-pointer transition-all hover:shadow-md"
+        :class="statusFilter === 'running' ? 'border-indigo-500 ring-2 ring-indigo-500/20 shadow-sm' : 'border-slate-200 dark:border-slate-800'"
+        @click="setFilter('running')"
+      >
+        <div>
+          <span class="text-[10px] font-black uppercase tracking-wider text-indigo-500">In Progress</span>
+          <p class="text-2xl font-black text-indigo-600 dark:text-indigo-400 mt-0.5 leading-none">{{ statistics.running }}</p>
+        </div>
+        <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+          <PlayCircle class="w-5 h-5 text-indigo-600" />
+        </div>
+      </div>
+
+      <!-- Completed -->
+      <div 
+        class="bg-white dark:bg-slate-900 border rounded-2xl p-3.5 flex items-center justify-between cursor-pointer transition-all hover:shadow-md"
+        :class="statusFilter === 'completed' ? 'border-emerald-500 ring-2 ring-emerald-500/20 shadow-sm' : 'border-slate-200 dark:border-slate-800'"
+        @click="setFilter('completed')"
+      >
+        <div>
+          <span class="text-[10px] font-black uppercase tracking-wider text-emerald-500">Completed</span>
+          <p class="text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5 leading-none">{{ statistics.completed }}</p>
+        </div>
+        <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+          <CheckCircle2 class="w-5 h-5 text-emerald-600" />
+        </div>
+      </div>
+
+      <!-- Missed -->
+      <div 
+        class="bg-white dark:bg-slate-900 border rounded-2xl p-3.5 flex items-center justify-between cursor-pointer transition-all hover:shadow-md"
+        :class="statusFilter === 'missed' ? 'border-rose-500 ring-2 ring-rose-500/20 shadow-sm' : 'border-slate-200 dark:border-slate-800'"
+        @click="setFilter('missed')"
+      >
+        <div>
+          <span class="text-[10px] font-black uppercase tracking-wider text-rose-500">Delayed / Missed</span>
+          <p class="text-2xl font-black text-rose-600 dark:text-rose-400 mt-0.5 leading-none">{{ statistics.missed }}</p>
+        </div>
+        <div class="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0">
+          <AlertTriangle class="w-5 h-5 text-rose-600" />
         </div>
       </div>
     </div>    <!-- 1-Panel Body -->

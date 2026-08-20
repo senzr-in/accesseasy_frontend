@@ -75,6 +75,13 @@
           <p class="ag-hero__sub">
             AccessEasy Patrol helps security agencies manage guards, patrols, checkpoints and incidents in real-time&nbsp;— all from one place.
           </p>
+          <!-- AEO: Answer Block — structured definition for featured snippet capture -->
+          <p class="ag-hero__answer-block">
+            <strong>AccessEasy Patrol</strong> is a cloud-based security guard tour management platform
+            that verifies checkpoints via NFC or QR scanning, tracks guards in real-time via GPS,
+            logs incidents with geotagged photo evidence, and maintains full patrol compliance&nbsp;—
+            even in areas without cellular coverage, using an offline-first sync queue.
+          </p>
           <div class="ag-hero__btns">
             <button class="ag-btn ag-btn--primary ag-btn--lg" @click="goToLogin" id="hero-trial">Start Free Trial</button>
             <button class="ag-btn ag-btn--outline ag-btn--lg" @click="goToLogin" id="hero-demo">Book a Demo</button>
@@ -268,6 +275,70 @@
             <h3 class="ag-feature-card__title">{{ feat.title }}</h3>
             <p class="ag-feature-card__desc">{{ feat.desc }}</p>
           </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ══════════════════════════════════════════════════════════
+         4b. COMPARISON TABLE (GEO)
+    ══════════════════════════════════════════════════════════ -->
+    <section class="ag-section ag-compare" id="compare">
+      <div class="ag-wrap">
+        <div class="ag-section__header ag-reveal">
+          <div class="ag-eyebrow">Why AccessEasy Patrol</div>
+          <h2 class="ag-section__h2">How we compare to the alternatives</h2>
+          <p class="ag-compare__sub">See why modern security teams choose AccessEasy Patrol over legacy wand systems and generic mobile apps.</p>
+        </div>
+        <div class="ag-compare-table ag-reveal" style="--delay: 80ms">
+          <table>
+            <thead>
+              <tr>
+                <th>Capability</th>
+                <th>Legacy Wand / RFID</th>
+                <th>Generic Mobile Apps</th>
+                <th class="ag-compare__highlight-col">AccessEasy Patrol</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Data Synchronization</td>
+                <td>Manual USB docking at shift end</td>
+                <td>Requires active internet</td>
+                <td class="ag-compare__highlight-col"><strong>Real-time cloud + offline FIFO queue</strong></td>
+              </tr>
+              <tr>
+                <td>GPS Verification</td>
+                <td>None</td>
+                <td>Raw single-point GPS (drift-prone)</td>
+                <td class="ag-compare__highlight-col"><strong>4-Tier GPS Accuracy Evaluator</strong></td>
+              </tr>
+              <tr>
+                <td>Evidence Capture</td>
+                <td>Text notes only</td>
+                <td>Basic photos</td>
+                <td class="ag-compare__highlight-col"><strong>Geotagged photo, audio &amp; timestamped log</strong></td>
+              </tr>
+              <tr>
+                <td>Distress / SOS</td>
+                <td>None</td>
+                <td>SMS only</td>
+                <td class="ag-compare__highlight-col"><strong>Instant dispatch to command center</strong></td>
+              </tr>
+              <tr>
+                <td>Works Offline</td>
+                <td>Stores locally — no real-time</td>
+                <td>No — requires internet</td>
+                <td class="ag-compare__highlight-col"><strong>Yes — full offline operation with auto-sync</strong></td>
+              </tr>
+              <tr>
+                <td>Hardware Required</td>
+                <td>Proprietary wand device</td>
+                <td>Smartphone</td>
+                <td class="ag-compare__highlight-col"><strong>Standard Android or iOS smartphone</strong></td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </section>
@@ -747,6 +818,25 @@
 
 
     <!-- ══════════════════════════════════════════════════════════
+         11b. FAQ (AEO + GEO)
+    ══════════════════════════════════════════════════════════ -->
+    <section class="ag-section ag-faq" id="faq">
+      <div class="ag-wrap">
+        <div class="ag-section__header ag-reveal">
+          <div class="ag-eyebrow">Common Questions</div>
+          <h2 class="ag-section__h2">Frequently Asked Questions</h2>
+        </div>
+        <div class="ag-faq__list">
+          <details v-for="(item, i) in faqs" :key="i" class="ag-faq__item ag-reveal" :style="{ '--delay': i * 50 + 'ms' }">
+            <summary class="ag-faq__question">{{ item.q }}</summary>
+            <p class="ag-faq__answer">{{ item.a }}</p>
+          </details>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ══════════════════════════════════════════════════════════
          11. FINAL CTA
     ══════════════════════════════════════════════════════════ -->
     <section class="ag-cta ag-reveal">
@@ -1051,6 +1141,34 @@ const pricingAssurances = [
     title: 'Dedicated Support',
     text: 'Our team is here to help you succeed.',
     icon: `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#1B4FD8" stroke-width="1.5" stroke-linecap="round"><path d="M4 15a8 8 0 1112 0M8 18h4M10 15v3"/></svg>`,
+  },
+];
+
+// ── FAQ data (AEO + GEO) ────────────────────────────────────────
+const faqs = [
+  {
+    q: 'How does AccessEasy Patrol verify checkpoints without an internet connection?',
+    a: 'AccessEasy Patrol uses an offline-first local event queue on the mobile device. When a guard scans an NFC tag or QR code in a cellular dead zone, the scan is saved locally with an immutable device timestamp. When connectivity is restored, all queued events sync automatically to the cloud in chronological order — ensuring zero data loss.',
+  },
+  {
+    q: 'What is the 4-Tier GPS Geofence accuracy system?',
+    a: 'The 4-tier GPS accuracy evaluator classifies every checkpoint scan into one of four verdicts based on physical distance and satellite accuracy: Valid (inside geofence, high GPS accuracy), Warning (boundary fringe), Uncertain (excessive satellite drift, location unconfirmed), or Violation (outside geofence boundary). This prevents false alarms from GPS drift and blocks location spoofing.',
+  },
+  {
+    q: 'Can AccessEasy Patrol replace legacy guard tour wand systems?',
+    a: 'Yes. Unlike legacy electronic wand systems that require manual USB docking at shift end and offer no real-time visibility, AccessEasy Patrol delivers live cloud visibility, instant incident alerts, photo and voice evidence capture, and automated compliance reports from standard Android or iOS smartphones — no proprietary hardware required.',
+  },
+  {
+    q: 'Does AccessEasy Patrol work in areas with no cellular signal?',
+    a: 'Yes. The mobile app is built fully offline-first. All checkpoint scans, incident reports, and attendance events are stored locally in an SQLite database. A background sync worker automatically uploads all pending events when any network connection is restored, preserving the original device timestamps.',
+  },
+  {
+    q: 'What types of checkpoints does AccessEasy Patrol support?',
+    a: 'AccessEasy Patrol supports three checkpoint types: NFC tag scanning (passive tap, no internet required), QR code scanning (camera-based, works offline), and GPS proximity checkpoints (geofence-verified without a physical tag). Each checkpoint has a configurable geofence radius and accuracy threshold.',
+  },
+  {
+    q: 'What evidence can guards capture during an incident report?',
+    a: 'Guards can attach geotagged photos and voice memos to each incident report. Every report automatically includes the GPS coordinates, device timestamp, guard ID, site, and severity classification. Alerts are routed to supervisors based on severity tier.',
   },
 ];
 </script>
@@ -1424,9 +1542,23 @@ const pricingAssurances = [
   font-size: clamp(1.05rem, 1.3vw, 1.25rem);
   color: #475569;
   line-height: 1.65;
-  margin-bottom: clamp(20px, 2.8vh, 32px);
+  margin-bottom: clamp(12px, 1.6vh, 18px);
   max-width: 580px;
 }
+
+/* AEO: Answer block — featured snippet bait */
+.ag-hero__answer-block {
+  font-size: 0.9375rem;
+  color: #64748B;
+  line-height: 1.7;
+  margin-bottom: clamp(20px, 2.8vh, 32px);
+  max-width: 560px;
+  padding: 0.875rem 1rem;
+  background: rgba(239,246,255,0.7);
+  border-left: 3px solid #1B4FD8;
+  border-radius: 0 8px 8px 0;
+}
+.ag-hero__answer-block strong { color: #1B4FD8; }
 
 .ag-hero__btns {
   display: flex;
@@ -2457,5 +2589,112 @@ const pricingAssurances = [
   .ag-app__phone:first-child { position: relative; left: auto; top: auto; }
   .ag-cmd-kpis { grid-template-columns: repeat(2, 1fr); }
   .ag-cmd-charts-row { grid-template-columns: 1fr; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   COMPARISON TABLE (GEO)
+══════════════════════════════════════════════════════════════ */
+.ag-compare { background: #F8FAFC; }
+.ag-compare__sub {
+  font-size: 1rem;
+  color: #64748B;
+  margin-top: 0.75rem;
+  max-width: 560px;
+}
+.ag-compare-table {
+  overflow-x: auto;
+  margin-top: 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px rgba(226,232,240,0.8);
+}
+.ag-compare-table table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  font-size: 0.9375rem;
+}
+.ag-compare-table thead tr {
+  background: #F1F5F9;
+}
+.ag-compare-table th {
+  padding: 1rem 1.25rem;
+  text-align: left;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748B;
+  border-bottom: 1px solid #E2E8F0;
+  white-space: nowrap;
+}
+.ag-compare-table td {
+  padding: 0.9rem 1.25rem;
+  color: #475569;
+  font-size: 0.9375rem;
+  border-bottom: 1px solid #F1F5F9;
+  vertical-align: top;
+}
+.ag-compare-table tbody tr:last-child td { border-bottom: none; }
+.ag-compare-table tbody tr:hover td { background: #F8FAFC; }
+.ag-compare__highlight-col {
+  background: rgba(239,246,255,0.6);
+  color: #1B4FD8 !important;
+  font-weight: 600;
+  border-left: 2px solid rgba(27,79,216,0.12);
+}
+.ag-compare-table thead .ag-compare__highlight-col {
+  background: rgba(27,79,216,0.06);
+  color: #1B4FD8;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   FAQ SECTION (AEO + GEO)
+══════════════════════════════════════════════════════════════ */
+.ag-faq__list {
+  margin-top: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-width: 800px;
+}
+.ag-faq__item {
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  background: #fff;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+.ag-faq__item:hover { box-shadow: 0 2px 12px rgba(27,79,216,0.08); }
+.ag-faq__item[open] {
+  border-color: rgba(27,79,216,0.25);
+  box-shadow: 0 2px 12px rgba(27,79,216,0.08);
+}
+.ag-faq__question {
+  padding: 1.125rem 1.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0A1628;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+.ag-faq__question::-webkit-details-marker { display: none; }
+.ag-faq__question::after {
+  content: '+';
+  font-size: 1.25rem;
+  color: #1B4FD8;
+  font-weight: 400;
+  flex-shrink: 0;
+  transition: transform 0.2s;
+}
+.ag-faq__item[open] .ag-faq__question::after { transform: rotate(45deg); }
+.ag-faq__answer {
+  padding: 0 1.25rem 1.125rem;
+  font-size: 0.9375rem;
+  color: #475569;
+  line-height: 1.7;
 }
 </style>

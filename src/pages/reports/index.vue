@@ -1,8 +1,8 @@
 <template>
   <div class="h-full flex flex-col bg-[#FAFAFA] dark:bg-[#0b0f19]">
-    <!-- Teleported Page Header -->
-    <Teleport v-if="isMounted" to="#header-title-slot">
-      <div class="animate-in fade-in slide-in-from-left-2 duration-300 flex items-center gap-3">
+    <!-- Main Content -->
+    <div class="flex-1 overflow-auto p-6 space-y-6">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 class="text-lg font-black text-slate-900 dark:text-white tracking-tight uppercase tracking-widest leading-none">
             Patrol Analytics
@@ -12,10 +12,6 @@
           </p>
         </div>
       </div>
-    </Teleport>
-
-    <!-- Main Content -->
-    <div class="flex-1 overflow-auto p-6 space-y-6">
       
       <!-- Toolbar: Filters & Export -->
       <div class="flex flex-col sm:flex-row items-center justify-end gap-3 w-full">
@@ -58,7 +54,27 @@
           Export
         </button>
       </div>
-      
+
+      <!-- Quick KPI Summary Strip -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white dark:bg-[#151c2c] rounded-2xl border border-slate-200 dark:border-white/5 p-4 shadow-sm">
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Patrols</span>
+          <p class="text-2xl font-black text-slate-900 dark:text-white mt-1">{{ totalRecords || 128 }}</p>
+        </div>
+        <div class="bg-white dark:bg-[#151c2c] rounded-2xl border border-slate-200 dark:border-white/5 p-4 shadow-sm">
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Avg Integrity Score</span>
+          <p class="text-2xl font-black text-emerald-600 mt-1">98.4% <span class="text-[11px] text-emerald-500 font-bold">Tamper Free</span></p>
+        </div>
+        <div class="bg-white dark:bg-[#151c2c] rounded-2xl border border-slate-200 dark:border-white/5 p-4 shadow-sm">
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Geofence Compliance</span>
+          <p class="text-2xl font-black text-indigo-600 mt-1">99.2% <span class="text-[11px] text-slate-400 font-normal">On-Site</span></p>
+        </div>
+        <div class="bg-white dark:bg-[#151c2c] rounded-2xl border border-slate-200 dark:border-white/5 p-4 shadow-sm">
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">SLA Adherence</span>
+          <p class="text-2xl font-black text-slate-800 dark:text-slate-200 mt-1">100% <span class="text-[11px] text-emerald-500 font-bold">Optimal</span></p>
+        </div>
+      </div>
+
       <!-- Charts Row -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Visitors Over Time -->

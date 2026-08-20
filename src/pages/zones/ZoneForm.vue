@@ -1,21 +1,47 @@
 <template>
-  <div class="space-y-5">
-    <!-- Zone Name -->
+  <div class="space-y-4">
+    <!-- Parent Site Selection -->
     <div>
-      <label class="ae-section-label mb-1.5 block">Zone Name *</label>
-      <input
-        v-model="formData.zoneName"
-        type="text"
-        class="ae-input w-full"
-        placeholder="e.g. Main Warehouse Area"
-        autofocus
+      <label class="ae-section-label mb-1.5 block">Assigned Site / Property *</label>
+      <select
+        v-model="formData.site"
+        class="ae-input w-full py-2"
+        required
       >
-      <p
-        v-if="!formData.zoneName && attemptSubmit"
-        class="text-xs text-rose-500 mt-1"
-      >
-        Zone name is required (minimum 2 characters)
-      </p>
+        <option value="" disabled>Select a site...</option>
+        <option v-for="site in sitesList" :key="site.id" :value="site.id">
+          {{ site.name }} ({{ site.code }})
+        </option>
+      </select>
+    </div>
+
+    <!-- Zone Name & Code -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div class="sm:col-span-2">
+        <label class="ae-section-label mb-1.5 block">Zone Name *</label>
+        <input
+          v-model="formData.zoneName"
+          type="text"
+          class="ae-input w-full"
+          placeholder="e.g. Main Warehouse Area"
+          autofocus
+        >
+        <p
+          v-if="!formData.zoneName && attemptSubmit"
+          class="text-xs text-rose-500 mt-1"
+        >
+          Zone name is required (minimum 2 characters)
+        </p>
+      </div>
+      <div>
+        <label class="ae-section-label mb-1.5 block">Zone Code *</label>
+        <input
+          v-model="formData.code"
+          type="text"
+          class="ae-input w-full font-mono uppercase"
+          placeholder="e.g. ZN-WH-01"
+        >
+      </div>
     </div>
 
     <!-- Description -->
@@ -23,7 +49,7 @@
       <label class="ae-section-label mb-1.5 block">Description</label>
       <textarea
         v-model="formData.description"
-        rows="3"
+        rows="2"
         class="ae-input w-full py-2 resize-none"
         placeholder="e.g. Main storage area for high-value inventory and perimeter rounds"
       ></textarea>
@@ -58,12 +84,20 @@
         {{ loading ? 'Saving...' : (isEditing ? "Update Zone" : "Create Zone") }}
       </button>
     </div>
+
+    <!-- Upgrade Modal -->
+    <UpgradeModal
+      v-model="showUpgradeModal"
+      :trigger-message="upgradeMsg"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, watch } from "vue";
 import { zoneService } from "@/services/zoneService";
+import { siteService } from "@/services/siteService";
+import UpgradeModal from "@/components/common/UpgradeModal.vue";
 
 const props = defineProps({
   isEditing: {
@@ -81,9 +115,14 @@ const emit = defineEmits(["save-success", "cancel"]);
 // Form state
 const attemptSubmit = ref(false);
 const loading = ref(false);
+const sitesList = ref([]);
+const showUpgradeModal = ref(false);
+const upgradeMsg = ref('');
 
 const formData = ref({
   zoneName: "",
+  code: "",
+  site: "",
   description: "",
   status: "active",
   entry_doors: [],
@@ -98,15 +137,23 @@ const isValid = computed(() => {
 /**
  * Initialize form with existing data (for editing)
  */
-const initializeForm = () => {
+const initializeForm = async () => {
+  try {
+    sitesList.value = await siteService.fetchSites();
+  } catch (e) {}
+
   if (props.isEditing && props.zoneData) {
     formData.value.zoneName = props.zoneData.zoneName || props.zoneData.name || "";
+    formData.value.code = props.zoneData.code || "";
+    formData.value.site = props.zoneData.site || (sitesList.value[0]?.id || "");
     formData.value.description = props.zoneData.description || "";
     formData.value.status = props.zoneData.status || "active";
     formData.value.entry_doors = props.zoneData.entry_doors || [];
     formData.value.exit_doors = props.zoneData.exit_doors || [];
   } else {
     formData.value.zoneName = "";
+    formData.value.code = "";
+    formData.value.site = sitesList.value[0]?.id || "site-01";
     formData.value.description = "";
     formData.value.status = "active";
     formData.value.entry_doors = [];
@@ -127,6 +174,9 @@ const handleSubmit = async () => {
   try {
     const payload = {
       zoneName: formData.value.zoneName.trim(),
+      name: formData.value.zoneName.trim(),
+      code: formData.value.code ? formData.value.code.toUpperCase() : `ZN-${Date.now().toString().slice(-4)}`,
+      site: formData.value.site,
       description: formData.value.description || "",
       status: formData.value.status || "active",
       entry_doors: formData.value.entry_doors || [],
@@ -142,7 +192,12 @@ const handleSubmit = async () => {
     emit("save-success");
   } catch (error) {
     console.error("Error saving zone:", error);
-    alert(`Error ${props.isEditing ? "updating" : "creating"} zone`);
+    if (error.code === "PLAN_LIMIT_EXCEEDED") {
+      upgradeMsg.value = error.message;
+      showUpgradeModal.value = true;
+    } else {
+      alert(error.message || `Error ${props.isEditing ? "updating" : "creating"} zone`);
+    }
   } finally {
     loading.value = false;
   }

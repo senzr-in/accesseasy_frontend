@@ -1,18 +1,16 @@
 <template>
   <div class="h-full flex flex-col gap-4 overflow-hidden p-1">
-    <!-- Header Teleport -->
-    <Teleport v-if="isMounted" to="#header-title-slot">
-      <div class="flex items-center gap-3">
-        <div>
-          <h1 class="text-lg font-bold text-slate-900 dark:text-slate-100 leading-tight">
-            Incidents
-          </h1>
-          <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
-            View and manage security incidents
-          </p>
-        </div>
+    <!-- Header -->
+    <div class="flex items-center gap-3 shrink-0">
+      <div>
+        <h1 class="text-lg font-bold text-slate-900 dark:text-slate-100 leading-tight">
+          Incidents
+        </h1>
+        <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+          View and manage security incidents
+        </p>
       </div>
-    </Teleport>
+    </div>
     
 
 
@@ -489,6 +487,13 @@
         </div>
       </div>
     </Teleport>
+
+    <!-- Pro 7-Stage Incident Workflow Modal -->
+    <IncidentWorkflowModal
+      v-model="showWorkflowModal"
+      :incident="selectedWorkflowIncident"
+      @updated="fetchIncidents"
+    />
 </template>
 
 <script setup>
@@ -503,6 +508,8 @@ import {
   AlertTriangle, Loader2, MapPin, Trash2, Upload, Pencil
 } from 'lucide-vue-next';
 import { authService } from '@/services/authService';
+import { usePlanGuard } from '@/composables/usePlanGuard';
+import IncidentWorkflowModal from './IncidentWorkflowModal.vue';
 
 const loading = ref(false);
 const showModal = ref(false);
@@ -517,11 +524,27 @@ const setFilter = (status, severity) => {
 };
 
 const showDetailsModal = ref(false);
-const selectedIncident = ref(null);
+const { can } = usePlanGuard();
+const showWorkflowModal = ref(false);
+const selectedWorkflowIncident = ref(null);
 
 const openDetailsPopup = (inc) => {
   selectedIncident.value = inc;
-  showDetailsModal.value = true;
+  if (can('incident.workflow')) {
+    selectedWorkflowIncident.value = {
+      ...inc,
+      title: inc.type || inc.title || `Incident ${inc.reportId}`,
+      site_name: inc.location || 'Main Site',
+      priority: inc.severity || 'Medium',
+      reported_by: inc.guardName || 'Security Guard',
+      action_log: inc.action_log || [
+        { status: 'reported', user: inc.guardName || 'Guard', time: inc.dateTime || new Date().toISOString(), notes: inc.description || 'Initial report' }
+      ]
+    };
+    showWorkflowModal.value = true;
+  } else {
+    showDetailsModal.value = true;
+  }
 };
 
 const closeDetails = () => {

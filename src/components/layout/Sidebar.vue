@@ -191,7 +191,6 @@ const userInitials = computed(() => userName.value.charAt(0).toUpperCase());
 const securityNav = computed(() => {
   return [
     { name: 'SOC Overview', href: '/dashboard', icon: LayoutDashboard, exact: true },
-    { name: 'Live Monitoring', href: '/dashboard/monitoring', icon: Camera },
     { name: 'Incident Logs', href: '/dashboard/incidents', icon: ShieldAlert },
     { name: 'AI Analytics', href: '/dashboard/analytics', icon: Activity }
   ];

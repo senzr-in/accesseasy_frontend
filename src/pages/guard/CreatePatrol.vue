@@ -1,9 +1,10 @@
 <template>
   <div class="h-full flex flex-col bg-[#FAFAFA] dark:bg-[#0b0f19] overflow-auto custom-scrollbar">
-    <Teleport v-if="isMounted" to="#header-title-slot">
-      <div class="flex items-center gap-3 w-full">
+    <!-- Header -->
+    <div class="max-w-[1400px] mx-auto w-full px-6 pt-2 pb-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
         <button
-          class="flex items-center justify-center w-8 h-8 rounded-xl border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:text-slate-200 bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 transition-colors shrink-0"
+          class="flex items-center justify-center w-8 h-8 rounded-xl border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:text-slate-200 bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 transition-colors shrink-0 cursor-pointer"
           @click="$router.push('/dashboard/patrols')"
         >
           <ArrowLeft class="w-4 h-4" />
@@ -17,9 +18,9 @@
           </p>
         </div>
       </div>
-    </Teleport>
+    </div>
 
-    <div class="max-w-[1400px] mx-auto w-full px-6 pt-2 pb-6 flex flex-col lg:flex-row gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div class="max-w-[1400px] mx-auto w-full px-6 pb-6 flex flex-col lg:flex-row gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       
       <!-- Left Column: Form -->
       <div class="flex-1 space-y-6">
@@ -45,14 +46,24 @@
 
             <!-- Zone -->
             <div>
-              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">Zone <span class="text-rose-500">*</span></label>
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Zone <span class="text-rose-500">*</span></label>
+                <button
+                  type="button"
+                  @click="openAddZoneModal"
+                  class="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                >
+                  + New Zone
+                </button>
+              </div>
               <select
                 v-model="form.zoneId"
-                @change="onZoneChange"
-                class="w-full text-sm font-semibold px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#0b0f19] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 appearance-none"
+                @change="handleZoneSelectChange"
+                class="w-full text-sm font-semibold px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#0b0f19] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 appearance-none cursor-pointer"
               >
                 <option value="" disabled>Select Zone</option>
                 <option v-for="z in zones" :key="z.id" :value="z.id">{{ z.zoneName || z.name }}</option>
+                <option value="__NEW_ZONE__" class="font-bold text-indigo-600">+ Create New Zone...</option>
               </select>
             </div>
 
@@ -633,6 +644,80 @@
         </div>
       </div>
     </Teleport>
+
+    <!-- Modal: Add Zone Modal -->
+    <Teleport to="body">
+      <div v-if="showAddZoneModal" class="fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/70 backdrop-blur-sm p-4" @click.self="showAddZoneModal = false">
+        <div class="w-full max-w-md bg-white dark:bg-[#151c2c] rounded-2xl shadow-2xl p-6 border border-slate-200 dark:border-white/10 animate-in zoom-in-95 flex flex-col">
+          <!-- Header -->
+          <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 dark:border-white/5">
+            <div class="flex items-center gap-2.5">
+              <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-sm">
+                <Layers class="w-4 h-4" />
+              </div>
+              <div>
+                <h3 class="text-sm font-black text-slate-900 dark:text-white">Create Security Zone</h3>
+                <p class="text-[11px] text-slate-500">Define a new zone for patrol checkpoints and routes</p>
+              </div>
+            </div>
+            <button class="text-slate-400 hover:text-slate-600 p-1 cursor-pointer" @click="showAddZoneModal = false">
+              <X class="w-4 h-4" />
+            </button>
+          </div>
+
+          <!-- Form -->
+          <form @submit.prevent="submitAddZone" class="space-y-3.5 text-xs">
+            <div class="space-y-1">
+              <label class="font-bold text-slate-700 dark:text-slate-300">Zone Name *</label>
+              <input
+                v-model="newZoneForm.name"
+                required
+                placeholder="e.g. Ground Floor & Main Gate"
+                class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none focus:border-indigo-500"
+              />
+            </div>
+
+            <div class="space-y-1">
+              <label class="font-bold text-slate-700 dark:text-slate-300">Zone Code (Optional)</label>
+              <input
+                v-model="newZoneForm.code"
+                placeholder="e.g. ZN-GF-01"
+                class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-mono uppercase outline-none focus:border-indigo-500"
+              />
+            </div>
+
+            <div class="space-y-1">
+              <label class="font-bold text-slate-700 dark:text-slate-300">Description (Optional)</label>
+              <textarea
+                v-model="newZoneForm.description"
+                rows="2"
+                placeholder="Brief description of the zone area..."
+                class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none focus:border-indigo-500 resize-none"
+              ></textarea>
+            </div>
+
+            <!-- Footer -->
+            <div class="mt-5 pt-3 border-t border-slate-100 dark:border-white/5 flex gap-2 justify-end">
+              <button
+                type="button"
+                class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs hover:bg-slate-200 cursor-pointer"
+                @click="showAddZoneModal = false"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-600/20 cursor-pointer flex items-center gap-1.5"
+                :disabled="isSavingZone || !newZoneForm.name.trim()"
+              >
+                <Plus class="w-3.5 h-3.5" />
+                <span>{{ isSavingZone ? 'Creating...' : 'Create & Select Zone' }}</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -642,9 +727,10 @@ import { useRouter } from 'vue-router';
 import { 
   ShieldPlus, ChevronRight, GripVertical, Trash2, Info, Clock, 
   Plus, CheckCircle2, ArrowDown, AlertCircle, Play, Check, MapPin, ArrowLeft,
-  ListFilter, Search, X, UserPlus
+  ListFilter, Search, X, UserPlus, Layers
 } from 'lucide-vue-next';
 import { patrolService } from '@/services/patrolService';
+import { zoneService } from '@/services/zoneService';
 import { authService } from '@/services/authService';
 
 const router = useRouter();
@@ -662,6 +748,14 @@ const showSelectCheckpointsModal = ref(false);
 const checkpointSearchQuery = ref('');
 const modalZoneFilter = ref('all');
 const modalSelectedCpIds = ref([]);
+
+const showAddZoneModal = ref(false);
+const isSavingZone = ref(false);
+const newZoneForm = ref({
+  name: '',
+  code: '',
+  description: ''
+});
 
 const showAddGuardModal = ref(false);
 const isSavingGuard = ref(false);
@@ -689,6 +783,51 @@ const form = ref({
   maxDuration: 30,
   guardId: ''
 });
+
+const openAddZoneModal = () => {
+  newZoneForm.value = {
+    name: '',
+    code: '',
+    description: ''
+  };
+  showAddZoneModal.value = true;
+};
+
+const handleZoneSelectChange = () => {
+  if (form.value.zoneId === '__NEW_ZONE__') {
+    form.value.zoneId = '';
+    openAddZoneModal();
+  } else {
+    onZoneChange();
+  }
+};
+
+const submitAddZone = async () => {
+  if (!newZoneForm.value.name.trim()) return;
+  isSavingZone.value = true;
+  try {
+    const createdZone = await zoneService.createZone({
+      name: newZoneForm.value.name.trim(),
+      zoneName: newZoneForm.value.name.trim(),
+      code: newZoneForm.value.code.trim() || undefined,
+      description: newZoneForm.value.description.trim() || undefined,
+      status: 'active'
+    });
+    
+    // Add to zones list if not already present and select it
+    if (!zones.value.some(z => String(z.id) === String(createdZone.id))) {
+      zones.value.push(createdZone);
+    }
+    form.value.zoneId = createdZone.id;
+    onZoneChange();
+    showAddZoneModal.value = false;
+  } catch (err) {
+    console.error("Failed to create zone:", err);
+    alert(`Failed to create zone: ${err.message || 'Unknown error'}`);
+  } finally {
+    isSavingZone.value = false;
+  }
+};
 
 const openAddGuardModal = () => {
   newGuardForm.value = {
@@ -1094,12 +1233,9 @@ onMounted(async () => {
   
   // Fetch Zones
   try {
-    const zRes = await fetch(`${apiUrl}/items/zones?filter[tenant][_eq]=${tenantId}`, { headers: { Authorization: `Bearer ${token}` } });
-    if(zRes.ok) {
-       const zData = await zRes.json();
-       zones.value = zData.data || [];
-    }
-  } catch (e) { console.error(e); }
+    const fetchedZones = await zoneService.fetchZones();
+    zones.value = fetchedZones || [];
+  } catch (e) { console.error('Failed to fetch zones:', e); }
 
   // Fetch Master Checkpoints
   try {

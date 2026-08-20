@@ -1,14 +1,5 @@
 <template>
   <div class="h-full flex flex-col bg-[#FAFAFA] dark:bg-[#0b0f19] overflow-auto custom-scrollbar">
-    <!-- Top Bar Title Teleport -->
-    <Teleport v-if="isMounted" to="#header-title-slot">
-      <div class="flex items-center gap-2 text-sm text-slate-500 font-medium">
-        <span class="cursor-pointer hover:text-slate-800 dark:hover:text-slate-300 transition-colors" @click="$router.push('/dashboard/patrols')">Patrols</span>
-        <ChevronRight class="w-4 h-4" />
-        <span class="font-bold text-slate-900 dark:text-slate-100">Patrol History</span>
-      </div>
-    </Teleport>
-
     <div class="max-w-[1400px] mx-auto w-full p-6 flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500 min-h-[calc(100vh-80px)]">
       
       <!-- Header -->

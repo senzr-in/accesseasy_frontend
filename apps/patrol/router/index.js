@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { authService } from "@/services/authService";
+import { usePlanStore } from "@/stores/usePlanStore";
 
 // Landing
 import AegisLanding from "@/pages/landing/AegisLanding.vue";
@@ -168,8 +169,9 @@ const routes = [
       },
       {
         path: "settings",
-        meta: { roles: ["Admin"] },
-        redirect: '/dashboard/settings/appearance'
+        name: "SettingsHub",
+        component: () => import("@/pages/settings/SettingsHub.vue"),
+        meta: { roles: ["Admin", "Manager"] }
       },
       {
         path: "settings/appearance",
@@ -196,6 +198,12 @@ const routes = [
         meta: { roles: ["Admin"] }
       },
       {
+        path: "settings/zones/:id",
+        name: "SettingsZoneDetail",
+        component: () => import("@/pages/zones/ZoneDetail.vue"),
+        meta: { roles: ["Admin", "Manager"] }
+      },
+      {
         path: "sites",
         name: "Sites",
         component: () => import("@/pages/sites/index.vue"),
@@ -206,6 +214,12 @@ const routes = [
         name: "SiteDetail",
         component: () => import("@/pages/sites/SiteDetail.vue"),
         meta: { roles: ["Admin", "Manager"] }
+      },
+      {
+        path: "sites/:id/geofence",
+        name: "SiteGeofenceEditor",
+        component: () => import("@/pages/sites/SiteGeofenceEditor.vue"),
+        meta: { roles: ["Admin", "Manager"], feature: "geofence.site" }
       },
       {
         path: "settings/checkpoints",
@@ -234,8 +248,8 @@ const routes = [
       {
         path: "settings/devices",
         name: "SettingsDevices",
-        component: Devices,
-        meta: { roles: ["Admin"] }
+        component: () => import("@/pages/settings/devices/DeviceDashboard.vue"),
+        meta: { roles: ["Admin", "Manager"], feature: "ops.operations_center" }
       },
       {
         path: "access-control/doors",
@@ -260,6 +274,12 @@ const routes = [
         name: "Guards",
         component: () => import("@/pages/guard/index.vue"),
         meta: { roles: ["Admin", "Manager"] }
+      },
+      {
+        path: "guards/attendance",
+        name: "GuardAttendance",
+        component: () => import("@/pages/guard/tabs/AttendanceTab.vue"),
+        meta: { roles: ["Admin", "Manager", "Guard"], feature: "attendance.basic" }
       },
       {
         path: "patrols",
@@ -356,6 +376,41 @@ const routes = [
         name: "Profile",
         component: () => import("@/pages/profile/index.vue"),
         meta: { roles: ["Admin", "Manager", "Employee", "Guard"] }
+      },
+      // ─── Subscription & Plan ─────────────────────────────────────────────
+      {
+        path: "settings/subscription",
+        name: "Subscription",
+        component: () => import("@/pages/settings/subscription/SubscriptionPage.vue"),
+        meta: { roles: ["Admin"] }
+      },
+      // ─── Escalation (Pro+) ───────────────────────────────────────────────
+      {
+        path: "settings/escalation",
+        name: "EscalationPolicies",
+        component: () => import("@/pages/settings/escalation/EscalationPolicies.vue"),
+        meta: { roles: ["Admin", "Manager"], feature: "incident.escalation" }
+      },
+      // ─── Device Management (Pro+) ────────────────────────────────────────
+      {
+        path: "settings/patrol-devices",
+        name: "PatrolDevices",
+        component: () => import("@/pages/settings/devices/DeviceDashboard.vue"),
+        meta: { roles: ["Admin", "Manager"], feature: "ops.operations_center" }
+      },
+      // ─── Shifts (Pro+) ───────────────────────────────────────────────────
+      {
+        path: "settings/patrol-shifts",
+        name: "PatrolShifts",
+        component: () => import("@/pages/settings/shifts/ShiftScheduler.vue"),
+        meta: { roles: ["Admin", "Manager"], feature: "attendance.shift_compliance" }
+      },
+      // ─── Audit Log (Pro+) ────────────────────────────────────────────────
+      {
+        path: "settings/audit-log",
+        name: "AuditLog",
+        component: () => import("@/pages/settings/AuditLog.vue"),
+        meta: { roles: ["Admin"], feature: "ops.audit_log" }
       }
     ]
   },
@@ -474,6 +529,24 @@ router.beforeEach(async (to, from, next) => {
       return;
     }
     // If userRole is still empty but user is authenticated, allow through
+  }
+
+  // ── Feature Entitlement Gate ────────────────────────────────────────────
+  // Blocks Pro/Custom-only routes if the org's plan doesn't have the feature.
+  // The plan store is populated on app mount; if not ready yet, allow through
+  // (the plan guard will also enforce this in the component via FeatureGate).
+  const requiredFeature = to.matched
+    .slice()
+    .reverse()
+    .find(record => record.meta.feature)?.meta.feature;
+
+  if (requiredFeature) {
+    const planStore = usePlanStore();
+    if (planStore.ready && !planStore.entitlements.has(requiredFeature)) {
+      // Redirect to subscription page with a query param so the upgrade modal auto-opens
+      next({ name: 'Subscription', query: { feature: requiredFeature, locked: '1' } });
+      return;
+    }
   }
 
   next();

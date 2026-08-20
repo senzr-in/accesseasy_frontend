@@ -4,11 +4,178 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/images/logoPatrol.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AccessEasy Patrol</title>
-    <script type="module" crossorigin src="/assets/index-CHU1e0vF.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-DYZRfHaw.css">
+
+    <!-- ═══════════════════════════════════════════
+         PRIMARY SEO
+    ═══════════════════════════════════════════ -->
+    <title>AccessEasy Patrol | Real-Time Security Guard Tour & Patrol Management</title>
+    <meta name="title" content="AccessEasy Patrol | Real-Time Security Guard Tour & Patrol Management" />
+    <meta name="description" content="Cloud-based security guard patrol management with live GPS tracking, NFC & QR checkpoint verification, offline-first incident reporting, and 4-tier geofence accuracy. Trusted by security agencies worldwide." />
+    <meta name="keywords" content="guard tour system, security patrol software, NFC checkpoint scanning, guard tracking app, offline patrol management, geofence security, QR checkpoint verification, security workforce management, guard tour management, patrol compliance software" />
+    <link rel="canonical" href="https://patrol.accesseasy.com/" />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="AccessEasy" />
+
+    <!-- ═══════════════════════════════════════════
+         OPEN GRAPH (LinkedIn, Facebook, WhatsApp)
+    ═══════════════════════════════════════════ -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://patrol.accesseasy.com/" />
+    <meta property="og:title" content="AccessEasy Patrol | Real-Time Security Guard Tour Management" />
+    <meta property="og:description" content="Manage security patrols with live GPS tracking, NFC/QR checkpoint verification, and offline-first incident dispatch. Built for modern security agencies." />
+    <meta property="og:image" content="https://patrol.accesseasy.com/images/patrol-og-banner.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="AccessEasy Patrol — Smart Patrol. Stronger Security. Complete Visibility." />
+    <meta property="og:site_name" content="AccessEasy Patrol" />
+    <meta property="og:locale" content="en_US" />
+
+    <!-- ═══════════════════════════════════════════
+         TWITTER / X CARDS
+    ═══════════════════════════════════════════ -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://patrol.accesseasy.com/" />
+    <meta name="twitter:title" content="AccessEasy Patrol | Real-Time Security Guard Tour Management" />
+    <meta name="twitter:description" content="Manage security patrols with live GPS tracking, NFC/QR checkpoints, and offline incident dispatch." />
+    <meta name="twitter:image" content="https://patrol.accesseasy.com/images/patrol-og-banner.jpg" />
+
+    <!-- ═══════════════════════════════════════════
+         JSON-LD STRUCTURED DATA (AEO + GEO)
+    ═══════════════════════════════════════════ -->
+
+    <!-- 1. Organization Entity Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "AccessEasy",
+      "url": "https://patrol.accesseasy.com",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://patrol.accesseasy.com/images/logoPatrol.png"
+      },
+      "description": "Enterprise cloud security management platform for guard tour, patrol management, access control, and workforce tracking.",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "Sales",
+        "email": "sales@accesseasy.com"
+      }
+    }
+    </script>
+
+    <!-- 2. SoftwareApplication Product Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "AccessEasy Patrol",
+      "applicationCategory": "SecurityApplication",
+      "operatingSystem": "Web, Android, iOS",
+      "url": "https://patrol.accesseasy.com",
+      "description": "Enterprise cloud security guard tour and patrol management system featuring NFC and QR checkpoint verification, live GPS guard tracking, 4-tier geofence accuracy evaluation, offline-first SQLite sync, incident reporting with photo evidence, and automated compliance reporting.",
+      "offers": {
+        "@type": "Offer",
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/InStock",
+        "description": "Contact for enterprise pricing"
+      },
+      "featureList": [
+        "Real-time GPS guard tracking with live breadcrumb trail",
+        "NFC and QR code checkpoint verification",
+        "4-tier GPS geofence accuracy evaluator (Valid, Warning, Uncertain, Violation)",
+        "Offline-first SQLite event queue with automatic cloud sync",
+        "Incident reporting with geotagged photo and voice evidence",
+        "Guard attendance with geofenced clock-in verification",
+        "SOS distress signal with real-time command center dispatch",
+        "Automated patrol compliance reports"
+      ],
+      "screenshot": {
+        "@type": "ImageObject",
+        "url": "https://patrol.accesseasy.com/images/patrol-og-banner.jpg"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "AccessEasy"
+      }
+    }
+    </script>
+
+    <!-- 3. FAQPage Schema (AEO — Featured Snippet & AI Overview Trigger) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "How does AccessEasy Patrol verify checkpoints without internet?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "AccessEasy Patrol uses an offline-first local event queue on the mobile device. When a guard scans an NFC tag or QR code in a cellular dead zone, the scan is saved locally with an immutable device timestamp. When connectivity is restored, all queued events sync automatically to the cloud in chronological order — ensuring zero data loss."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is the 4-Tier GPS Geofence accuracy system in AccessEasy Patrol?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "The 4-tier GPS accuracy evaluator classifies every checkpoint scan into one of four verdicts: Valid (guard inside geofence, high GPS accuracy), Warning (boundary fringe), Uncertain (excessive satellite drift, location unconfirmed), or Violation (guard outside geofence boundary). This system prevents false alarms from GPS drift and blocks location spoofing attempts."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can AccessEasy Patrol replace legacy guard tour wand systems?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Unlike legacy electronic wand systems that require manual USB docking at shift end and provide no real-time visibility, AccessEasy Patrol provides real-time cloud visibility, instant incident alerts, photo and voice evidence capture, and automated compliance reports from standard Android or iOS smartphones — no proprietary hardware required."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What checkpoint types does AccessEasy Patrol support?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "AccessEasy Patrol supports NFC tag scanning (passive tap, no internet required), QR code scanning (camera-based, works offline), and GPS proximity-based checkpoints. Each checkpoint is tied to a site location with a configurable geofence radius and accuracy threshold."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does AccessEasy Patrol work in areas with no cellular signal?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. The AccessEasy Patrol mobile app is built offline-first. All checkpoint scans, incident reports, and attendance events are stored locally in an SQLite database. A background sync worker automatically uploads all pending events when any network connection is restored, maintaining the original device timestamps."
+          }
+        }
+      ]
+    }
+    </script>
+
+    <!-- 4. BreadcrumbList Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "AccessEasy Patrol",
+          "item": "https://patrol.accesseasy.com/"
+        }
+      ]
+    }
+    </script>
+
+    <!-- ═══════════════════════════════════════════
+         FONT PRECONNECT (Core Web Vitals)
+    ═══════════════════════════════════════════ -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script type="module" crossorigin src="/assets/index-CF0fyBth.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-BUg1r3HS.css">
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app"></div>
   </body>
 </html>

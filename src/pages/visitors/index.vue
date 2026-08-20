@@ -1,16 +1,14 @@
 <template>
   <div class="h-full flex flex-col gap-4 overflow-hidden animate-in">
-    <!-- Teleported Page Header -->
-    <Teleport to="#header-title-slot">
-      <div class="animate-in fade-in slide-in-from-left-2 duration-300">
-        <h1 class="text-lg font-black text-slate-900 dark:text-white tracking-tight">
-          {{ pageTitle }}
-        </h1>
-        <p class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-0.5 truncate max-w-xl">
-          {{ pageSubtitle }}
-        </p>
-      </div>
-    </Teleport>
+    <!-- Page Header -->
+    <div class="shrink-0">
+      <h1 class="text-lg font-black text-slate-900 dark:text-white tracking-tight">
+        {{ pageTitle }}
+      </h1>
+      <p class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-0.5 truncate max-w-xl">
+        {{ pageSubtitle }}
+      </p>
+    </div>
 
     <!-- Portal link copied toast -->
     <transition name="fade">

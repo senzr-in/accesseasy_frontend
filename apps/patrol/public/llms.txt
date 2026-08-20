@@ -1,0 +1,50 @@
+# AccessEasy Patrol — Cloud Security Guard Tour & Patrol Management
+
+> AccessEasy Patrol is an enterprise cloud security guard tour and patrol management platform. It provides NFC and QR checkpoint verification, real-time GPS guard tracking, a 4-tier geofence accuracy engine, offline-first incident reporting, and automated compliance reports for security agencies managing multi-site guard deployments.
+
+## Core Capabilities
+
+- **NFC & QR Checkpoint Verification**: Guards scan NFC tags or QR codes at physical checkpoints. Every scan is cryptographically timestamped and verified against configured site geofence boundaries. Supports both NFC tag tap and QR code camera scan.
+
+- **4-Tier GPS Geofence Accuracy Engine**: Every checkpoint scan is evaluated against the site geofence using two dimensions — physical distance from boundary and GPS satellite horizontal accuracy. The engine classifies each scan into one of four verdicts:
+  - **Valid**: Guard is inside the geofence radius and GPS accuracy is high.
+  - **Warning**: Guard is at the boundary fringe (minor overlap).
+  - **Uncertain**: GPS satellite drift is excessive; location cannot be confirmed.
+  - **Violation**: Guard is outside the configured geofence boundary.
+  This system eliminates false alarms from GPS drift and blocks location spoofing.
+
+- **Offline-First Architecture**: All mobile events — checkpoint scans, incident reports, guard attendance — are committed locally to an SQLite queue with an immutable device timestamp. A background sync worker automatically uploads all pending events in chronological order when cellular or Wi-Fi connectivity is restored. Data is never lost due to connectivity gaps.
+
+- **Real-Time Guard Tracking**: Live GPS breadcrumb trail for all on-duty guards is displayed on the command center map. Supervisors see all active guard positions, active patrols, checkpoint completion status, and time-since-last-scan in real time.
+
+- **Incident & Evidence Management**: Guards capture geotagged photos and voice memos with each incident report. Reports include GPS coordinates, severity classification, and timestamped evidence. Alerts route to the appropriate supervisor tier.
+
+- **Guard Attendance Verification**: Guards clock in via the mobile app with GPS geofence boundary verification to confirm on-site presence before a patrol shift begins.
+
+- **SOS & Command Center Dispatch**: Guards can trigger a distress SOS signal from the mobile app. The command center receives an immediate alert with the guard's live GPS location and can dispatch support in real time.
+
+- **Automated Compliance Reporting**: The platform generates patrol compliance reports per site, per guard, and per time period — showing checkpoint completion rates, missed scans, and incident summaries.
+
+## Platform Architecture
+
+- **Web Command Center**: Vue 3 SPA with real-time WebSocket updates, Leaflet live map, and ApexCharts analytics.
+- **Mobile Guard App**: Flutter (Android/iOS) with offline SQLite storage, background Workmanager sync, and NFC/camera QR scanning.
+- **Backend**: Directus CMS (headless), MQTT for real-time device telemetry.
+
+## Pages & Reference Links
+
+- [Platform Overview & Features](https://patrol.accesseasy.com/#features)
+- [Command Center Demo](https://patrol.accesseasy.com/#product)
+- [Comparison: Patrol vs Legacy Systems](https://patrol.accesseasy.com/#compare)
+- [Pricing Plans](https://patrol.accesseasy.com/#pricing)
+- [Frequently Asked Questions](https://patrol.accesseasy.com/#faq)
+
+## Target Users
+
+Security agencies, facility management companies, hospital and healthcare security, industrial site security, corporate campus security, and enterprise organizations managing multi-site guard deployments.
+
+## Supported Checkpoint Types
+
+- NFC tag scan (passive tap, no internet required)
+- QR code scan (camera-based, works offline)
+- GPS proximity checkpoint (geofence-verified without physical tag)

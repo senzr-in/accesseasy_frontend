@@ -36,7 +36,7 @@
     </div>
     <!-- Navigation -->
     <nav
-      class="flex-1 overflow-y-auto custom-scrollbar py-4 space-y-5"
+      class="flex-1 overflow-y-auto custom-scrollbar py-3 space-y-3"
       :class="isCollapsed ? 'px-2' : 'px-3'"
     >
       <!-- Daily Operations -->

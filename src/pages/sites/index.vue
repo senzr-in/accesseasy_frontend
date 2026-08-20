@@ -17,6 +17,12 @@
         </div>
 
         <div class="flex items-center gap-3">
+          <!-- Plan Capacity Indicator -->
+          <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300">
+            <span class="w-2 h-2 rounded-full" :class="siteLimitInfo.allowed ? 'bg-emerald-500' : 'bg-rose-500'" />
+            <span>Sites: <strong>{{ sites.length }}</strong> / {{ siteLimitInfo.max === Infinity ? '∞' : siteLimitInfo.max }}</span>
+          </div>
+
           <button
             class="h-10 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white flex items-center gap-2 text-xs font-bold shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
             @click="openCreateModal"
@@ -26,6 +32,17 @@
           </button>
         </div>
       </div>
+
+      <!-- Plan Limit Warning Banner (if limit reached or approaching) -->
+      <PlanLimitBanner
+        v-if="!siteLimitInfo.allowed"
+        :message="siteLimitInfo.upgradeMessage"
+        :current-count="sites.length"
+        :max-count="siteLimitInfo.max"
+        severity="error"
+        upgrade-label="Upgrade to Pro"
+        @upgrade="showUpgradeModal = true"
+      />
 
       <!-- Sites Grid View -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -397,6 +414,12 @@
       </div>
     </Teleport>
 
+    <!-- Upgrade Modal -->
+    <UpgradeModal
+      v-model="showUpgradeModal"
+      :trigger-message="siteLimitInfo.upgradeMessage"
+    />
+
   </div>
 </template>
 
@@ -408,14 +431,21 @@ import {
   ChevronDown, SlidersHorizontal, Check 
 } from 'lucide-vue-next';
 import { siteService } from '@/services/siteService';
+import { subscriptionService } from '@/services/subscriptionService';
+import { usePlanGuard } from '@/composables/usePlanGuard';
+import PlanLimitBanner from '@/components/common/PlanLimitBanner.vue';
+import UpgradeModal from '@/components/common/UpgradeModal.vue';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 const router = useRouter();
+const { isNormal, isPro, currentPlan } = usePlanGuard();
 const sites = ref([]);
 const showCreateSiteModal = ref(false);
 const showMapPickerModal = ref(false);
 const showAdvancedSettings = ref(false);
+const showUpgradeModal = ref(false);
+const siteLimitInfo = ref({ allowed: true, current: 0, max: 1, upgradeMessage: '' });
 const locationSearchQuery = ref('');
 const isSearchingLocation = ref(false);
 
@@ -437,6 +467,19 @@ const newSiteForm = ref({
   longitude: 80.2435
 });
 
+const resetSiteForm = () => {
+  newSiteForm.value = {
+    name: '',
+    code: '',
+    address: '',
+    latitude: 12.9716,
+    longitude: 80.2435,
+    geofence_radius: 500,
+    emergency_phone: '',
+    status: 'active'
+  };
+};
+
 // Temporary coordinates for map picker modal
 const tempCoords = ref({ lat: 12.9716, lng: 80.2435 });
 const tempAddress = ref('');
@@ -446,9 +489,15 @@ let leafletMap = null;
 let leafletMarker = null;
 let leafletCircle = null;
 
-const openCreateModal = () => {
+const openCreateModal = async () => {
+  const check = await subscriptionService.checkLimit('sites');
+  siteLimitInfo.value = check;
+  if (!check.allowed) {
+    showUpgradeModal.value = true;
+    return;
+  }
+  resetSiteForm();
   showCreateSiteModal.value = true;
-  showAdvancedSettings.value = false;
 };
 
 const openMapPickerModal = async () => {
@@ -613,12 +662,22 @@ const confirmLocationSelection = () => {
 
 const loadSites = async () => {
   sites.value = await siteService.fetchSites();
+  siteLimitInfo.value = await subscriptionService.checkLimit('sites');
 };
 
 const submitCreateSite = async () => {
-  await siteService.createSite(newSiteForm.value);
-  showCreateSiteModal.value = false;
-  await loadSites();
+  try {
+    await siteService.createSite(newSiteForm.value);
+    showCreateSiteModal.value = false;
+    await loadSites();
+  } catch (error) {
+    if (error.code === 'PLAN_LIMIT_EXCEEDED') {
+      showCreateSiteModal.value = false;
+      showUpgradeModal.value = true;
+    } else {
+      alert(error.message || "Failed to create site.");
+    }
+  }
 };
 
 onMounted(async () => {
