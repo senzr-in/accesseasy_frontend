@@ -1,77 +1,195 @@
+import { authService } from '@/services/authService';
+import { currentUserTenant } from '@/utils/currentUserTenant';
+
+const API_URL = import.meta.env.VITE_API_URL || 'https://appv1.fieldseasy.com/directus';
+
+const getHeaders = () => {
+  const token = authService.getToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
 export const attendanceService = {
   /**
-   * Get attendance time-series analytics (Today, 7 Days, 30 Days, Custom)
+   * Get attendance time-series analytics (Today, 7 Days, 30 Days, Custom) from live database
    */
   async getAttendanceAnalytics(timeframe = '7d', filter = {}) {
-    if (timeframe === 'today') {
+    try {
+      const activeTenantId = await currentUserTenant.getTenantIdAsync();
+      const token = authService.getToken();
+      if (!token) {
+        return this.getEmptyAnalytics(timeframe);
+      }
+
+      if (timeframe === 'today') {
+        const today = new Date().toISOString().split('T')[0];
+        const hours = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
+        
+        let presentCount = 0;
+        let lateCount = 0;
+        let absentCount = 0;
+        let leaveCount = 0;
+        
+        try {
+          let attUrl = `${API_URL}/items/attendance?filter[date][_eq]=${today}&limit=-1&fields=id,status,inTime,outTime,attendance`;
+          if (activeTenantId) {
+            attUrl += `&filter[tenant][_eq]=${encodeURIComponent(activeTenantId)}`;
+          }
+          let res = await fetch(attUrl, { headers: getHeaders() });
+          if (!res.ok && activeTenantId) {
+            res = await fetch(`${API_URL}/items/attendance?filter[date][_eq]=${today}&limit=-1&fields=id,status,inTime,outTime,attendance`, { headers: getHeaders() });
+          }
+          if (res.ok) {
+            const data = await res.json();
+            const records = data.data || [];
+            presentCount = records.length;
+            lateCount = records.filter(r => r.lateBy || (r.inTime && r.inTime > '09:30:00')).length;
+            leaveCount = records.filter(r => r.leaveType && r.leaveType !== 'none').length;
+          }
+        } catch (e) {
+          console.warn('[attendanceService] error querying today attendance:', e);
+        }
+
+        const hourDist = hours.map((_, i) => (presentCount > 0 ? Math.round(presentCount / hours.length) : 0));
+
+        return {
+          categories: hours,
+          series: [
+            { name: 'Present', data: hourDist },
+            { name: 'Late', data: hours.map(() => lateCount > 0 ? Math.round(lateCount / hours.length) : 0) },
+            { name: 'Absent', data: hours.map(() => 0) },
+            { name: 'Leave', data: hours.map(() => 0) },
+            { name: 'Overtime', data: hours.map(() => 0) }
+          ],
+          summary: {
+            presentTotal: presentCount,
+            lateTotal: lateCount,
+            absentTotal: absentCount,
+            leaveTotal: leaveCount,
+            overtimeHours: '0 hrs'
+          }
+        };
+      }
+
+      // 7 Days or 30 Days query
+      const daysCount = timeframe === '30d' ? 30 : 7;
+      const categories = [];
+      const now = new Date();
+      for (let i = daysCount - 1; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i);
+        categories.push(timeframe === '30d' ? `${d.getMonth() + 1}/${d.getDate()}` : d.toLocaleDateString('en-US', { weekday: 'short' }));
+      }
+
+      let attRecords = [];
+      try {
+        let attUrl = `${API_URL}/items/attendance?limit=-1&sort[]=-date&fields=id,date,status,inTime,attendance`;
+        if (activeTenantId) {
+          attUrl += `&filter[tenant][_eq]=${encodeURIComponent(activeTenantId)}`;
+        }
+        let res = await fetch(attUrl, { headers: getHeaders() });
+        if (!res.ok && activeTenantId) {
+          res = await fetch(`${API_URL}/items/attendance?limit=-1&sort[]=-date&fields=id,date,status,inTime,attendance`, { headers: getHeaders() });
+        }
+        if (res.ok) {
+          const data = await res.json();
+          attRecords = data.data || [];
+        }
+      } catch (e) {
+        console.warn('[attendanceService] query historical attendance error:', e);
+      }
+
+      const presentByDay = categories.map(() => 0);
+      const lateByDay = categories.map(() => 0);
+
+      attRecords.forEach(r => {
+        if (!r.date) return;
+        const rDate = new Date(r.date);
+        const idx = categories.findIndex((cat, i) => {
+          const d = new Date(now);
+          d.setDate(d.getDate() - (daysCount - 1 - i));
+          return d.toISOString().split('T')[0] === r.date;
+        });
+        if (idx >= 0) {
+          presentByDay[idx]++;
+          if (r.inTime && r.inTime > '09:30:00') lateByDay[idx]++;
+        }
+      });
+
+      const totalPres = presentByDay.reduce((a, b) => a + b, 0);
+      const totalLate = lateByDay.reduce((a, b) => a + b, 0);
+
       return {
-        categories: ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'],
+        categories,
         series: [
-          { name: 'Present', data: [320, 1150, 1680, 1780, 1810, 1842, 1820, 1790, 1650, 1200] },
-          { name: 'Late', data: [15, 68, 92, 105, 105, 105, 105, 105, 105, 105] },
-          { name: 'Absent', data: [450, 390, 360, 356, 356, 356, 356, 356, 356, 356] },
-          { name: 'Leave', data: [87, 87, 87, 87, 87, 87, 87, 87, 87, 87] },
-          { name: 'Overtime', data: [0, 0, 0, 0, 12, 45, 80, 140, 290, 420] }
+          { name: 'Present', data: presentByDay },
+          { name: 'Late', data: lateByDay },
+          { name: 'Absent', data: categories.map(() => 0) },
+          { name: 'Leave', data: categories.map(() => 0) },
+          { name: 'Overtime', data: categories.map(() => 0) }
         ],
         summary: {
-          presentTotal: 1842,
-          lateTotal: 105,
-          absentTotal: 356,
-          leaveTotal: 87,
-          overtimeHours: '342 hrs'
+          presentTotal: totalPres,
+          lateTotal: totalLate,
+          absentTotal: 0,
+          leaveTotal: 0,
+          overtimeHours: '0 hrs'
         }
       };
+    } catch (err) {
+      console.error('[attendanceService] Error loading analytics:', err);
+      return this.getEmptyAnalytics(timeframe);
     }
+  },
 
-    if (timeframe === '30d') {
-      const days = Array.from({ length: 30 }, (_, i) => `Day ${i + 1}`);
-      return {
-        categories: days,
-        series: [
-          { name: 'Present', data: [1780, 1820, 1840, 1810, 1835, 1200, 850, 1820, 1845, 1860, 1850, 1842, 1220, 890, 1830, 1850, 1840, 1865, 1870, 1210, 880, 1840, 1855, 1860, 1845, 1842, 1230, 895, 1850, 1842] },
-          { name: 'Late', data: [65, 72, 80, 58, 64, 20, 10, 75, 82, 90, 68, 70, 22, 12, 60, 78, 85, 92, 70, 25, 15, 68, 74, 88, 65, 72, 20, 14, 60, 68] },
-          { name: 'Absent', data: [380, 360, 350, 365, 355, 800, 1100, 360, 345, 340, 350, 356, 790, 1080, 360, 345, 350, 335, 340, 795, 1090, 355, 345, 340, 350, 356, 785, 1075, 350, 356] },
-          { name: 'Leave', data: [95, 90, 85, 92, 88, 40, 30, 92, 86, 84, 89, 87, 45, 35, 90, 85, 88, 82, 85, 42, 32, 88, 84, 82, 86, 87, 44, 34, 86, 87] },
-          { name: 'Overtime', data: [210, 240, 310, 290, 350, 80, 40, 230, 260, 320, 300, 340, 90, 50, 220, 250, 315, 295, 360, 85, 45, 225, 255, 330, 310, 342, 88, 48, 235, 342] }
-        ],
-        summary: {
-          presentTotal: '97.2% Avg',
-          lateTotal: '3.4% Avg',
-          absentTotal: '4.8% Avg',
-          leaveTotal: '2.8% Avg',
-          overtimeHours: '8,420 hrs'
-        }
-      };
-    }
-
-    // Default: 7 Days
+  getEmptyAnalytics(timeframe) {
+    const categories = timeframe === 'today' 
+      ? ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00']
+      : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     return {
-      categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      categories,
       series: [
-        { name: 'Present', data: [1810, 1835, 1850, 1845, 1842, 620, 310] },
-        { name: 'Late', data: [68, 74, 82, 60, 55, 12, 5] },
-        { name: 'Absent', data: [365, 350, 340, 355, 356, 840, 980] },
-        { name: 'Leave', data: [92, 88, 85, 87, 87, 35, 20] },
-        { name: 'Overtime', data: [280, 310, 340, 325, 342, 45, 15] }
+        { name: 'Present', data: categories.map(() => 0) },
+        { name: 'Late', data: categories.map(() => 0) },
+        { name: 'Absent', data: categories.map(() => 0) },
+        { name: 'Leave', data: categories.map(() => 0) },
+        { name: 'Overtime', data: categories.map(() => 0) }
       ],
       summary: {
-        presentTotal: 1842,
-        lateTotal: 55,
-        absentTotal: 356,
-        leaveTotal: 87,
-        overtimeHours: '1,957 hrs'
+        presentTotal: 0,
+        lateTotal: 0,
+        absentTotal: 0,
+        leaveTotal: 0,
+        overtimeHours: '0 hrs'
       }
     };
   },
 
   /**
-   * Get regularisation requests pending
+   * Get regularisation requests pending from live database
    */
   async getRegularisationRequests() {
-    return [
-      { id: 'REG-201', employee: 'Arun Kumar', date: '2026-08-18', reason: 'Biometric sync error at Gate 2', status: 'Pending' },
-      { id: 'REG-202', employee: 'Marcus Vance', date: '2026-08-17', reason: 'Remote shift missing checkout', status: 'Pending' },
-      { id: 'REG-203', employee: 'Amara Okonkwo', date: '2026-08-18', reason: 'Emergency field audit visit', status: 'Pending' }
-    ];
+    try {
+      const activeTenantId = await currentUserTenant.getTenantIdAsync();
+      const token = authService.getToken();
+      if (!token) return [];
+
+      const tenantParam = activeTenantId ? `filter[tenant][tenantId][_eq]=${activeTenantId}&` : '';
+      const res = await fetch(`${API_URL}/items/attendance?${tenantParam}filter[status][_eq]=pending&limit=10&fields=id,date,reason,employeeId.firstName,employeeId.lastName`, {
+        headers: getHeaders()
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return (data.data || []).map(r => ({
+          id: `REG-${r.id}`,
+          employee: `${r.employeeId?.firstName || ''} ${r.employeeId?.lastName || ''}`.trim() || 'Employee',
+          date: r.date || '—',
+          reason: r.reason || 'Pending verification',
+          status: 'Pending'
+        }));
+      }
+    } catch (err) {
+      console.warn('[attendanceService] getRegularisationRequests error:', err);
+    }
+    return [];
   }
 };

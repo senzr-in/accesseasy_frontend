@@ -5,21 +5,7 @@
       <span>Filters</span>
     </div>
 
-    <!-- Organization -->
-    <div class="relative shrink-0">
-      <select
-        v-model="filters.organization"
-        class="filter-select"
-        @change="emitChange"
-      >
-        <option value="all">All Organizations</option>
-        <option value="acme_hq">Acme Corporation</option>
-        <option value="acme_tech">Acme Technologies</option>
-        <option value="acme_logistics">Acme Logistics</option>
-      </select>
-    </div>
-
-    <!-- Site -->
+    <!-- Site / Location -->
     <div class="relative shrink-0">
       <select
         v-model="filters.site"
@@ -27,10 +13,9 @@
         @change="emitChange"
       >
         <option value="all">All Sites</option>
-        <option value="site_nyc">Global HQ (New York)</option>
-        <option value="site_sf">Tech Campus (SF)</option>
-        <option value="site_blr">APAC Hub (Bengaluru)</option>
-        <option value="site_ldn">EMEA Office (London)</option>
+        <option v-for="s in options.sites" :key="s.id" :value="s.id">
+          {{ s.name }}
+        </option>
       </select>
     </div>
 
@@ -42,27 +27,23 @@
         @change="emitChange"
       >
         <option value="all">All Departments</option>
-        <option value="eng">Engineering</option>
-        <option value="ops">Operations</option>
-        <option value="sec">Security</option>
-        <option value="fin">Finance</option>
-        <option value="hr">Human Resources</option>
-        <option value="sales">Sales & Marketing</option>
+        <option v-for="d in options.departments" :key="d.id" :value="d.id">
+          {{ d.name }}
+        </option>
       </select>
     </div>
 
-    <!-- Team -->
+    <!-- Access Group / Team -->
     <div class="relative shrink-0">
       <select
         v-model="filters.team"
         class="filter-select"
         @change="emitChange"
       >
-        <option value="all">All Teams</option>
-        <option value="backend">Backend Platform</option>
-        <option value="frontend">Frontend Web</option>
-        <option value="devops">Cloud Infrastructure</option>
-        <option value="facilities">Facilities & Guard</option>
+        <option value="all">All Access Groups</option>
+        <option v-for="t in options.teams" :key="t.id" :value="t.id">
+          {{ t.name }}
+        </option>
       </select>
     </div>
 
@@ -74,9 +55,9 @@
         @change="emitChange"
       >
         <option value="all">All Shifts</option>
-        <option value="morning">Morning (09:00 - 18:00)</option>
-        <option value="afternoon">Afternoon (13:00 - 22:00)</option>
-        <option value="night">Night (22:00 - 06:00)</option>
+        <option v-for="sh in options.shifts" :key="sh.id" :value="sh.id">
+          {{ sh.name }}
+        </option>
       </select>
     </div>
 
@@ -92,10 +73,19 @@
 </template>
 
 <script setup>
-import { reactive, computed } from 'vue';
+import { reactive, ref, computed, onMounted } from 'vue';
 import { SlidersHorizontal } from 'lucide-vue-next';
+import { workforceService } from '@/services/workforceService';
 
 const emit = defineEmits(['filter-change']);
+
+const options = ref({
+  organizations: [],
+  sites: [],
+  departments: [],
+  teams: [],
+  shifts: []
+});
 
 const filters = reactive({
   organization: 'all',
@@ -105,9 +95,29 @@ const filters = reactive({
   shift: 'all'
 });
 
+const loadOptions = async () => {
+  try {
+    const res = await workforceService.getFilterOptions();
+    if (res) {
+      options.value = {
+        organizations: (res.organizations || []).filter(o => o.id !== 'all'),
+        sites: (res.sites || []).filter(s => s.id !== 'all'),
+        departments: (res.departments || []).filter(d => d.id !== 'all'),
+        teams: (res.teams || []).filter(t => t.id !== 'all'),
+        shifts: (res.shifts || []).filter(s => s.id !== 'all')
+      };
+    }
+  } catch (err) {
+    console.warn('Error loading filter options:', err);
+  }
+};
+
+onMounted(() => {
+  loadOptions();
+});
+
 const hasActiveFilters = computed(() => {
   return (
-    filters.organization !== 'all' ||
     filters.site !== 'all' ||
     filters.department !== 'all' ||
     filters.team !== 'all' ||

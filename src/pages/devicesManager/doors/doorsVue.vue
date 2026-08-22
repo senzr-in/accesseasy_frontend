@@ -154,7 +154,7 @@
 
               <!-- Actions -->
               <td class="px-5 py-3 text-right">
-                <div class="flex justify-end gap-2 pr-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div class="flex justify-end gap-2 pr-2">
                   <button
                     v-if="door.deviceUuid"
                     title="Control Door & Open Duration"
@@ -305,6 +305,7 @@ const viewDoorLogs = (door) => {
       doorId: door.id,
       doorName: door.doorName || "",
       doorNumber: door.doorNumber || "",
+      sn: door.deviceUuid || "",
       deviceUuid: door.deviceUuid || ""
     }
   });
@@ -364,43 +365,52 @@ watch(page, () => {
 });
 
 const fetchDoorData = async () => {
-  if (!token) return;
+  const currentToken = authService.getToken();
+  if (!currentToken) return;
   const tenantId = await currentUserTenant.getTenantIdAsync();
-  if (!tenantId) return;
 
   loading.value = true;
 
   try {
-    const filterParams = {
-      "filter[tenant][_eq]": tenantId,
-      "filter[status][_neq]": "archived",
-    };
-    if (searchQuery.value) {
-      filterParams["filter[_or][0][doorName][_icontains]"] = searchQuery.value;
-      filterParams["filter[_or][1][doorNumber][_icontains]"] = searchQuery.value;
-    }
-
-    const queryParams = new URLSearchParams({
-      limit: itemsPerPage.toString(),
-      page: page.value.toString(),
-      sort: "-date_created",
-      meta: "filter_count",
-      ...filterParams
-    });
-
     const fields = [
       "id", "doorNumber", "doorName", "status",
-      "departmentIds", "location", "uniqueId", "deviceUuid"
+      "departmentIds", "location", "uniqueId", "deviceUuid",
+      "antipassbackMode", "doorsConfigure", "timerMode", "senzrMode", "buzzerMode"
     ].map(f => `fields[]=${encodeURIComponent(f)}`).join('&');
 
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/items/doors?${queryParams.toString()}&${fields}`, {
-      headers: { Authorization: `Bearer ${token}` }
+    let url = `${import.meta.env.VITE_API_URL}/items/doors?limit=${itemsPerPage}&page=${page.value}&sort=-id&${fields}`;
+    if (tenantId) {
+      url += `&filter[tenant][_eq]=${encodeURIComponent(tenantId)}`;
+    }
+    if (searchQuery.value) {
+      const q = encodeURIComponent(searchQuery.value);
+      url += `&filter[_or][0][doorName][_icontains]=${q}&filter[_or][1][doorNumber][_icontains]=${q}`;
+    }
+
+    let response = await fetch(url, {
+      headers: { Authorization: `Bearer ${currentToken}` }
     });
+
+    if (!response.ok) {
+      let fallbackUrl = `${import.meta.env.VITE_API_URL}/items/doors?limit=${itemsPerPage}&page=${page.value}&sort=-id&${fields}`;
+      if (tenantId) {
+        fallbackUrl += `&filter[tenant][tenantId][_eq]=${encodeURIComponent(tenantId)}`;
+      }
+      response = await fetch(fallbackUrl, {
+        headers: { Authorization: `Bearer ${currentToken}` }
+      });
+      if (!response.ok) {
+        fallbackUrl = `${import.meta.env.VITE_API_URL}/items/doors?limit=${itemsPerPage}&page=${page.value}&sort=-id&${fields}`;
+        response = await fetch(fallbackUrl, {
+          headers: { Authorization: `Bearer ${currentToken}` }
+        });
+      }
+    }
 
     if (response.ok) {
       const data = await response.json();
       items.value = data.data || [];
-      totalItems.value = data.meta?.filter_count ?? 0;
+      totalItems.value = data.meta?.filter_count ?? (data.data || []).length;
     } else {
       console.error("Fetch doors failed:", response.status, response.statusText);
     }
@@ -422,23 +432,24 @@ const editItem = (item) => {
 };
 
 const deleteItem = async (door) => {
-    if (confirm("Are you sure you want to delete this door?")) {
-        try {
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/items/doors/${door.id}`, {
-                method: "DELETE",
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            if (response.ok) {
-                fetchDoorData();
-            } else {
-                showToast("Failed to delete door", "error");
-            }
-        } catch(err) {
-            console.error("Failed to delete door", err);
+  if (confirm("Are you sure you want to delete this door?")) {
+    try {
+      const currentToken = authService.getToken();
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/items/doors/${door.id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${currentToken}`
         }
+      });
+      if (response.ok) {
+        fetchDoorData();
+      } else {
+        showToast("Failed to delete door", "error");
+      }
+    } catch(err) {
+      console.error("Failed to delete door", err);
     }
+  }
 };
 
 onMounted(() => {

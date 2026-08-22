@@ -15,7 +15,7 @@
               </div>
               <div class="min-w-0">
                 <h2 class="text-base font-bold text-[#111827] truncate">
-                  {{ employee?.first_name }} {{ employee?.last_name }}
+                  {{ employee?.first_name || 'Employee' }} {{ employee?.last_name || '' }}
                 </h2>
                 <p class="text-xs text-[#6B7280] truncate mt-0.5">
                   {{ employee?.designation || 'Staff Member' }} &bull; {{ employee?.department || 'Operations' }}
@@ -26,7 +26,7 @@
                     {{ employee?.status || 'Active' }}
                   </span>
                   <span class="font-mono text-[11px] text-[#9CA3AF]">
-                    {{ employee?.id ? `ID: ${employee.id.slice(0, 8)}` : 'EMP-002481' }}
+                    {{ employee?.employeeId || employee?.id || '—' }}
                   </span>
                 </div>
               </div>
@@ -40,7 +40,7 @@
             </button>
           </div>
 
-          <!-- 2. Navigation Tabs (Overview, Access, Biometrics, Attendance, Logs) -->
+          <!-- 2. Navigation Tabs (Overview, Access, Biometrics, Attendance) -->
           <div class="flex items-center border-b border-[#E5E7EB] px-6 bg-[#F9FAFB] text-xs">
             <button
               v-for="tab in tabs"
@@ -68,19 +68,19 @@
                 <div class="grid grid-cols-2 gap-3">
                   <div class="p-3 rounded-xl border border-[#E5E7EB] bg-[#FFFFFF]">
                     <span class="text-[10px] text-[#9CA3AF]">First Name</span>
-                    <p class="font-semibold text-[#111827] mt-0.5">{{ employee?.first_name || 'Rajesh' }}</p>
+                    <p class="font-semibold text-[#111827] mt-0.5">{{ employee?.first_name || '—' }}</p>
                   </div>
                   <div class="p-3 rounded-xl border border-[#E5E7EB] bg-[#FFFFFF]">
                     <span class="text-[10px] text-[#9CA3AF]">Last Name</span>
-                    <p class="font-semibold text-[#111827] mt-0.5">{{ employee?.last_name || 'Kumar' }}</p>
+                    <p class="font-semibold text-[#111827] mt-0.5">{{ employee?.last_name || '—' }}</p>
                   </div>
                   <div class="p-3 rounded-xl border border-[#E5E7EB] bg-[#FFFFFF] col-span-2">
-                    <span class="text-[10px] text-[#9CA3AF]">Corporate Email</span>
-                    <p class="font-semibold text-[#111827] mt-0.5">{{ employee?.email || 'rajesh.kumar@acme.corp' }}</p>
+                    <span class="text-[10px] text-[#9CA3AF]">Work Email</span>
+                    <p class="font-semibold text-[#111827] mt-0.5">{{ employee?.email || '—' }}</p>
                   </div>
                   <div class="p-3 rounded-xl border border-[#E5E7EB] bg-[#FFFFFF] col-span-2">
                     <span class="text-[10px] text-[#9CA3AF]">Phone Number</span>
-                    <p class="font-semibold text-[#111827] mt-0.5">{{ employee?.phone || '+91 98765 43210' }}</p>
+                    <p class="font-semibold text-[#111827] mt-0.5">{{ employee?.phone || '—' }}</p>
                   </div>
                 </div>
               </div>
@@ -92,19 +92,19 @@
                 <div class="grid grid-cols-2 gap-3">
                   <div class="p-3 rounded-xl border border-[#E5E7EB] bg-[#FFFFFF]">
                     <span class="text-[10px] text-[#9CA3AF]">Department</span>
-                    <p class="font-semibold text-[#111827] mt-0.5">{{ employee?.department || 'Security' }}</p>
+                    <p class="font-semibold text-[#111827] mt-0.5">{{ employee?.department || '—' }}</p>
                   </div>
                   <div class="p-3 rounded-xl border border-[#E5E7EB] bg-[#FFFFFF]">
-                    <span class="text-[10px] text-[#9CA3AF]">Role Level</span>
-                    <p class="font-semibold text-[#111827] mt-0.5">{{ employee?.designation || 'Security Officer' }}</p>
+                    <span class="text-[10px] text-[#9CA3AF]">Designation</span>
+                    <p class="font-semibold text-[#111827] mt-0.5">{{ employee?.designation || 'Staff' }}</p>
                   </div>
                   <div class="p-3 rounded-xl border border-[#E5E7EB] bg-[#FFFFFF]">
-                    <span class="text-[10px] text-[#9CA3AF]">Assigned Site</span>
-                    <p class="font-semibold text-[#111827] mt-0.5">Headquarters (Main Tower)</p>
+                    <span class="text-[10px] text-[#9CA3AF]">Location</span>
+                    <p class="font-semibold text-[#111827] mt-0.5">{{ employee?.location || 'Main Campus' }}</p>
                   </div>
                   <div class="p-3 rounded-xl border border-[#E5E7EB] bg-[#FFFFFF]">
-                    <span class="text-[10px] text-[#9CA3AF]">Workforce Status</span>
-                    <p class="font-semibold text-[#059669] mt-0.5">Active & Verified</p>
+                    <span class="text-[10px] text-[#9CA3AF]">Status</span>
+                    <p class="font-semibold text-[#059669] mt-0.5">{{ employee?.status || 'Active' }}</p>
                   </div>
                 </div>
               </div>
@@ -114,29 +114,16 @@
             <div v-else-if="activeTab === 'access'" class="space-y-4">
               <div>
                 <h4 class="text-[11px] font-bold uppercase tracking-wider text-[#6B7280] mb-3">
-                  Assigned Access Group
+                  Access Authorization
                 </h4>
                 <div class="p-4 rounded-xl border border-[#BFDBFE] bg-[#EFF6FF] space-y-2">
                   <div class="flex items-center justify-between">
-                    <span class="font-bold text-xs text-[#1E40AF]">Standard 24/7 Security Access</span>
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#DBEAFE] text-[#1D4ED8]">Active</span>
+                    <span class="font-bold text-xs text-[#1E40AF]">Standard Access Group</span>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#DBEAFE] text-[#1D4ED8]">
+                      {{ employee?.status === 'Active' ? 'Active' : 'Configured' }}
+                    </span>
                   </div>
-                  <p class="text-[11px] text-[#3B82F6]">Full authorization to primary entrances, security offices, and turnstiles.</p>
-                </div>
-              </div>
-
-              <div>
-                <h4 class="text-[11px] font-bold uppercase tracking-wider text-[#6B7280] mb-2">
-                  Authorized Entry Doors (4)
-                </h4>
-                <div class="space-y-2">
-                  <div v-for="door in authorizedDoors" :key="door.name" class="flex items-center justify-between p-3 rounded-xl border border-[#E5E7EB] bg-[#FFFFFF]">
-                    <div class="flex items-center gap-2.5">
-                      <DoorClosed class="w-4 h-4 text-[#6B7280]" />
-                      <span class="font-semibold text-[#111827]">{{ door.name }}</span>
-                    </div>
-                    <span class="text-[11px] text-[#6B7280]">{{ door.schedule }}</span>
-                  </div>
+                  <p class="text-[11px] text-[#3B82F6]">Configured door and turnstile permissions assigned to this workforce profile.</p>
                 </div>
               </div>
             </div>
@@ -144,7 +131,7 @@
             <!-- Tab 3: Biometrics & Credentials -->
             <div v-else-if="activeTab === 'biometrics'" class="space-y-4">
               <h4 class="text-[11px] font-bold uppercase tracking-wider text-[#6B7280] mb-3">
-                Biometric Template Status
+                Biometric & Credential Status
               </h4>
 
               <!-- Face -->
@@ -154,12 +141,15 @@
                     <ScanFace class="w-4 h-4" />
                   </div>
                   <div>
-                    <p class="font-semibold text-[#111827]">Face Recognition Template</p>
-                    <p class="text-[11px] text-[#6B7280]">3D Neural Embedding Synced</p>
+                    <p class="font-semibold text-[#111827]">Facial Recognition</p>
+                    <p class="text-[11px] text-[#6B7280]">{{ employee?.has_face || employee?.face_registered ? 'Face Enrolled' : 'Not Registered' }}</p>
                   </div>
                 </div>
-                <span class="px-2 py-1 rounded-md text-[10px] font-bold bg-[#ECFDF5] text-[#059669]">
-                  Enrolled (99.4%)
+                <span
+                  class="px-2 py-1 rounded-md text-[10px] font-bold"
+                  :class="employee?.has_face || employee?.face_registered ? 'bg-[#ECFDF5] text-[#059669]' : 'bg-[#F1F5F9] text-[#64748B]'"
+                >
+                  {{ employee?.has_face || employee?.face_registered ? 'Enrolled' : 'Pending' }}
                 </span>
               </div>
 
@@ -170,12 +160,15 @@
                     <Fingerprint class="w-4 h-4" />
                   </div>
                   <div>
-                    <p class="font-semibold text-[#111827]">Fingerprint Templates</p>
-                    <p class="text-[11px] text-[#6B7280]">Right Thumb, Left Index</p>
+                    <p class="font-semibold text-[#111827]">Fingerprint Sensor</p>
+                    <p class="text-[11px] text-[#6B7280]">{{ employee?.has_finger || employee?.biometric_enrolled ? 'Biometric Enrolled' : 'Not Enrolled' }}</p>
                   </div>
                 </div>
-                <span class="px-2 py-1 rounded-md text-[10px] font-bold bg-[#ECFDF5] text-[#059669]">
-                  2 Enrolled
+                <span
+                  class="px-2 py-1 rounded-md text-[10px] font-bold"
+                  :class="employee?.has_finger || employee?.biometric_enrolled ? 'bg-[#ECFDF5] text-[#059669]' : 'bg-[#F1F5F9] text-[#64748B]'"
+                >
+                  {{ employee?.has_finger || employee?.biometric_enrolled ? 'Enrolled' : 'Pending' }}
                 </span>
               </div>
 
@@ -187,76 +180,28 @@
                   </div>
                   <div>
                     <p class="font-semibold text-[#111827]">Smart RFID Card</p>
-                    <p class="text-[11px] font-mono text-[#6B7280]">{{ employee?.card_number || 'CRD-89421' }}</p>
+                    <p class="text-[11px] font-mono text-[#6B7280]">{{ employee?.card_number || 'No Card Assigned' }}</p>
                   </div>
                 </div>
-                <span class="px-2 py-1 rounded-md text-[10px] font-bold bg-[#F5F3FF] text-[#7C3AED]">
-                  Active
-                </span>
-              </div>
-
-              <!-- Mobile Pass -->
-              <div class="p-3.5 rounded-xl border border-[#E5E7EB] bg-[#FFFFFF] flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <div class="p-2 rounded-lg bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE]">
-                    <Smartphone class="w-4 h-4" />
-                  </div>
-                  <div>
-                    <p class="font-semibold text-[#111827]">NFC / BLE Mobile Pass</p>
-                    <p class="text-[11px] text-[#6B7280]">Device Authenticated</p>
-                  </div>
-                </div>
-                <span class="px-2 py-1 rounded-md text-[10px] font-bold bg-[#EFF6FF] text-[#2563EB]">
-                  Enabled
+                <span
+                  class="px-2 py-1 rounded-md text-[10px] font-bold"
+                  :class="employee?.card_number ? 'bg-[#F5F3FF] text-[#7C3AED]' : 'bg-[#F1F5F9] text-[#64748B]'"
+                >
+                  {{ employee?.card_number ? 'Active' : 'None' }}
                 </span>
               </div>
             </div>
 
-            <!-- Tab 4: Attendance Analytics -->
+            <!-- Tab 4: Attendance Summary -->
             <div v-else-if="activeTab === 'attendance'" class="space-y-4">
               <h4 class="text-[11px] font-bold uppercase tracking-wider text-[#6B7280] mb-3">
-                Attendance & Punctuality Summary
+                Attendance & Punctuality
               </h4>
-
-              <div class="grid grid-cols-3 gap-2.5 text-center">
-                <div class="p-3 rounded-xl border border-[#E5E7EB] bg-[#FFFFFF]">
-                  <p class="text-[10px] text-[#9CA3AF]">Punctuality</p>
-                  <p class="text-base font-bold text-[#059669] mt-0.5">98.2%</p>
-                </div>
-                <div class="p-3 rounded-xl border border-[#E5E7EB] bg-[#FFFFFF]">
-                  <p class="text-[10px] text-[#9CA3AF]">Avg Hours</p>
-                  <p class="text-base font-bold text-[#111827] mt-0.5">8h 42m</p>
-                </div>
-                <div class="p-3 rounded-xl border border-[#E5E7EB] bg-[#FFFFFF]">
-                  <p class="text-[10px] text-[#9CA3AF]">Leaves</p>
-                  <p class="text-base font-bold text-[#2563EB] mt-0.5">2 Days</p>
-                </div>
-              </div>
 
               <div class="p-4 rounded-xl border border-[#E5E7EB] bg-[#FFFFFF] space-y-2">
-                <p class="font-bold text-xs text-[#111827]">Today's Shift: General (09:00 AM – 06:00 PM)</p>
+                <p class="font-bold text-xs text-[#111827]">Current Status: {{ employee?.status || 'Active' }}</p>
                 <div class="flex items-center justify-between text-xs text-[#6B7280] pt-1">
-                  <span>First Check-in: <strong class="text-[#059669]">08:52 AM</strong></span>
-                  <span>Last Checkout: <strong class="text-[#111827]">In Progress</strong></span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Tab 5: Access Logs -->
-            <div v-else-if="activeTab === 'logs'" class="space-y-3">
-              <h4 class="text-[11px] font-bold uppercase tracking-wider text-[#6B7280] mb-3">
-                Recent Access Activity
-              </h4>
-
-              <div class="space-y-2">
-                <div v-for="log in sampleLogs" :key="log.time" class="p-3 rounded-xl border border-[#E5E7EB] bg-[#FFFFFF] flex items-center justify-between">
-                  <div>
-                    <p class="font-semibold text-xs text-[#111827]">{{ log.door }}</p>
-                    <p class="text-[10px] text-[#6B7280] mt-0.5">{{ log.method }} &bull; {{ log.time }}</p>
-                  </div>
-                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-[#ECFDF5] text-[#059669]">
-                    Granted
-                  </span>
+                  <span>Last Active Time: <strong class="text-[#0F172A]">{{ employee?.last_active || '—' }}</strong></span>
                 </div>
               </div>
             </div>
@@ -305,8 +250,7 @@ const tabs = [
   { id: 'overview', label: 'Overview' },
   { id: 'access', label: 'Access' },
   { id: 'biometrics', label: 'Biometrics' },
-  { id: 'attendance', label: 'Attendance' },
-  { id: 'logs', label: 'Logs' }
+  { id: 'attendance', label: 'Attendance' }
 ];
 
 const activeTab = ref(props.initialTab || 'overview');
@@ -323,17 +267,4 @@ const close = () => {
 const getInitials = (first, last) => {
   return `${(first?.[0] || 'E')}${(last?.[0] || '')}`.toUpperCase();
 };
-
-const authorizedDoors = [
-  { name: 'Main Lobby Turnstiles (North)', schedule: '24/7 Unrestricted' },
-  { name: 'Security Control Operations Center', schedule: '24/7 Authorized' },
-  { name: 'B1 Secure Staff Entrance', schedule: '24/7 Unrestricted' },
-  { name: 'Server & IT Room 3A', schedule: 'Escort Required' }
-];
-
-const sampleLogs = [
-  { door: 'Main Lobby Turnstiles (North)', method: 'Face Recognition', time: 'Today at 08:52:14 AM' },
-  { door: 'Security Operations Center B1', method: 'Fingerprint Sensor', time: 'Today at 10:14:02 AM' },
-  { door: 'Main Lobby Turnstiles (South)', method: 'Smart RFID Card', time: 'Yesterday at 06:12:45 PM' }
-];
 </script>

@@ -22,9 +22,9 @@
         @click="navigateTo('/dashboard/settings/logs?status=granted')"
       >
         <span class="text-[10px] uppercase font-bold text-[#64748B]">Granted</span>
-        <p class="text-xl font-bold text-[#0F172A] mt-1">12,481</p>
+        <p class="text-xl font-bold text-[#0F172A] mt-1">{{ grantedCount.toLocaleString() }}</p>
         <span class="inline-flex items-center text-[10px] text-[#059669] font-semibold mt-1">
-          99.8% rate
+          Today
         </span>
       </div>
 
@@ -34,9 +34,9 @@
         @click="navigateTo('/dashboard/settings/logs?status=denied')"
       >
         <span class="text-[10px] uppercase font-bold text-[#64748B]">Denied</span>
-        <p class="text-xl font-bold text-[#DC2626] mt-1">23</p>
+        <p class="text-xl font-bold text-[#DC2626] mt-1">{{ deniedCount.toLocaleString() }}</p>
         <span class="inline-flex items-center text-[10px] text-[#DC2626] font-semibold mt-1">
-          0.2% rate
+          {{ deniedCount > 0 ? 'Review' : 'None' }}
         </span>
       </div>
 
@@ -46,9 +46,9 @@
         @click="navigateTo('/dashboard/settings/logs?filter=suspicious')"
       >
         <span class="text-[10px] uppercase font-bold text-[#64748B]">Suspicious</span>
-        <p class="text-xl font-bold text-[#D97706] mt-1">5</p>
+        <p class="text-xl font-bold text-[#D97706] mt-1">{{ suspiciousCount.toLocaleString() }}</p>
         <span class="inline-flex items-center text-[10px] text-[#D97706] font-semibold mt-1">
-          Flagged
+          {{ suspiciousCount > 0 ? 'Flagged' : 'None' }}
         </span>
       </div>
     </div>
@@ -67,8 +67,8 @@
           <span class="text-xs font-bold text-[#0F172A]">Doors</span>
         </div>
         <div class="flex items-center gap-3 text-xs">
-          <span class="text-[#059669] font-bold">42 Online</span>
-          <span class="text-[#DC2626] font-bold">2 Offline</span>
+          <span class="text-[#059669] font-bold">{{ doorsData.online }} Configured</span>
+          <span v-if="doorsData.offline > 0" class="text-[#DC2626] font-bold">{{ doorsData.offline }} Offline</span>
         </div>
       </div>
 
@@ -84,8 +84,8 @@
           <span class="text-xs font-bold text-[#0F172A]">Turnstiles</span>
         </div>
         <div class="flex items-center gap-3 text-xs">
-          <span class="text-[#059669] font-bold">8 Online</span>
-          <span class="text-[#94A3B8] font-medium">0 Offline</span>
+          <span class="text-[#059669] font-bold">{{ turnstilesData.online }} Online</span>
+          <span class="text-[#94A3B8] font-medium">{{ turnstilesData.offline }} Offline</span>
         </div>
       </div>
 
@@ -101,8 +101,9 @@
           <span class="text-xs font-bold text-[#0F172A]">Controllers</span>
         </div>
         <div class="flex items-center gap-3 text-xs">
-          <span class="text-[#059669] font-bold">31 Online</span>
-          <span class="text-[#DC2626] font-bold">1 Offline</span>
+          <span class="text-[#059669] font-bold">{{ controllersData.online }} Online</span>
+          <span v-if="controllersData.offline > 0" class="text-[#DC2626] font-bold">{{ controllersData.offline }} Offline</span>
+          <span v-else class="text-[#94A3B8] font-medium">0 Offline</span>
         </div>
       </div>
     </div>
@@ -110,10 +111,21 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { ChevronRight, DoorClosed, ShieldCheck, Server } from 'lucide-vue-next';
+import { useDeviceStatus } from '@/composables/workforce/useDeviceStatus';
 
 const router = useRouter();
+const { accessOverview } = useDeviceStatus();
+
+const grantedCount = computed(() => accessOverview.value?.granted || 0);
+const deniedCount = computed(() => accessOverview.value?.denied || 0);
+const suspiciousCount = computed(() => accessOverview.value?.suspicious || 0);
+
+const doorsData = computed(() => accessOverview.value?.equipment?.doors || { online: 0, offline: 0, total: 0 });
+const turnstilesData = computed(() => accessOverview.value?.equipment?.turnstiles || { online: 0, offline: 0, total: 0 });
+const controllersData = computed(() => accessOverview.value?.equipment?.controllers || { online: 0, offline: 0, total: 0 });
 
 const navigateTo = (path) => {
   router.push(path);

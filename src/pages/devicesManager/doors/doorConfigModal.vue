@@ -182,6 +182,25 @@
                 </option>
               </select>
             </div>
+
+            <!-- Anti-Passback Mode Select -->
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <ShieldCheck class="w-3.5 h-3.5 text-blue-500" />
+                <span>Anti-Passback (APB) Mode</span>
+              </label>
+              <select
+                v-model.number="door.apb"
+                class="w-full h-9 px-3 text-xs bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500 text-slate-900 dark:text-white"
+              >
+                <option :value="0">
+                  0 - Disabled
+                </option>
+                <option :value="1">
+                  1 - Enabled (Strict In/Out Sequence)
+                </option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -385,10 +404,10 @@ watch(() => props.deviceUuid, (val) => {
 let unsubReply = null;
 
 const doorsConfig = ref([
-  { doorIndex: '01', timing: 5, buzzer: 1, sensor: 0 },
-  { doorIndex: '02', timing: 5, buzzer: 1, sensor: 0 },
-  { doorIndex: '03', timing: 5, buzzer: 1, sensor: 0 },
-  { doorIndex: '04', timing: 5, buzzer: 1, sensor: 0 },
+  { doorIndex: '01', timing: 5, buzzer: 1, sensor: 0, apb: 0 },
+  { doorIndex: '02', timing: 5, buzzer: 1, sensor: 0, apb: 0 },
+  { doorIndex: '03', timing: 5, buzzer: 1, sensor: 0, apb: 0 },
+  { doorIndex: '04', timing: 5, buzzer: 1, sensor: 0, apb: 0 },
 ]);
 
 const mqttConfig = ref({
@@ -428,7 +447,8 @@ onMounted(() => {
               doorIndex: item.doorIndex || item.index || '01',
               timing: Number(item.timing || item.door_timing || 5),
               buzzer: Number(item.buzzer ?? 1),
-              sensor: Number(item.sensor ?? 0)
+              sensor: Number(item.sensor ?? 0),
+              apb: Number(item.apb ?? 0)
             }));
             emit('toast', { title: 'Config Updated', message: `Updated 4-door parameters from ${targetUuid.value}`, type: 'success' });
           }
@@ -472,7 +492,8 @@ const fetchConfig = async () => {
           doorIndex: item.doorIndex || item.index || '01',
           timing: Number(item.timing || item.door_timing || 5),
           buzzer: Number(item.buzzer ?? 1),
-          sensor: Number(item.sensor ?? 0)
+          sensor: Number(item.sensor ?? 0),
+          apb: Number(item.apb ?? 0)
         }));
       }
       if (res.data.mqttInfo) {
@@ -505,9 +526,10 @@ const saveConfig = async () => {
       payloadData = {
         childInfo: doorsConfig.value.map(d => ({
           doorIndex: d.doorIndex,
-          timing: Number(d.timing),
-          buzzer: Number(d.buzzer),
-          sensor: Number(d.sensor)
+          timing: Number(d.timing || 5),
+          buzzer: Number(d.buzzer ?? 1),
+          sensor: Number(d.sensor ?? 0),
+          apb: Number(d.apb ?? 0)
         }))
       };
     } else if (activeTab.value === 'mqttInfo') {
@@ -536,9 +558,42 @@ const saveConfig = async () => {
           })
         }).catch(err => console.warn('[doorConfigModal] API patch warning:', err));
       }
+
+      // Also sync door timing and sensor settings to matching Directus door records
+      if (activeTab.value === 'childInfo') {
+        try {
+          const dRes = await fetch(`${import.meta.env.VITE_API_URL}/items/doors?filter[deviceUuid][_eq]=${targetUuid.value}&fields=id,doorNumber`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (dRes.ok) {
+            const dData = await dRes.json();
+            (dData.data || []).forEach(async (doorRec) => {
+              const rawNum = parseInt(doorRec.doorNumber || '1', 10);
+              const channelIdx = ((isNaN(rawNum) ? 0 : rawNum - 1) % 4);
+              const cfg = doorsConfig.value[channelIdx];
+              if (cfg && doorRec.id) {
+                await fetch(`${import.meta.env.VITE_API_URL}/items/doors/${doorRec.id}`, {
+                  method: 'PATCH',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                  },
+                  body: JSON.stringify({
+                    timerMode: String(cfg.timing || 5),
+                    senzrMode: Number(cfg.sensor || 0),
+                    antipassbackMode: Number(cfg.apb || 0)
+                  })
+                }).catch(e => console.debug('Directus door sync warning:', e));
+              }
+            });
+          }
+        } catch (e) {
+          console.debug('Directus door sync query warning:', e);
+        }
+      }
     }
 
-    // 2. Dispatch setConfig command via Knative HTTP Router
+    // 2. Dispatch setConfig command via Knative HTTP Router / MQTT
     const res = await sendSetConfig(targetUuid.value, payloadData);
     console.log('[doorConfigModal] Knative setConfig reply:', res);
 

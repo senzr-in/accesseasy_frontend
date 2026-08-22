@@ -171,7 +171,7 @@ const handleSelectEvent = (ev) => {
     status: ev.result === 'Granted' ? 'On-site' : 'Denied',
     location: ev.location,
     id: ev.id,
-    card_number: 'CRD-89421'
+    card_number: ev.card_number || null
   };
   isProfileDrawerOpen.value = true;
 };

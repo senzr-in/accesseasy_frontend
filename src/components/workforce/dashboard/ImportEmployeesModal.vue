@@ -10,7 +10,7 @@
         <div class="px-6 py-4 border-b border-[#E8E8E8] flex items-center justify-between">
           <div>
             <h3 class="text-sm font-bold text-[#171717]">Import Employees</h3>
-            <p class="text-xs text-[#6B6B6B] mt-0.5">Upload CSV or Excel roster for batch provisioning</p>
+            <p class="text-xs text-[#6B6B6B] mt-0.5">Upload CSV file for batch employee provisioning</p>
           </div>
           <button
             class="w-7 h-7 rounded-md border border-[#E8E8E8] flex items-center justify-center text-[#6B6B6B] hover:text-[#171717] hover:bg-[#F7F7F8] transition-colors cursor-pointer"
@@ -29,11 +29,11 @@
           >
             <UploadCloud class="w-8 h-8 text-[#6B6B6B] mx-auto mb-2" />
             <p class="font-medium text-[#171717]">Click to select CSV or drag file here</p>
-            <p class="text-[11px] text-[#929292] mt-1">Supports UTF-8 CSV, XLSX up to 50MB (100,000+ rows)</p>
+            <p class="text-[11px] text-[#929292] mt-1">Supports standard UTF-8 CSV</p>
             <input
               ref="fileInput"
               type="file"
-              accept=".csv, .xlsx"
+              accept=".csv"
               class="hidden"
               @change="handleFileSelected"
             >
@@ -46,6 +46,11 @@
               <span class="font-medium text-[#171717]">{{ selectedFile.name }}</span>
             </div>
             <span class="text-[11px] text-[#6B6B6B]">{{ (selectedFile.size / 1024).toFixed(1) }} KB</span>
+          </div>
+
+          <!-- Error / Feedback -->
+          <div v-if="importError" class="p-2.5 rounded-lg bg-[#FEF2F2] border border-[#FECACA] text-[#DC2626] text-xs">
+            {{ importError }}
           </div>
 
           <!-- Template Download Link -->
@@ -83,6 +88,8 @@
 <script setup>
 import { ref } from 'vue';
 import { X, UploadCloud, FileSpreadsheet } from 'lucide-vue-next';
+import { processCSVImport } from '@/utils/helpers/importHelper';
+import { currentUserTenant } from '@/utils/currentUserTenant';
 
 defineProps({
   isOpen: Boolean
@@ -92,20 +99,23 @@ const emit = defineEmits(['update:isOpen', 'success']);
 
 const selectedFile = ref(null);
 const isImporting = ref(false);
+const importError = ref('');
 
 const close = () => {
   emit('update:isOpen', false);
   selectedFile.value = null;
+  importError.value = '';
 };
 
 const handleFileSelected = (e) => {
   if (e.target.files && e.target.files[0]) {
     selectedFile.value = e.target.files[0];
+    importError.value = '';
   }
 };
 
 const downloadTemplate = () => {
-  const csvContent = "data:text/csv;charset=utf-8,First_Name,Last_Name,Email,Department,Card_Number,Access_Group\nJohn,Doe,john@acme.corp,Engineering,CRD-1001,General Staff";
+  const csvContent = "data:text/csv;charset=utf-8,Employee ID,First Name,Last Name,Email,Phone,Designation\n";
   const encodedUri = encodeURI(csvContent);
   const link = document.createElement("a");
   link.setAttribute("href", encodedUri);
@@ -115,12 +125,21 @@ const downloadTemplate = () => {
   document.body.removeChild(link);
 };
 
-const processImport = () => {
+const processImport = async () => {
+  if (!selectedFile.value) return;
   isImporting.value = true;
-  setTimeout(() => {
-    isImporting.value = false;
-    emit('success', { count: 120 });
+  importError.value = '';
+
+  try {
+    const tenantId = await currentUserTenant.getTenantIdAsync();
+    await processCSVImport(selectedFile.value, 'personalModule', tenantId);
+    emit('success');
     close();
-  }, 1200);
+  } catch (err) {
+    console.error('Import processing error:', err);
+    importError.value = err.message || 'Failed to process import.';
+  } finally {
+    isImporting.value = false;
+  }
 };
 </script>

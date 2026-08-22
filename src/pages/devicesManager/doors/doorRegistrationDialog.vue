@@ -287,17 +287,38 @@ watch(() => props.modelValue, (isOpen) => {
     fetchControllers();
     
     if (props.door) {
+      let depts = [];
+      if (props.door.departmentIds) {
+        try {
+          depts = typeof props.door.departmentIds === 'string'
+            ? JSON.parse(props.door.departmentIds)
+            : props.door.departmentIds;
+        } catch {
+          depts = [];
+        }
+      } else if (Array.isArray(props.door.assignedDepts)) {
+        depts = props.door.assignedDepts.map(d => d.id || d);
+      }
+
       // Map Directus fields
       formData.value = {
         doorNumber: props.door.doorNumber || 1,
         doorName: props.door.doorName || '',
         location: props.door.location || '',
         deviceUuid: props.door.deviceUuid || '',
-        assignedDepts: (props.door.assignedDepts || []).map(d => d.id || d),
-        antiPassbackMode: props.door.antiPassbackMode !== undefined ? props.door.antiPassbackMode : 0,
-        interlockMode: props.door.interlockMode !== undefined ? props.door.interlockMode : 0,
-        doorTiming: props.door.doorTiming || 5,
-        sensorMode: props.door.sensorMode !== undefined ? props.door.sensorMode : 1
+        assignedDepts: Array.isArray(depts) ? depts : [],
+        antiPassbackMode: props.door.antipassbackMode !== undefined && props.door.antipassbackMode !== null
+          ? Number(props.door.antipassbackMode)
+          : (props.door.antiPassbackMode !== undefined ? Number(props.door.antiPassbackMode) : 0),
+        interlockMode: props.door.doorsConfigure !== undefined && props.door.doorsConfigure !== null
+          ? Number(props.door.doorsConfigure)
+          : (props.door.interlockMode !== undefined ? Number(props.door.interlockMode) : 0),
+        doorTiming: props.door.timerMode !== undefined && props.door.timerMode !== null
+          ? Number(props.door.timerMode)
+          : (props.door.doorTiming !== undefined ? Number(props.door.doorTiming) : 5),
+        sensorMode: props.door.senzrMode !== undefined && props.door.senzrMode !== null
+          ? Number(props.door.senzrMode)
+          : (props.door.sensorMode !== undefined ? Number(props.door.sensorMode) : 1)
       };
     } else {
       // Reset
@@ -325,10 +346,16 @@ const fetchDepartments = async () => {
     const token = authService.getToken();
     const tenantId = await currentUserTenant.getTenantIdAsync();
     
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/items/department?filter[tenant][_eq]=${tenantId}&fields[]=id&fields[]=departmentName`,
+    let res = await fetch(
+      `${import.meta.env.VITE_API_URL}/items/department?filter[tenant][tenantId][_eq]=${tenantId}&fields[]=id&fields[]=departmentName`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
+    if (!res.ok) {
+      res = await fetch(
+        `${import.meta.env.VITE_API_URL}/items/department?filter[tenant][_eq]=${tenantId}&fields[]=id&fields[]=departmentName`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    }
     if (res.ok) {
       const data = await res.json();
       departments.value = data.data || [];
@@ -343,10 +370,16 @@ const fetchControllers = async () => {
     const token = authService.getToken();
     const tenantId = await currentUserTenant.getTenantIdAsync();
     
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/items/controllers?filter[tenant][_eq]=${tenantId}&fields[]=id&fields[]=controllerName&fields[]=sn`,
+    let res = await fetch(
+      `${import.meta.env.VITE_API_URL}/items/controllers?filter[tenant][tenantId][_eq]=${tenantId}&fields[]=id&fields[]=controllerName&fields[]=sn`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
+    if (!res.ok) {
+      res = await fetch(
+        `${import.meta.env.VITE_API_URL}/items/controllers?filter[tenant][_eq]=${tenantId}&fields[]=id&fields[]=controllerName&fields[]=sn`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    }
     if (res.ok) {
       const data = await res.json();
       controllers.value = data.data || [];
@@ -358,10 +391,16 @@ const fetchControllers = async () => {
 
 const generateDoorNumber = async (token, tenantId) => {
   try {
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/items/doors?filter[tenant][_eq]=${tenantId}&fields=doorNumber`,
+    let res = await fetch(
+      `${import.meta.env.VITE_API_URL}/items/doors?filter[tenant][tenantId][_eq]=${tenantId}&fields=doorNumber`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
+    if (!res.ok) {
+      res = await fetch(
+        `${import.meta.env.VITE_API_URL}/items/doors?filter[tenant][_eq]=${tenantId}&fields=doorNumber`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+    }
     const data = await res.json();
     if (!data.data || data.data.length === 0) return '1';
     let max = 0;
@@ -385,20 +424,29 @@ const handleSubmit = async () => {
       : `${import.meta.env.VITE_API_URL}/items/doors`;
     
     const doorNumber = isEdit ? (props.door.doorNumber || '1') : await generateDoorNumber(token, tenantId);
-    const uniqueId = isEdit ? (props.door.uniqueId || `${tenantId}-${doorNumber}`) : `${tenantId}-${doorNumber}`;
+    
+    // Generate a guaranteed unique identifier for newly created doors
+    const generateUniqueDoorId = () => {
+      const devPrefix = formData.value.deviceUuid ? `${String(formData.value.deviceUuid).trim().slice(0, 8)}-` : '';
+      const timestamp = Date.now().toString(36);
+      const rand = Math.random().toString(36).substring(2, 7);
+      return `${tenantId}-${devPrefix}door-${doorNumber}-${timestamp}-${rand}`;
+    };
+
+    const uniqueId = isEdit ? (props.door.uniqueId || generateUniqueDoorId()) : generateUniqueDoorId();
 
     const payload = {
       doorName: formData.value.doorName,
-      doorNumber,
+      doorNumber: String(doorNumber),
       location: formData.value.location || null,
       status: 'active',
       tenant: tenantId,
       uniqueId,
       deviceUuid: formData.value.deviceUuid || null,
-      antiPassbackMode: formData.value.antiPassbackMode,
-      interlockMode: formData.value.interlockMode,
-      doorTiming: formData.value.doorTiming,
-      sensorMode: formData.value.sensorMode,
+      antipassbackMode: formData.value.antiPassbackMode,
+      doorsConfigure: formData.value.interlockMode ? String(formData.value.interlockMode) : null,
+      timerMode: String(formData.value.doorTiming || 5),
+      senzrMode: formData.value.sensorMode,
       departmentIds: formData.value.assignedDepts.length > 0
         ? JSON.stringify(formData.value.assignedDepts)
         : null,
@@ -414,18 +462,21 @@ const handleSubmit = async () => {
     });
 
     if (res.ok) {
-      // If a hardware controller is linked, publish updated door configuration via MQTT V1.0.6
+      // If a hardware controller is linked, publish updated door configuration via MQTT V1.0.6 childInfo
       if (formData.value.deviceUuid) {
-        const doorNum = ((parseInt(doorNumber, 10) - 1) % 4) + 1;
+        const rawNum = parseInt(doorNumber, 10);
+        const doorNum = ((isNaN(rawNum) ? 0 : rawNum - 1) % 4) + 1;
         const doorIndex = String(doorNum).padStart(2, '0');
-        mqttService.sendSetConfig(formData.value.deviceUuid, {
-          index: doorIndex,
-          timing: formData.value.doorTiming || 5,
-          buzzer: 1,
-          sensor: formData.value.sensorMode,
-          apb: formData.value.antiPassbackMode,
-          interlock: formData.value.interlockMode
-        });
+        mqttService.sendSet4DoorConfig(formData.value.deviceUuid, [
+          {
+            index: doorIndex,
+            timing: Number(formData.value.doorTiming) || 5,
+            buzzer: 1,
+            sensor: Number(formData.value.sensorMode),
+            apb: Number(formData.value.antiPassbackMode),
+            interlock: Number(formData.value.interlockMode)
+          }
+        ]);
       }
 
       emit('success');

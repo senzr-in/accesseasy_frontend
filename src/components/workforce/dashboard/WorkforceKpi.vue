@@ -12,10 +12,15 @@
         </div>
       </div>
       <div class="flex items-baseline justify-between">
-        <span class="text-3xl font-bold tracking-tight text-[#0F172A]">2,486</span>
-        <span class="inline-flex items-center text-xs font-semibold text-[#059669] bg-[#ECFDF5] px-2 py-0.5 rounded-full border border-[#A7F3D0]">
+        <span class="text-3xl font-bold tracking-tight text-[#0F172A]">
+          {{ kpiData.totalEmployees.value.toLocaleString() }}
+        </span>
+        <span
+          v-if="kpiData.totalEmployees.value > 0"
+          class="inline-flex items-center text-xs font-semibold text-[#059669] bg-[#ECFDF5] px-2 py-0.5 rounded-full border border-[#A7F3D0]"
+        >
           <TrendingUp class="w-3 h-3 mr-1" />
-          +4.2%
+          {{ kpiData.totalEmployees.change }}
         </span>
       </div>
       <p class="text-[11px] text-[#94A3B8] mt-2.5 font-normal">
@@ -26,7 +31,7 @@
     <!-- 2. Present Today -->
     <div
       class="kpi-card group cursor-pointer"
-      @click="navigateTo('/dashboard/easy-access/employees?status=on-site')"
+      @click="navigateTo('/dashboard/easy-access/employees?status=active')"
     >
       <div class="flex items-center justify-between mb-3">
         <span class="text-xs font-semibold text-[#64748B]">Present Today</span>
@@ -35,20 +40,22 @@
         </div>
       </div>
       <div class="flex items-baseline justify-between">
-        <span class="text-3xl font-bold tracking-tight text-[#0F172A]">1,842</span>
+        <span class="text-3xl font-bold tracking-tight text-[#0F172A]">
+          {{ kpiData.presentToday.value.toLocaleString() }}
+        </span>
         <span class="inline-flex items-center text-xs font-semibold text-[#2563EB] bg-[#EFF6FF] px-2 py-0.5 rounded-full border border-[#DBEAFE]">
-          74.1%
+          {{ kpiData.presentToday.rate }}
         </span>
       </div>
       <p class="text-[11px] text-[#94A3B8] mt-2.5 font-normal">
-        Checked in across all shifts
+        Checked in across today's records
       </p>
     </div>
 
     <!-- 3. Currently On-Site -->
     <div
       class="kpi-card group cursor-pointer"
-      @click="navigateTo('/dashboard/easy-access/employees?status=on-site')"
+      @click="navigateTo('/dashboard/easy-access/employees?status=active')"
     >
       <div class="flex items-center justify-between mb-3">
         <span class="text-xs font-semibold text-[#64748B]">Currently On-Site</span>
@@ -57,14 +64,16 @@
         </div>
       </div>
       <div class="flex items-baseline justify-between">
-        <span class="text-3xl font-bold tracking-tight text-[#0F172A]">1,731</span>
+        <span class="text-3xl font-bold tracking-tight text-[#0F172A]">
+          {{ kpiData.currentlyOnSite.value.toLocaleString() }}
+        </span>
         <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#16A34A] bg-[#DCFCE7] px-2.5 py-0.5 rounded-full border border-[#BBF7D0]">
           <span class="w-1.5 h-1.5 rounded-full bg-[#16A34A] animate-pulse" />
           Live
         </span>
       </div>
       <p class="text-[11px] text-[#94A3B8] mt-2.5 font-normal">
-        Real-time badge & face occupancy
+        Real-time badge & attendance occupancy
       </p>
     </div>
 
@@ -80,10 +89,15 @@
         </div>
       </div>
       <div class="flex items-baseline justify-between">
-        <span class="text-3xl font-bold tracking-tight text-[#0F172A]">97.4%</span>
-        <span class="inline-flex items-center text-xs font-semibold text-[#059669] bg-[#ECFDF5] px-2 py-0.5 rounded-full border border-[#A7F3D0]">
+        <span class="text-3xl font-bold tracking-tight text-[#0F172A]">
+          {{ kpiData.attendanceRate.value }}
+        </span>
+        <span
+          v-if="kpiData.presentToday.value > 0"
+          class="inline-flex items-center text-xs font-semibold text-[#059669] bg-[#ECFDF5] px-2 py-0.5 rounded-full border border-[#A7F3D0]"
+        >
           <TrendingUp class="w-3 h-3 mr-1" />
-          +1.2%
+          Active
         </span>
       </div>
       <p class="text-[11px] text-[#94A3B8] mt-2.5 font-normal">
@@ -94,10 +108,32 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { Users, UserCheck, Building2, CheckCircle2, TrendingUp } from 'lucide-vue-next';
+import { workforceService } from '@/services/workforceService';
 
 const router = useRouter();
+
+const kpiData = ref({
+  totalEmployees: { value: 0, change: '0', period: '', trend: 'up' },
+  presentToday: { value: 0, rate: '0%', period: '', trend: 'up' },
+  currentlyOnSite: { value: 0, subtext: '', trend: 'live' },
+  attendanceRate: { value: '0%', change: '', period: '', trend: 'up' }
+});
+
+const loadKpis = async () => {
+  try {
+    const data = await workforceService.getDashboardKPIs();
+    if (data) kpiData.value = data;
+  } catch (err) {
+    console.warn('Error loading KPIs in WorkforceKpi.vue:', err);
+  }
+};
+
+onMounted(() => {
+  loadKpis();
+});
 
 const navigateTo = (path) => {
   router.push(path);

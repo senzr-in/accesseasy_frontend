@@ -19,6 +19,7 @@
             @keydown.up.prevent="navigateResults(-1)"
             @keydown.enter.prevent="selectActive"
             @keydown.esc="close"
+            @input="handleSearchInput"
           >
           <kbd class="text-[10px] bg-[#F7F7F8] border border-[#E8E8E8] text-[#6B6B6B] px-1.5 py-0.5 rounded font-mono">
             ESC
@@ -65,7 +66,8 @@
 
           <!-- Empty State -->
           <div v-if="filteredResults.length === 0" class="py-8 text-center text-xs text-[#929292]">
-            No results found for "{{ query }}"
+            <span v-if="query.trim()">No results found for "{{ query }}"</span>
+            <span v-else>Type to search directory, equipment, and access zones...</span>
           </div>
         </div>
 
@@ -86,6 +88,8 @@
 import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { Search, Users, DoorClosed, Shield, Server, FileText, MapPin } from 'lucide-vue-next';
+import { authService } from '@/services/authService';
+import { currentUserTenant } from '@/utils/currentUserTenant';
 
 const props = defineProps({
   isOpen: Boolean
@@ -98,39 +102,103 @@ const query = ref('');
 const inputRef = ref(null);
 const activeIndex = ref(0);
 const selectedCategory = ref('all');
+const liveResults = ref([]);
 
 const categories = [
   { id: 'all', name: 'All Categories' },
   { id: 'employees', name: 'Employees' },
   { id: 'doors', name: 'Doors' },
   { id: 'zones', name: 'Zones' },
-  { id: 'devices', name: 'Devices' },
-  { id: 'reports', name: 'Reports' }
+  { id: 'devices', name: 'Devices' }
 ];
 
-const database = [
-  { id: 's-1', title: 'Rajesh Kumar', subtitle: 'Security Lead &bull; Main Gate B1', category: 'Employees', icon: Users, path: '/dashboard/easy-access/employees?search=Rajesh' },
-  { id: 's-2', title: 'Priya Sundaram', subtitle: 'Senior Financial Analyst &bull; Floor 2', category: 'Employees', icon: Users, path: '/dashboard/easy-access/employees?search=Priya' },
-  { id: 's-3', title: 'Arun Kumar', subtitle: 'Staff Software Engineer &bull; Building 3', category: 'Employees', icon: Users, path: '/dashboard/easy-access/employees?search=Arun' },
-  { id: 's-4', title: 'Main Gate B1 Terminal', subtitle: 'Face & Card Access Point', category: 'Doors', icon: DoorClosed, path: '/dashboard/access-control/doors' },
-  { id: 's-5', title: 'Server Room Vault', subtitle: 'Restricted Biometric Zone', category: 'Zones', icon: MapPin, path: '/dashboard/settings/zones' },
-  { id: 's-6', title: 'Turnstile Controller A01', subtitle: '192.168.1.102 &bull; Online', category: 'Devices', icon: Server, path: '/dashboard/settings/devices' },
-  { id: 's-7', title: 'Daily Attendance Audit', subtitle: 'Automated CSV Report &bull; 09:30 AM', category: 'Reports', icon: FileText, path: '/dashboard/report-automation' },
-  { id: 's-8', title: 'Executive Access Group', subtitle: '24/7 All-Zone Clearance', category: 'Access Groups', icon: Shield, path: '/dashboard/easy-access/configurators/access-levels' }
-];
+let debounceTimer = null;
+const handleSearchInput = () => {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    performSearch();
+  }, 250);
+};
+
+const performSearch = async () => {
+  if (!query.value.trim()) {
+    liveResults.value = [];
+    return;
+  }
+
+  const q = query.value.trim();
+  const activeTenantId = await currentUserTenant.getTenantIdAsync();
+  const token = authService.getToken();
+  if (!token) return;
+
+  const tenantParam = activeTenantId ? `filter[tenant][tenantId][_eq]=${activeTenantId}&` : '';
+  const results = [];
+
+  try {
+    // 1. Search employees
+    const empRes = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule?${tenantParam}filter[_or][0][firstName][_icontains]=${q}&filter[_or][1][lastName][_icontains]=${q}&filter[_or][2][employeeId][_icontains]=${q}&limit=5&fields=id,employeeId,firstName,lastName,department.departmentName`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (empRes.ok) {
+      const empData = await empRes.json();
+      (empData.data || []).forEach(e => {
+        results.push({
+          id: `emp-${e.id}`,
+          title: `${e.firstName || ''} ${e.lastName || ''}`.trim() || e.employeeId || 'Employee',
+          subtitle: `${e.employeeId || ''} • ${e.department?.departmentName || 'Operations'}`,
+          category: 'Employees',
+          icon: Users,
+          path: `/dashboard/easy-access/employees?search=${encodeURIComponent(e.firstName || e.employeeId || '')}`
+        });
+      });
+    }
+
+    // 2. Search doors
+    const doorRes = await fetch(`${import.meta.env.VITE_API_URL}/items/doors?${tenantParam}filter[doorName][_icontains]=${q}&limit=5&fields=id,doorName,doorNumber`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (doorRes.ok) {
+      const doorData = await doorRes.json();
+      (doorData.data || []).forEach(d => {
+        results.push({
+          id: `door-${d.id}`,
+          title: d.doorName || `Door ${d.doorNumber}`,
+          subtitle: `Door #${d.doorNumber || '—'}`,
+          category: 'Doors',
+          icon: DoorClosed,
+          path: '/dashboard/access-control/doors'
+        });
+      });
+    }
+
+    // 3. Search controllers
+    const ctrlRes = await fetch(`${import.meta.env.VITE_API_URL}/items/controllers?${tenantParam}filter[name][_icontains]=${q}&limit=5&fields=id,name,sn,ip`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (ctrlRes.ok) {
+      const ctrlData = await ctrlRes.json();
+      (ctrlData.data || []).forEach(c => {
+        results.push({
+          id: `ctrl-${c.id}`,
+          title: c.name || `Controller ${c.sn}`,
+          subtitle: `${c.ip || '—'} • SN: ${c.sn || '—'}`,
+          category: 'Devices',
+          icon: Server,
+          path: '/dashboard/settings/devices'
+        });
+      });
+    }
+  } catch (err) {
+    console.warn('Search query error:', err);
+  }
+
+  liveResults.value = results;
+};
 
 const filteredResults = computed(() => {
-  let list = database;
+  let list = liveResults.value;
   if (selectedCategory.value !== 'all') {
     list = list.filter(item => item.category.toLowerCase().includes(selectedCategory.value.toLowerCase()));
-  }
-  if (query.value.trim()) {
-    const q = query.value.toLowerCase();
-    list = list.filter(item =>
-      item.title.toLowerCase().includes(q) ||
-      item.subtitle.toLowerCase().includes(q) ||
-      item.category.toLowerCase().includes(q)
-    );
   }
   return list;
 });
@@ -160,6 +228,7 @@ const selectActive = () => {
 watch(() => props.isOpen, (open) => {
   if (open) {
     query.value = '';
+    liveResults.value = [];
     activeIndex.value = 0;
     nextTick(() => {
       inputRef.value?.focus();

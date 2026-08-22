@@ -557,11 +557,16 @@ async function createNewDoor() {
       (level) => level.accessLevelName === formData.accessLevel,
     );
 
+    const timestamp = Date.now().toString(36);
+    const rand = Math.random().toString(36).substring(2, 7);
+    const uniqueId = `${resolvedTenantId}-door-${DoorNumber}-${timestamp}-${rand}`;
+
     const payload = {
       doorName: formData.doorName,
       doorNumber: DoorNumber,
       status: formData.status ? "active" : "inactive",
       tenant: resolvedTenantId,
+      uniqueId,
       assignedDepts: selectedDepartment?.id,
       accessLevel: selectedAccessLevel?.id,
       accessStartTime: formData.accessStartTime,

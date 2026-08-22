@@ -69,11 +69,10 @@
             <div>
               <label class="block font-medium text-[#171717] mb-1">Assigned Zone</label>
               <select v-model="form.zone" class="form-input">
-                <option value="Main Gate B1">Main Gate B1</option>
-                <option value="Floor 2 East Wing">Floor 2 East Wing</option>
-                <option value="Building 3 Level 4">Building 3 Level 4</option>
-                <option value="Server Room Vault">Server Room Vault</option>
-                <option value="Executive Suite">Executive Suite</option>
+                <option value="">General Area</option>
+                <option v-for="z in availableZones" :key="z.id" :value="z.id">
+                  {{ z.zoneName || z.name }}
+                </option>
               </select>
             </div>
           </div>
@@ -102,9 +101,11 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue';
+import { reactive, ref, onMounted } from 'vue';
 import { X } from 'lucide-vue-next';
 import { deviceService } from '@/services/deviceService';
+import { authService } from '@/services/authService';
+import { currentUserTenant } from '@/utils/currentUserTenant';
 
 defineProps({
   isOpen: Boolean
@@ -113,13 +114,31 @@ defineProps({
 const emit = defineEmits(['update:isOpen', 'success']);
 
 const isSubmitting = ref(false);
+const availableZones = ref([]);
 
 const form = reactive({
   name: '',
   type: 'Face Terminal',
   ip: '',
   uuid: '',
-  zone: 'Main Gate B1'
+  zone: ''
+});
+
+onMounted(async () => {
+  try {
+    const activeTenantId = await currentUserTenant.getTenantIdAsync();
+    const token = authService.getToken();
+    if (!token) return;
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/zones?filter[tenant][_eq]=${activeTenantId}&limit=-1&fields=id,zoneName`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      availableZones.value = data.data || [];
+    }
+  } catch (err) {
+    console.warn('Error loading zones:', err);
+  }
 });
 
 const close = () => {

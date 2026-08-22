@@ -97,10 +97,13 @@
                 colspan="7"
                 class="h-64 text-center text-slate-500 dark:text-slate-400"
               >
-                <div class="flex flex-col items-center justify-center space-y-3">
-                  <Activity class="w-12 h-12 text-slate-300 dark:text-slate-700 dark:text-slate-200" />
-                  <p class="text-sm font-medium">
-                    No system logs found.
+                <div class="flex flex-col items-center justify-center space-y-2">
+                  <Activity class="w-10 h-10 text-slate-300 dark:text-slate-700" />
+                  <p class="text-sm font-bold text-slate-800 dark:text-zinc-200">
+                    {{ activeDoorFilter ? `No access events recorded for "${activeDoorFilter}" yet.` : 'No system logs found.' }}
+                  </p>
+                  <p v-if="activeDoorFilter" class="text-xs text-slate-400 dark:text-zinc-500">
+                    No card swipes or sensor triggers have been registered on this specific door yet.
                   </p>
                 </div>
               </td>
@@ -109,10 +112,11 @@
               v-for="log in items"
               v-else 
               :key="log.id"
-              class="hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-slate-800/50 transition-colors"
+              class="hover:bg-blue-50/40 dark:hover:bg-slate-800/60 transition-colors cursor-pointer group"
+              @click="openLogDetails(log)"
             >
               <td class="px-5 py-3">
-                <div class="h-8 w-8 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden border border-slate-200 dark:border-slate-700 flex items-center justify-center font-bold text-xs text-slate-500 dark:text-slate-400">
+                <div class="h-8 w-8 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden border border-slate-200 dark:border-slate-700 flex items-center justify-center font-bold text-xs text-slate-500 dark:text-slate-400 group-hover:border-blue-400 transition-colors">
                   <img
                     v-if="log.avatarImage"
                     :src="log.avatarImage"
@@ -126,11 +130,11 @@
               </td>
               <td class="px-5 py-3">
                 <div class="flex flex-col">
-                  <span class="font-bold text-xs text-slate-900 dark:text-white">
+                  <span class="font-bold text-xs text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                     {{ getEmployeeName(log) }}
                   </span>
                   <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-0.5">
-                    {{ log.employeeId?.employeeId || log.rfid || 'N/A' }}
+                    {{ getEmployeeSubtext(log) }}
                   </span>
                 </div>
               </td>
@@ -144,10 +148,29 @@
                   </span>
                 </div>
               </td>
-              <td class="px-5 py-3">
-                <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 py-0.5">
+              <td class="px-5 py-3" @click.stop>
+                <div v-if="editingLogId === log.id" class="flex items-center gap-1.5">
+                  <select
+                    :value="getLogDoorValue(log)"
+                    class="text-xs bg-white dark:bg-slate-900 border border-purple-500 rounded-lg px-2 py-1 font-semibold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-1 focus:ring-purple-500 shadow-sm"
+                    @change="onDoorSelectChange(log, $event)"
+                    @blur="editingLogId = null"
+                  >
+                    <option value="" disabled>Select Door...</option>
+                    <option v-for="d in doorsList" :key="d.id" :value="d.id">
+                      {{ d.doorName }} (#{{ d.doorNumber }})
+                    </option>
+                  </select>
+                </div>
+                <div 
+                  v-else 
+                  class="flex items-center gap-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300 py-0.5 group/door cursor-pointer rounded px-1.5 py-0.5 hover:bg-purple-50 dark:hover:bg-purple-950/30 transition-colors w-fit"
+                  title="Click to change or assign specific door"
+                  @click.stop="editingLogId = log.id"
+                >
                   <DoorOpen class="w-3.5 h-3.5 text-purple-500 shrink-0" />
                   <span>{{ getDoorDisplayName(log) }}</span>
+                  <Edit2 class="w-3 h-3 text-purple-400 opacity-0 group-hover/door:opacity-100 transition-opacity ml-1" />
                 </div>
               </td>
               <td class="px-5 py-3">
@@ -205,6 +228,156 @@
         </button>
       </div>
     </div>
+
+    <!-- Employee & Log Details Modal -->
+    <div
+      v-if="selectedLog"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-in fade-in duration-200"
+      @click.self="selectedLog = null"
+    >
+      <div class="relative w-full max-w-lg bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <!-- Header -->
+        <div class="p-6 border-b border-slate-100 dark:border-zinc-800/80 flex items-start justify-between gap-4 bg-slate-50/50 dark:bg-zinc-900/40">
+          <div class="flex items-center gap-4">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-lg font-black shadow-md shrink-0 overflow-hidden border border-white/20">
+              <img
+                v-if="selectedLog.avatarImage"
+                :src="selectedLog.avatarImage"
+                class="w-full h-full object-cover"
+              />
+              <span v-else>{{ getInitials(getEmployeeName(selectedLog)) }}</span>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="text-base font-black text-slate-900 dark:text-white">
+                  {{ getEmployeeName(selectedLog) }}
+                </h3>
+                <span 
+                  class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border"
+                  :class="getValidLogsClass(selectedLog.ValidLogs)"
+                >
+                  {{ getValidLogsText(selectedLog.ValidLogs) }}
+                </span>
+              </div>
+              <p class="text-xs font-semibold text-slate-500 dark:text-zinc-400 mt-0.5">
+                {{ getEmployeeSubtext(selectedLog) }}
+              </p>
+            </div>
+          </div>
+          <button
+            class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
+            @click="selectedLog = null"
+          >
+            <X class="w-5 h-5" />
+          </button>
+        </div>
+
+        <!-- Body -->
+        <div class="p-6 overflow-y-auto space-y-5 text-sm">
+          <!-- Access Event Info -->
+          <div>
+            <h4 class="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-zinc-500 mb-2.5 flex items-center gap-1.5">
+              <Activity class="w-3.5 h-3.5 text-blue-500" /> Access Event Details
+            </h4>
+            <div class="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-slate-50 dark:bg-zinc-900/60 border border-slate-100 dark:border-zinc-800/60 text-xs">
+              <div>
+                <span class="text-[10px] font-bold text-slate-400 dark:text-zinc-500 block uppercase">Door Location</span>
+                <span class="font-bold text-slate-800 dark:text-zinc-200 flex items-center gap-1 mt-0.5">
+                  <DoorOpen class="w-3.5 h-3.5 text-purple-500" />
+                  {{ getDoorDisplayName(selectedLog) }}
+                </span>
+              </div>
+              <div>
+                <span class="text-[10px] font-bold text-slate-400 dark:text-zinc-500 block uppercase">Direction / Action</span>
+                <span 
+                  class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-widest border mt-0.5"
+                  :class="getActionClass(selectedLog.action)"
+                >
+                  {{ selectedLog.action || 'N/A' }}
+                </span>
+              </div>
+              <div>
+                <span class="text-[10px] font-bold text-slate-400 dark:text-zinc-500 block uppercase">Timestamp</span>
+                <span class="font-semibold text-slate-800 dark:text-zinc-200 mt-0.5 block">
+                  {{ selectedLog.date || '-' }} at {{ formatTime(selectedLog.timeStamp, selectedLog.date_created) }}
+                </span>
+              </div>
+              <div>
+                <span class="text-[10px] font-bold text-slate-400 dark:text-zinc-500 block uppercase">Authentication Mode</span>
+                <span class="font-semibold text-slate-800 dark:text-zinc-200 flex items-center gap-1 mt-0.5 capitalize">
+                  <component :is="getModeIcon(selectedLog.mode)" class="w-3.5 h-3.5 text-blue-500" />
+                  {{ selectedLog.mode || 'RFID' }}
+                </span>
+              </div>
+              <div v-if="selectedLog.sn" class="col-span-2">
+                <span class="text-[10px] font-bold text-slate-400 dark:text-zinc-500 block uppercase">Controller Device Serial</span>
+                <span class="font-mono text-[11px] font-semibold text-slate-600 dark:text-zinc-400 break-all">
+                  {{ selectedLog.sn }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Employee Credentials & Profile -->
+          <div>
+            <h4 class="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-zinc-500 mb-2.5 flex items-center gap-1.5">
+              <User class="w-3.5 h-3.5 text-indigo-500" /> Employee Information
+            </h4>
+            <div class="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-slate-50 dark:bg-zinc-900/60 border border-slate-100 dark:border-zinc-800/60 text-xs">
+              <div>
+                <span class="text-[10px] font-bold text-slate-400 dark:text-zinc-500 block uppercase">Employee ID</span>
+                <span class="font-bold text-slate-800 dark:text-zinc-200 mt-0.5 block">
+                  {{ selectedLog.employeeId?.employeeId || 'Not Assigned' }}
+                </span>
+              </div>
+              <div>
+                <span class="text-[10px] font-bold text-slate-400 dark:text-zinc-500 block uppercase">Department</span>
+                <span class="font-semibold text-slate-800 dark:text-zinc-200 mt-0.5 block">
+                  {{ selectedLog.employeeId?.department?.departmentName || 'General Staff' }}
+                </span>
+              </div>
+              <div>
+                <span class="text-[10px] font-bold text-slate-400 dark:text-zinc-500 block uppercase">Email Address</span>
+                <span class="font-semibold text-slate-800 dark:text-zinc-200 truncate mt-0.5 block">
+                  {{ selectedLog.employeeId?.assignedUser?.email || '—' }}
+                </span>
+              </div>
+              <div>
+                <span class="text-[10px] font-bold text-slate-400 dark:text-zinc-500 block uppercase">Phone Number</span>
+                <span class="font-semibold text-slate-800 dark:text-zinc-200 mt-0.5 block">
+                  {{ selectedLog.employeeId?.assignedUser?.phone || '—' }}
+                </span>
+              </div>
+              <div>
+                <span class="text-[10px] font-bold text-slate-400 dark:text-zinc-500 block uppercase">RFID Card Number</span>
+                <span class="font-mono font-bold text-blue-600 dark:text-blue-400 mt-0.5 block">
+                  {{ selectedLog.rfid || 'None' }}
+                </span>
+              </div>
+              <div>
+                <span class="text-[10px] font-bold text-slate-400 dark:text-zinc-500 block uppercase">Biometric Status</span>
+                <div class="flex items-center gap-2 mt-0.5 text-[11px] font-semibold text-slate-700 dark:text-zinc-300">
+                  <span :class="selectedLog.employeeId?.face ? 'text-emerald-500 font-bold' : 'text-slate-400'">Face: {{ selectedLog.employeeId?.face ? 'Enrolled' : 'No' }}</span>
+                  <span>•</span>
+                  <span :class="selectedLog.employeeId?.finger ? 'text-emerald-500 font-bold' : 'text-slate-400'">Finger: {{ selectedLog.employeeId?.finger ? 'Enrolled' : 'No' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="p-4 border-t border-slate-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 flex items-center justify-between">
+          <span class="text-[10px] font-mono text-slate-400">Log ID: #{{ selectedLog.id }}</span>
+          <button
+            class="px-5 py-2 rounded-xl text-xs font-bold bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:opacity-90 transition-opacity cursor-pointer shadow-sm"
+            @click="selectedLog = null"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -229,6 +402,17 @@ const activeDoorFilter = ref("");
 const page = ref(1);
 const limit = 25;
 const totalItems = ref(0);
+const selectedLog = ref(null);
+
+const openLogDetails = (log) => {
+  if (editingLogId.value) return;
+  selectedLog.value = log;
+};
+
+const getInitials = (name) => {
+  if (!name) return 'U';
+  return name.split(' ').filter(Boolean).map(n => n[0]).join('').toUpperCase().slice(0, 2) || 'U';
+};
 
 const doorsList = ref([]);
 const doorsById = ref({});
@@ -242,8 +426,8 @@ const fetchDoors = async () => {
   if (!tId) return;
   try {
     const params = new URLSearchParams({
-      "filter[_or][0][tenant][tenantId][_eq]": tId,
-      "filter[_or][1][tenant][_eq]": tId,
+      "filter[_or][0][tenant][_eq]": tId,
+      "filter[_or][1][tenant][tenantId][_eq]": tId,
       "limit": "100"
     });
     ["id", "doorNumber", "doorName", "status", "uniqueId", "deviceUuid", "doorsConfigure"].forEach(f => {
@@ -322,7 +506,7 @@ const getDoorDisplayName = (log) => {
     if (log.door.id && doorsById.value[log.door.id]) return doorsById.value[log.door.id].doorName;
     if (log.door.uniqueId && doorsById.value[log.door.uniqueId]) return doorsById.value[log.door.uniqueId].doorName;
     if (log.door.doorNumber) {
-      const devId = log.sn;
+      const devId = log.sn ? String(log.sn).trim() : null;
       if (devId && doorsByDevAndNum.value[`${devId}_${log.door.doorNumber}`]) {
         return doorsByDevAndNum.value[`${devId}_${log.door.doorNumber}`].doorName;
       }
@@ -330,18 +514,18 @@ const getDoorDisplayName = (log) => {
     }
   }
   
-  // 2. Direct doorName string on log
+  // 3. Direct doorName string on log
   if (log.doorName && typeof log.doorName === 'string') return log.doorName;
 
-  // 3. Primitive door ID lookup (when log.door is primitive string/number)
+  // 4. Primitive door ID lookup (when log.door is primitive string/number)
   if (log.door && (typeof log.door === 'string' || typeof log.door === 'number')) {
     if (doorsById.value[log.door]) {
       return doorsById.value[log.door].doorName;
     }
   }
 
-  // 4. Scoped Device SN + Door Number / Index matching
-  const devId = log.sn;
+  // 5. Scoped Device SN + Door Number / Index matching
+  const devId = log.sn ? String(log.sn).trim() : null;
   const doorNum = (log.door && (typeof log.door === 'string' || typeof log.door === 'number'))
     ? log.door
     : (log.doorNumber ?? log.doorIndex ?? log.doorNo ?? log.reader ?? null);
@@ -365,9 +549,9 @@ const getDoorDisplayName = (log) => {
     if (doorsByNum.value[paddedNum]) return doorsByNum.value[paddedNum].doorName;
   }
 
-  // 5. Active URL filter fallback
-  if (route.query.doorName) {
-    return route.query.doorName;
+  // 6. If controller device SN is known, match to the controller's primary door
+  if (devId && doorsByDevUuid.value[devId]) {
+    return doorsByDevUuid.value[devId].doorName;
   }
 
   return "—";
@@ -449,13 +633,27 @@ watch(page, () => {
   fetchLogs();
 });
 
+watch(() => route.query, () => {
+  if (route.query.doorName || route.query.doorNumber || route.query.doorId) {
+    const dName = route.query.doorName || "";
+    const dNum = route.query.doorNumber ? `#${route.query.doorNumber}` : "";
+    activeDoorFilter.value = dName ? `${dName} ${dNum}`.trim() : (route.query.doorId ? `Door #${route.query.doorId}` : "");
+  } else {
+    activeDoorFilter.value = "";
+  }
+  page.value = 1;
+  fetchLogs();
+}, { deep: true });
+
 const aggregateCount = async () => {
   const tenantId = await currentUserTenant.getTenantIdAsync();
-  if (!token || !tenantId) return;
+  const currentToken = authService.getToken();
+  if (!currentToken || !tenantId) return;
   try {
     const params = new URLSearchParams({
       "aggregate[count]": "id",
-      "filter[_and][0][tenant][tenantId][_eq]": tenantId,
+      "filter[_and][0][_or][0][tenant][_eq]": tenantId,
+      "filter[_and][0][_or][1][tenant][tenantId][_eq]": tenantId,
       "filter[_and][1][mode][_neq]": "cronJob",
       "_t": Date.now().toString()
     });
@@ -466,50 +664,101 @@ const aggregateCount = async () => {
        params.append("filter[_and][2][_or][2][employeeId][assignedUser][last_name][_icontains]", searchQuery.value);
        params.append("filter[_and][2][_or][3][name][_icontains]", searchQuery.value);
        params.append("filter[_and][2][_or][4][door][doorName][_icontains]", searchQuery.value);
-    } else if (route.query.doorId || route.query.doorName || route.query.deviceUuid) {
-       let idx = 0;
-       if (route.query.doorId) {
-         params.append(`filter[_and][2][_or][${idx++}][door][id][_eq]`, route.query.doorId);
-         params.append(`filter[_and][2][_or][${idx++}][door][_eq]`, route.query.doorId);
-       }
-       if (route.query.doorName) {
-         params.append(`filter[_and][2][_or][${idx++}][door][doorName][_icontains]`, route.query.doorName);
-       }
-       if (route.query.deviceUuid) {
-         params.append(`filter[_and][2][_or][${idx++}][deviceUuid][_eq]`, route.query.deviceUuid);
-       }
+    } else if (route.query.doorId) {
+       params.append("filter[_and][2][_or][0][door][id][_eq]", route.query.doorId);
+       params.append("filter[_and][2][_or][1][door][_eq]", route.query.doorId);
+    } else if (route.query.deviceUuid || route.query.sn) {
+       const devSn = route.query.sn || route.query.deviceUuid;
+       params.append("filter[_and][2][sn][_eq]", devSn);
     }
 
     const res = await fetch(`${import.meta.env.VITE_API_URL}/items/logs?${params.toString()}`, {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${currentToken}` }
     });
     const data = await res.json();
     totalItems.value = data?.data?.[0]?.count?.id || 0;
   } catch (err) {
     console.error("Aggregate count error:", err);
   }
+};const processLogsWithCards = async (rawLogs, currentToken) => {
+  if (!rawLogs || rawLogs.length === 0) return [];
+
+  // Extract all RFIDs present in logs
+  const rfids = [...new Set(rawLogs.filter(l => l.rfid && String(l.rfid).trim() !== '0' && String(l.rfid).trim() !== '00000000').map(l => String(l.rfid).trim()))];
+  const cardMap = {};
+
+  if (rfids.length > 0) {
+    try {
+      const cardParams = new URLSearchParams({
+        limit: "100",
+        fields: "rfidCard,employeeId.id,employeeId.employeeId,employeeId.status,employeeId.department.departmentName,employeeId.assignedUser.id,employeeId.assignedUser.first_name,employeeId.assignedUser.last_name,employeeId.assignedUser.email,employeeId.assignedUser.phone,employeeId.assignedUser.avatar.id,employeeId.face,employeeId.finger"
+      });
+      rfids.forEach((rf, i) => {
+        cardParams.append(`filter[_or][${i}][rfidCard][_eq]`, rf);
+      });
+      const cardRes = await fetch(`${import.meta.env.VITE_API_URL}/items/cardManagement?${cardParams.toString()}`, {
+        headers: { Authorization: `Bearer ${currentToken}` }
+      });
+      if (cardRes.ok) {
+        const cardData = await cardRes.json();
+        (cardData.data || []).forEach(c => {
+          if (c.rfidCard && c.employeeId) {
+            cardMap[String(c.rfidCard).trim()] = c.employeeId;
+          }
+        });
+      }
+    } catch (e) {
+      console.debug('Batch card lookup error:', e);
+    }
+  }
+
+  return await Promise.all(rawLogs.map(async (logItem) => {
+    const cleanRfid = logItem.rfid ? String(logItem.rfid).trim() : null;
+    if (cleanRfid && cardMap[cleanRfid]) {
+      logItem.employeeId = cardMap[cleanRfid];
+    }
+
+    if (logItem.employeeId?.assignedUser?.avatar?.id) {
+      const avatarUrl = `${import.meta.env.VITE_API_URL}/assets/${logItem.employeeId.assignedUser.avatar.id}`;
+      try {
+        const imgRes = await fetch(avatarUrl, { headers: { Authorization: `Bearer ${currentToken}` } });
+        if (imgRes.ok) {
+          const blob = await imgRes.blob();
+          logItem.avatarImage = URL.createObjectURL(blob);
+        }
+      } catch (e) {}
+    }
+    return logItem;
+  }));
 };
 
-const fetchLogs = async () => {
+const fetchLogs = async (isBackground = false) => {
+  const currentToken = authService.getToken();
   const tenantId = await currentUserTenant.getTenantIdAsync();
-  if (!token || !tenantId) return;
-  loading.value = true;
-  await aggregateCount();
+  if (!currentToken || !tenantId) return;
+
+  if (!isBackground) {
+    loading.value = true;
+    await aggregateCount();
+  }
 
   try {
     const params = new URLSearchParams({
       limit: limit.toString(),
       page: page.value.toString(),
       "sort[]": "-date_created",
-      "filter[_and][0][tenant][tenantId][_eq]": tenantId,
+      "filter[_and][0][_or][0][tenant][_eq]": tenantId,
+      "filter[_and][0][_or][1][tenant][tenantId][_eq]": tenantId,
       "filter[_and][1][mode][_neq]": "cronJob",
       "_t": Date.now().toString()
     });
 
     const fields = [
-      "status", "action", "employeeId.employeeId", 
-      "employeeId.assignedUser.id", "employeeId.assignedUser.first_name", 
-      "employeeId.assignedUser.last_name", "employeeId.assignedUser.avatar.id",
+      "status", "action", "employeeId.id", "employeeId.employeeId", "employeeId.status",
+      "employeeId.department.departmentName", "employeeId.assignedUser.id", 
+      "employeeId.assignedUser.first_name", "employeeId.assignedUser.last_name", 
+      "employeeId.assignedUser.email", "employeeId.assignedUser.phone",
+      "employeeId.assignedUser.avatar.id", "employeeId.face", "employeeId.finger",
       "mode", "timeStamp", "date", "id", "ValidLogs", "date_created",
       "name", "rfid", "sn",
       "door.id", "door.doorNumber", "door.doorName"
@@ -523,78 +772,65 @@ const fetchLogs = async () => {
        params.append("filter[_and][2][_or][2][employeeId][assignedUser][last_name][_icontains]", searchQuery.value);
        params.append("filter[_and][2][_or][3][name][_icontains]", searchQuery.value);
        params.append("filter[_and][2][_or][4][door][doorName][_icontains]", searchQuery.value);
-    } else if (route.query.doorId || route.query.doorName || route.query.deviceUuid) {
-       let idx = 0;
-       if (route.query.doorId) {
-         params.append(`filter[_and][2][_or][${idx++}][door][id][_eq]`, route.query.doorId);
-         params.append(`filter[_and][2][_or][${idx++}][door][_eq]`, route.query.doorId);
-       }
-       if (route.query.doorName) {
-         params.append(`filter[_and][2][_or][${idx++}][door][doorName][_icontains]`, route.query.doorName);
-       }
-       if (route.query.deviceUuid) {
-         params.append(`filter[_and][2][_or][${idx++}][deviceUuid][_eq]`, route.query.deviceUuid);
-       }
+    } else if (route.query.doorId) {
+       params.append("filter[_and][2][_or][0][door][id][_eq]", route.query.doorId);
+       params.append("filter[_and][2][_or][1][door][_eq]", route.query.doorId);
+    } else if (route.query.deviceUuid || route.query.sn) {
+       const devSn = route.query.sn || route.query.deviceUuid;
+       params.append("filter[_and][2][sn][_eq]", devSn);
     }
 
     const response = await fetch(`${import.meta.env.VITE_API_URL}/items/logs?${params.toString()}`, {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${currentToken}` }
     });
 
     if (response.ok) {
       const data = await response.json();
-      
-      items.value = await Promise.all(data.data.map(async (logItem) => {
-        // Fallback: If employeeId is missing but rfid exists, look up assigned employee from cardManagement
-        if (!logItem.employeeId && logItem.rfid) {
-          try {
-            const cardRes = await fetch(
-              `${import.meta.env.VITE_API_URL}/items/cardManagement?filter[rfidCard][_eq]=${encodeURIComponent(logItem.rfid)}&fields=employeeId.employeeId,employeeId.assignedUser.id,employeeId.assignedUser.first_name,employeeId.assignedUser.last_name,employeeId.assignedUser.avatar.id`,
-              { headers: { Authorization: `Bearer ${token}` } }
-            );
-            if (cardRes.ok) {
-              const cardData = await cardRes.json();
-              if (cardData.data?.[0]?.employeeId) {
-                logItem.employeeId = cardData.data[0].employeeId;
-              }
-            }
-          } catch (e) {
-            console.debug('Fallback card lookup error:', e);
-          }
-        }
-
-        if (logItem.employeeId?.assignedUser?.avatar?.id) {
-          const avatarUrl = `${import.meta.env.VITE_API_URL}/assets/${logItem.employeeId.assignedUser.avatar.id}`;
-          try {
-             const imgRes = await fetch(avatarUrl, { headers: { Authorization: `Bearer ${token}` }});
-             if(imgRes.ok) {
-               const blob = await imgRes.blob();
-               logItem.avatarImage = URL.createObjectURL(blob);
-             }
-          } catch(e) {}
-        }
-        return logItem;
-      }));
+      const rawLogs = data.data || [];
+      items.value = await processLogsWithCards(rawLogs, currentToken);
     } else {
       console.error("Fetch logs failed:", response.status, await response.text());
     }
   } catch (error) {
     console.error("Fetch logs error:", error);
   } finally {
-    loading.value = false;
+    if (!isBackground) loading.value = false;
   }
 };
 
 const getEmployeeName = (item) => {
+  // 1. If assigned employee has name from personalModule
   if (item?.employeeId?.assignedUser) {
-    return `${item.employeeId.assignedUser.first_name || ''} ${item.employeeId.assignedUser.last_name || ''}`.trim() || "Unknown";
+    const first = item.employeeId.assignedUser.first_name || '';
+    const last = item.employeeId.assignedUser.last_name || '';
+    const fullName = `${first} ${last}`.trim();
+    if (fullName) return fullName;
   }
   
-  if (item?.name) return item.name;
-  if (item?.employeeName) return item.employeeName;
-  if (item?.rfid) return "Unassigned Card";
+  // 2. Direct name on log
+  if (item?.name && typeof item.name === 'string' && item.name.trim()) return item.name.trim();
+  if (item?.employeeName && typeof item.employeeName === 'string' && item.employeeName.trim()) return item.employeeName.trim();
   
-  return "Unknown";
+  // 3. Unauthorized / Unassigned card
+  const rfid = item?.rfid ? String(item.rfid).trim() : '';
+  if (rfid === '0' || rfid === '00000000' || !rfid) {
+    return 'Unauthorized Event';
+  }
+  return `Unauthorized (Card #${rfid})`;
+};
+
+const getEmployeeSubtext = (item) => {
+  // 1. If assigned employee has an employeeId (e.g. EMP0004)
+  if (item?.employeeId?.employeeId) {
+    return String(item.employeeId.employeeId);
+  }
+  
+  // 2. If card number is available
+  const rfid = item?.rfid ? String(item.rfid).trim() : '';
+  if (rfid === '0' || rfid === '00000000' || !rfid) {
+    return 'SENSOR / MANUAL TRIGGER (0)';
+  }
+  return `CARD: ${rfid}`;
 };
 
 const formatTime = (timeStr, fallbackDateCreated) => {
@@ -643,6 +879,8 @@ const getValidLogsText = (valid) => {
    return "Unknown";
 }
 
+let pollInterval = null;
+
 onMounted(async () => {
   await currentUserTenant.initialize();
   token = authService.getToken();
@@ -659,78 +897,10 @@ onMounted(async () => {
   pollInterval = setInterval(() => {
     // Only background poll if we are on the first page and not searching
     if (page.value === 1 && !searchQuery.value) {
-      // Fetch logs silently in background
-      fetchLogsInBackground();
+      fetchLogs(true);
     }
   }, 5000);
 });
-
-let pollInterval = null;
-
-const fetchLogsInBackground = async () => {
-  const tenantId = await currentUserTenant.getTenantIdAsync();
-  if (!token || !tenantId) return;
-
-  try {
-    const params = new URLSearchParams({
-      limit: limit.toString(),
-      page: page.value.toString(),
-      "sort[]": "-date_created",
-      "filter[_and][0][tenant][tenantId][_eq]": tenantId,
-      "filter[_and][1][mode][_neq]": "cronJob",
-      "_t": Date.now().toString()
-    });
-
-    const fields = [
-      "status", "action", "employeeId.employeeId", 
-      "employeeId.assignedUser.id", "employeeId.assignedUser.first_name", 
-      "employeeId.assignedUser.last_name", "employeeId.assignedUser.avatar.id",
-      "mode", "timeStamp", "date", "id", "ValidLogs", "date_created",
-      "name", "rfid", "sn",
-      "door.id", "door.doorNumber", "door.doorName"
-    ];
-
-    fields.forEach(f => params.append("fields[]", f));
-
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/items/logs?${params.toString()}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      
-      const newItems = await Promise.all(data.data.map(async (logItem) => {
-        if (logItem.employeeId?.assignedUser?.avatar?.id) {
-           // Basic URL is enough for background, avoid re-fetching blobs to save memory
-           logItem.avatarImage = `${import.meta.env.VITE_API_URL}/assets/${logItem.employeeId.assignedUser.avatar.id}?access_token=${token}`;
-        }
-        return logItem;
-      }));
-      
-      // Update only if items changed or lengths differ
-      if (newItems.length > 0) {
-        items.value = newItems;
-      }
-    }
-    
-    // Also update count silently
-    const countParams = new URLSearchParams({
-      "aggregate[count]": "id",
-      "filter[_and][0][tenant][tenantId][_eq]": tenantId,
-      "filter[_and][1][mode][_neq]": "cronJob",
-      "_t": Date.now().toString()
-    });
-    const countRes = await fetch(`${import.meta.env.VITE_API_URL}/items/logs?${countParams.toString()}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    if (countRes.ok) {
-        const cData = await countRes.json();
-        totalItems.value = cData?.data?.[0]?.count?.id || 0;
-    }
-  } catch (error) {
-    // Silent
-  }
-};
 
 onUnmounted(() => {
   if (pollInterval) clearInterval(pollInterval);

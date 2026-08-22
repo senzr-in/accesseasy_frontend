@@ -45,7 +45,7 @@
             Peak Entry Time
           </p>
           <p class="stat-strip__value">
-            08:30 AM <span class="stat-strip__accent stat-strip__accent--teal">(412)</span>
+            {{ peakEntryTime }} <span class="stat-strip__accent stat-strip__accent--teal">({{ peakEntryCount }})</span>
           </p>
         </div>
       </div>
@@ -60,7 +60,7 @@
             Peak Exit Time
           </p>
           <p class="stat-strip__value">
-            05:30 PM <span class="stat-strip__accent stat-strip__accent--sky">(380)</span>
+            {{ peakExitTime }} <span class="stat-strip__accent stat-strip__accent--sky">({{ peakExitCount }})</span>
           </p>
         </div>
       </div>
@@ -75,7 +75,7 @@
             Currently Inside
           </p>
           <p class="stat-strip__value">
-            126 Occupants
+            {{ currentlyInside }} Occupants
           </p>
         </div>
       </div>
@@ -90,7 +90,7 @@
             Access Denied
           </p>
           <p class="stat-strip__value stat-strip__value--rose">
-            23 Events <span class="stat-strip__accent stat-strip__accent--rose">(2.7%)</span>
+            {{ deniedEvents }} Events <span class="stat-strip__accent stat-strip__accent--rose">({{ deniedRate }})</span>
           </p>
         </div>
       </div>
@@ -144,7 +144,7 @@
             <stop
               offset="0%"
               stop-color="#0ea5e9"
-              stop-opacity="0.2"
+              stop-opacity="0.25"
             />
             <stop
               offset="100%"
@@ -152,23 +152,23 @@
               stop-opacity="0"
             />
           </linearGradient>
-          <filter id="glow-teal">
-            <feGaussianBlur
-              stdDeviation="3"
-              result="coloredBlur"
-            />
+
+          <!-- SVG Drop Shadows -->
+          <filter id="glow-teal" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feFlood flood-color="#10b981" flood-opacity="0.3" result="color" />
+            <feComposite in2="blur" operator="in" />
             <feMerge>
-              <feMergeNode in="coloredBlur" />
+              <feMergeNode />
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
-          <filter id="glow-sky">
-            <feGaussianBlur
-              stdDeviation="3"
-              result="coloredBlur"
-            />
+          <filter id="glow-sky" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feFlood flood-color="#0ea5e9" flood-opacity="0.3" result="color" />
+            <feComposite in2="blur" operator="in" />
             <feMerge>
-              <feMergeNode in="coloredBlur" />
+              <feMergeNode />
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
@@ -211,32 +211,20 @@
           class="chart-grid"
         />
 
-        <!-- Peak marker line -->
-        <line
-          x1="200"
-          y1="0"
-          x2="200"
-          y2="160"
-          stroke="#6366f1"
-          stroke-width="1.5"
-          stroke-dasharray="5 3"
-          opacity="0.5"
-        />
-
         <!-- Area fills -->
         <path
-          d="M 0,160 Q 100,150 200,40 T 400,110 T 600,150 T 800,140 L 800,160 L 0,160 Z"
+          d="M 0,160 Q 100,150 200,80 T 400,120 T 600,150 T 800,155 L 800,160 L 0,160 Z"
           fill="url(#entryGradient2)"
         />
         <path
-          d="M 0,160 Q 100,160 200,140 T 400,130 T 600,35 T 800,150 L 800,160 L 0,160 Z"
+          d="M 0,160 Q 100,160 200,150 T 400,140 T 600,75 T 800,155 L 800,160 L 0,160 Z"
           fill="url(#exitGradient2)"
         />
 
         <!-- Lines with draw animation -->
         <path
           class="chart-line"
-          d="M 0,160 Q 100,150 200,40 T 400,110 T 600,150 T 800,140"
+          d="M 0,160 Q 100,150 200,80 T 400,120 T 600,150 T 800,155"
           fill="none"
           stroke="#10b981"
           stroke-width="2.5"
@@ -246,47 +234,13 @@
         />
         <path
           class="chart-line chart-line--delay"
-          d="M 0,160 Q 100,160 200,140 T 400,130 T 600,35 T 800,150"
+          d="M 0,160 Q 100,160 200,150 T 400,140 T 600,75 T 800,155"
           fill="none"
           stroke="#0ea5e9"
           stroke-width="2.5"
           stroke-linecap="round"
           filter="url(#glow-sky)"
           pathLength="1"
-        />
-
-        <!-- Peak dot — Entry -->
-        <circle
-          cx="200"
-          cy="40"
-          r="8"
-          fill="rgba(16,185,129,0.2)"
-          class="peak-ring"
-        />
-        <circle
-          cx="200"
-          cy="40"
-          r="5"
-          fill="#10b981"
-          stroke="white"
-          stroke-width="2"
-        />
-
-        <!-- Peak dot — Exit -->
-        <circle
-          cx="600"
-          cy="35"
-          r="8"
-          fill="rgba(14,165,233,0.2)"
-          class="peak-ring peak-ring--delay"
-        />
-        <circle
-          cx="600"
-          cy="35"
-          r="5"
-          fill="#0ea5e9"
-          stroke="white"
-          stroke-width="2"
         />
       </svg>
 
@@ -303,11 +257,25 @@
 <script setup>
 import { ref, computed, onMounted, nextTick } from 'vue';
 import { LogIn, LogOut, Users, ShieldAlert } from 'lucide-vue-next';
+import { workforceService } from '@/services/workforceService';
+import { accessService } from '@/services/accessService';
 
 const activeRange = ref('Today');
 const rangeOptions = ['Today', 'Yesterday', 'Last 7 Days', 'Last 30 Days'];
 const tabEls = ref([]);
 const indicatorStyle = ref({ width: '0px', left: '0px' });
+
+const currentlyInside = ref(0);
+const deniedEvents = ref(0);
+const peakEntryTime = ref('—');
+const peakEntryCount = ref(0);
+const peakExitTime = ref('—');
+const peakExitCount = ref(0);
+
+const deniedRate = computed(() => {
+  const total = currentlyInside.value + deniedEvents.value;
+  return total > 0 ? `${((deniedEvents.value / total) * 100).toFixed(1)}%` : '0%';
+});
 
 const setRange = (range, idx) => {
   activeRange.value = range;
@@ -327,6 +295,27 @@ onMounted(async () => {
   await nextTick();
   const initIdx = rangeOptions.indexOf(activeRange.value);
   updateIndicator(initIdx >= 0 ? initIdx : 0);
+
+  try {
+    const [kpi, access] = await Promise.all([
+      workforceService.getDashboardKPIs().catch(() => null),
+      accessService.getAccessOverview().catch(() => null)
+    ]);
+
+    if (kpi) {
+      currentlyInside.value = kpi.currentlyOnSite?.value || 0;
+      if (kpi.presentToday?.value > 0) {
+        peakEntryTime.value = 'Morning';
+        peakEntryCount.value = kpi.presentToday.value;
+      }
+    }
+
+    if (access) {
+      deniedEvents.value = access.denied || 0;
+    }
+  } catch (err) {
+    console.warn('TodayAccessAnalytics load error:', err);
+  }
 });
 </script>
 
@@ -363,111 +352,113 @@ onMounted(async () => {
 .analytics-card__badge {
   font-size: 10px;
   font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 6px;
-  background: rgba(99,102,241,0.08);
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(99, 102, 241, 0.1);
   color: #6366f1;
-  border: 1px solid rgba(99,102,241,0.15);
+  border: 1px solid rgba(99, 102, 241, 0.2);
 }
 :global(.dark) .analytics-card__badge {
-  background: rgba(99,102,241,0.15);
-  color: #a5b4fc;
-  border-color: rgba(99,102,241,0.25);
+  background: rgba(99, 102, 241, 0.18);
+  color: #818cf8;
+  border-color: rgba(99, 102, 241, 0.3);
 }
 
 .analytics-card__sub {
   font-size: 11px;
   color: #94a3b8;
-  margin-top: 3px;
+  margin-top: 2px;
 }
 
-/* ─── Liquid Tab Pills ────────────────────────────────── */
+/* ─── Tab Control ─────────────────────────────────────── */
 .tab-pill-group {
   position: relative;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  padding: 4px;
-  background: rgba(241,245,249,0.9);
-  border: 1px solid rgba(226,232,240,0.6);
+  background: rgba(241, 245, 249, 0.8);
   border-radius: 12px;
-  flex-shrink: 0;
-  align-self: flex-start;
+  padding: 3px;
+  gap: 2px;
 }
 :global(.dark) .tab-pill-group {
-  background: rgba(255,255,255,0.05);
-  border-color: rgba(255,255,255,0.06);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .tab-pill-indicator {
   position: absolute;
-  top: 4px;
-  bottom: 4px;
-  border-radius: 8px;
-  background: white;
-  border: 1px solid rgba(226,232,240,0.5);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-  transition: left 300ms cubic-bezier(0.34, 1.2, 0.64, 1),
-              width 300ms cubic-bezier(0.34, 1.2, 0.64, 1);
+  top: 3px;
+  bottom: 3px;
+  border-radius: 9px;
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1), 0 0 0 1px rgba(0,0,0,0.04);
+  transition: left 300ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              width 300ms cubic-bezier(0.34, 1.56, 0.64, 1);
   pointer-events: none;
 }
 :global(.dark) .tab-pill-indicator {
-  background: rgba(30,40,60,0.95);
-  border-color: rgba(255,255,255,0.08);
-  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  background: #1e293b;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
 }
 
 .tab-pill {
   position: relative;
   z-index: 1;
-  padding: 6px 14px;
-  border-radius: 8px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 9px;
   border: none;
   background: transparent;
+  color: #64748b;
   cursor: pointer;
-  color: #94a3b8;
-  transition: color 200ms;
   white-space: nowrap;
+  transition: color 200ms ease;
 }
-.tab-pill--active { color: #6366f1; }
-:global(.dark) .tab-pill { color: #64748b; }
-:global(.dark) .tab-pill--active { color: #818cf8; }
-.tab-pill:not(.tab-pill--active):hover { color: #475569; }
-:global(.dark) .tab-pill:not(.tab-pill--active):hover { color: #cbd5e1; }
+.tab-pill:hover { color: #0f172a; }
+.tab-pill--active { color: #0f172a; font-weight: 800; }
+:global(.dark) .tab-pill { color: #94a3b8; }
+:global(.dark) .tab-pill:hover { color: #f8fafc; }
+:global(.dark) .tab-pill--active { color: #f8fafc; }
 
 /* ─── Stat Strip ──────────────────────────────────────── */
 .stat-strip {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0;
-  background: rgba(248,250,252,0.8);
-  border: 1px solid rgba(241,245,249,0.8);
-  border-radius: 14px;
-  padding: 14px 16px;
-  margin-bottom: 20px;
+  grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
   align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-radius: 16px;
+  background: rgba(248, 250, 252, 0.7);
+  border: 1px solid rgba(241, 245, 249, 0.8);
+  margin-bottom: 20px;
 }
 :global(.dark) .stat-strip {
-  background: rgba(255,255,255,0.025);
-  border-color: rgba(255,255,255,0.05);
+  background: rgba(255, 255, 255, 0.025);
+  border-color: rgba(255, 255, 255, 0.05);
 }
 
-.stat-strip__divider {
-  width: 1px;
-  height: 36px;
-  background: rgba(226,232,240,0.6);
-  margin: 0 auto;
+@media (max-width: 640px) {
+  .stat-strip {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .stat-strip__divider { display: none; }
 }
-:global(.dark) .stat-strip__divider { background: rgba(255,255,255,0.06); }
 
 .stat-strip__item {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 0 12px;
 }
-.stat-strip__item:first-child { padding-left: 0; }
+
+.stat-strip__divider {
+  width: 1px;
+  height: 28px;
+  background: rgba(226, 232, 240, 0.8);
+}
+:global(.dark) .stat-strip__divider {
+  background: rgba(255, 255, 255, 0.07);
+}
 
 .stat-strip__icon {
   width: 32px;
@@ -478,51 +469,55 @@ onMounted(async () => {
   justify-content: center;
   flex-shrink: 0;
 }
-.stat-strip__icon--teal { background: rgba(20,184,166,0.1); color: #14b8a6; }
-.stat-strip__icon--sky { background: rgba(14,165,233,0.1); color: #0ea5e9; }
-.stat-strip__icon--indigo { background: rgba(99,102,241,0.1); color: #6366f1; }
-.stat-strip__icon--rose { background: rgba(244,63,94,0.1); color: #f43f5e; }
-:global(.dark) .stat-strip__icon--teal { background: rgba(20,184,166,0.15); color: #2dd4bf; }
-:global(.dark) .stat-strip__icon--sky { background: rgba(14,165,233,0.15); color: #38bdf8; }
-:global(.dark) .stat-strip__icon--indigo { background: rgba(99,102,241,0.15); color: #818cf8; }
-:global(.dark) .stat-strip__icon--rose { background: rgba(244,63,94,0.15); color: #fb7185; }
+.stat-strip__icon--teal   { background: rgba(20, 184, 166, 0.12); color: #0d9488; }
+.stat-strip__icon--sky    { background: rgba(14, 165, 233, 0.12); color: #0284c7; }
+.stat-strip__icon--indigo { background: rgba(99, 102, 241, 0.12); color: #4f46e5; }
+.stat-strip__icon--rose   { background: rgba(244, 63, 94, 0.12);  color: #e11d48; }
 
 .stat-strip__label {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.08em;
   text-transform: uppercase;
+  letter-spacing: 0.05em;
   color: #94a3b8;
-  margin-bottom: 2px;
+  line-height: 1;
+  margin-bottom: 3px;
 }
+
 .stat-strip__value {
   font-size: 12px;
   font-weight: 800;
-  color: #1e293b;
-  font-variant-numeric: tabular-nums;
+  color: #0f172a;
+  line-height: 1;
+  white-space: nowrap;
 }
-:global(.dark) .stat-strip__value { color: #e2e8f0; }
+:global(.dark) .stat-strip__value { color: #f8fafc; }
 .stat-strip__value--rose { color: #e11d48; }
 :global(.dark) .stat-strip__value--rose { color: #fb7185; }
 
-.stat-strip__accent { font-weight: 900; }
-.stat-strip__accent--teal { color: #14b8a6; }
-.stat-strip__accent--sky { color: #0ea5e9; }
+.stat-strip__accent {
+  font-weight: 700;
+  font-size: 11px;
+}
+.stat-strip__accent--teal { color: #0d9488; }
+.stat-strip__accent--sky  { color: #0284c7; }
 .stat-strip__accent--rose { color: #f43f5e; }
 
-/* ─── Chart ───────────────────────────────────────────── */
+/* ─── Chart Area ──────────────────────────────────────── */
 .chart-area {
-  flex: 1;
   position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
 }
+
 .chart-legend {
-  position: absolute;
-  top: 0;
-  right: 4px;
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 16px;
-  z-index: 10;
+  margin-bottom: 8px;
 }
 .chart-legend__item {
   display: flex;
@@ -534,65 +529,48 @@ onMounted(async () => {
   height: 8px;
   border-radius: 50%;
 }
-.chart-legend__dot--teal { background: #10b981; box-shadow: 0 0 6px rgba(16,185,129,0.5); }
-.chart-legend__dot--sky { background: #0ea5e9; box-shadow: 0 0 6px rgba(14,165,233,0.5); }
+.chart-legend__dot--teal { background: #10b981; }
+.chart-legend__dot--sky  { background: #0ea5e9; }
 .chart-legend__label {
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 600;
   color: #64748b;
 }
 :global(.dark) .chart-legend__label { color: #94a3b8; }
 
 .chart-svg {
   width: 100%;
-  height: 200px;
+  height: 130px;
   overflow: visible;
 }
-.chart-grid {
-  color: rgba(148,163,184,0.15);
-}
-:global(.dark) .chart-grid { color: rgba(255,255,255,0.04); }
 
-/* Line draw animation */
+.chart-grid {
+  color: rgba(226, 232, 240, 0.7);
+}
+:global(.dark) .chart-grid {
+  color: rgba(255, 255, 255, 0.05);
+}
+
 .chart-line {
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
-  animation: drawChartLine 1.4s cubic-bezier(0.4, 0, 0.2, 1) 0.2s forwards;
+  animation: drawLine 1.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
 }
 .chart-line--delay {
-  animation-delay: 0.45s;
-}
-@keyframes drawChartLine {
-  to { stroke-dashoffset: 0; }
+  animation-delay: 0.2s;
 }
 
-/* Peak dot ring pulse */
-.peak-ring {
-  animation: peakPulse 2.5s ease-in-out infinite;
-}
-.peak-ring--delay {
-  animation-delay: 1.25s;
-}
-@keyframes peakPulse {
-  0%, 100% { r: 6; opacity: 0.6; }
-  50% { r: 12; opacity: 0; }
+@keyframes drawLine {
+  to { stroke-dashoffset: 0; }
 }
 
 .chart-xaxis {
   display: flex;
   justify-content: space-between;
-  padding: 8px 0 0;
+  padding: 6px 0 0;
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 600;
   color: #94a3b8;
-  letter-spacing: 0.02em;
-}
-:global(.dark) .chart-xaxis { color: #475569; }
-
-/* ─── Reduced Motion ──────────────────────────────────── */
-@media (prefers-reduced-motion: reduce) {
-  .chart-line { animation: none; stroke-dashoffset: 0; }
-  .peak-ring { animation: none; }
-  .tab-pill-indicator { transition: none; }
+  font-family: ui-monospace, monospace;
 }
 </style>

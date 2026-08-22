@@ -26,7 +26,7 @@
             stroke-width="18"
             fill="none"
           />
-          <!-- 1. On-site (69.6%) -->
+          <!-- 1. On-site -->
           <circle
             cx="80"
             cy="80"
@@ -34,14 +34,14 @@
             stroke="#2563EB"
             stroke-width="18"
             fill="none"
-            :stroke-dasharray="`${69.6 * 4.084} ${100 * 4.084}`"
+            :stroke-dasharray="`${onSitePct * 4.084} ${100 * 4.084}`"
             stroke-dashoffset="0"
             stroke-linecap="round"
             class="transition-all duration-500 cursor-pointer hover:opacity-80"
             :class="{ 'stroke-[22]': selectedCategory === 'onSite' }"
             @click="selectCategory('onSite')"
           />
-          <!-- 2. Remote (12.5%) -->
+          <!-- 2. Remote -->
           <circle
             cx="80"
             cy="80"
@@ -49,13 +49,13 @@
             stroke="#10B981"
             stroke-width="18"
             fill="none"
-            :stroke-dasharray="`${12.5 * 4.084} ${100 * 4.084}`"
-            :stroke-dashoffset="`-${69.6 * 4.084}`"
+            :stroke-dasharray="`${remotePct * 4.084} ${100 * 4.084}`"
+            :stroke-dashoffset="`-${onSitePct * 4.084}`"
             class="transition-all duration-500 cursor-pointer hover:opacity-80"
             :class="{ 'stroke-[22]': selectedCategory === 'remote' }"
             @click="selectCategory('remote')"
           />
-          <!-- 3. On Leave (3.5%) -->
+          <!-- 3. On Leave -->
           <circle
             cx="80"
             cy="80"
@@ -63,13 +63,13 @@
             stroke="#F59E0B"
             stroke-width="18"
             fill="none"
-            :stroke-dasharray="`${3.5 * 4.084} ${100 * 4.084}`"
-            :stroke-dashoffset="`-${(69.6 + 12.5) * 4.084}`"
+            :stroke-dasharray="`${onLeavePct * 4.084} ${100 * 4.084}`"
+            :stroke-dashoffset="`-${(onSitePct + remotePct) * 4.084}`"
             class="transition-all duration-500 cursor-pointer hover:opacity-80"
             :class="{ 'stroke-[22]': selectedCategory === 'onLeave' }"
             @click="selectCategory('onLeave')"
           />
-          <!-- 4. Absent (14.3%) -->
+          <!-- 4. Absent -->
           <circle
             cx="80"
             cy="80"
@@ -77,8 +77,8 @@
             stroke="#EF4444"
             stroke-width="18"
             fill="none"
-            :stroke-dasharray="`${14.3 * 4.084} ${100 * 4.084}`"
-            :stroke-dashoffset="`-${(69.6 + 12.5 + 3.5) * 4.084}`"
+            :stroke-dasharray="`${absentPct * 4.084} ${100 * 4.084}`"
+            :stroke-dashoffset="`-${(onSitePct + remotePct + onLeavePct) * 4.084}`"
             class="transition-all duration-500 cursor-pointer hover:opacity-80"
             :class="{ 'stroke-[22]': selectedCategory === 'absent' }"
             @click="selectCategory('absent')"
@@ -119,7 +119,7 @@
             </div>
           </div>
           <div class="text-right">
-            <span class="text-sm font-bold text-[#0F172A]">{{ cat.count.toLocaleString() }}</span>
+            <span class="text-sm font-bold text-[#0F172A]">{{ (cat.count || 0).toLocaleString() }}</span>
           </div>
         </div>
       </div>
@@ -148,12 +148,19 @@ import { ChevronRight } from 'lucide-vue-next';
 import { usePresence } from '@/composables/workforce/usePresence';
 
 const router = useRouter();
-const { categories, selectedCategory, selectCategory } = usePresence();
+const { categories, selectedCategory, selectCategory, presenceData } = usePresence();
+
+const onSitePct = computed(() => Number(categories.value.find(c => c.key === 'onSite')?.percentage || 0));
+const remotePct = computed(() => Number(categories.value.find(c => c.key === 'remote')?.percentage || 0));
+const onLeavePct = computed(() => Number(categories.value.find(c => c.key === 'onLeave')?.percentage || 0));
+const absentPct = computed(() => Number(categories.value.find(c => c.key === 'absent')?.percentage || 0));
 
 const activeDisplayCount = computed(() => {
-  if (!selectedCategory.value) return '1,731';
+  if (!selectedCategory.value) {
+    return (presenceData.value?.onSite || 0).toLocaleString();
+  }
   const found = categories.value.find(c => c.key === selectedCategory.value);
-  return found ? found.count.toLocaleString() : '1,731';
+  return found ? (found.count || 0).toLocaleString() : '0';
 });
 
 const activeDisplayLabel = computed(() => {
@@ -163,9 +170,11 @@ const activeDisplayLabel = computed(() => {
 });
 
 const activeDisplaySub = computed(() => {
-  if (!selectedCategory.value) return '69.6% of workforce';
+  if (!selectedCategory.value) {
+    return `${onSitePct.value}% of workforce`;
+  }
   const found = categories.value.find(c => c.key === selectedCategory.value);
-  return found ? `${found.percentage}% of workforce` : '69.6% of workforce';
+  return found ? `${found.percentage}% of workforce` : '0% of workforce';
 });
 
 const selectedCategoryLabel = computed(() => {

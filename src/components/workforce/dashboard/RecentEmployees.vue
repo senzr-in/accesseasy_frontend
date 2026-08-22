@@ -3,7 +3,7 @@
     <div class="flex items-center justify-between pb-4 border-b border-[#E2E8F0]">
       <div>
         <h3 class="text-sm font-bold text-[#0F172A]">Recently Active</h3>
-        <p class="text-xs text-[#64748B] mt-0.5">Latest workforce authentications</p>
+        <p class="text-xs text-[#64748B] mt-0.5">Latest workforce directory updates</p>
       </div>
       <router-link
         to="/dashboard/easy-access/employees"
@@ -15,7 +15,7 @@
     </div>
 
     <!-- Employee Items -->
-    <div class="divide-y divide-[#F1F5F9] pt-1">
+    <div v-if="activeEmployees.length > 0" class="divide-y divide-[#F1F5F9] pt-1">
       <div
         v-for="emp in activeEmployees"
         :key="emp.id"
@@ -31,7 +31,7 @@
               {{ emp.first_name }} {{ emp.last_name }}
             </p>
             <p class="text-[11px] text-[#64748B] truncate mt-0.5">
-              {{ emp.department }} &bull; {{ emp.location }}
+              {{ emp.department || 'General' }} &bull; {{ emp.location }}
             </p>
           </div>
         </div>
@@ -42,6 +42,10 @@
           </span>
         </div>
       </div>
+    </div>
+
+    <div v-else class="py-8 text-center text-xs text-[#94A3B8]">
+      No employee activity recorded yet.
     </div>
   </div>
 </template>
@@ -58,7 +62,7 @@ const activeEmployees = ref([]);
 onMounted(async () => {
   try {
     const list = await employeeService.getRecentlyActive(5);
-    activeEmployees.value = list;
+    activeEmployees.value = list || [];
   } catch (e) {
     console.error('Error loading recently active employees:', e);
   }

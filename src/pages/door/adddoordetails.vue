@@ -390,7 +390,7 @@ const createDoor = async () => {
           )
         : null,
     branchLocation: formData.branchLocation,
-    uniqueId: `${props.tenantId}-${doorNumber}`,
+    uniqueId: `${props.tenantId}-door-${doorNumber}-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 7)}`,
   };
 
   console.log("Creating door with payload:", JSON.stringify(payload, null, 2));

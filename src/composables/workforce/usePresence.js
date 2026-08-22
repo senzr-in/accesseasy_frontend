@@ -3,12 +3,12 @@ import { workforceService } from '@/services/workforceService';
 
 export function usePresence() {
   const presenceData = ref({
-    total: 2486,
-    onSite: 1731,
-    remote: 312,
-    onLeave: 87,
-    absent: 356,
-    onSitePercentage: 69.6,
+    total: 0,
+    onSite: 0,
+    remote: 0,
+    onLeave: 0,
+    absent: 0,
+    onSitePercentage: 0,
     departments: []
   });
   const isLoading = ref(true);
@@ -18,7 +18,9 @@ export function usePresence() {
     isLoading.value = true;
     try {
       const res = await workforceService.getPresenceBreakdown(filter);
-      presenceData.value = res;
+      if (res) {
+        presenceData.value = res;
+      }
     } catch (e) {
       console.error('[usePresence] Error loading presence:', e);
     } finally {
@@ -30,12 +32,17 @@ export function usePresence() {
     loadPresence();
   });
 
-  const categories = computed(() => [
-    { key: 'onSite', label: 'On-site', count: presenceData.value.onSite, percentage: ((presenceData.value.onSite / presenceData.value.total) * 100).toFixed(1), color: '#3478F6' },
-    { key: 'remote', label: 'Remote', count: presenceData.value.remote, percentage: ((presenceData.value.remote / presenceData.value.total) * 100).toFixed(1), color: '#34A853' },
-    { key: 'onLeave', label: 'On Leave', count: presenceData.value.onLeave, percentage: ((presenceData.value.onLeave / presenceData.value.total) * 100).toFixed(1), color: '#F5A623' },
-    { key: 'absent', label: 'Absent', count: presenceData.value.absent, percentage: ((presenceData.value.absent / presenceData.value.total) * 100).toFixed(1), color: '#E5484D' }
-  ]);
+  const categories = computed(() => {
+    const total = presenceData.value.total || 0;
+    const calcPct = (count) => (total > 0 ? ((count / total) * 100).toFixed(1) : '0.0');
+
+    return [
+      { key: 'onSite', label: 'On-site', count: presenceData.value.onSite || 0, percentage: calcPct(presenceData.value.onSite || 0), color: '#3478F6' },
+      { key: 'remote', label: 'Remote', count: presenceData.value.remote || 0, percentage: calcPct(presenceData.value.remote || 0), color: '#34A853' },
+      { key: 'onLeave', label: 'On Leave', count: presenceData.value.onLeave || 0, percentage: calcPct(presenceData.value.onLeave || 0), color: '#F5A623' },
+      { key: 'absent', label: 'Absent', count: presenceData.value.absent || 0, percentage: calcPct(presenceData.value.absent || 0), color: '#E5484D' }
+    ];
+  });
 
   const selectCategory = (key) => {
     if (selectedCategory.value === key) {

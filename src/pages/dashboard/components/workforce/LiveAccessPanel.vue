@@ -25,42 +25,43 @@
 
     <!-- Feed List -->
     <TransitionGroup
+      v-if="events.length > 0"
       name="feed-item"
       tag="div"
       class="feed-list"
     >
       <div
-        v-for="(event, idx) in liveEvents"
+        v-for="(event, idx) in events"
         :key="event.id"
         class="feed-item"
-        :class="event.status === 'Granted' ? 'feed-item--granted' : 'feed-item--denied'"
+        :class="event.result === 'Granted' ? 'feed-item--granted' : 'feed-item--denied'"
         :style="{ '--feed-delay': `${idx * 60}ms` }"
       >
         <!-- Left accent strip -->
         <div
           class="feed-item__strip"
-          :class="event.status === 'Granted' ? 'feed-item__strip--granted' : 'feed-item__strip--denied'"
+          :class="event.result === 'Granted' ? 'feed-item__strip--granted' : 'feed-item__strip--denied'"
         />
 
-        <!-- Avatar -->
+        <!-- Avatar / Initial -->
         <div class="feed-item__avatar-wrap">
-          <img
-            :src="event.avatar"
-            :alt="event.name"
-            class="feed-item__avatar"
-            :class="event.status === 'Granted' ? 'feed-item__avatar--granted' : 'feed-item__avatar--denied'"
+          <div
+            class="feed-item__avatar-initial"
+            :class="event.result === 'Granted' ? 'feed-item__avatar--granted' : 'feed-item__avatar--denied'"
           >
+            {{ getInitials(event.employee) }}
+          </div>
         </div>
 
         <!-- Info -->
         <div class="feed-item__info">
           <div class="feed-item__name-row">
-            <span class="feed-item__name">{{ event.name }}</span>
-            <span class="feed-item__emp-id">{{ event.empId }}</span>
+            <span class="feed-item__name">{{ event.employee || 'Employee' }}</span>
+            <span class="feed-item__emp-id">{{ event.department || '' }}</span>
           </div>
           <p class="feed-item__location">
             <MapPin class="w-3 h-3 flex-shrink-0" />
-            <span>{{ event.device }}</span>
+            <span>{{ event.location || 'Access Point' }}</span>
           </p>
         </div>
 
@@ -68,36 +69,40 @@
         <div class="feed-item__badges">
           <span
             class="feed-status-badge"
-            :class="event.status === 'Granted' ? 'feed-status-badge--granted' : 'feed-status-badge--denied'"
+            :class="event.result === 'Granted' ? 'feed-status-badge--granted' : 'feed-status-badge--denied'"
           >
-            {{ event.status }}
+            {{ event.result || 'Granted' }}
           </span>
           <p class="feed-item__time">
-            {{ event.relativeTime }}
+            {{ event.time || 'Just now' }}
           </p>
           <span
             class="feed-type-badge"
-            :class="event.type === 'Entry' ? 'feed-type-badge--entry' : 'feed-type-badge--exit'"
+            :class="(event.result || '').toLowerCase() === 'granted' ? 'feed-type-badge--entry' : 'feed-type-badge--exit'"
           >
-            {{ event.type }}
+            {{ event.method || 'RFID' }}
           </span>
         </div>
       </div>
     </TransitionGroup>
+
+    <div v-else class="py-12 text-center text-xs text-slate-400 dark:text-slate-500">
+      No live access events recorded yet today.
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
 import { MapPin } from 'lucide-vue-next';
+import { useLiveAccess } from '@/composables/workforce/useLiveAccess';
 
-const liveEvents = ref([
-  { id: 1, name: 'Arun Kumar', empId: 'EMP-1042', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=120', type: 'Entry', device: 'Main Entrance Gate A', relativeTime: '2 min ago', status: 'Granted' },
-  { id: 2, name: 'Priya Sundaram', empId: 'EMP-1088', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=120', type: 'Exit', device: 'South Wing Turnstile 2', relativeTime: '3 min ago', status: 'Granted' },
-  { id: 3, name: 'Rajesh Kanna', empId: 'EMP-1115', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=120', type: 'Entry', device: 'Server Room Controller 1', relativeTime: '5 min ago', status: 'Granted' },
-  { id: 4, name: 'Vikram Sethi', empId: 'EMP-0924', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=120', type: 'Entry', device: 'Executive Suite Door', relativeTime: '7 min ago', status: 'Denied' },
-  { id: 5, name: 'Ananya Sharma', empId: 'EMP-1204', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=120', type: 'Entry', device: 'Main Entrance Gate B', relativeTime: '9 min ago', status: 'Granted' },
-]);
+const { events } = useLiveAccess();
+
+const getInitials = (name) => {
+  if (!name) return 'E';
+  const parts = name.split(' ');
+  return ((parts[0]?.[0] || '') + (parts[1]?.[0] || '')).toUpperCase() || 'E';
+};
 </script>
 
 <style scoped>
@@ -253,14 +258,19 @@ const liveEvents = ref([
   background: linear-gradient(to bottom, #f43f5e, rgba(244,63,94,0.3));
 }
 
-/* Avatar */
+/* Avatar / Initial */
 .feed-item__avatar-wrap { flex-shrink: 0; }
-.feed-item__avatar {
+.feed-item__avatar-initial {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  object-fit: cover;
-  ring: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  background: #f1f5f9;
+  color: #334155;
   transition: box-shadow 250ms;
 }
 .feed-item__avatar--granted {
@@ -268,12 +278,6 @@ const liveEvents = ref([
 }
 .feed-item__avatar--denied {
   box-shadow: 0 0 0 2px rgba(244,63,94,0.3), 0 0 10px rgba(244,63,94,0.12);
-}
-.feed-item:hover .feed-item__avatar--granted {
-  box-shadow: 0 0 0 2px rgba(16,185,129,0.5), 0 0 14px rgba(16,185,129,0.2);
-}
-.feed-item:hover .feed-item__avatar--denied {
-  box-shadow: 0 0 0 2px rgba(244,63,94,0.5), 0 0 14px rgba(244,63,94,0.18);
 }
 
 /* Info */

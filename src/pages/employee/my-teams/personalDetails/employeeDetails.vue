@@ -979,7 +979,7 @@ const openProfile = (emp) => {
     department: emp.department?.departmentName || 'Operations',
     designation: getRoleName(emp),
     status: emp.status || 'Active',
-    card_number: rfidCardsMap.value[emp.id] ? 'CRD-89421' : null,
+    card_number: emp.assignedCards?.[0]?.cardManagement_id?.rfidCard || emp.rfid || null,
     has_face: hasFace(emp),
     has_finger: hasFinger(emp.id)
   };

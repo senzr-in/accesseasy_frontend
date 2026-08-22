@@ -20,36 +20,42 @@
       <div>
         <div class="flex justify-between text-xs mb-1.5">
           <span class="font-semibold text-[#0F172A]">Face Recognition</span>
-          <span class="font-bold text-[#2563EB]">96%</span>
+          <span class="font-bold text-[#2563EB]">{{ faceScore }}%</span>
         </div>
         <div class="w-full bg-[#F1F5F9] h-2 rounded-full overflow-hidden">
-          <div class="bg-[#2563EB] h-full rounded-full transition-all duration-500" style="width: 96%" />
+          <div class="bg-[#2563EB] h-full rounded-full transition-all duration-500" :style="{ width: `${faceScore}%` }" />
         </div>
-        <p class="text-[10px] text-[#94A3B8] mt-1">2,387 / 2,486 employees enrolled</p>
+        <p class="text-[10px] text-[#94A3B8] mt-1">
+          {{ faceEnrolled.toLocaleString() }} / {{ totalEligible.toLocaleString() }} employees enrolled
+        </p>
       </div>
 
       <!-- 2. Fingerprint Devices -->
       <div>
         <div class="flex justify-between text-xs mb-1.5">
-          <span class="font-semibold text-[#0F172A]">Fingerprint Devices</span>
-          <span class="font-bold text-[#059669]">100%</span>
+          <span class="font-semibold text-[#0F172A]">Fingerprint Templates</span>
+          <span class="font-bold text-[#059669]">{{ fingerScore }}%</span>
         </div>
         <div class="w-full bg-[#F1F5F9] h-2 rounded-full overflow-hidden">
-          <div class="bg-[#059669] h-full rounded-full transition-all duration-500" style="width: 100%" />
+          <div class="bg-[#059669] h-full rounded-full transition-all duration-500" :style="{ width: `${fingerScore}%` }" />
         </div>
-        <p class="text-[10px] text-[#94A3B8] mt-1">All biometric templates synchronized</p>
+        <p class="text-[10px] text-[#94A3B8] mt-1">
+          {{ fingerEnrolled.toLocaleString() }} / {{ totalEligible.toLocaleString() }} templates enrolled
+        </p>
       </div>
 
       <!-- 3. Credential Synchronization -->
       <div>
         <div class="flex justify-between text-xs mb-1.5">
-          <span class="font-semibold text-[#0F172A]">Credential Synchronization</span>
-          <span class="font-bold text-[#D97706]">91%</span>
+          <span class="font-semibold text-[#0F172A]">Device Online Rate</span>
+          <span class="font-bold text-[#D97706]">{{ syncScore }}%</span>
         </div>
         <div class="w-full bg-[#F1F5F9] h-2 rounded-full overflow-hidden">
-          <div class="bg-[#F59E0B] h-full rounded-full transition-all duration-500" style="width: 91%" />
+          <div class="bg-[#F59E0B] h-full rounded-full transition-all duration-500" :style="{ width: `${syncScore}%` }" />
         </div>
-        <p class="text-[10px] text-[#94A3B8] mt-1">1 gateway queue syncing</p>
+        <p class="text-[10px] text-[#94A3B8] mt-1">
+          {{ devicesOffline > 0 ? `${devicesOffline} gateway(s) offline` : 'All gateways responding' }}
+        </p>
       </div>
     </div>
 
@@ -59,21 +65,21 @@
         class="p-2.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] cursor-pointer hover:border-[#CBD5E1] transition-all shadow-2xs"
         @click="navigateTo('/dashboard/settings/devices?status=online')"
       >
-        <p class="font-bold text-[#059669]">48</p>
+        <p class="font-bold text-[#059669]">{{ devicesOnline }}</p>
         <p class="text-[10px] text-[#64748B] mt-0.5 font-medium">Online</p>
       </div>
       <div
         class="p-2.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] cursor-pointer hover:border-[#CBD5E1] transition-all shadow-2xs"
         @click="navigateTo('/dashboard/settings/devices?status=offline')"
       >
-        <p class="font-bold text-[#DC2626]">2</p>
+        <p class="font-bold text-[#DC2626]">{{ devicesOffline }}</p>
         <p class="text-[10px] text-[#64748B] mt-0.5 font-medium">Offline</p>
       </div>
       <div
         class="p-2.5 rounded-xl bg-[#F8FAFC] border border-[#E2E8F0] cursor-pointer hover:border-[#CBD5E1] transition-all shadow-2xs"
         @click="navigateTo('/dashboard/settings/devices?sync=pending')"
       >
-        <p class="font-bold text-[#D97706]">1</p>
+        <p class="font-bold text-[#D97706]">{{ devicesOffline }}</p>
         <p class="text-[10px] text-[#64748B] mt-0.5 font-medium">Sync Req.</p>
       </div>
     </div>
@@ -81,10 +87,25 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { ChevronRight } from 'lucide-vue-next';
+import { useDeviceStatus } from '@/composables/workforce/useDeviceStatus';
 
 const router = useRouter();
+const { biometricHealth } = useDeviceStatus();
+
+const faceScore = computed(() => biometricHealth.value?.faceRecognition?.score || 0);
+const faceEnrolled = computed(() => biometricHealth.value?.faceRecognition?.enrolledCount || 0);
+const totalEligible = computed(() => biometricHealth.value?.faceRecognition?.totalEligible || 0);
+
+const fingerScore = computed(() => biometricHealth.value?.fingerprintDevices?.score || 0);
+const fingerEnrolled = computed(() => biometricHealth.value?.fingerprintDevices?.enrolledCount || 0);
+
+const syncScore = computed(() => biometricHealth.value?.credentialSync?.score || 0);
+
+const devicesOnline = computed(() => biometricHealth.value?.summary?.devicesOnline || 0);
+const devicesOffline = computed(() => biometricHealth.value?.summary?.devicesOffline || 0);
 
 const navigateTo = (path) => {
   router.push(path);
