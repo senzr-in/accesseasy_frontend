@@ -7,6 +7,9 @@
       <!-- Main Content -->
       <div class="flex flex-1 flex-col overflow-hidden min-w-0">
 
+        <!-- 7-Day Free Trial Notification Banner -->
+        <TrialBanner />
+
         <!-- Onboarding Banner -->
         <OnboardingBanner />
 
@@ -16,6 +19,9 @@
         </main>
       </div>
     </div>
+
+    <!-- 7-Day Trial Welcome Popup -->
+    <TrialWelcomeModal />
     <!-- Alert Detail Modal -->
     <Teleport to="body">
       <div
@@ -102,6 +108,8 @@ import { Building, Shield, MapPin, ChevronDown, ChevronRight, Search, Bell, Sun,
 import SecuritySidebar from '@/components/layout/SecuritySidebar.vue';
 import WorkforceSidebar from '@/components/layout/WorkforceSidebar.vue';
 import OnboardingBanner from '@/components/layout/OnboardingBanner.vue';
+import TrialBanner from '@/components/layout/TrialBanner.vue';
+import TrialWelcomeModal from '@/components/layout/TrialWelcomeModal.vue';
 import { authService } from '@/services/authService';
 import { patrolService } from '@/services/patrolService';
 import { onboardingService } from '@/services/onboardingService';

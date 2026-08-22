@@ -69,23 +69,25 @@ class CurrentUserTenant {
 
       if (userData) {
         // Verify that the user's tenant has access to accesseasy
-        let hasAccess = false;
-        if (!userData.tenant) {
-          hasAccess = true; // Allow if no tenant is attached (e.g. system admin)
-        } else {
-          let userApps = userData.tenant?.userApp || [];
-          if (typeof userApps === "string") {
-            try {
-              userApps = JSON.parse(userApps);
-            } catch (e) {
-              userApps = [];
-            }
+        let userApps = userData.tenant?.userApp || [];
+        if (typeof userApps === "string") {
+          try {
+            userApps = JSON.parse(userApps);
+          } catch (e) {
+            userApps = [];
           }
-          hasAccess = Array.isArray(userApps) && userApps.some(app => app.userApp === "accesseasy");
         }
+        hasAccess = !userData.tenant || (Array.isArray(userApps) && userApps.some(app => String(app.userApp || "").toLowerCase() === "accesseasy"));
 
-        if (!hasAccess) {
-          throw new Error("User tenant does not have access to accesseasy");
+        // If tenant does not have accesseasy entry yet (e.g. fresh Google signup), auto-allow and register in background
+        if (!hasAccess && userData.tenant) {
+          hasAccess = true;
+          const tId = userData.tenant?.tenantId || userData.tenant?.id || (typeof userData.tenant === "string" ? userData.tenant : null);
+          if (tId && userData.id) {
+            authService.ensureTenantUserApp(tId, userData.id, "accesseasy").catch(e =>
+              console.warn("[currentUserTenant] Background userApp registration:", e.message)
+            );
+          }
         }
 
         this.tenantId = userData.tenant?.tenantId || userData.tenant?.id || (typeof userData.tenant === "string" ? userData.tenant : null) || authService.getTenantId() || null;

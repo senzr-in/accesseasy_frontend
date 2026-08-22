@@ -1,1747 +1,639 @@
 <template>
-  <!-- Main container for the application -->
-  <div class="container">
-    <!-- Header section -->
-    <header class="header">
-      <div class="header-content">
-        <!-- Active plans display -->
-        <div class="active-plans-header">
-          <h2>Active Plans</h2>
-          <div class="active-plan-tags">
-            <span
-              v-for="plan in activeTenantPlans"
-              :key="plan.key"
-              class="plan-tag"
-              @click="showActivePlanModal = true"
-            >{{ plan.name }}</span>
+  <div class="min-h-full flex flex-col bg-slate-50 dark:bg-[#0b0f19] text-slate-900 dark:text-slate-100 font-sans overflow-y-auto custom-scrollbar">
+
+    <!-- Sticky Navigation / Header -->
+    <div class="border-b border-slate-200/80 dark:border-white/5 bg-white/80 dark:bg-[#0b0f19]/80 backdrop-blur-md sticky top-0 z-30 px-6 py-4">
+      <div class="max-w-7xl mx-auto flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/20">
+            <ShieldCheck class="w-5 h-5" />
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-black text-sm text-slate-900 dark:text-white tracking-tight">AccessEasy Patrol</span>
+              <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 border border-blue-200 dark:border-blue-500/20">
+                Operations Platform
+              </span>
+            </div>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">Flat ₹1,999 / site / month</p>
           </div>
         </div>
 
-        <!-- Header controls including trial status, employee count, currency, billing toggle, and action buttons -->
-        <div class="header-controls">
-          <!-- Free trial badge and upgrade button -->
-          <div
-            v-if="isFreeTrial"
-            class="free-trial"
-          >
-            <span class="free-trial-badge">🎉 Free Trial Active</span>
-            <button
-              class="btn upgrade-btn"
-              @click="handleUpgradeFromTrial"
-            >
-              Upgrade Now
-            </button>
-          </div>
+        <button
+          class="h-9 px-4 rounded-xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 text-xs font-bold transition-all text-slate-700 dark:text-slate-300 flex items-center gap-1.5"
+          @click="router.push('/dashboard/settings/subscription')"
+        >
+          <ArrowLeft class="w-3.5 h-3.5" />
+          <span>My Subscription</span>
+        </button>
+      </div>
+    </div>
 
-          <!-- Employee count adjustment controls -->
-          <div class="employees-control">
-            <button
-              :disabled="employees <= 1"
-              class="btn employee-btn"
-              @click="adjustEmployees(-1)"
-            >
-              -
-            </button>
-            <div class="employee-count">
-              <div class="employee-number">
-                {{ employees }}
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-7xl mx-auto w-full p-6 lg:p-10 space-y-12">
+
+      <!-- Hero Header -->
+      <div class="text-center space-y-4 max-w-3xl mx-auto pt-2">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-blue-500/10 via-indigo-500/10 to-emerald-500/10 border border-blue-500/20 text-xs font-bold text-blue-600 dark:text-blue-400">
+          <Sparkles class="w-3.5 h-3.5" />
+          <span>Single Unified Security Platform · Zero Feature Gating</span>
+        </div>
+
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
+          Scale Your Security Patrols <br />
+          <span class="bg-gradient-to-r from-blue-600 via-indigo-600 to-emerald-500 bg-clip-text text-transparent">
+            One Site at a Time
+          </span>
+        </h1>
+
+        <p class="text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
+          Flat <strong>₹1,999 / site / month</strong>. Only pay for the physical sites you protect. <strong>Guards, checkpoints, live GPS tracking, dispatch & shift rosters are 100% Unlimited</strong>.
+        </p>
+      </div>
+
+      <!-- Main Interactive Pricing Card -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch" ref="pricingCardRef">
+        
+        <!-- Left: Interactive Capacity & Calculator (7 Cols) -->
+        <div class="lg:col-span-7 bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/50 dark:shadow-none flex flex-col justify-between gap-8 relative overflow-hidden">
+          <div class="absolute -top-24 -right-24 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+          <div class="space-y-6">
+            <!-- Card Header -->
+            <div class="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-4">
+              <div>
+                <span class="text-xs font-black uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                  Select Licensed Site Capacity
+                </span>
+                <h2 class="text-lg font-black text-slate-900 dark:text-white mt-0.5">
+                  How many sites do you manage?
+                </h2>
               </div>
-              <div class="employee-label">
-                employees
+              <div class="text-right">
+                <span class="text-xs font-bold text-slate-400 block">Monthly Rate</span>
+                <span class="text-sm font-mono font-black text-slate-900 dark:text-white">
+                  {{ currencySymbol }}{{ formattedUnitPrice }} <span class="text-xs font-normal text-slate-500">/site/mo</span>
+                </span>
               </div>
             </div>
+
+            <!-- Stepper + Range Slider Controls -->
+            <div class="p-5 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 space-y-4">
+              <div class="flex items-center justify-between gap-4">
+                <div>
+                  <span class="text-sm font-black text-slate-900 dark:text-white">Licensed Sites</span>
+                  <p class="text-xs text-slate-500">Perimeter sites, branches, complexes or facilities</p>
+                </div>
+
+                <!-- Stepper Buttons -->
+                <div class="flex items-center bg-white dark:bg-white/10 border border-slate-200 dark:border-white/10 rounded-xl p-1 shrink-0 shadow-sm">
+                  <button
+                    class="w-9 h-9 rounded-lg text-slate-700 dark:text-slate-200 font-black text-base flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all disabled:opacity-30 disabled:pointer-events-none"
+                    :disabled="sitesCount <= 1"
+                    @click="adjustSites(-1)"
+                  >
+                    −
+                  </button>
+                  <div class="flex items-baseline px-4 gap-1">
+                    <input
+                      type="number"
+                      v-model.number="sitesCount"
+                      min="1"
+                      max="500"
+                      class="w-12 bg-transparent text-center font-mono font-black text-lg text-slate-900 dark:text-white outline-none"
+                      @blur="sanitizeSitesCount"
+                    />
+                    <span class="text-xs font-bold text-slate-500">
+                      {{ sitesCount === 1 ? 'Site' : 'Sites' }}
+                    </span>
+                  </div>
+                  <button
+                    class="w-9 h-9 rounded-lg text-slate-700 dark:text-slate-200 font-black text-base flex items-center justify-center hover:bg-blue-600 hover:text-white transition-all"
+                    @click="adjustSites(1)"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+
+              <!-- Interactive Range Slider -->
+              <div class="pt-2">
+                <input
+                  type="range"
+                  v-model.number="sitesCount"
+                  min="1"
+                  max="50"
+                  class="w-full h-2 bg-slate-200 dark:bg-white/10 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                />
+                <div class="flex justify-between text-[10px] font-bold text-slate-400 mt-1">
+                  <span>1 Site</span>
+                  <span>10 Sites</span>
+                  <span>25 Sites</span>
+                  <span>50+ Sites</span>
+                </div>
+              </div>
+
+              <!-- Quick Presets -->
+              <div class="flex items-center gap-2 pt-1">
+                <span class="text-[11px] font-bold text-slate-400">Quick Select:</span>
+                <button
+                  v-for="preset in [1, 3, 5, 10, 20]"
+                  :key="preset"
+                  class="px-2.5 py-1 rounded-lg text-xs font-bold transition-all border"
+                  :class="sitesCount === preset ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-white/5 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-white/10 hover:border-blue-500'"
+                  @click="sitesCount = preset"
+                >
+                  {{ preset }} {{ preset === 1 ? 'Site' : 'Sites' }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Currency Selector -->
+            <div class="flex items-center justify-between text-xs px-1">
+              <span class="text-slate-500 dark:text-slate-400 font-medium">Selected Currency</span>
+              <div class="flex gap-2">
+                <button
+                  class="px-3 py-1 rounded-lg font-bold transition-all"
+                  :class="currency === 'INR' ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400'"
+                  @click="currency = 'INR'"
+                >
+                  ₹ INR
+                </button>
+                <button
+                  class="px-3 py-1 rounded-lg font-bold transition-all"
+                  :class="currency === 'USD' ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-slate-400'"
+                  @click="currency = 'USD'"
+                >
+                  $ USD
+                </button>
+              </div>
+            </div>
+
+            <!-- Calculation Breakdown Card -->
+            <div class="p-5 rounded-2xl bg-gradient-to-br from-slate-50 to-blue-50/40 dark:from-white/[0.02] dark:to-blue-950/20 border border-blue-100 dark:border-blue-500/20 space-y-3">
+              <div class="flex justify-between items-center text-xs">
+                <span class="text-slate-500 dark:text-slate-400">Monthly Unit Rate</span>
+                <span class="font-mono font-bold text-slate-800 dark:text-slate-200">
+                  {{ currencySymbol }}{{ formattedUnitPrice }} × {{ sitesCount }} {{ sitesCount === 1 ? 'Site' : 'Sites' }}
+                </span>
+              </div>
+              <div class="flex justify-between items-center text-xs">
+                <span class="text-slate-500 dark:text-slate-400">Billing Cycle</span>
+                <span class="font-bold text-slate-800 dark:text-slate-200">
+                  Monthly Subscription
+                </span>
+              </div>
+              <div class="border-t border-slate-200/80 dark:border-white/10 pt-3 flex justify-between items-baseline">
+                <div>
+                  <span class="text-sm font-black text-slate-900 dark:text-white block">Total Monthly Amount</span>
+                  <span class="text-[11px] text-slate-500">
+                    Billed monthly for {{ sitesCount }} {{ sitesCount === 1 ? 'Site' : 'Sites' }}
+                  </span>
+                </div>
+                <div class="text-right">
+                  <span class="text-3xl font-mono font-black text-blue-600 dark:text-blue-400">
+                    {{ currencySymbol }}{{ totalPayable.toLocaleString() }}
+                  </span>
+                  <span class="text-xs font-semibold text-slate-400 block">/ month</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Checkout CTAs -->
+          <div class="space-y-3 pt-2">
             <button
-              :disabled="isFreeTrial && employees >= 5"
-              class="btn employee-btn employee-btn-primary"
-              @click="adjustEmployees(1)"
+              class="w-full h-13 py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-700 text-white font-black text-sm uppercase tracking-wider transition-all shadow-xl shadow-blue-500/25 flex items-center justify-center gap-2.5 disabled:opacity-50"
+              :disabled="isProcessingPayment"
+              @click="openCheckoutModal"
             >
-              +
+              <CreditCard class="w-5 h-5" />
+              <span>{{ isProcessingPayment ? 'Processing...' : `Proceed to Payment (${currencySymbol}${totalPayable.toLocaleString()} / mo)` }}</span>
+              <ArrowRight class="w-4 h-4" />
             </button>
-            <div
-              v-if="isFreeTrial && employees >= 5"
-              class="trial-warning"
-            >
-              Trial limit reached. Upgrade to add more employees.
-            </div>
-          </div>
 
-          <!-- Currency selection dropdown -->
-          <select
-            v-model="currency"
-            class="currency-select"
-          >
-            <option value="USD">
-              USD ($)
-            </option>
-            <option value="INR">
-              INR (₹)
-            </option>
-          </select>
-
-          <!-- Billing cycle toggle (monthly/annual) -->
-          <div class="billing-switch">
-            <div
-              :class="[
-                'switch-tab',
-                { active: !annual, disabled: isFreeTrial },
-              ]"
-              @click="!isFreeTrial && toggleBilling(false)"
-            >
-              Monthly
-            </div>
-            <div
-              :class="['switch-tab', { active: annual, disabled: isFreeTrial }]"
-              @click="!isFreeTrial && toggleBilling(true)"
-            >
-              Annual <span class="save-text">(Save 20%)</span>
-            </div>
-          </div>
-
-          <!-- Action buttons: Start Free Trial or Proceed to Payment -->
-          <div class="header-actions">
+            <!-- 1-Click Free Trial -->
             <button
-              v-if="isFreeTrial"
-              class="btn start-trial-btn"
+              v-if="!isFreeTrialActive && !isPlanPaidActive"
+              class="w-full h-11 rounded-2xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 text-slate-800 dark:text-slate-200 font-bold text-xs transition-all flex items-center justify-center gap-2"
+              :disabled="isProcessingTrial"
               @click="handleStartFreeTrial"
             >
-              Start Free Trial
+              <Zap class="w-4 h-4 text-blue-600" />
+              <span>{{ isProcessingTrial ? 'Activating...' : 'Start 7-Day Free Trial (1 Site · Full Platform)' }}</span>
             </button>
-            <button
-              v-else
-              class="btn payment-btn"
-              @click="showPaymentModal = true"
-            >
-              Proceed to Payment
-            </button>
-            <button
-              v-if="!isFreeTrial"
-              class="btn try-trial-btn"
-              @click="
-                isFreeTrial = true;
-                employees = 5;
-              "
-            >
-              Try Free Trial Instead
-            </button>
-          </div>
-        </div>
-      </div>
-    </header>
 
-    <!-- Main content area -->
-    <div class="main-content">
-      <!-- Plans selection section -->
-      <div class="plans-selection">
-        <h2>Select Your Plans</h2>
-        <p class="plans-note">
-          The Lite plan is included by default. Customize by adding advanced
-          plans or the Locate add-on.
-        </p>
-
-        <!-- Plans grid -->
-        <div class="plans-grid">
-          <div
-            v-for="plan in plansData"
-            :key="plan.key"
-            :class="[
-              'plan-card',
-              {
-                selected: selectedPlans.has(plan.key),
-                lite: plan.key === 'lite',
-              },
-            ]"
-            @click="plan.key !== 'lite' && togglePlan(plan.key)"
-          >
-            <div class="plan-header">
-              <div class="plan-info">
-                <div class="plan-title-price">
-                  <h3>{{ plan.name }}</h3>
-                  <div class="plan-pricing">
-                    <div class="price">
-                      {{
-                        isFreeTrial
-                          ? "Free"
-                          : formatPrice(
-                            plan.perUser[currency][
-                              annual ? "annual" : "monthly"
-                            ],
-                          ) + `/user/${annual ? "year" : "month"}`
-                      }}
-                    </div>
-                    <div class="total-cost">
-                      {{
-                        isFreeTrial
-                          ? "Trial"
-                          : formatPrice(calculatePlanCost(plan)) +
-                            ` ${annual ? "yearly" : "monthly"}`
-                      }}
-                    </div>
-                    <div
-                      v-if="
-                        annual &&
-                          !isFreeTrial &&
-                          calculateAnnualSavingsPerPlan(plan) > 0
-                      "
-                      class="savings"
-                    >
-                      Save
-                      {{
-                        formatPrice(calculateAnnualSavingsPerPlan(plan))
-                      }}/year 🎉
-                    </div>
-                  </div>
-                </div>
-                <ul class="plan-features">
-                  <li
-                    v-for="feature in plan.features"
-                    :key="feature"
-                  >
-                    {{ feature }}
-                  </li>
-                  <li
-                    v-for="addOn in plan.addOns"
-                    :key="addOn.key"
-                    class="add-on-feature"
-                  >
-                    <input
-                      v-model="selectedAddOns"
-                      type="checkbox"
-                      :value="`${plan.key}_${addOn.key}`"
-                      :disabled="!selectedPlans.has(plan.key) || isFreeTrial"
-                      @click.stop="toggleAddOn(plan.key, addOn.key)"
-                    >
-                    {{ addOn.name }} (+{{
-                      formatPrice(
-                        addOn.perUser[currency][annual ? "annual" : "monthly"],
-                      )
-                    }}/user/{{ annual ? "year" : "month" }})
-                    <ul>
-                      <li
-                        v-for="feature in addOn.features"
-                        :key="feature"
-                      >
-                        {{ feature }}
-                      </li>
-                    </ul>
-                  </li>
-                </ul>
-              </div>
+            <!-- Trust Badges -->
+            <div class="flex items-center justify-center gap-6 pt-2 text-[11px] text-slate-400 dark:text-slate-500">
+              <span class="flex items-center gap-1.5"><Lock class="w-3.5 h-3.5 text-emerald-500" /> 256-Bit Razorpay Security</span>
+              <span class="flex items-center gap-1.5"><Zap class="w-3.5 h-3.5 text-amber-500" /> Instant Activation</span>
+              <span class="flex items-center gap-1.5"><CheckCircle2 class="w-3.5 h-3.5 text-blue-500" /> Cancel Anytime</span>
             </div>
-            <div class="plan-checkbox">
-              <input
-                v-if="plan.key !== 'lite'"
-                v-model="selectedPlans"
-                type="checkbox"
-                :value="plan.key"
-              >
+          </div>
+
+        </div>
+
+        <!-- Right: What's Included in Every Site (5 Cols) -->
+        <div class="lg:col-span-5 bg-gradient-to-br from-slate-900 to-slate-950 text-white rounded-3xl p-6 sm:p-8 shadow-xl flex flex-col justify-between gap-6 border border-slate-800 relative overflow-hidden">
+          <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+          <div class="space-y-6">
+            <div class="border-b border-white/10 pb-4">
+              <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-black uppercase tracking-wider mb-2">
+                ✓ 100% Unlimited Capabilities
+              </div>
+              <h3 class="text-xl font-black text-white tracking-tight">Included with Every Site</h3>
+              <p class="text-xs text-slate-400 mt-1">Zero per-guard fees. Zero add-on surcharges.</p>
+            </div>
+
+            <!-- Rich Feature Badges List -->
+            <div class="space-y-4">
               <div
-                v-else
-                class="required-label"
+                v-for="(feat, idx) in keyPlatformFeatures"
+                :key="idx"
+                class="flex items-start gap-3.5 p-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm"
               >
-                Required
+                <div class="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center shrink-0 mt-0.5">
+                  <component :is="feat.icon" class="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 class="text-xs font-bold text-white flex items-center gap-1.5">
+                    <span>{{ feat.title }}</span>
+                    <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300">
+                      Unlimited
+                    </span>
+                  </h4>
+                  <p class="text-[11px] text-slate-400 mt-0.5 leading-snug">{{ feat.desc }}</p>
+                </div>
               </div>
             </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Comparison Matrix -->
+      <div class="bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+        <div>
+          <h3 class="text-lg font-black text-slate-900 dark:text-white">Patrol Feature Matrix</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Everything you need to run high-reliability security operations</p>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="border-b border-slate-100 dark:border-white/5 text-[11px] font-extrabold uppercase text-slate-400">
+                <th class="py-3 px-4">Feature Capability</th>
+                <th class="py-3 px-4">7-Day Free Trial</th>
+                <th class="py-3 px-4 text-blue-600 dark:text-blue-400">Full Platform Subscription</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-white/5">
+              <tr>
+                <td class="py-3.5 px-4 font-bold text-slate-800 dark:text-slate-200">Licensed Site Capacity</td>
+                <td class="py-3.5 px-4 text-slate-500">1 Site Included</td>
+                <td class="py-3.5 px-4 font-bold text-blue-600 dark:text-blue-400">Scaled to Your Operations ({{ sitesCount }} Sites)</td>
+              </tr>
+              <tr>
+                <td class="py-3.5 px-4 font-bold text-slate-800 dark:text-slate-200">Guards & Supervisor Accounts</td>
+                <td class="py-3.5 px-4 text-emerald-600 font-semibold">✓ Unlimited</td>
+                <td class="py-3.5 px-4 text-emerald-600 font-bold">✓ Unlimited (Zero Per-Guard Fees)</td>
+              </tr>
+              <tr>
+                <td class="py-3.5 px-4 font-bold text-slate-800 dark:text-slate-200">QR & NFC Checkpoints</td>
+                <td class="py-3.5 px-4 text-emerald-600 font-semibold">✓ Unlimited</td>
+                <td class="py-3.5 px-4 text-emerald-600 font-bold">✓ Unlimited Checkpoints & Tags</td>
+              </tr>
+              <tr>
+                <td class="py-3.5 px-4 font-bold text-slate-800 dark:text-slate-200">Live GPS Tracking & Breadcrumbs</td>
+                <td class="py-3.5 px-4 text-emerald-600 font-semibold">✓ Included</td>
+                <td class="py-3.5 px-4 text-emerald-600 font-bold">✓ Real-Time Live Map & Telemetry</td>
+              </tr>
+              <tr>
+                <td class="py-3.5 px-4 font-bold text-slate-800 dark:text-slate-200">Automated Incident Escalation</td>
+                <td class="py-3.5 px-4 text-emerald-600 font-semibold">✓ Included</td>
+                <td class="py-3.5 px-4 text-emerald-600 font-bold">✓ Multi-Tier Fallback Engine</td>
+              </tr>
+              <tr>
+                <td class="py-3.5 px-4 font-bold text-slate-800 dark:text-slate-200">24/7 Shift Scheduler & Rostering</td>
+                <td class="py-3.5 px-4 text-emerald-600 font-semibold">✓ Included</td>
+                <td class="py-3.5 px-4 text-emerald-600 font-bold">✓ Full Shift Rotation Matrix</td>
+              </tr>
+              <tr>
+                <td class="py-3.5 px-4 font-bold text-slate-800 dark:text-slate-200">Supervisor Compliance Logs</td>
+                <td class="py-3.5 px-4 text-slate-500">90-Day Retention</td>
+                <td class="py-3.5 px-4 text-emerald-600 font-bold">✓ 1-Year Immutable Audit Trail</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- FAQ Section -->
+      <div class="bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+        <h3 class="text-lg font-black text-slate-900 dark:text-white">Frequently Asked Questions</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div class="space-y-1.5">
+            <h4 class="font-bold text-slate-900 dark:text-white">How does site billing work?</h4>
+            <p class="text-slate-500 leading-relaxed">
+              You pay ₹1,999 / month for each licensed physical site or branch. All guards, checkpoints, routes, and software features are completely included without any extra charges.
+            </p>
+          </div>
+          <div class="space-y-1.5">
+            <h4 class="font-bold text-slate-900 dark:text-white">Are guards really unlimited?</h4>
+            <p class="text-slate-500 leading-relaxed">
+              Yes! You can add 10, 50, or 500+ security guards, dispatchers, and supervisors without paying a single rupee more per user.
+            </p>
+          </div>
+          <div class="space-y-1.5">
+            <h4 class="font-bold text-slate-900 dark:text-white">Can I add or remove sites anytime?</h4>
+            <p class="text-slate-500 leading-relaxed">
+              Yes, you can upgrade your licensed site capacity instantly at any time. Your new sites will be provisioned immediately.
+            </p>
+          </div>
+          <div class="space-y-1.5">
+            <h4 class="font-bold text-slate-900 dark:text-white">What payment methods are supported?</h4>
+            <p class="text-slate-500 leading-relaxed">
+              We support UPI (Google Pay, PhonePe, Paytm), Credit & Debit Cards, NetBanking via Razorpay, as well as direct UPI QR code transfers.
+            </p>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- Payment Modal -->
-    <div
-      v-if="showPaymentModal"
-      class="payment-modal"
-    >
-      <div class="payment-modal-content">
-        <div class="modal-header">
-          <h3>Complete Payment</h3>
-          <button
-            class="modal-close-btn"
-            @click="showPaymentModal = false"
-          >
-            ×
-          </button>
-        </div>
+    </main>
 
-        <!-- Plan Summary in Modal -->
-        <div class="modal-plan-summary">
-          <h4>Plan Summary</h4>
-          <div class="billing-info">
-            <div class="label">
-              Billing for
+    <!-- Checkout Modal (Razorpay + UPI) -->
+    <Teleport to="body">
+      <div v-if="showPaymentModal" class="fixed inset-0 z-[200] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200" @click.self="showPaymentModal = false">
+        <div class="relative w-full max-w-lg bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-3xl shadow-2xl p-6 sm:p-8 space-y-6 animate-in zoom-in duration-200">
+          
+          <div class="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-4">
+            <div>
+              <span class="text-[10px] font-black uppercase text-blue-600 dark:text-blue-400 tracking-wider">Secure Checkout</span>
+              <h3 class="text-base font-black text-slate-900 dark:text-white mt-0.5">Confirm Patrol Subscription</h3>
             </div>
-            <div class="employees-count">
-              {{ effectiveEmployees }} employees
-            </div>
-            <div class="billing-cycle">
-              {{
-                isFreeTrial
-                  ? "Free Trial (14 days)"
-                  : annual
-                    ? "Annual billing"
-                    : "Monthly billing"
-              }}
-            </div>
+            <button class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-400 hover:text-slate-600 flex items-center justify-center" @click="showPaymentModal = false">
+              <X class="w-4 h-4" />
+            </button>
           </div>
 
-          <div class="selected-plans-list">
-            <div class="label">
-              Selected Plans:
-            </div>
-            <div
-              v-for="planKey in selectedPlans"
-              :key="planKey"
-              class="selected-plan-item"
+          <!-- Checkout Tabs -->
+          <div class="flex p-1 bg-slate-100 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10">
+            <button
+              :class="['flex-1 py-2.5 rounded-xl text-xs font-bold transition-all text-center', paymentTab === 'online' ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white']"
+              @click="paymentTab = 'online'"
             >
-              <span class="selected-plan-name">{{
-                plansData.find((p) => p.key === planKey).name
-              }}</span>
-              <span
-                v-if="selectedAddOns.has(`${planKey}_locate`)"
-                class="add-on-label"
-              >
-                + Locate
-              </span>
-              <span
-                v-if="isFreeTrial"
-                class="free-trial-badge-small"
-              >Free Trial</span>
-              <span class="selected-plan-cost">
-                {{
-                  isFreeTrial
-                    ? "FREE"
-                    : annual
-                      ? formatPrice(
-                        calculatePlanCost(
-                          plansData.find((p) => p.key === planKey),
-                        ),
-                      ) + "/year"
-                      : formatPrice(
-                        calculatePlanCost(
-                          plansData.find((p) => p.key === planKey),
-                        ),
-                      ) + "/month"
-                }}
-              </span>
-            </div>
-          </div>
-
-          <div class="total-cost-section">
-            <div
-              v-if="annual && !isFreeTrial && totalAnnualSavings > 0"
-              class="annual-savings-box"
+              💳 Razorpay (UPI, Cards, NetBanking)
+            </button>
+            <button
+              v-if="currency === 'INR'"
+              :class="['flex-1 py-2.5 rounded-xl text-xs font-bold transition-all text-center', paymentTab === 'upi' ? 'bg-blue-600 text-white shadow-md shadow-blue-500/20' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white']"
+              @click="paymentTab = 'upi'"
             >
-              <div class="month-vs-annual">
-                <span>If paid monthly for 12 months:</span>
-                <span>{{ formatPrice(totalMonthlyCostFor12Months) }}</span>
-              </div>
-              <div class="annual-payment">
-                <span>Annual payment:</span>
-                <span>{{ formatPrice(totalCost) }}</span>
-              </div>
-              <div class="your-savings">
-                <span>Your savings:</span>
-                <span>{{ formatPrice(totalAnnualSavings) }} (20% OFF) 🎉</span>
-              </div>
-            </div>
+              📱 Direct UPI QR
+            </button>
+          </div>
 
-            <div class="total-row">
-              <span class="total-label">
-                {{
-                  isFreeTrial
-                    ? "Trial Cost:"
-                    : annual
-                      ? "Pay Once Yearly:"
-                      : "Pay Monthly:"
-                }}
-              </span>
-              <span class="total-amount">{{
-                isFreeTrial ? "FREE" : formatPrice(totalCost)
-              }}</span>
+          <!-- Order Breakdown -->
+          <div class="p-4 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 space-y-2 text-xs">
+            <div class="flex justify-between">
+              <span class="text-slate-500">Plan Tier</span>
+              <strong class="text-slate-800 dark:text-slate-200">AccessEasy Patrol Full Platform</strong>
             </div>
-            <div
-              v-if="!isFreeTrial"
-              class="billing-note"
+            <div class="flex justify-between">
+              <span class="text-slate-500">Licensed Sites</span>
+              <strong class="text-slate-800 dark:text-slate-200">{{ sitesCount }} {{ sitesCount === 1 ? 'Site' : 'Sites' }}</strong>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-500">Billing Interval</span>
+              <strong class="text-slate-800 dark:text-slate-200">Monthly Subscription</strong>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-500">Unit Rate</span>
+              <strong class="text-slate-800 dark:text-slate-200">{{ currencySymbol }}{{ formattedUnitPrice }} / site / month</strong>
+            </div>
+            <div class="border-t border-slate-200 dark:border-white/10 pt-2 flex justify-between items-baseline">
+              <span class="text-sm font-black text-slate-900 dark:text-white">Total Amount Due</span>
+              <span class="text-2xl font-mono font-black text-blue-600 dark:text-blue-400">{{ currencySymbol }}{{ totalPayable.toLocaleString() }}</span>
+            </div>
+          </div>
+
+          <!-- Online Razorpay Flow -->
+          <div v-if="paymentTab === 'online'" class="space-y-3">
+            <button
+              class="w-full h-12 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs uppercase tracking-wide transition-all shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2 disabled:opacity-50"
+              :disabled="isProcessingPayment"
+              @click="initiateRazorpayPayment"
             >
-              {{ annual ? "Billed annually, save 20%" : "Billed monthly" }}
-            </div>
+              <div v-if="isProcessingPayment" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              <span>{{ isProcessingPayment ? 'Connecting Payment Gateway...' : `Pay ${currencySymbol}${totalPayable.toLocaleString()} via Razorpay` }}</span>
+            </button>
+            <p class="text-[10px] text-center text-slate-400">Supports Google Pay, PhonePe, Paytm, Visa, MasterCard & NetBanking</p>
           </div>
-        </div>
 
-        <!-- Payment methods -->
-        <div class="payment-methods">
-          <div class="method-label">
-            For Indian Companies:
+          <!-- UPI Direct QR Flow -->
+          <div v-else class="text-center space-y-3">
+            <div class="inline-block p-3 bg-white rounded-2xl shadow border border-slate-200">
+              <img :src="dynamicUpiQrUrl" alt="UPI QR" class="w-40 h-40 object-contain mx-auto" />
+            </div>
+            <div class="flex items-center justify-center gap-2 p-2 rounded-xl bg-slate-100 dark:bg-white/5 text-xs">
+              <span class="text-slate-500">UPI ID:</span>
+              <span class="font-mono font-bold text-blue-600 dark:text-blue-400">{{ UPI_ID }}</span>
+              <button class="px-2.5 py-1 rounded-lg bg-blue-600 text-white text-[10px] font-bold" @click="copyUpiId">
+                {{ copiedUpi ? 'Copied! ✓' : 'Copy' }}
+              </button>
+            </div>
+            <a
+              :href="whatsappProofLink"
+              target="_blank"
+              rel="noreferrer"
+              class="w-full h-10 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20"
+            >
+              <MessageSquare class="w-4 h-4" />
+              <span>Submit Payment Screenshot on WhatsApp</span>
+            </a>
           </div>
-          <button
-            :disabled="isProcessingPayment"
-            class="payment-method-btn razorpay-btn"
-            @click="handlePayment('razorpay')"
-          >
-            <div class="method-icon">
-              ₹
-            </div>
-            <div class="method-info">
-              <div class="method-name">
-                Razorpay
-              </div>
-              <div class="method-desc">
-                UPI, Cards, Net Banking
-              </div>
-            </div>
-          </button>
 
-          <div class="method-label">
-            International:
-          </div>
-          <button
-            :disabled="isProcessingPayment"
-            class="payment-method-btn stripe-btn"
-            @click="handlePayment('stripe')"
-          >
-            <div class="method-icon">
-              $
-            </div>
-            <div class="method-info">
-              <div class="method-name">
-                Stripe
-              </div>
-              <div class="method-desc">
-                Cards, Apple Pay, Google Pay
-              </div>
-            </div>
-          </button>
-        </div>
-
-        <!-- Payment processing indicator -->
-        <div
-          v-if="isProcessingPayment"
-          class="processing-payment"
-        >
-          <div class="spinner" />
-          <span>Processing Payment...</span>
         </div>
       </div>
-    </div>
+    </Teleport>
 
-    <!-- Active Plan Details Modal -->
-    <div
-      v-if="showActivePlanModal"
-      class="active-plan-modal"
-    >
-      <div class="active-plan-modal-content">
-        <div class="modal-header">
-          <h3>Active Plans Details</h3>
-          <button
-            class="modal-close-btn"
-            @click="showActivePlanModal = false"
-          >
-            ×
-          </button>
-        </div>
-        <div class="active-plans-list">
-          <div
-            v-for="plan in activeTenantPlans"
-            :key="plan.key"
-            class="active-plan-item"
-          >
-            <span class="plan-name">{{ plan.name }}</span>
-            <span class="plan-validity">
-              Valid from: {{ activePlanStartDate }} to {{ activePlanEndDate }}
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
-import { currentUserTenant } from "@/utils/currentUserTenant";
-import { authService } from "@/services/authService";
+import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { currentUserTenant } from '@/utils/currentUserTenant';
+import { authService } from '@/services/authService';
+import { usePlanStore } from '@/stores/usePlanStore';
+import { paymentService } from '@/services/paymentService';
+import { 
+  ShieldCheck, CreditCard, ArrowLeft, ArrowRight, Sparkles, 
+  Zap, Lock, CheckCircle2, MessageSquare, ExternalLink, X, 
+  Users, Route, QrCode, Navigation, AlertCircle, Clock 
+} from 'lucide-vue-next';
 
-// Mock payment APIs for simulation
-const activePlanStartDate = ref("");
-const activePlanEndDate = ref("");
-const showActivePlanModal = ref(false);
-const tenantplan = currentUserTenant.getTenantPlan();
-const token = authService.getToken();
-const mockPaymentAPI = {
-  razorpay: (amount, currency = "INR") => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          success: true,
-          paymentId: `rzp_${Math.random().toString(36).substr(2, 9)}`,
-          amount,
-          currency,
-        });
-      }, 2000);
-    });
-  },
-  stripe: (amount, currency = "USD") => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          success: true,
-          paymentId: `pi_${Math.random().toString(36).substr(2, 9)}`,
-          amount,
-          currency,
-        });
-      }, 2000);
-    });
-  },
+const router = useRouter();
+const store = usePlanStore();
+const pricingCardRef = ref(null);
+
+const sitesCount = ref(1);
+const currency = ref('INR');
+const isProcessingPayment = ref(false);
+const isProcessingTrial = ref(false);
+const showPaymentModal = ref(false);
+const paymentTab = ref('online');
+const copiedUpi = ref(false);
+
+const UPI_ID = 'iwinxdigital@tmb';
+const UPI_NAME = 'IWINX+DIGITAL+TECHNO';
+
+const PRICING = {
+  INR: 1999,
+  USD: 24,
 };
 
-// Plans data configuration without icons
-const plansData = [
-  {
-    name: "Lite",
-    key: "lite",
-    perUser: {
-      INR: { monthly: 25, annual: 20 },
-      USD: { monthly: 0.29, annual: 0.24 },
-    },
-    features: [
-      " Selfie & QR check-in",
-      "Geofence check-in",
-      "Leave management",
-      "Expense management",
-      "Daily & monthly reports",
-    ],
-    addOns: [
-      {
-        name: "Locate",
-        key: "locate",
-        perUser: {
-          INR: { monthly: 80, annual: 64 },
-          USD: { monthly: 12, annual: 10 },
-        },
-        features: ["Live GPS tracking"],
-      },
-    ],
-  },
-  {
-    name: "PRO",
-    key: "pro",
-    perUser: {
-      INR: { monthly: 50, annual: 40 },
-      USD: { monthly: 0.59, annual: 0.47 },
-    },
-    features: [
-      "All Lite features",
-      "Face check-in with liveness",
-      "Regularisation",
-      "Scheduled reports",
-      "Payroll integration (API)",
-    ],
-    addOns: [
-      {
-        name: "Locate",
-        key: "locate",
-        perUser: {
-          INR: { monthly: 80, annual: 64 },
-          USD: { monthly: 12, annual: 10 },
-        },
-        features: ["Live GPS tracking"],
-      },
-    ],
-  },
-  {
-    name: "FieldPro",
-    key: "fieldpro",
-    perUser: {
-      INR: { monthly: 150, annual: 120 },
-      USD: { monthly: 1.76, annual: 14 },
-    },
-    features: [
-      "All Lite features",
-      "Work order management",
-      "Client management",
-      "Field job tracking",
-      "Work order scheduling",
-    ],
-    addOns: [
-      {
-        name: "Smart-Forms",
-        key: "forms",
-        perUser: {
-          INR: { monthly: 80, annual: 64 },
-          USD: { monthly: 0.94, annual: 0.75 },
-        },
-        features: ["Smart-forms for workorder"],
-      },
-      {
-        name: "Locate",
-        key: "locate",
-        perUser: {
-          INR: { monthly: 80, annual: 64 },
-          USD: { monthly: 12, annual: 10 },
-        },
-        features: ["Live GPS tracking"],
-      },
-    ],
-  },
-  {
-    name: "GrowthSuite CRMENTERPRISE",
-    key: "crm",
-    perUser: {
-      INR: { monthly: 230, annual: 184 },
-      USD: { monthly: 24, annual: 20 },
-    },
-    features: [
-      "All Lite features",
-      "Smart Forms (custom)",
-      "CRM Dashboard",
-      "Role configurator",
-      "WhatsApp reports",
-      "Employee KPI Dashboard",
-      "CRM integrations (Zoho, ERPNext)",
-    ],
-    addOns: [],
-  },
+const currencySymbol = computed(() => (currency.value === 'INR' ? '₹' : '$'));
+
+const formattedUnitPrice = computed(() => {
+  return PRICING[currency.value].toLocaleString();
+});
+
+const totalPayable = computed(() => {
+  return PRICING[currency.value] * sitesCount.value;
+});
+
+const isFreeTrialActive = computed(() => store.isTrial && !store.isExpired);
+const isPlanPaidActive = computed(() => !store.isTrial && !store.isExpired && store.plan !== 'expired');
+
+const keyPlatformFeatures = [
+  { title: 'Unlimited Guard Accounts', desc: 'Add all security guards & supervisors with zero per-user fees.', icon: Users },
+  { title: 'QR & NFC Checkpoint Library', desc: 'Generate tamper-proof checkpoints and NFC hardware tokens.', icon: QrCode },
+  { title: 'Live Guard GPS & Breadcrumbs', desc: 'Real-time officer geolocation, speed, and boundary alarms.', icon: Navigation },
+  { title: 'Automated Incident Escalation', desc: 'Multi-tier fallback alert engine for SOS and missed rounds.', icon: AlertCircle },
+  { title: '24/7 Patrol Shift Rosters', desc: 'Complete guard shift matrix, fatigue checks, and compliance.', icon: Clock },
+  { title: 'Unlimited Patrol Routes', desc: 'Design complex multi-checkpoint routes per facility.', icon: Route }
 ];
 
-// Reactive state variables
-const selectedPlans = ref(new Set(["lite"]));
-const selectedAddOns = ref(new Set());
-const employees = ref(5);
-const currency = ref("USD");
-const annual = ref(false);
-const isFreeTrial = ref(true);
-const isProcessingPayment = ref(false);
-const showPaymentModal = ref(false);
-const activePlan = ref("");
-const tenantId = currentUserTenant.getTenantId();
-const activeTenantPlans = ref([]);
+const upiDeepLink = computed(() => {
+  return `upi://pay?pa=${UPI_ID}&pn=${UPI_NAME}&am=${totalPayable.value}&cu=INR&tn=Patrol_${sitesCount.value}Sites`;
+});
 
-// Toggle billing cycle (monthly/annual)
-const toggleBilling = (isAnnual) => {
-  annual.value = isAnnual;
-};
+const dynamicUpiQrUrl = computed(() => {
+  const encoded = encodeURIComponent(upiDeepLink.value);
+  return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encoded}`;
+});
 
-// Toggle plan selection
-const togglePlan = (key) => {
-  if (key === "lite") return;
-  const newSet = new Set(selectedPlans.value);
-  if (newSet.has(key)) {
-    newSet.delete(key);
-    selectedAddOns.value.delete(`${key}_locate`);
-  } else {
-    newSet.add(key);
-  }
-  selectedPlans.value = newSet;
-};
+const whatsappProofLink = computed(() => {
+  const msg = encodeURIComponent(`Hi, I completed payment of ₹${totalPayable.value.toLocaleString()} for ${sitesCount.value} Sites on AccessEasy Patrol. Please activate.`);
+  return `https://wa.me/919876543210?text=${msg}`;
+});
 
-// Toggle add-on selection
-const toggleAddOn = (planKey, addOnKey) => {
-  const addOnId = `${planKey}_${addOnKey}`;
-  const newAddOns = new Set(selectedAddOns.value);
-  if (newAddOns.has(addOnId)) {
-    newAddOns.delete(addOnId);
-  } else if (selectedPlans.value.has(planKey) && !isFreeTrial.value) {
-    newAddOns.add(addOnId);
-  }
-  selectedAddOns.value = newAddOns;
-};
+function adjustSites(delta) {
+  sitesCount.value = Math.max(1, sitesCount.value + delta);
+}
 
-// Adjust employee count
-const adjustEmployees = (delta) => {
-  const newCount = Math.max(1, employees.value + delta);
-  if (isFreeTrial.value && newCount > 5) {
-    alert(
-      "Free trial is limited to 5 employees. Upgrade to add more employees.",
-    );
-    return;
-  }
-  employees.value = newCount;
-};
+function sanitizeSitesCount() {
+  if (!sitesCount.value || sitesCount.value < 1) sitesCount.value = 1;
+  if (sitesCount.value > 500) sitesCount.value = 500;
+}
 
-// Handle upgrade from trial
-const handleUpgradeFromTrial = () => {
-  isFreeTrial.value = false;
-  selectedAddOns.value.clear();
-  if (employees.value < 20) {
-    employees.value = 20;
-  }
-};
+function openCheckoutModal() {
+  showPaymentModal.value = true;
+}
 
-// Start free trial
-const handleStartFreeTrial = async () => {
-  selectedAddOns.value.clear();
-  alert(
-    "🎉 Free trial started! You have 14 days to explore all features with up to 5 employees.",
-  );
-  await updateTenantPlan(true);
-};
+function copyUpiId() {
+  navigator.clipboard.writeText(UPI_ID);
+  copiedUpi.value = true;
+  setTimeout(() => (copiedUpi.value = false), 2500);
+}
 
-// Update tenant plan
-const updateTenantPlan = async (isTrial) => {
-  if (!tenantId) {
-    alert("Error: Tenant ID not found. Please log in again.");
-    return;
-  }
-
-  if (!selectedPlans.value.size || !selectedPlans.value.has("lite")) {
-    alert("Error: At least the Lite plan must be selected.");
-    return;
-  }
-
-  if (!["USD", "INR"].includes(currency.value)) {
-    alert("Error: Invalid currency selected.");
-    return;
-  }
-
-  const today = new Date();
-  let endDate = new Date(today);
-  let billingCycle = isTrial ? "trial" : annual.value ? "annual" : "monthly";
-
-  if (isTrial) {
-    endDate.setDate(today.getDate() + 14);
-    employees.value = Math.min(employees.value, 5);
-  } else if (annual.value) {
-    endDate.setFullYear(today.getFullYear() + 1);
-    employees.value = Math.max(20, employees.value);
-  } else {
-    endDate.setMonth(today.getMonth() + 1);
-    employees.value = Math.max(20, employees.value);
-  }
-  const planData = {
-    users: effectiveEmployees.value,
-    features: Array.from(selectedPlans.value).map((key) => {
-      const plan = plansData.find((p) => p.key === key);
-      const addOns = plan.addOns.filter((addOn) =>
-        selectedAddOns.value.has(`${key}_${addOn.key}`),
-      );
-      return {
-        key: plan.key,
-        name: plan.name,
-        features: [...plan.features, ...addOns.flatMap((a) => a.features)],
-        value: calculatePlanCost(plan),
-      };
-    }),
-    billing_cycle: billingCycle,
-    start_date: today.toISOString().split("T")[0],
-    end_date: endDate.toISOString().split("T")[0],
-    currency: currency.value,
-    total_value: totalCost.value,
-  };
-
+async function handleStartFreeTrial() {
+  isProcessingTrial.value = true;
   try {
-    if (!token) {
-      alert("Error: Authentication token missing. Please log in again.");
-      return;
-    }
-
-    const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/items/tenant/${tenantId}`,
-      {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ plan: JSON.stringify(planData) }),
-      },
-    );
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(
-        `Failed to update plan: ${errorData.message || response.statusText}`,
-      );
-    }
-
-    const responseData = await response.json();
-    if (!responseData.data || !responseData.data.plan) {
-      throw new Error("Invalid response format from server.");
-    }
-
-    alert("✅ Plan updated successfully!");
-    setActivePlanHeader();
-    activeTenantPlans.value = planData.features;
-    activePlanStartDate.value = planData.start_date;
-    activePlanEndDate.value = planData.end_date;
+    await paymentService.startFreeTrial({ sitesCount: 1, days: 7 });
+    alert('🎉 7-Day Free Trial activated for 1 site with full platform access.');
+    await currentUserTenant.refresh();
+    await store.refreshPlan();
   } catch (error) {
-    console.error("Error updating tenant plan:", error);
-    alert(`❌ Error updating plan: ${error.message}`);
+    alert(`❌ Failed to start free trial: ${error.message}`);
+  } finally {
+    isProcessingTrial.value = false;
   }
-};
+}
 
-// Fetch tenant plan on component mount
-const fetchTenantPlan = async () => {
-  if (!tenantId) {
-    console.warn("No tenant ID found. Skipping plan fetch.");
-    return;
-  }
-
+async function initiateRazorpayPayment() {
+  isProcessingPayment.value = true;
   try {
-    const plan = currentUserTenant.getTenantPlan();
+    const scriptLoaded = await paymentService.loadRazorpaySDK();
+    if (!scriptLoaded) throw new Error('Could not load Razorpay SDK.');
 
-    if (!plan || typeof plan !== "object" || Object.keys(plan).length === 0) {
-      console.log(
-        "No existing tenant plan found. Using default configuration.",
-      );
-
-      selectedPlans.value = new Set(["lite"]);
-      selectedAddOns.value = new Set();
-      employees.value = 5;
-      annual.value = false;
-      currency.value = "USD";
-      isFreeTrial.value = true;
-      activeTenantPlans.value = [];
-
-      const today = new Date();
-      const trialEndDate = new Date(today);
-      trialEndDate.setDate(today.getDate() + 14);
-
-      activePlanStartDate.value = today.toISOString().split("T")[0];
-      activePlanEndDate.value = trialEndDate.toISOString().split("T")[0];
-
-      return;
-    }
-
-    if (!Array.isArray(plan.features)) {
-      console.warn("Plan features are not an array or are missing.");
-      activeTenantPlans.value = [];
-      return;
-    }
-
-    selectedPlans.value = new Set(
-      plan.features.map((f) => f.key).filter((key) => key),
-    );
-    selectedAddOns.value = new Set();
-
-    plan.features.forEach((feature) => {
-      const planData = plansData.find((p) => p.key === feature.key);
-      if (planData && planData.addOns.length > 0) {
-        const hasLocate =
-          feature.features && feature.features.includes("Live GPS tracking");
-        if (hasLocate) {
-          selectedAddOns.value.add(`${feature.key}_locate`);
-        }
-      }
+    const orderData = await paymentService.createOrder({
+      amount: totalPayable.value,
+      currency: currency.value,
+      sitesCount: sitesCount.value,
+      billingCycle: 'monthly',
+      planDetails: {
+        plan_key: 'ez_patrol_platform',
+        plan_name: 'AccessEasy Patrol Platform',
+        sites: sitesCount.value,
+      },
     });
 
-    employees.value = Number.isFinite(plan.users) ? plan.users : 5;
-    annual.value = plan.billing_cycle === "annual";
-    currency.value = ["USD", "INR"].includes(plan.currency)
-      ? plan.currency
-      : "USD";
-    isFreeTrial.value = plan.billing_cycle === "trial";
-    activeTenantPlans.value = plan.features.filter((f) => f.key && f.name);
-    activePlanStartDate.value =
-      plan.start_date || new Date().toISOString().split("T")[0];
-    activePlanEndDate.value =
-      plan.end_date || new Date().toISOString().split("T")[0];
-
-    setActivePlanHeader();
-  } catch (error) {
-    console.error("Error processing tenant plan:", error);
-    selectedPlans.value = new Set(["lite"]);
-    selectedAddOns.value = new Set();
-    employees.value = 5;
-    isFreeTrial.value = true;
-    activeTenantPlans.value = [];
-    alert("Failed to load tenant plan data. Using default configuration.");
-  }
-};
-
-// Set active plan header text
-const setActivePlanHeader = () => {
-  const planNames = activeTenantPlans.value.map((plan) => {
-    const hasLocate = selectedAddOns.value.has(`${plan.key}_locate`);
-    return hasLocate ? `${plan.name} + Locate` : plan.name;
-  });
-  activePlan.value = `Active: ${planNames.join(", ")}`;
-};
-
-// Format price based on currency
-const formatPrice = (amount) =>
-  currency.value === "USD" ? `$${amount.toFixed(2)}` : `₹${amount.toFixed(2)}`;
-
-// Computed properties
-const effectiveEmployees = computed(() =>
-  isFreeTrial.value
-    ? Math.min(5, employees.value)
-    : Math.max(20, employees.value),
-);
-
-// Calculate cost for a specific plan
-const calculatePlanCost = (plan) => {
-  let cost = annual.value
-    ? plan.perUser[currency.value]["annual"] * effectiveEmployees.value * 12
-    : plan.perUser[currency.value]["monthly"] * effectiveEmployees.value;
-
-  plan.addOns.forEach((addOn) => {
-    if (selectedAddOns.value.has(`${plan.key}_${addOn.key}`)) {
-      cost += annual.value
-        ? addOn.perUser[currency.value]["annual"] *
-          effectiveEmployees.value *
-          12
-        : addOn.perUser[currency.value]["monthly"] * effectiveEmployees.value;
-    }
-  });
-
-  return cost;
-};
-
-// Calculate monthly cost without annual discount
-const calculateMonthlyCostOnly = (plan) => {
-  let cost = plan.perUser[currency.value]["monthly"] * effectiveEmployees.value;
-  plan.addOns.forEach((addOn) => {
-    if (selectedAddOns.value.has(`${plan.key}_${addOn.key}`)) {
-      cost +=
-        addOn.perUser[currency.value]["monthly"] * effectiveEmployees.value;
-    }
-  });
-  return cost;
-};
-
-// Calculate annual savings per plan
-const calculateAnnualSavingsPerPlan = (plan) => {
-  const monthlyPrice = plan.perUser[currency.value]["monthly"];
-  const annualPrice = plan.perUser[currency.value]["annual"];
-  let monthlyCostFor12Months = monthlyPrice * 12 * effectiveEmployees.value;
-  let annualCost = annualPrice * 12 * effectiveEmployees.value;
-
-  plan.addOns.forEach((addOn) => {
-    if (selectedAddOns.value.has(`${plan.key}_${addOn.key}`)) {
-      monthlyCostFor12Months +=
-        addOn.perUser[currency.value]["monthly"] *
-        12 *
-        effectiveEmployees.value;
-      annualCost +=
-        addOn.perUser[currency.value]["annual"] * 12 * effectiveEmployees.value;
-    }
-  });
-
-  return monthlyCostFor12Months - annualCost;
-};
-
-// Total cost for all selected plans
-const totalCost = computed(() =>
-  isFreeTrial.value
-    ? 0
-    : Array.from(selectedPlans.value).reduce((sum, planKey) => {
-        const plan = plansData.find((p) => p.key === planKey);
-        return sum + calculatePlanCost(plan);
-      }, 0),
-);
-
-// Total monthly cost extrapolated to 12 months
-const totalMonthlyCostFor12Months = computed(() =>
-  Array.from(selectedPlans.value).reduce((sum, planKey) => {
-    const plan = plansData.find((p) => p.key === planKey);
-    return sum + calculateMonthlyCostOnly(plan) * 12;
-  }, 0),
-);
-
-// Total annual savings
-const totalAnnualSavings = computed(() =>
-  annual.value && !isFreeTrial.value
-    ? totalMonthlyCostFor12Months.value - totalCost.value
-    : 0,
-);
-
-// 1. Add Razorpay script to your index.html or load it dynamically
-const loadRazorpayScript = () => {
-  return new Promise((resolve) => {
-    const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.onload = () => resolve(true);
-    script.onerror = () => resolve(false);
-    document.body.appendChild(script);
-  });
-};
-
-// 2. Update your handlePayment function
-const handlePayment = async (paymentMethod) => {
-  if (paymentMethod !== "razorpay") {
-    alert("Only Razorpay is implemented. Stripe coming soon!");
-    return;
-  }
-
-  isProcessingPayment.value = true;
-
-  try {
-    // Load Razorpay script
-    const scriptLoaded = await loadRazorpayScript();
-    if (!scriptLoaded) {
-      throw new Error("Failed to load Razorpay SDK");
-    }
-
-    // Prepare plan data
-    const planData = {
-      users: effectiveEmployees.value,
-      features: Array.from(selectedPlans.value).map((key) => {
-        const plan = plansData.find((p) => p.key === key);
-        const addOns = plan.addOns.filter((addOn) =>
-          selectedAddOns.value.has(`${key}_${addOn.key}`),
-        );
-        return {
-          key: plan.key,
-          name: plan.name,
-          features: [...plan.features, ...addOns.flatMap((a) => a.features)],
-          value: calculatePlanCost(plan),
-        };
-      }),
-      billing_cycle: isFreeTrial.value
-        ? "trial"
-        : annual.value
-          ? "annual"
-          : "monthly",
-      start_date: new Date().toISOString().split("T")[0],
-      end_date: calculateEndDate(),
-      currency: currency.value,
-      total_value: totalCost.value,
-    };
-
-    // Step 1: Create order on backend
-    const orderResponse = await fetch(
-      `${import.meta.env.VITE_API_URL}/payment/create-order`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          amount: totalCost.value,
-          currency: currency.value,
-          tenantId: tenantId,
-          planDetails: planData,
-        }),
-      },
-    );
-
-    const orderData = await orderResponse.json();
-
-    if (!orderData.success) {
-      throw new Error(orderData.message || "Failed to create order");
-    }
-
-    // Step 2: Open Razorpay checkout
     const options = {
-      key: orderData.key_id,
-      amount: orderData.amount,
-      currency: orderData.currency,
-      name: "Samaya Access",
-      description: `Plan: ${planData.features.map((f) => f.name).join(", ")}`,
-      order_id: orderData.order_id,
+      key: orderData.key_id || orderData.key || 'rzp_live_SFtdcXl5bOdexn',
+      amount: (orderData.amount || totalPayable.value) * 100,
+      currency: orderData.currency || currency.value,
+      name: 'AccessEasy Patrol Platform',
+      description: `Subscription for ${sitesCount.value} ${sitesCount.value === 1 ? 'Site' : 'Sites'} (Monthly)`,
+      order_id: orderData.order_id || orderData.id,
       handler: async function (response) {
-        // Step 3: Verify payment on backend
         try {
-          const verifyResponse = await fetch(
-            `${import.meta.env.VITE_API_URL}/payment/verify-payment`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                payment_record_id: orderData.payment_record_id,
-              }),
-            },
-          );
+          await paymentService.verifyPayment({
+            razorpayOrderId: response.razorpay_order_id || orderData.order_id,
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpaySignature: response.razorpay_signature,
+            paymentRecordId: orderData.payment_record_id,
+            sitesCount: sitesCount.value,
+            billingCycle: 'monthly',
+            amount: totalPayable.value,
+            currency: currency.value,
+          });
 
-          const verifyData = await verifyResponse.json();
-
-          if (verifyData.success) {
-            showPaymentModal.value = false;
-            isProcessingPayment.value = false;
-            alert(
-              `✅ Payment successful! Payment ID: ${response.razorpay_payment_id}`,
-            );
-
-            // Refresh tenant plan data
-            await fetchTenantPlan();
-          } else {
-            throw new Error(
-              verifyData.message || "Payment verification failed",
-            );
-          }
-        } catch (error) {
-          console.error("Payment verification error:", error);
-          alert(`❌ Payment verification failed: ${error.message}`);
+          showPaymentModal.value = false;
+          alert(`✅ Payment Successful! AccessEasy Patrol active for ${sitesCount.value} sites.`);
+          await currentUserTenant.refresh();
+          await store.refreshPlan();
+          router.push('/dashboard/settings/subscription');
+        } catch (verifyError) {
+          alert(`❌ Payment verification failed: ${verifyError.message}`);
+        } finally {
+          isProcessingPayment.value = false;
         }
       },
       prefill: {
-        name: currentUserTenant.getTenantName() || "",
-        email: authService.getUserEmail() || "",
-        contact: "",
+        name: currentUserTenant.getTenantName() || 'AccessEasy Patrol Tenant',
+        email: authService.getUserEmail() || '',
       },
-      theme: {
-        color: "#007bff",
-      },
+      theme: { color: '#2563eb' },
       modal: {
-        ondismiss: async function () {
-          // Handle payment cancellation
+        ondismiss: function () {
           isProcessingPayment.value = false;
-
-          await fetch(
-            `${import.meta.env.VITE_API_URL}/payment/handle-failure`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-              body: JSON.stringify({
-                payment_record_id: orderData.payment_record_id,
-                error_description: "Payment cancelled by user",
-              }),
-            },
-          );
-
-          alert("Payment cancelled");
         },
       },
     };
 
     const rzp = new window.Razorpay(options);
-
-    // Handle payment failures
-    rzp.on("payment.failed", async function (response) {
-      console.error("Payment failed:", response.error);
-
-      await fetch(`${import.meta.env.VITE_API_URL}/payment/handle-failure`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          payment_record_id: orderData.payment_record_id,
-          error_description: response.error.description,
-        }),
-      });
-
-      isProcessingPayment.value = false;
-      alert(`❌ Payment failed: ${response.error.description}`);
-    });
-
-    // Open Razorpay modal
     rzp.open();
-  } catch (error) {
-    console.error("Payment error:", error);
+  } catch (err) {
+    alert(`❌ Checkout error: ${err.message}`);
     isProcessingPayment.value = false;
-    alert(`❌ Payment failed: ${error.message}`);
   }
-};
+}
 
-// Helper function to calculate end date
-const calculateEndDate = () => {
-  const today = new Date();
-  let endDate = new Date(today);
-
-  if (isFreeTrial.value) {
-    endDate.setDate(today.getDate() + 14);
-  } else if (annual.value) {
-    endDate.setFullYear(today.getFullYear() + 1);
-  } else {
-    endDate.setMonth(today.getMonth() + 1);
-  }
-
-  return endDate.toISOString().split("T")[0];
-};
-
-// Initialize component
 onMounted(async () => {
-  await fetchTenantPlan();
-  console.log(tenantId);
+  if (!store.ready) await store.initPlan();
+  if (store.subscription?.sites) sitesCount.value = Number(store.subscription.sites) || 1;
 });
 </script>
-
-<style>
-/* Minimal styles for a clean UI */
-
-/* Container */
-
-/* Add-on feature styling */
-.add-on-feature {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 8px;
-  font-size: 14px;
-  color: #666;
-}
-.add-on-feature input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  background-color: white;
-  transition: all 0.2s ease;
-}
-.add-on-feature input[type="checkbox"]:checked {
-  background-color: #007bff;
-  border-color: #007bff;
-  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
-}
-.add-on-feature input[type="checkbox"]:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-.add-on-label {
-  font-size: 12px;
-  color: #28a745;
-  font-weight: 600;
-  margin-left: 8px;
-}
-
-/* Header styling */
-.header {
-  background-color: #fff;
-  border-bottom: 1px solid #eee;
-  padding: 12px 24px;
-  flex-shrink: 0;
-}
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-direction: row;
-}
-.active-plans-header {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-}
-.active-plans-header h2 {
-  margin: 0;
-  font-weight: 600;
-  font-size: 18px;
-  color: #333;
-}
-.active-plan-tags {
-  display: flex;
-  gap: 8px;
-}
-.plan-tag {
-  background-color: #f8f9fa;
-  color: #666;
-  padding: 4px 10px;
-  font-size: 13px;
-  font-weight: 500;
-  border-radius: 4px;
-  user-select: none;
-}
-.header-controls {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-.free-trial {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.free-trial-badge {
-  background-color: #e9ffe9;
-  color: #28a745;
-  font-size: 13px;
-  font-weight: 500;
-  padding: 4px 12px;
-  border-radius: 4px;
-  user-select: none;
-}
-.upgrade-btn {
-  background-color: #007bff;
-  color: white;
-  font-size: 13px;
-  border: none;
-  padding: 4px 12px;
-  cursor: pointer;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-}
-.upgrade-btn:hover {
-  background-color: #0056b3;
-}
-.employees-control {
-  display: flex;
-  align-items: center;
-  position: relative;
-}
-.employee-btn {
-  padding: 6px 10px;
-  background-color: #f8f9fa;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 18px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-.employee-btn:hover:not(:disabled) {
-  background-color: #e9ecef;
-}
-.employee-btn:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-.employee-btn-primary {
-  background-color: #007bff;
-  color: white;
-  border: none;
-}
-.employee-btn-primary:hover:not(:disabled) {
-  background-color: #0056b3;
-}
-.employee-count {
-  text-align: center;
-  margin: 0 8px;
-}
-.employee-number {
-  font-size: 22px;
-  font-weight: 700;
-  color: #007bff;
-}
-.employee-label {
-  font-size: 10px;
-  color: #666;
-}
-.trial-warning {
-  font-size: 10px;
-  color: #ffc107;
-  margin-top: 4px;
-  user-select: none;
-}
-.currency-select {
-  border: 1px solid #ddd;
-  padding: 6px 10px;
-  border-radius: 4px;
-  background-color: white;
-  font-size: 14px;
-  cursor: pointer;
-}
-.billing-switch {
-  display: flex;
-  background-color: #f8f9fa;
-  border-radius: 4px;
-  padding: 2px;
-}
-.switch-tab {
-  padding: 6px 16px;
-  font-size: 14px;
-  color: #666;
-  cursor: pointer;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-}
-.switch-tab.active {
-  background-color: #007bff;
-  color: white;
-}
-.switch-tab:not(.active):hover {
-  background-color: #e9ecef;
-}
-.switch-tab:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-.save-text {
-  font-weight: 500;
-  font-size: 12px;
-  margin-left: 4px;
-}
-.header-actions {
-  display: flex;
-  gap: 12px;
-}
-.start-trial-btn,
-.payment-btn,
-.try-trial-btn {
-  padding: 8px 16px;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  border: none;
-  transition: background-color 0.2s;
-}
-.start-trial-btn {
-  background-color: #28a745;
-  color: white;
-}
-.start-trial-btn:hover {
-  background-color: #218838;
-}
-.payment-btn {
-  background-color: #007bff;
-  color: white;
-}
-.payment-btn:hover {
-  background-color: #0056b3;
-}
-.try-trial-btn {
-  background-color: white;
-  border: 1px solid #28a745;
-  color: #28a745;
-}
-.try-trial-btn:hover {
-  background-color: #e9ffe9;
-}
-
-/* Plans selection */
-.plans-selection {
-  flex: 1;
-  background: white;
-  padding: 24px;
-  overflow-y: auto;
-  max-height: 80vh;
-}
-.plans-selection h2 {
-  font-weight: 600;
-  font-size: 18px;
-  color: #333;
-  margin-bottom: 8px;
-}
-.plans-note {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 16px;
-}
-.plans-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-.plan-card {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 20px;
-  cursor: pointer;
-  background-color: white;
-  transition: border-color 0.3s;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-.plan-card:hover {
-  border-color: #007bff;
-}
-.plan-card.selected {
-  border-color: #007bff;
-  background-color: #f8f9fa;
-}
-.plan-card.lite {
-  cursor: default;
-}
-.plan-header {
-  display: flex;
-  gap: 16px;
-  flex: 1;
-}
-.plan-icon {
-  font-size: 30px;
-  line-height: 1;
-}
-.plan-info {
-  flex: 1;
-}
-.plan-title-price {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 8px;
-}
-.plan-title-price h3 {
-  margin: 0;
-  font-weight: 600;
-  font-size: 18px;
-  color: #333;
-}
-.plan-pricing {
-  text-align: right;
-  min-width: 120px;
-}
-.price {
-  color: #007bff;
-  font-weight: 600;
-  font-size: 16px;
-  margin-bottom: 2px;
-}
-.total-cost {
-  font-weight: 700;
-  color: #333;
-  font-size: 16px;
-  margin-bottom: 6px;
-}
-.savings {
-  font-size: 13px;
-  color: #28a745;
-  font-weight: 600;
-}
-.plan-features {
-  list-style-type: disc;
-  padding-left: 20px;
-  font-size: 14px;
-  color: #666;
-}
-.plan-checkbox {
-  margin-left: 16px;
-  margin-top: 8px;
-}
-.plan-checkbox input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  cursor: pointer;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-  background-color: white;
-  transition: all 0.2s ease;
-}
-.plan-checkbox input[type="checkbox"]:checked {
-  background-color: #007bff;
-  border-color: #007bff;
-  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
-}
-.plan-checkbox input[type="checkbox"]:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-.required-label {
-  font-size: 14px;
-  color: #999;
-  user-select: none;
-}
-
-/* Payment Modal */
-.payment-modal {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-}
-.payment-modal-content {
-  background-color: white;
-  border-radius: 8px;
-  max-width: 400px;
-  width: 100%;
-  padding: 24px;
-  position: relative;
-}
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-}
-.modal-header h3 {
-  font-size: 20px;
-  font-weight: 600;
-  color: #333;
-  margin: 0;
-}
-.modal-close-btn {
-  font-size: 28px;
-  background: none;
-  border: none;
-  color: #999;
-  cursor: pointer;
-  transition: color 0.2s;
-}
-.modal-close-btn:hover {
-  color: #666;
-}
-.modal-plan-summary {
-  margin-bottom: 24px;
-}
-.modal-plan-summary h4 {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 16px;
-}
-.billing-info {
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  padding: 16px;
-  margin-bottom: 24px;
-  font-size: 14px;
-  color: #666;
-}
-.employees-count {
-  font-size: 22px;
-  color: #333;
-  font-weight: 600;
-  margin: 4px 0;
-}
-.selected-plans-list {
-  margin-bottom: 24px;
-}
-.selected-plans-list .label {
-  font-weight: 600;
-  color: #666;
-  margin-bottom: 8px;
-  font-size: 14px;
-}
-.selected-plan-item {
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  padding: 8px 12px;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 14px;
-  color: #333;
-  justify-content: space-between;
-}
-.selected-plan-icon {
-  font-size: 20px;
-}
-.selected-plan-name {
-  flex: 1;
-}
-.free-trial-badge-small {
-  background-color: #e9ffe9;
-  color: #28a745;
-  font-size: 10px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 4px;
-  margin-left: 6px;
-  user-select: none;
-}
-.selected-plan-cost {
-  font-weight: 600;
-  color: #007bff;
-}
-.total-cost-section {
-  border-top: 1px solid #eee;
-  padding-top: 16px;
-}
-.annual-savings-box {
-  background-color: #e9ffe9;
-  border-radius: 8px;
-  padding: 12px 16px;
-  margin-bottom: 16px;
-  color: #28a745;
-  font-weight: 600;
-  font-size: 14px;
-}
-.month-vs-annual,
-.annual-payment,
-.your-savings {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 4px;
-}
-.total-row {
-  display: flex;
-  justify-content: space-between;
-  font-weight: 700;
-  font-size: 20px;
-  color: #007bff;
-  align-items: center;
-}
-.total-label {
-  font-weight: 600;
-  color: #333;
-}
-.billing-note {
-  font-size: 12px;
-  color: #999;
-  text-align: right;
-  margin-top: 6px;
-}
-.payment-methods {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-.method-label {
-  font-weight: 600;
-  color: #666;
-  font-size: 16px;
-  margin-bottom: 8px;
-}
-.payment-method-btn {
-  padding: 16px;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  transition: background-color 0.2s;
-  background-color: white;
-}
-.payment-method-btn:hover:not(:disabled) {
-  background-color: #f8f9fa;
-}
-.payment-method-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-.razorpay-btn {
-  border-color: #007bff;
-}
-.stripe-btn {
-  border-color: #6f42c1;
-}
-.method-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  color: white;
-  font-weight: 700;
-  font-size: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.razorpay-btn .method-icon {
-  background-color: #007bff;
-}
-.stripe-btn .method-icon {
-  background-color: #6f42c1;
-}
-.method-info {
-  display: flex;
-  flex-direction: column;
-}
-.method-name {
-  font-weight: 600;
-  font-size: 16px;
-  color: #333;
-}
-.method-desc {
-  font-size: 12px;
-  color: #999;
-}
-.processing-payment {
-  margin-top: 24px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  justify-content: center;
-  color: #007bff;
-  font-size: 16px;
-  font-weight: 600;
-}
-.spinner {
-  width: 20px;
-  height: 20px;
-  border: 3px solid #007bff;
-  border-top-color: transparent;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-</style>

@@ -2,78 +2,11 @@ import { authService } from "@/services/authService";
 
 class ShiftService {
   getDefaultShiftTemplates() {
-    return [
-      { id: "tmpl-1", name: "Morning Shift (General)", startTime: "06:00", endTime: "14:00", durationHours: 8 },
-      { id: "tmpl-2", name: "Afternoon Shift", startTime: "14:00", endTime: "22:00", durationHours: 8 },
-      { id: "tmpl-3", name: "Night Shift (Perimeter)", startTime: "22:00", endTime: "06:00", durationHours: 8 },
-      { id: "tmpl-4", name: "12-Hour Day Shift", startTime: "07:00", endTime: "19:00", durationHours: 12 }
-    ];
+    return [];
   }
 
   getDefaultRoster() {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    return [
-      {
-        guardId: "g-01",
-        guardName: "Kumar S",
-        siteId: "site-01",
-        zoneId: "zone-01",
-        schedule: {
-          Mon: { shiftId: "tmpl-1", shiftName: "Morning (06-14)", status: "confirmed" },
-          Tue: { shiftId: "tmpl-1", shiftName: "Morning (06-14)", status: "confirmed" },
-          Wed: { shiftId: "tmpl-1", shiftName: "Morning (06-14)", status: "confirmed" },
-          Thu: { shiftId: "tmpl-1", shiftName: "Morning (06-14)", status: "confirmed" },
-          Fri: { shiftId: "tmpl-1", shiftName: "Morning (06-14)", status: "confirmed" },
-          Sat: { shiftId: "off", shiftName: "Weekly Off", status: "off" },
-          Sun: { shiftId: "off", shiftName: "Weekly Off", status: "off" },
-        }
-      },
-      {
-        guardId: "g-02",
-        guardName: "Ramesh K",
-        siteId: "site-01",
-        zoneId: "zone-02",
-        schedule: {
-          Mon: { shiftId: "tmpl-2", shiftName: "Afternoon (14-22)", status: "confirmed" },
-          Tue: { shiftId: "tmpl-2", shiftName: "Afternoon (14-22)", status: "confirmed" },
-          Wed: { shiftId: "tmpl-2", shiftName: "Afternoon (14-22)", status: "confirmed" },
-          Thu: { shiftId: "tmpl-2", shiftName: "Afternoon (14-22)", status: "confirmed" },
-          Fri: { shiftId: "tmpl-2", shiftName: "Afternoon (14-22)", status: "confirmed" },
-          Sat: { shiftId: "tmpl-2", shiftName: "Afternoon (14-22)", status: "confirmed" },
-          Sun: { shiftId: "off", shiftName: "Weekly Off", status: "off" },
-        }
-      },
-      {
-        guardId: "g-03",
-        guardName: "Suresh M",
-        siteId: "site-01",
-        zoneId: "zone-03",
-        schedule: {
-          Mon: { shiftId: "tmpl-3", shiftName: "Night (22-06)", status: "confirmed" },
-          Tue: { shiftId: "tmpl-3", shiftName: "Night (22-06)", status: "confirmed" },
-          Wed: { shiftId: "tmpl-3", shiftName: "Night (22-06)", status: "confirmed" },
-          Thu: { shiftId: "tmpl-3", shiftName: "Night (22-06)", status: "confirmed" },
-          Fri: { shiftId: "off", shiftName: "Weekly Off", status: "off" },
-          Sat: { shiftId: "tmpl-3", shiftName: "Night (22-06)", status: "confirmed" },
-          Sun: { shiftId: "tmpl-3", shiftName: "Night (22-06)", status: "confirmed" },
-        }
-      },
-      {
-        guardId: "g-04",
-        guardName: "Vignesh P",
-        siteId: "site-01",
-        zoneId: "zone-01",
-        schedule: {
-          Mon: { shiftId: "tmpl-1", shiftName: "Morning (06-14)", status: "confirmed" },
-          Tue: { shiftId: "tmpl-1", shiftName: "Morning (06-14)", status: "confirmed" },
-          Wed: { shiftId: "off", shiftName: "Weekly Off", status: "off" },
-          Thu: { shiftId: "tmpl-2", shiftName: "Afternoon (14-22)", status: "confirmed" },
-          Fri: { shiftId: "tmpl-2", shiftName: "Afternoon (14-22)", status: "confirmed" },
-          Sat: { shiftId: "tmpl-3", shiftName: "Night (22-06)", status: "confirmed" },
-          Sun: { shiftId: "off", shiftName: "Weekly Off", status: "off" },
-        }
-      }
-    ];
+    return [];
   }
 
   /**
@@ -82,16 +15,16 @@ class ShiftService {
   async fetchShiftTemplates() {
     try {
       const tenantId = authService.getTenantId();
-      if (!tenantId) return this.getDefaultShiftTemplates();
+      if (!tenantId) return [];
 
       try {
         const res = await authService.protectedApi.get(`/items/shifts?filter[tenant][_eq]=${tenantId}&sort=name`);
-        if (res.data.data && res.data.data.length > 0) return res.data.data;
+        if (res.data?.data) return res.data.data;
       } catch (e) {}
 
-      return this.getDefaultShiftTemplates();
+      return [];
     } catch (e) {
-      return this.getDefaultShiftTemplates();
+      return [];
     }
   }
 
@@ -110,11 +43,9 @@ class ShiftService {
         } catch (e) {}
       }
 
-      const defaults = this.getDefaultRoster();
-      if (siteId) return defaults.filter(r => String(r.siteId) === String(siteId));
-      return defaults;
+      return [];
     } catch (e) {
-      return this.getDefaultRoster();
+      return [];
     }
   }
 

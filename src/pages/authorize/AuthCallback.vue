@@ -218,11 +218,10 @@ const clearSessionAndRedirect = () => {
   sessionStorage.removeItem("tenant_id");
   sessionStorage.removeItem("auth_return_url");
   
-  if (returnUrl) {
+  if (returnUrl && returnUrl !== "/" && returnUrl !== "/login") {
     router.replace(returnUrl);
   } else {
-    // Immediate redirect - / usually handles roles internally via router guards
-    router.replace("/");
+    router.replace("/dashboard");
   }
 };
 </script>

@@ -79,41 +79,8 @@ class GeofenceService {
     };
   }
 
-  /**
-   * Mock default violations list
-   */
   getDefaultViolations() {
-    const today = new Date().toISOString().split('T')[0];
-    return [
-      {
-        id: "viol-01",
-        guard_name: "Kumar S",
-        checkpoint_name: "North Gate Perimeter CP-04",
-        checkpoint_id: "CP-04",
-        site_name: "Chennai Tech Park",
-        zone_name: "Perimeter Fence",
-        distance_m: 180,
-        accuracy_m: 8.5,
-        geofence_status: "VIOLATION",
-        violation_type: "wrong_location",
-        timestamp: `${today}T10:14:22`,
-        resolved: false
-      },
-      {
-        id: "viol-02",
-        guard_name: "Ramesh K",
-        checkpoint_name: "Server Room Core CP-02",
-        checkpoint_id: "CP-02",
-        site_name: "Chennai Tech Park",
-        zone_name: "Tower A Core",
-        distance_m: 55,
-        accuracy_m: 28.0,
-        geofence_status: "UNCERTAIN",
-        violation_type: "weak_gps",
-        timestamp: `${today}T09:40:05`,
-        resolved: true
-      }
-    ];
+    return [];
   }
 
   /**
@@ -122,13 +89,13 @@ class GeofenceService {
   async fetchViolations(siteId = null) {
     try {
       const tenantId = authService.getTenantId();
-      if (!tenantId) return this.getDefaultViolations();
+      if (!tenantId) return [];
 
       try {
         let endpoint = `/items/geofence_violations?filter[tenant][_eq]=${tenantId}&sort=-timestamp`;
         if (siteId) endpoint += `&filter[site][_eq]=${siteId}`;
         const res = await authService.protectedApi.get(endpoint);
-        if (res.data.data && res.data.data.length > 0) return res.data.data;
+        if (res.data?.data) return res.data.data;
       } catch (e) {}
 
       const stored = localStorage.getItem(`accesseasy_violations_${tenantId}`);
@@ -140,9 +107,9 @@ class GeofenceService {
         } catch (e) {}
       }
 
-      return this.getDefaultViolations();
+      return [];
     } catch (e) {
-      return this.getDefaultViolations();
+      return [];
     }
   }
 

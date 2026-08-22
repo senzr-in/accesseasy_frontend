@@ -665,21 +665,10 @@ export default {
       } catch (error) {
         console.error('Error fetching serial numbers:', error);
         serialNumbersError.value = error.message;
-        mockFetchSerialNumbers();
+        serialNumbers.value = [];
       } finally {
         isLoadingSerialNumbers.value = false;
       }
-    };
-    
-    const mockFetchSerialNumbers = () => {
-      setTimeout(() => {
-        const mockSerials = [
-          { serialNumber: '445676666667766667', status: 'assigned' },
-          { serialNumber: '445676666667766668', status: 'active' }
-        ];
-        serialNumbers.value = mockSerials;
-        serialNumbersError.value = null;
-      }, 1000);
     };
     
     const handleImageError = () => {

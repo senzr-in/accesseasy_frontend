@@ -390,11 +390,7 @@ async function fetchTenants() {
     tenants.value = res.data?.data || [];
   } catch (e) {
     console.error("Failed to fetch tenants:", e);
-    // Fallback mock so UI is visible during dev
-    tenants.value = [
-      { tenantId: "TNT001", tenantName: "TechCorp Solutions", companyAddress: "Mumbai, MH" },
-      { tenantId: "TNT002", tenantName: "InnovateTech", companyAddress: "Bengaluru, KA" },
-    ];
+    tenants.value = [];
   } finally {
     loadingTenants.value = false;
   }

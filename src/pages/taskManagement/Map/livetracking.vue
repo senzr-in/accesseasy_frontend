@@ -628,28 +628,12 @@ const fetchLocations = async () => {
     }
     
     const data = await response.json();
-    const locationsData = data.data || data;
+    const locationsData = Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []);
     
     // Log API response for debugging
     logApiResponse(locationsData);
     
-    // Mock Camera Locations for Demo
-    const mockCameras = [
-      {
-        locType: 'camera',
-        locdetail: { locationName: 'Main Entrance Cam', address: 'Headquarters', pincode: '123456' },
-        locmark: { coordinates: [78.9629, 20.5937] }, // Near center
-        orgLocation: { orgType: 'main tenant' }
-      },
-      {
-        locType: 'camera',
-        locdetail: { locationName: 'Warehouse Cam', address: 'Warehouse A', pincode: '654321' },
-        locmark: { coordinates: [77.5946, 12.9716] }, // Bangalore
-        orgLocation: { orgType: 'main tenant' }
-      }
-    ];
-    
-    return [...locationsData, ...mockCameras];
+    return locationsData;
   } catch (error) {
     console.error('Error fetching locations:', error);
     return [];

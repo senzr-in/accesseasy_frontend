@@ -56,8 +56,7 @@
               <label class="font-bold text-slate-700 dark:text-slate-300 block mb-1">Target Audience *</label>
               <select v-model="broadcastForm.target" class="ae-input w-full py-2">
                 <option value="all">All Active Guards Across All Sites</option>
-                <option value="site-01">Chennai Tech Park On-Duty Team</option>
-                <option value="site-02">ABC Retail Mall On-Duty Team</option>
+                <option v-for="site in sitesList" :key="site.id" :value="site.id">{{ site.name }} On-Duty Team</option>
                 <option value="supervisors">Shift Supervisors Only</option>
               </select>
             </div>
@@ -77,7 +76,7 @@
                 v-model="broadcastForm.message"
                 required
                 rows="3"
-                placeholder="e.g. VIP delegation arriving at Main Gate in 15 minutes. Increase perimeter vigilance."
+                placeholder="e.g. VIP delegation arriving in 15 minutes. Increase perimeter vigilance."
                 class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none focus:border-indigo-500 resize-none"
               ></textarea>
             </div>
@@ -105,23 +104,28 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { Search, MessageSquare, Plus, X } from 'lucide-vue-next';
+import { siteService } from '@/services/siteService';
 
 const showBroadcastModal = ref(false);
+const sitesList = ref([]);
 const broadcastForm = ref({
   target: 'all',
   priority: 'normal',
   message: ''
 });
 
+onMounted(async () => {
+  try {
+    sitesList.value = await siteService.fetchSites();
+  } catch (e) {}
+});
+
 const sendBroadcast = () => {
-  alert(`Broadcast successfully dispatched to ${broadcastForm.value.target}!`);
   broadcastForm.value.message = '';
   showBroadcastModal.value = false;
 };
 
-const openDispatchModal = () => {
-  alert("Guard quick dispatch console ready.");
-};
+const openDispatchModal = () => {};
 </script>

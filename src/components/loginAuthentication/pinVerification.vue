@@ -305,13 +305,6 @@
                 >
                   Switch Account
                 </button>
-                <button
-                  class="mt-2 text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 px-3 py-1.5 rounded-lg border border-indigo-200 dark:border-indigo-500/30 hover:bg-indigo-100 transition-all flex items-center gap-1.5 cursor-pointer"
-                  @click="quickBypassDev"
-                >
-                  <Zap class="w-3.5 h-3.5 text-amber-500" />
-                  <span>⚡ Enter Patrol Dashboard (Dev Bypass)</span>
-                </button>
               </div>
             </div>
 

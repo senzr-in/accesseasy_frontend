@@ -195,8 +195,8 @@
             <div>
               <label class="font-bold text-slate-700 dark:text-slate-300 block mb-1">Assigned Property Site</label>
               <select v-model="registerForm.site_name" class="ae-input w-full py-2">
-                <option value="Chennai Tech Park">Chennai Tech Park</option>
-                <option value="ABC Retail Mall">ABC Retail Mall</option>
+                <option value="">Select Property Site</option>
+                <option v-for="s in availableSites" :key="s.id" :value="s.name">{{ s.name }}</option>
               </select>
             </div>
 
@@ -227,16 +227,18 @@
 import { ref, computed, onMounted } from 'vue';
 import { Smartphone, Plus, RefreshCw, X } from 'lucide-vue-next';
 import { deviceService } from '@/services/deviceService';
+import { siteService } from '@/services/siteService';
 import FeatureGate from '@/components/common/FeatureGate.vue';
 
 const devices = ref([]);
+const availableSites = ref([]);
 const showRegisterModal = ref(false);
 const registerForm = ref({
   device_name: '',
   device_model: '',
   imei: '',
-  site_name: 'Chennai Tech Park',
-  assigned_guard: 'Kumar S',
+  site_name: '',
+  assigned_guard: '',
   app_version: 'v2.4.1',
   os_version: 'Android 13'
 });
@@ -283,8 +285,8 @@ const submitRegister = async () => {
     device_name: '',
     device_model: '',
     imei: '',
-    site_name: 'Chennai Tech Park',
-    assigned_guard: 'Kumar S',
+    site_name: '',
+    assigned_guard: '',
     app_version: 'v2.4.1',
     os_version: 'Android 13'
   };
@@ -293,6 +295,7 @@ const submitRegister = async () => {
 
 const loadData = async () => {
   devices.value = await deviceService.fetchDevices();
+  availableSites.value = await siteService.fetchSites();
 };
 
 onMounted(async () => {

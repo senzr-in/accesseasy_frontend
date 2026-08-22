@@ -65,7 +65,7 @@
       <div class="ag-wrap ag-hero__inner">
 
         <!-- LEFT: content -->
-        <div class="ag-hero__content ag-reveal">
+        <div class="ag-hero__content">
           <div class="ag-eyebrow">Patrol Management Made Simple</div>
           <h1 class="ag-hero__h1">
             Smart Patrol.<br>

@@ -6,98 +6,7 @@ class AttendanceService {
    * Mock default attendance roster when backend collection is empty
    */
   getDefaultAttendance() {
-    const today = new Date().toISOString().split('T')[0];
-    return [
-      {
-        id: "att-01",
-        guard: { id: "g-01", first_name: "Kumar", last_name: "S", phone: "+91 98765 43210", avatar: null },
-        guard_name: "Kumar S",
-        site: { id: "site-01", name: "Chennai Tech Park" },
-        site_name: "Chennai Tech Park",
-        zone_name: "Main Entrance",
-        check_in_time: `${today}T08:02:15`,
-        check_out_time: null,
-        status: "present", // 'present' | 'late' | 'absent' | 'on_break' | 'early_exit'
-        check_in_lat: 12.9716,
-        check_in_lng: 80.2435,
-        check_in_accuracy_m: 6.5,
-        shift_start: "08:00",
-        shift_end: "16:00",
-        is_late: false,
-        break_duration_mins: 0,
-        active_patrol: "PTR-101"
-      },
-      {
-        id: "att-02",
-        guard: { id: "g-02", first_name: "Ramesh", last_name: "K", phone: "+91 98765 43211", avatar: null },
-        guard_name: "Ramesh K",
-        site: { id: "site-01", name: "Chennai Tech Park" },
-        site_name: "Chennai Tech Park",
-        zone_name: "Perimeter North",
-        check_in_time: `${today}T08:24:00`,
-        check_out_time: null,
-        status: "late",
-        check_in_lat: 12.9718,
-        check_in_lng: 80.2438,
-        check_in_accuracy_m: 9.0,
-        shift_start: "08:00",
-        shift_end: "16:00",
-        is_late: true,
-        late_by_mins: 24,
-        break_duration_mins: 0,
-        active_patrol: "PTR-102"
-      },
-      {
-        id: "att-03",
-        guard: { id: "g-03", first_name: "Suresh", last_name: "M", phone: "+91 98765 43212", avatar: null },
-        guard_name: "Suresh M",
-        site: { id: "site-01", name: "Chennai Tech Park" },
-        site_name: "Chennai Tech Park",
-        zone_name: "Warehouse Bay",
-        check_in_time: `${today}T07:55:10`,
-        check_out_time: null,
-        status: "on_break",
-        break_started_at: new Date(Date.now() - 15 * 60000).toISOString(),
-        check_in_lat: 12.9714,
-        check_in_lng: 80.2430,
-        check_in_accuracy_m: 5.2,
-        shift_start: "08:00",
-        shift_end: "16:00",
-        is_late: false,
-        break_duration_mins: 15,
-        active_patrol: null
-      },
-      {
-        id: "att-04",
-        guard: { id: "g-04", first_name: "Vignesh", last_name: "P", phone: "+91 98765 43213", avatar: null },
-        guard_name: "Vignesh P",
-        site: { id: "site-01", name: "Chennai Tech Park" },
-        site_name: "Chennai Tech Park",
-        zone_name: "Not Assigned",
-        check_in_time: null,
-        check_out_time: null,
-        status: "absent",
-        shift_start: "08:00",
-        shift_end: "16:00",
-        is_late: false,
-        active_patrol: null
-      },
-      {
-        id: "att-05",
-        guard: { id: "g-05", first_name: "Arun", last_name: "D", phone: "+91 98765 43214", avatar: null },
-        guard_name: "Arun D",
-        site: { id: "site-01", name: "Chennai Tech Park" },
-        site_name: "Chennai Tech Park",
-        zone_name: "Main Entrance",
-        check_in_time: `${today}T00:00:00`,
-        check_out_time: `${today}T08:00:00`,
-        status: "off_duty",
-        shift_start: "00:00",
-        shift_end: "08:00",
-        is_late: false,
-        active_patrol: null
-      }
-    ];
+    return [];
   }
 
   /**
@@ -107,7 +16,7 @@ class AttendanceService {
   async getTodayAttendance(siteId = null) {
     try {
       const tenantId = authService.getTenantId();
-      if (!tenantId) return this.getDefaultAttendance();
+      if (!tenantId) return [];
 
       const today = new Date().toISOString().split('T')[0];
       let query = `/items/guard_attendance?filter[tenant][_eq]=${tenantId}&filter[date_created][_gte]=${today}T00:00:00&sort=-check_in_time&fields=*,guard.first_name,guard.last_name,guard.phone,guard.avatar,site.name,zone.name`;
@@ -118,7 +27,7 @@ class AttendanceService {
 
       try {
         const res = await authService.protectedApi.get(query);
-        if (res.data.data && res.data.data.length > 0) {
+        if (res.data?.data) {
           return res.data.data.map(r => ({
             ...r,
             guard_name: r.guard ? `${r.guard.first_name || ''} ${r.guard.last_name || ''}`.trim() : (r.guard_name || 'Guard'),
@@ -139,12 +48,10 @@ class AttendanceService {
         } catch (e) {}
       }
 
-      const defaults = this.getDefaultAttendance();
-      if (siteId) return defaults.filter(a => String(a.site?.id || a.site) === String(siteId));
-      return defaults;
+      return [];
     } catch (error) {
       console.error("Error fetching attendance:", error);
-      return this.getDefaultAttendance();
+      return [];
     }
   }
 

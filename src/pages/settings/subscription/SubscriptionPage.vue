@@ -1,471 +1,249 @@
 <template>
-  <div class="sub-page">
-    <!-- Loading state -->
-    <div v-if="store.loading" class="sub-page__loading">
-      <div class="sub-spinner" />
-      <span>Loading plan details…</span>
+  <div class="h-full flex flex-col bg-slate-50 dark:bg-[#0b0f19] text-slate-900 dark:text-slate-100 overflow-y-auto custom-scrollbar font-sans p-4 sm:p-6 lg:p-10 gap-6 max-w-6xl mx-auto w-full">
+
+    <!-- Loading Skeleton -->
+    <div v-if="store.loading" class="flex flex-col items-center justify-center py-32 gap-4 text-slate-500">
+      <div class="w-10 h-10 border-3 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+      <span class="text-sm font-bold tracking-wide">Loading Subscription Details…</span>
     </div>
 
     <template v-else>
-      <!-- Plan Header -->
-      <div class="sub-header">
-        <div class="sub-header__left">
-          <div class="sub-plan-badge" :class="`sub-plan-badge--${store.plan}`">
-            {{ planBadgeLabel }}
+
+      <!-- Expired Critical Warning Banner -->
+      <div
+        v-if="store.isExpired"
+        class="p-5 rounded-3xl bg-red-600 text-white shadow-xl shadow-red-500/20 flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in duration-300"
+      >
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0">
+            <AlertTriangle class="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 class="sub-header__title">Your Subscription</h1>
-            <p class="sub-header__meta">
-              Status: <strong :class="statusClass">{{ statusLabel }}</strong>
-              <span v-if="renewalDate" class="sub-header__renewal">
-                · Renews {{ renewalDate }}
-              </span>
-            </p>
+            <h3 class="text-sm font-black uppercase tracking-wider">Patrol Subscription Expired</h3>
+            <p class="text-xs text-red-100 mt-0.5">Your site licenses and live officer GPS tracking are currently suspended.</p>
           </div>
         </div>
         <button
-          v-if="store.plan !== 'custom'"
-          class="sub-upgrade-btn"
-          @click="showUpgradeModal = true"
+          class="h-11 px-6 rounded-2xl bg-white text-red-700 hover:bg-red-50 font-black text-xs uppercase tracking-wider transition-all shadow-lg shrink-0 flex items-center gap-2 cursor-pointer"
+          @click="router.push('/dashboard/settings/plans')"
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-          {{ store.plan === 'normal' ? 'Upgrade to Pro' : 'Upgrade to Enterprise' }}
+          <span>Renew Subscription Now</span>
+          <ArrowRight class="w-4 h-4" />
         </button>
       </div>
 
-      <!-- Usage Meters -->
-      <section class="sub-section">
-        <h2 class="sub-section__title">Plan Usage</h2>
-        <div class="sub-meters-grid">
-          <div
-            v-for="meter in store.usageMeters"
-            :key="meter.resource"
-            class="sub-meter-card"
-            :class="{
-              'sub-meter-card--warn': meter.nearLimit,
-              'sub-meter-card--full': meter.atLimit,
-            }"
-          >
-            <div class="sub-meter-card__header">
-              <span class="sub-meter-card__label">{{ meter.label }}</span>
-              <span class="sub-meter-card__count">
-                <template v-if="meter.max === Infinity">Unlimited</template>
-                <template v-else>{{ meter.current }} <span class="sub-meter-card__max">/ {{ meter.max }}</span></template>
-              </span>
+      <!-- Main Subscription Header Card -->
+      <div class="bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+        
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-white/5 pb-6">
+          <div class="flex items-center gap-4">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white flex items-center justify-center shadow-lg shadow-blue-600/20 shrink-0">
+              <ShieldCheck class="w-7 h-7" />
             </div>
-            <div class="sub-meter-card__bar-wrap">
-              <div class="sub-meter-card__bar">
-                <div
-                  class="sub-meter-card__fill"
-                  :style="{ width: `${Math.min(meter.percent, 100)}%` }"
-                />
+            <div>
+              <div class="flex flex-wrap items-center gap-2.5">
+                <h1 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">
+                  {{ store.isTrial ? '7-Day Free Trial' : 'AccessEasy Patrol Platform' }}
+                </h1>
+                <span
+                  class="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border"
+                  :class="store.isTrial ? 'bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300 border-amber-300 dark:border-amber-500/30' : store.isExpired ? 'bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-300 border-red-300 dark:border-red-500/30' : 'bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300 border-emerald-300 dark:border-emerald-500/30'"
+                >
+                  {{ store.isExpired ? '● Expired' : store.isTrial ? '● Trial Active' : '● Active Subscription' }}
+                </span>
               </div>
-              <span class="sub-meter-card__pct" v-if="meter.max !== Infinity">{{ meter.percent }}%</span>
-            </div>
-            <div v-if="meter.atLimit" class="sub-meter-card__warn-msg">
-              Limit reached — <button class="sub-inline-link" @click="showUpgradeModal = true">Upgrade to increase</button>
-            </div>
-            <div v-else-if="meter.nearLimit" class="sub-meter-card__warn-msg sub-meter-card__warn-msg--amber">
-              Approaching limit
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Licensed for <strong>{{ store.allowedSites }} {{ store.allowedSites === 1 ? 'Physical Site' : 'Physical Sites' }}</strong> · Flat <strong>₹1,999 / site / month</strong>
+              </p>
             </div>
           </div>
-        </div>
-      </section>
 
-      <!-- Plan Limits Reference -->
-      <section class="sub-section">
-        <h2 class="sub-section__title">Plan Limits</h2>
-        <div class="sub-limits-table">
-          <div class="sub-limits-row sub-limits-row--header">
-            <span>Resource</span>
-            <span>Your Limit</span>
-          </div>
-          <div v-for="row in limitRows" :key="row.label" class="sub-limits-row">
-            <span class="sub-limits-row__label">{{ row.label }}</span>
-            <span class="sub-limits-row__value">{{ row.value }}</span>
-          </div>
-        </div>
-      </section>
-
-      <!-- Feature Entitlements -->
-      <section class="sub-section">
-        <h2 class="sub-section__title">Feature Access</h2>
-        <div class="sub-features-grid">
-          <div
-            v-for="group in featureGroups"
-            :key="group.label"
-            class="sub-feature-group"
-          >
-            <div class="sub-feature-group__title">{{ group.label }}</div>
-            <div
-              v-for="feat in group.features"
-              :key="feat.key"
-              class="sub-feature-row"
-              :class="{ 'sub-feature-row--locked': !store.entitlements.has(feat.key) }"
+          <div class="flex items-center gap-3 shrink-0">
+            <button
+              class="h-11 px-5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-black uppercase tracking-wider transition-all shadow-md shadow-blue-600/20 flex items-center gap-2 cursor-pointer"
+              @click="router.push('/dashboard/settings/plans')"
             >
-              <span class="sub-feature-row__icon">
-                {{ store.entitlements.has(feat.key) ? '✓' : '✗' }}
+              <CreditCard class="w-4 h-4" />
+              <span>Change Site Capacity & Billing</span>
+              <ArrowUpRight class="w-4 h-4" />
+            </button>
+            <button
+              class="h-11 w-11 rounded-2xl border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-all cursor-pointer"
+              @click="handleRefresh"
+              :disabled="isRefreshing"
+              title="Sync Status"
+            >
+              <RefreshCw class="w-4 h-4" :class="{ 'animate-spin': isRefreshing }" />
+            </button>
+          </div>
+        </div>
+
+        <!-- 3 Core Stats Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          
+          <!-- Stat 1: Site Capacity -->
+          <div class="p-5 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 space-y-2">
+            <div class="flex items-center justify-between text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <span>Licensed Site Capacity</span>
+              <Building2 class="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div class="flex items-baseline gap-2">
+              <span class="text-3xl font-mono font-black text-slate-900 dark:text-white">
+                {{ store.usage?.site_count || 0 }}
               </span>
-              <span>{{ feat.label }}</span>
+              <span class="text-sm font-bold text-slate-400">
+                / {{ store.allowedSites }} {{ store.allowedSites === 1 ? 'Site' : 'Sites' }}
+              </span>
+            </div>
+            <div class="w-full h-2 bg-slate-200 dark:bg-white/10 rounded-full overflow-hidden mt-2">
+              <div
+                class="h-full rounded-full transition-all duration-500"
+                :class="siteUsagePercent >= 100 ? 'bg-amber-500' : 'bg-blue-600'"
+                :style="{ width: `${Math.min(siteUsagePercent, 100)}%` }"
+              ></div>
+            </div>
+            <div class="flex justify-between items-center text-[11px] pt-1">
+              <span class="text-slate-500">{{ siteUsagePercent }}% Allocated</span>
+              <button
+                class="text-blue-600 dark:text-blue-400 font-bold hover:underline"
+                @click="router.push('/dashboard/settings/plans')"
+              >
+                + Add More Sites
+              </button>
+            </div>
+          </div>
+
+          <!-- Stat 2: Monthly Spend -->
+          <div class="p-5 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 space-y-2">
+            <div class="flex items-center justify-between text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <span>Monthly Subscription</span>
+              <CreditCard class="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            </div>
+            <div class="text-3xl font-mono font-black text-slate-900 dark:text-white">
+              ₹{{ (1999 * (store.allowedSites || 1)).toLocaleString() }}
+            </div>
+            <p class="text-xs text-slate-500 font-medium">
+              ₹1,999 × {{ store.allowedSites }} {{ store.allowedSites === 1 ? 'Site' : 'Sites' }} / month
+            </p>
+            <div class="flex justify-between items-center text-[11px] pt-1">
+              <span class="text-slate-500">Billing Interval</span>
+              <span class="font-bold text-emerald-600">Monthly</span>
+            </div>
+          </div>
+
+          <!-- Stat 3: Renewal / Trial -->
+          <div class="p-5 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 space-y-2">
+            <div class="flex items-center justify-between text-xs font-bold text-slate-400 uppercase tracking-wider">
+              <span>{{ store.isTrial ? 'Trial Expiry' : 'Renewal Status' }}</span>
+              <Clock class="w-4 h-4 text-amber-600 dark:text-amber-400" />
+            </div>
+            <div class="text-2xl font-black text-slate-900 dark:text-white">
+              {{ renewalDateFormatted || 'Active' }}
+            </div>
+            <p v-if="store.daysRemaining !== null && !store.isExpired" class="text-xs text-blue-600 dark:text-blue-400 font-bold">
+              {{ store.daysRemaining }} days remaining
+            </p>
+            <p v-else class="text-xs text-slate-500">Continuous active operation</p>
+            <div class="flex justify-between items-center text-[11px] pt-1">
+              <span class="text-slate-500">Payment Status</span>
+              <span class="font-bold text-emerald-600">✓ Active</span>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Platform Capabilities (100% Unlimited Features) -->
+      <div class="bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+        <div class="flex items-center justify-between border-b border-slate-100 dark:border-white/5 pb-4">
+          <div>
+            <h3 class="text-base font-black text-slate-900 dark:text-white">Included Platform Capabilities</h3>
+            <p class="text-xs text-slate-500">Every feature is 100% unlocked with zero per-user or add-on charges</p>
+          </div>
+          <span class="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">
+            ✓ 100% Unlocked
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div
+            v-for="(feature, idx) in activeFeaturesList"
+            :key="idx"
+            class="p-4 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 flex items-start gap-3.5"
+          >
+            <div class="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 mt-0.5">
+              <component :is="feature.icon" class="w-4 h-4" />
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-slate-900 dark:text-white">{{ feature.title }}</span>
+                <span class="text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-300">
+                  Unlimited
+                </span>
+              </div>
+              <p class="text-[11px] text-slate-500 mt-0.5 leading-snug">{{ feature.desc }}</p>
             </div>
           </div>
         </div>
-      </section>
+      </div>
+
     </template>
 
-    <!-- Upgrade Modal -->
-    <UpgradeModal
-      v-model="showUpgradeModal"
-      @upgrade-requested="onUpgradeRequested"
-    />
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { usePlanStore } from '@/stores/usePlanStore';
-import UpgradeModal from '@/components/common/UpgradeModal.vue';
+import { currentUserTenant } from '@/utils/currentUserTenant';
+import { 
+  ShieldCheck, CreditCard, AlertTriangle, Building2, Clock, 
+  RefreshCw, ArrowRight, ArrowUpRight, Navigation, AlertCircle, 
+  Smartphone, ScrollText, Calendar, QrCode
+} from 'lucide-vue-next';
 
+const router = useRouter();
 const store = usePlanStore();
-const showUpgradeModal = ref(false);
+const isRefreshing = ref(false);
 
-const planBadgeLabel = computed(() => ({
-  normal: '🟢 Normal',
-  pro:    '🔵 Pro ⭐',
-  custom: '🟣 Custom',
-}[store.plan] || store.plan));
-
-const statusLabel = computed(() => {
-  const s = store.subscription ? store.subscription.status : 'active';
-  return { active: 'Active', trial: 'Trial', suspended: 'Suspended', cancelled: 'Cancelled' }[s] || 'Active';
-});
-
-const statusClass = computed(() => {
-  const s = store.subscription ? store.subscription.status : 'active';
-  return { active: 'sub-status--active', trial: 'sub-status--trial', suspended: 'sub-status--warn', cancelled: 'sub-status--error' }[s] || 'sub-status--active';
-});
-
-const renewalDate = computed(() => {
-  const d = store.subscription?.renewal_date;
+const renewalDateFormatted = computed(() => {
+  const d = store.subscription?.active_until || store.subscription?.renewal_date || store.subscription?.end_date;
   if (!d) return null;
   return new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 });
 
-const limitRows = computed(() => {
-  const l = store.limits;
-  if (!l) return [];
-  const fmt = v => v === undefined || v === null || v === Infinity ? 'Unlimited' : v.toLocaleString();
-  const fmtBytes = v => v === Infinity ? 'Unlimited' : `${(v / 1073741824).toFixed(0)} GB`;
-  const fmtDays = v => v === Infinity ? 'Unlimited' : `${v} days`;
-  return [
-    { label: 'Sites',               value: fmt(l.sites) },
-    { label: 'Zones per Site',      value: fmt(l.zones_per_site) },
-    { label: 'Guards',              value: fmt(l.guards) },
-    { label: 'Patrol Routes',       value: fmt(l.patrol_routes) },
-    { label: 'Checkpoints',         value: fmt(l.checkpoints) },
-    { label: 'Active Patrols/Day',  value: fmt(l.active_patrols_per_day) },
-    { label: 'Admin Users',         value: fmt(l.admin_users) },
-    { label: 'Storage',             value: fmtBytes(l.storage_bytes) },
-    { label: 'Data Retention',      value: fmtDays(l.retention_days) },
-  ];
+const siteUsagePercent = computed(() => {
+  const current = store.usage?.site_count || 0;
+  const max = store.allowedSites || 1;
+  return Math.round((current / max) * 100);
 });
 
-const featureGroups = [
-  {
-    label: 'Attendance',
-    features: [
-      { key: 'attendance.basic',           label: 'Basic Attendance' },
-      { key: 'attendance.advanced',        label: 'Advanced Attendance' },
-      { key: 'attendance.breaks',          label: 'Break Management' },
-      { key: 'attendance.shift_compliance',label: 'Shift Compliance' },
-      { key: 'attendance.replacement',     label: 'Guard Replacement' },
-    ]
-  },
-  {
-    label: 'Geofencing',
-    features: [
-      { key: 'geofence.checkpoint_radius', label: 'Checkpoint Radius' },
-      { key: 'geofence.site',              label: 'Site Geofence' },
-      { key: 'geofence.zone',              label: 'Zone Geofence' },
-      { key: 'geofence.live_tracking',     label: 'Live Guard Tracking' },
-      { key: 'geofence.violation_history', label: 'Violation History' },
-    ]
-  },
-  {
-    label: 'Evidence',
-    features: [
-      { key: 'evidence.qr',       label: 'QR Scanning' },
-      { key: 'evidence.gps',      label: 'GPS Verification' },
-      { key: 'evidence.photo',    label: 'Photo Evidence' },
-      { key: 'evidence.nfc',      label: 'NFC Scanning' },
-      { key: 'evidence.video',    label: 'Video Evidence' },
-      { key: 'evidence.checklist',label: 'Checklists' },
-      { key: 'evidence.export',   label: 'Evidence Export' },
-    ]
-  },
-  {
-    label: 'Incidents',
-    features: [
-      { key: 'incident.basic',           label: 'Basic Incident Reporting' },
-      { key: 'incident.workflow',        label: 'Full Incident Workflow' },
-      { key: 'incident.escalation',      label: 'Escalation Engine' },
-      { key: 'incident.custom_workflow', label: 'Custom Workflows' },
-    ]
-  },
-  {
-    label: 'Operations',
-    features: [
-      { key: 'ops.operations_center', label: 'Operations Center' },
-      { key: 'ops.live_map',          label: 'Live Map' },
-      { key: 'ops.broadcast',         label: 'Broadcast Messaging' },
-      { key: 'ops.audit_log',         label: 'Audit Logs' },
-      { key: 'ops.api',               label: 'API Access' },
-      { key: 'ops.webhooks',          label: 'Webhooks' },
-    ]
-  },
-  {
-    label: 'Enterprise',
-    features: [
-      { key: 'enterprise.sso',            label: 'SSO' },
-      { key: 'enterprise.custom_roles',   label: 'Custom Roles' },
-      { key: 'enterprise.multi_client',   label: 'Multi-Client' },
-      { key: 'enterprise.integrations',   label: 'Enterprise Integrations' },
-      { key: 'enterprise.cctv',           label: 'CCTV/NVR Integration' },
-      { key: 'enterprise.custom_sla',     label: 'Custom SLA' },
-    ]
-  },
+const activeFeaturesList = [
+  { title: 'Unlimited Guard Accounts', desc: 'Add all security guards and supervisors with zero per-user fees.', icon: ShieldCheck },
+  { title: 'Live GPS & Breadcrumbs', desc: 'Real-time officer geolocation, live map telemetry, and boundary alarms.', icon: Navigation },
+  { title: 'QR & NFC Checkpoints', desc: 'Generate tamper-proof checkpoint tokens and physical NFC tags.', icon: QrCode },
+  { title: 'Automated Escalation Chains', desc: 'Multi-tier fallback alert engine for SOS emergency panic & missed rounds.', icon: AlertCircle },
+  { title: '24/7 Shift Scheduler', desc: 'Guard shift rotation matrix, fatigue detection, and compliance logs.', icon: Calendar },
+  { title: 'Handheld Fleet Telemetry', desc: 'Live battery %, device heartbeat, and remote unlinking.', icon: Smartphone }
 ];
 
-function onUpgradeRequested(targetPlan) {
-  // TODO: Route to billing / contact sales
-  console.log('[SubscriptionPage] Upgrade requested:', targetPlan);
+async function handleRefresh() {
+  isRefreshing.value = true;
+  try {
+    await currentUserTenant.refresh();
+    await store.refreshPlan();
+  } catch (e) {
+    console.error('Failed to sync plan:', e);
+  } finally {
+    isRefreshing.value = false;
+  }
 }
+
+onMounted(async () => {
+  if (!store.ready) {
+    await store.initPlan();
+  }
+});
 </script>
-
-<style scoped>
-.sub-page {
-  padding: 28px 24px;
-  max-width: 1000px;
-  font-family: inherit;
-}
-
-.sub-page__loading {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: #6b7280;
-  padding: 40px 0;
-}
-
-.sub-spinner {
-  width: 20px;
-  height: 20px;
-  border: 2px solid rgba(255,255,255,0.1);
-  border-top-color: #4f46e5;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-/* Header */
-.sub-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 32px;
-  flex-wrap: wrap;
-}
-
-.sub-header__left {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.sub-plan-badge {
-  padding: 6px 14px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-}
-.sub-plan-badge--normal { background: rgba(74,222,128,0.12); color: #4ade80; border: 1px solid rgba(74,222,128,0.25); }
-.sub-plan-badge--pro    { background: rgba(99,102,241,0.15); color: #818cf8; border: 1px solid rgba(99,102,241,0.35); }
-.sub-plan-badge--custom { background: rgba(168,85,247,0.12); color: #c084fc; border: 1px solid rgba(168,85,247,0.3); }
-
-.sub-header__title {
-  font-size: 20px;
-  font-weight: 800;
-  color: #f9fafb;
-  margin: 0 0 4px;
-}
-
-.sub-header__meta {
-  font-size: 13px;
-  color: #6b7280;
-  margin: 0;
-}
-
-.sub-header__renewal { margin-left: 4px; }
-
-.sub-status--active { color: #4ade80; }
-.sub-status--trial  { color: #fbbf24; }
-.sub-status--warn   { color: #f59e0b; }
-.sub-status--error  { color: #f87171; }
-
-.sub-upgrade-btn {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 9px 18px;
-  background: linear-gradient(135deg, #4f46e5, #7c3aed);
-  color: white;
-  border: none;
-  border-radius: 10px;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: opacity 0.18s, transform 0.15s;
-}
-.sub-upgrade-btn:hover { opacity: 0.88; transform: scale(0.98); }
-
-/* Sections */
-.sub-section { margin-bottom: 32px; }
-.sub-section__title {
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: #6b7280;
-  margin: 0 0 14px;
-}
-
-/* Usage meters */
-.sub-meters-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 12px;
-}
-
-.sub-meter-card {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 12px;
-  padding: 14px;
-}
-.sub-meter-card--warn { border-color: rgba(245,158,11,0.3); }
-.sub-meter-card--full { border-color: rgba(239,68,68,0.3); }
-
-.sub-meter-card__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 8px;
-}
-.sub-meter-card__label { font-size: 13px; color: #9ca3af; }
-.sub-meter-card__count { font-size: 14px; font-weight: 800; color: #f9fafb; font-variant-numeric: tabular-nums; }
-.sub-meter-card__max   { font-size: 12px; font-weight: 500; color: #6b7280; }
-
-.sub-meter-card__bar-wrap { display: flex; align-items: center; gap: 8px; }
-.sub-meter-card__bar {
-  flex: 1;
-  height: 5px;
-  background: rgba(255,255,255,0.07);
-  border-radius: 999px;
-  overflow: hidden;
-}
-.sub-meter-card__fill {
-  height: 100%;
-  background: #4f46e5;
-  border-radius: 999px;
-  transition: width 0.6s cubic-bezier(0.25,1,0.5,1);
-}
-.sub-meter-card--warn .sub-meter-card__fill { background: #f59e0b; }
-.sub-meter-card--full .sub-meter-card__fill { background: #ef4444; }
-.sub-meter-card__pct { font-size: 11px; color: #6b7280; min-width: 30px; text-align: right; font-variant-numeric: tabular-nums; }
-
-.sub-meter-card__warn-msg {
-  margin-top: 6px;
-  font-size: 11px;
-  color: #f87171;
-}
-.sub-meter-card__warn-msg--amber { color: #fbbf24; }
-.sub-inline-link {
-  background: none;
-  border: none;
-  color: inherit;
-  text-decoration: underline;
-  cursor: pointer;
-  font-size: inherit;
-  padding: 0;
-}
-
-/* Limits table */
-.sub-limits-table {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 12px;
-  overflow: hidden;
-}
-.sub-limits-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 10px 16px;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  font-size: 13px;
-}
-.sub-limits-row:last-child { border-bottom: none; }
-.sub-limits-row--header {
-  background: rgba(255,255,255,0.03);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #6b7280;
-}
-.sub-limits-row__label { color: #9ca3af; }
-.sub-limits-row__value { font-weight: 700; color: #f9fafb; font-variant-numeric: tabular-nums; }
-
-/* Features grid */
-.sub-features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 16px;
-}
-
-.sub-feature-group {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 12px;
-  padding: 14px;
-}
-
-.sub-feature-group__title {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: #6b7280;
-  margin-bottom: 10px;
-}
-
-.sub-feature-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  color: #d1d5db;
-  padding: 3px 0;
-}
-.sub-feature-row--locked { color: #4b5563; }
-.sub-feature-row__icon {
-  font-size: 11px;
-  font-weight: 800;
-  min-width: 12px;
-}
-.sub-feature-row:not(.sub-feature-row--locked) .sub-feature-row__icon { color: #4ade80; }
-.sub-feature-row--locked .sub-feature-row__icon { color: #374151; }
-</style>

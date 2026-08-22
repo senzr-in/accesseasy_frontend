@@ -3,56 +3,7 @@ import { subscriptionService } from "@/services/subscriptionService";
 
 class ZoneService {
   getDefaultZones() {
-    return [
-      {
-        id: "zone-01",
-        zoneName: "Main Entrance & Reception",
-        name: "Main Entrance & Reception",
-        code: "ZN-ENTRANCE",
-        description: "Front gates, visitor lobby, and primary access turnstiles",
-        site: "site-01",
-        status: "active",
-        checkpointsCount: 6,
-        securityTier: "High Security",
-        boundary_geojson: null,
-      },
-      {
-        id: "zone-02",
-        zoneName: "Perimeter Fence - North Sector",
-        name: "Perimeter Fence - North Sector",
-        code: "ZN-PERIM-N",
-        description: "Outer perimeter fence line and northern boundary checkpoints",
-        site: "site-01",
-        status: "active",
-        checkpointsCount: 10,
-        securityTier: "Medium Security",
-        boundary_geojson: null,
-      },
-      {
-        id: "zone-03",
-        zoneName: "Warehouse & Loading Dock",
-        name: "Warehouse & Loading Dock",
-        code: "ZN-WH-DOCK",
-        description: "Loading docks, freight intake, and high-value storage bay",
-        site: "site-01",
-        status: "active",
-        checkpointsCount: 8,
-        securityTier: "High Security",
-        boundary_geojson: null,
-      },
-      {
-        id: "zone-04",
-        zoneName: "Retail Concourse Level 1",
-        name: "Retail Concourse Level 1",
-        code: "ZN-MALL-L1",
-        description: "Public corridors, escalator lobbies, and emergency exits",
-        site: "site-02",
-        status: "active",
-        checkpointsCount: 12,
-        securityTier: "Standard",
-        boundary_geojson: null,
-      }
-    ];
+    return [];
   }
 
   /**
@@ -79,7 +30,7 @@ class ZoneService {
   async fetchZones(siteId = null, userId = null) {
     try {
       const tenantId = authService.getTenantId();
-      if (!tenantId) return this.getDefaultZones();
+      if (!tenantId) return [];
 
       let query = `/items/zones?filter[tenant][_eq]=${tenantId}&sort=name`;
       if (siteId) {
@@ -100,7 +51,7 @@ class ZoneService {
 
       try {
         const response = await authService.protectedApi.get(query);
-        if (response.data.data && response.data.data.length > 0) {
+        if (response.data?.data) {
           return response.data.data.map(z => ({
             ...z,
             name: z.name || z.zoneName,
@@ -121,14 +72,10 @@ class ZoneService {
         } catch (e) {}
       }
 
-      const defaults = this.getDefaultZones();
-      if (siteId) return defaults.filter(z => String(z.site) === String(siteId));
-      return defaults;
+      return [];
     } catch (error) {
       console.error("Error fetching zones:", error);
-      const defaults = this.getDefaultZones();
-      if (siteId) return defaults.filter(z => String(z.site) === String(siteId));
-      return defaults;
+      return [];
     }
   }
 

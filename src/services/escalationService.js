@@ -2,89 +2,11 @@ import { authService } from "@/services/authService";
 
 class EscalationService {
   getDefaultPolicies() {
-    return [
-      {
-        id: "esc-pol-01",
-        name: "Standard SOS Emergency Escalation",
-        trigger_type: "sos_emergency",
-        site_name: "All Properties",
-        enabled: true,
-        levels: [
-          {
-            level: 1,
-            delay_minutes: 0,
-            target_role: "On-Duty Shift Supervisor",
-            channels: ["push", "audio_alarm", "sms"],
-            action: "Immediate alarm on supervisor handheld & SOC console"
-          },
-          {
-            level: 2,
-            delay_minutes: 5,
-            target_role: "Site Security Manager",
-            channels: ["sms", "push"],
-            action: "SMS dispatch & priority alert to manager if unacknowledged in 5 mins"
-          },
-          {
-            level: 3,
-            delay_minutes: 15,
-            target_role: "Central SOC Command & External Emergency Dispatch",
-            channels: ["voice_call", "webhook"],
-            action: "Automated voice call to Head of Security + Webhook trigger to 911 dispatch"
-          }
-        ]
-      },
-      {
-        id: "esc-pol-02",
-        name: "Overdue / Missed Patrol Escalation",
-        trigger_type: "missed_patrol",
-        site_name: "All Properties",
-        enabled: true,
-        levels: [
-          {
-            level: 1,
-            delay_minutes: 0,
-            target_role: "Assigned Guard",
-            channels: ["push"],
-            action: "Prompt guard mobile with 5-minute reminder"
-          },
-          {
-            level: 2,
-            delay_minutes: 10,
-            target_role: "Shift Supervisor",
-            channels: ["push", "sms"],
-            action: "Alert supervisor of missed perimeter round"
-          },
-          {
-            level: 3,
-            delay_minutes: 30,
-            target_role: "Operations Manager",
-            channels: ["sms", "email"],
-            action: "Log SLA penalty and notify client security lead"
-          }
-        ]
-      }
-    ];
+    return [];
   }
 
   getDefaultActiveEscalations() {
-    const now = new Date();
-    return [
-      {
-        id: "esc-act-01",
-        policy_id: "esc-pol-01",
-        trigger_type: "sos_emergency",
-        incident_title: "SOS Panic Button Triggered",
-        site_name: "Chennai Tech Park",
-        zone_name: "North Gate Perimeter",
-        guard_name: "Kumar S",
-        current_level: 2,
-        max_level: 3,
-        triggered_at: new Date(now.getTime() - 7 * 60000).toISOString(),
-        next_escalation_at: new Date(now.getTime() + 8 * 60000).toISOString(),
-        status: "escalating", // 'escalating' | 'acknowledged' | 'resolved'
-        acknowledged_by: null
-      }
-    ];
+    return [];
   }
 
   /**
@@ -93,13 +15,13 @@ class EscalationService {
   async fetchPolicies(siteId = null) {
     try {
       const tenantId = authService.getTenantId();
-      if (!tenantId) return this.getDefaultPolicies();
+      if (!tenantId) return [];
 
       try {
         const res = await authService.protectedApi.get(
           `/items/escalation_policies?filter[tenant][_eq]=${tenantId}&sort=name`
         );
-        if (res.data.data && res.data.data.length > 0) return res.data.data;
+        if (res.data?.data) return res.data.data;
       } catch (e) {}
 
       const stored = localStorage.getItem(`accesseasy_escalation_policies_${tenantId}`);
@@ -109,10 +31,10 @@ class EscalationService {
         } catch (e) {}
       }
 
-      return this.getDefaultPolicies();
+      return [];
     } catch (error) {
       console.error("Error fetching escalation policies:", error);
-      return this.getDefaultPolicies();
+      return [];
     }
   }
 
@@ -152,9 +74,9 @@ class EscalationService {
           return JSON.parse(stored);
         } catch (e) {}
       }
-      return this.getDefaultActiveEscalations();
+      return [];
     } catch (e) {
-      return this.getDefaultActiveEscalations();
+      return [];
     }
   }
 
@@ -182,7 +104,7 @@ class EscalationService {
   /**
    * Test / Simulate Escalation Trigger
    */
-  async simulateTrigger(triggerType = "sos_emergency", siteName = "Chennai Tech Park") {
+  async simulateTrigger(triggerType = "sos_emergency", siteName = "Default Site", guardName = "On-Duty Guard") {
     try {
       const tenantId = authService.getTenantId();
       const list = await this.fetchActiveEscalations();
@@ -190,10 +112,10 @@ class EscalationService {
         id: `esc-act-${Date.now()}`,
         policy_id: "esc-pol-01",
         trigger_type: triggerType,
-        incident_title: `Simulated Alert: ${triggerType.toUpperCase()}`,
+        incident_title: `Alert: ${triggerType.toUpperCase()}`,
         site_name: siteName,
-        zone_name: "Test Perimeter Sector",
-        guard_name: "Kumar S",
+        zone_name: "Active Zone",
+        guard_name: guardName,
         current_level: 1,
         max_level: 3,
         triggered_at: new Date().toISOString(),

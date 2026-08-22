@@ -1417,12 +1417,12 @@ const successToastMessage = ref('');
 const activeQuickModal = ref(null);
 
 // Form Models for Direct Modals
-const quickPatrolForm = ref({ guardName: 'Raj Kumar', routeName: 'Night Perimeter Inspection', siteName: 'Chennai Tech Park', priority: 'Normal' });
+const quickPatrolForm = ref({ guardName: '', routeName: '', siteName: '', priority: 'Normal' });
 const quickScheduleForm = ref({ name: '', frequency: 'Every 2 hours', shift: 'Night (22:00 - 06:00)' });
 const quickGuardForm = ref({ first_name: '', last_name: '', badge_number: '', phone: '' });
 const quickSiteForm = ref({ name: '', code: '', address: '', geofence_radius: 500, emergency_phone: '', latitude: 12.9716, longitude: 80.2435 });
-const quickZoneForm = ref({ name: '', siteId: 'site-01', securityTier: 'Tier 1 Critical' });
-const quickCheckpointForm = ref({ name: '', type: 'QR Code', zone: 'Perimeter Boundary' });
+const quickZoneForm = ref({ name: '', siteId: '', securityTier: 'Tier 1 Critical' });
+const quickCheckpointForm = ref({ name: '', type: 'QR Code', zone: '' });
 const quickIncidentForm = ref({ title: '', severity: 'critical', location: '', description: '' });
 
 // ── MAP LOCATION PICKER STATE ─────────────────────────────────────────────────
@@ -1731,21 +1731,25 @@ const selectSite = (siteId) => {
 // ── METRICS COMPUTATION ───────────────────────────────────────────────────────
 const currentMetrics = computed(() => {
   if (selectedSiteId.value === 'all') {
+    const totalGuards = sitesList.value.reduce((acc, s) => acc + (s.totalGuards || 0), 0);
+    const activeGuards = sitesList.value.reduce((acc, s) => acc + (s.activeGuards || 0), 0);
+    const offDutyGuards = sitesList.value.reduce((acc, s) => acc + (s.offDutyGuards || 0), 0);
+    const completedToday = sitesList.value.reduce((acc, s) => acc + (s.completedToday || 0), 0);
     return {
-      totalGuards: sitesList.value.reduce((acc, s) => acc + (s.totalGuards || 0), 0) || 24,
-      activeGuards: sitesList.value.reduce((acc, s) => acc + (s.activeGuards || 0), 0) || 18,
-      offDutyGuards: sitesList.value.reduce((acc, s) => acc + (s.offDutyGuards || 0), 0) || 6,
-      activePatrols: mockActivePatrols.value.length || 8,
-      onTrackPatrols: mockActivePatrols.value.filter(p => p.status === 'running').length || 6,
-      delayedPatrols: mockActivePatrols.value.filter(p => p.status === 'delayed').length || 2,
-      completedToday: sitesList.value.reduce((acc, s) => acc + (s.completedToday || 0), 0) || 126,
-      completionRate: 96.4,
-      completionTrend: '+4.2%',
-      missedCount: sitesList.value.reduce((acc, s) => acc + (s.missedCount || 0), 0) || 2,
-      overdueCount: sitesList.value.reduce((acc, s) => acc + (s.overdueCount || 0), 0) || 2,
-      incidentsCount: recentIncidentsList.value.length || 7,
-      criticalIncidents: recentIncidentsList.value.filter(i => i.severity === 'critical').length || 3,
-      normalIncidents: recentIncidentsList.value.filter(i => i.severity !== 'critical').length || 4,
+      totalGuards,
+      activeGuards,
+      offDutyGuards,
+      activePatrols: mockActivePatrols.value.length,
+      onTrackPatrols: mockActivePatrols.value.filter(p => p.status === 'running').length,
+      delayedPatrols: mockActivePatrols.value.filter(p => p.status === 'delayed').length,
+      completedToday,
+      completionRate: completedToday > 0 ? 100 : 0,
+      completionTrend: '0.0%',
+      missedCount: sitesList.value.reduce((acc, s) => acc + (s.missedCount || 0), 0),
+      overdueCount: sitesList.value.reduce((acc, s) => acc + (s.overdueCount || 0), 0),
+      incidentsCount: recentIncidentsList.value.length,
+      criticalIncidents: recentIncidentsList.value.filter(i => i.severity === 'critical').length,
+      normalIncidents: recentIncidentsList.value.filter(i => i.severity !== 'critical').length,
     };
   }
   const match = sitesList.value.find(s => String(s.id) === String(selectedSiteId.value));
@@ -1753,76 +1757,7 @@ const currentMetrics = computed(() => {
 });
 
 // ── ACTIVE PATROLS STREAM ─────────────────────────────────────────────────────
-const mockActivePatrols = ref([
-  {
-    id: 'pat-101',
-    siteId: 'site-01',
-    siteName: 'Chennai Tech Park',
-    guardName: 'Raj Kumar',
-    routeName: 'Night Perimeter Route',
-    status: 'running',
-    scannedCheckpoints: 4,
-    totalCheckpoints: 8,
-    startedTime: '10:42 PM',
-    lastScanTime: '11:17 PM',
-    nextCheckpoint: 'Tower B Main Gate',
-    lat: 12.9716,
-    lng: 80.2435,
-    battery: '94%',
-    signal: '4G LTE'
-  },
-  {
-    id: 'pat-102',
-    siteId: 'site-02',
-    siteName: 'ABC Retail Mall',
-    guardName: 'Arun Prakash',
-    routeName: 'Basement Parking Inspection',
-    status: 'running',
-    scannedCheckpoints: 7,
-    totalCheckpoints: 10,
-    startedTime: '11:00 PM',
-    lastScanTime: '11:28 PM',
-    nextCheckpoint: 'P2 East Fire Exit',
-    lat: 12.9815,
-    lng: 80.2180,
-    battery: '82%',
-    signal: '5G'
-  },
-  {
-    id: 'pat-103',
-    siteId: 'site-03',
-    siteName: 'Industrial Warehouse Hub',
-    guardName: 'Kumar Swamy',
-    routeName: 'North Storage Fence',
-    status: 'delayed',
-    scannedCheckpoints: 2,
-    totalCheckpoints: 6,
-    startedTime: '10:30 PM',
-    lastScanTime: '11:05 PM',
-    nextCheckpoint: 'Chemical Vault 04',
-    lat: 12.8342,
-    lng: 79.9480,
-    battery: '68%',
-    signal: '3G Weak'
-  },
-  {
-    id: 'pat-104',
-    siteId: 'site-01',
-    siteName: 'Chennai Tech Park',
-    guardName: 'Vijay Anand',
-    routeName: 'Server Room Core Patrol',
-    status: 'running',
-    scannedCheckpoints: 5,
-    totalCheckpoints: 5,
-    startedTime: '11:15 PM',
-    lastScanTime: '11:32 PM',
-    nextCheckpoint: 'Completed',
-    lat: 12.9720,
-    lng: 80.2440,
-    battery: '98%',
-    signal: 'Wi-Fi 6'
-  }
-]);
+const mockActivePatrols = ref([]);
 
 const filteredActivePatrols = computed(() => {
   if (selectedSiteId.value === 'all') return mockActivePatrols.value;
@@ -1831,78 +1766,10 @@ const filteredActivePatrols = computed(() => {
 
 // ── ATTENTION REQUIRED & INCIDENTS ────────────────────────────────────────────
 const attentionItems = computed(() => {
-  const allAlerts = [
-    {
-      id: 'att-1',
-      siteId: 'site-03',
-      siteName: 'Industrial Warehouse Hub',
-      title: '🔴 Guard Kumar - 18 min overdue on North Storage Route',
-      location: 'Chemical Vault 04',
-      timeAgo: '18 min ago',
-      severity: 'critical',
-      type: 'patrol'
-    },
-    {
-      id: 'att-2',
-      siteId: 'site-01',
-      siteName: 'Chennai Tech Park',
-      title: '🟠 Checkpoint CP-17 missed in East Wing',
-      location: 'Server Room 3B',
-      timeAgo: '24 min ago',
-      severity: 'warning',
-      type: 'checkpoint'
-    },
-    {
-      id: 'att-3',
-      siteId: 'site-02',
-      siteName: 'ABC Retail Mall',
-      title: '🔴 Critical SOS Alert Triggered',
-      location: 'P1 Parking Entry',
-      timeAgo: '4 min ago',
-      severity: 'critical',
-      type: 'incident'
-    }
-  ];
-
-  if (selectedSiteId.value === 'all') return allAlerts;
-  return allAlerts.filter(a => String(a.siteId) === String(selectedSiteId.value));
+  return [];
 });
 
-const recentIncidentsList = ref([
-  {
-    id: 'inc-1',
-    siteId: 'site-01',
-    siteName: 'Chennai Tech Park',
-    title: 'Unauthorized Gate Access Attempt',
-    location: 'Tower B Main Gate',
-    reportedBy: 'Raj Kumar',
-    timeAgo: '2 min ago',
-    severity: 'critical',
-    description: 'Vehicle attempted entry without authorized biometric NFC badge. Gate held.'
-  },
-  {
-    id: 'inc-2',
-    siteId: 'site-02',
-    siteName: 'ABC Retail Mall',
-    title: 'Broken CCTV Camera Cable',
-    location: 'Basement Parking Bay 04',
-    reportedBy: 'Arun Prakash',
-    timeAgo: '18 min ago',
-    severity: 'medium',
-    description: 'Camera lens obscured and wire cut near ventilation duct.'
-  },
-  {
-    id: 'inc-3',
-    siteId: 'site-03',
-    siteName: 'Industrial Warehouse Hub',
-    title: 'Perimeter Fence Obstruction Cleared',
-    location: 'North Warehouse Gate',
-    reportedBy: 'Kumar Swamy',
-    timeAgo: '45 min ago',
-    severity: 'low',
-    description: 'Fallen tree branch cleared from secondary patrol pathway.'
-  }
-]);
+const recentIncidentsList = ref([]);
 
 const filteredRecentIncidents = computed(() => {
   if (selectedSiteId.value === 'all') return recentIncidentsList.value;
@@ -1924,16 +1791,8 @@ const handleAttentionClick = (item) => {
 };
 
 // ── LEADERBOARDS ──────────────────────────────────────────────────────────────
-const topGuards = [
-  { rank: 1, name: 'Raj Kumar', patrols: 18, completion: '100%' },
-  { rank: 2, name: 'Arun Prakash', patrols: 16, completion: '98.2%' },
-  { rank: 3, name: 'Vijay Anand', patrols: 15, completion: '96.0%' }
-];
-
-const flagGuards = [
-  { name: 'Kumar Swamy', missed: 3 },
-  { name: 'Suresh Raina', missed: 2 }
-];
+const topGuards = [];
+const flagGuards = [];
 
 // ── GOOGLE MAP INTEGRATION ────────────────────────────────────────────────────
 const dashboardMapRef = ref(null);

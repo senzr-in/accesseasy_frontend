@@ -419,92 +419,11 @@ export default {
       doorCounts: { total: 0, assigned: 0, unassigned: 0 },
       controllerCounts: { total: 0, connected: 0, waiting: 0 },
       accessLevelCounts: { total: 0, active: 0, inactive: 0 },
-      criticalAlerts: 0, // Mocked for now
+      criticalAlerts: 0,
       isQuickActionsExpanded: true, // Quick Actions collapsed by default
 
-      // Mocked Data for AI Events
-      aiEvents: [
-        {
-          type: "Tailgating",
-          camera: "Main Entrance Cam",
-          location: "Hyderabad Branch",
-          description: "Tailgating detected at Main Entrance",
-          time: "2 mins ago",
-          severity: "high",
-          snapshot: "https://via.placeholder.com/150?text=Tailgating",
-        },
-        {
-          type: "Unrecognized Person",
-          camera: "Server Room Cam",
-          location: "Bangalore Branch",
-          description: "Unknown person in Server Room corridor",
-          time: "15 mins ago",
-          severity: "medium",
-          snapshot: "https://via.placeholder.com/150?text=Unknown",
-        },
-        {
-          type: "Crowd Density",
-          camera: "Lobby Cam",
-          location: "Hyderabad Branch",
-          description: "High crowd density in Lobby Area",
-          time: "1 hour ago",
-          severity: "low",
-          snapshot: "https://via.placeholder.com/150?text=Crowd",
-        },
-        {
-          type: "Motion Detected",
-          camera: "NewTenant Camera 1",
-          location: "Kukatpally Branch", // Assuming the second branch is Kukatpally based on user request "kku"
-          description: "Motion detected in restricted area",
-          time: "Just now",
-          severity: "high",
-          snapshot: "https://via.placeholder.com/150?text=Motion",
-        },
-      ],
-
-      // Mocked Data for Access Logs
-      recentAccessLogs: [
-        {
-          user: "John Doe",
-          door: "Main Entrance",
-          branch: "Hyderabad Branch",
-          time: "10:45 AM",
-          status: "Granted",
-          accessMethod: "RFID Card",
-        },
-        {
-          user: "Jane Smith",
-          door: "Server Room",
-          branch: "Bangalore Branch",
-          time: "10:42 AM",
-          status: "Denied",
-          accessMethod: "Face ID",
-        },
-        {
-          user: "Mike Ross",
-          door: "Back Gate",
-          branch: "Hyderabad Branch",
-          time: "10:30 AM",
-          status: "Granted",
-          accessMethod: "QR Code",
-        },
-        {
-          user: "Rachel Zane",
-          door: "Office Lobby",
-          branch: "Bangalore Branch",
-          time: "10:15 AM",
-          status: "Granted",
-          accessMethod: "Mobile NFC",
-        },
-        {
-          user: "Harvey Specter",
-          door: "Executive Suite",
-          branch: "Hyderabad Branch",
-          time: "09:55 AM",
-          status: "Granted",
-          accessMethod: "Fingerprint",
-        },
-      ],
+      aiEvents: [],
+      recentAccessLogs: [],
     };
   },
   computed: {
@@ -549,9 +468,6 @@ export default {
       const branch = this.branches.find((b) => b.id === this.selectedBranch);
       if (!branch) return this.aiEvents;
 
-      // Filter events that match the branch name
-      // Note: This relies on the mock data having 'location' matching the branch name
-      // In a real app, you'd filter by branch ID
       return this.aiEvents.filter(
         (event) => event.location === branch.locationName
       );
@@ -568,11 +484,6 @@ export default {
     await this.fetchLocations();
     await this.fetchBranches();
     await this.fetchDashboardData();
-
-    // Simulate real-time updates for AI events (optional, just for effect)
-    setInterval(() => {
-      this.simulateNewEvent();
-    }, 30000);
   },
   methods: {
     formatShortDate(date) {

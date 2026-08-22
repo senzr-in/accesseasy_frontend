@@ -383,35 +383,41 @@ const routes = [
         path: "settings/subscription",
         name: "Subscription",
         component: () => import("@/pages/settings/subscription/SubscriptionPage.vue"),
-        meta: { roles: ["Admin"] }
+        meta: { roles: ["Admin", "Manager"] }
       },
-      // ─── Escalation (Pro+) ───────────────────────────────────────────────
+      {
+        path: "settings/plans",
+        name: "PatrolPlans",
+        component: () => import("@/pages/settings/plans/plans.vue"),
+        meta: { roles: ["Admin", "Manager"] }
+      },
+      // ─── Escalation Policies ─────────────────────────────────────────────
       {
         path: "settings/escalation",
         name: "EscalationPolicies",
         component: () => import("@/pages/settings/escalation/EscalationPolicies.vue"),
-        meta: { roles: ["Admin", "Manager"], feature: "incident.escalation" }
+        meta: { roles: ["Admin", "Manager"] }
       },
-      // ─── Device Management (Pro+) ────────────────────────────────────────
+      // ─── Device Management ────────────────────────────────────────────────
       {
         path: "settings/patrol-devices",
         name: "PatrolDevices",
         component: () => import("@/pages/settings/devices/DeviceDashboard.vue"),
-        meta: { roles: ["Admin", "Manager"], feature: "ops.operations_center" }
+        meta: { roles: ["Admin", "Manager"] }
       },
-      // ─── Shifts (Pro+) ───────────────────────────────────────────────────
+      // ─── Shifts ───────────────────────────────────────────────────────────
       {
         path: "settings/patrol-shifts",
         name: "PatrolShifts",
         component: () => import("@/pages/settings/shifts/ShiftScheduler.vue"),
-        meta: { roles: ["Admin", "Manager"], feature: "attendance.shift_compliance" }
+        meta: { roles: ["Admin", "Manager"] }
       },
-      // ─── Audit Log (Pro+) ────────────────────────────────────────────────
+      // ─── Audit Log ────────────────────────────────────────────────────────
       {
         path: "settings/audit-log",
         name: "AuditLog",
         component: () => import("@/pages/settings/AuditLog.vue"),
-        meta: { roles: ["Admin"], feature: "ops.audit_log" }
+        meta: { roles: ["Admin"] }
       }
     ]
   },

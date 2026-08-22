@@ -1,0 +1,1 @@
+import{W as t}from"./index-Cy2lO09W.js";const s={__name:"FeatureGate",props:{feature:{type:String,default:""},showLockedBadge:{type:Boolean,default:!1},lockedLabel:{type:String,default:""}},setup(a){return(e,r)=>t(e.$slots,"default")}};export{s as _};

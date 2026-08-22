@@ -464,94 +464,11 @@
             </div>
           </div>
 
-          <!-- Timeline Container (Mock Data) -->
-          <div class="relative pl-6 space-y-8">
-            <!-- Connecting Line -->
-            <div class="absolute left-[39px] top-4 bottom-4 w-0.5 bg-slate-100 dark:bg-zinc-800 rounded-full" />
-
-            <!-- Scanned Checkpoint 1 -->
-            <div class="relative flex gap-6 items-start group">
-              <div class="relative z-10 w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20 ring-4 ring-white dark:ring-zinc-950 shrink-0 transform transition-transform group-hover:scale-110">
-                <Check class="w-5 h-5 text-white" />
-              </div>
-              <div class="flex-1 bg-slate-50 dark:bg-slate-900/50 dark:hover:bg-zinc-800/50 rounded-2xl p-4 border border-slate-100 dark:border-zinc-800/80 backdrop-blur-sm transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 group-hover:border-emerald-200 dark:group-hover:border-emerald-500/30">
-                <div class="flex justify-between items-start">
-                  <div>
-                    <h3 class="text-sm font-bold text-slate-900 dark:text-white">
-                      Main Lobby Desk
-                    </h3>
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1 font-medium">
-                      <MapPin class="w-3 h-3" /> NFC-001 • Checkpoint 1
-                    </p>
-                  </div>
-                  <span class="text-[11px] font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 px-2 py-1 rounded-md">
-                    10:00 AM
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Scanned Checkpoint 2 -->
-            <div class="relative flex gap-6 items-start group">
-              <div class="relative z-10 w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-500/20 ring-4 ring-white dark:ring-zinc-950 shrink-0 transform transition-transform group-hover:scale-110">
-                <Check class="w-5 h-5 text-white" />
-              </div>
-              <div class="flex-1 bg-slate-50 dark:bg-slate-900/50 dark:hover:bg-zinc-800/50 rounded-2xl p-4 border border-slate-100 dark:border-zinc-800/80 backdrop-blur-sm transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 group-hover:border-emerald-200 dark:group-hover:border-emerald-500/30">
-                <div class="flex justify-between items-start">
-                  <div>
-                    <h3 class="text-sm font-bold text-slate-900 dark:text-white">
-                      Server Room Corridor
-                    </h3>
-                    <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1 font-medium">
-                      <MapPin class="w-3 h-3" /> QR-042 • Checkpoint 2
-                    </p>
-                  </div>
-                  <span class="text-[11px] font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 px-2 py-1 rounded-md">
-                    10:15 AM
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Missed Checkpoint -->
-            <div class="relative flex gap-6 items-start group">
-              <div class="relative z-10 w-10 h-10 rounded-xl bg-gradient-to-br from-rose-400 to-rose-600 flex items-center justify-center shadow-lg shadow-rose-500/20 ring-4 ring-white dark:ring-zinc-950 shrink-0 transform transition-transform group-hover:scale-110">
-                <X class="w-5 h-5 text-white" />
-              </div>
-              <div class="flex-1 bg-rose-50/50 dark:bg-rose-500/5 rounded-2xl p-4 border border-rose-100 dark:border-rose-500/20 backdrop-blur-sm group-hover:border-rose-300 dark:group-hover:border-rose-500/40 transition-colors">
-                <div class="flex justify-between items-start">
-                  <div>
-                    <h3 class="text-sm font-bold text-rose-900 dark:text-rose-100">
-                      South Parking Exit
-                    </h3>
-                    <p class="text-[11px] text-rose-500 mt-1 flex items-center gap-1 font-medium">
-                      <AlertCircle class="w-3 h-3" /> Missed Checkpoint
-                    </p>
-                  </div>
-                  <span class="text-[9px] font-black text-rose-600 dark:text-rose-400 bg-rose-100 dark:bg-rose-500/20 border border-rose-200 dark:border-rose-500/30 px-2 py-1 rounded-md uppercase tracking-widest">
-                    Expected 10:30 AM
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Pending Checkpoint -->
-            <div class="relative flex gap-6 items-start group">
-              <div class="relative z-10 w-10 h-10 rounded-xl bg-slate-100 dark:hover:bg-zinc-800 border border-slate-200 dark:border-zinc-800 flex items-center justify-center ring-4 ring-white dark:ring-zinc-950 shrink-0">
-                <Clock class="w-4 h-4 text-slate-400" />
-              </div>
-              <div class="flex-1 border-2 border-dashed border-slate-200 dark:border-zinc-800 bg-white dark:bg-slate-900/50 dark:bg-zinc-950/50 rounded-2xl p-4 opacity-60">
-                <div class="flex justify-between items-start">
-                  <div>
-                    <h3 class="text-sm font-bold text-slate-600 dark:text-zinc-400">
-                      North Gate
-                    </h3>
-                    <p class="text-[11px] text-slate-400 mt-1 font-medium">
-                      Pending Scan
-                    </p>
-                  </div>
-                </div>
-              </div>
+          <!-- Timeline Container -->
+          <div class="relative pl-6 space-y-4">
+            <div class="text-center py-8 text-slate-500 dark:text-slate-400 text-xs">
+              <Clock class="w-8 h-8 mx-auto mb-2 text-slate-300 dark:text-zinc-600" />
+              <p class="font-medium">No live checkpoints scanned yet for this active route.</p>
             </div>
           </div>
         </div>
@@ -590,8 +507,6 @@ const viewPatrolMap = (guard) => {
 };
 
 const openMessageModal = (guard) => {
-  console.log('Opening message modal for guard:', guard);
-  alert('Click handler fired! If you see this, the button works but the modal failed to show.');
   selectedGuardForMessage.value = guard;
   showMessageModal.value = true;
 };

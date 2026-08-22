@@ -85,7 +85,7 @@ const settingsCards = [
     icon: Volume2,
     iconBg: 'bg-rose-50 dark:bg-rose-500/10',
     iconColor: 'text-rose-600',
-    tag: 'Pro Feature',
+    tag: 'Escalation Engine',
     tagClass: 'bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300'
   },
   {
@@ -105,7 +105,7 @@ const settingsCards = [
     icon: Calendar,
     iconBg: 'bg-emerald-50 dark:bg-emerald-500/10',
     iconColor: 'text-emerald-600',
-    tag: 'Pro Feature',
+    tag: 'Shift Matrix',
     tagClass: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300'
   },
   {

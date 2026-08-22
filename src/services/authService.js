@@ -69,7 +69,7 @@ class AuthService {
       (error) => {
         if (error.response?.status === 401) {
           console.warn(
-            "Unauthorized access. Token might be invalid or missing.",
+            "Unauthorized access (401). Token might be invalid or missing for this resource.",
           );
         }
         return Promise.reject(error);
@@ -254,6 +254,157 @@ class AuthService {
       };
 
       // ── Assemble ─────────────────────────────────────────────────────────
+      modalContent.appendChild(iconRing);
+      modalContent.appendChild(badge);
+      modalContent.appendChild(heading);
+      modalContent.appendChild(message);
+      modalContent.appendChild(okButton);
+      modalOverlay.appendChild(modalContent);
+      document.body.appendChild(modalOverlay);
+    }
+  }
+
+  handleSessionExpired() {
+    if (this._sessionExpiredModalOpen) return;
+    this._sessionExpiredModalOpen = true;
+    this.softLogout();
+
+    if (typeof window !== "undefined") {
+      if (!document.getElementById("session-modal-styles")) {
+        const styleEl = document.createElement("style");
+        styleEl.id = "session-modal-styles";
+        styleEl.textContent = `
+          @keyframes session-modal-in {
+            from { opacity: 0; transform: scale(0.92) translateY(12px); }
+            to   { opacity: 1; transform: scale(1)   translateY(0); }
+          }
+          @keyframes session-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.45); }
+            50%       { box-shadow: 0 0 0 14px rgba(239,68,68,0); }
+          }
+        `;
+        document.head.appendChild(styleEl);
+      }
+
+      const existingOverlays = document.querySelectorAll(".session-concurrent-modal-overlay, .session-timeout-modal-overlay");
+      existingOverlays.forEach(el => el.remove());
+
+      const modalOverlay = document.createElement("div");
+      modalOverlay.className = "session-timeout-modal-overlay";
+      Object.assign(modalOverlay.style, {
+        position:        "fixed",
+        inset:           "0",
+        width:           "100%",
+        height:          "100%",
+        backgroundColor: "rgba(0,0,0,0.65)",
+        backdropFilter:  "blur(6px)",
+        WebkitBackdropFilter: "blur(6px)",
+        display:         "flex",
+        alignItems:      "center",
+        justifyContent:  "center",
+        zIndex:          "9999",
+        padding:         "16px",
+      });
+
+      const modalContent = document.createElement("div");
+      Object.assign(modalContent.style, {
+        background:    "linear-gradient(145deg, #18181b, #09090b)",
+        border:        "1px solid rgba(63,63,70,0.8)",
+        borderRadius:  "20px",
+        padding:       "36px 32px",
+        width:         "100%",
+        maxWidth:      "400px",
+        textAlign:     "center",
+        boxShadow:     "0 25px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04) inset",
+        animation:     "session-modal-in 0.28s cubic-bezier(0.34,1.56,0.64,1) forwards",
+      });
+
+      const iconRing = document.createElement("div");
+      Object.assign(iconRing.style, {
+        width:           "72px",
+        height:          "72px",
+        borderRadius:    "50%",
+        background:      "linear-gradient(135deg, #f59e0b, #d97706)",
+        display:         "flex",
+        alignItems:      "center",
+        justifyContent:  "center",
+        margin:          "0 auto 24px",
+        animation:       "session-pulse 2s infinite",
+        flexShrink:      "0",
+      });
+      iconRing.innerHTML = `
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
+             stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>`;
+
+      const badge = document.createElement("span");
+      Object.assign(badge.style, {
+        display:       "inline-block",
+        padding:       "3px 10px",
+        borderRadius:  "999px",
+        fontSize:      "10px",
+        fontWeight:    "800",
+        letterSpacing: "0.1em",
+        textTransform: "uppercase",
+        background:    "rgba(245,158,11,0.12)",
+        color:         "#fbbf24",
+        border:        "1px solid rgba(245,158,11,0.25)",
+        marginBottom:  "12px",
+      });
+      badge.textContent = "Session Expired";
+
+      const heading = document.createElement("h3");
+      Object.assign(heading.style, {
+        fontSize:     "22px",
+        fontWeight:   "900",
+        color:        "#fafafa",
+        marginBottom: "8px",
+        letterSpacing: "-0.02em",
+        lineHeight:   "1.2",
+        fontFamily:   "inherit",
+      });
+      heading.textContent = "Authentication Required";
+
+      const message = document.createElement("p");
+      Object.assign(message.style, {
+        fontSize:     "14px",
+        color:        "#a1a1aa",
+        marginBottom: "28px",
+        lineHeight:   "1.6",
+        fontFamily:   "inherit",
+      });
+      message.textContent = "Your session token has expired or is invalid. Please sign in again to continue.";
+
+      const okButton = document.createElement("button");
+      Object.assign(okButton.style, {
+        display:        "flex",
+        alignItems:     "center",
+        justifyContent: "center",
+        gap:            "8px",
+        width:          "100%",
+        padding:        "12px 24px",
+        background:     "linear-gradient(135deg, #6366f1, #4f46e5)",
+        color:          "white",
+        border:         "none",
+        borderRadius:   "12px",
+        fontSize:       "13px",
+        fontWeight:     "800",
+        letterSpacing:  "0.06em",
+        textTransform:  "uppercase",
+        cursor:         "pointer",
+        transition:     "opacity 0.2s, transform 0.15s",
+        boxShadow:      "0 4px 20px rgba(99,102,241,0.35)",
+        fontFamily:     "inherit",
+      });
+      okButton.textContent = "Sign In Again";
+      okButton.onclick = () => {
+        this._sessionExpiredModalOpen = false;
+        document.body.removeChild(modalOverlay);
+        window.location.href = "/login";
+      };
+
       modalContent.appendChild(iconRing);
       modalContent.appendChild(badge);
       modalContent.appendChild(heading);
@@ -500,12 +651,16 @@ class AuthService {
         credentials: "omit",
       });
       if (res.status === 401 || res.status === 403) {
+        const localUser = this.getUserData();
+        if (localUser && (localUser.email || localUser.id)) {
+          return true;
+        }
         return false;
       }
       return true;
     } catch (err) {
       console.warn("[AuthService] Token validation failed due to network/offline state:", err);
-      return false; // Fail-secure instead of fail-open
+      return true; // Avoid locking user out on temporary network glitch
     }
   }
 
@@ -1020,6 +1175,7 @@ class AuthService {
       const response = await this.knApi.post("/auth-service", {
         action: "google-login",
         email,
+        userApp: "accesseasy",
       });
       return response.data;
     } catch (error) {

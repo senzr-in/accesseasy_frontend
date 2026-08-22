@@ -36,94 +36,48 @@
                 v-for="meter in store.usageMeters"
                 :key="meter.resource"
                 class="um-meter"
-                :class="{ 'um-meter--warn': meter.nearLimit, 'um-meter--full': meter.atLimit }"
+                :class="{ 'um-meter--warn': meter.resource === 'sites' && meter.nearLimit, 'um-meter--full': meter.resource === 'sites' && meter.atLimit }"
               >
                 <div class="um-meter__row">
                   <span class="um-meter__label">{{ meter.label }}</span>
                   <span class="um-meter__count">
-                    {{ meter.max === Infinity ? '∞' : `${meter.current} / ${meter.max}` }}
+                    {{ meter.isUnlimited || meter.max === Infinity ? `${meter.current} (∞)` : `${meter.current} / ${meter.max}` }}
                   </span>
                 </div>
                 <div class="um-meter__bar">
                   <div
                     class="um-meter__fill"
-                    :style="{ width: `${Math.min(meter.percent, 100)}%` }"
+                    :style="{ width: `${meter.isUnlimited || meter.max === Infinity ? 100 : Math.min(meter.percent || 0, 100)}%` }"
                   />
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Plan Comparison Table -->
-          <div class="um-plans">
-            <!-- Normal -->
-            <div class="um-plan" :class="{ 'um-plan--current': store.plan === 'normal' }">
-              <div class="um-plan__badge um-plan__badge--normal">Normal</div>
-              <div class="um-plan__name">Basic Patrol</div>
-              <div class="um-plan__desc">Single-site patrol execution for small teams</div>
-              <ul class="um-plan__list">
-                <li><span class="um-check">✓</span> 1 Site, 3 Zones</li>
-                <li><span class="um-check">✓</span> 5 Guards</li>
-                <li><span class="um-check">✓</span> 30 Checkpoints</li>
-                <li><span class="um-check">✓</span> QR + GPS + Photo</li>
-                <li><span class="um-check">✓</span> Offline patrol</li>
-                <li><span class="um-check">✓</span> Basic incidents</li>
-                <li><span class="um-x">✗</span> Escalation engine</li>
-                <li><span class="um-x">✗</span> Live map</li>
-                <li><span class="um-x">✗</span> NFC / Video</li>
-              </ul>
-              <div v-if="store.plan === 'normal'" class="um-plan__current-label">Current Plan</div>
+          <!-- Plan Showcase Card -->
+          <div class="um-single-plan">
+            <div class="um-single-plan__left">
+              <div class="um-single-plan__tag">⭐ All Patrol Features Included</div>
+              <h3 class="um-single-plan__title">AccessEasy Patrol Platform</h3>
+              <p class="um-single-plan__desc">
+                Everything unlocked: Live GPS tracking, geofence breach alarms, automated escalation chains, patrol scheduling, and command center.
+              </p>
+              <div class="um-single-plan__price">
+                <span class="price-val">₹1,999</span>
+                <span class="price-sub">/ site / month</span>
+              </div>
             </div>
 
-            <!-- Pro -->
-            <div class="um-plan um-plan--pro" :class="{ 'um-plan--current': store.plan === 'pro' }">
-              <div class="um-plan__badge um-plan__badge--pro">⭐ Pro</div>
-              <div class="um-plan__name">Security Operations</div>
-              <div class="um-plan__desc">Multi-site command for professional security teams</div>
-              <ul class="um-plan__list">
-                <li><span class="um-check">✓</span> 10 Sites, 25 Zones/Site</li>
-                <li><span class="um-check">✓</span> 100 Guards</li>
-                <li><span class="um-check">✓</span> 1,000 Checkpoints</li>
-                <li><span class="um-check">✓</span> NFC + Video + Checklists</li>
-                <li><span class="um-check">✓</span> Operations Center + Live Map</li>
-                <li><span class="um-check">✓</span> Escalation engine</li>
-                <li><span class="um-check">✓</span> Full incident workflow</li>
-                <li><span class="um-check">✓</span> Advanced geofencing</li>
-                <li><span class="um-check">✓</span> API + Webhooks</li>
+            <div class="um-single-plan__right">
+              <ul class="um-features-list">
+                <li><span class="um-check">✓</span> All Platform Features Unlocked</li>
+                <li><span class="um-check">✓</span> Scale Sites Seamlessly</li>
+                <li><span class="um-check">✓</span> Unlimited Guards & Checkpoints</li>
+                <li><span class="um-check">✓</span> Live Breadcrumbs & Escalation</li>
               </ul>
-              <button
-                v-if="store.plan === 'normal'"
-                class="um-plan__cta"
-                @click="handleUpgrade('pro')"
-              >
-                Upgrade to Pro →
+              <button class="um-plan__cta" @click="handleNavigateToPlans">
+                Configure Sites & Upgrade →
               </button>
-              <div v-else-if="store.plan === 'pro'" class="um-plan__current-label">Current Plan</div>
-            </div>
-
-            <!-- Custom -->
-            <div class="um-plan" :class="{ 'um-plan--current': store.plan === 'custom' }">
-              <div class="um-plan__badge um-plan__badge--custom">Custom</div>
-              <div class="um-plan__name">Enterprise Platform</div>
-              <div class="um-plan__desc">Built for large agencies, industrial groups and enterprises</div>
-              <ul class="um-plan__list">
-                <li><span class="um-check">✓</span> Custom capacity</li>
-                <li><span class="um-check">✓</span> Multiple clients</li>
-                <li><span class="um-check">✓</span> SSO + Custom roles</li>
-                <li><span class="um-check">✓</span> Custom workflows + SLA</li>
-                <li><span class="um-check">✓</span> CCTV/NVR integrations</li>
-                <li><span class="um-check">✓</span> Dedicated support</li>
-                <li><span class="um-check">✓</span> Custom dashboards</li>
-                <li><span class="um-check">✓</span> Enterprise integrations</li>
-              </ul>
-              <button
-                v-if="store.plan !== 'custom'"
-                class="um-plan__cta um-plan__cta--secondary"
-                @click="handleUpgrade('custom')"
-              >
-                Contact Sales →
-              </button>
-              <div v-else class="um-plan__current-label">Current Plan</div>
             </div>
           </div>
         </div>
@@ -134,6 +88,7 @@
 
 <script setup>
 import { computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { usePlanStore } from '@/stores/usePlanStore';
 import { subscriptionService } from '@/services/subscriptionService';
 
@@ -150,20 +105,19 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['update:modelValue', 'upgrade-requested']);
-
+const router = useRouter();
 const store = usePlanStore();
 
-const planLabel = computed(() => ({
-  normal: '🟢 Normal',
-  pro:    '🔵 Pro',
-  custom: '🟣 Custom',
-}[store.plan] || store.plan));
+const planLabel = computed(() => {
+  if (store.isTrial) return '⚡ 7-Day Free Trial';
+  return '⭐ Full Platform Plan';
+});
 
-async function handleUpgrade(targetPlan) {
-  await subscriptionService.logEvent('plan_upgrade_requested', { target_plan: targetPlan });
-  emit('upgrade-requested', targetPlan);
+async function handleNavigateToPlans() {
+  await subscriptionService.logEvent('plan_upgrade_requested', { target_plan: 'full_platform' });
+  emit('upgrade-requested', 'full_platform');
   emit('update:modelValue', false);
-  // TODO: Navigate to billing page or open external checkout
+  router.push('/dashboard/settings/plans');
 }
 </script>
 
@@ -297,77 +251,68 @@ async function handleUpgrade(targetPlan) {
 .um-meter--warn .um-meter__fill { background: #f59e0b; }
 .um-meter--full .um-meter__fill { background: #ef4444; }
 
-/* Plan cards */
-.um-plans {
+/* Single Plan Showcase */
+.um-single-plan {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(79, 70, 229, 0.12) 100%);
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  border-radius: 16px;
+  padding: 24px;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 24px;
+  align-items: center;
 }
 
 @media (max-width: 700px) {
-  .um-plans { grid-template-columns: 1fr; }
+  .um-single-plan { grid-template-columns: 1fr; }
 }
 
-.um-plan {
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.08);
-  border-radius: 14px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.um-plan--pro {
-  background: rgba(99, 102, 241, 0.06);
-  border-color: rgba(99, 102, 241, 0.3);
-}
-
-.um-plan--current {
-  border-color: rgba(74, 222, 128, 0.3);
-}
-
-.um-plan__badge {
+.um-single-plan__tag {
   display: inline-block;
   font-size: 11px;
   font-weight: 800;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  padding: 2px 8px;
-  border-radius: 5px;
-  align-self: flex-start;
+  color: #818cf8;
+  background: rgba(99, 102, 241, 0.18);
+  padding: 3px 8px;
+  border-radius: 6px;
+  margin-bottom: 8px;
 }
-.um-plan__badge--normal { background: rgba(74,222,128,0.15); color: #4ade80; }
-.um-plan__badge--pro    { background: rgba(99,102,241,0.2);  color: #818cf8; }
-.um-plan__badge--custom { background: rgba(168,85,247,0.15); color: #c084fc; }
 
-.um-plan__name {
-  font-size: 16px;
+.um-single-plan__title {
+  font-size: 20px;
   font-weight: 800;
-  color: #f9fafb;
+  color: #ffffff;
+  margin: 0 0 6px;
 }
 
-.um-plan__desc {
+.um-single-plan__desc {
   font-size: 12px;
-  color: #6b7280;
+  color: #94a3b8;
   line-height: 1.5;
+  margin: 0 0 14px;
 }
 
-.um-plan__list {
-  list-style: none;
-  padding: 0;
-  margin: 8px 0 0;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  flex: 1;
-}
-
-.um-plan__list li {
-  font-size: 12px;
-  color: #d1d5db;
+.um-single-plan__price {
   display: flex;
   align-items: baseline;
+  gap: 6px;
+}
+.price-val { font-size: 28px; font-weight: 900; color: #ffffff; }
+.price-sub { font-size: 12px; color: #64748b; font-weight: 600; }
+
+.um-features-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.um-features-list li {
+  font-size: 12px;
+  color: #cbd5e1;
+  display: flex;
+  align-items: center;
   gap: 6px;
 }
 

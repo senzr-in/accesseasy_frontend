@@ -12,67 +12,7 @@ export const INCIDENT_STAGES = [
 
 class IncidentService {
   getDefaultIncidents() {
-    const today = new Date().toISOString().split('T')[0];
-    return [
-      {
-        id: "inc-101",
-        title: "Perimeter Gate Lock Tampered",
-        category: "Security Breach",
-        priority: "Critical",
-        status: "investigating",
-        site_name: "Chennai Tech Park",
-        zone_name: "Perimeter Fence - North",
-        reported_by: "Kumar S (Guard)",
-        reported_at: `${today}T08:30:00`,
-        acknowledged_at: `${today}T08:35:00`,
-        acknowledged_by: "Supervisor Rajesh",
-        sla_target_hours: 2,
-        description: "Padlock at North Emergency gate found cut and hanging. Barbed wire slightly shifted.",
-        photo_url: "https://images.unsplash.com/photo-1590674899484-d5640e854abe?w=400",
-        action_log: [
-          { status: "reported", user: "Kumar S", time: `${today}T08:30:00`, notes: "Reported during routine patrol round #102." },
-          { status: "acknowledged", user: "Supervisor Rajesh", time: `${today}T08:35:00`, notes: "Dispatched backup response team to perimeter gate." },
-          { status: "investigating", user: "Supervisor Rajesh", time: `${today}T08:42:00`, notes: "Inspecting CCTV coverage on Sector 4 camera." }
-        ]
-      },
-      {
-        id: "inc-102",
-        title: "Water Leakage Near Server Room",
-        category: "Facility / Safety",
-        priority: "High",
-        status: "action_taken",
-        site_name: "Chennai Tech Park",
-        zone_name: "Tower A Core",
-        reported_by: "Suresh M (Guard)",
-        reported_at: `${today}T07:15:00`,
-        acknowledged_at: `${today}T07:20:00`,
-        acknowledged_by: "Admin",
-        sla_target_hours: 4,
-        description: "Ceiling AC duct condensation dripping near electrical cabinet.",
-        action_log: [
-          { status: "reported", user: "Suresh M", time: `${today}T07:15:00`, notes: "Logged via mobile checklist." },
-          { status: "acknowledged", user: "Admin", time: `${today}T07:20:00`, notes: "Notified Facilities engineering." },
-          { status: "action_taken", user: "Facilities Team", time: `${today}T08:10:00`, notes: "Drain line cleared, catch pan installed." }
-        ]
-      },
-      {
-        id: "inc-103",
-        title: "Unidentified Vehicle in Loading Bay",
-        category: "Suspicious Activity",
-        priority: "Medium",
-        status: "resolved",
-        site_name: "ABC Retail Mall",
-        zone_name: "Loading Dock",
-        reported_by: "Vignesh P",
-        reported_at: `${today}T06:00:00`,
-        sla_target_hours: 6,
-        description: "White commercial van parked without delivery permit.",
-        action_log: [
-          { status: "reported", user: "Vignesh P", time: `${today}T06:00:00`, notes: "Found parked during morning intake." },
-          { status: "resolved", user: "Supervisor", time: `${today}T06:45:00`, notes: "Driver identified as vendor technician with valid pass." }
-        ]
-      }
-    ];
+    return [];
   }
 
   /**
@@ -81,13 +21,13 @@ class IncidentService {
   async fetchIncidents(siteId = null) {
     try {
       const tenantId = authService.getTenantId();
-      if (!tenantId) return this.getDefaultIncidents();
+      if (!tenantId) return [];
 
       try {
         let endpoint = `/items/patrol_alerts?filter[tenant][_eq]=${tenantId}&sort=-date_created`;
         if (siteId) endpoint += `&filter[site][_eq]=${siteId}`;
         const res = await authService.protectedApi.get(endpoint);
-        if (res.data.data && res.data.data.length > 0) return res.data.data;
+        if (res.data?.data) return res.data.data;
       } catch (e) {}
 
       const stored = localStorage.getItem(`accesseasy_incidents_${tenantId}`);
@@ -99,10 +39,10 @@ class IncidentService {
         } catch (e) {}
       }
 
-      return this.getDefaultIncidents();
+      return [];
     } catch (error) {
       console.error("Error fetching incidents:", error);
-      return this.getDefaultIncidents();
+      return [];
     }
   }
 
