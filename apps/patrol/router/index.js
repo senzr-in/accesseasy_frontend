@@ -3,8 +3,7 @@ import { authService } from "@/services/authService";
 import { usePlanStore } from "@/stores/usePlanStore";
 
 // Landing (Eagerly loaded for instant initial render)
-import AegisLanding from "@/pages/landing/AegisLanding.vue";
-import Landing3D from "@/pages/landing/Landing3D.vue";
+import LandingPage2 from "@/pages/landing/LandingPage2.vue";
 
 // Auth (Lazy Loaded)
 const Login = () => import("@/components/loginAuthentication/login.vue");
@@ -56,7 +55,7 @@ const routes = [
   {
     path: "/",
     name: "Landing",
-    component: AegisLanding,
+    component: LandingPage2,
     beforeEnter: (to, from, next) => {
       // If already authenticated, skip the landing page and go to the appropriate home
       if (authService.isAuthenticated()) {
@@ -65,6 +64,23 @@ const routes = [
         next();
       }
     },
+  },
+  {
+    path: "/landing",
+    name: "LandingPage",
+    component: LandingPage2,
+  },
+  {
+    path: "/landing-2",
+    redirect: "/",
+  },
+  {
+    path: "/landing-v2",
+    redirect: "/",
+  },
+  {
+    path: "/landing-3d",
+    redirect: "/",
   },
   {
     path: "/dealer-dashboard",
