@@ -1,29 +1,38 @@
-//serverice/attendanceCycle.vue
-export const getAttendanceCycles = async (tenantId, token) => {
+import { authService } from "@/services/authService";
+import { currentUserTenant } from "@/utils/currentUserTenant";
+
+//service/attendanceCycle.js
+export const getAttendanceCycles = async (providedTenantId, providedToken) => {
+  const tenantId = providedTenantId || currentUserTenant.getTenantId() || authService.getTenantId();
+  const token = providedToken || authService.getToken();
+
   const queryParams = [
     "fields[]=endDate",
     "fields[]=includeWeekoffs",
     "fields[]=startDate",
-
     "fields[]=fixedCycle",
     "fields[]=startMonth",
     "fields[]=endMonth",
     "fields[]=includeHolidays",
-
+    "fields[]=status",
     "fields[]=id",
-    `filter[tenant][tenantId][_eq]=${tenantId}`,
+    `filter[tenant][_eq]=${tenantId}`,
     "filter[status][_neq]=archived",
   ].join("&");
 
   try {
+    const headers = {
+      "Content-Type": "application/json",
+    };
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
     const response = await fetch(
       `${import.meta.env.VITE_API_URL}/items/attendanceCycle?${queryParams}`,
       {
         method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+        headers,
       },
     );
 

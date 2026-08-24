@@ -46,7 +46,7 @@ class PaymentService {
     const token =
       authService.getToken() ||
       localStorage.getItem("directus_access_token") ||
-      "p2pJHhZAjca6jQea0RbPVwNWRyrJG29X";
+      "";
 
     // Primary attempt: via authService.knApi
     try {
@@ -222,13 +222,18 @@ class PaymentService {
       };
 
       try {
-        await fetch(`${import.meta.env.VITE_API_URL}/items/tenant/${tenantId}`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ plan: JSON.stringify(planData) }),
+        await authService.protectedApi.post("/items/plans", {
+          tenant: tenantId,
+          name: "AccessEasy Patrol 7-Day Free Trial",
+          tier: "trial",
+          billing_period: "trial",
+          price: 0,
+          currency: "INR",
+          max_sites: 1,
+          max_checkpoints: 25,
+          max_patrols_per_day: 50,
+          currentplan: planData,
+          date_created: new Date().toISOString()
         });
       } catch (_) {}
 

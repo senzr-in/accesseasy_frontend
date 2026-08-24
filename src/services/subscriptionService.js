@@ -111,11 +111,23 @@ class SubscriptionService {
       return defaultAnon;
     }
 
+    // Do not attempt cloud plan lookup unless a valid JWT token is available
+    if (!authService.getToken()) {
+      return {
+        plan_key: "ez_patrol_platform",
+        plan_name: "AccessEasy Patrol 7-Day Free Trial",
+        plan: "trial",
+        status: "trial",
+        is_trial: true,
+        sites: 1,
+      };
+    }
+
     try {
       // 1. Query Directus `plans` collection
       try {
         const res = await authService.protectedApi.get(
-          `/items/plans?filter[tenant][tenantId][_eq]=${tenantId}&sort=-id&limit=5`
+          `/items/plans?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&sort=-id&limit=5`
         );
         const rows = res.data?.data || [];
 
@@ -262,7 +274,10 @@ class SubscriptionService {
 
     try {
       const tenantId = currentUserTenant.getTenantId() || authService.getTenantId();
-      if (!tenantId) return { site_count: 0, zone_count: 0, guard_count: 0 };
+      // Guard: don't query APIs without a token (e.g. during login flow)
+      if (!tenantId || !authService.getToken()) {
+        return { site_count: 0, zone_count: 0, guard_count: 0, patrol_route_count: 0, checkpoint_count: 0 };
+      }
 
       let siteCount = 0;
       let zoneCount = 0;
@@ -270,10 +285,10 @@ class SubscriptionService {
       let checkpointCount = 0;
       let patrolRouteCount = 0;
 
-      // Sites count
+      // Sites (Location Management) count
       try {
         const res = await authService.protectedApi.get(
-          `/items/sites?filter[tenant][_eq]=${tenantId}&fields[]=id&limit=500`
+          `/items/locationManagement?filter[tenant][_eq]=${tenantId}&fields[]=id&limit=500`
         );
         if (res.data?.data) siteCount = res.data.data.length;
       } catch (_) {
@@ -291,20 +306,21 @@ class SubscriptionService {
         if (res.data?.data) checkpointCount = res.data.data.length;
       } catch (_) {}
 
-      // Patrol routes / templates count
+      // Patrol routes / groups count
       try {
         const res = await authService.protectedApi.get(
-          `/items/patrol_templates?filter[tenant][_eq]=${tenantId}&fields[]=id&limit=500`
+          `/items/checkpoint_groups?filter[tenant][_eq]=${tenantId}&fields[]=id&limit=500`
         );
         if (res.data?.data) patrolRouteCount = res.data.data.length;
       } catch (_) {}
 
-      // Guards count
+      // Guards count — use aggregate to avoid requiring Admin-level /users access
       try {
         const res = await authService.protectedApi.get(
-          `/users?filter[tenant][_eq]=${tenantId}&fields[]=id&limit=500`
+          `/users?filter[tenant][_eq]=${tenantId}&aggregate[count]=id&groupBy[]=tenant`
         );
-        if (res.data?.data) guardCount = res.data.data.length;
+        const row = res.data?.data?.[0];
+        guardCount = row ? Number(row.count?.id || 0) : 0;
       } catch (_) {}
 
       const usage = {
@@ -328,24 +344,24 @@ class SubscriptionService {
    * Checks whether creating a new resource exceeds the plan limit.
    */
   async checkLimit(resource) {
+    if (resource !== "sites") {
+      return { allowed: true, current: 0, max: Infinity, upgradeMessage: "", plan: "Active" };
+    }
+
     const [limits, usage, sub] = await Promise.all([
       this.getLimits(),
       this.getUsage(),
       this.getSubscription(),
     ]);
 
-    if (resource === "sites") {
-      const current = usage.site_count ?? 0;
-      const max = limits.sites ?? 1;
-      const allowed = current < max;
-      const upgradeMessage = !allowed
-        ? `You've reached your ${max}-site limit (${sub.is_trial ? "7-Day Free Trial" : "Active Plan"}). Add more sites at ₹1,999/site to expand.`
-        : "";
+    const current = usage.site_count ?? 0;
+    const max = limits.sites ?? 1;
+    const allowed = current < max;
+    const upgradeMessage = !allowed
+      ? `You've reached your ${max}-site limit (${sub.is_trial ? "7-Day Free Trial" : "Active Plan"}). Add more sites at ₹1,999/site to expand.`
+      : "";
 
-      return { allowed, current, max, upgradeMessage, plan: sub.plan_name, isTrial: sub.is_trial };
-    }
-
-    return { allowed: true, current: 0, max: Infinity, upgradeMessage: "", plan: sub.plan_name };
+    return { allowed, current, max, upgradeMessage, plan: sub.plan_name, isTrial: sub.is_trial };
   }
 
   /**

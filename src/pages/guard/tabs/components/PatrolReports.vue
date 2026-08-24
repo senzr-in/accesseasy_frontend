@@ -632,9 +632,9 @@ const submitIncident = async () => {
       // uploadedFileIds.push(uploadData.data.id);
     }
 
-    // POST to backend (graceful failure if collection not yet set up)
+    // POST to backend patrol_alerts collection
     try {
-      await fetch(`${apiUrl}/items/incident_reports`, {
+      await fetch(`${apiUrl}/items/patrol_alerts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ ...incident.value, reportId: newId, attachments: uploadedFileIds })

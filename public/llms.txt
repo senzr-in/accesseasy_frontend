@@ -1,0 +1,29 @@
+# AccessEasy Patrol
+
+> Real-Time Security Guard Tour, NFC/QR Checkpoint Verification, and Security Operations Center (SOC) Platform.
+
+## Overview
+AccessEasy Patrol is a cloud-based security workforce and guard tour management platform designed for security agencies, property managers, commercial tech parks, residential societies, and industrial facilities. It bridges ground security guards with central SOC supervisors using smartphone-based NFC/QR scanning, 4-tier sub-meter GPS tracking, and instant panic dispatch.
+
+## Core Capabilities
+- **Anti-Tamper Checkpoint Verification**: Cryptographic NFC (Type 4 NTAG) and dynamic rolling QR code scanning to eliminate ghost patrols and fake check-ins.
+- **Offline-First SQLite Synchronization**: Full operational functionality in basements, elevator shafts, and remote perimeter sectors without active cellular/Wi-Fi connection. Scans and photos queue locally with immutable hardware timestamps and sync automatically upon reconnection.
+- **Sub-Meter GPS & Kalman Geofencing**: 4-tier hybrid location positioning (GNSS + Cell-Tower + Wi-Fi SSID + BLE Beacon) with perimeter breach alerts in < 3.2 seconds.
+- **1-Tap SOS Panic Dispatch**: Instant supervisor alerts with live siren notifications, GPS map coordinates, and nearest officer dispatch routing.
+- **Automated Handover Rosters & Shift Management**: Digital guard shift scheduling, clock-in biometrics, handover equipment logs, and PDF compliance reports for facility audits.
+
+## Official Pricing Model
+- **Platform License**: Flat ₹1,999 per licensed site per month (+ GST).
+- **Inclusions**: 100% features unlocked with zero tier gating. Includes Unlimited Guards, Unlimited Checkpoints, Live GPS Tracking, Offline Sync, SOS Dispatch, and SOC Command Dashboard.
+- **Trial**: 7-Day Free Trial on 1 licensed site with zero credit card requirement.
+- **Enterprise Plan**: Custom high-volume rollouts with dedicated Account Managers, 99.99% SLAs, custom REST/MQTT APIs, and facial biometric verification.
+
+## Technology Stack
+- Native Guard Mobile Apps (Android & iOS with offline SQLite engine)
+- Web SOC Command Dashboard (Vue 3, Three.js 3D Campus telemetry, Leaflet GPS maps, Directus backend API, MQTT realtime telemetry)
+
+## Official URLs
+- Main Platform: https://patrol.accesseasy.in/
+- Features: https://patrol.accesseasy.in/#features
+- Pricing: https://patrol.accesseasy.in/#pricing
+- FAQ: https://patrol.accesseasy.in/#faq

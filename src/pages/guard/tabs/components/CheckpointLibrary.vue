@@ -23,9 +23,17 @@
                 :key="zone.id"
                 :value="zone.id"
               >
-                {{ zone.zoneName }}
+                {{ zone.zoneName || zone.name }}
               </option>
             </select>
+            <button
+              type="button"
+              @click="showAddZoneModal = true"
+              class="h-8 px-2.5 rounded-lg border border-dashed border-indigo-300 dark:border-indigo-700 bg-indigo-50/50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer"
+            >
+              <Plus class="w-3 h-3" />
+              <span>New Zone</span>
+            </button>
           </div>
         </div>
 
@@ -186,9 +194,19 @@
 
             <!-- Zone Assignment -->
             <div>
-              <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Zone Assignment *</label>
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Zone Assignment *</label>
+                <button
+                  type="button"
+                  @click="showAddZoneModal = true"
+                  class="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                >
+                  + New Zone
+                </button>
+              </div>
               <select
                 v-model="editingCp.zone"
+                @change="handleCpZoneChange"
                 class="ae-input w-full pr-8"
               >
                 <option :value="null" disabled>Select target zone...</option>
@@ -197,8 +215,9 @@
                   :key="zone.id"
                   :value="zone.id"
                 >
-                  {{ zone.zoneName }}
+                  {{ zone.zoneName || zone.name }}
                 </option>
+                <option value="__NEW_ZONE__" class="font-bold text-indigo-600">+ Create New Zone...</option>
               </select>
             </div>
 
@@ -576,12 +595,22 @@ const deleteCheckpoint = async () => {
   }
 };
 
+const handleCpZoneChange = () => {
+  if (editingCp.value && editingCp.value.zone === '__NEW_ZONE__') {
+    editingCp.value.zone = null;
+    showAddZoneModal.value = true;
+  }
+};
+
 const createNewZone = async () => {
   if (!newZoneName.value.trim()) return;
   creatingZone.value = true;
   try {
-    await zoneService.createZone({ zoneName: newZoneName.value.trim() });
+    const created = await zoneService.createZone({ zoneName: newZoneName.value.trim(), name: newZoneName.value.trim() });
     zones.value = await zoneService.fetchZones();
+    if (editingCp.value) {
+      editingCp.value.zone = created?.id || zones.value[zones.value.length - 1]?.id || null;
+    }
     showAddZoneModal.value = false;
     newZoneName.value = '';
   } catch (e) {

@@ -1,11 +1,26 @@
 // src/utils/validations/cardValidation.js
+import { authService } from "@/services/authService";
 
 export const CardValidator = {
     async checkCardUniqueness(rfidCard) {
       try {
-        const response = await fetch(`/items/cardManagement?filter[rfidCard][_eq]=${rfidCard}`);
+        const token = authService.getToken();
+        const headers = { "Content-Type": "application/json" };
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+
+        const tenantId = authService.getTenantId();
+        let url = `${import.meta.env.VITE_API_URL}/items/cardManagement?filter[rfidCard][_eq]=${encodeURIComponent(rfidCard)}`;
+        if (tenantId) {
+          url += `&filter[tenant][_eq]=${tenantId}`;
+        }
+
+        const response = await fetch(url, { headers });
+        if (!response.ok) {
+          console.warn(`[CardValidator] Card uniqueness check returned ${response.status}`);
+          return true;
+        }
         const data = await response.json();
-        return data.data.length === 0;
+        return (data.data || []).length === 0;
       } catch (error) {
         console.error("Error checking card uniqueness:", error);
         return false;
@@ -76,14 +91,6 @@ export const CardValidator = {
         errors.push("Invalid email format");
       }
   
-      // Check if email is unique
-      // if (userData.email) {
-      //   const isEmailUnique = await this.checkEmailUniqueness(userData.email, userData.id);
-      //   if (!isEmailUnique) {
-      //     errors.push("Email already exists");
-      //   }
-      // }
-  
       // Phone validation
       if (userData.phone && !this.isValidPhone(userData.phone)) {
         errors.push("Phone number must be between 10 and 15 digits");
@@ -111,21 +118,23 @@ export const CardValidator = {
   
    async checkEmailUniqueness(email, userId) {
       try {
-        // Fetch users with the same email
-        const response = await fetch(`/users?filter[email][_eq]=${email}`);
-        if (!response.ok) throw new Error("Failed to check email uniqueness");
+        const token = authService.getToken();
+        const headers = { "Content-Type": "application/json" };
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/users?filter[email][_eq]=${encodeURIComponent(email)}`, {
+          headers
+        });
+        if (!response.ok) throw new Error(`Failed to check email uniqueness: ${response.status}`);
         
         const data = await response.json();
         
-        // If no users found with this email, it's unique
-        if (data.data.length === 0) return true;
+        if (!data.data || data.data.length === 0) return true;
         
-        // If updating existing user, check if the found email belongs to the same user
         if (userId) {
           return data.data.every(user => user.id === userId);
         }
         
-        // If creating new user, any existing email means it's not unique
         return false;
       } catch (error) {
         console.error("Error checking email uniqueness:", error);

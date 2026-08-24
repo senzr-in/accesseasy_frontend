@@ -64,6 +64,14 @@ const fetchAllData = async () => {
   }
 };
 
+const stopPolling = () => {
+  if (socketInterval) {
+    clearInterval(socketInterval);
+    socketInterval = null;
+  }
+  isConnected.value = false;
+};
+
 const setupLivePolling = () => {
   if (socketInterval) clearInterval(socketInterval);
   socketInterval = setInterval(async () => {
@@ -73,11 +81,11 @@ const setupLivePolling = () => {
     } catch (e) {
       console.warn('Silent polling failure', e);
     }
-  }, 5000); // Poll every 5 seconds for live guard tracking
+  }, 10000); // Poll every 10 seconds for live guard tracking
 };
 
 const initSocketConnection = async () => {
-  if (isConnected.value) return; // Prevent double init
+  if (isConnected.value && socketInterval) return; // Prevent double init
   isLoading.value = true;
   try {
     await fetchAllData();
@@ -112,6 +120,7 @@ const storeInstance = reactive({
   kpiMetrics,
 
   initSocketConnection,
+  stopPolling,
   fetchAllData
 });
 

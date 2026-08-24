@@ -196,6 +196,175 @@
       </div>
     </Teleport>
 
+    <!-- Create / Edit Policy Modal -->
+    <Teleport to="body">
+      <div
+        v-if="showPolicyModal"
+        class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto"
+        @click.self="showPolicyModal = false"
+      >
+        <div class="w-full max-w-2xl bg-white dark:bg-[#151c2c] rounded-2xl shadow-2xl p-6 border border-slate-200 dark:border-white/10 animate-in zoom-in-95 duration-150 text-xs my-8">
+          <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 dark:border-white/5">
+            <div>
+              <h3 class="text-base font-black text-slate-900 dark:text-white">
+                {{ editingPolicy.id ? 'Edit Escalation Policy' : 'Create Escalation Policy' }}
+              </h3>
+              <p class="text-xs text-slate-500 mt-0.5">Define multi-tier notification chains when critical alerts occur</p>
+            </div>
+            <button class="text-slate-400 hover:text-slate-600 p-1 cursor-pointer" @click="showPolicyModal = false">
+              <X class="w-5 h-5" />
+            </button>
+          </div>
+
+          <form @submit.prevent="savePolicySubmit" class="space-y-4">
+            <!-- Grid: Name, Trigger, Site -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="sm:col-span-2">
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Policy Name *</label>
+                <input
+                  v-model="editingPolicy.name"
+                  type="text"
+                  required
+                  placeholder="e.g. Critical SOS Emergency Matrix"
+                  class="w-full h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white font-medium text-xs focus:ring-2 focus:ring-indigo-500/50 outline-none"
+                />
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Trigger Event *</label>
+                <select
+                  v-model="editingPolicy.trigger_type"
+                  class="w-full h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white font-medium text-xs focus:ring-2 focus:ring-indigo-500/50 outline-none"
+                >
+                  <option value="sos_emergency">Guard SOS Panic Trigger</option>
+                  <option value="missed_patrol">Missed Patrol / Checkpoint Overdue</option>
+                  <option value="geofence_breach">Perimeter Geofence Violation</option>
+                  <option value="man_down">Man-Down / Inactivity Alert</option>
+                  <option value="checkpoint_tamper">Checkpoint Tamper / QR Scan Failure</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Scope / Property Location</label>
+                <select
+                  v-model="editingPolicy.site_name"
+                  class="w-full h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white font-medium text-xs focus:ring-2 focus:ring-indigo-500/50 outline-none"
+                >
+                  <option value="All Sites (Global)">All Sites (Global)</option>
+                  <option v-for="s in sites" :key="s.id" :value="s.name || s.locName">{{ s.name || s.locName }}</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Escalation Levels (Tiers) -->
+            <div class="space-y-3 pt-2">
+              <div class="flex items-center justify-between">
+                <label class="text-xs font-black uppercase tracking-wider text-slate-800 dark:text-slate-200">
+                  Escalation Chain Levels
+                </label>
+                <button
+                  type="button"
+                  @click="addLevel"
+                  class="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  <Plus class="w-3 h-3" /> Add Tier Level
+                </button>
+              </div>
+
+              <div class="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                <div
+                  v-for="(lvl, idx) in editingPolicy.levels"
+                  :key="idx"
+                  class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40 space-y-2.5 relative"
+                >
+                  <div class="flex items-center justify-between">
+                    <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-indigo-600 text-white">
+                      Tier Level {{ lvl.level }}
+                    </span>
+                    <button
+                      v-if="editingPolicy.levels.length > 1"
+                      type="button"
+                      @click="removeLevel(idx)"
+                      class="text-rose-500 hover:text-rose-700 text-[10px] font-bold cursor-pointer"
+                    >
+                      Remove Tier
+                    </button>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    <div>
+                      <label class="block text-[10px] font-bold text-slate-500 mb-0.5">Delay (Minutes)</label>
+                      <input
+                        v-model.number="lvl.delay_minutes"
+                        type="number"
+                        min="0"
+                        class="w-full h-8 px-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium"
+                      />
+                    </div>
+                    <div class="sm:col-span-2">
+                      <label class="block text-[10px] font-bold text-slate-500 mb-0.5">Target Role / Contact</label>
+                      <input
+                        v-model="lvl.target_role"
+                        type="text"
+                        placeholder="e.g. On-Duty Shift Supervisor"
+                        class="w-full h-8 px-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-500 mb-0.5">Action Description</label>
+                    <input
+                      v-model="lvl.action"
+                      type="text"
+                      placeholder="e.g. Dispatch push notification and SMS alert to shift leader"
+                      class="w-full h-8 px-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium"
+                    />
+                  </div>
+
+                  <!-- Channels Selection -->
+                  <div class="flex items-center gap-2 flex-wrap pt-1">
+                    <label
+                      v-for="ch in ['in_app_push', 'sms', 'voice_call', 'email', 'webhook']"
+                      :key="ch"
+                      class="flex items-center gap-1 text-[10px] font-semibold text-slate-600 dark:text-slate-300 cursor-pointer bg-white dark:bg-slate-900 px-2 py-1 rounded border border-slate-200 dark:border-slate-800"
+                    >
+                      <input
+                        type="checkbox"
+                        :value="ch"
+                        v-model="lvl.channels"
+                        class="rounded text-indigo-600 focus:ring-0"
+                      />
+                      <span>{{ ch.replace(/_/g, ' ').toUpperCase() }}</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="pt-4 border-t border-slate-100 dark:border-white/5 flex gap-2 justify-end">
+              <button
+                type="button"
+                class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs cursor-pointer hover:bg-slate-200"
+                @click="showPolicyModal = false"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-600/20 cursor-pointer flex items-center gap-1.5"
+                :disabled="isSavingPolicy"
+              >
+                <Plus class="w-3.5 h-3.5" />
+                <span>{{ isSavingPolicy ? 'Saving...' : 'Save Escalation Policy' }}</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </Teleport>
+
   </div>
 </template>
 
@@ -203,16 +372,47 @@
 import { ref, onMounted } from 'vue';
 import { Volume2, Plus, Zap, ShieldAlert, X } from 'lucide-vue-next';
 import { escalationService } from '@/services/escalationService';
+import { siteService } from '@/services/siteService';
 import FeatureGate from '@/components/common/FeatureGate.vue';
 
 const policies = ref([]);
 const activeEscalations = ref([]);
+const sites = ref([]);
+
 const showSimModal = ref(false);
 const selectedSimType = ref('sos_emergency');
+
+const showPolicyModal = ref(false);
+const isSavingPolicy = ref(false);
+const editingPolicy = ref({
+  id: null,
+  name: '',
+  trigger_type: 'sos_emergency',
+  site_name: 'All Sites (Global)',
+  levels: [
+    {
+      level: 1,
+      delay_minutes: 0,
+      target_role: 'On-Duty Shift Supervisor',
+      action: 'Immediate in-app push notification + SMS alert dispatch',
+      channels: ['in_app_push', 'sms']
+    },
+    {
+      level: 2,
+      delay_minutes: 5,
+      target_role: 'Central SOC & Operations Manager',
+      action: 'Automated voice dispatch call + email escalation',
+      channels: ['in_app_push', 'voice_call', 'email']
+    }
+  ]
+});
 
 const loadData = async () => {
   policies.value = await escalationService.fetchPolicies();
   activeEscalations.value = await escalationService.fetchActiveEscalations();
+  try {
+    sites.value = await siteService.fetchSites();
+  } catch (e) {}
 };
 
 const getMinutesLeft = (nextAt) => {
@@ -238,7 +438,63 @@ const runSimulationTrigger = async () => {
 };
 
 const openAddPolicyModal = () => {
-  alert("Policy creation modal is ready.");
+  editingPolicy.value = {
+    id: null,
+    name: '',
+    trigger_type: 'sos_emergency',
+    site_name: 'All Sites (Global)',
+    levels: [
+      {
+        level: 1,
+        delay_minutes: 0,
+        target_role: 'On-Duty Shift Supervisor',
+        action: 'Immediate in-app push notification + SMS alert dispatch',
+        channels: ['in_app_push', 'sms']
+      },
+      {
+        level: 2,
+        delay_minutes: 5,
+        target_role: 'Central SOC & Operations Manager',
+        action: 'Automated voice dispatch call + email escalation',
+        channels: ['in_app_push', 'voice_call', 'email']
+      }
+    ]
+  };
+  showPolicyModal.value = true;
+};
+
+const addLevel = () => {
+  const nextLvl = editingPolicy.value.levels.length + 1;
+  const lastDelay = editingPolicy.value.levels[editingPolicy.value.levels.length - 1]?.delay_minutes || 0;
+  editingPolicy.value.levels.push({
+    level: nextLvl,
+    delay_minutes: lastDelay + 5,
+    target_role: nextLvl === 3 ? 'Director of Security / VP' : 'Operations Lead',
+    action: 'Executive notification & webhook webhook trigger',
+    channels: ['in_app_push', 'sms', 'webhook']
+  });
+};
+
+const removeLevel = (index) => {
+  editingPolicy.value.levels.splice(index, 1);
+  editingPolicy.value.levels.forEach((l, idx) => {
+    l.level = idx + 1;
+  });
+};
+
+const savePolicySubmit = async () => {
+  if (!editingPolicy.value.name.trim()) return;
+  isSavingPolicy.value = true;
+  try {
+    await escalationService.savePolicy(editingPolicy.value);
+    showPolicyModal.value = false;
+    await loadData();
+  } catch (err) {
+    console.error("Failed to save policy:", err);
+    alert(`Failed to save policy: ${err.message || 'Unknown error'}`);
+  } finally {
+    isSavingPolicy.value = false;
+  }
 };
 
 onMounted(async () => {

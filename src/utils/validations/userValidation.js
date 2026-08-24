@@ -1,14 +1,30 @@
+import { authService } from "@/services/authService";
+
 export const UserValidator = {
     // Check unique fields in roles/users
     async checkUserFieldsUniqueness(email, phone, currentUserId = null) {
       try {
-        const response = await fetch(`/roles?fields=users.email,users.phone,users.id`);
+        const token = authService.getToken();
+        const headers = { "Content-Type": "application/json" };
+        if (token) {
+          headers["Authorization"] = `Bearer ${token}`;
+        }
+
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/roles?fields=users.email,users.phone,users.id`, {
+          headers
+        });
+
+        if (!response.ok) {
+          console.warn(`[UserValidator] Failed to fetch roles for uniqueness check: ${response.status}`);
+          return true;
+        }
+
         const data = await response.json();
         
         let isUnique = true;
         let users = [];
   
-        data.data.forEach(role => {
+        (data.data || []).forEach(role => {
           if (role.users) {
             users = users.concat(role.users);
           }

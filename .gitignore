@@ -7,3 +7,9 @@ service-account.json
 decoded-service-account.json
 encoded-service-account.json
 gcloud-service-key.json
+*.timestamp-*.mjs
+vite.config.*.timestamp-*
+dist
+dist-*
+.DS_Store
+*.log

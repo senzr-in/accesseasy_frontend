@@ -39,95 +39,79 @@ class EscalationService {
   }
 
   /**
-   * Save / Update Escalation Policy
+   * Save / Update Escalation Policy in Directus Cloud
    */
   async savePolicy(policyData) {
     try {
       const tenantId = authService.getTenantId();
-      const policies = await this.fetchPolicies();
+      const payload = { ...policyData, tenant: tenantId };
       
-      if (policyData.id) {
-        const idx = policies.findIndex(p => p.id === policyData.id);
-        if (idx !== -1) policies[idx] = policyData;
+      if (policyData.id && !policyData.id.startsWith('esc-pol-')) {
+        const res = await authService.protectedApi.patch(`/items/escalation_policies/${policyData.id}`, payload);
+        return res.data.data;
       } else {
-        policyData.id = `esc-pol-${Date.now()}`;
-        policies.push(policyData);
+        delete payload.id;
+        const res = await authService.protectedApi.post("/items/escalation_policies", payload);
+        return res.data.data;
       }
-
-      localStorage.setItem(`accesseasy_escalation_policies_${tenantId}`, JSON.stringify(policies));
-      return policyData;
     } catch (error) {
-      console.error("Error saving escalation policy:", error);
+      console.error("Error saving escalation policy on cloud:", error);
       throw error;
     }
   }
 
   /**
    * Fetch currently running escalation jobs
+  /**
+   * Fetch currently active/escalating alerts from Directus Cloud
    */
   async fetchActiveEscalations() {
     try {
       const tenantId = authService.getTenantId();
-      const stored = localStorage.getItem(`accesseasy_active_escalations_${tenantId}`);
-      if (stored) {
-        try {
-          return JSON.parse(stored);
-        } catch (e) {}
-      }
-      return [];
+      const res = await authService.protectedApi.get(
+        `/items/patrol_alerts?filter[tenant][_eq]=${tenantId}&filter[status][_in]=reported,acknowledged,investigating,action_taken,pending_review&sort=-date_created`
+      );
+      return res.data?.data || [];
     } catch (e) {
       return [];
     }
   }
 
   /**
-   * Acknowledge active escalation (stops further escalation up the chain)
+   * Acknowledge active escalation in Directus Cloud
    */
   async acknowledgeEscalation(escalationId, user = 'Supervisor') {
     try {
-      const tenantId = authService.getTenantId();
-      const list = await this.fetchActiveEscalations();
-      const item = list.find(e => String(e.id) === String(escalationId));
-      if (item) {
-        item.status = "acknowledged";
-        item.acknowledged_by = user;
-        item.acknowledged_at = new Date().toISOString();
-        localStorage.setItem(`accesseasy_active_escalations_${tenantId}`, JSON.stringify(list));
-      }
-      return item;
+      const res = await authService.protectedApi.patch(`/items/patrol_alerts/${escalationId}`, {
+        status: 'acknowledged',
+        acknowledged_at: new Date().toISOString()
+      });
+      return res.data.data;
     } catch (error) {
-      console.error("Error acknowledging escalation:", error);
+      console.error("Error acknowledging escalation on cloud:", error);
       throw error;
     }
   }
 
   /**
-   * Test / Simulate Escalation Trigger
+   * Simulate / test escalation trigger — creates a real alert record in Directus Cloud
    */
   async simulateTrigger(triggerType = "sos_emergency", siteName = "Default Site", guardName = "On-Duty Guard") {
     try {
       const tenantId = authService.getTenantId();
-      const list = await this.fetchActiveEscalations();
-      const newEsc = {
-        id: `esc-act-${Date.now()}`,
-        policy_id: "esc-pol-01",
-        trigger_type: triggerType,
-        incident_title: `Alert: ${triggerType.toUpperCase()}`,
-        site_name: siteName,
-        zone_name: "Active Zone",
-        guard_name: guardName,
-        current_level: 1,
-        max_level: 3,
-        triggered_at: new Date().toISOString(),
-        next_escalation_at: new Date(Date.now() + 5 * 60000).toISOString(),
-        status: "escalating",
-        acknowledged_by: null
+      const payload = {
+        tenant: tenantId,
+        title: `Alert: ${triggerType.toUpperCase()}`,
+        type: triggerType,
+        severity: 'critical',
+        status: 'reported',
+        notes: `Simulated escalation from ${siteName} — Guard: ${guardName}`,
+        action_log: []
       };
-      list.unshift(newEsc);
-      localStorage.setItem(`accesseasy_active_escalations_${tenantId}`, JSON.stringify(list));
-      return newEsc;
+      const res = await authService.protectedApi.post("/items/patrol_alerts", payload);
+      return res.data.data;
     } catch (error) {
-      console.error("Error triggering simulation:", error);
+      console.error("Error triggering simulation on cloud:", error);
       throw error;
     }
   }

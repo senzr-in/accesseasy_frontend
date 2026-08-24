@@ -84,27 +84,28 @@ class GeofenceService {
   }
 
   /**
-   * Fetch all logged geofence violations
+   * Fetch all logged geofence violations from patrol_alerts
    */
   async fetchViolations(siteId = null) {
     try {
       const tenantId = authService.getTenantId();
       if (!tenantId) return [];
 
-      try {
-        let endpoint = `/items/geofence_violations?filter[tenant][_eq]=${tenantId}&sort=-timestamp`;
-        if (siteId) endpoint += `&filter[site][_eq]=${siteId}`;
-        const res = await authService.protectedApi.get(endpoint);
-        if (res.data?.data) return res.data.data;
-      } catch (e) {}
-
-      const stored = localStorage.getItem(`accesseasy_violations_${tenantId}`);
-      if (stored) {
-        try {
-          const list = JSON.parse(stored);
-          if (siteId) return list.filter(v => String(v.site) === String(siteId));
-          return list;
-        } catch (e) {}
+      let endpoint = `/items/patrol_alerts?filter[tenant][_eq]=${tenantId}&filter[type][_eq]=geofence&sort=-date_created`;
+      if (siteId) endpoint += `&filter[site][_eq]=${siteId}`;
+      
+      const res = await authService.protectedApi.get(endpoint);
+      if (res.data?.data) {
+        return res.data.data.map(a => ({
+          id: a.id,
+          site: a.site,
+          guard_name: a.guard_name || a.reported_by || 'Guard',
+          checkpoint_name: a.title,
+          geofence_status: 'VIOLATION',
+          timestamp: a.date_created || a.timestamp,
+          notes: a.notes,
+          resolved: a.status === 'resolved' || a.status === 'closed'
+        }));
       }
 
       return [];
@@ -114,29 +115,36 @@ class GeofenceService {
   }
 
   /**
-   * Log a new violation to backend and trigger SOC alert
+   * Log a new violation to patrol_alerts and trigger SOC alarm
    */
   async logViolation(violationData) {
     try {
       const tenantId = authService.getTenantId();
       const payload = {
-        ...violationData,
         tenant: tenantId,
-        timestamp: new Date().toISOString()
+        title: `Geofence Breach: ${violationData.checkpoint_name || 'Checkpoint'} (${violationData.distance_m || 0}m out of bounds)`,
+        type: "geofence",
+        severity: "warning",
+        status: "reported",
+        site: violationData.site,
+        guard_id: violationData.guard || violationData.guard_id || null,
+        reported_by: violationData.guard_name || "Security Officer",
+        notes: `GPS perimeter breach detected: Guard scanned ${violationData.distance_m || 0}m away from checkpoint station. GPS Precision: ±${violationData.accuracy_m || 10}m.`,
+        action_log: [
+          {
+            stage: "reported",
+            user: "Automated GPS Geofence Engine",
+            time: new Date().toISOString(),
+            notes: "Perimeter breach automatically logged by GPS geofence calibrator."
+          }
+        ],
+        date_created: new Date().toISOString()
       };
 
-      try {
-        const res = await authService.protectedApi.post("/items/geofence_violations", payload);
-        return res.data.data;
-      } catch (e) {
-        const list = await this.fetchViolations();
-        const newViol = { id: `viol-${Date.now()}`, ...payload };
-        list.unshift(newViol);
-        localStorage.setItem(`accesseasy_violations_${tenantId}`, JSON.stringify(list));
-        return newViol;
-      }
+      const res = await authService.protectedApi.post("/items/patrol_alerts", payload);
+      return res.data.data;
     } catch (error) {
-      console.error("Error logging violation:", error);
+      console.error("Error logging violation to patrol_alerts:", error);
       throw error;
     }
   }

@@ -19,7 +19,7 @@ class AttendanceService {
       if (!tenantId) return [];
 
       const today = new Date().toISOString().split('T')[0];
-      let query = `/items/guard_attendance?filter[tenant][_eq]=${tenantId}&filter[date_created][_gte]=${today}T00:00:00&sort=-check_in_time&fields=*,guard.first_name,guard.last_name,guard.phone,guard.avatar,site.name,zone.name`;
+      let query = `/items/guard_attendance?filter[tenant][_eq]=${tenantId}&filter[date_created][_gte]=${today}T00:00:00&sort=-check_in_time&fields=*,guard.*,guard.assignedUser.*,site.*,zone.*`;
       
       if (siteId) {
         query += `&filter[site][_eq]=${siteId}`;
@@ -28,24 +28,21 @@ class AttendanceService {
       try {
         const res = await authService.protectedApi.get(query);
         if (res.data?.data) {
-          return res.data.data.map(r => ({
-            ...r,
-            guard_name: r.guard ? `${r.guard.first_name || ''} ${r.guard.last_name || ''}`.trim() : (r.guard_name || 'Guard'),
-            site_name: r.site?.name || r.site_name || 'Main Site',
-            zone_name: r.zone?.name || r.zone_name || 'General Area'
-          }));
+          return res.data.data.map(r => {
+            const guardName = r.guard?.assignedUser?.first_name
+              ? `${r.guard.assignedUser.first_name} ${r.guard.assignedUser.last_name || ''}`.trim()
+              : (r.guard?.first_name ? `${r.guard.first_name} ${r.guard.last_name || ''}`.trim() : (r.guard_name || 'Guard'));
+            
+            return {
+              ...r,
+              guard_name: guardName,
+              site_name: r.site?.locName || r.site?.name || r.site_name || 'Main Site',
+              zone_name: r.zone?.zoneName || r.zone?.name || r.zone_name || 'General Area'
+            };
+          });
         }
       } catch (err) {
         // Directus collection might not exist yet
-      }
-
-      const stored = localStorage.getItem(`accesseasy_attendance_${tenantId}`);
-      if (stored) {
-        try {
-          const list = JSON.parse(stored);
-          if (siteId) return list.filter(a => String(a.site?.id || a.site) === String(siteId));
-          return list;
-        } catch (e) {}
       }
 
       return [];
@@ -102,22 +99,8 @@ class AttendanceService {
         date_created: now
       };
 
-      try {
-        const res = await authService.protectedApi.post("/items/guard_attendance", payload);
-        return res.data.data;
-      } catch (e) {
-        // Local state save
-        const list = await this.getTodayAttendance();
-        const newRecord = {
-          ...payload,
-          id: `att-${Date.now()}`,
-          guard_name: `Guard ${guardId}`,
-          site_name: `Site ${siteId}`
-        };
-        list.unshift(newRecord);
-        localStorage.setItem(`accesseasy_attendance_${tenantId}`, JSON.stringify(list));
-        return newRecord;
-      }
+      const res = await authService.protectedApi.post("/items/guard_attendance", payload);
+      return res.data.data;
     } catch (error) {
       console.error("Error during check-in:", error);
       throw error;
@@ -138,18 +121,8 @@ class AttendanceService {
         check_out_lng: location.lng || null
       };
 
-      try {
-        const res = await authService.protectedApi.patch(`/items/guard_attendance/${attendanceId}`, payload);
-        return res.data.data;
-      } catch (e) {
-        const list = await this.getTodayAttendance();
-        const item = list.find(a => String(a.id) === String(attendanceId));
-        if (item) {
-          Object.assign(item, payload);
-          localStorage.setItem(`accesseasy_attendance_${tenantId}`, JSON.stringify(list));
-          return item;
-        }
-      }
+      const res = await authService.protectedApi.patch(`/items/guard_attendance/${attendanceId}`, payload);
+      return res.data.data;
     } catch (error) {
       console.error("Error during check-out:", error);
       throw error;
@@ -168,18 +141,8 @@ class AttendanceService {
         break_started_at: now
       };
 
-      try {
-        const res = await authService.protectedApi.patch(`/items/guard_attendance/${attendanceId}`, payload);
-        return res.data.data;
-      } catch (e) {
-        const list = await this.getTodayAttendance();
-        const item = list.find(a => String(a.id) === String(attendanceId));
-        if (item) {
-          Object.assign(item, payload);
-          localStorage.setItem(`accesseasy_attendance_${tenantId}`, JSON.stringify(list));
-          return item;
-        }
-      }
+      const res = await authService.protectedApi.patch(`/items/guard_attendance/${attendanceId}`, payload);
+      return res.data.data;
     } catch (error) {
       console.error("Error starting break:", error);
       throw error;
@@ -198,18 +161,8 @@ class AttendanceService {
         break_ended_at: now
       };
 
-      try {
-        const res = await authService.protectedApi.patch(`/items/guard_attendance/${attendanceId}`, payload);
-        return res.data.data;
-      } catch (e) {
-        const list = await this.getTodayAttendance();
-        const item = list.find(a => String(a.id) === String(attendanceId));
-        if (item) {
-          Object.assign(item, payload);
-          localStorage.setItem(`accesseasy_attendance_${tenantId}`, JSON.stringify(list));
-          return item;
-        }
-      }
+      const res = await authService.protectedApi.patch(`/items/guard_attendance/${attendanceId}`, payload);
+      return res.data.data;
     } catch (error) {
       console.error("Error ending break:", error);
       throw error;
@@ -241,6 +194,53 @@ class AttendanceService {
     } catch (error) {
       console.error("Error requesting replacement:", error);
       throw error;
+    }
+  }
+
+  /**
+   * Fetch attendance history for specified date range, site, or guard
+   */
+  async getAttendanceHistory({ startDate = null, endDate = null, siteId = null, guardId = null } = {}) {
+    try {
+      const tenantId = authService.getTenantId();
+      if (!tenantId) return [];
+
+      let query = `/items/guard_attendance?filter[tenant][_eq]=${tenantId}&sort=-check_in_time&fields=*,guard.*,guard.assignedUser.*,site.*,zone.*&limit=200`;
+      
+      if (startDate) {
+        query += `&filter[date_created][_gte]=${startDate}T00:00:00`;
+      }
+      if (endDate) {
+        query += `&filter[date_created][_lte]=${endDate}T23:59:59`;
+      }
+      if (siteId && siteId !== 'all') {
+        query += `&filter[site][_eq]=${siteId}`;
+      }
+      if (guardId && guardId !== 'all') {
+        query += `&filter[guard][_eq]=${guardId}`;
+      }
+
+      try {
+        const res = await authService.protectedApi.get(query);
+        if (res.data?.data) {
+          return res.data.data.map(r => {
+            const guardName = r.guard?.assignedUser?.first_name
+              ? `${r.guard.assignedUser.first_name} ${r.guard.assignedUser.last_name || ''}`.trim()
+              : (r.guard?.first_name ? `${r.guard.first_name} ${r.guard.last_name || ''}`.trim() : (r.guard_name || 'Security Guard'));
+            
+            return {
+              ...r,
+              guard_name: guardName,
+              site_name: r.site?.locName || r.site?.name || r.site_name || 'Main Site',
+              zone_name: r.zone?.zoneName || r.zone?.name || r.zone_name || 'General Area'
+            };
+          });
+        }
+      } catch (err) {}
+      return [];
+    } catch (error) {
+      console.error("Error fetching attendance history:", error);
+      return [];
     }
   }
 }

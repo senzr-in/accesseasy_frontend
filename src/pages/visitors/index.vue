@@ -1247,14 +1247,11 @@ onMounted(() => {
           items.value = d.data || []; 
           totalItems.value = d.meta?.filter_count ?? 0; 
         }
-        
-        // Refresh analytics stats silently too
-        loadAnalytics();
       } catch (e) {
         // silent fetch error during polling
       }
     }
-  }, 5000);
+  }, 10000);
 });
 
 onUnmounted(() => {

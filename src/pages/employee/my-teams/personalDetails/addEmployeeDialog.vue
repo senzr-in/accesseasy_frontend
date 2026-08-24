@@ -813,9 +813,10 @@ const handleSubmit = async () => {
         role: employeeRoleId,
         tenant: tenantId,
         phone: formData.value.personalPhone ? `+91${formData.value.personalPhone}` : formData.value.personalEmail,
-        userApp: "accesseasy",
+        userApp: "accesseasy, patrol",
         appAccess: true,
-        accesseasyRole: formData.value.roleConfigId || null
+        accesseasyRole: formData.value.roleConfigId || null,
+        accesseasyPatrolRole: formData.value.roleConfigId || null
       };
 
       const userRes = await fetch(`${import.meta.env.VITE_API_URL}/users`, {

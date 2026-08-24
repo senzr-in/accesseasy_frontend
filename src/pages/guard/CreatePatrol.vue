@@ -44,6 +44,29 @@
               />
             </div>
 
+            <!-- Site Selection -->
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">Site <span class="text-rose-500">*</span></label>
+                <button
+                  type="button"
+                  @click="openAddSiteModal"
+                  class="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                >
+                  + New Site
+                </button>
+              </div>
+              <select
+                v-model="form.siteId"
+                @change="handleSiteSelectChange"
+                class="w-full text-sm font-semibold px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#0b0f19] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 appearance-none cursor-pointer"
+              >
+                <option value="">All Sites (Global)</option>
+                <option v-for="s in sites" :key="s.id" :value="s.id">{{ s.name || s.locName }}</option>
+                <option value="__NEW_SITE__" class="font-bold text-indigo-600">+ Create New Site...</option>
+              </select>
+            </div>
+
             <!-- Zone -->
             <div>
               <div class="flex items-center justify-between mb-1.5">
@@ -62,7 +85,7 @@
                 class="w-full text-sm font-semibold px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#0b0f19] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 appearance-none cursor-pointer"
               >
                 <option value="" disabled>Select Zone</option>
-                <option v-for="z in zones" :key="z.id" :value="z.id">{{ z.zoneName || z.name }}</option>
+                <option v-for="z in filteredZones" :key="z.id" :value="z.id">{{ z.zoneName || z.name }}</option>
                 <option value="__NEW_ZONE__" class="font-bold text-indigo-600">+ Create New Zone...</option>
               </select>
             </div>
@@ -188,41 +211,159 @@
             </div>
           </div>
 
-          <!-- Inline Create Form -->
-          <div v-if="isCreatingInline" class="mb-4 w-full text-left p-4 bg-indigo-50/50 dark:bg-[#151c2c] border border-indigo-200 dark:border-indigo-500/30 rounded-xl shadow-sm animate-in fade-in zoom-in-95 duration-200">
-            <div class="flex items-center justify-between mb-3">
-              <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                <MapPin class="w-4 h-4 text-indigo-500" /> Create & Add Checkpoint
-              </h3>
-              <button class="text-slate-400 hover:text-slate-600 p-1 cursor-pointer" @click="isCreatingInline = false">
-                <X class="w-4 h-4" />
-              </button>
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div :class="form.zoneId ? 'sm:col-span-2' : 'sm:col-span-1'">
-                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Checkpoint Name <span class="text-rose-500">*</span></label>
-                <input v-model="inlineForm.name" type="text" class="w-full text-sm font-semibold px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#0b0f19] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50" placeholder="e.g. Server Room Door" />
+          <!-- ── Add Checkpoint Modal Dialog ── -->
+          <Teleport to="body">
+            <div
+              v-if="isCreatingInline"
+              class="fixed inset-0 z-[120] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200"
+            >
+              <div class="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl animate-in zoom-in-95 duration-200 w-full max-w-md overflow-hidden flex flex-col">
+                <!-- Modal Header -->
+                <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+                  <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100 uppercase tracking-widest flex items-center gap-2">
+                    <MapPin class="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                    <span>ADD CHECKPOINT</span>
+                  </h3>
+                  <button
+                    class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1"
+                    @click="isCreatingInline = false"
+                  >
+                    <X class="w-4 h-4" />
+                  </button>
+                </div>
+
+                <!-- Form Area -->
+                <div class="p-6 space-y-4 text-left max-h-[70vh] overflow-y-auto custom-scrollbar">
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Checkpoint Name *</label>
+                    <input
+                      v-model="inlineForm.name"
+                      type="text"
+                      class="w-full h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-900 dark:text-slate-100 shadow-sm"
+                      placeholder="e.g. Server Room Entrance"
+                      required
+                    />
+                  </div>
+
+                  <!-- Zone Assignment -->
+                  <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                      <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Zone Assignment *</label>
+                      <button
+                        type="button"
+                        @click="openAddZoneModal"
+                        class="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                      >
+                        + New Zone
+                      </button>
+                    </div>
+                    <select
+                      v-model="inlineForm.zoneId"
+                      @change="handleInlineZoneChange"
+                      class="w-full h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-900 dark:text-slate-100 shadow-sm"
+                      required
+                    >
+                      <option value="" disabled>Select target zone...</option>
+                      <option
+                        v-for="zone in zones"
+                        :key="zone.id"
+                        :value="zone.id"
+                      >
+                        {{ zone.zoneName || zone.name }}
+                      </option>
+                      <option value="__NEW_ZONE__" class="font-bold text-indigo-600">+ Create New Zone...</option>
+                    </select>
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-3">
+                    <div>
+                      <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Building</label>
+                      <input
+                        v-model="inlineForm.building"
+                        type="text"
+                        class="w-full h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-900 dark:text-slate-100 shadow-sm"
+                        placeholder="e.g. Tower B"
+                      />
+                    </div>
+                    <div>
+                      <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Floor</label>
+                      <input
+                        v-model="inlineForm.floor"
+                        type="text"
+                        class="w-full h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-900 dark:text-slate-100 shadow-sm"
+                        placeholder="e.g. 2nd Floor"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-3">
+                    <div>
+                      <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Dwell Time (Minutes)</label>
+                      <input
+                        v-model.number="inlineForm.dwell_time"
+                        type="number"
+                        min="0"
+                        class="w-full h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-900 dark:text-slate-100 shadow-sm font-semibold"
+                      />
+                    </div>
+                    <div>
+                      <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Status</label>
+                      <button
+                        type="button"
+                        class="w-full h-10 rounded-xl border flex items-center justify-center gap-2 transition-colors cursor-pointer text-xs font-bold"
+                        :class="inlineForm.status !== 'inactive' ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 border-emerald-200 dark:border-emerald-500/30' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700'"
+                        @click="inlineForm.status = inlineForm.status !== 'inactive' ? 'inactive' : 'active'"
+                      >
+                        <span class="w-2 h-2 rounded-full" :class="inlineForm.status !== 'inactive' ? 'bg-emerald-500' : 'bg-slate-400'" />
+                        {{ inlineForm.status !== 'inactive' ? 'Active' : 'Inactive' }}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">NFC UID (Optional)</label>
+                    <input
+                      v-model="inlineForm.nfc_tag_id"
+                      type="text"
+                      class="w-full h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-900 dark:text-slate-100 shadow-sm font-mono"
+                      placeholder="e.g. 04:A2:3E:C5"
+                    />
+                  </div>
+
+                  <div>
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Expected Within (Minutes From Patrol Start)</label>
+                    <input
+                      v-model.number="inlineForm.expectedOffset"
+                      type="number"
+                      min="0"
+                      class="w-full h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-900 dark:text-slate-100 shadow-sm font-semibold"
+                      placeholder="5"
+                    />
+                  </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex items-center justify-end gap-3">
+                  <button
+                    type="button"
+                    class="px-4 py-2 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+                    @click="isCreatingInline = false"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    class="px-5 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md shadow-indigo-600/20 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                    :disabled="savingInline || !inlineForm.name"
+                    @click="createInlineCheckpoint"
+                  >
+                    <span v-if="savingInline">Saving...</span>
+                    <span v-else>Save Checkpoint</span>
+                  </button>
+                </div>
               </div>
-              <div v-if="!form.zoneId">
-                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Zone <span class="text-rose-500">*</span></label>
-                <select v-model="inlineForm.zoneId" class="w-full text-sm font-semibold px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#0b0f19] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
-                  <option value="" disabled>Select Zone</option>
-                  <option v-for="z in zones" :key="z.id" :value="z.id">{{ z.zoneName || z.name }}</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Expected within (min)</label>
-                <input v-model.number="inlineForm.expectedOffset" type="number" min="0" class="w-full text-sm font-semibold px-3 py-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#0b0f19] text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50" />
-              </div>
             </div>
-            <div class="flex items-center justify-end gap-2 mt-4 pt-3 border-t border-slate-200 dark:border-slate-800">
-              <button @click="isCreatingInline = false" class="h-8 px-4 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer">Cancel</button>
-              <button @click="createInlineCheckpoint" class="btn-primary text-xs h-8 px-4" :disabled="savingInline || !inlineForm.name">
-                <span v-if="savingInline">Saving...</span>
-                <span v-else>Create & Add</span>
-              </button>
-            </div>
-          </div>
+          </Teleport>
 
           <div v-if="selectedCheckpoints.length > 0" class="space-y-2 relative">
             <div 
@@ -718,6 +859,85 @@
         </div>
       </div>
     </Teleport>
+
+    <!-- Modal: Add New Site -->
+    <Teleport to="body">
+      <div
+        v-if="showAddSiteModal"
+        class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+        @click.self="showAddSiteModal = false"
+      >
+        <div class="w-full max-w-md bg-white dark:bg-[#151c2c] rounded-2xl shadow-2xl p-6 border border-slate-200 dark:border-white/10 animate-in zoom-in-95 duration-150">
+          <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-100 dark:border-white/5">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 flex items-center justify-center font-bold text-xs">
+                <MapPin class="w-4 h-4" />
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-slate-900 dark:text-white">Add Property / Site</h3>
+                <p class="text-[11px] text-slate-500">Create a new site location for your guard tours</p>
+              </div>
+            </div>
+            <button
+              class="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors cursor-pointer"
+              @click="showAddSiteModal = false"
+            >
+              <X class="w-4 h-4" />
+            </button>
+          </div>
+
+          <form @submit.prevent="submitAddSite" class="space-y-3.5 text-xs">
+            <div class="space-y-1">
+              <label class="font-bold text-slate-700 dark:text-slate-300">Property / Site Name *</label>
+              <input
+                v-model="newSiteForm.name"
+                required
+                placeholder="e.g. Headquarters Campus"
+                class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none focus:border-indigo-500"
+              />
+            </div>
+
+            <div class="space-y-1">
+              <label class="font-bold text-slate-700 dark:text-slate-300">Site Code (Optional)</label>
+              <input
+                v-model="newSiteForm.code"
+                placeholder="e.g. SITE-HQ-01"
+                class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-mono uppercase outline-none focus:border-indigo-500"
+              />
+            </div>
+
+            <div class="space-y-1">
+              <label class="font-bold text-slate-700 dark:text-slate-300">Address / Location</label>
+              <textarea
+                v-model="newSiteForm.address"
+                rows="2"
+                placeholder="Full address of the property..."
+                class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none focus:border-indigo-500 resize-none"
+              ></textarea>
+            </div>
+
+            <!-- Footer -->
+            <div class="mt-5 pt-3 border-t border-slate-100 dark:border-white/5 flex gap-2 justify-end">
+              <button
+                type="button"
+                class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs hover:bg-slate-200 cursor-pointer"
+                @click="showAddSiteModal = false"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-600/20 cursor-pointer flex items-center gap-1.5"
+                :disabled="isSavingSite || !newSiteForm.name.trim()"
+              >
+                <Plus class="w-3.5 h-3.5" />
+                <span>{{ isSavingSite ? 'Creating...' : 'Create & Select Site' }}</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
@@ -731,12 +951,14 @@ import {
 } from 'lucide-vue-next';
 import { patrolService } from '@/services/patrolService';
 import { zoneService } from '@/services/zoneService';
+import { siteService } from '@/services/siteService';
 import { authService } from '@/services/authService';
 
 const router = useRouter();
 const isMounted = ref(false);
 const saving = ref(false);
 
+const sites = ref([]);
 const zones = ref([]);
 const guards = ref([]);
 const allMasterCheckpoints = ref([]);
@@ -755,6 +977,15 @@ const newZoneForm = ref({
   name: '',
   code: '',
   description: ''
+});
+
+const showAddSiteModal = ref(false);
+const isSavingSite = ref(false);
+const newSiteForm = ref({
+  name: '',
+  code: '',
+  address: '',
+  geofence_radius: 500
 });
 
 const showAddGuardModal = ref(false);
@@ -777,12 +1008,70 @@ const inlineForm = ref({
 
 const form = ref({
   name: '',
+  siteId: '',
   zoneId: '',
   startsAt: '08:00',
   repeat: 'none',
   maxDuration: 30,
   guardId: ''
 });
+
+const filteredZones = computed(() => {
+  if (!form.value.siteId) return zones.value;
+  return zones.value.filter(z => !z.site || String(z.site) === String(form.value.siteId));
+});
+
+const openAddSiteModal = () => {
+  newSiteForm.value = {
+    name: '',
+    code: '',
+    address: '',
+    geofence_radius: 500
+  };
+  showAddSiteModal.value = true;
+};
+
+const handleSiteSelectChange = async () => {
+  if (form.value.siteId === '__NEW_SITE__') {
+    form.value.siteId = '';
+    openAddSiteModal();
+    return;
+  }
+  form.value.zoneId = '';
+  selectedCheckpoints.value = [];
+  try {
+    const fetchedZones = await zoneService.fetchZones(form.value.siteId || null);
+    if (fetchedZones) zones.value = fetchedZones;
+  } catch (e) {}
+};
+
+const submitAddSite = async () => {
+  if (!newSiteForm.value.name.trim()) return;
+  isSavingSite.value = true;
+  try {
+    const created = await siteService.createSite({
+      name: newSiteForm.value.name.trim(),
+      locName: newSiteForm.value.name.trim(),
+      code: newSiteForm.value.code.trim() || undefined,
+      address: newSiteForm.value.address.trim() || undefined,
+      locAddress: newSiteForm.value.address.trim() || undefined,
+      geofence_radius: newSiteForm.value.geofence_radius || 500,
+      status: 'active'
+    });
+    if (created) {
+      if (!sites.value.some(s => String(s.id) === String(created.id))) {
+        sites.value.push(created);
+      }
+      form.value.siteId = created.id;
+    }
+    showAddSiteModal.value = false;
+  } catch (err) {
+    console.error("Failed to create site:", err);
+    alert(`Failed to create site: ${err.message || 'Unknown error'}`);
+  } finally {
+    isSavingSite.value = false;
+  }
+};
 
 const openAddZoneModal = () => {
   newZoneForm.value = {
@@ -858,7 +1147,7 @@ const submitAddGuard = async () => {
     // Find guard role if not already cached
     let roleId = null;
     try {
-      const roleRes = await fetch(`${apiUrl}/items/roleConfigurator?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][_and][1][accessType][_eq]=accessEasy&filter[_and][0][_and][2][roleName][_contains]=guard&fields[]=id`, { headers: { Authorization: `Bearer ${token}` } });
+      const roleRes = await fetch(`${apiUrl}/items/roleConfigurator?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][_and][1][accessType][_in]=accessEasy,accesseasy_patrol,patrol&filter[_and][0][_and][2][roleName][_contains]=guard&fields[]=id`, { headers: { Authorization: `Bearer ${token}` } });
       if (roleRes.ok) {
         const roleData = await roleRes.json();
         roleId = roleData.data?.[0]?.id || null;
@@ -872,10 +1161,12 @@ const submitAddGuard = async () => {
       title: newGuardForm.value.badge_number.trim() || undefined,
       email: newGuardForm.value.email.trim() || undefined,
       tenant: tenantId,
-      status: 'active'
+      status: 'active',
+      userApp: 'accesseasy, patrol'
     };
     if (roleId) {
       payload.accesseasyRole = roleId;
+      payload.accesseasyPatrolRole = roleId;
     }
 
     let createdGuardId = null;
@@ -986,6 +1277,11 @@ const openInlineCreate = () => {
   inlineForm.value = {
     name: '',
     zoneId: form.value.zoneId || (zones.value[0]?.id || ''),
+    building: '',
+    floor: '',
+    dwell_time: 0,
+    status: 'active',
+    nfc_tag_id: '',
     expectedOffset: (selectedCheckpoints.value.length + 1) * 5
   };
   isCreatingInline.value = true;
@@ -1034,8 +1330,8 @@ const removeCheckpoint = (idx) => {
 
 const createInlineCheckpoint = async () => {
   const targetZoneId = inlineForm.value.zoneId || form.value.zoneId;
-  if (!inlineForm.value.name || !targetZoneId) return;
-  if (!form.value.zoneId) {
+  if (!inlineForm.value.name) return;
+  if (!form.value.zoneId && targetZoneId) {
     form.value.zoneId = targetZoneId;
   }
   savingInline.value = true;
@@ -1043,31 +1339,54 @@ const createInlineCheckpoint = async () => {
     const payload = {
       name: inlineForm.value.name,
       checkpoint_id: 'CP' + Math.floor(1000 + Math.random() * 9000),
-      instructions: `__ZONE_ASSIGNMENT__:${targetZoneId}`,
-      status: 'active'
+      instructions: targetZoneId ? `__ZONE_ASSIGNMENT__:${targetZoneId}` : '',
+      zone: targetZoneId || null,
+      building_id: inlineForm.value.building || null,
+      floor: inlineForm.value.floor || null,
+      dwell_time: inlineForm.value.dwell_time || 0,
+      nfc_tag_id: inlineForm.value.nfc_tag_id || null,
+      status: inlineForm.value.status || 'active'
     };
-    const updatedList = await patrolService.saveMasterCheckpoint(payload);
+    const savedCp = await patrolService.saveMasterCheckpoint(payload);
     
-    // Checkpoint saved successfully. Find it and add to route
-    if (updatedList) {
+    // Checkpoint saved successfully. Fetch refreshed master list
+    const updatedList = await patrolService.getMasterCheckpoints();
+    if (updatedList && Array.isArray(updatedList)) {
       updatedList.forEach(cp => {
         const match = cp.instructions?.match(/__ZONE_ASSIGNMENT__:(\d+)/);
-        cp.zone = match ? Number(match[1]) : null;
+        cp.zone = match ? Number(match[1]) : (cp.zone || null);
       });
       allMasterCheckpoints.value = updatedList;
-      
-      const newCp = updatedList.find(c => c.name === inlineForm.value.name && c.checkpoint_id === payload.checkpoint_id);
-      if (newCp) {
-        addCheckpoint({ ...newCp, expectedOffset: inlineForm.value.expectedOffset });
-      }
+    }
+    
+    const newCp = savedCp || (Array.isArray(updatedList) && updatedList.find(c => c.name === inlineForm.value.name));
+    if (newCp) {
+      const match = newCp.instructions?.match(/__ZONE_ASSIGNMENT__:(\d+)/);
+      newCp.zone = match ? Number(match[1]) : (targetZoneId || null);
+      addCheckpoint({ 
+        ...newCp, 
+        building: inlineForm.value.building,
+        floor: inlineForm.value.floor,
+        dwell_time: inlineForm.value.dwell_time,
+        expectedOffset: inlineForm.value.expectedOffset || 5 
+      });
     }
     
     // Reset form
-    inlineForm.value = { name: '', zoneId: '', expectedOffset: 5 };
+    inlineForm.value = {
+      name: '',
+      zoneId: '',
+      building: '',
+      floor: '',
+      dwell_time: 0,
+      status: 'active',
+      nfc_tag_id: '',
+      expectedOffset: 5
+    };
     isCreatingInline.value = false;
   } catch (err) {
-    console.error("Failed to inline create checkpoint", err);
-    alert("Failed to create checkpoint. Please try again.");
+    console.error("Failed to create checkpoint", err);
+    alert(err?.message || "Failed to create checkpoint. Please try again.");
   } finally {
     savingInline.value = false;
   }
@@ -1158,62 +1477,56 @@ const submit = async () => {
   
   saving.value = true;
   try {
-    // 1. Create a Checkpoint Group representing the route configuration
+    // 1. Create a Checkpoint Group representing the route configuration (1 API call)
     const group = await patrolService.createCheckpointGroup({
       name: form.value.name.trim(),
+      site_id: form.value.siteId || null,
+      site: form.value.siteId || null,
       zone_id: form.value.zoneId,
       frequency: form.value.repeat === 'none' ? 'custom' : `every_${form.value.repeat}h`,
       grace_period: 15 // static grace period buffer
     });
 
-    // 2. Clone and save checkpoints to this new group in order
-    for (let index = 0; index < selectedCheckpoints.value.length; index++) {
-      const originalCp = selectedCheckpoints.value[index];
-      const clone = {
-        name: originalCp.name,
-        checkpoint_id: originalCp.checkpoint_id || originalCp.id,
-        building_id: originalCp.building_id,
-        floor: originalCp.floor,
-        dwell_time: enableAdvancedTiming.value ? (originalCp.expectedOffset || 0) : 0,
-        nfc_uid: originalCp.nfc_uid,
-        status: 'pending',
-        sort_order: index,
-        zone: form.value.zoneId,
-        latitude: originalCp.latitude || null,
-        longitude: originalCp.longitude || null,
-        x: originalCp.x || 0,
-        y: originalCp.y || 0
-      };
-      await patrolService.saveCheckpoint(group.id, clone);
-    }
+    // 2. Clone and batch-save checkpoints to this new group (1 single API call for all checkpoints)
+    const clones = selectedCheckpoints.value.map((originalCp, index) => ({
+      name: originalCp.name,
+      checkpoint_id: originalCp.checkpoint_id || ('CP' + Math.floor(1000 + Math.random() * 9000)),
+      building_id: originalCp.building_id || originalCp.building || null,
+      floor: originalCp.floor || null,
+      dwell_time: Number(originalCp.dwell_time) || (enableAdvancedTiming.value ? Number(originalCp.expectedOffset || 0) : 0),
+      nfc_uid: originalCp.nfc_uid || originalCp.nfc_tag_id || null,
+      status: 'active',
+      sort_order: index,
+      zone: form.value.zoneId
+    }));
+    await patrolService.saveCheckpointsBatch(group.id, clones);
 
-    // 3. Generate patrol rounds based on repeat
+    // 3. Batch-generate scheduled patrol rounds (1 single API call for all scheduled timings)
     const timings = generateTimings();
     const todayStr = new Date().toISOString().split('T')[0];
     const z = zones.value.find(z => z.id === form.value.zoneId);
 
-    for (const time of timings) {
-      const scheduledTimeStr = `${todayStr}T${time}:00`;
-      
-      const payload = {
-        zoneId: form.value.zoneId,
-        zoneName: z?.zoneName || z?.name || 'Security Zone',
-        groupId: group.id,
-        routeName: form.value.name.trim(),
-        guardId: form.value.guardId || null,
-        guardName: form.value.guardId
-          ? (guards.value.find(g => g.id === form.value.guardId)?.name || 'Assigned Guard')
-          : 'Unassigned',
-        date: todayStr,
-        scheduledTime: scheduledTimeStr,
-        status: 'scheduled',
-        allowed_delay: form.value.maxDuration, // use max duration as allowed delay boundary
-        qr_support: true
-      };
+    const patrolRounds = timings.map(time => ({
+      site: form.value.siteId || null,
+      siteId: form.value.siteId || null,
+      zoneId: form.value.zoneId,
+      zoneName: z?.zoneName || z?.name || 'Security Zone',
+      groupId: group.id,
+      routeName: form.value.name.trim(),
+      guardId: form.value.guardId || null,
+      guardName: form.value.guardId
+        ? (guards.value.find(g => g.id === form.value.guardId)?.name || 'Assigned Guard')
+        : 'Unassigned',
+      date: todayStr,
+      scheduledTime: `${todayStr}T${time}:00`,
+      status: 'scheduled',
+      allowed_delay: form.value.maxDuration,
+      qr_support: true
+    }));
 
-      await patrolService.createPatrol(payload);
-    }
+    await patrolService.createPatrolsBatch(patrolRounds);
 
+    subscriptionService.clearCache();
     router.push('/dashboard/patrols');
   } catch (err) {
     alert(`Failed to save patrol plan: ${err.message}`);
@@ -1231,6 +1544,12 @@ onMounted(async () => {
   const tenantId = authService.getTenantId();
   const apiUrl = import.meta.env.VITE_API_URL;
   
+  // Fetch Sites
+  try {
+    const fetchedSites = await siteService.fetchSites();
+    sites.value = fetchedSites || [];
+  } catch (e) { console.error('Failed to fetch sites:', e); }
+
   // Fetch Zones
   try {
     const fetchedZones = await zoneService.fetchZones();

@@ -634,7 +634,7 @@ async function handleRegistration() {
         role: adminRoleId,
         tenant: tenantId,
         appAccess: true,
-        userApp: "accesseasy",
+        userApp: "accesseasy, patrol",
       },
     };
     await api.post("/items/personalModule", personalModulePayload);

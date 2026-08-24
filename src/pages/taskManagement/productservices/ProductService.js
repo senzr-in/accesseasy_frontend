@@ -1,10 +1,8 @@
 import axios from "axios"
 import { currentUserTenant } from "@/utils/currentUserTenant";
+import { authService } from "@/services/authService";
 
 import { Product, ProductCategory } from "../productmodels/Product"
-
-// Get token from localStorage or environment
-const token = "bennGJlPG_qUNKhCSE9WFUo6G_RnQAts" ||""
 
 export class ProductService {
   constructor() {
@@ -12,8 +10,14 @@ export class ProductService {
     this.axios = axios.create({
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
+    })
+    this.axios.interceptors.request.use((config) => {
+      const token = authService.getToken();
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
     })
   }
 
@@ -171,8 +175,14 @@ export class CategoryService {
     this.axios = axios.create({
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
+    })
+    this.axios.interceptors.request.use((config) => {
+      const token = authService.getToken();
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
     })
   }
 
@@ -253,10 +263,16 @@ export class FileService {
       const formData = new FormData()
       formData.append("file", file)
 
-      const response = await axios.post(`${this.baseUrl}/files?access_token=${token}`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+      const token = authService.getToken();
+      const headers = {
+        "Content-Type": "multipart/form-data",
+      };
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      const response = await axios.post(`${this.baseUrl}/files`, formData, {
+        headers,
       })
 
       if (response.status === 200) {
@@ -284,10 +300,16 @@ export class FileService {
       const formData = new FormData()
       formData.append("file", file)
 
-      const response = await axios.post(`${this.baseUrl}/files?access_token=${token}`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+      const token = authService.getToken();
+      const headers = {
+        "Content-Type": "multipart/form-data",
+      };
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      const response = await axios.post(`${this.baseUrl}/files`, formData, {
+        headers,
       })
 
       if (response.status === 200) {

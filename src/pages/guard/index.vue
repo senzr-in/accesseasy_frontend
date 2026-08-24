@@ -389,7 +389,7 @@
           </div>
 
           <div class="space-y-1.5">
-            <label class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Email Address (Optional)</label>
+            <label class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Email Address</label>
             <input
               v-model="form.email"
               type="email"
@@ -398,16 +398,42 @@
             >
           </div>
 
-          <div class="grid grid-cols-2 gap-4">
-            <div class="space-y-1.5">
-              <label class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Mobile Number</label>
+          <!-- Mobile Number with Country Code Dropdown -->
+          <div class="space-y-1.5">
+            <label class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Mobile Number *</label>
+            <div class="flex gap-2">
+              <select
+                v-model="form.country_code"
+                class="w-28 h-9 px-2 rounded-md border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 shadow-sm shrink-0"
+              >
+                <option v-for="c in countryCodes" :key="c.code" :value="c.code">
+                  {{ c.flag }} {{ c.code }}
+                </option>
+              </select>
               <input
                 v-model="form.phone"
-                type="text"
+                type="tel"
                 placeholder="10-digit number"
-                class="w-full h-9 px-3 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-slate-900 dark:text-slate-100 shadow-sm focus:border-emerald-500 transition-all"
+                class="flex-1 h-9 px-3 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-slate-900 dark:text-slate-100 shadow-sm focus:border-emerald-500 transition-all"
               >
             </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <!-- Guard Role Selector -->
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Guard Role *</label>
+              <select
+                v-model="form.role_id"
+                class="w-full h-9 px-3 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-slate-900 dark:text-slate-100 shadow-sm focus:border-emerald-500 transition-all"
+              >
+                <option v-for="r in availableRoles" :key="r.id" :value="r.id">
+                  {{ r.roleName }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Assigned Security Zone -->
             <div class="space-y-1.5">
               <label class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Assigned Zone</label>
               <select
@@ -428,12 +454,32 @@
             </div>
           </div>
 
+          <!-- Share Login Link via Email Option -->
+          <div class="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
+            <label class="flex items-start gap-2.5 cursor-pointer select-none">
+              <input
+                v-model="form.send_login_link"
+                type="checkbox"
+                class="w-4 h-4 mt-0.5 text-emerald-600 rounded border-slate-300 dark:border-slate-700 focus:ring-emerald-500 cursor-pointer"
+              >
+              <div>
+                <span class="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                  <Mail class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                  Share Login Link & App Access via Email
+                </span>
+                <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">
+                  Sends onboarding instructions and one-click login link to the officer's email.
+                </p>
+              </div>
+            </label>
+          </div>
+
           <div
             v-if="!editingGuard"
             class="pt-2 border-t border-slate-100 dark:border-slate-700"
           >
             <p class="text-[9px] text-slate-500 dark:text-slate-400 font-semibold mb-2">
-              Guards login using their mobile number and OTP.
+              Guards login on mobile using their mobile number (or email) and OTP.
             </p>
           </div>
         </div>
@@ -509,11 +555,37 @@ const isDeleting = ref(false);
 const editingGuard = ref(null);
 const doors = ref([]);
 const fileInput = ref(null);
+
+const countryCodes = [
+  { code: '+91', country: 'IN', flag: '🇮🇳', name: 'India (+91)' },
+  { code: '+1', country: 'US', flag: '🇺🇸', name: 'USA (+1)' },
+  { code: '+44', country: 'GB', flag: '🇬🇧', name: 'UK (+44)' },
+  { code: '+971', country: 'AE', flag: '🇦🇪', name: 'UAE (+971)' },
+  { code: '+966', country: 'SA', flag: '🇸🇦', name: 'Saudi Arabia (+966)' },
+  { code: '+65', country: 'SG', flag: '🇸🇬', name: 'Singapore (+65)' },
+  { code: '+60', country: 'MY', flag: '🇲🇾', name: 'Malaysia (+60)' },
+  { code: '+61', country: 'AU', flag: '🇦🇺', name: 'Australia (+61)' },
+  { code: '+49', country: 'DE', flag: '🇩🇪', name: 'Germany (+49)' },
+  { code: '+33', country: 'FR', flag: '🇫🇷', name: 'France (+33)' },
+  { code: '+81', country: 'JP', flag: '🇯🇵', name: 'Japan (+81)' },
+  { code: '+234', country: 'NG', flag: '🇳🇬', name: 'Nigeria (+234)' },
+  { code: '+27', country: 'ZA', flag: '🇿🇦', name: 'South Africa (+27)' },
+];
+
+const availableRoles = ref([
+  { id: 4940, roleName: 'Security Guard' },
+  { id: 4941, roleName: 'Head Guard' },
+  { id: 4942, roleName: 'Patrol Supervisor' },
+]);
+
 const form = ref({ 
   first_name: '', 
   last_name: '', 
   email: '', 
+  country_code: '+91',
   phone: '',
+  role_id: 4940,
+  send_login_link: true,
   assigned_door: null,
   avatarFile: null,
   avatarPreview: null,
@@ -582,7 +654,10 @@ const openAddDialog = () => {
     first_name: '', 
     last_name: '', 
     email: '', 
+    country_code: '+91',
     phone: '',
+    role_id: availableRoles.value[0]?.id || guardRoleId.value || null,
+    send_login_link: true,
     assigned_door: null,
     avatarFile: null,
     avatarPreview: null,
@@ -594,11 +669,26 @@ const openAddDialog = () => {
 const editGuard = async (guard) => {
   selectedGuard.value = null;
   editingGuard.value = guard;
+  
+  // Extract country code if present (e.g. +91, +1, +44)
+  let matchedCode = '+91';
+  let cleanPhone = guard.phone || '';
+  for (const c of countryCodes) {
+    if (cleanPhone.startsWith(c.code)) {
+      matchedCode = c.code;
+      cleanPhone = cleanPhone.slice(c.code.length);
+      break;
+    }
+  }
+
   form.value = {
     first_name: guard.first_name || '',
     last_name: guard.last_name || '',
-    email: guard.email || '',
-    phone: (guard.phone || '').replace(/^\+91/, ''),
+    email: (guard.email && !guard.email.includes('@accesseasy.app')) ? guard.email : '',
+    country_code: matchedCode,
+    phone: cleanPhone,
+    role_id: guard.accesseasyRole?.id || guard.accesseasyRole || availableRoles.value[0]?.id || guardRoleId.value || null,
+    send_login_link: false,
     assigned_door: null,
     avatarFile: null,
     avatarPreview: null,
@@ -652,7 +742,9 @@ const confirmDelete = async () => {
 const fetchDoors = async () => {
   try {
     const token = authService.getToken();
+    if (!token || !authService.isAuthenticated()) return;
     const tenantId = await currentUserTenant.getTenantIdAsync();
+    if (!tenantId) return;
     const res = await fetch(`${apiUrl}/items/doors?filter[tenant][_eq]=${tenantId}&filter[status][_neq]=archived&fields[]=id&fields[]=doorName`, {
       headers: { Authorization: `Bearer ${token}` }
     });
@@ -668,15 +760,21 @@ const fetchDoors = async () => {
 const fetchGuardRoleId = async () => {
   try {
     const token = authService.getToken();
+    if (!token || !authService.isAuthenticated()) return null;
     const tenantId = await currentUserTenant.getTenantIdAsync();
+    if (!tenantId) return null;
     const res = await fetch(
-      `${apiUrl}/items/roleConfigurator?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][_and][1][accessType][_eq]=accessEasy&filter[_and][0][_and][2][roleName][_contains]=guard&fields[]=id`,
+      `${apiUrl}/items/roleConfigurator?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][_and][1][accessType][_in]=accessEasy,accesseasy_patrol,patrol&fields[]=id&fields[]=roleName`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     if (res.ok) {
       const data = await res.json();
       if (data.data && data.data.length > 0) {
+        availableRoles.value = data.data;
         guardRoleId.value = data.data[0].id;
+        if (!form.value.role_id) {
+          form.value.role_id = data.data[0].id;
+        }
         return data.data[0].id;
       }
     }
@@ -687,10 +785,12 @@ const fetchGuardRoleId = async () => {
 };
 
 const fetchGuards = async () => {
+  const token = authService.getToken();
+  if (!token || !authService.isAuthenticated()) return;
   loading.value = true;
   try {
-    const token = authService.getToken();
     const tenantId = await currentUserTenant.getTenantIdAsync();
+    if (!tenantId) return;
     
     let roleId = guardRoleId.value;
     if (!roleId) {
@@ -741,7 +841,8 @@ const fetchGuards = async () => {
 
 const saveGuard = async () => {
   if (!form.value.first_name.trim()) return alert("First name is required");
-  if (!form.value.phone || form.value.phone.length < 10) return alert("Valid 10-digit mobile number is required");
+  const cleanDigits = form.value.phone.replace(/\D/g, '');
+  if (!cleanDigits || cleanDigits.length < 7) return alert("Valid mobile number is required");
   
   saving.value = true;
   try {
@@ -754,10 +855,12 @@ const saveGuard = async () => {
     const roleData = await roleRes.json();
     const employeeRoleId = roleData?.data?.[0]?.id;
 
+    const fullPhone = `${form.value.country_code || '+91'}${cleanDigits}`;
+
     const payload = {
       first_name: form.value.first_name,
       last_name: form.value.last_name,
-      phone: `+91${form.value.phone.replace(/\D/g, '')}`,
+      phone: fullPhone,
     };
     
     if (form.value.email) {
@@ -765,8 +868,9 @@ const saveGuard = async () => {
     }
     
     if (!editingGuard.value) {
-      payload.userApp = 'accesseasy';
-      payload.accesseasyRole = guardRoleId.value || null;
+      payload.userApp = 'accesseasy_patrol';
+      payload.accesseasyRole = form.value.role_id || guardRoleId.value || null;
+      payload.accesseasyPatrolRole = form.value.role_id || guardRoleId.value || null;
       payload.tenant = tenantId;
       payload.role = employeeRoleId;
       if (!payload.email) payload.email = `guard_${Date.now()}@accesseasy.app`;
@@ -870,7 +974,9 @@ const saveGuard = async () => {
 };
 
 onMounted(() => {
-  fetchGuards();
-  fetchDoors();
+  if (authService.isAuthenticated() && authService.getToken()) {
+    fetchGuards();
+    fetchDoors();
+  }
 });
 </script>

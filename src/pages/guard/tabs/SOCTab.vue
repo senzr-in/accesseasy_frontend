@@ -40,7 +40,7 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, onUnmounted } from 'vue';
 import CommandBar from '../components/shared/CommandBar.vue';
 import KPIBar from '../components/soc/KPIBar.vue';
 import LiveMapWidget from '../components/soc/LiveMapWidget.vue';
@@ -55,5 +55,10 @@ const socStore = useSOCStore();
 onMounted(() => {
   // Initialize the unified socket/data connection when the SOC dashboard mounts
   socStore.initSocketConnection();
+});
+
+onUnmounted(() => {
+  // Clean up polling when user leaves SOC tab
+  socStore.stopPolling();
 });
 </script>

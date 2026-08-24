@@ -643,21 +643,30 @@ const fetchIncidents = async () => {
   try {
     const token = authService.getToken();
     const tenantId = authService.getTenantId();
+    if (!token || !tenantId) return;
     
-    // Fetch from Directus API
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/incident_reports?filter[tenant][_eq]=${tenantId}&sort=-date_created&limit=100`, {
+    // Fetch from Directus API (patrol_alerts collection)
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/patrol_alerts?filter[tenant][_eq]=${tenantId}&sort=-date_created&limit=100`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     
     if (res.ok) {
       const data = await res.json();
-      incidents.value = data.data || [];
+      incidents.value = (data.data || []).map(alert => ({
+        ...alert,
+        reportId: alert.reportId || `ALT-${alert.id}`,
+        type: alert.type || alert.alert_type || 'Incident',
+        severity: alert.severity || (alert.type === 'sos' ? 'Critical' : 'Medium'),
+        dateTime: alert.date_created || alert.timestamp || new Date().toISOString(),
+        description: alert.message || alert.description || 'Alert logged',
+        guardName: alert.guard_name || alert.guard?.firstName || 'Guard',
+        status: alert.status || 'open'
+      }));
     } else {
-      // Graceful fallback to LocalStorage if endpoint does not exist yet
       loadFromLocalStorage();
     }
   } catch (err) {
-    console.warn("API unavailable, falling back to local database persistence:", err);
+    console.warn("API fallback to local cache:", err);
     loadFromLocalStorage();
   } finally {
     loading.value = false;
@@ -673,40 +682,7 @@ const loadFromLocalStorage = () => {
       incidents.value = [];
     }
   } else {
-    // Generate initial dummy data for professional presentation
-    incidents.value = [
-      {
-        id: 1,
-        reportId: 'INC-9F8A',
-        type: 'Intruder / Trespassing',
-        severity: 'Critical',
-        location: 'Zone 4, Perimeter Gate Fence',
-        guardName: 'beast',
-        status: 'open',
-        assignedTo: 'beast',
-        dateTime: new Date(Date.now() - 3600000).toISOString(),
-        description: 'Sensor alert triggered on Perimeter Zone 4. Identified unauthorized personnel attempting to scale the outer chain-link fence.',
-        images: [],
-        closedBy: '',
-        closedTime: ''
-      },
-      {
-        id: 2,
-        reportId: 'INC-2A4F',
-        type: 'Unsecure Entry / Broken Lock',
-        severity: 'Medium',
-        location: 'Ground Floor Lobby',
-        guardName: userName,
-        status: 'closed',
-        assignedTo: userName,
-        dateTime: new Date(Date.now() - 86400000).toISOString(),
-        description: 'Found Lobby side entry door latch unsecured during shift change rounds. Locked manually and logged alert.',
-        images: [],
-        closedBy: userName,
-        closedTime: new Date(Date.now() - 85000000).toISOString()
-      }
-    ];
-    saveToLocalStorage();
+    incidents.value = [];
   }
 };
 
@@ -718,17 +694,21 @@ const fetchGuards = async () => {
   try {
     const token = authService.getToken();
     const tenantId = authService.getTenantId();
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/guards?filter[tenant][_eq]=${tenantId}&fields=id,name&limit=100`, {
+    if (!token || !tenantId) return;
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule?filter[tenant][_eq]=${tenantId}&fields=id,firstName,lastName,personalPhone&limit=100`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     if (res.ok) {
       const data = await res.json();
-      guardsList.value = data.data || [];
+      guardsList.value = (data.data || []).map(g => ({
+        id: g.id,
+        name: `${g.firstName || ''} ${g.lastName || ''}`.trim() || g.personalPhone || 'Guard'
+      }));
     } else {
-      guardsList.value = [{ id: 1, name: 'beast' }, { id: 2, name: userName }];
+      guardsList.value = [{ id: 1, name: userName }];
     }
   } catch {
-    guardsList.value = [{ id: 1, name: 'beast' }, { id: 2, name: userName }];
+    guardsList.value = [{ id: 1, name: userName }];
   }
 };
 
@@ -783,8 +763,8 @@ const saveIncident = async () => {
     const tenantId = authService.getTenantId();
     const method = isEditing.value ? 'PATCH' : 'POST';
     const url = isEditing.value 
-      ? `${import.meta.env.VITE_API_URL}/items/incident_reports/${form.value.id}`
-      : `${import.meta.env.VITE_API_URL}/items/incident_reports`;
+      ? `${import.meta.env.VITE_API_URL}/items/patrol_alerts/${form.value.id}`
+      : `${import.meta.env.VITE_API_URL}/items/patrol_alerts`;
     
     await fetch(url, {
       method,
@@ -806,7 +786,7 @@ const closeIncident = async (inc) => {
   
   try {
     const token = authService.getToken();
-    await fetch(`${import.meta.env.VITE_API_URL}/items/incident_reports/${inc.id}`, {
+    await fetch(`${import.meta.env.VITE_API_URL}/items/patrol_alerts/${inc.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({ status: 'closed', closedBy: userName, closedTime: inc.closedTime })
@@ -822,7 +802,7 @@ const reopenIncident = async (inc) => {
 
   try {
     const token = authService.getToken();
-    await fetch(`${import.meta.env.VITE_API_URL}/items/incident_reports/${inc.id}`, {
+    await fetch(`${import.meta.env.VITE_API_URL}/items/patrol_alerts/${inc.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({ status: 'open', closedBy: '', closedTime: '' })

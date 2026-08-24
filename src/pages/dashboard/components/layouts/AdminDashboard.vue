@@ -270,7 +270,11 @@ import { authService } from '@/services/authService';
 import { currentUserTenant } from '@/utils/currentUserTenant';
 import { useDashboardState } from '@/composables/useDashboardState';
 import { useZoneFilter } from '@/composables/useZoneFilter';
+import { patrolService } from '@/services/patrolService';
+import { zoneService } from '@/services/zoneService';
 import { Loader } from '@googlemaps/js-api-loader';
+
+let cachedGuardRoleId = null;
 
 const router = useRouter();
 const token = authService.getToken();
@@ -819,7 +823,6 @@ const loadStats = async (isBackground = false) => {
 
     // Patrol stats from service
     try {
-      const { patrolService } = await import('@/services/patrolService');
       const patrols = await patrolService.getPatrols();
       const cpGroups = await patrolService.fetchCheckpointGroups();
       
@@ -828,18 +831,19 @@ const loadStats = async (isBackground = false) => {
       
       // Global Guard Tracking: Fetch all guards who are "On Duty" (status === 'active')
       try {
-        const roleRes = await fetch(
-          `${apiUrl}/items/roleConfigurator?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][_and][1][accessType][_eq]=accessEasy&filter[_and][0][_and][2][roleName][_contains]=guard&fields[]=id`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        let guardRoleId = null;
-        if (roleRes.ok) {
-          const roleData = await roleRes.json();
-          guardRoleId = roleData.data?.[0]?.id || null;
+        if (!cachedGuardRoleId) {
+          const roleRes = await fetch(
+            `${apiUrl}/items/roleConfigurator?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][_and][1][accessType][_in]=accessEasy,accesseasy_patrol,patrol&filter[_and][0][_and][2][roleName][_contains]=guard&fields[]=id`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          if (roleRes.ok) {
+            const roleData = await roleRes.json();
+            cachedGuardRoleId = roleData.data?.[0]?.id || null;
+          }
         }
 
         let filterStr = `filter[tenant][_eq]=${tenantId}&filter[status][_eq]=active`;
-        if (guardRoleId) filterStr += `&filter[accesseasyRole][_eq]=${guardRoleId}`;
+        if (cachedGuardRoleId) filterStr += `&filter[accesseasyRole][_eq]=${cachedGuardRoleId}`;
 
         const usersRes = await fetch(`${apiUrl}/users?${filterStr}&fields=id,first_name,last_name,avatar,phone,email,location,currentLat,currentLng`, {
           headers: { Authorization: `Bearer ${token}` }
@@ -893,7 +897,6 @@ const loadStats = async (isBackground = false) => {
 
     // Zone count
     try {
-      const { zoneService } = await import('@/services/zoneService');
       const zones = await zoneService.fetchZones();
       stats.value.zones = zones.length;
     } catch (e) { /* zone service fallback */ }
@@ -1097,12 +1100,12 @@ onMounted(async () => {
   await loadStats();
   await loadIncidents();
   loadDashboardData();
-  startPolling(5000); // Poll every 5 seconds
+  startPolling(15000); // Polling for metrics and logs
   refreshInterval = setInterval(async () => {
     await loadStats(true);
     await loadIncidents();
     centerMapOnActiveGuards();
-  }, 5000); // Refresh stats and map every 5 seconds
+  }, 15000); // Coordinated 15s refresh
   if (activeSection.value === 'patrol') {
     await initDashboardMap();
     centerMapOnActiveGuards();
@@ -1134,14 +1137,14 @@ const handleVisibilityChange = async () => {
     clearInterval(refreshInterval);
   } else {
     loadDashboardData();
-    startPolling(5000);
+    startPolling(15000);
     refreshInterval = setInterval(async () => {
       await loadStats(true);
       await loadIncidents();
       if (activeSection.value === 'patrol') {
         centerMapOnActiveGuards();
       }
-    }, 5000);
+    }, 15000);
   }
 };
 

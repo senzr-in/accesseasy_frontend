@@ -358,8 +358,6 @@ const autoGenerateEmployeeQr = async () => {
   }
 };
 
-let alertsInterval = null;
-
 onMounted(() => {
   window.addEventListener('keydown', handleKeyDown);
   const role = authService.getUserRole();
@@ -369,14 +367,10 @@ onMounted(() => {
   if (role === 'Employee') {
     autoGenerateEmployeeQr();
   }
-  
-  fetchAlerts();
-  alertsInterval = setInterval(fetchAlerts, 10000); // Poll for alerts every 10 seconds
 });
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeyDown);
-  if (alertsInterval) clearInterval(alertsInterval);
 });
 
 const currentPageTitle = computed(() => {

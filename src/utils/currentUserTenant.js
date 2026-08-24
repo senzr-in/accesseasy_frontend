@@ -68,23 +68,26 @@ class CurrentUserTenant {
       }
 
       if (userData) {
-        // Verify that the user's tenant has access to accesseasy
+        // Verify that the user's tenant has access to accesseasy or patrol
         let userApps = userData.tenant?.userApp || [];
         if (typeof userApps === "string") {
           try {
             userApps = JSON.parse(userApps);
           } catch (e) {
-            userApps = [];
+            userApps = userApps.split(',').map(s => ({ userApp: s.trim() }));
           }
         }
-        hasAccess = !userData.tenant || (Array.isArray(userApps) && userApps.some(app => String(app.userApp || "").toLowerCase() === "accesseasy"));
+        hasAccess = !userData.tenant || (Array.isArray(userApps) && userApps.some(app => {
+          const name = String(app.userApp || app || "").toLowerCase().replace(/[\s-]/g, "_");
+          return name === "accesseasy_patrol";
+        }));
 
         // If tenant does not have accesseasy entry yet (e.g. fresh Google signup), auto-allow and register in background
         if (!hasAccess && userData.tenant) {
           hasAccess = true;
           const tId = userData.tenant?.tenantId || userData.tenant?.id || (typeof userData.tenant === "string" ? userData.tenant : null);
           if (tId && userData.id) {
-            authService.ensureTenantUserApp(tId, userData.id, "accesseasy").catch(e =>
+            authService.ensureTenantUserApp(tId, userData.id, "patrol").catch(e =>
               console.warn("[currentUserTenant] Background userApp registration:", e.message)
             );
           }

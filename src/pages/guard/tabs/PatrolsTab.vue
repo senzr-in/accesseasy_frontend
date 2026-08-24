@@ -816,20 +816,20 @@ async function load() {
     
     const todayPatrols = patrols; // Removed date filter to show all patrols
     
-    // Load checkpoints for today's patrols (todayPatrols already computed above)
+    // Load checkpoints for today's patrols
     const cpMap = {};
-    
-    // Deduplicate API calls for routes
-    const routeCache = {};
 
     await Promise.all(todayPatrols.map(async p => {
       const gId = typeof p.groupId === 'object' && p.groupId ? p.groupId.id : p.groupId;
       if (!gId) return;
 
-      if (!routeCache[gId]) {
-        routeCache[gId] = patrolService.getCheckpointsForRoute(gId);
+      if (!globalRouteCache[gId] || (Date.now() - (globalRouteCache[gId].timestamp || 0) > 60000)) {
+        globalRouteCache[gId] = {
+          data: await patrolService.getCheckpointsForRoute(gId),
+          timestamp: Date.now()
+        };
       }
-      const staticCps = await routeCache[gId];
+      const staticCps = globalRouteCache[gId].data || [];
       
       // Bug #5: Scope checkpoint scan state to this patrol's time window.
       // If a checkpoint was scanned before this patrol's scheduled start, treat it
@@ -861,7 +861,7 @@ async function load() {
       }
     }));
     
-    // Batch reactive assignments synchronously at the end to prevent screen flicker and layout shift
+    // Batch reactive assignments synchronously at the end
     checkpointMap.value = cpMap;
     allPatrols.value = todayPatrols;
     checkpointGroups.value = groups;
@@ -869,7 +869,9 @@ async function load() {
     const dismissedIds = new Set(getDismissedAlertIds());
     activeAlerts.value = (alerts || []).filter(a => a && a.status !== 'resolved' && !dismissedIds.has(a.id));
   } catch (e) { console.error(e); }
+}
 
+const fetchStaticMetadata = async () => {
   try {
     zones.value = await zoneService.fetchZones();
   } catch (e) { /* zones may not be available */ }
@@ -880,7 +882,7 @@ async function load() {
     const tenantId = authService.getTenantId();
     const apiUrl = import.meta.env.VITE_API_URL;
     
-    const roleRes = await fetch(`${apiUrl}/items/roleConfigurator?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][_and][1][accessType][_eq]=accessEasy&filter[_and][0][_and][2][roleName][_contains]=guard&fields[]=id`, { headers: { Authorization: `Bearer ${token}` } });
+    const roleRes = await fetch(`${apiUrl}/items/roleConfigurator?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][_and][1][accessType][_in]=accessEasy,accesseasy_patrol,patrol&filter[_and][0][_and][2][roleName][_contains]=guard&fields[]=id`, { headers: { Authorization: `Bearer ${token}` } });
     let guardRoleId = null;
     if (roleRes.ok) {
       const roleData = await roleRes.json();
@@ -905,13 +907,15 @@ async function load() {
       }));
     }
   } catch (e) { console.error('Failed to fetch guards:', e); }
-}
+};
 
+const globalRouteCache = {};
 let pollInterval = null;
 let isPolling = false;
 
 onMounted(async () => {
   await requestNotificationPermission();
+  await fetchStaticMetadata();
   await load();
   
   if (route.query.filter) {
@@ -920,7 +924,7 @@ onMounted(async () => {
   
   notificationInterval = setInterval(() => {
     checkMissedPatrols();
-  }, 10000);
+  }, 30000);
 
   pollInterval = setInterval(async () => {
     if (isPolling) return;
@@ -931,7 +935,7 @@ onMounted(async () => {
     } finally {
       isPolling = false;
     }
-  }, 5000);
+  }, 30000);
 });
 
 onUnmounted(() => {

@@ -1,0 +1,29 @@
+# AccessEasy Patrol Robots.txt (SEO, AEO, and GEO friendly)
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /dashboard/
+Disallow: /dealer-dashboard/
+Disallow: /admin/
+Disallow: /settings/
+
+# AI Crawlers for GEO (ChatGPT, Perplexity, Claude, Gemini, Copilot)
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+Sitemap: https://patrol.accesseasy.in/sitemap.xml

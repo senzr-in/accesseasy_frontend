@@ -1,14 +1,15 @@
 import { authService } from "@/services/authService";
 import { currentUserTenant } from "@/utils/currentUserTenant";
 
-const tenantId = currentUserTenant.getTenantId();
-const token = authService.getToken();
+const getAuthToken = () => authService.getToken();
+const getTenantId = () => currentUserTenant.getTenantId() || authService.getTenantId();
 const currentYear = new Date().getFullYear();
 const startDate = `${currentYear}-04-01`;
 const endDate = `${currentYear + 1}-03-31`;
 
 // Batch GET for multiple users
 const getTdsDeductionByUsers = async (employeeIds, startDate, endDate) => {
+  const token = getAuthToken();
   if (!token || !employeeIds || employeeIds.length === 0) return {};
 
   const params = {
@@ -79,6 +80,7 @@ const getTdsDeductionByUsers = async (employeeIds, startDate, endDate) => {
 };
 const fetchPayrollVerification = async (employeeId, payrollEndDate) => {
   const employeeIds = employeeId.map((emp) => emp.employeeId).join(",");
+  const token = getAuthToken();
   if (!token) return;
 
   try {
@@ -580,6 +582,7 @@ const saveTdsDeduction = async (results, startDate, endDate) => {
       }
     }
 
+    const token = getAuthToken();
     const headers = {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
@@ -1019,6 +1022,7 @@ const saveTdsDeduction = async (results, startDate, endDate) => {
 // };
 
 const getTdsRules = async (regime) => {
+  const token = getAuthToken();
   if (!token || !regime) return [];
 
   try {

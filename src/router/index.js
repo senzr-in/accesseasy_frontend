@@ -1,6 +1,9 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { authService } from "@/services/authService";
 
+// Landing
+import LandingPage2 from "@/pages/landing/LandingPage2.vue";
+
 // Auth
 import Login from "@/components/loginAuthentication/login.vue";
 import Register from "@/components/loginAuthentication/register.vue";
@@ -138,7 +141,32 @@ if (appMode === 'security') {
 const routes = [
   {
     path: "/",
-    redirect: getRoleHome,
+    name: "Landing",
+    component: LandingPage2,
+    beforeEnter: (to, from, next) => {
+      if (authService.isAuthenticated()) {
+        next(getRoleHome());
+      } else {
+        next();
+      }
+    },
+  },
+  {
+    path: "/landing",
+    name: "LandingPage",
+    component: LandingPage2,
+  },
+  {
+    path: "/landing-2",
+    redirect: "/landing",
+  },
+  {
+    path: "/landing-v2",
+    redirect: "/landing",
+  },
+  {
+    path: "/landing-3d",
+    redirect: "/landing",
   },
   {
     path: "/dealer-dashboard",

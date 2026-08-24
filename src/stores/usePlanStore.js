@@ -113,6 +113,13 @@ const usageMeters = computed(() => {
  */
 const initPlan = async () => {
   if (loading.value) return;
+  
+  // Do not fire backend subscription queries if user is not logged in
+  if (!authService.isAuthenticated() || !authService.getToken()) {
+    ready.value = true;
+    return;
+  }
+
   loading.value = true;
   error.value = null;
 

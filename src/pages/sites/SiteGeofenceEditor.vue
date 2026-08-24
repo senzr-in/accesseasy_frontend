@@ -193,7 +193,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue';
+import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ArrowLeft, Save, Activity, MapPin } from 'lucide-vue-next';
 import { siteService } from '@/services/siteService';
@@ -316,5 +316,12 @@ onMounted(async () => {
   await nextTick();
   initMap();
   runSimulation();
+});
+
+onUnmounted(() => {
+  if (leafletMap) {
+    leafletMap.remove();
+    leafletMap = null;
+  }
 });
 </script>

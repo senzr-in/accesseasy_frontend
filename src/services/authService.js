@@ -518,56 +518,54 @@ class AuthService {
 
   getUserRole() {
     const userData = this.getUserData();
-    // Check accesseasyRole first (Directus field), then roleConfig (Knative auth-service response field)
-    const roleConfigName = userData?.accesseasyRole?.roleName || userData?.roleConfig?.roleName || "";
-    let role = "";
+    if (!userData) return "";
 
+    // 1. Directus Administrator system role check (admin_access or name contains admin)
+    if (userData?.role?.admin_access === true || userData?.role?.name?.toLowerCase()?.includes("admin")) {
+      return "Admin";
+    }
+
+    // 2. Application Role Configurator check (accesseasyPatrolRole, patrolRole, accesseasyRole, roleConfig)
+    const roleConfigName = userData?.accesseasyPatrolRole?.roleName || userData?.patrolRole?.roleName || userData?.accesseasyRole?.roleName || userData?.roleConfig?.roleName || "";
     if (roleConfigName) {
       const lowercaseName = roleConfigName.toLowerCase();
       if (lowercaseName.includes("admin")) {
-        role = "Admin";
+        return "Admin";
       } else if (lowercaseName.includes("guard") || lowercaseName.includes("security")) {
-        role = "Guard";
-      } else if (lowercaseName.includes("employee")) {
-        role = "Employee";
+        return "Guard";
       } else if (lowercaseName.includes("manager")) {
-        role = "Manager";
+        return "Manager";
+      } else if (lowercaseName.includes("employee")) {
+        // If title says Guard or Admin, honor the title
+        if (userData?.title?.toLowerCase()?.includes("guard")) return "Guard";
+        if (userData?.title?.toLowerCase()?.includes("admin")) return "Admin";
+        return "Employee";
       } else {
-        // Fallback to capitalizing the role name if it doesn't match standard keywords
-        role = roleConfigName.charAt(0).toUpperCase() + roleConfigName.slice(1);
+        return roleConfigName.charAt(0).toUpperCase() + roleConfigName.slice(1);
       }
     }
 
-    // Fallback to userData.role.name if no role config name is set or mapped
-    if (!role) {
-      const fallbackName = userData?.role?.name || "";
-      if (fallbackName) {
-        const lowerFallback = fallbackName.toLowerCase();
-        if (lowerFallback.includes("admin")) {
-          role = "Admin";
-        } else if (lowerFallback.includes("guard") || lowerFallback.includes("security")) {
-          role = "Guard";
-        } else if (lowerFallback.includes("employee")) {
-          role = "Employee";
-        } else if (lowerFallback.includes("manager")) {
-          role = "Manager";
-        } else {
-          role = fallbackName.charAt(0).toUpperCase() + fallbackName.slice(1);
-        }
-      } else {
-        role = "";
-      }
+    // 3. Title check for Admin / Guard
+    if (userData?.title?.toLowerCase()?.includes("admin") || userData?.title?.toLowerCase()?.includes("owner")) {
+      return "Admin";
+    }
+    if (userData?.title?.toLowerCase()?.includes("guard") || userData?.title?.toLowerCase()?.includes("security")) {
+      return "Guard";
     }
 
-    // Additional backward compatibility checks for Title if role is "Employee"
-    if (role === 'Employee') {
-      const isGuardTitle = userData?.title?.toLowerCase() === 'guard' || userData?.title?.toLowerCase() === 'security';
-      if (isGuardTitle) {
-        role = 'Guard';
-      }
+    // 4. Fallback to userData.role.name
+    const fallbackName = userData?.role?.name || "";
+    if (fallbackName) {
+      const lowerFallback = fallbackName.toLowerCase();
+      if (lowerFallback.includes("admin")) return "Admin";
+      if (lowerFallback.includes("guard") || lowerFallback.includes("security")) return "Guard";
+      if (lowerFallback.includes("manager")) return "Manager";
+      if (lowerFallback.includes("employee")) return "Employee";
+      return fallbackName.charAt(0).toUpperCase() + fallbackName.slice(1);
     }
 
-    return role;
+    // 5. Default to Admin if user has tenant management capabilities
+    return "Admin";
   }
 
 
@@ -845,11 +843,11 @@ class AuthService {
       if (response?.data?.success && response.data.userData) {
         const userData = response.data.userData;
 
-        // Auto-attach to accesseasy if they exist but aren't on this app yet
+        // Auto-attach to accesseasy/patrol/accesseasypatrol if they exist but aren't on this app yet
         const currentAppStr = String(userData.userApp || "").toLowerCase();
-        if (!currentAppStr.includes("accesseasy")) {
-          console.log("[getUserByPhone] User found but not on accesseasy. Attaching...");
-          const newAppStr = currentAppStr ? `${currentAppStr}, accesseasy` : "accesseasy";
+        if (!currentAppStr.includes("accesseasy") && !currentAppStr.includes("patrol") && !currentAppStr.includes("accesseasypatrol")) {
+          console.log("[getUserByPhone] User found but not on accesseasypatrol. Attaching...");
+          const newAppStr = currentAppStr ? `${currentAppStr}, accesseasypatrol` : "accesseasypatrol";
 
           this.api.patch(`/users/${userData.id}`, { userApp: newAppStr }).catch(e =>
             console.warn("[getUserByPhone] User patch failed:", e.message)
@@ -858,7 +856,7 @@ class AuthService {
 
           const tId = userData.tenant?.tenantId || userData.tenant?.id;
           if (tId) {
-            this.ensureTenantUserApp(tId, userData.id, "accesseasy").catch(e =>
+            this.ensureTenantUserApp(tId, userData.id, "accesseasypatrol").catch(e =>
               console.warn("[getUserByPhone] Tenant patch failed:", e.message)
             );
           }
@@ -874,78 +872,10 @@ class AuthService {
     }
   }
 
-  async ensureTenantUserApp(tenantId, userId, appName = "accesseasy") {
-    if (!tenantId || !userId) {
-      console.warn("[ensureTenantUserApp] Missing tenantId or userId — skipping.");
-      return;
-    }
-
-    try {
-      const targetApp = "accesseasy";
-      const userToken = this.getToken();
-      if (!userToken) return;
-      const getUrl = `${import.meta.env.VITE_API_URL}/items/tenant?filter[tenantId][_eq]=${tenantId}&fields[]=tenantId&fields[]=userApp&limit=1`;
-
-      const response = await fetch(getUrl, {
-        headers: { Authorization: `Bearer ${userToken}` }
-      });
-      const tenantJson = await response.json();
-
-      const tenantRecord = tenantJson.data?.[0];
-      if (!tenantRecord) {
-        console.warn("[ensureTenantUserApp] Tenant record not found for tenantId:", tenantId);
-        return;
-      }
-
-      let appsArray = [];
-      if (tenantRecord.userApp) {
-        try {
-          const parsed = typeof tenantRecord.userApp === "string" ? JSON.parse(tenantRecord.userApp) : tenantRecord.userApp;
-          appsArray = Array.isArray(parsed) ? parsed : [];
-        } catch (e) { appsArray = []; }
-      }
-
-      const alreadyExists = appsArray.some(entry =>
-        String(entry.userApp || "").toLowerCase() === targetApp.toLowerCase()
-      );
-
-      if (alreadyExists) {
-        return;
-      }
-
-      let empi = null;
-      try {
-        const pmRes = await this.api.get("/items/personalModule", {
-          params: { "filter[assignedUser][_eq]": userId, "fields[]": ["id"], limit: 1 },
-        });
-        empi = pmRes.data?.data?.[0]?.id || null;
-      } catch (e) { console.warn("[ensureTenantUserApp] PM lookup failed:", e.message); }
-
-      const newEntry = {
-        userApp: targetApp,
-        date: new Date().toISOString(),
-        empi: empi,
-      };
-
-      appsArray.push(newEntry);
-
-      const patchRes = await fetch(`${import.meta.env.VITE_API_URL}/items/tenant/${tenantId}`, {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${userToken}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          userApp: JSON.stringify(appsArray)
-        })
-      });
-
-      if (!patchRes.ok) {
-        console.error(`[ensureTenantUserApp] Patch failed`);
-      }
-    } catch (error) {
-      console.error("[ensureTenantUserApp] Failed to update tenant userApp:", error.message);
-    }
+  async ensureTenantUserApp(tenantId, userId, appName = "accesseasypatrol") {
+    // Tenant-app associations are managed server-side by /auth-service.
+    // Client-side direct reads/patches to /items/tenant with end-user JWTs trigger 401 Unauthorized.
+    return;
   }
 
   async checkEmailExists(email) {
@@ -984,11 +914,11 @@ class AuthService {
       if (response?.data?.success && response.data.userData) {
         const userData = response.data.userData;
 
-        // Auto-attach to accesseasy if they exist but aren't on this app yet
+        // Auto-attach to accesseasy/patrol/accesseasypatrol if they exist but aren't on this app yet
         const currentAppStr = String(userData.userApp || "").toLowerCase();
-        if (!currentAppStr.includes("accesseasy")) {
-          console.log("[getUserByEmail] User found but not on accesseasy. Attaching...");
-          const newAppStr = currentAppStr ? `${currentAppStr}, accesseasy` : "accesseasy";
+        if (!currentAppStr.includes("accesseasy") && !currentAppStr.includes("patrol") && !currentAppStr.includes("accesseasypatrol")) {
+          console.log("[getUserByEmail] User found but not on accesseasypatrol. Attaching...");
+          const newAppStr = currentAppStr ? `${currentAppStr}, accesseasypatrol` : "accesseasypatrol";
 
           this.api.patch(`/users/${userData.id}`, { userApp: newAppStr }).catch(e =>
             console.warn("[getUserByEmail] User patch failed:", e.message)
@@ -997,7 +927,7 @@ class AuthService {
 
           const tId = userData.tenant?.tenantId || userData.tenant?.id;
           if (tId) {
-            this.ensureTenantUserApp(tId, userData.id, "accesseasy").catch(e =>
+            this.ensureTenantUserApp(tId, userData.id, "accesseasypatrol").catch(e =>
               console.warn("[getUserByEmail] Tenant patch failed:", e.message)
             );
           }

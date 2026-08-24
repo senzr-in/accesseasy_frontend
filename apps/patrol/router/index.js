@@ -4,6 +4,7 @@ import { usePlanStore } from "@/stores/usePlanStore";
 
 // Landing (Eagerly loaded for instant initial render)
 import AegisLanding from "@/pages/landing/AegisLanding.vue";
+import Landing3D from "@/pages/landing/Landing3D.vue";
 
 // Auth (Lazy Loaded)
 const Login = () => import("@/components/loginAuthentication/login.vue");
@@ -117,6 +118,22 @@ const routes = [
     name: "Onboarding",
     component: OnboardingPage,
     meta: { requiresAuth: true },
+  },
+  // 3D Landing Page (Version 1)
+  {
+    path: "/landing-3d",
+    name: "Landing3D",
+    component: Landing3D,
+  },
+  // 3D Landing Page (Version 2 - Cyber-Core & Cursor Tracking)
+  {
+    path: "/landing-2",
+    name: "LandingPage2",
+    component: () => import("@/pages/landing/LandingPage2.vue"),
+  },
+  {
+    path: "/landing-v2",
+    redirect: "/landing-2",
   },
   {
     path: "/register",

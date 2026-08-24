@@ -4,10 +4,142 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/png" href="/images/logoPatrol.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Primary SEO Meta Tags -->
+    <title>AccessEasy Patrol | Real-Time Security Guard Tour & Patrol Management Platform</title>
+    <meta name="title" content="AccessEasy Patrol | Real-Time Security Guard Tour & Patrol Management Platform" />
+    <meta name="description" content="Connect your security command center with guards on the ground. Real-time GPS patrol tracking, NFC & QR checkpoints, instant SOS dispatch, and automated incident reports for 500+ security teams." />
+    <meta name="keywords" content="security guard patrol system, guard tour management, NFC patrol tracking, QR checkpoint verification, GPS guard tracker, SOC command center, security workforce management, AccessEasy Patrol" />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="AccessEasy Patrol" />
+    <meta name="theme-color" content="#030614" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://patrol.accesseasy.in/" />
+    <meta property="og:site_name" content="AccessEasy Patrol" />
+    <meta property="og:title" content="AccessEasy Patrol | Real-Time Security Guard Tour & Patrol Management Platform" />
+    <meta property="og:description" content="Connect your security command center with guards on the ground. Real-time GPS patrol tracking, NFC & QR checkpoints, instant SOS dispatch, and automated incident reports for 500+ security teams." />
+    <meta property="og:image" content="/images/logoPatrol.png" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://patrol.accesseasy.in/" />
+    <meta property="twitter:title" content="AccessEasy Patrol | Real-Time Security Guard Tour & Patrol Management Platform" />
+    <meta property="twitter:description" content="Connect your security command center with guards on the ground. Real-time GPS patrol tracking, NFC & QR checkpoints, instant SOS dispatch, and automated incident reports for 500+ security teams." />
+    <meta property="twitter:image" content="/images/logoPatrol.png" />
+
+    <link rel="canonical" href="https://patrol.accesseasy.in/" />
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <title>Access Easy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Structured Data (JSON-LD) for Search Engines & AI Overviews (SEO, AEO, GEO) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://patrol.accesseasy.in/#software",
+          "name": "AccessEasy Patrol",
+          "url": "https://patrol.accesseasy.in/",
+          "applicationCategory": "SecurityBusinessApplication",
+          "operatingSystem": "Web, iOS, Android",
+          "description": "Real-time security guard tour, NFC and dynamic QR checkpoint verification, 4-tier GPS geofencing, offline-first SQLite sync, and instant SOS panic dispatch platform.",
+          "offers": {
+            "@type": "Offer",
+            "name": "AccessEasy Patrol Unified License",
+            "price": "1999",
+            "priceCurrency": "INR",
+            "billingDuration": "P1M",
+            "priceValidUntil": "2027-12-31",
+            "availability": "https://schema.org/InStock",
+            "description": "Flat ₹1,999 per licensed site per month with unlimited guards, unlimited NFC checkpoints, sub-meter GPS tracking, and 7-day free trial."
+          },
+          "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "4.9",
+            "ratingCount": "520",
+            "bestRating": "5",
+            "worstRating": "1"
+          },
+          "featureList": [
+            "Sub-meter real-time GPS tracking with Kalman filtering",
+            "Anti-tamper cryptographic NFC and Dynamic QR checkpoint verification",
+            "Offline-first SQLite local caching for basements and dead zones",
+            "1-tap SOS emergency panic dispatch with live sirens",
+            "Shift scheduling and automated guard handover rosters",
+            "Security Operations Center (SOC) web dashboard and automated PDF audit reports"
+          ]
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://patrol.accesseasy.in/#organization",
+          "name": "AccessEasy Patrol",
+          "url": "https://patrol.accesseasy.in/",
+          "logo": "https://patrol.accesseasy.in/images/logoPatrol.png",
+          "sameAs": [
+            "https://twitter.com/AccessEasy",
+            "https://linkedin.com/company/accesseasy"
+          ],
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "contactType": "Customer Support",
+            "availableLanguage": ["English", "Hindi"]
+          }
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://patrol.accesseasy.in/#faq",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "How does AccessEasy Patrol verify checkpoints without an internet connection?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "AccessEasy Patrol uses an offline-first local event queue on the mobile device. When a guard scans an NFC tag or QR code in a cellular dead zone or basement, the scan is saved locally in an SQLite database with an immutable hardware timestamp. When connectivity is restored, all queued events sync automatically to the cloud in chronological order — ensuring zero data loss."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What is the 4-Tier GPS Geofence accuracy system?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "The platform fuses GNSS satellite, cellular cell-tower triangulation, Wi-Fi SSID positioning, and on-site BLE/NFC beacons with Kalman filtering. This achieves sub-meter positional accuracy and detects boundary breaches in under 3.2 seconds."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can AccessEasy Patrol replace legacy electronic guard tour wand systems?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. AccessEasy Patrol replaces legacy RFID wands with any standard NFC-enabled Android or iOS smartphone. You get live cloud sync, photo evidence collection, instant SOS panic dispatch, and automated PDF compliance reports."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Does AccessEasy Patrol work in basements and dead zones without cellular coverage?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. All route data, checkpoint IDs, and scan protocols are cached locally. The app records scans, photos, and timestamps completely offline and automatically batch-uploads them once the guard re-enters network range."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What is the pricing model for AccessEasy Patrol?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "AccessEasy Patrol costs a flat ₹1,999 per licensed site per month with all features unlocked, including unlimited guards, unlimited checkpoints, live GPS tracking, and shift rosters, plus a 7-day free trial."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
     <div id="app"></div>

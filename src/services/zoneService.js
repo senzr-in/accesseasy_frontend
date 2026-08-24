@@ -2,6 +2,19 @@ import { authService } from "@/services/authService";
 import { subscriptionService } from "@/services/subscriptionService";
 
 class ZoneService {
+  constructor() {
+    this._zonesCache = new Map(); // key: siteId || 'all' -> { data, expiry }
+    this._inFlightPromises = new Map();
+    this._workingStrategy = null;
+  }
+
+  /**
+   * Invalidate cached zones
+   */
+  invalidateCache() {
+    this._zonesCache.clear();
+  }
+
   getDefaultZones() {
     return [];
   }
@@ -26,64 +39,110 @@ class ZoneService {
    * Fetch all zones filtered by tenant and optionally by site ID
    * @param {string|null} siteId
    * @param {string|null} userId (for zone_access checking)
+   * @param {boolean} forceRefresh
    */
-  async fetchZones(siteId = null, userId = null) {
-    try {
-      const tenantId = authService.getTenantId();
-      if (!tenantId) return [];
+  async fetchZones(siteId = null, userId = null, forceRefresh = false) {
+    const cacheKey = siteId ? String(siteId) : 'all';
 
-      let query = `/items/zones?filter[tenant][_eq]=${tenantId}&sort=name`;
-      if (siteId) {
-        query += `&filter[site][_eq]=${siteId}`;
-      }
-
-      if (userId) {
-        try {
-          const accessRes = await authService.protectedApi.get(
-            `/items/zone_access?filter[tenant][_eq]=${tenantId}&filter[user][_eq]=${userId}`
-          );
-          if (accessRes.data.data && accessRes.data.data.length > 0) {
-            const allowedZoneIds = accessRes.data.data.map(a => a.zone);
-            query += `&filter[id][_in]=${allowedZoneIds.join(',')}`;
-          }
-        } catch (e) {}
-      }
-
-      try {
-        const response = await authService.protectedApi.get(query);
-        if (response.data?.data) {
-          return response.data.data.map(z => ({
-            ...z,
-            name: z.name || z.zoneName,
-            zoneName: z.zoneName || z.name
-          }));
-        }
-      } catch (err) {
-        // Directus collection may not exist yet
-      }
-
-      // Check localStorage
-      const stored = localStorage.getItem(`accesseasy_zones_${tenantId}`);
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          if (siteId) return parsed.filter(z => String(z.site) === String(siteId));
-          return parsed;
-        } catch (e) {}
-      }
-
-      return [];
-    } catch (error) {
-      console.error("Error fetching zones:", error);
-      return [];
+    // 1. Check in-memory cache
+    const cached = this._zonesCache.get(cacheKey);
+    if (!forceRefresh && cached && Date.now() < cached.expiry) {
+      return cached.data;
     }
+
+    // 2. In-flight request deduplication
+    if (this._inFlightPromises.has(cacheKey)) {
+      return this._inFlightPromises.get(cacheKey);
+    }
+
+    const promise = (async () => {
+      try {
+        const tenantId = authService.getTenantId();
+        if (!tenantId || !authService.getToken()) return [];
+
+        let rawData = [];
+
+        // Fast path: use previously verified working strategy
+        if (this._workingStrategy) {
+          try {
+            let q = `/items/zones?sort=zoneName`;
+            if (this._workingStrategy === 'or') {
+              q = `/items/zones?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&sort=zoneName`;
+            } else if (this._workingStrategy === 'tenant') {
+              q = `/items/zones?filter[tenant][_eq]=${tenantId}&sort=zoneName`;
+            } else if (this._workingStrategy === 'tenantId') {
+              q = `/items/zones?filter[tenant][tenantId][_eq]=${tenantId}&sort=zoneName`;
+            } else {
+              q = `/items/zones?limit=500`;
+            }
+            if (siteId && siteId !== 'all') q += `&filter[site][_eq]=${siteId}`;
+            const res = await authService.protectedApi.get(q);
+            rawData = res.data?.data || [];
+          } catch (e) {
+            this._workingStrategy = null;
+          }
+        }
+
+        // Discovery path: attempt most specific filter first
+        if (rawData.length === 0 && !this._workingStrategy) {
+          try {
+            let q = `/items/zones?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&sort=zoneName`;
+            if (siteId && siteId !== 'all') q += `&filter[site][_eq]=${siteId}`;
+            const res1 = await authService.protectedApi.get(q);
+            rawData = res1.data?.data || [];
+            this._workingStrategy = 'or';
+          } catch (e1) {
+            try {
+              let q = `/items/zones?filter[tenant][_eq]=${tenantId}&sort=zoneName`;
+              if (siteId && siteId !== 'all') q += `&filter[site][_eq]=${siteId}`;
+              const res2 = await authService.protectedApi.get(q);
+              rawData = res2.data?.data || [];
+              this._workingStrategy = 'tenant';
+            } catch (e2) {
+              try {
+                let q = `/items/zones?filter[tenant][tenantId][_eq]=${tenantId}&sort=zoneName`;
+                if (siteId && siteId !== 'all') q += `&filter[site][_eq]=${siteId}`;
+                const res3 = await authService.protectedApi.get(q);
+                rawData = res3.data?.data || [];
+                this._workingStrategy = 'tenantId';
+              } catch (e3) {
+                try {
+                  let q = `/items/zones?limit=500`;
+                  if (siteId && siteId !== 'all') q += `&filter[site][_eq]=${siteId}`;
+                  const res4 = await authService.protectedApi.get(q);
+                  rawData = res4.data?.data || [];
+                  this._workingStrategy = 'plain';
+                } catch (e4) {}
+              }
+            }
+          }
+        }
+
+        const mapped = rawData.map(z => ({
+          ...z,
+          name: z.zoneName || z.name || `Zone ${z.id}`,
+          zoneName: z.zoneName || z.name || `Zone ${z.id}`
+        }));
+
+        this._zonesCache.set(cacheKey, { data: mapped, expiry: Date.now() + 30000 });
+        return mapped;
+      } catch (error) {
+        console.error("Error fetching zones:", error);
+        return [];
+      } finally {
+        this._inFlightPromises.delete(cacheKey);
+      }
+    })();
+
+    this._inFlightPromises.set(cacheKey, promise);
+    return promise;
   }
 
   /**
    * Fetch zones for a specific site
    */
-  async fetchZonesBySite(siteId) {
-    return this.fetchZones(siteId);
+  async fetchZonesBySite(siteId, forceRefresh = false) {
+    return this.fetchZones(siteId, null, forceRefresh);
   }
 
   /**
@@ -91,7 +150,6 @@ class ZoneService {
    */
   async createZone(zoneData) {
     try {
-      // Step 1: Pre-flight plan limit check for zones
       const limitCheck = await subscriptionService.checkLimit('zones');
       if (!limitCheck.allowed) {
         const error = new Error(limitCheck.upgradeMessage || "Zone limit exceeded for current plan.");
@@ -109,26 +167,10 @@ class ZoneService {
         date_created: new Date().toISOString()
       };
 
-      try {
-        const response = await authService.protectedApi.post("/items/zones", payload);
-        subscriptionService.clearCache();
-        return response.data.data;
-      } catch (e) {
-        if (e.response?.data?.errors?.[0]?.extensions?.code === "PLAN_LIMIT_EXCEEDED") {
-          throw e;
-        }
-        // Local persistence fallback
-        const zones = await this.fetchZones();
-        const newZone = {
-          ...payload,
-          id: `zone-${Date.now()}`,
-          checkpointsCount: 0,
-          status: payload.status || 'active'
-        };
-        zones.push(newZone);
-        localStorage.setItem(`accesseasy_zones_${tenantId}`, JSON.stringify(zones));
-        return newZone;
-      }
+      const response = await authService.protectedApi.post("/items/zones", payload);
+      this.invalidateCache();
+      subscriptionService.clearCache();
+      return response.data.data;
     } catch (error) {
       console.error("Error creating zone:", error);
       throw error;
@@ -140,26 +182,14 @@ class ZoneService {
    */
   async updateZone(zoneId, zoneData) {
     try {
-      const tenantId = authService.getTenantId();
-      const payload = {
-        ...zoneData,
-        name: zoneData.name || zoneData.zoneName,
-        zoneName: zoneData.zoneName || zoneData.name,
-        tenant: tenantId,
-      };
-
-      try {
-        const response = await authService.protectedApi.patch(`/items/zones/${zoneId}`, payload);
-        return response.data.data;
-      } catch (e) {
-        const zones = await this.fetchZones();
-        const idx = zones.findIndex(z => String(z.id) === String(zoneId));
-        if (idx !== -1) {
-          zones[idx] = { ...zones[idx], ...payload };
-          localStorage.setItem(`accesseasy_zones_${tenantId}`, JSON.stringify(zones));
-          return zones[idx];
-        }
+      const payload = { ...zoneData };
+      if (zoneData.name || zoneData.zoneName) {
+        payload.name = zoneData.name || zoneData.zoneName;
+        payload.zoneName = zoneData.zoneName || zoneData.name;
       }
+      const response = await authService.protectedApi.patch(`/items/zones/${zoneId}`, payload);
+      this.invalidateCache();
+      return response.data.data;
     } catch (error) {
       console.error(`Error updating zone ${zoneId}:`, error);
       throw error;
@@ -171,15 +201,9 @@ class ZoneService {
    */
   async deleteZone(zoneId) {
     try {
-      const tenantId = authService.getTenantId();
-      try {
-        await authService.protectedApi.delete(`/items/zones/${zoneId}`);
-        subscriptionService.clearCache();
-      } catch (e) {
-        const zones = await this.fetchZones();
-        const updated = zones.filter(z => String(z.id) !== String(zoneId));
-        localStorage.setItem(`accesseasy_zones_${tenantId}`, JSON.stringify(updated));
-      }
+      await authService.protectedApi.delete(`/items/zones/${zoneId}`);
+      this.invalidateCache();
+      subscriptionService.clearCache();
     } catch (error) {
       console.error(`Error deleting zone ${zoneId}:`, error);
       throw error;
@@ -187,45 +211,33 @@ class ZoneService {
   }
 
   /**
-   * Pro / Custom: Fetch users with access permissions for a specific zone
+   * Pro / Custom: Fetch users assigned to a zone
    */
   async getZoneAccess(zoneId) {
     try {
-      const tenantId = authService.getTenantId();
-      const response = await authService.protectedApi.get(
-        `/items/zone_access?filter[tenant][_eq]=${tenantId}&filter[zone][_eq]=${zoneId}&fields=*,user.first_name,user.last_name,user.email`
-      );
-      return response.data.data || [];
+      const response = await authService.protectedApi.get(`/items/zones/${zoneId}?fields=assigned_users`);
+      const users = response.data?.data?.assigned_users || [];
+      return users.map(u => (typeof u === 'object' ? u : { user: u }));
     } catch (error) {
-      console.warn("Could not fetch zone_access:", error.message);
+      console.warn("Could not fetch zone access:", error.message);
       return [];
     }
   }
 
   /**
-   * Pro / Custom: Assign user zone access level
+   * Pro / Custom: Assign user to a zone
    */
-  async assignZoneAccess(zoneId, userId, accessLevel = 'operate') {
+  async assignZoneAccess(zoneId, userId) {
     try {
-      const tenantId = authService.getTenantId();
-      const existing = await authService.protectedApi.get(
-        `/items/zone_access?filter[tenant][_eq]=${tenantId}&filter[zone][_eq]=${zoneId}&filter[user][_eq]=${userId}`
-      );
-      if (existing.data.data?.length > 0) {
-        const accessId = existing.data.data[0].id;
-        const res = await authService.protectedApi.patch(`/items/zone_access/${accessId}`, {
-          access_level: accessLevel
-        });
-        return res.data.data;
-      } else {
-        const res = await authService.protectedApi.post(`/items/zone_access`, {
-          tenant: tenantId,
-          zone: zoneId,
-          user: userId,
-          access_level: accessLevel
-        });
+      const current = await authService.protectedApi.get(`/items/zones/${zoneId}?fields=assigned_users`);
+      const users = current.data?.data?.assigned_users || [];
+      if (!users.includes(userId)) {
+        users.push(userId);
+        const res = await authService.protectedApi.patch(`/items/zones/${zoneId}`, { assigned_users: users });
+        this.invalidateCache();
         return res.data.data;
       }
+      return current.data.data;
     } catch (error) {
       console.error("Error assigning zone access:", error);
       throw error;

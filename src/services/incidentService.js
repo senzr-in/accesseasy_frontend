@@ -25,16 +25,21 @@ class IncidentService {
 
       try {
         let endpoint = `/items/patrol_alerts?filter[tenant][_eq]=${tenantId}&sort=-date_created`;
-        if (siteId) endpoint += `&filter[site][_eq]=${siteId}`;
         const res = await authService.protectedApi.get(endpoint);
-        if (res.data?.data) return res.data.data;
+        if (res.data?.data) {
+          const list = res.data.data;
+          if (siteId) {
+            return list.filter(i => String(i.site || i.location || '') === String(siteId));
+          }
+          return list;
+        }
       } catch (e) {}
 
       const stored = localStorage.getItem(`accesseasy_incidents_${tenantId}`);
       if (stored) {
         try {
           const list = JSON.parse(stored);
-          if (siteId) return list.filter(i => String(i.site) === String(siteId));
+          if (siteId) return list.filter(i => String(i.site || i.location || '') === String(siteId));
           return list;
         } catch (e) {}
       }
@@ -71,14 +76,13 @@ class IncidentService {
       if (targetStatus === 'resolved') inc.resolved_at = now;
       if (targetStatus === 'closed') inc.closed_at = now;
 
-      try {
-        await authService.protectedApi.patch(`/items/patrol_alerts/${incidentId}`, {
-          status: targetStatus,
-          action_log: JSON.stringify(inc.action_log)
-        });
-      } catch (e) {}
-
-      localStorage.setItem(`accesseasy_incidents_${tenantId}`, JSON.stringify(incidents));
+      await authService.protectedApi.patch(`/items/patrol_alerts/${incidentId}`, {
+        status: targetStatus,
+        action_log: inc.action_log,
+        acknowledged_at: inc.acknowledged_at || null,
+        resolved_at: inc.resolved_at || null,
+        closed_at: inc.closed_at || null
+      });
       return inc;
     } catch (error) {
       console.error("Error transitioning incident:", error);

@@ -2,6 +2,21 @@ import { authService } from "@/services/authService";
 import { subscriptionService } from "@/services/subscriptionService";
 
 class SiteService {
+  constructor() {
+    this._sitesCache = null;
+    this._cacheExpiry = 0;
+    this._inFlightPromise = null;
+    this._workingStrategy = null; // 'or' | 'tenant' | 'tenantId' | 'plain'
+  }
+
+  /**
+   * Invalidate cached sites
+   */
+  invalidateCache() {
+    this._sitesCache = null;
+    this._cacheExpiry = 0;
+  }
+
   getDefaultSites(tenantId) {
     return [];
   }
@@ -9,46 +24,98 @@ class SiteService {
   /**
    * Fetch all Sites filtered by tenant (and optionally user site_access)
    */
-  async fetchSites(userId = null) {
-    try {
-      const tenantId = authService.getTenantId();
-      if (!tenantId) return [];
+  async fetchSites(userId = null, forceRefresh = false) {
+    // 1. Return in-memory cache if still valid
+    if (!forceRefresh && this._sitesCache && Date.now() < this._cacheExpiry) {
+      return this._sitesCache;
+    }
 
+    // 2. Deduplicate simultaneous in-flight network requests
+    if (this._inFlightPromise) {
+      return this._inFlightPromise;
+    }
+
+    this._inFlightPromise = (async () => {
       try {
-        let endpoint = `/items/sites?filter[tenant][_eq]=${tenantId}&sort=name`;
-        
-        // If a userId is specified and we want site_access filtering (Pro / Custom restrictions)
-        if (userId) {
-          const accessRes = await authService.protectedApi.get(
-            `/items/site_access?filter[tenant][_eq]=${tenantId}&filter[user][_eq]=${userId}`
-          );
-          if (accessRes.data.data && accessRes.data.data.length > 0) {
-            const allowedSiteIds = accessRes.data.data.map(a => a.site);
-            endpoint += `&filter[id][_in]=${allowedSiteIds.join(',')}`;
+        const tenantId = authService.getTenantId();
+        if (!tenantId || !authService.getToken()) return [];
+
+        let rawData = [];
+
+        // Fast path: use previously verified working strategy
+        if (this._workingStrategy) {
+          try {
+            let endpoint = `/items/locationManagement?sort=locName`;
+            if (this._workingStrategy === 'or') {
+              endpoint = `/items/locationManagement?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&sort=locName`;
+            } else if (this._workingStrategy === 'tenant') {
+              endpoint = `/items/locationManagement?filter[tenant][_eq]=${tenantId}&sort=locName`;
+            } else if (this._workingStrategy === 'tenantId') {
+              endpoint = `/items/locationManagement?filter[tenant][tenantId][_eq]=${tenantId}&sort=locName`;
+            } else {
+              endpoint = `/items/locationManagement?limit=500`;
+            }
+            const res = await authService.protectedApi.get(endpoint);
+            rawData = res.data?.data || [];
+          } catch (e) {
+            this._workingStrategy = null; // Reset strategy if schema changed
           }
         }
 
-        const response = await authService.protectedApi.get(endpoint);
-        if (response.data?.data) {
-          return response.data.data;
+        // Discovery path: attempt most specific filter first, remember success
+        if (rawData.length === 0 && !this._workingStrategy) {
+          try {
+            const res1 = await authService.protectedApi.get(
+              `/items/locationManagement?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&sort=locName`
+            );
+            rawData = res1.data?.data || [];
+            this._workingStrategy = 'or';
+          } catch (e1) {
+            try {
+              const res2 = await authService.protectedApi.get(
+                `/items/locationManagement?filter[tenant][_eq]=${tenantId}&sort=locName`
+              );
+              rawData = res2.data?.data || [];
+              this._workingStrategy = 'tenant';
+            } catch (e2) {
+              try {
+                const res3 = await authService.protectedApi.get(
+                  `/items/locationManagement?filter[tenant][tenantId][_eq]=${tenantId}&sort=locName`
+                );
+                rawData = res3.data?.data || [];
+                this._workingStrategy = 'tenantId';
+              } catch (e3) {
+                try {
+                  const res4 = await authService.protectedApi.get(`/items/locationManagement?limit=500`);
+                  rawData = res4.data?.data || [];
+                  this._workingStrategy = 'plain';
+                } catch (e4) {}
+              }
+            }
+          }
         }
-      } catch (err) {
-        // Directus collection might not exist yet; fall back gracefully
-      }
 
-      // Check local storage override if user added custom sites
-      const stored = localStorage.getItem(`accesseasy_sites_${tenantId}`);
-      if (stored) {
-        try {
-          return JSON.parse(stored);
-        } catch (e) {}
-      }
+        const mapped = rawData.map(loc => ({
+          ...loc,
+          name: loc.locName || loc.orgLocation?.orgName || loc.name || loc.locdetail?.name || `Site ${loc.id}`,
+          locName: loc.locName || loc.orgLocation?.orgName || loc.name || `Site ${loc.id}`,
+          address: loc.locAddress || loc.locdetail?.address || '',
+          lat: loc.locmark?.lat || loc.latitude || null,
+          lng: loc.locmark?.lng || loc.longitude || null,
+        }));
 
-      return [];
-    } catch (error) {
-      console.error("Error in fetchSites:", error);
-      return [];
-    }
+        this._sitesCache = mapped;
+        this._cacheExpiry = Date.now() + 30000; // 30s TTL
+        return mapped;
+      } catch (error) {
+        console.error("Error in fetchSites:", error);
+        return [];
+      } finally {
+        this._inFlightPromise = null;
+      }
+    })();
+
+    return this._inFlightPromise;
   }
 
   /**
@@ -56,8 +123,11 @@ class SiteService {
    */
   async getSiteById(siteId) {
     try {
-      const response = await authService.protectedApi.get(`/items/sites/${siteId}`);
-      if (response.data?.data) return response.data.data;
+      const response = await authService.protectedApi.get(`/items/locationManagement/${siteId}`);
+      if (response.data?.data) {
+        const loc = response.data.data;
+        return { ...loc, name: loc.locName, address: loc.locAddress };
+      }
     } catch (e) {}
 
     const sites = await this.fetchSites();
@@ -69,7 +139,6 @@ class SiteService {
    */
   async createSite(siteData) {
     try {
-      // Step 1: Pre-flight plan limit check
       const limitCheck = await subscriptionService.checkLimit('sites');
       if (!limitCheck.allowed) {
         const error = new Error(limitCheck.upgradeMessage || "Site limit exceeded for current plan.");
@@ -80,46 +149,22 @@ class SiteService {
 
       const tenantId = authService.getTenantId();
       const payload = {
-        ...siteData,
+        locName: siteData.name || siteData.locName,
+        locAddress: siteData.address || siteData.locAddress,
+        locType: siteData.locType || 'site',
+        locmark: siteData.locmark || (siteData.lat ? { lat: siteData.lat, lng: siteData.lng } : null),
+        locdetail: siteData.locdetail || { locationName: siteData.name || siteData.locName },
+        geofence_radius: siteData.geofence_radius || 500,
+        status: siteData.status || 'active',
         tenant: tenantId,
         date_created: new Date().toISOString()
       };
 
-      try {
-        const response = await authService.protectedApi.post("/items/sites", payload);
-        subscriptionService.clearCache(); // invalidate usage cache
-        return response.data.data;
-      } catch (e) {
-        if (e.response?.data?.errors?.[0]?.extensions?.code === "PLAN_LIMIT_EXCEEDED") {
-          throw e;
-        }
-        // Local persistence fallback for dev/offline testing
-        const sites = await this.fetchSites();
-        const newSite = {
-          ...payload,
-          id: `site-${Date.now()}`,
-          totalGuards: 0,
-          activeGuards: 0,
-          offDutyGuards: 0,
-          activePatrols: 0,
-          onTrackPatrols: 0,
-          delayedPatrols: 0,
-          completedToday: 0,
-          completionRate: 100,
-          completionTrend: "0.0%",
-          missedCount: 0,
-          overdueCount: 0,
-          incidentsCount: 0,
-          criticalIncidents: 0,
-          normalIncidents: 0,
-          healthStatus: 'healthy',
-          zonesCount: 0,
-          checkpointsCount: 0
-        };
-        sites.push(newSite);
-        localStorage.setItem(`accesseasy_sites_${tenantId}`, JSON.stringify(sites));
-        return newSite;
-      }
+      const response = await authService.protectedApi.post("/items/locationManagement", payload);
+      this.invalidateCache();
+      subscriptionService.clearCache();
+      const loc = response.data.data;
+      return { ...loc, name: loc.locName, address: loc.locAddress };
     } catch (error) {
       console.error("Error creating site:", error);
       throw error;
@@ -132,19 +177,18 @@ class SiteService {
   async updateSite(siteId, siteData) {
     try {
       const tenantId = authService.getTenantId();
-      try {
-        const response = await authService.protectedApi.patch(`/items/sites/${siteId}`, siteData);
-        return response.data.data;
-      } catch (e) {
-        // Fallback update in local storage
-        const sites = await this.fetchSites();
-        const idx = sites.findIndex(s => String(s.id) === String(siteId));
-        if (idx !== -1) {
-          sites[idx] = { ...sites[idx], ...siteData };
-          localStorage.setItem(`accesseasy_sites_${tenantId}`, JSON.stringify(sites));
-          return sites[idx];
-        }
-      }
+      const payload = {};
+      if (siteData.name || siteData.locName) payload.locName = siteData.name || siteData.locName;
+      if (siteData.address || siteData.locAddress) payload.locAddress = siteData.address || siteData.locAddress;
+      if (siteData.locType) payload.locType = siteData.locType;
+      if (siteData.locmark) payload.locmark = siteData.locmark;
+      if (siteData.geofence_radius !== undefined) payload.geofence_radius = siteData.geofence_radius;
+      if (siteData.status) payload.status = siteData.status;
+
+      const response = await authService.protectedApi.patch(`/items/locationManagement/${siteId}`, payload);
+      this.invalidateCache();
+      const loc = response.data.data;
+      return { ...loc, name: loc.locName, address: loc.locAddress };
     } catch (error) {
       console.error(`Error updating site ${siteId}:`, error);
       throw error;
@@ -157,14 +201,9 @@ class SiteService {
   async deleteSite(siteId) {
     try {
       const tenantId = authService.getTenantId();
-      try {
-        await authService.protectedApi.delete(`/items/sites/${siteId}`);
-        subscriptionService.clearCache();
-      } catch (e) {
-        const sites = await this.fetchSites();
-        const updated = sites.filter(s => String(s.id) !== String(siteId));
-        localStorage.setItem(`accesseasy_sites_${tenantId}`, JSON.stringify(updated));
-      }
+      await authService.protectedApi.delete(`/items/locationManagement/${siteId}`);
+      this.invalidateCache();
+      subscriptionService.clearCache();
     } catch (error) {
       console.error(`Error deleting site ${siteId}:`, error);
       throw error;
@@ -172,45 +211,33 @@ class SiteService {
   }
 
   /**
-   * Pro / Custom: Fetch users with access permissions for a specific site
+   * Pro / Custom: Fetch users assigned to a location via empIds
    */
   async getSiteAccess(siteId) {
     try {
-      const tenantId = authService.getTenantId();
-      const response = await authService.protectedApi.get(
-        `/items/site_access?filter[tenant][_eq]=${tenantId}&filter[site][_eq]=${siteId}&fields=*,user.first_name,user.last_name,user.email`
-      );
-      return response.data.data || [];
+      const response = await authService.protectedApi.get(`/items/locationManagement/${siteId}?fields=empIds`);
+      const empIds = response.data?.data?.empIds || [];
+      return empIds.map(id => ({ user: id }));
     } catch (error) {
-      console.warn("Could not fetch site_access:", error.message);
+      console.warn("Could not fetch site access:", error.message);
       return [];
     }
   }
 
   /**
-   * Pro / Custom: Assign or update user site access level ('view', 'operate', 'manage')
+   * Pro / Custom: Assign user to a location (add to empIds JSON array)
    */
-  async assignSiteAccess(siteId, userId, accessLevel = 'operate') {
+  async assignSiteAccess(siteId, userId) {
     try {
-      const tenantId = authService.getTenantId();
-      const existing = await authService.protectedApi.get(
-        `/items/site_access?filter[tenant][_eq]=${tenantId}&filter[site][_eq]=${siteId}&filter[user][_eq]=${userId}`
-      );
-      if (existing.data.data?.length > 0) {
-        const accessId = existing.data.data[0].id;
-        const res = await authService.protectedApi.patch(`/items/site_access/${accessId}`, {
-          access_level: accessLevel
-        });
-        return res.data.data;
-      } else {
-        const res = await authService.protectedApi.post(`/items/site_access`, {
-          tenant: tenantId,
-          site: siteId,
-          user: userId,
-          access_level: accessLevel
-        });
+      const current = await authService.protectedApi.get(`/items/locationManagement/${siteId}?fields=empIds`);
+      const empIds = current.data?.data?.empIds || [];
+      if (!empIds.includes(userId)) {
+        empIds.push(userId);
+        const res = await authService.protectedApi.patch(`/items/locationManagement/${siteId}`, { empIds });
+        this.invalidateCache();
         return res.data.data;
       }
+      return current.data.data;
     } catch (error) {
       console.error("Error assigning site access:", error);
       throw error;
@@ -218,15 +245,15 @@ class SiteService {
   }
 
   /**
-   * Custom: Fetch clients for multi-client enterprise setups
+   * Custom: Fetch clients for multi-client enterprise setups (uses locationManagement collection)
    */
   async fetchClients() {
     try {
       const tenantId = authService.getTenantId();
       const response = await authService.protectedApi.get(
-        `/items/clients?filter[tenant][_eq]=${tenantId}&sort=name`
+        `/items/locationManagement?filter[tenant][_eq]=${tenantId}&sort=locName`
       );
-      return response.data.data || [];
+      return (response.data.data || []).map(l => ({ ...l, name: l.locName, address: l.locAddress }));
     } catch (error) {
       return [];
     }

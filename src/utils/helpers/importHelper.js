@@ -1,3 +1,5 @@
+import { authService } from "@/services/authService";
+
 const exportHeaders = {
   doors: ["door Number", "door Name"],
   personalModule: ["Profile", "Employee ID", "person Name", "Phone", "Email", "Assigned Cards", "Assigned Tags"],
@@ -81,35 +83,39 @@ export const processCSVImport = async (file, collectionName, userTenant) => {
         while (processedCount < transformedData.length) {
           const batch = transformedData.slice(processedCount, processedCount + BATCH_SIZE);
          
-          // Process batch
           const batchPromises = batch.map(async (data) => {
             try {
               let checkURL = '';
               let nameField = '';
+              const baseUrl = import.meta.env.VITE_API_URL || '';
+              const token = authService.getToken();
+              const headers = { "Content-Type": "application/json" };
+              if (token) headers["Authorization"] = `Bearer ${token}`;
              
               // Set check parameters based on collection
               if (collectionName === "accesslevels") {
-                checkURL = `/items/accesslevels?filter[accessLevelName][_eq]=${data.accessLevelName}&filter[tenant][_eq]=${userTenant}`;
+                checkURL = `${baseUrl}/items/accesslevels?filter[accessLevelName][_eq]=${encodeURIComponent(data.accessLevelName)}&filter[tenant][_eq]=${userTenant}`;
                 nameField = 'accessLevelName';
               } else if (collectionName === "doors") {
-                checkURL = `/items/doors?filter[doorName][_eq]=${data.doorName}&filter[tenant][_eq]=${userTenant}`;
+                checkURL = `${baseUrl}/items/doors?filter[doorName][_eq]=${encodeURIComponent(data.doorName)}&filter[tenant][_eq]=${userTenant}`;
                 nameField = 'doorName';
               } else if (collectionName === "branch") {
-                checkURL = `/items/branch?filter[branchName][_eq]=${data.branchName}&filter[tenant][_eq]=${userTenant}`;
+                checkURL = `${baseUrl}/items/branch?filter[branchName][_eq]=${encodeURIComponent(data.branchName)}&filter[tenant][_eq]=${userTenant}`;
                 nameField = 'branchName';
               } else if (collectionName === "department") {
-                checkURL = `/items/department?filter[departmentName][_eq]=${data.departmentName}&filter[tenant][_eq]=${userTenant}`;
+                checkURL = `${baseUrl}/items/department?filter[departmentName][_eq]=${encodeURIComponent(data.departmentName)}&filter[tenant][_eq]=${userTenant}`;
                 nameField = 'departmentName';
               } else if (collectionName === "personalModule") {
-                checkURL = `/items/personalModule?filter[uniqueId][_eq]=${data.uniqueId}`;
+                checkURL = `${baseUrl}/items/personalModule?filter[uniqueId][_eq]=${encodeURIComponent(data.uniqueId)}`;
                 nameField = 'employeeId';
               }
 
-              const checkResponse = await fetch(checkURL);
-              const existingData = await checkResponse.json();
-
-              if (existingData.data?.length > 0) {
-                return { isDuplicate: true, name: data[nameField] };
+              const checkResponse = await fetch(checkURL, { headers });
+              if (checkResponse.ok) {
+                const existingData = await checkResponse.json();
+                if (existingData.data?.length > 0) {
+                  return { isDuplicate: true, name: data[nameField] };
+                }
               }
 
               // Assign sequence number and uniqueId
@@ -326,13 +332,18 @@ const sendImportRequest = async (transformedData, collectionName) => {
   const formData = new FormData();
   formData.append("file", new Blob([JSON.stringify(transformedData)], { type: "application/json" }), "data.json");
 
-  const response = await fetch(`/utils/import/${collectionName}`, {
+  const token = authService.getToken();
+  const headers = {};
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/utils/import/${collectionName}`, {
     method: "POST",
+    headers,
     body: formData,
   });
 
   if (!response.ok) {
-    const errorData = await response.json();
+    const errorData = await response.json().catch(() => ({}));
     throw new Error(`Upload failed: ${errorData.errors?.[0]?.message || "Unknown error"}`);
   }
 
@@ -340,10 +351,14 @@ const sendImportRequest = async (transformedData, collectionName) => {
 };
 
 async function generateSequentialAccessLevelNumber(userTenant) {
- 
   try {
+    const token = authService.getToken();
+    const headers = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
     const response = await fetch(
-      `/items/accesslevels?filter[tenant][tenantId][_eq]=${userTenant}&sort[]=-accessLevelNumber&limit=1`
+      `${import.meta.env.VITE_API_URL}/items/accesslevels?filter[tenant][tenantId][_eq]=${userTenant}&sort[]=-accessLevelNumber&limit=1`,
+      { headers }
     );
     const data = await response.json();
 
@@ -362,8 +377,13 @@ async function generateSequentialAccessLevelNumber(userTenant) {
 // Add new method for branchId
 async function generateSequentialBranchId(userTenant) {
   try {
+    const token = authService.getToken();
+    const headers = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
     const response = await fetch(
-      `/items/branch?filter[tenant][tenantId][_eq]=${userTenant}&sort[]=-branchId&limit=1`
+      `${import.meta.env.VITE_API_URL}/items/branch?filter[tenant][tenantId][_eq]=${userTenant}&sort[]=-branchId&limit=1`,
+      { headers }
     );
     const data = await response.json();
 
@@ -382,8 +402,13 @@ async function generateSequentialBranchId(userTenant) {
 // Add new method for departmentId
 async function generateSequentialDepartmentId(userTenant) {
   try {
+    const token = authService.getToken();
+    const headers = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
     const response = await fetch(
-      `/items/department?filter[tenant][tenantId][_eq]=${userTenant}&sort[]=-departmentId&limit=1`
+      `${import.meta.env.VITE_API_URL}/items/department?filter[tenant][tenantId][_eq]=${userTenant}&sort[]=-departmentId&limit=1`,
+      { headers }
     );
     const data = await response.json();
 
@@ -401,8 +426,13 @@ async function generateSequentialDepartmentId(userTenant) {
  // Add new door number generator
 async function generateSequentialDoorNumber(userTenant) {
   try {
+    const token = authService.getToken();
+    const headers = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+
     const response = await fetch(
-      `/items/doors?filter[tenant][tenantId][_eq]=${userTenant}&sort[]=-doorNumber&limit=1`
+      `${import.meta.env.VITE_API_URL}/items/doors?filter[tenant][tenantId][_eq]=${userTenant}&sort[]=-doorNumber&limit=1`,
+      { headers }
     );
     const data = await response.json();
 

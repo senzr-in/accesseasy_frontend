@@ -4,27 +4,28 @@ import { currentUserTenant } from '@/utils/currentUserTenant';
 
 export const tdsRules = ref([]);
 
-const tenantId = currentUserTenant.getTenantId();
-const token = authService.getToken();
-
 export const fetchTDSRules = async () => {
   try {
-    const params = {
-      // [`filter[tenant][tenantId][_eq]`]: tenantId,
+    const tenantId = currentUserTenant.getTenantId() || authService.getTenantId();
+    const token = authService.getToken();
+    const headers = {
+      "Content-Type": "application/json",
     };
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const params = {};
 
     const queryString = Object.keys(params)
       .map((key) => `${key}=${encodeURIComponent(params[key])}`)
       .join("&");
 
     const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/items/tdsRules?${queryString}`,
+      `${import.meta.env.VITE_API_URL}/items/tdsRules${queryString ? `?${queryString}` : ''}`,
       {
         method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+        headers,
       }
     );
 

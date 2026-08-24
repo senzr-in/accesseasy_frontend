@@ -6,11 +6,14 @@ class PatrolService {
     const tenantId = authService.getTenantId();
     try {
       let endpoint = `/items/patrols?filter[tenant][_eq]=${tenantId}&sort=-scheduledTime&limit=100`;
-      if (siteId) {
-        endpoint += `&filter[site][_eq]=${siteId}`;
-      }
       const response = await authService.protectedApi.get(endpoint);
-      if (response.data?.data) return response.data.data;
+      if (response.data?.data) {
+        const patrols = response.data.data;
+        if (siteId) {
+          return patrols.filter(p => String(p.site || p.zoneId || '') === String(siteId));
+        }
+        return patrols;
+      }
     } catch (error) {
       // Fallback to local storage
     }
@@ -119,17 +122,11 @@ class PatrolService {
     const tenantId = authService.getTenantId();
     try {
       if (cpData.id) {
-        try {
-          await authService.protectedApi.patch(`/items/checkpoints/${cpData.id}`, cpData);
-        } catch (err) {
-          // Local update fallback
-          const all = await this.getMasterCheckpoints();
-          const idx = all.findIndex(c => c.id === cpData.id);
-          if (idx !== -1) {
-            all[idx] = { ...all[idx], ...cpData };
-            localStorage.setItem(`accesseasy_checkpoints_${tenantId}`, JSON.stringify(all));
-          }
-        }
+        const cleanPayload = { ...cpData };
+        delete cleanPayload.zone;
+        delete cleanPayload.expectedOffset;
+        const res = await authService.protectedApi.patch(`/items/checkpoints/${cpData.id}`, cleanPayload);
+        return res.data.data;
       } else {
         // Pre-flight plan limit check for checkpoints
         const limitCheck = await subscriptionService.checkLimit('checkpoints');
@@ -140,54 +137,49 @@ class PatrolService {
           throw error;
         }
 
+        let instructions = cpData.instructions || '';
+        if (cpData.zone) {
+          const zId = typeof cpData.zone === 'object' && cpData.zone ? cpData.zone.id : cpData.zone;
+          if (!instructions.includes('__ZONE_ASSIGNMENT__:')) {
+            instructions = `__ZONE_ASSIGNMENT__:${zId} ${instructions}`.trim();
+          }
+        }
+
         const payload = {
-          ...cpData,
+          name: cpData.name,
+          checkpoint_id: cpData.checkpoint_id || ('CP' + Math.floor(1000 + Math.random() * 9000)),
           group_id: null,
           tenant: tenantId,
+          instructions: instructions,
+          building_id: cpData.building_id || cpData.building || null,
+          floor: cpData.floor || null,
+          dwell_time: Number(cpData.dwell_time) || 0,
+          status: cpData.status || 'active',
           allowed_radius_m: cpData.allowed_radius_m || 50,
-          requires_nfc: cpData.requires_nfc || false,
-          requires_photo: cpData.requires_photo || false
+          requires_nfc: Boolean(cpData.requires_nfc || cpData.nfc_uid || cpData.nfc_tag_id),
+          requires_photo: Boolean(cpData.requires_photo)
         };
 
-        try {
-          await authService.protectedApi.post("/items/checkpoints", payload);
-          subscriptionService.clearCache();
-        } catch (err) {
-          if (err.response?.data?.errors?.[0]?.extensions?.code === "PLAN_LIMIT_EXCEEDED") {
-            throw err;
-          }
-          // Local storage persistence fallback
-          const all = await this.getMasterCheckpoints();
-          const newCp = {
-            ...payload,
-            id: `cp-${Date.now()}`,
-            name: payload.name || payload.checkpoint_name || 'Checkpoint',
-            status: payload.status || 'Active',
-            date_created: new Date().toISOString()
-          };
-          all.unshift(newCp);
-          localStorage.setItem(`accesseasy_checkpoints_${tenantId}`, JSON.stringify(all));
+        if (cpData.nfc_uid || cpData.nfc_tag_id) {
+          payload.nfc_uid = cpData.nfc_uid || cpData.nfc_tag_id;
         }
+
+        const res = await authService.protectedApi.post("/items/checkpoints", payload);
+        subscriptionService.clearCache();
+        return res.data.data;
       }
-      return await this.getMasterCheckpoints(cpData.site, cpData.zone);
     } catch (error) {
-      console.error("Error saving master checkpoint:", error);
-      throw error;
+      console.error("Error saving master checkpoint:", error?.response?.data || error);
+      const errMsg = error.response?.data?.errors?.[0]?.message || error.message;
+      throw new Error(errMsg);
     }
   }
 
   async deleteMasterCheckpoint(cpId) {
     const tenantId = authService.getTenantId();
     try {
-      try {
-        await authService.protectedApi.delete(`/items/checkpoints/${cpId}`);
-        subscriptionService.clearCache();
-      } catch (err) {
-        // Local delete fallback
-        const all = await this.getMasterCheckpoints();
-        const filtered = all.filter(c => c.id !== cpId);
-        localStorage.setItem(`accesseasy_checkpoints_${tenantId}`, JSON.stringify(filtered));
-      }
+      await authService.protectedApi.delete(`/items/checkpoints/${cpId}`);
+      subscriptionService.clearCache();
       return await this.getMasterCheckpoints();
     } catch (error) {
       console.error("Error deleting master checkpoint:", error);
@@ -208,21 +200,9 @@ class PatrolService {
       }
 
       const data = { ...payload, tenant: tenantId, date_created: new Date().toISOString() };
-      try {
-        const response = await authService.protectedApi.post("/items/checkpoint_groups", data);
-        subscriptionService.clearCache();
-        return response.data.data;
-      } catch (err) {
-        if (err.response?.data?.errors?.[0]?.extensions?.code === "PLAN_LIMIT_EXCEEDED") {
-          throw err;
-        }
-        // Local persistence fallback
-        const groups = await this.fetchCheckpointGroups();
-        const newGroup = { ...data, id: `group-${Date.now()}` };
-        groups.unshift(newGroup);
-        localStorage.setItem(`accesseasy_checkpoint_groups_${tenantId}`, JSON.stringify(groups));
-        return newGroup;
-      }
+      const response = await authService.protectedApi.post("/items/checkpoint_groups", data);
+      subscriptionService.clearCache();
+      return response.data.data;
     } catch (error) {
       console.error("Error creating checkpoint group:", error);
       throw error;
@@ -232,33 +212,29 @@ class PatrolService {
   async createPatrol(payload) {
     const tenantId = authService.getTenantId();
     try {
-      // Pre-flight limit check for active patrols
-      const limitCheck = await subscriptionService.checkLimit('active_patrols');
-      if (!limitCheck.allowed) {
-        const error = new Error(limitCheck.upgradeMessage || "Active patrol limit reached for today.");
-        error.code = "PLAN_LIMIT_EXCEEDED";
-        error.limitDetails = limitCheck;
-        throw error;
-      }
-
       const data = { ...payload, tenant: tenantId, date_created: new Date().toISOString() };
-      try {
-        const response = await authService.protectedApi.post("/items/patrols", data);
-        subscriptionService.clearCache();
-        return response.data.data;
-      } catch (err) {
-        if (err.response?.data?.errors?.[0]?.extensions?.code === "PLAN_LIMIT_EXCEEDED") {
-          throw err;
-        }
-        // Local persistence fallback
-        const patrols = await this.getPatrols();
-        const newPatrol = { ...data, id: `patrol-${Date.now()}` };
-        patrols.unshift(newPatrol);
-        localStorage.setItem(`accesseasy_patrols_${tenantId}`, JSON.stringify(patrols));
-        return newPatrol;
-      }
+      const response = await authService.protectedApi.post("/items/patrols", data);
+      return response.data.data;
     } catch (error) {
       console.error("Error scheduling patrol:", error);
+      throw error;
+    }
+  }
+
+  async createPatrolsBatch(patrolsList) {
+    if (!patrolsList || patrolsList.length === 0) return [];
+    const tenantId = authService.getTenantId();
+    try {
+      const now = new Date().toISOString();
+      const payloadArray = patrolsList.map(p => ({
+        ...p,
+        tenant: tenantId,
+        date_created: now
+      }));
+      const response = await authService.protectedApi.post("/items/patrols", payloadArray);
+      return response.data?.data || [];
+    } catch (error) {
+      console.error("Error batch scheduling patrols:", error);
       throw error;
     }
   }
@@ -286,11 +262,14 @@ class PatrolService {
     const tenantId = authService.getTenantId();
     try {
       let endpoint = `/items/patrol_alerts?filter[tenant][_eq]=${tenantId}&sort=-date_created`;
-      if (siteId) {
-        endpoint += `&filter[site][_eq]=${siteId}`;
-      }
       const response = await authService.protectedApi.get(endpoint);
-      if (response.data?.data) return response.data.data;
+      if (response.data?.data) {
+        const alerts = response.data.data;
+        if (siteId) {
+          return alerts.filter(a => String(a.site || a.location || '') === String(siteId));
+        }
+        return alerts;
+      }
     } catch (error) {
       // Fallback to local storage
     }
@@ -363,7 +342,13 @@ class PatrolService {
       
       // If the checkpoint already exists (has a DB id), update it
       if (cpData.id) {
-        await authService.protectedApi.patch(`/items/checkpoints/${cpData.id}`, cpData);
+        const cleanPayload = {
+          group_id: groupId,
+          name: cpData.name,
+          status: cpData.status || 'active',
+          sort_order: typeof cpData.sort_order === 'number' ? cpData.sort_order : 0
+        };
+        await authService.protectedApi.patch(`/items/checkpoints/${cpData.id}`, cleanPayload);
       } else {
         // Pre-flight check limit
         const limitCheck = await subscriptionService.checkLimit('checkpoints');
@@ -374,26 +359,88 @@ class PatrolService {
           throw error;
         }
 
+        let instructions = cpData.instructions || '';
+        if (cpData.zone) {
+          const zId = typeof cpData.zone === 'object' && cpData.zone ? cpData.zone.id : cpData.zone;
+          if (!instructions.includes('__ZONE_ASSIGNMENT__:')) {
+            instructions = `__ZONE_ASSIGNMENT__:${zId} ${instructions}`.trim();
+          }
+        }
+
         // Create new
         const payload = {
-          ...cpData,
+          name: cpData.name,
+          checkpoint_id: cpData.checkpoint_id || ('CP' + Math.floor(1000 + Math.random() * 9000)),
           group_id: groupId,
           tenant: tenantId,
+          instructions: instructions,
+          building_id: cpData.building_id || null,
+          floor: cpData.floor || null,
+          dwell_time: Number(cpData.dwell_time) || 0,
+          status: cpData.status || 'active',
+          sort_order: typeof cpData.sort_order === 'number' ? cpData.sort_order : 0,
           allowed_radius_m: cpData.allowed_radius_m || 50,
-          requires_nfc: cpData.requires_nfc || false,
-          requires_photo: cpData.requires_photo || false
+          requires_nfc: Boolean(cpData.requires_nfc || cpData.nfc_uid || cpData.nfc_tag_id),
+          requires_photo: Boolean(cpData.requires_photo)
         };
-        const currentList = await this.getCheckpointsForRoute(groupId);
-        payload.sort_order = currentList.length;
+
+        if (cpData.nfc_uid || cpData.nfc_tag_id) {
+          payload.nfc_uid = cpData.nfc_uid || cpData.nfc_tag_id;
+        }
         
         await authService.protectedApi.post("/items/checkpoints", payload);
-        subscriptionService.clearCache();
       }
       
       return await this.getCheckpointsForRoute(groupId);
     } catch (error) {
-      console.error("Error saving checkpoint:", error);
-      throw error;
+      console.error("Error saving checkpoint:", error?.response?.data || error);
+      const errMsg = error.response?.data?.errors?.[0]?.message || error.message;
+      throw new Error(errMsg);
+    }
+  }
+
+  async saveCheckpointsBatch(groupId, list) {
+    if (!list || list.length === 0) return [];
+    const tenantId = authService.getTenantId();
+    try {
+      const payloadArray = list.map((cpData, index) => {
+        let instructions = cpData.instructions || '';
+        if (cpData.zone) {
+          const zId = typeof cpData.zone === 'object' && cpData.zone ? cpData.zone.id : cpData.zone;
+          if (!instructions.includes('__ZONE_ASSIGNMENT__:')) {
+            instructions = `__ZONE_ASSIGNMENT__:${zId} ${instructions}`.trim();
+          }
+        }
+
+        const item = {
+          name: cpData.name,
+          checkpoint_id: cpData.checkpoint_id || ('CP' + Math.floor(1000 + Math.random() * 9000)),
+          group_id: groupId,
+          tenant: tenantId,
+          instructions: instructions,
+          building_id: cpData.building_id || null,
+          floor: cpData.floor || null,
+          dwell_time: Number(cpData.dwell_time) || 0,
+          status: cpData.status || 'active',
+          sort_order: typeof cpData.sort_order === 'number' ? cpData.sort_order : index,
+          allowed_radius_m: cpData.allowed_radius_m || 50,
+          requires_nfc: Boolean(cpData.requires_nfc || cpData.nfc_uid || cpData.nfc_tag_id),
+          requires_photo: Boolean(cpData.requires_photo)
+        };
+
+        if (cpData.nfc_uid || cpData.nfc_tag_id) {
+          item.nfc_uid = cpData.nfc_uid || cpData.nfc_tag_id;
+        }
+
+        return item;
+      });
+
+      const response = await authService.protectedApi.post("/items/checkpoints", payloadArray);
+      return response.data?.data || [];
+    } catch (error) {
+      console.error("Error batch saving checkpoints:", error?.response?.data || error);
+      const errMsg = error.response?.data?.errors?.[0]?.message || error.message;
+      throw new Error(errMsg);
     }
   }
 

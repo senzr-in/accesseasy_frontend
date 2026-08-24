@@ -110,6 +110,86 @@
                   </div>
                   <span class="text-[10px] text-slate-400 shrink-0 font-mono">{{ site.code }}</span>
                 </button>
+
+                <div class="p-2 border-t border-slate-100 dark:border-slate-800">
+                  <button
+                    class="w-full py-2 px-3 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-400 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                    @click="openQuickCreateModal('add_site')"
+                  >
+                    <Plus class="w-3.5 h-3.5" />
+                    <span>+ Add Property / Site</span>
+                  </button>
+                </div>
+              </div>
+            </transition>
+          </div>
+
+          <!-- Global Zone Selector Dropdown -->
+          <div class="relative" ref="zoneDropdownRef">
+            <button
+              class="h-10 px-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 hover:border-indigo-400 flex items-center gap-2.5 text-xs font-bold text-slate-800 dark:text-slate-100 shadow-sm transition-all cursor-pointer"
+              @click="isZoneDropdownOpen = !isZoneDropdownOpen; isSiteDropdownOpen = false;"
+            >
+              <Layers class="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+              <span>{{ selectedZoneName }}</span>
+              <ChevronDown class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200" :class="{ 'rotate-180': isZoneDropdownOpen }" />
+            </button>
+
+            <!-- Dropdown Menu -->
+            <transition
+              enter-active-class="transition ease-out duration-100"
+              enter-from-class="transform opacity-0 scale-95"
+              enter-to-class="transform opacity-100 scale-100"
+              leave-active-class="transition ease-in duration-75"
+              leave-from-class="transform opacity-100 scale-100"
+              leave-to-class="transform opacity-0 scale-95"
+            >
+              <div
+                v-if="isZoneDropdownOpen"
+                class="absolute right-0 sm:left-0 mt-2 w-64 rounded-xl bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-slate-700 shadow-xl py-1.5 z-50 overflow-hidden animate-in"
+              >
+                <div class="px-3 py-2 border-b border-slate-100 dark:border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  Select Security Zone
+                </div>
+                <button
+                  class="w-full px-3.5 py-2.5 text-left text-xs font-semibold hover:bg-indigo-50 dark:hover:bg-indigo-500/10 flex items-center justify-between transition-colors cursor-pointer"
+                  :class="selectedZoneId === 'all' ? 'text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-50/50 dark:bg-indigo-500/5' : 'text-slate-700 dark:text-slate-200'"
+                  @click="selectZone('all')"
+                >
+                  <div class="flex items-center gap-2">
+                    <Layers class="w-4 h-4 text-slate-400" />
+                    <span>All Zones (Combined)</span>
+                  </div>
+                  <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 font-mono">{{ zonesList.length }}</span>
+                </button>
+                
+                <button
+                  v-for="zone in zonesList"
+                  :key="zone.id"
+                  class="w-full px-3.5 py-2.5 text-left text-xs font-semibold hover:bg-indigo-50 dark:hover:bg-indigo-500/10 flex items-center justify-between transition-colors cursor-pointer"
+                  :class="selectedZoneId === zone.id ? 'text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-50/50 dark:bg-indigo-500/5' : 'text-slate-700 dark:text-slate-200'"
+                  @click="selectZone(zone.id)"
+                >
+                  <div class="flex items-center gap-2 truncate">
+                    <div class="w-2 h-2 rounded-full shrink-0 bg-indigo-500" />
+                    <span class="truncate">{{ zone.name || zone.zoneName }}</span>
+                  </div>
+                  <span v-if="zone.securityTier" class="text-[9px] text-slate-400 shrink-0">{{ zone.securityTier }}</span>
+                </button>
+
+                <div v-if="zonesList.length === 0" class="px-3.5 py-3 text-center text-xs text-slate-400">
+                  No zones configured for this site
+                </div>
+
+                <div class="p-2 border-t border-slate-100 dark:border-slate-800">
+                  <button
+                    class="w-full py-2 px-3 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-400 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                    @click="openQuickCreateModal('add_zone')"
+                  >
+                    <Plus class="w-3.5 h-3.5" />
+                    <span>+ Add Security Zone</span>
+                  </button>
+                </div>
               </div>
             </transition>
           </div>
@@ -168,7 +248,7 @@
       </div>
 
       <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- 2. FIVE PRIMARY KPI CARDS                                   -->
+      <!-- 2. FIVE PRIMARY KPI CARDS (DETAILS WITH / TOTAL)            -->
       <!-- ═══════════════════════════════════════════════════════════ -->
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
 
@@ -183,9 +263,12 @@
               <Users class="w-3.5 h-3.5" />
             </div>
           </div>
-          <div class="mt-2">
+          <div class="mt-2 flex items-baseline gap-1.5">
             <span class="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
-              {{ currentMetrics.totalGuards }}
+              {{ currentMetrics.activeGuards }}
+            </span>
+            <span class="text-sm font-bold text-slate-400 dark:text-slate-500">
+              / {{ currentMetrics.totalGuards }}
             </span>
           </div>
           <div class="mt-3 pt-2.5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-[11px] font-semibold text-slate-600 dark:text-slate-400">
@@ -207,9 +290,12 @@
               <ShieldAlert class="w-3.5 h-3.5" />
             </div>
           </div>
-          <div class="mt-2">
+          <div class="mt-2 flex items-baseline gap-1.5">
             <span class="text-3xl font-black text-blue-600 dark:text-blue-400 tracking-tight leading-none">
               {{ currentMetrics.activePatrols }}
+            </span>
+            <span class="text-sm font-bold text-blue-400/70 dark:text-blue-500/70">
+              / {{ currentMetrics.totalPatrols }}
             </span>
           </div>
           <div class="mt-3 pt-2.5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-[11px] font-semibold text-slate-600 dark:text-slate-400">
@@ -229,9 +315,12 @@
               <CheckCircle2 class="w-3.5 h-3.5" />
             </div>
           </div>
-          <div class="mt-2">
+          <div class="mt-2 flex items-baseline gap-1.5">
             <span class="text-3xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight leading-none">
               {{ currentMetrics.completedToday }}
+            </span>
+            <span class="text-sm font-bold text-emerald-400/70 dark:text-emerald-500/70">
+              / {{ currentMetrics.totalPatrols }}
             </span>
           </div>
           <div class="mt-3 pt-2.5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-[11px] font-semibold text-slate-600 dark:text-slate-400">
@@ -245,23 +334,26 @@
         <!-- Card 4: Missed / Overdue (Alert Highlight) -->
         <div
           class="bg-white dark:bg-[#151c2c] border rounded-2xl p-4 shadow-sm transition-all cursor-pointer flex flex-col justify-between group"
-          :class="currentMetrics.missedCount > 0 ? 'border-rose-300 dark:border-rose-500/30 hover:border-rose-500 bg-rose-50/20' : 'border-slate-200 dark:border-white/10 hover:border-indigo-400'"
+          :class="(currentMetrics.missedCount + currentMetrics.overdueCount) > 0 ? 'border-rose-300 dark:border-rose-500/30 hover:border-rose-500 bg-rose-50/20' : 'border-slate-200 dark:border-white/10 hover:border-indigo-400'"
           @click="router.push('/dashboard/patrols?filter=missed')"
         >
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-extrabold uppercase tracking-wider" :class="currentMetrics.missedCount > 0 ? 'text-rose-600 dark:text-rose-400 font-black' : 'text-slate-500'">
+            <span class="text-[11px] font-extrabold uppercase tracking-wider" :class="(currentMetrics.missedCount + currentMetrics.overdueCount) > 0 ? 'text-rose-600 dark:text-rose-400 font-black' : 'text-slate-500'">
               Missed / Overdue
             </span>
             <div
               class="w-7 h-7 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform"
-              :class="currentMetrics.missedCount > 0 ? 'bg-rose-100 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400' : 'bg-slate-100 text-slate-500'"
+              :class="(currentMetrics.missedCount + currentMetrics.overdueCount) > 0 ? 'bg-rose-100 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400' : 'bg-slate-100 text-slate-500'"
             >
               <AlertTriangle class="w-3.5 h-3.5" />
             </div>
           </div>
-          <div class="mt-2">
-            <span class="text-3xl font-black tracking-tight leading-none" :class="currentMetrics.missedCount > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-700'">
+          <div class="mt-2 flex items-baseline gap-1.5">
+            <span class="text-3xl font-black tracking-tight leading-none" :class="(currentMetrics.missedCount + currentMetrics.overdueCount) > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-700 dark:text-slate-200'">
               {{ currentMetrics.missedCount + currentMetrics.overdueCount }}
+            </span>
+            <span class="text-sm font-bold opacity-60">
+              / {{ currentMetrics.totalPatrols }}
             </span>
           </div>
           <div class="mt-3 pt-2.5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-[11px] font-semibold text-slate-600 dark:text-slate-400">
@@ -281,9 +373,12 @@
               <AlertCircle class="w-3.5 h-3.5" />
             </div>
           </div>
-          <div class="mt-2">
+          <div class="mt-2 flex items-baseline gap-1.5">
             <span class="text-3xl font-black text-amber-600 dark:text-amber-400 tracking-tight leading-none">
-              {{ currentMetrics.incidentsCount }}
+              {{ currentMetrics.openIncidents }}
+            </span>
+            <span class="text-sm font-bold text-amber-400/70 dark:text-amber-500/70">
+              / {{ currentMetrics.totalIncidents }}
             </span>
           </div>
           <div class="mt-3 pt-2.5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-[11px] font-semibold text-slate-600 dark:text-slate-400">
@@ -1391,10 +1486,14 @@ import {
   Shield, Building2, Globe, Users, ShieldAlert, CheckCircle2,
   AlertTriangle, AlertCircle, TrendingUp, Plus, RefreshCw, ChevronDown,
   ArrowRight, MapPin, Maximize2, Crosshair, PhoneCall, Battery, Wifi,
-  Clock, Award, X, QrCode, Map as MapIcon, Check, Search, SlidersHorizontal
+  Clock, Award, X, QrCode, Map as MapIcon, Check, Search, SlidersHorizontal, Layers
 } from 'lucide-vue-next';
 import { siteService } from '@/services/siteService';
+import { zoneService } from '@/services/zoneService';
 import { patrolService } from '@/services/patrolService';
+import { authService } from '@/services/authService';
+import { attendanceService } from '@/services/attendanceService';
+import { currentUserTenant } from '@/utils/currentUserTenant';
 import { Loader } from '@googlemaps/js-api-loader';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -1405,8 +1504,14 @@ const router = useRouter();
 const isRefreshing = ref(false);
 const selectedSiteId = ref('all');
 const isSiteDropdownOpen = ref(false);
-const isCreateDropdownOpen = ref(false);
 const siteDropdownRef = ref(null);
+
+const zonesList = ref([]);
+const selectedZoneId = ref('all');
+const isZoneDropdownOpen = ref(false);
+const zoneDropdownRef = ref(null);
+
+const isCreateDropdownOpen = ref(false);
 const createDropdownRef = ref(null);
 const selectedChartPeriod = ref('7 Days');
 const selectedMapGuard = ref(null);
@@ -1722,38 +1827,113 @@ const selectedSiteName = computed(() => {
   return match ? match.name : 'All Sites';
 });
 
-const selectSite = (siteId) => {
+const selectedZoneName = computed(() => {
+  if (selectedZoneId.value === 'all') return 'All Zones';
+  const match = zonesList.value.find(z => String(z.id) === String(selectedZoneId.value));
+  return match ? (match.name || match.zoneName) : 'All Zones';
+});
+
+const selectSite = async (siteId) => {
   selectedSiteId.value = siteId;
+  selectedZoneId.value = 'all';
   isSiteDropdownOpen.value = false;
   panMapToSelectedSite();
+  await loadZones(siteId);
 };
 
-// ── METRICS COMPUTATION ───────────────────────────────────────────────────────
-const currentMetrics = computed(() => {
-  if (selectedSiteId.value === 'all') {
-    const totalGuards = sitesList.value.reduce((acc, s) => acc + (s.totalGuards || 0), 0);
-    const activeGuards = sitesList.value.reduce((acc, s) => acc + (s.activeGuards || 0), 0);
-    const offDutyGuards = sitesList.value.reduce((acc, s) => acc + (s.offDutyGuards || 0), 0);
-    const completedToday = sitesList.value.reduce((acc, s) => acc + (s.completedToday || 0), 0);
-    return {
-      totalGuards,
-      activeGuards,
-      offDutyGuards,
-      activePatrols: mockActivePatrols.value.length,
-      onTrackPatrols: mockActivePatrols.value.filter(p => p.status === 'running').length,
-      delayedPatrols: mockActivePatrols.value.filter(p => p.status === 'delayed').length,
-      completedToday,
-      completionRate: completedToday > 0 ? 100 : 0,
-      completionTrend: '0.0%',
-      missedCount: sitesList.value.reduce((acc, s) => acc + (s.missedCount || 0), 0),
-      overdueCount: sitesList.value.reduce((acc, s) => acc + (s.overdueCount || 0), 0),
-      incidentsCount: recentIncidentsList.value.length,
-      criticalIncidents: recentIncidentsList.value.filter(i => i.severity === 'critical').length,
-      normalIncidents: recentIncidentsList.value.filter(i => i.severity !== 'critical').length,
-    };
+const selectZone = (zoneId) => {
+  selectedZoneId.value = zoneId;
+  isZoneDropdownOpen.value = false;
+};
+
+const loadZones = async (siteId = null) => {
+  try {
+    const targetSiteId = siteId === 'all' ? null : siteId;
+    zonesList.value = await zoneService.fetchZones(targetSiteId);
+  } catch (e) {
+    zonesList.value = [];
   }
-  const match = sitesList.value.find(s => String(s.id) === String(selectedSiteId.value));
-  return match || sitesList.value[0] || {};
+};
+
+onClickOutside(siteDropdownRef, () => {
+  isSiteDropdownOpen.value = false;
+});
+
+onClickOutside(zoneDropdownRef, () => {
+  isZoneDropdownOpen.value = false;
+});
+
+onClickOutside(createDropdownRef, () => {
+  isCreateDropdownOpen.value = false;
+});
+
+// ── METRICS COMPUTATION (LIVE REAL-TIME DATA & / TOTALS) ─────────────────────
+const allGuards = ref([]);
+const allPatrols = ref([]);
+const allIncidents = ref([]);
+const todayAttendance = ref([]);
+
+const currentMetrics = computed(() => {
+  const siteFilter = selectedSiteId.value;
+  const zoneFilter = selectedZoneId.value;
+
+  const filteredP = allPatrols.value.filter(p => {
+    if (siteFilter !== 'all' && p.site && String(p.site) !== String(siteFilter)) return false;
+    if (zoneFilter !== 'all' && p.zoneId && String(p.zoneId) !== String(zoneFilter)) return false;
+    return true;
+  });
+
+  const filteredI = allIncidents.value.filter(i => {
+    if (siteFilter !== 'all' && i.site && String(i.site) !== String(siteFilter)) return false;
+    return true;
+  });
+
+  const totalG = allGuards.value.length;
+  const activeAttendanceGuardIds = new Set(
+    todayAttendance.value
+      .filter(a => a.status === 'present' || a.status === 'late' || a.check_in_time)
+      .map(a => String(a.guard_id || a.user || a.userId))
+  );
+
+  const activeG = allGuards.value.filter(g =>
+    (g.status === 'active' || g.status === 'on_duty') || activeAttendanceGuardIds.has(String(g.id))
+  ).length;
+  const offDutyG = Math.max(0, totalG - activeG);
+
+  const totalP = filteredP.length;
+  const activeP = filteredP.filter(p => p.status === 'running' || p.status === 'in_progress').length;
+  const onTrackP = filteredP.filter(p => (p.status === 'running' || p.status === 'in_progress') && !p.is_delayed).length;
+  const delayedP = filteredP.filter(p => p.status === 'delayed' || p.is_delayed).length;
+  const completedP = filteredP.filter(p => p.status === 'completed').length;
+  const missedP = filteredP.filter(p => p.status === 'missed').length;
+  const overdueP = filteredP.filter(p => p.status === 'overdue').length;
+
+  const totalInc = filteredI.length;
+  const openInc = filteredI.filter(i => i.status === 'open' || i.status === 'active' || !i.status).length;
+  const criticalInc = filteredI.filter(i => (i.severity || '').toLowerCase() === 'critical' || (i.priority || '').toLowerCase() === 'high').length;
+  const normalInc = Math.max(0, openInc - criticalInc);
+
+  const completionRate = totalP > 0 ? Math.round((completedP / totalP) * 100) : (completedP > 0 ? 100 : 0);
+
+  return {
+    totalGuards: totalG,
+    activeGuards: activeG,
+    offDutyGuards: offDutyG,
+    totalPatrols: totalP,
+    activePatrols: activeP,
+    onTrackPatrols: onTrackP,
+    delayedPatrols: delayedP,
+    completedToday: completedP,
+    completionRate,
+    completionTrend: '+0.0%',
+    missedCount: missedP,
+    overdueCount: overdueP,
+    totalIncidents: totalInc,
+    openIncidents: openInc,
+    incidentsCount: openInc,
+    criticalIncidents: criticalInc,
+    normalIncidents: normalInc
+  };
 });
 
 // ── ACTIVE PATROLS STREAM ─────────────────────────────────────────────────────
@@ -1893,25 +2073,93 @@ const formattedCurrentDate = computed(() => {
 const currentTime = ref('');
 let clockTimer = null;
 
-const refreshDashboard = async () => {
-  isRefreshing.value = true;
-  sitesList.value = await siteService.fetchSites();
+const loadDashboardData = async () => {
   try {
-    const alerts = await patrolService.getAlerts();
-    if (alerts && alerts.length > 0) {
-      recentIncidentsList.value = alerts.slice(0, 5).map(a => ({
+    const token = authService.getToken();
+    let tenantId = authService.getTenantId();
+    try {
+      if (!tenantId && currentUserTenant?.getTenantIdAsync) {
+        tenantId = await currentUserTenant.getTenantIdAsync();
+      }
+    } catch (e) {}
+
+    // 1. Fetch Sites & Zones
+    try {
+      sitesList.value = await siteService.fetchSites();
+      await loadZones(selectedSiteId.value);
+    } catch (e) {
+      console.warn("Could not fetch sites/zones:", e);
+    }
+
+    // 2. Fetch Guards from /users
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/users?filter[_and][0][tenant][tenantId][_eq]=${tenantId}&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=status&fields[]=accesseasyRole.*&fields[]=tenant.userApp`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      if (res.ok) {
+        const udata = await res.json();
+        const usersList = (udata.data || []).filter(u => {
+          if (!u.tenant) return false;
+          let apps = u.tenant.userApp;
+          if (typeof apps === 'string') {
+            try { apps = JSON.parse(apps); } catch (e) { apps = []; }
+          }
+          return Array.isArray(apps) && apps.some(a => a.userApp === 'accesseasy' || a.userApp === 'accesseasy_patrol');
+        });
+
+        // Filter for security guard roles (or all assigned force if roles are generic)
+        const guardRoles = usersList.filter(u => {
+          const roleName = u.accesseasyRole?.roleName?.toLowerCase() || '';
+          return roleName.includes('guard') || roleName.includes('security') || roleName.includes('patrol') || !roleName.includes('admin');
+        });
+
+        allGuards.value = guardRoles.length > 0 ? guardRoles : usersList;
+      }
+    } catch (e) {
+      console.warn("Could not fetch guards for metrics:", e);
+    }
+
+    // 3. Fetch Patrols
+    try {
+      allPatrols.value = await patrolService.getPatrols();
+      mockActivePatrols.value = allPatrols.value.filter(p => p.status === 'running' || p.status === 'in_progress');
+    } catch (e) {
+      console.warn("Could not fetch patrols for metrics:", e);
+    }
+
+    // 4. Fetch Incidents
+    try {
+      allIncidents.value = await patrolService.getAlerts();
+      recentIncidentsList.value = (allIncidents.value || []).slice(0, 10).map(a => ({
         id: a.id,
-        siteId: 'site-01',
-        siteName: a.location || 'Site Alpha',
-        title: a.title || a.type || 'Incident',
+        siteId: a.site || 'site-01',
+        siteName: a.location || 'Security Zone',
+        title: a.title || a.type || 'Incident Alert',
         location: a.location || 'Perimeter',
         reportedBy: a.reported_by || 'Guard',
-        timeAgo: 'Just now',
+        timeAgo: a.date_created ? new Date(a.date_created).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just now',
         severity: (a.severity || 'medium').toLowerCase(),
         description: a.description
       }));
+    } catch (e) {
+      console.warn("Could not fetch incidents for metrics:", e);
     }
-  } catch (e) {}
+
+    // 5. Fetch Attendance
+    try {
+      todayAttendance.value = await attendanceService.getTodayAttendance();
+    } catch (e) {
+      console.warn("Could not fetch attendance for metrics:", e);
+    }
+  } catch (err) {
+    console.error("Failed to load dashboard data:", err);
+  }
+};
+
+const refreshDashboard = async () => {
+  isRefreshing.value = true;
+  await loadDashboardData();
   setTimeout(() => isRefreshing.value = false, 500);
 };
 
@@ -1921,7 +2169,7 @@ onMounted(async () => {
   }, 1000);
   currentTime.value = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
 
-  sitesList.value = await siteService.fetchSites();
+  await loadDashboardData();
   await nextTick();
   await initMap();
 });

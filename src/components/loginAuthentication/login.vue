@@ -503,20 +503,8 @@ async function onPhoneSubmit() {
     }
 
     const user = await authService.getUserByPhone(fullPhoneNumber);
-    const hasPin = user && user.userPin;
-    const token = authService.getToken();
-    const isTokenValid = token && authService.isAuthenticated();
-
     localStorage.setItem("userPhone", digits);
-
-    if (hasPin && isTokenValid) {
-      router.push({
-        name: "PinVerification",
-        params: { contactType: "phone", contactValue: digits },
-      });
-    } else {
-      await proceedToOtpVerification(fullPhoneNumber);
-    }
+    await proceedToOtpVerification(fullPhoneNumber);
   } catch (error) {
     console.error("Error during login:", error);
     let errorMessage = "An error occurred. Please try again or check the internet connection";
@@ -606,30 +594,18 @@ async function onEmailSubmit() {
       return;
     }
 
-    const user = await authService.getUserByEmail(email.value);
-    const hasPin = user && user.userPin;
-    const token = authService.getToken();
-    const isTokenValid = token && authService.isAuthenticated();
-
     localStorage.setItem("email", email.value);
 
-    if (hasPin && isTokenValid) {
-      router.push({
-        name: "PinVerification",
-        params: { contactType: "email", contactValue: email.value },
-      });
-    } else {
-      const data = await authService.generateEmailOtp(email.value);
+    const data = await authService.generateEmailOtp(email.value);
 
-      if (!data?.success && !data?.otp_session_uuid) {
-        throw new Error(data?.message || "Could not start email session. Try again.");
-      }
-
-      if (data?.otp_session_uuid) {
-        localStorage.setItem("emailSessionUuid", data.otp_session_uuid);
-      }
-      router.push({ name: "EmailVerification", params: { email: email.value } });
+    if (!data?.success && !data?.otp_session_uuid) {
+      throw new Error(data?.message || "Could not start email session. Try again.");
     }
+
+    if (data?.otp_session_uuid) {
+      localStorage.setItem("emailSessionUuid", data.otp_session_uuid);
+    }
+    router.push({ name: "EmailVerification", params: { email: email.value } });
   } catch (err) {
     emailError.value = err?.response?.data?.message || err?.message || "Something went wrong. Please try again.";
   } finally {
@@ -641,12 +617,18 @@ async function loginWithGoogle() {
   try {
     sessionStorage.setItem("connector_type", "google");
     googleLoading.value = true;
+    phoneError.value = "";
     
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
+
     const response = await fetch(`${import.meta.env.VITE_KN_API_URL}/google-accesseasy`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ type: "google" }),
+      signal: controller.signal
     });
+    clearTimeout(timeoutId);
 
     const data = await response.json();
     if (data.success && data.url) {
@@ -656,7 +638,9 @@ async function loginWithGoogle() {
     }
   } catch (error) {
     console.error("Google login error:", error);
-    phoneError.value = error.message || "Failed to connect to Google";
+    phoneError.value = error.name === 'AbortError' 
+      ? "Google service took too long to respond. Please try phone/email login." 
+      : (error.message || "Failed to connect to Google");
     googleLoading.value = false;
   }
 }

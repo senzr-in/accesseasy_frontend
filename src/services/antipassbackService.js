@@ -94,9 +94,11 @@ class AntipassbackService {
    */
   async fetchZones() {
     try {
-      const response = await authService.protectedApi.get(
-        "/items/antiPassbackModeZones"
-      );
+      const tenantId = authService.getTenantId();
+      const endpoint = tenantId
+        ? `/items/antiPassbackModeZones?filter[tenant][_eq]=${tenantId}`
+        : "/items/antiPassbackModeZones";
+      const response = await authService.protectedApi.get(endpoint);
       return response.data.data;
     } catch (error) {
       console.error("Error fetching zones:", error);
