@@ -135,22 +135,6 @@ const routes = [
     component: OnboardingPage,
     meta: { requiresAuth: true },
   },
-  // 3D Landing Page (Version 1)
-  {
-    path: "/landing-3d",
-    name: "Landing3D",
-    component: Landing3D,
-  },
-  // 3D Landing Page (Version 2 - Cyber-Core & Cursor Tracking)
-  {
-    path: "/landing-2",
-    name: "LandingPage2",
-    component: () => import("@/pages/landing/LandingPage2.vue"),
-  },
-  {
-    path: "/landing-v2",
-    redirect: "/landing-2",
-  },
   {
     path: "/register",
     name: "Register",
