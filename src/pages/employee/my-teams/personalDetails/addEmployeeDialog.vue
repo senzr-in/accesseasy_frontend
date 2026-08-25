@@ -1213,6 +1213,30 @@ const handleSubmit = async () => {
       throw new Error("Phone number must be exactly 10 digits.");
     }
 
+    // ── Phone uniqueness check ──────────────────────────────────────────────
+    if (formData.value.personalPhone) {
+      const formattedPhone = `+91${formData.value.personalPhone}`;
+      try {
+        const phoneCheckRes = await fetch(
+          `${import.meta.env.VITE_API_URL}/users?filter[phone][_eq]=${encodeURIComponent(formattedPhone)}&fields=id,phone&limit=2`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (phoneCheckRes.ok) {
+          const phoneCheckData = await phoneCheckRes.json();
+          const matches = phoneCheckData.data || [];
+          const currentUserId = props.employee?.assignedUser?.id || null;
+          const isDuplicate = matches.some(u => u.id !== currentUserId);
+          if (isDuplicate) {
+            throw new Error("This mobile number is already registered with another employee.");
+          }
+        }
+      } catch (err) {
+        if (err.message.includes("already registered")) throw err;
+        console.warn("[addEmployeeDialog] Phone uniqueness check failed:", err.message);
+      }
+    }
+    // ───────────────────────────────────────────────────────────────────────
+
     if (formData.value.rfidCard) {
       if (!/^\d+$/.test(formData.value.rfidCard)) {
         throw new Error("RFID Card number must contain digits only.");
