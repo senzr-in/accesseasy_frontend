@@ -383,23 +383,23 @@
                   <span
                     class="w-1.5 h-1.5 rounded-full"
                     :class="[
-                      emp.status === 'Active' || emp.status === 'active' || !emp.status
+                      getStatusLabel(emp.status) === 'Active'
                         ? 'bg-[#10B981]'
-                        : emp.status === 'Pending' || emp.status === 'pending'
+                        : getStatusLabel(emp.status) === 'Pending'
                         ? 'bg-[#F59E0B]'
                         : 'bg-[#94A3B8]'
                     ]"
                   />
                   <span
                     :class="[
-                      emp.status === 'Active' || emp.status === 'active' || !emp.status
+                      getStatusLabel(emp.status) === 'Active'
                         ? 'text-[#059669]'
-                        : emp.status === 'Pending' || emp.status === 'pending'
+                        : getStatusLabel(emp.status) === 'Pending'
                         ? 'text-[#D97706]'
                         : 'text-[#64748B]'
                     ]"
                   >
-                    {{ emp.status || 'Active' }}
+                    {{ getStatusLabel(emp.status) }}
                   </span>
                 </div>
               </td>
@@ -969,6 +969,12 @@ const getEmployeeAccessName = (emp) => {
   return 'No Access Group';
 };
 
+const getStatusLabel = (status) => {
+  if (status === 'Pending' || status === 'pending') return 'Pending';
+  if (status === false || status === 'false' || status === 'Inactive' || status === 'inactive') return 'Inactive';
+  return 'Active';
+};
+
 const getDepartmentName = (deptId) => {
   const d = availableDepartments.value.find(item => String(item.id) === String(deptId));
   return d ? (d.departmentName || d.name) : deptId;
@@ -1200,9 +1206,9 @@ const fetchEmployeeData = async () => {
       items.value = data.data || [];
 
       // Calculate summary breakdowns
-      activeCount.value = items.value.filter(e => e.status === 'Active' || e.status === 'active' || !e.status).length;
-      inactiveCount.value = items.value.filter(e => e.status === 'Inactive' || e.status === 'inactive').length;
-      pendingCount.value = items.value.filter(e => e.status === 'Pending' || e.status === 'pending').length;
+      activeCount.value = items.value.filter(e => getStatusLabel(e.status) === 'Active').length;
+      inactiveCount.value = items.value.filter(e => getStatusLabel(e.status) === 'Inactive').length;
+      pendingCount.value = items.value.filter(e => getStatusLabel(e.status) === 'Pending').length;
 
       if (items.value.length > 0) {
         await fetchBiometricAndCredentialStatus(items.value.map(item => item.id));
