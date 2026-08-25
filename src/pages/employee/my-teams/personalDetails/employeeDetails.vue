@@ -955,8 +955,18 @@ const getRoleName = (emp) => {
 };
 
 const getEmployeeAccessName = (emp) => {
-  const al = emp.assignedAccessLevels?.[0]?.accesslevels_id?.accessLevelName;
-  return al || 'Standard 24/7';
+  if (!emp) return 'No Access Group';
+  const al1 = emp.assignedAccessLevels?.[0]?.accesslevels_id?.accessLevelName;
+  if (al1) return al1;
+  const al2 = typeof emp.assignedAccessLevel === 'object' ? emp.assignedAccessLevel?.accessLevelName : null;
+  if (al2) return al2;
+  const rawId = emp.assignedAccessLevel?.id || emp.assignedAccessLevel || emp.assignedAccessLevels?.[0]?.accesslevels_id || emp.assignedAccessLevels?.[0];
+  if (rawId) {
+    const idStr = typeof rawId === 'object' ? String(rawId.id || rawId._id || '') : String(rawId);
+    const found = availableAccessLevels.value.find(a => String(a.id) === idStr);
+    if (found) return found.accessLevelName || found.name || found.groupName;
+  }
+  return 'No Access Group';
 };
 
 const getDepartmentName = (deptId) => {
@@ -1173,6 +1183,9 @@ const fetchEmployeeData = async () => {
       "assignedCards.cardManagement_id.rfidCard",
       "assignedCards.cardManagement_id.type",
       "assignedCards.cardManagement_id.cardAccess",
+      "assignedAccessLevel.id",
+      "assignedAccessLevel.accessLevelName",
+      "assignedAccessLevel.accessLevelNumber",
       "assignedAccessLevels.accesslevels_id.id",
       "assignedAccessLevels.accesslevels_id.accessLevelName",
       "assignedAccessLevels.accesslevels_id.accessLevelNumber"

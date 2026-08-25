@@ -897,7 +897,15 @@ watch(() => props.modelValue, async (isOpen) => {
         dateOfJoining: props.employee.dateOfJoining ? props.employee.dateOfJoining.split('T')[0] : '',
         departmentId: props.employee.department?.id || props.employee.department || '',
         branchId: props.employee.branch?.id || props.employee.branch || '',
-        groupId: props.employee.assignedAccessLevel?.id || props.employee.assignedAccessLevel || props.employee.group?.id || props.employee.group || '',
+        groupId: (() => {
+          if (!props.employee) return '';
+          const g = props.employee.assignedAccessLevel ||
+                    props.employee.assignedAccessLevels?.[0]?.accesslevels_id ||
+                    props.employee.assignedAccessLevels?.[0] ||
+                    props.employee.group;
+          if (!g) return '';
+          return typeof g === 'object' ? String(g.id || g._id || '') : String(g);
+        })(),
         status: props.employee.status || 'active',
         roleId: props.employee.assignedUser?.role?.id || props.employee.assignedUser?.role || '',
         rfidCard: '',
