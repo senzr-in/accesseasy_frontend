@@ -315,12 +315,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { authService } from "@/services/authService";
 import { 
   Building2, Smartphone, AlertTriangle, Globe, Radio, ShieldCheck,
-  ScanFace, Zap, CheckCircle2, ArrowRight, AlertCircle, Nfc, QrCode, IdCard,
+  ScanFace, ArrowRight, AlertCircle, Nfc, QrCode, IdCard,
   Phone, Mail, X
 } from "lucide-vue-next";
 

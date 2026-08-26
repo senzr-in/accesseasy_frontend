@@ -1392,12 +1392,7 @@ const filteredApproverOptions = computed(() => {
   return approverOptions.value.filter((approver) => {
     if (formData.role === "Employee") {
       return approver.role === "Employee";
-    } else if (formData.role === "Employee") {
-      return approver.role === "Employee";
     }
-    //  else if (formData.role === "Employee") {
-    //   return approver.role === "Employee";
-    // }
     return false;
   });
 });

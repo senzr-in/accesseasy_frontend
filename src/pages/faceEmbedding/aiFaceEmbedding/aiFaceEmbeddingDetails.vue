@@ -9,20 +9,31 @@
         :has-error="error"
         @update:search-query="debouncedSearch"
       >
-        <!-- Delete Button -->
+        <!-- Action Buttons -->
         <template #before-search>
-          <v-btn
-            v-if="selected.length > 0"
-            color="error"
-            variant="tonal"
-            prepend-icon="mdi-delete"
-            :disabled="deleting"
-            :loading="deleting"
-            class="delete-btn"
-            @click="deleteSelectedItems"
-          >
-            Delete Selected ({{ selected.length }})
-          </v-btn>
+          <div class="d-flex align-center gap-2">
+            <v-btn
+              color="primary"
+              variant="elevated"
+              prepend-icon="mdi-camera-plus"
+              class="mr-2"
+              @click="showEnrollModal = true"
+            >
+              Enroll from Photo
+            </v-btn>
+            <v-btn
+              v-if="selected.length > 0"
+              color="error"
+              variant="tonal"
+              prepend-icon="mdi-delete"
+              :disabled="deleting"
+              :loading="deleting"
+              class="delete-btn"
+              @click="deleteSelectedItems"
+            >
+              Delete Selected ({{ selected.length }})
+            </v-btn>
+          </div>
         </template>
 
         <!-- Table content states -->
@@ -186,6 +197,12 @@
         {{ snackbar.message }}
       </div>
     </v-snackbar>
+
+    <!-- Web Face Enrollment Modal -->
+    <WebEnrollmentModal
+      v-model="showEnrollModal"
+      @enrolled="fetchAiFaceData"
+    />
   </div>
 </template>
 
@@ -199,9 +216,11 @@ import DataTableWrapper from "@/components/common/table/DataTableWrapper.vue";
 import SkeletonLoader from "@/components/common/states/SkeletonLoading.vue";
 import EmptyState from "@/components/common/states/EmptyState.vue";
 import ErrorState from "@/components/common/states/ErrorState.vue";
+import WebEnrollmentModal from "@/pages/faceEmbedding/webUploadFaceEmbedding/WebEnrollmentModal.vue";
 import { debounce } from "lodash";
 
 // State
+const showEnrollModal = ref(false);
 const items = ref([]);
 const loading = ref(false);
 const error = ref(null);

@@ -286,6 +286,16 @@ const initialFilters = computed(() => ({
 const customTemplates = ref([]);
 const createDialog = ref(false);
 const newTemplate = ref({ name: "" });
+const isSaving = ref(false);
+const showSnackbar = (msg, type = "info") => {
+  if (type === "warning" || type === "error") {
+    errorMessage.value = msg;
+    showError.value = true;
+  } else {
+    console.log(msg);
+  }
+};
+const loadTemplates = () => fetchData();
 const pageFilters = ref([
   { key: "dateFrom", label: "From Date", type: "date", show: true },
   { key: "status", label: "Status", type: "select", show: true },

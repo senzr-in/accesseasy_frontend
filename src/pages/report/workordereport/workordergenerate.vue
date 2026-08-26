@@ -178,14 +178,12 @@ import * as XLSX from "xlsx";
 import SkeletonLoader from "@/components/common/states/SkeletonLoading.vue";
 import BaseButton from "@/components/common/buttons/BaseButton.vue";
 import DataTable from "@/components/common/table/DataTable.vue";
-import DataTableWrapper from "@/components/common/table/DataTableWrapper.vue";
-import { Wrench, RefreshCw, Download } from "lucide-vue-next";
+import { Wrench, Download } from "lucide-vue-next";
 
 const emit = defineEmits(["closeAddPage"]);
 const loading = ref(false);
 const showWarning = ref(false);
 const warningMessage = ref("");
-const form = ref(null);
 
 const isGenerating = ref(false);
 const isGeneratingAll = ref(false);

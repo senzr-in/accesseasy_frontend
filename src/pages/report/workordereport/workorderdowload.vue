@@ -70,16 +70,16 @@
   />
 </template>
 <script setup>
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted } from "vue";
 import { currentUserTenant } from "@/utils/currentUserTenant";
 import GenerateReport from "./workordergenerate.vue";
 import CustomPagination from "@/utils/pagination/CustomPagination.vue";
 import { authService } from "@/services/authService";
 
+const emit = defineEmits(["showEditPage"]);
 const showReport = ref(false);
 const editedItem = ref({});
 const showEditPage = ref(false);
-const selected = ref([]);
 const items = ref([]);
 const page = ref(1);
 const itemsPerPage = ref(25);

@@ -2,6 +2,30 @@ import { authService } from '@/services/authService';
 import { subscriptionService } from '@/services/subscriptionService';
 
 class PatrolService {
+  constructor() {
+    // Static data caches — these rarely change, refresh every 5 minutes
+    this._cache = {};
+    this._cacheExpiry = {};
+    this._TTL = 5 * 60 * 1000; // 5 minutes
+  }
+
+  _getCache(key) {
+    if (this._cache[key] && Date.now() < (this._cacheExpiry[key] || 0)) {
+      return this._cache[key];
+    }
+    return null;
+  }
+
+  _setCache(key, data) {
+    this._cache[key] = data;
+    this._cacheExpiry[key] = Date.now() + this._TTL;
+  }
+
+  invalidateCache(key) {
+    delete this._cache[key];
+    delete this._cacheExpiry[key];
+  }
+
   async getPatrols(siteId = null) {
     const tenantId = authService.getTenantId();
     try {
@@ -29,17 +53,21 @@ class PatrolService {
   }
 
   async fetchCheckpointGroups(siteId = null) {
+    const cacheKey = `checkpoint_groups_${siteId || 'all'}`;
+    const cached = this._getCache(cacheKey);
+    if (cached) return siteId ? cached.filter(g => String(g.site) === String(siteId)) : cached;
+
     const tenantId = authService.getTenantId();
     try {
       let endpoint = `/items/checkpoint_groups?filter[tenant][_eq]=${tenantId}&sort=-date_created`;
-      if (siteId) {
-        endpoint += `&filter[site][_eq]=${siteId}`;
-      }
+      if (siteId) endpoint += `&filter[site][_eq]=${siteId}`;
       const response = await authService.protectedApi.get(endpoint);
-      if (response.data?.data) return response.data.data;
-    } catch (error) {
-      // Fallback to local storage
-    }
+      if (response.data?.data) {
+        this._setCache(cacheKey, response.data.data);
+        return response.data.data;
+      }
+    } catch (error) { /* Fallback to local storage */ }
+
     const stored = localStorage.getItem(`accesseasy_checkpoint_groups_${tenantId}`);
     if (stored) {
       try {
@@ -76,16 +104,21 @@ class PatrolService {
   }
 
   async getCheckpoints(siteId = null) {
+    const cacheKey = `checkpoints_${siteId || 'all'}`;
+    const cached = this._getCache(cacheKey);
+    if (cached) return siteId ? cached.filter(c => String(c.site) === String(siteId)) : cached;
+
     const tenantId = authService.getTenantId();
     try {
       let endpoint = `/items/checkpoints?filter[tenant][_eq]=${tenantId}&limit=250`;
       if (siteId) endpoint += `&filter[site][_eq]=${siteId}`;
-      
       const response = await authService.protectedApi.get(endpoint);
-      if (response.data?.data) return response.data.data;
-    } catch (error) {
-      // Fallback to local storage
-    }
+      if (response.data?.data) {
+        this._setCache(cacheKey, response.data.data);
+        return response.data.data;
+      }
+    } catch (error) { /* Fallback to local storage */ }
+
     const stored = localStorage.getItem(`accesseasy_checkpoints_${tenantId}`);
     if (stored) {
       try {
@@ -261,7 +294,9 @@ class PatrolService {
   async getAlerts(siteId = null) {
     const tenantId = authService.getTenantId();
     try {
-      let endpoint = `/items/patrol_alerts?filter[tenant][_eq]=${tenantId}&sort=-date_created`;
+      let endpoint = tenantId 
+        ? `/items/patrol_alerts?filter[tenant][_eq]=${tenantId}&sort=-date_created`
+        : `/items/patrol_alerts?sort=-date_created`;
       const response = await authService.protectedApi.get(endpoint);
       if (response.data?.data) {
         const alerts = response.data.data;
@@ -295,12 +330,18 @@ class PatrolService {
 
   async getCheckpointsForRoute(groupId) {
     if (!groupId) return [];
+    const cacheKey = `route_checkpoints_${groupId}`;
+    const cached = this._getCache(cacheKey);
+    if (cached) return cached;
+
     try {
       const tenantId = authService.getTenantId();
       const response = await authService.protectedApi.get(
         `/items/checkpoints?filter[tenant][_eq]=${tenantId}&filter[group_id][_eq]=${groupId}&sort=sort_order&limit=50`
       );
-      return response.data.data;
+      const data = response.data?.data || [];
+      this._setCache(cacheKey, data);
+      return data;
     } catch (error) {
       console.error("Error fetching checkpoints:", error);
       return [];
@@ -311,12 +352,17 @@ class PatrolService {
     try {
       const tenantId = authService.getTenantId();
       const today = new Date().toISOString().split('T')[0];
-      let endpoint = `/items/patrol_logs?filter[tenant][_eq]=${tenantId}&filter[date_created][_gte]=${today}T00:00:00&sort=timestamp`;
+      let endpoint = `/items/patrol_logs?filter[tenant][_eq]=${tenantId}&filter[date_created][_gte]=${today}T00:00:00&sort=-date_created&limit=500`;
       if (siteId) {
-        endpoint += `&filter[site][_eq]=${siteId}`;
+        endpoint += `&filter[site_id][_eq]=${siteId}`;
       }
-      const response = await authService.protectedApi.get(endpoint);
-      return response.data.data;
+      try {
+        const response = await authService.protectedApi.get(endpoint);
+        return response.data?.data || [];
+      } catch (e) {
+        const res = await authService.protectedApi.get(`/items/patrol_logs?filter[date_created][_gte]=${today}T00:00:00&sort=-date_created&limit=500`);
+        return res.data?.data || [];
+      }
     } catch (error) {
       console.error("Error fetching today's patrol logs:", error);
       return [];

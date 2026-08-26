@@ -1193,10 +1193,8 @@ const onSalarySettingChange = async (id) => {
 
     const data = await response.json();
     const setting = data.data;
-    console.log("56", setting);
     if (setting.configName === "Custom") {
-      alert("called");
-      return CustomConfig;
+      return setting;
     }
 
     selectedCategory.value = { id: setting.id, name: setting.configName };

@@ -526,8 +526,6 @@ const migrateLegacyPincode = () => {
       formData.value.locdetail.pincodes = [];
     }
 
-    施;
-
     if (
       !formData.value.locdetail.pincodes.includes(
         formData.value.locdetail.pincode,
@@ -722,7 +720,6 @@ const validateWorkingRange = () => {
   let value = formData.value.workingRange;
   if (value > 500) formData.value.workingRange = 500;
   if (value < 1) formData.value.workingRange = 1;
-  updateLocationSize();
 };
 
 const checkLocationNameExists = (locationName) => {

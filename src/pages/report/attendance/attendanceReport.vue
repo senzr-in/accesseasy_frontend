@@ -194,7 +194,8 @@ const formatOptions = ["Pdf", "Excel"];
 const format = ref(null);
 const branches = ref([]);
 const loadingBranches = ref(false);
-const departmentOptions = ref();
+const loadingDepartments = ref(false);
+const departmentOptions = ref([]);
 const selectedDepartment = ref(null);
 const branch = ref();
 const startDate = ref();
@@ -202,6 +203,14 @@ const endDate = ref();
 const reportType = ref();
 const token = authService.getToken();
 const tenantId = currentUserTenant.getTenantId();
+
+const showSnackbar = (msg, type = "info") => {
+  if (type === "error") {
+    console.error(msg);
+  } else {
+    console.log(msg);
+  }
+};
 
 const fetchBranches = async () => {
   loadingBranches.value = true;

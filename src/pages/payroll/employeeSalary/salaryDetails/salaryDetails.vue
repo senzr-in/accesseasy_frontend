@@ -492,21 +492,21 @@ import SkeletonLoader from "@/components/common/states/SkeletonLoading.vue";
 import EmptyState from "@/components/common/states/EmptyState.vue";
 import FilterComponent from "@/components/common/filters/payrollfilter.vue";
 import CustomPagination from "@/utils/pagination/CustomPagination.vue";
-import { useRouter, useRoute } from "vue-router";
+import { useRouter } from "vue-router";
 import ErrorState from "@/components/common/states/ErrorState.vue";
-import { X, Upload } from "lucide-vue-next";
+import { Upload } from "lucide-vue-next";
 import * as XLSX from "xlsx";
 import ExcelJS from "exceljs";
 
 // State
-const route = useRoute();
+const router = useRouter();
 const loading = ref(false);
 const error = ref(null);
 const showFilters = ref(true);
 const search = ref("");
 const showForm = ref(false);
-const isEditing = ref(false);
-const editedItem = ref({});
+const branchOptions = ref([]);
+const departmentOptions = ref([]);
 const page = ref(1);
 const itemsPerPage = ref(25);
 const totalItems = ref(0);
@@ -516,10 +516,6 @@ const selected = ref([]);
 const tenantId = currentUserTenant.getTenantId();
 const userRole = currentUserTenant.getRole();
 const userId = currentUserTenant.getUserId();
-
-// Dialog states
-const lwfDialog = reactive({ show: false, data: null });
-const ptDialog = reactive({ show: false, data: null });
 
 // Filters
 const filters = reactive({
@@ -594,7 +590,6 @@ const filteredItems = computed(() => {
   return items.value;
 });
 
-const router = useRouter();
 const token = authService.getToken();
 
 // Helper Functions
@@ -625,18 +620,6 @@ const fetchAuthorizedImage = async (imageUrl) => {
     console.error("Error loading profile image:", error);
     return null;
   }
-};
-
-const parseTaxRules = (rules) => {
-  if (typeof rules === "string") {
-    try {
-      return JSON.parse(rules);
-    } catch (e) {
-      console.error("Error parsing tax rules:", e);
-      return [];
-    }
-  }
-  return Array.isArray(rules) ? rules : [];
 };
 
 // API Logic
@@ -1040,7 +1023,6 @@ const handleImport = async () => {
 
     // ------------------------------
     // 5️⃣ Batch GET Personal module
-    const personalMap = {};
     for (let start = 0; start < employeeRows.length; start += BATCH_SIZE) {
       const batchRows = employeeRows.slice(start, start + BATCH_SIZE);
       const batchIDs = batchRows.map((r) => r.employeeID);
@@ -1562,18 +1544,6 @@ const handleSort = ({ field, direction }) => {
   fetchSalaryDetails();
 };
 
-const showLWFDetails = (item) => {
-  if (isEmployeeLeft(item)) return;
-  lwfDialog.data = item.salaryConfig?.LWF;
-  lwfDialog.show = true;
-};
-
-const showPTDetails = (item) => {
-  if (isEmployeeLeft(item)) return;
-  ptDialog.data = item.salaryConfig?.professionalTax;
-  ptDialog.show = true;
-};
-
 const handleRowClick = (item) => {
   if (isEmployeeLeft(item)) {
     console.log("Cannot navigate: Employee has left.");
@@ -1591,11 +1561,6 @@ const handleRowClick = (item) => {
     console.error("Invalid item or employee ID", item);
     alert("Unable to navigate to employee details. Employee ID not found.");
   }
-};
-
-const handleSaveSuccess = () => {
-  showForm.value = false;
-  fetchSalaryDetails();
 };
 
 const handlePageChange = (newPage) => {

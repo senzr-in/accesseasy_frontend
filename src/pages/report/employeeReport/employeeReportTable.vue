@@ -151,6 +151,7 @@
 import { ref, onMounted, computed } from "vue";
 import { currentUserTenant } from "@/utils/currentUserTenant";
 import GenerateReport from "./employeeReportGen.vue";
+const emit = defineEmits(["showEditPage"]);
 const showReport = ref(false);
 const editedItem = ref({});
 const showEditPage = ref(false);

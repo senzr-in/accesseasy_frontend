@@ -25,7 +25,7 @@
               @change="$emit('update:selectedZoneId', $event.target.value || null)"
             >
               <option value="">All Zones</option>
-              <option v-for="z in zones" :key="z.id" :value="z.id">{{ z.zoneName || z.name }}</option>
+              <option v-for="z in displayZones" :key="z.id" :value="z.id">{{ z.zoneName || z.name }}</option>
             </select>
           </div>
         </div>
@@ -383,7 +383,8 @@ const props = defineProps({
 const emit = defineEmits(['openMap', 'editPatrol', 'deletePatrol', 'update:selectedZoneId', 'update:statusFilter']);
 
 const route = useRoute();
-const zones = ref([]);
+const internalZones = ref([]);
+const displayZones = computed(() => (props.zones && props.zones.length > 0) ? props.zones : internalZones.value);
 const searchQuery = ref('');
 
 const selectedPatrolId = ref(null);
@@ -403,7 +404,7 @@ watch(activePatrol, (newPatrol) => {
 
 const loadZones = async () => {
   try {
-    zones.value = await zoneService.fetchZones();
+    internalZones.value = await zoneService.fetchZones();
   } catch (e) { console.error(e); }
 };
 

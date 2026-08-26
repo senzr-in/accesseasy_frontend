@@ -54,17 +54,23 @@
           >
             <div class="space-y-1">
               <div class="flex items-center gap-2">
-                <span class="text-xs font-black text-rose-700 dark:text-rose-300">{{ esc.incident_title }}</span>
+                <span class="text-xs font-black text-rose-700 dark:text-rose-300">{{ esc.incident_title || esc.title || '🚨 EMERGENCY SOS' }}</span>
                 <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-rose-600 text-white">
-                  Tier {{ esc.current_level }} of {{ esc.max_level }}
+                  Tier {{ esc.current_level || 1 }} of {{ esc.max_level || 3 }}
+                </span>
+                <span v-if="esc.severity" class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-rose-100 dark:bg-rose-900/40 text-rose-700 dark:text-rose-300">
+                  {{ esc.severity }}
                 </span>
               </div>
               <p class="text-[11px] text-rose-800/80 dark:text-rose-300/80">
-                {{ esc.site_name }} · {{ esc.zone_name }} · Guard: {{ esc.guard_name }}
+                {{ esc.site_name || esc.location || esc.site || 'Patrol Site' }} <span v-if="esc.zone_name">· {{ esc.zone_name }}</span> · Guard: <strong class="font-bold text-rose-900 dark:text-rose-200">{{ esc.guard_name || esc.reported_by || 'On-Duty Guard' }}</strong>
               </p>
               <div class="text-[10px] font-mono text-rose-600 dark:text-rose-400 font-semibold pt-1">
-                Next Tier Escalation in ~{{ getMinutesLeft(esc.next_escalation_at) }} mins (Voice Dispatch + Webhook)
+                Next Tier Escalation in ~{{ getMinutesLeft(esc.next_escalation_at || esc.date_created) }} mins (Voice Dispatch + Webhook)
               </div>
+              <p v-if="esc.description || esc.notes" class="text-[10px] text-slate-600 dark:text-slate-400 italic pt-0.5">
+                {{ esc.description || esc.notes }}
+              </p>
             </div>
 
             <button
@@ -369,7 +375,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { Volume2, Plus, Zap, ShieldAlert, X } from 'lucide-vue-next';
 import { escalationService } from '@/services/escalationService';
 import { siteService } from '@/services/siteService';
@@ -497,7 +503,25 @@ const savePolicySubmit = async () => {
   }
 };
 
+let pollTimer = null;
+let isPollingEscalations = false;
+
 onMounted(async () => {
   await loadData();
+  // Auto-polling every 25 seconds for active escalations
+  pollTimer = setInterval(async () => {
+    if (isPollingEscalations) return;
+    isPollingEscalations = true;
+    try {
+      activeEscalations.value = await escalationService.fetchActiveEscalations();
+    } catch (e) {
+    } finally {
+      isPollingEscalations = false;
+    }
+  }, 25000);
+});
+
+onUnmounted(() => {
+  if (pollTimer) clearInterval(pollTimer);
 });
 </script>

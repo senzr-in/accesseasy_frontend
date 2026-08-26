@@ -755,7 +755,7 @@ const fetchGroups = async () => {
 const roleConfigurators = ref([]);
 const fetchRoleConfigurators = async () => {
   try {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/roleConfigurator?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][_and][1][accessType][_eq]=accessEasy`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/roleConfigurator?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][_and][1][accessType][_in]=patrol,accesseasy_patrol`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     const data = await res.json();
@@ -813,9 +813,8 @@ const handleSubmit = async () => {
         role: employeeRoleId,
         tenant: tenantId,
         phone: formData.value.personalPhone ? `+91${formData.value.personalPhone}` : formData.value.personalEmail,
-        userApp: "accesseasy, patrol",
+        userApp: "patrol",
         appAccess: true,
-        accesseasyRole: formData.value.roleConfigId || null,
         accesseasyPatrolRole: formData.value.roleConfigId || null
       };
 

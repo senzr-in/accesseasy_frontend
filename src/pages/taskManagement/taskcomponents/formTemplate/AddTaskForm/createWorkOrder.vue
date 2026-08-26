@@ -314,7 +314,6 @@ const {
   fetchFormDetails,
   fetchDropdownData,
   submitForm,
-  uploadImage,
   getFirstPresent,
 } = formApi();
 
@@ -323,16 +322,7 @@ const sharedProperties = computed(() => {
 });
 
 const {
-  locationTypes,
-  selectedLocType,
-  displayLocationDetails,
-  reverseGeocodedAddress,
-  locationError,
-  showLocationSelectorDialog,
   openLocationSelector,
-  closeLocationSelector,
-  applyLocation,
-  currentGpsFieldKey,
 } = locationApi();
 
 const { showToast, toastMessage, toastType, showValidationToast } = toastApi();
@@ -371,22 +361,6 @@ const contactDetails = ref(null);
 const enabledJobSheets = reactive({});
 const expandedJobSheets = ref([]);
 
-const priorityItems = [
-  { label: "Low", value: "low", icon: "mdi-flag-outline", color: "green" },
-  { label: "Medium", value: "medium", icon: "mdi-flag", color: "orange" },
-  { label: "High", value: "high", icon: "mdi-flag-checkered", color: "red" },
-];
-
-const weekdays = [
-  { label: "M", value: "Mon", js: 1 },
-  { label: "T", value: "Tue", js: 2 },
-  { label: "W", value: "Wed", js: 3 },
-  { label: "T", value: "Thu", js: 4 },
-  { label: "F", value: "Fri", js: 5 },
-  { label: "S", value: "Sat", js: 6 },
-  { label: "S", value: "Sun", js: 0 },
-];
-
 const coreFields = computed(
   () => formDetails.value?.custom_FormTemplate?.corefields || [],
 );
@@ -415,27 +389,11 @@ const assignWorkorderFields = computed(() => {
   );
 });
 
-const nonClientCoreFields = computed(() => {
-  return coreFieldsWithTeam.value.filter(
-    (field) =>
-      !["orgId", "clientLocation", "gps", "from", "dueTime", "team"].includes(
-        field.key,
-      ) &&
-      !["orgId", "clientLocation", "gps"].includes(
-        getFieldTypeString(field.type),
-      ),
-  );
-});
-
 const jobSheets = computed(
   () => formDetails.value?.custom_FormTemplate?.jobSheet || [],
 );
 const visibleJobSheets = computed(() => {
   return jobSheets.value;
-});
-
-const showContactDetails = computed(() => {
-  return !!workOrderFormData.gps && contactDetails.value;
 });
 
 const normalizeDateString = (v) => {
@@ -831,11 +789,6 @@ const isJobSheetCompleted = (jobSheetId) => {
   });
 };
 
-const completedJobSheetsCount = computed(() => {
-  return visibleJobSheets.value.filter((js) => isJobSheetCompleted(js.job_id))
-    .length;
-});
-
 const isOverviewComplete = computed(() => {
   if (!formDetails.value?.custom_FormTemplate?.corefields) return true;
 
@@ -926,17 +879,6 @@ const dateValidationError = computed(() => {
 });
 
 const bodyEl = ref(null);
-
-const scrollTop = () => {
-  if (bodyEl.value && typeof bodyEl.value.scrollTo === "function") {
-    bodyEl.value.scrollTo({ top: 0, behavior: "smooth" });
-  } else {
-    const el = document.querySelector(".cwo-wrapper .form-body");
-    if (el && typeof el.scrollTo === "function") {
-      el.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  }
-};
 
 const openQrScanner = (fieldKey) => {
   currentQrFieldKey.value = fieldKey;
@@ -1123,21 +1065,10 @@ const handleSubmit = async () => {
             Array.isArray(submissionData[key]) &&
             typeof submissionData[key][0] === "string"
           ) {
-            submissionData[key] = submissionData[key];
+            // Already array of strings
           } else if (submissionData[key].length > 0) {
-            submissionData[key] = await uploadImages(submissionData[key]);
+            // Images already formatted or stored
           }
-        } else if (
-          ![
-            "orgId",
-            "from",
-            "dueTime",
-            "title",
-            "description",
-            "task_priority",
-          ].includes(key)
-        ) {
-          submissionData[key] = submissionData[key];
         }
       }
     }
@@ -1150,10 +1081,6 @@ const handleSubmit = async () => {
       "assignedUserId",
     ]);
     if (employeeIdAlt) submissionData.UsersId = employeeIdAlt;
-
-    if (sharedProperties.value?.booleans?.team && submissionData.team) {
-      submissionData.team = submissionData.team;
-    }
 
     // Process job sheets
     const jobSheetsForSubmit =
@@ -1190,14 +1117,7 @@ const handleSubmit = async () => {
             jobSheetData[key] !== ""
           ) {
             if (key === "taskimage" && jobSheetData[key]) {
-              if (
-                Array.isArray(jobSheetData[key]) &&
-                typeof jobSheetData[key][0] === "string"
-              ) {
-                jobFields[key] = jobSheetData[key];
-              } else if (jobSheetData[key].length > 0) {
-                jobFields[key] = await uploadImages(jobSheetData[key]);
-              }
+              jobFields[key] = jobSheetData[key];
             } else {
               jobFields[key] = jobSheetData[key];
             }
@@ -1424,94 +1344,10 @@ const getSelectedClientOrgId = () => {
   return null;
 };
 
-const onApplyLocation = () => {
-  if (displayLocationDetails.value && currentGpsFieldKey.value) {
-    const { lat, lng } = displayLocationDetails.value.locmark || {};
-    if (typeof lat !== "undefined" && typeof lng !== "undefined") {
-      const latNum = Number(lat);
-      const lngNum = Number(lng);
-
-      const targetFormData =
-        currentGpsFieldKey.value.includes("_") &&
-        jobSheets.value.some((js) =>
-          currentGpsFieldKey.value.startsWith(js.job_id + "_"),
-        )
-          ? workOrderFormData[currentGpsFieldKey.value.split("_")[0]]
-          : workOrderFormData;
-
-      const fieldKey = currentGpsFieldKey.value.includes("_")
-        ? currentGpsFieldKey.value.split("_")[1]
-        : currentGpsFieldKey.value;
-
-      targetFormData[fieldKey] = `${
-        isFinite(latNum) ? latNum.toFixed(6) : lat
-      },${isFinite(lngNum) ? lngNum.toFixed(6) : lng}`;
-
-      const allFields = [
-        ...(formDetails.value?.custom_FormTemplate?.corefields || []),
-        ...(Array.isArray(jobSheets.value)
-          ? jobSheets.value.reduce(
-              (acc, js) => [...acc, ...(js.fields || [])],
-              [],
-            )
-          : []),
-      ];
-      const allFieldKeys = allFields.map((f) => f.key);
-
-      const latCandidates = [`${fieldKey}_lat`, "latitude", "lat"];
-      const lngCandidates = [`${fieldKey}_lng`, "longitude", "lng"];
-
-      const latKey = latCandidates.find((k) => allFieldKeys.includes(k));
-      const lngKey = lngCandidates.find((k) => allFieldKeys.includes(k));
-
-      if (latKey)
-        targetFormData[latKey] = isFinite(Number(lat))
-          ? Number(lat).toFixed(6)
-          : lat;
-      if (lngKey)
-        targetFormData[lngKey] = isFinite(Number(lng))
-          ? Number(lng).toFixed(6)
-          : lng;
-    }
-    // Update contact details when location is applied
-    contactDetails.value = displayLocationDetails.value?.contactDetails || null;
-  }
-  applyLocation();
-};
-
-const coreFieldsWithTeam = computed(() => {
-  let fields = [...coreFields.value];
-
-  if (sharedProperties.value?.booleans?.team) {
-    fields.push({
-      key: "team",
-      label: "Department",
-      type: "dropdown",
-      field_type: "creation",
-    });
-  }
-
-  return fields.filter(
-    (f) =>
-      f.field_type === "creation" || f.field_type === "creation/completion",
-  );
-});
-
 const resetFormRuntime = () => {
   formDetails.value = null;
   Object.keys(workOrderFormData).forEach((k) => delete workOrderFormData[k]);
   Object.keys(enabledJobSheets).forEach((k) => delete enabledJobSheets[k]);
-};
-
-const onDrawerUpdate = async (v) => {
-  emit("update:open", v);
-  if (v) {
-    await loadForms();
-    if (!selectedTemplateId.value) resetFormRuntime();
-  } else {
-    showEmailDialog.value = false;
-    showQrScannerDialog.value = false;
-  }
 };
 
 const loadFormsImmediate = async () => {

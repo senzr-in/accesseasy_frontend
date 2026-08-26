@@ -103,27 +103,60 @@
           />
         </div>
 
-        <!-- Avatar & Identity -->
-        <div class="relative z-10 flex flex-col items-center mt-2 mb-4">
-          <div class="w-16 h-16 rounded-full overflow-hidden bg-zinc-800 border-2 border-zinc-700/50 shadow-inner mb-3 flex items-center justify-center text-zinc-400 font-bold text-xl">
+        <!-- Avatar & Face Biometric Frame -->
+        <div class="relative z-10 flex flex-col items-center mt-1 mb-4">
+          <div 
+            class="relative w-20 h-20 rounded-2xl overflow-hidden bg-zinc-800/90 border-2 shadow-lg mb-3 flex items-center justify-center text-zinc-300 font-bold text-2xl group/avatar transition-all duration-300 hover:scale-105 cursor-pointer"
+            :class="[
+              guard.faceStatus === 'active' 
+                ? 'border-emerald-500/60 shadow-emerald-500/20 ring-4 ring-emerald-500/10' 
+                : guard.faceStatus === 'pending_update'
+                ? 'border-amber-500/60 shadow-amber-500/20 ring-4 ring-amber-500/10'
+                : 'border-zinc-700/60 shadow-zinc-900/50'
+            ]"
+            @click.stop="openBiometricModal(guard)"
+          >
+            <!-- Face Photo -->
             <img
-              v-if="guard.avatar"
-              :src="guard.avatar"
+              v-if="guard.facePhoto || guard.avatar"
+              :src="guard.facePhoto || guard.avatar"
               :alt="fullName(guard)"
-              class="w-full h-full object-cover"
+              class="w-full h-full object-cover rounded-xl transition-transform duration-500 group-hover/avatar:scale-110"
+              loading="lazy"
+              @error="() => { guard.facePhoto = null; guard.avatar = null; }"
             >
-            <span v-else>{{ initials(guard) }}</span>
+            <!-- Fallback Initials -->
+            <div v-else class="flex flex-col items-center justify-center text-zinc-400">
+              <span class="tracking-wider">{{ initials(guard) }}</span>
+            </div>
+
+            <!-- Biometric Verification Badge Overlay -->
+            <div
+              v-if="guard.faceStatus === 'active'"
+              class="absolute bottom-1 right-1 p-1 rounded-full bg-emerald-500 text-white border-2 border-zinc-900 shadow-md flex items-center justify-center"
+              title="Verified Face ID Enrolled"
+            >
+              <ScanFace class="w-3 h-3" />
+            </div>
+            <div
+              v-else-if="guard.faceStatus === 'pending_update'"
+              class="absolute bottom-1 right-1 p-1 rounded-full bg-amber-500 text-white border-2 border-zinc-900 shadow-md flex items-center justify-center"
+              title="Re-Scan Required"
+            >
+              <RotateCw class="w-3 h-3" />
+            </div>
           </div>
-          <h3 class="text-[16px] font-bold text-white tracking-wide">
+
+          <h3 class="text-[16px] font-bold text-white tracking-wide text-center">
             {{ fullName(guard) }}
           </h3>
-          <p class="text-[11px] text-zinc-400 mt-0.5">
+          <p class="text-[11px] text-zinc-400 mt-0.5 font-mono">
             Employee ID {{ guard.employeeId || guard.id.toString().padStart(2, '0') }}
           </p>
         </div>
 
         <!-- Details List -->
-        <div class="relative z-10 space-y-3 flex-1 w-full px-1">
+        <div class="relative z-10 space-y-2.5 flex-1 w-full px-1">
           <!-- Status Row -->
           <div class="flex items-center justify-between text-xs">
             <span class="text-zinc-400">Status</span>
@@ -154,10 +187,33 @@
               <MapPin class="w-3 h-3 text-zinc-500 shrink-0" />
             </div>
           </div>
+
+          <!-- Biometric Face ID Status Row -->
+          <div class="flex items-center justify-between text-xs pt-1.5 border-t border-zinc-800/80">
+            <span class="text-zinc-400 flex items-center gap-1">
+              <ScanFace class="w-3.5 h-3.5 text-indigo-400" />
+              Face ID
+            </span>
+            <button
+              class="flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold transition-all cursor-pointer"
+              :class="[
+                guard.faceStatus === 'active' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20' :
+                guard.faceStatus === 'pending_update' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30 hover:bg-amber-500/20' :
+                'bg-zinc-800 text-zinc-400 border border-zinc-700 hover:bg-zinc-700'
+              ]"
+              @click.stop="openBiometricModal(guard)"
+            >
+              <span
+                class="w-1.5 h-1.5 rounded-full"
+                :class="guard.faceStatus === 'active' ? 'bg-emerald-400' : guard.faceStatus === 'pending_update' ? 'bg-amber-400' : 'bg-zinc-500'"
+              />
+              <span>{{ guard.faceStatus === 'active' ? 'Enrolled' : guard.faceStatus === 'pending_update' ? 'Re-Scan Needed' : 'Not Registered' }}</span>
+            </button>
+          </div>
         </div>
 
         <!-- Actions Row -->
-        <div class="relative z-30 mt-6 grid grid-cols-2 gap-3">
+        <div class="relative z-30 mt-5 grid grid-cols-2 gap-3">
           <button 
             class="flex items-center justify-center gap-2 h-9 rounded-lg border border-zinc-700 hover:border-zinc-500 hover:bg-zinc-800 text-zinc-300 text-xs font-medium transition-colors group/btn"
             @click.stop.prevent="openMessageModal(guard)"
@@ -173,6 +229,13 @@
         
         <!-- Overlay Admin Actions -->
         <div class="absolute inset-0 bg-zinc-950/80 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3 z-20 pointer-events-none group-hover:pointer-events-auto">
+          <button
+            title="Biometric Face ID Profile"
+            class="h-10 w-10 rounded-full flex items-center justify-center bg-indigo-500/20 text-indigo-400 hover:bg-indigo-500 hover:text-white transition-colors border border-indigo-500/30"
+            @click.stop="openBiometricModal(guard)"
+          >
+            <ScanFace class="w-4 h-4" />
+          </button>
           <button
             title="View Patrol Route"
             class="h-10 w-10 rounded-full flex items-center justify-center bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-white transition-colors border border-emerald-500/30"
@@ -265,6 +328,17 @@
             class="space-y-6"
             @submit.prevent="handleSubmit"
           >
+            <!-- Employee ID -->
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-black text-slate-500 dark:text-zinc-400 uppercase tracking-widest">Employee ID</label>
+              <input
+                v-model="form.employee_id"
+                type="text"
+                placeholder="e.g. GRD-001"
+                class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all text-foreground shadow-sm focus:border-indigo-500"
+              >
+            </div>
+
             <div class="grid grid-cols-2 gap-4">
               <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-slate-500 dark:text-zinc-400 uppercase tracking-widest">First Name <span class="text-red-500">*</span></label>
@@ -494,14 +568,157 @@
         </div>
       </div>
     </div>
+
+    <!-- Biometric Face ID Profile Modal -->
+    <div
+      v-if="showBiometricModal && selectedGuardForBiometric"
+      class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300 p-4 w-full"
+      @click.self="showBiometricModal = false"
+    >
+      <div class="relative w-full max-w-md bg-white dark:bg-zinc-950 rounded-[28px] shadow-2xl shadow-indigo-500/10 border border-slate-200 dark:border-zinc-800/80 overflow-hidden transform transition-all animate-in zoom-in-95 duration-300">
+        <!-- Header -->
+        <div class="relative px-6 pt-6 pb-4 flex justify-between items-start border-b border-slate-100 dark:border-zinc-800/80">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center border border-indigo-100 dark:border-indigo-500/20 shadow-inner">
+              <ScanFace class="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            </div>
+            <div>
+              <h3 class="text-base font-black text-slate-900 dark:text-white tracking-tight">
+                Biometric Face ID Profile
+              </h3>
+              <p class="text-xs text-slate-500 dark:text-zinc-400">
+                Guard: {{ fullName(selectedGuardForBiometric) }}
+              </p>
+            </div>
+          </div>
+          <button
+            class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
+            @click="showBiometricModal = false"
+          >
+            <X class="w-4 h-4" />
+          </button>
+        </div>
+
+        <!-- Body -->
+        <div class="p-6 space-y-5">
+          <!-- Face ID Photo Frame -->
+          <div class="flex flex-col items-center">
+            <div class="relative w-36 h-36 rounded-2xl overflow-hidden bg-zinc-900 border-2 border-indigo-500/30 shadow-lg flex items-center justify-center group">
+              <img
+                v-if="selectedGuardForBiometric.facePhoto"
+                :src="selectedGuardForBiometric.facePhoto"
+                :alt="fullName(selectedGuardForBiometric)"
+                class="w-full h-full object-cover"
+              >
+              <div v-else class="flex flex-col items-center justify-center text-zinc-500 gap-1.5 p-4 text-center">
+                <Camera class="w-8 h-8 text-zinc-600" />
+                <span class="text-[11px] font-medium">No Reference Photo</span>
+              </div>
+              
+              <!-- Scan overlay animation if active -->
+              <div
+                v-if="selectedGuardForBiometric.faceStatus === 'active'"
+                class="absolute inset-0 bg-gradient-to-b from-indigo-500/10 via-transparent to-indigo-500/20 pointer-events-none border border-indigo-400/40 rounded-2xl"
+              />
+              <div
+                v-if="selectedGuardForBiometric.faceStatus === 'active'"
+                class="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-emerald-500 text-white text-[9px] font-black uppercase tracking-wider shadow-sm flex items-center gap-1"
+              >
+                <CheckCircle2 class="w-2.5 h-2.5" /> Active
+              </div>
+            </div>
+            
+            <p class="text-xs font-bold text-slate-700 dark:text-zinc-300 mt-3">
+              {{ selectedGuardForBiometric.first_name }} {{ selectedGuardForBiometric.last_name }}
+            </p>
+            <p class="text-[11px] text-slate-500 dark:text-zinc-500">
+              Employee ID: {{ selectedGuardForBiometric.employeeId || selectedGuardForBiometric.id }}
+            </p>
+          </div>
+
+          <!-- Biometric Info Card -->
+          <div class="bg-slate-50 dark:bg-zinc-900/80 rounded-xl p-4 border border-slate-200/80 dark:border-zinc-800 space-y-2.5 text-xs">
+            <div class="flex justify-between items-center">
+              <span class="text-slate-500 dark:text-zinc-400">Enrollment Status</span>
+              <span
+                class="px-2 py-0.5 rounded-md font-bold text-[11px]"
+                :class="[
+                  selectedGuardForBiometric.faceStatus === 'active' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' :
+                  selectedGuardForBiometric.faceStatus === 'pending_update' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' :
+                  'bg-zinc-200 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400'
+                ]"
+              >
+                {{ selectedGuardForBiometric.faceStatus === 'active' ? 'Enrolled & Verified' : selectedGuardForBiometric.faceStatus === 'pending_update' ? 'Re-Scan Required' : 'Not Registered' }}
+              </span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-slate-500 dark:text-zinc-400">AI Model</span>
+              <span class="font-mono text-[11px] text-slate-700 dark:text-zinc-300">MobileFaceNet (192-d)</span>
+            </div>
+            <div v-if="selectedGuardForBiometric.faceProfile?.deviceEnrolled" class="flex justify-between items-center">
+              <span class="text-slate-500 dark:text-zinc-400">Enrolled Device</span>
+              <span class="font-medium text-slate-700 dark:text-zinc-300">{{ selectedGuardForBiometric.faceProfile.deviceEnrolled }}</span>
+            </div>
+            <div v-if="selectedGuardForBiometric.faceEnrolledDate" class="flex justify-between items-center">
+              <span class="text-slate-500 dark:text-zinc-400">Enrolled Date</span>
+              <span class="text-slate-700 dark:text-zinc-300">{{ new Date(selectedGuardForBiometric.faceEnrolledDate).toLocaleDateString() }}</span>
+            </div>
+            <div class="flex justify-between items-center">
+              <span class="text-slate-500 dark:text-zinc-400">Multi-Device Sync</span>
+              <span class="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
+                <Check class="w-3 h-3" /> Synced to all devices
+              </span>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="space-y-2 pt-1">
+            <button
+              v-if="selectedGuardForBiometric.faceStatus === 'active'"
+              :disabled="biometricActionLoading"
+              class="w-full h-10 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              @click="handleRequestReScan(selectedGuardForBiometric)"
+            >
+              <RotateCw class="w-3.5 h-3.5" :class="{ 'animate-spin': biometricActionLoading }" />
+              <span>Request Face Re-Scan on Mobile</span>
+            </button>
+
+            <button
+              v-if="selectedGuardForBiometric.faceStatus === 'active' || selectedGuardForBiometric.faceStatus === 'pending_update'"
+              :disabled="biometricActionLoading"
+              class="w-full h-10 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30 text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              @click="handleRevokeFace(selectedGuardForBiometric)"
+            >
+              <Trash2 class="w-3.5 h-3.5" />
+              <span>Revoke Biometric Face ID</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="px-6 py-4 bg-slate-50 dark:bg-zinc-900/60 border-t border-slate-100 dark:border-zinc-800/80 flex justify-end">
+          <button
+            class="px-5 h-9 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-bold hover:opacity-90 transition-all cursor-pointer"
+            @click="showBiometricModal = false"
+          >
+            Done
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { UserPlus, Search, Loader2, ShieldCheck, Phone, Settings, Trash2, X, AlertTriangle, Map, MapPin, Check, AlertCircle, Clock, MessageSquare } from 'lucide-vue-next';
+import { 
+  UserPlus, Search, Loader2, ShieldCheck, Phone, Settings, Trash2, X, 
+  AlertTriangle, Map, MapPin, Check, AlertCircle, Clock, MessageSquare,
+  ScanFace, Camera, CheckCircle2, RotateCw
+} from 'lucide-vue-next';
 import { authService } from '@/services/authService';
 import { currentUserTenant } from '@/utils/currentUserTenant';
+import { biometricService } from '@/services/biometricService';
 import ValueHeader from '@/components/common/ValueHeader.vue';
 import GuardMessageModal from '@/components/guard/GuardMessageModal.vue';
 
@@ -514,6 +731,43 @@ const dialogLoading = ref(false);
 const dialogError = ref('');
 const doors = ref([]);
 const guardRoleId = ref(null);
+
+const showBiometricModal = ref(false);
+const selectedGuardForBiometric = ref(null);
+const biometricActionLoading = ref(false);
+
+const openBiometricModal = (guard) => {
+  selectedGuardForBiometric.value = guard;
+  showBiometricModal.value = true;
+};
+
+const handleRequestReScan = async (guard) => {
+  if (!guard?.faceProfile?.id) return;
+  try {
+    biometricActionLoading.value = true;
+    await biometricService.requestReEnrollment(guard.faceProfile.id);
+    guard.faceStatus = 'pending_update';
+  } catch (e) {
+    console.error('Failed to request re-scan:', e);
+  } finally {
+    biometricActionLoading.value = false;
+  }
+};
+
+const handleRevokeFace = async (guard) => {
+  if (!guard?.faceProfile?.id) return;
+  if (!confirm(`Are you sure you want to revoke Face ID biometric access for ${fullName(guard)}?`)) return;
+  try {
+    biometricActionLoading.value = true;
+    await biometricService.revokeFaceId(guard.faceProfile.id);
+    guard.faceStatus = 'revoked';
+    guard.facePhoto = null;
+  } catch (e) {
+    console.error('Failed to revoke Face ID:', e);
+  } finally {
+    biometricActionLoading.value = false;
+  }
+};
 
 const countryCodes = [
   { code: '+91', country: 'IN', flag: '🇮🇳', name: 'India (+91)' },
@@ -578,16 +832,71 @@ const fetchGuardRoleId = async () => {
     const tenantId = await currentUserTenant.getTenantIdAsync();
     if (!tenantId) return;
     const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/items/roleConfigurator?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][_and][1][accessType][_in]=accessEasy,accesseasy_patrol,patrol&fields[]=id&fields[]=roleName`,
+      `${import.meta.env.VITE_API_URL}/items/roleConfigurator?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][_and][1][accessType][_in]=patrol,accesseasy_patrol&fields[]=id&fields[]=roleName`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     if (res.ok) {
       const data = await res.json();
       if (data.data && data.data.length > 0) {
         availableRoles.value = data.data;
-        guardRoleId.value = data.data[0].id;
-        if (!form.value.role_id) {
-          form.value.role_id = data.data[0].id;
+        const guardRole = data.data.find(r => /guard|security|patrol|officer/i.test(r.roleName));
+        if (guardRole) {
+          guardRoleId.value = guardRole.id;
+          if (!form.value.role_id) {
+            form.value.role_id = guardRole.id;
+          }
+        } else {
+          // Auto-provision default Security Guard role for this tenant
+          try {
+            const createRes = await fetch(`${import.meta.env.VITE_API_URL}/items/roleConfigurator`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+              },
+              body: JSON.stringify({
+                roleName: 'Security Guard',
+                accessType: 'patrol',
+                tenant: tenantId
+              })
+            });
+            if (createRes.ok) {
+              const created = await createRes.json();
+              if (created.data?.id) {
+                availableRoles.value.push(created.data);
+                guardRoleId.value = created.data.id;
+                form.value.role_id = created.data.id;
+              }
+            }
+          } catch (e) {
+            guardRoleId.value = null;
+          }
+        }
+      } else {
+        // No patrol roles exist at all for this tenant — auto-create Security Guard
+        try {
+          const createRes = await fetch(`${import.meta.env.VITE_API_URL}/items/roleConfigurator`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              roleName: 'Security Guard',
+              accessType: 'patrol',
+              tenant: tenantId
+            })
+          });
+          if (createRes.ok) {
+            const created = await createRes.json();
+            if (created.data?.id) {
+              availableRoles.value = [created.data];
+              guardRoleId.value = created.data.id;
+              form.value.role_id = created.data.id;
+            }
+          }
+        } catch (e) {
+          guardRoleId.value = null;
         }
       }
     }
@@ -611,6 +920,7 @@ const openAddDialog = () => {
   editingGuard.value = null;
   dialogError.value = '';
   form.value = {
+    employee_id: `GRD-${Date.now().toString().slice(-5)}`,
     first_name: '',
     last_name: '',
     email: '',
@@ -641,6 +951,7 @@ const editGuard = async (guard) => {
   }
 
   form.value = {
+    employee_id: guard.employeeId || guard.employee_id || '',
     first_name: guard.first_name || '',
     last_name: guard.last_name || '',
     email: (guard.email && !guard.email.includes('@accesseasy.app')) ? guard.email : '',
@@ -654,11 +965,11 @@ const editGuard = async (guard) => {
     enable_patrols: false,
   };
   
-  // Fetch personalModule to get assigned_door and mobilePermissions
+  // Fetch personalModule to get assigned_door, employeeId, and mobilePermissions
   try {
     dialogLoading.value = true;
     const token = authService.getToken();
-    const pmRes = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule?filter[assignedUser][_eq]=${guard.id}&fields[]=id&fields[]=assigned_door&fields[]=mobilePermissions`, {
+    const pmRes = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule?filter[assignedUser][_eq]=${guard.id}&fields[]=id&fields[]=employeeId&fields[]=assigned_door&fields[]=mobilePermissions`, {
         headers: { Authorization: `Bearer ${token}` }
     });
     if (pmRes.ok) {
@@ -666,6 +977,9 @@ const editGuard = async (guard) => {
         if (pmData.data && pmData.data.length > 0) {
             const pm = pmData.data[0];
             form.value.assigned_door = typeof pm.assigned_door === 'object' && pm.assigned_door !== null ? pm.assigned_door.id || pm.assigned_door : pm.assigned_door;
+            if (pm.employeeId) {
+              form.value.employee_id = pm.employeeId;
+            }
             editingGuard.value.personalModuleId = pm.id;
             
             // Load toggles if they exist
@@ -692,9 +1006,12 @@ const fetchGuards = async () => {
   loading.value = true;
   try {
     const token = authService.getToken();
-    const tenantId = await currentUserTenant.getTenantIdAsync();
+    let tenantId = authService.getTenantId();
+    if (!tenantId) {
+      try { tenantId = await currentUserTenant.getTenantIdAsync(); } catch (_) {}
+    }
 
-    if (!tenantId || !token) {
+    if (!token) {
       items.value = [];
       return;
     }
@@ -703,40 +1020,144 @@ const fetchGuards = async () => {
       await fetchGuardRoleId();
     }
 
-    let filterString = `filter[_and][0][tenant][tenantId][_eq]=${tenantId}`;
-    if (guardRoleId.value) {
-      filterString += `&filter[_and][1][accesseasyRole][_eq]=${guardRoleId.value}`;
-    } else {
-      filterString += `&filter[_and][1][accesseasyRole][roleName][_contains]=guard`;
-    }
+    let rawGuards = [];
 
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/users?${filterString}&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=email&fields[]=phone&fields[]=status&fields[]=title&fields[]=accesseasyRole.*&fields[]=tenant.userApp`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    if (res.ok) {
-      const data = await res.json();
-      const allUsers = data.data || [];
-      const filtered = allUsers.filter(u => {
-        if (!u.tenant) return false;
-        let userApps = u.tenant.userApp || [];
-        if (typeof userApps === "string") {
-          try {
-            userApps = JSON.parse(userApps);
-          } catch (e) {
-            userApps = [];
+    // Step 1: Query /users with multi-strategy fallback
+    const queryUrls = [];
+    if (tenantId) {
+      queryUrls.push(`${import.meta.env.VITE_API_URL}/users?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&filter[_or][2][tenant][id][_eq]=${tenantId}&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=email&fields[]=phone&fields[]=status&fields[]=title&fields[]=avatar&fields[]=role.name&limit=500`);
+      queryUrls.push(`${import.meta.env.VITE_API_URL}/users?filter[tenant][_eq]=${tenantId}&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=email&fields[]=phone&fields[]=status&fields[]=title&fields[]=avatar&fields[]=role.name&limit=500`);
+    }
+    queryUrls.push(`${import.meta.env.VITE_API_URL}/users?fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=email&fields[]=phone&fields[]=status&fields[]=title&fields[]=avatar&fields[]=role.name&limit=500`);
+
+    for (const url of queryUrls) {
+      try {
+        const usersRes = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+        if (usersRes.ok) {
+          const usersData = await usersRes.json();
+          if (usersData.data && Array.isArray(usersData.data) && usersData.data.length > 0) {
+            rawGuards = usersData.data.map(u => ({
+              id: u.id,
+              first_name: u.first_name || '',
+              last_name: u.last_name || '',
+              email: u.email || '',
+              phone: u.phone || '',
+              status: u.status || 'active',
+              employeeId: u.title || null,
+              avatar: u.avatar || null,
+              assigned_zone_name: null,
+              _roleSystemName: (u.role?.name || '').toLowerCase()
+            }));
+            break;
           }
         }
-        return Array.isArray(userApps) && userApps.some(app => app.userApp === "accesseasy");
-      });
-      if (filtered.length > 0) {
-        items.value = filtered;
-      } else {
-        items.value = [];
+      } catch (e) {
+        console.warn('Guard /users fetch error:', e);
       }
-    } else {
-      items.value = [];
     }
+
+    // Step 2: Enrich rawGuards with personalModule data (zone, employeeId, mobilePermissions)
+    if (rawGuards.length > 0) {
+      try {
+        const userIds = rawGuards.map(g => g.id).filter(Boolean).join(',');
+        const pmRes = await fetch(
+          `${import.meta.env.VITE_API_URL}/items/personalModule?filter[assignedUser][_in]=${userIds}&fields[]=assignedUser&fields[]=id&fields[]=employeeId&fields[]=mobilePermissions&fields[]=assigned_door.doorName`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (pmRes.ok) {
+          const pmData = await pmRes.json();
+          const pmMap = {};
+          (pmData.data || []).forEach(pm => {
+            if (pm.assignedUser) {
+              pmMap[pm.assignedUser] = {
+                personalModuleId: pm.id,
+                employeeId: pm.employeeId,
+                mobilePermissions: pm.mobilePermissions,
+                assigned_zone_name: pm.assigned_door?.doorName || null
+              };
+            }
+          });
+          rawGuards.forEach(g => {
+            const pm = pmMap[g.id];
+            if (pm) {
+              g.personalModuleId = pm.personalModuleId;
+              g.employeeId = g.employeeId || pm.employeeId;
+              g.mobilePermissions = pm.mobilePermissions;
+              g.assigned_zone_name = pm.assigned_zone_name;
+            }
+          });
+        }
+      } catch (e) {
+        console.warn('personalModule enrichment error:', e);
+      }
+    }
+
+    // Step 3: Exclude current admin and system accounts
+    const currentUserId = authService.getUserId?.() || authService.getUserData?.()?.id;
+    const filtered = rawGuards.filter(u => {
+      if (u._roleSystemName?.includes('administrator') || u._roleSystemName?.includes('public')) return false;
+      if (currentUserId && String(u.id) === String(currentUserId)) {
+        const myRole = (authService.getUserRole?.() || '').toLowerCase();
+        if (myRole.includes('admin') || myRole.includes('owner')) return false;
+      }
+      return true;
+    });
+
+    // 5. Fetch biometric face ID records for current tenant
+    let faceProfiles = [];
+    try {
+      faceProfiles = await biometricService.getTenantFaceProfiles();
+    } catch (err) {
+      console.warn('Failed to load biometric face profiles:', err);
+    }
+
+    const enhanced = filtered.map(u => {
+      const matchingProfile = faceProfiles.find(fp => 
+        fp.assignedTo?.assignedUser?.id === u.id || 
+        fp.assignedTo?.assignedUser === u.id || 
+        fp.assignedTo?.id === u.personalModuleId || 
+        fp.assignedTo?.id === u.id || 
+        fp.assignedTo === u.personalModuleId || 
+        fp.assignedTo === u.id
+      );
+
+      // Resolve face photo from biometric record, personal module, or user avatar
+      let photoUrl = null;
+      if (matchingProfile?.rawImage) {
+        photoUrl = matchingProfile.rawImage;
+      } else {
+        const photoId = matchingProfile?.referencePhoto?.id || 
+                        matchingProfile?.referencePhoto || 
+                        matchingProfile?.photo?.id || 
+                        matchingProfile?.photo || 
+                        matchingProfile?.facePhoto?.id || 
+                        matchingProfile?.facePhoto || 
+                        matchingProfile?.image?.id || 
+                        matchingProfile?.image || 
+                        matchingProfile?.avatar?.id || 
+                        matchingProfile?.avatar || 
+                        matchingProfile?.assignedTo?.avatar?.id || 
+                        matchingProfile?.assignedTo?.avatar || 
+                        matchingProfile?.assignedTo?.photo?.id || 
+                        matchingProfile?.assignedTo?.photo || 
+                        u.avatar?.id || 
+                        u.avatar;
+
+        photoUrl = photoId ? biometricService.getFacePhotoUrl(photoId) : null;
+      }
+
+      return {
+        ...u,
+        avatar: photoUrl,
+        faceProfile: matchingProfile || null,
+        faceStatus: matchingProfile?.status || 'not_enrolled',
+        facePhoto: photoUrl,
+        faceEnrolledDate: matchingProfile?.date_created || matchingProfile?.date_updated || null,
+        is_face_enrolled: matchingProfile?.status === 'active'
+      };
+    });
+
+    items.value = enhanced;
   } catch (err) {
     console.error('Failed to fetch guards:', err);
     items.value = [];
@@ -794,8 +1215,8 @@ const handleSubmit = async () => {
       last_name: form.value.last_name,
       email: form.value.email,
       phone: fullPhone,
-      userApp: 'accesseasy_patrol',
-      accesseasyRole: form.value.role_id || guardRoleId.value || null,
+      title: form.value.employee_id?.trim() || undefined,
+      userApp: 'patrol',
       accesseasyPatrolRole: form.value.role_id || guardRoleId.value || null,
       tenant: tenantId,
     };
@@ -829,10 +1250,10 @@ const handleSubmit = async () => {
       const newUserId = userData.data?.id;
 
       // If this is a newly created Guard, they strictly require a personalModule profile to pass Flow validation!
+      const guardEmpId = form.value.employee_id?.trim() || `GRD-${Date.now().toString().slice(-5)}`;
       if (!isEdit && newUserId) {
-        const generatedEmpId = `GRD-${Date.now().toString().slice(-5)}`;
         const personalPayload = {
-          employeeId: generatedEmpId,
+          employeeId: guardEmpId,
           firstName: form.value.first_name,
           lastName: form.value.last_name || '-',
           personalEmail: form.value.email,
@@ -840,7 +1261,7 @@ const handleSubmit = async () => {
           designation: 'Guard',
           status: 'true',
           accessOn: true,
-          uniqueId: `${tenantId}-${generatedEmpId}`,
+          uniqueId: `${tenantId}-${guardEmpId}`,
           config: [{ shiftName: 1, startTime: "09:00", endTime: "18:00" }],
           mobilePermissions: { 
             enable_incidents: form.value.enable_incidents, 
@@ -865,8 +1286,9 @@ const handleSubmit = async () => {
           console.warn('Backend rejected personalModule assignment for Guard.');
         }
       } else if (isEdit && editingGuard.value.personalModuleId) {
-        // Update assigned_door and mobile permissions
+        // Update assigned_door, mobile permissions, and employeeId
         const personalPayload = {
+            employeeId: form.value.employee_id?.trim() || undefined,
             firstName: form.value.first_name,
             lastName: form.value.last_name || '-',
             personalEmail: form.value.email,

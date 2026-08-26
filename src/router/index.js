@@ -29,6 +29,7 @@ import DevLogin from "@/components/loginAuthentication/devLogin.vue";
 import DashboardHome from "@/pages/dashboard/index.vue";
 import Employees from "@/pages/employee/my-teams/personalDetails/employeeDetails.vue";
 import Devices from "@/pages/devicesManager/deviceManagerTabs.vue";
+import DeviceDashboard from "@/pages/settings/devices/DeviceDashboard.vue";
 import Doors from "@/pages/devicesManager/doors/doorsVue.vue";
 import Zones from "@/pages/zones/index.vue";
 import Logs from "@/pages/logs/logTab.vue";
@@ -57,7 +58,7 @@ if (appMode === 'security') {
     { path: "", name: "DashboardHome", component: DashboardHome, meta: { roles: ["Admin", "Manager", "Employee", "Guard"] } },
     { path: "settings", name: "SettingsHub", component: () => import("@/pages/settings/SettingsHub.vue"), meta: { roles: ["Admin", "Manager"] } },
     { path: "settings/appearance", name: "SettingsAppearance", component: AppearanceSettings, meta: { roles: ["Admin"] } },
-    { path: "settings/devices", name: "SettingsDevices", component: Devices, meta: { roles: ["Admin"] } },
+    { path: "settings/devices", name: "SettingsDevices", component: DeviceDashboard, meta: { roles: ["Admin"] } },
     { path: "settings/checkpoints", name: "SettingsCheckpoints", component: () => import("@/pages/settings/checkpoints/index.vue"), meta: { roles: ["Admin", "Manager"] } },
     { path: "settings/ai-events", name: "SettingsAiEvents", component: () => import("@/pages/settings/aiEvents.vue"), meta: { roles: ["Admin", "Manager", "Guard"] } },
     { path: "settings/logs", name: "SettingsLogs", component: Logs, meta: { roles: ["Admin", "Manager", "Guard"] } },
@@ -90,7 +91,7 @@ if (appMode === 'security') {
     { path: "easy-access/employees", name: "Employees", component: Employees, meta: { roles: ["Admin", "Manager"] } },
     { path: "settings", name: "SettingsHub", component: () => import("@/pages/settings/SettingsHub.vue"), meta: { roles: ["Admin", "Manager"] } },
     { path: "settings/appearance", name: "SettingsAppearance", component: AppearanceSettings, meta: { roles: ["Admin"] } },
-    { path: "settings/devices", name: "SettingsDevices", component: Devices, meta: { roles: ["Admin"] } },
+    { path: "settings/devices", name: "SettingsDevices", component: DeviceDashboard, meta: { roles: ["Admin"] } },
     { path: "settings/checkpoints", name: "SettingsCheckpoints", component: () => import("@/pages/settings/checkpoints/index.vue"), meta: { roles: ["Admin", "Manager"] } },
     { path: "settings/ai-events", name: "SettingsAiEvents", component: () => import("@/pages/settings/aiEvents.vue"), meta: { roles: ["Admin", "Manager", "Guard"] } },
     { path: "settings/logs", name: "SettingsLogs", component: Logs, meta: { roles: ["Admin", "Manager", "Guard"] } },

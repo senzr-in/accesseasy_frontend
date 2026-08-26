@@ -482,7 +482,7 @@
             size="md"
             text="Import"
             :disabled="!readyToImport || importing || validation.loading"
-            :left-icon="import"
+            left-icon="mdi-import"
             @click="onImportClicked"
           />
         </v-card-actions>

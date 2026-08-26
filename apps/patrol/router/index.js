@@ -28,13 +28,10 @@ const DevLogin = () => import("@/components/loginAuthentication/devLogin.vue");
 
 // Placeholders / Ports
 const DashboardHome = () => import("@/pages/dashboard/index.vue");
-const Employees = () => import("@/pages/employee/my-teams/personalDetails/employeeDetails.vue");
-const Devices = () => import("@/pages/devicesManager/deviceManagerTabs.vue");
 const Doors = () => import("@/pages/devicesManager/doors/doorsVue.vue");
 const Zones = () => import("@/pages/zones/index.vue");
 const Logs = () => import("@/pages/logs/logTab.vue");
 const OnboardingPage = () => import("@/pages/onboarding/index.vue");
-const Timerzones = () => import("@/pages/accesslevel/timerzone.vue");
 const BranchConfiguration = () => import("@/pages/settings/configuration/branch/branchConfiguration.vue");
 const BranchAddForm = () => import("@/pages/settings/configuration/branch/branchAddForm.vue");
 const BranchEditForm = () => import("@/pages/settings/configuration/branch/branchEditForm.vue");

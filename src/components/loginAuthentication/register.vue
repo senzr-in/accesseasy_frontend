@@ -413,6 +413,7 @@
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
+import { authService } from "@/services/authService";
 import { 
   Building2, Smartphone, AlertTriangle, Globe, Radio, ShieldCheck,
   ScanFace, Zap, CheckCircle2, User, Phone, Mail, IdCard, ArrowRight,
@@ -494,28 +495,24 @@ async function validateRegistration() {
     return false;
   }
   
-  // Quick availability checks
+  // Availability checks via authService
   try {
-    const emailRes = await api.get(`/users`, {
-      params: { "filter[email][_eq]": email.value.toLowerCase(), "fields[]": "email" },
-    });
-    if (emailRes.data.data.length > 0) {
+    const emailExists = await authService.checkEmailExists(email.value.trim().toLowerCase());
+    if (emailExists) {
       showError("This email is already registered");
       return false;
     }
 
-    const phoneRes = await api.get(`/users`, {
-      params: { "filter[phone][_eq]": `+91${mobileNumber.value}`, "fields[]": "phone" },
-    });
-    if (phoneRes.data.data.length > 0) {
+    const phoneExists = await authService.checkPhoneExists(`+91${mobileNumber.value.trim()}`);
+    if (phoneExists) {
       showError("This phone number is already registered");
       return false;
     }
     
     return true;
   } catch (err) {
-    console.error("Validation error:", err);
-    return true; // Proceed and let the main handler catch API errors
+    console.error("Validation check error (proceeding to submission):", err);
+    return true; // Proceed and let Knative auth-service handle canonical deduplication
   }
 }
 
@@ -602,46 +599,27 @@ async function handleRegistration() {
   }
 
   try {
-    const accountSettings = {
-      currency: "INR",
-      currency_name: "Indian Rupee",
-      currency_symbol: "₹",
-      country: "India",
-      country_code: "IN",
-    };
-
-    const tenantPayload = {
-      tenantName: companyName.value,
-      panOrGst: null,
-      companyAddress: null,
-      accountSettings: JSON.stringify(accountSettings),
-      plan: JSON.stringify(buildTrialPlan()),
-    };
-    const tenantResponse = await api.post("/items/tenant", tenantPayload);
-    const tenantId = tenantResponse.data.data.tenantId;
-
-    const adminRoleId = "ea2303aa-1662-43ca-a7f7-ab84924a7e0a";
-    const personalModulePayload = {
-      status: "active",
-      accessOn: true,
-      cycleType: 1,
-      uniqueId: `${tenantId}-${employeeId.value}`,
-      employeeId: employeeId.value,
-      assignedUser: {
-        first_name: fullName.value,
-        email: email.value.toLowerCase(),
-        phone: `+91${mobileNumber.value}`,
-        role: adminRoleId,
-        tenant: tenantId,
-        appAccess: true,
-        userApp: "accesseasy, patrol",
+    const regResult = await authService.register({
+      fullName: fullName.value.trim(),
+      companyName: companyName.value.trim(),
+      phone: `+91${mobileNumber.value.trim()}`,
+      email: email.value.trim().toLowerCase(),
+      employeeId: employeeId.value.trim(),
+      userApp: "accesseasy, patrol",
+      countryName: "India",
+      countryCode: "IN",
+      currencyInfo: {
+        currency: "INR",
+        currency_name: "Indian Rupee",
+        currency_symbol: "₹",
       },
-    };
-    await api.post("/items/personalModule", personalModulePayload);
+      deviceName: "AccessEasy Web Console",
+      source: "AccessEasy Web",
+    });
 
     showSuccess("Registration successful! Initiating login...", 3000);
 
-    const registeredPhoneNumber = `+91${mobileNumber.value}`;
+    const registeredPhoneNumber = `+91${mobileNumber.value.trim()}`;
     localStorage.setItem("justRegisteredPhone", registeredPhoneNumber);
     localStorage.setItem("fromRegistration", "true");
 
@@ -650,10 +628,10 @@ async function handleRegistration() {
         path: "/login",
         query: { autoSubmit: "true" }
       });
-    }, 2000);
+    }, 1500);
   } catch (e) {
     console.error("Registration error:", e);
-    showError(e.response?.data?.message || "Registration failed. Please contact support.");
+    showError(e.response?.data?.message || e.message || "Registration failed. Please contact support.");
     isLoading.value = false;
   }
 }

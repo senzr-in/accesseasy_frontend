@@ -317,8 +317,7 @@ export default {
       );
       const stateName = selectedStateInfo ? selectedStateInfo.text : "";
       const count = (this.stateCategoryCounts[stateName] || 0) + 1;
-      this.categoryName = `${stateName} ${count}`; // This line is correct! Keep it!
-      return this.categoryName;
+      return `${stateName} ${count}`;
     },
     token() {
       return authService.getToken();

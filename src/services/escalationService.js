@@ -68,11 +68,14 @@ class EscalationService {
   async fetchActiveEscalations() {
     try {
       const tenantId = authService.getTenantId();
-      const res = await authService.protectedApi.get(
-        `/items/patrol_alerts?filter[tenant][_eq]=${tenantId}&filter[status][_in]=reported,acknowledged,investigating,action_taken,pending_review&sort=-date_created`
-      );
+      let query = `filter[status][_in]=open,reported,acknowledged,investigating,action_taken,pending_review&sort=-date_created`;
+      if (tenantId) {
+        query = `filter[tenant][_eq]=${tenantId}&` + query;
+      }
+      const res = await authService.protectedApi.get(`/items/patrol_alerts?${query}`);
       return res.data?.data || [];
     } catch (e) {
+      console.warn("fetchActiveEscalations error:", e);
       return [];
     }
   }

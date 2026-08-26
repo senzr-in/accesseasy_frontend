@@ -497,14 +497,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 const isMounted = ref(false);
 onMounted(() => {
   isMounted.value = true;
 });
 import { 
-  AlertOctagon, Activity, ShieldAlert, CheckCircle2, ChevronDown, 
-  Search, Filter, Plus, FileText, ChevronLeft, ChevronRight, X, ArrowLeft,
+  Search, Plus, FileText, X,
   AlertTriangle, Loader2, MapPin, Trash2, Upload, Pencil
 } from 'lucide-vue-next';
 import { authService } from '@/services/authService';
@@ -524,6 +523,7 @@ const setFilter = (status, severity) => {
 };
 
 const showDetailsModal = ref(false);
+const selectedIncident = ref(null);
 const { can } = usePlanGuard();
 const showWorkflowModal = ref(false);
 const selectedWorkflowIncident = ref(null);
@@ -639,29 +639,44 @@ const criticalCount = computed(() => filteredList.value.filter(inc => ['High', '
 const closedCount = computed(() => filteredList.value.filter(inc => inc.status === 'closed').length);
 
 const fetchIncidents = async () => {
-  loading.value = true;
+  if (!incidents.value.length) loading.value = true;
   try {
     const token = authService.getToken();
     const tenantId = authService.getTenantId();
-    if (!token || !tenantId) return;
+    if (!token) return;
     
     // Fetch from Directus API (patrol_alerts collection)
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/patrol_alerts?filter[tenant][_eq]=${tenantId}&sort=-date_created&limit=100`, {
+    const endpoint = tenantId 
+      ? `${import.meta.env.VITE_API_URL}/items/patrol_alerts?filter[tenant][_eq]=${tenantId}&sort=-date_created&limit=100`
+      : `${import.meta.env.VITE_API_URL}/items/patrol_alerts?sort=-date_created&limit=100`;
+
+    const res = await fetch(endpoint, {
       headers: { Authorization: `Bearer ${token}` }
     });
     
     if (res.ok) {
       const data = await res.json();
-      incidents.value = (data.data || []).map(alert => ({
-        ...alert,
-        reportId: alert.reportId || `ALT-${alert.id}`,
-        type: alert.type || alert.alert_type || 'Incident',
-        severity: alert.severity || (alert.type === 'sos' ? 'Critical' : 'Medium'),
-        dateTime: alert.date_created || alert.timestamp || new Date().toISOString(),
-        description: alert.message || alert.description || 'Alert logged',
-        guardName: alert.guard_name || alert.guard?.firstName || 'Guard',
-        status: alert.status || 'open'
-      }));
+      incidents.value = (data.data || []).map(alert => {
+        const titleStr = (alert.title || alert.type || alert.alert_type || '').toLowerCase();
+        const isCritical = alert.severity?.toLowerCase() === 'critical' || 
+          titleStr.includes('sos') || 
+          titleStr.includes('emergency') || 
+          titleStr.includes('threat') || 
+          titleStr.includes('intruder') ||
+          titleStr.includes('duress');
+
+        return {
+          ...alert,
+          reportId: alert.reportId || `ALT-${alert.id}`,
+          type: alert.type || alert.title || alert.alert_type || 'Incident',
+          severity: alert.severity ? (alert.severity.charAt(0).toUpperCase() + alert.severity.slice(1).toLowerCase()) : (isCritical ? 'Critical' : 'Medium'),
+          dateTime: alert.date_created || alert.timestamp || new Date().toISOString(),
+          description: alert.description || alert.message || alert.notes || 'Alert logged',
+          guardName: alert.reported_by || alert.guard_name || alert.guard?.firstName || 'Guard',
+          location: alert.location || alert.site || alert.zone_name || 'Patrol Site',
+          status: alert.status || 'open'
+        };
+      });
     } else {
       loadFromLocalStorage();
     }
@@ -848,13 +863,6 @@ const getSeverityBadgeClass = (sev) => {
   return 'bg-emerald-500/10 text-emerald-700 border-emerald-500/20';
 };
 
-const getSeverityDotClass = (sev) => {
-  if (sev === 'Critical') return 'bg-red-500';
-  if (sev === 'High') return 'bg-orange-500';
-  if (sev === 'Medium') return 'bg-amber-500';
-  return 'bg-emerald-500';
-};
-
 const formatDateTime = (dateStr) => {
   if (!dateStr) return '';
   return new Date(dateStr).toLocaleString([], {
@@ -865,8 +873,25 @@ const formatDateTime = (dateStr) => {
   });
 };
 
+let incidentPollTimer = null;
+let isPollingIncidents = false;
+
 onMounted(() => {
   fetchIncidents();
   fetchGuards();
+  // Auto-poll every 30 seconds for new device alerts / incidents
+  incidentPollTimer = setInterval(async () => {
+    if (isPollingIncidents) return;
+    isPollingIncidents = true;
+    try {
+      await fetchIncidents();
+    } finally {
+      isPollingIncidents = false;
+    }
+  }, 30000);
+});
+
+onUnmounted(() => {
+  if (incidentPollTimer) clearInterval(incidentPollTimer);
 });
 </script>

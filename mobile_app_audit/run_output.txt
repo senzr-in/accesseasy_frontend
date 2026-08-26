@@ -1,0 +1,33 @@
+﻿Launching lib\main.dart on CPH2341 in debug mode...
+Running Gradle task 'assembleDebug'...                          
+flutter : Exhausted heap space, trying to allocate 10972048 bytes.
+At line:1 char:50
++ ... IONS="--old_gen_heap_size=3072"; flutter run -d bb464577 2>&1 | Out-F ...
++                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Exhausted heap ...10972048 bytes.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Exhausted heap space, trying to allocate 67108896 bytes.
+Unhandled exception:
+Out of Memory
+#0      _CopyingBytesBuilder._grow (dart:_internal/bytes_builder.dart)
+#1      _CopyingBytesBuilder.add (dart:_internal/bytes_builder.dart)
+#2      ByteSink.add (package:front_end/src/kernel/utils.dart)
+#3      BufferedSink.addBytes (package:kernel/binary/ast_to_binary.dart)
+#4      BinaryPrinter.writeBytes (package:kernel/binary/ast_to_binary.dart)
+#5      BinaryPrinter.writeUriToSource (package:kernel/binary/ast_to_binary.dart)
+#6      BinaryPrinter.writeComponentFile.<anonymous closure> (package:kernel/binary/ast_to_binary.dart)
+#7      Timeline.timeSync (dart:developer/timeline.dart)
+#8      BinaryPrinter.writeComponentFile (package:kernel/binary/ast_to_binary.dart)
+#9      IncrementalSerializer.serialize (package:front_end/src/base/incremental_serializer.dart)
+#10     IncrementalSerializer.writePackagesToSinkAndTrimComponent 
+(package:front_end/src/base/incremental_serializer.dart)
+#11     FrontendCompiler.writeDillFile (package:frontend_server/frontend_server.dart)
+#12     FrontendCompiler.compile (package:frontend_server/frontend_server.dart)
+#13     _SuspendState._createAsyncStarCallback.<anonymous closure> (dart:async-patch/async_patch.dart)
+#14     _microtaskLoop (dart:async/schedule_microtask.dart)
+#15     _startMicrotaskLoop (dart:async/schedule_microtask.dart)
+#16     _Timer._runTimers (dart:isolate-patch/timer_impl.dart)
+#17     _Timer._handleMessage (dart:isolate-patch/timer_impl.dart)
+#18     _RawReceivePort._handleMessage (dart:isolate-patch/isolate_patch.dart)
+The Dart compiler exited unexpectedly.

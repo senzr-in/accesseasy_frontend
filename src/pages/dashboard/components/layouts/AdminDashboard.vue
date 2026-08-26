@@ -833,7 +833,7 @@ const loadStats = async (isBackground = false) => {
       try {
         if (!cachedGuardRoleId) {
           const roleRes = await fetch(
-            `${apiUrl}/items/roleConfigurator?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][_and][1][accessType][_in]=accessEasy,accesseasy_patrol,patrol&filter[_and][0][_and][2][roleName][_contains]=guard&fields[]=id`,
+            `${apiUrl}/items/roleConfigurator?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][_and][1][accessType][_in]=patrol,accesseasy_patrol&filter[_and][0][_and][2][roleName][_contains]=guard&fields[]=id`,
             { headers: { Authorization: `Bearer ${token}` } }
           );
           if (roleRes.ok) {
@@ -843,7 +843,7 @@ const loadStats = async (isBackground = false) => {
         }
 
         let filterStr = `filter[tenant][_eq]=${tenantId}&filter[status][_eq]=active`;
-        if (cachedGuardRoleId) filterStr += `&filter[accesseasyRole][_eq]=${cachedGuardRoleId}`;
+        if (cachedGuardRoleId) filterStr += `&filter[_or][0][accesseasyPatrolRole][_eq]=${cachedGuardRoleId}&filter[_or][1][accesseasyRole][_eq]=${cachedGuardRoleId}`;
 
         const usersRes = await fetch(`${apiUrl}/users?${filterStr}&fields=id,first_name,last_name,avatar,phone,email,location,currentLat,currentLng`, {
           headers: { Authorization: `Bearer ${token}` }

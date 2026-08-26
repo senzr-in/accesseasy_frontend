@@ -1373,8 +1373,6 @@ const transformEmployeeData = async (
       }));
 
     if (enabledLeaves.length > 0) {
-      enabled遵0;
-
       enabledLeaves.forEach((leave) => {
         const leaveType = leave.leaveName.toLowerCase().replace(/\s+/g, "");
         leavesPayload.leaveBalance[leaveType] = leave.leaveConfig?.days || 0;

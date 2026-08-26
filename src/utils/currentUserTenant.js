@@ -77,9 +77,9 @@ class CurrentUserTenant {
             userApps = userApps.split(',').map(s => ({ userApp: s.trim() }));
           }
         }
-        hasAccess = !userData.tenant || (Array.isArray(userApps) && userApps.some(app => {
+        let hasAccess = !userData.tenant || (Array.isArray(userApps) && userApps.some(app => {
           const name = String(app.userApp || app || "").toLowerCase().replace(/[\s-]/g, "_");
-          return name === "accesseasy_patrol";
+          return name === "patrol" || name === "accesseasy_patrol";
         }));
 
         // If tenant does not have accesseasy entry yet (e.g. fresh Google signup), auto-allow and register in background

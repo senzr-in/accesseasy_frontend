@@ -501,9 +501,9 @@
 </template>
 
 <script>
-import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import QrcodeVue from 'qrcode.vue';
-import { ProductService, CategoryService, FileService } from '../productservices/ProductService';
+import { ProductService, CategoryService } from '../productservices/ProductService';
 import { useRouter } from 'vue-router';
 
 export default {
@@ -552,7 +552,7 @@ export default {
     const successMessage = ref('');
     
     // Constants
-    const token = "bennGJlPG_qUNKhCSE9WFUo6G_RnQAts" || "";
+    const token = "bennGJlPG_qUNKhCSE9WFUo6G_RnQAts";
     const tabs = ['Asset Information', 'Documents', 'QR Code'];
     const tabValues = ['details', 'documents', 'qrcode'];
     

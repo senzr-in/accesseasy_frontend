@@ -176,7 +176,6 @@ class SiteService {
    */
   async updateSite(siteId, siteData) {
     try {
-      const tenantId = authService.getTenantId();
       const payload = {};
       if (siteData.name || siteData.locName) payload.locName = siteData.name || siteData.locName;
       if (siteData.address || siteData.locAddress) payload.locAddress = siteData.address || siteData.locAddress;
@@ -200,7 +199,6 @@ class SiteService {
    */
   async deleteSite(siteId) {
     try {
-      const tenantId = authService.getTenantId();
       await authService.protectedApi.delete(`/items/locationManagement/${siteId}`);
       this.invalidateCache();
       subscriptionService.clearCache();

@@ -945,14 +945,15 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { 
-  ShieldPlus, ChevronRight, GripVertical, Trash2, Info, Clock, 
-  Plus, CheckCircle2, ArrowDown, AlertCircle, Play, Check, MapPin, ArrowLeft,
+  ShieldPlus, GripVertical, Trash2, Info, Clock, 
+  Plus, ArrowDown, AlertCircle, Play, Check, MapPin, ArrowLeft,
   ListFilter, Search, X, UserPlus, Layers
 } from 'lucide-vue-next';
 import { patrolService } from '@/services/patrolService';
 import { zoneService } from '@/services/zoneService';
 import { siteService } from '@/services/siteService';
 import { authService } from '@/services/authService';
+import { subscriptionService } from '@/services/subscriptionService';
 
 const router = useRouter();
 const isMounted = ref(false);
@@ -1147,12 +1148,33 @@ const submitAddGuard = async () => {
     // Find guard role if not already cached
     let roleId = null;
     try {
-      const roleRes = await fetch(`${apiUrl}/items/roleConfigurator?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][_and][1][accessType][_in]=accessEasy,accesseasy_patrol,patrol&filter[_and][0][_and][2][roleName][_contains]=guard&fields[]=id`, { headers: { Authorization: `Bearer ${token}` } });
+      const roleRes = await fetch(`${apiUrl}/items/roleConfigurator?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][_and][1][accessType][_in]=patrol,accesseasy_patrol&filter[_and][0][_and][2][roleName][_contains]=guard&fields[]=id`, { headers: { Authorization: `Bearer ${token}` } });
       if (roleRes.ok) {
         const roleData = await roleRes.json();
         roleId = roleData.data?.[0]?.id || null;
       }
     } catch (e) {}
+
+    if (!roleId) {
+      try {
+        const createRes = await fetch(`${apiUrl}/items/roleConfigurator`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            roleName: 'Security Guard',
+            accessType: 'patrol',
+            tenant: tenantId
+          })
+        });
+        if (createRes.ok) {
+          const created = await createRes.json();
+          roleId = created.data?.id || null;
+        }
+      } catch (_) {}
+    }
 
     const payload = {
       first_name: newGuardForm.value.first_name.trim(),
@@ -1162,10 +1184,9 @@ const submitAddGuard = async () => {
       email: newGuardForm.value.email.trim() || undefined,
       tenant: tenantId,
       status: 'active',
-      userApp: 'accesseasy, patrol'
+      userApp: 'patrol'
     };
     if (roleId) {
-      payload.accesseasyRole = roleId;
       payload.accesseasyPatrolRole = roleId;
     }
 
@@ -1305,15 +1326,6 @@ const onZoneChange = () => {
   }
 };
 
-// Available Checkpoints (in selected zone & not already selected)
-const availableCheckpoints = computed(() => {
-  if (!form.value.zoneId) return [];
-  return allMasterCheckpoints.value.filter(c => {
-    const zId = typeof c.zone === 'object' && c.zone ? c.zone.id : c.zone;
-    return String(zId) === String(form.value.zoneId) && !selectedCheckpoints.value.some(sel => sel.id === c.id);
-  });
-});
-
 const addCheckpoint = (cp) => {
   // Give it a default expected offset based on length
   const lastOffset = selectedCheckpoints.value.length > 0 ? selectedCheckpoints.value[selectedCheckpoints.value.length - 1].expectedOffset : 0;
@@ -1330,7 +1342,19 @@ const removeCheckpoint = (idx) => {
 
 const createInlineCheckpoint = async () => {
   const targetZoneId = inlineForm.value.zoneId || form.value.zoneId;
-  if (!inlineForm.value.name) return;
+  if (!inlineForm.value.name || !inlineForm.value.name.trim()) return;
+
+  const trimmedName = inlineForm.value.name.trim().toLowerCase();
+  const duplicate = allMasterCheckpoints.value.find(cp =>
+    cp.name.trim().toLowerCase() === trimmedName &&
+    String(cp.zone || '') === String(targetZoneId || '')
+  );
+
+  if (duplicate) {
+    alert(`A checkpoint named "${inlineForm.value.name.trim()}" already exists in this zone. Please choose a unique name.`);
+    return;
+  }
+
   if (!form.value.zoneId && targetZoneId) {
     form.value.zoneId = targetZoneId;
   }
@@ -1390,10 +1414,6 @@ const createInlineCheckpoint = async () => {
   } finally {
     savingInline.value = false;
   }
-};
-
-const sortCheckpointsByTime = () => {
-  selectedCheckpoints.value.sort((a, b) => (a.expectedOffset || 0) - (b.expectedOffset || 0));
 };
 
 // --- DRAG AND DROP ---
@@ -1570,20 +1590,35 @@ onMounted(async () => {
 
   // Fetch Guards
   try {
-    const roleRes = await fetch(`${apiUrl}/items/roleConfigurator?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][_and][1][accessType][_eq]=accessEasy&filter[_and][0][_and][2][roleName][_contains]=guard&fields[]=id`, { headers: { Authorization: `Bearer ${token}` } });
+    const roleRes = await fetch(`${apiUrl}/items/roleConfigurator?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][_and][1][accessType][_in]=patrol,accesseasy_patrol&filter[_and][0][_and][2][roleName][_contains]=guard&fields[]=id`, { headers: { Authorization: `Bearer ${token}` } });
     let guardRoleId = null;
     if (roleRes.ok) {
       const roleData = await roleRes.json();
       guardRoleId = roleData.data?.[0]?.id || null;
     }
 
-    let filterStr = `filter[tenant][_eq]=${tenantId}`;
-    if (guardRoleId) filterStr += `&filter[accesseasyRole][_eq]=${guardRoleId}`;
+    const filterStr = guardRoleId
+      ? `filter[_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_or][0][accesseasyPatrolRole][_eq]=${guardRoleId}&filter[_or][1][accesseasyRole][_eq]=${guardRoleId}`
+      : `filter[tenant][tenantId][_eq]=${tenantId}`;
 
-    const res = await fetch(`${apiUrl}/users?${filterStr}&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=phone`, { headers: { Authorization: `Bearer ${token}` } });
+    const res = await fetch(`${apiUrl}/users?${filterStr}&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=phone&fields[]=title&fields[]=accesseasyPatrolRole.*&fields[]=accesseasyRole.*&fields[]=role.*`, { headers: { Authorization: `Bearer ${token}` } });
     if (res.ok) {
       const data = await res.json();
-      guards.value = (data.data || []).map(u => ({
+      const currentUserId = authService.getUserId?.() || authService.getUserData?.()?.id;
+      const guardsOnly = (data.data || []).filter(u => {
+        const roleName = (u.accesseasyPatrolRole?.roleName || u.accesseasyRole?.roleName || u.title || u.role?.name || '').toLowerCase();
+        if (roleName.includes('admin') || roleName.includes('owner') || roleName.includes('manager') || roleName.includes('superadmin')) {
+          return false;
+        }
+        if (currentUserId && String(u.id) === String(currentUserId)) {
+          const myRole = (authService.getUserRole?.() || '').toLowerCase();
+          if (myRole.includes('admin') || myRole.includes('owner')) {
+            return false;
+          }
+        }
+        return true;
+      });
+      guards.value = guardsOnly.map(u => ({
         id: u.id,
         name: `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.phone || 'Guard'
       }));

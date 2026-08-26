@@ -61,41 +61,41 @@
                 </div>
                 <div>
                   <h3 class="text-sm font-black text-slate-900 dark:text-white group-hover:text-indigo-600 transition-colors">{{ site.name }}</h3>
-                  <span class="text-[10px] font-mono font-semibold text-slate-400">{{ site.code }}</span>
+                  <span class="text-[10px] font-mono font-semibold text-slate-400">{{ site.code || ('SITE-' + (site.id || '01')) }}</span>
                 </div>
               </div>
 
               <span
                 class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full flex items-center gap-1"
-                :class="site.healthStatus === 'healthy' 
+                :class="(site.healthStatus || 'healthy') === 'healthy' 
                   ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200' 
                   : site.healthStatus === 'warning'
                   ? 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 border border-amber-200'
                   : 'bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400 border border-rose-200'"
               >
-                <span class="w-1.5 h-1.5 rounded-full" :class="site.healthStatus === 'healthy' ? 'bg-emerald-500' : site.healthStatus === 'warning' ? 'bg-amber-500' : 'bg-rose-500'" />
-                {{ site.healthStatus }}
+                <span class="w-1.5 h-1.5 rounded-full" :class="(site.healthStatus || 'healthy') === 'healthy' ? 'bg-emerald-500' : site.healthStatus === 'warning' ? 'bg-amber-500' : 'bg-rose-500'" />
+                {{ site.healthStatus || 'healthy' }}
               </span>
             </div>
 
             <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mb-4">
               <MapPin class="w-3.5 h-3.5 text-slate-400 shrink-0" />
-              <span class="truncate">{{ site.address }}</span>
+              <span class="truncate">{{ site.address || 'No address specified' }}</span>
             </p>
 
             <!-- Metrics Strip -->
             <div class="grid grid-cols-3 gap-2 bg-slate-50 dark:bg-slate-800/40 p-3 rounded-xl border border-slate-100 dark:border-white/5 text-center mb-4">
               <div>
                 <span class="text-[10px] font-semibold text-slate-400 block uppercase">Guards</span>
-                <span class="text-xs font-black text-slate-800 dark:text-slate-200">{{ site.activeGuards }} / {{ site.totalGuards }}</span>
+                <span class="text-xs font-black text-slate-800 dark:text-slate-200">{{ site.activeGuards ?? 0 }} / {{ site.totalGuards ?? 0 }}</span>
               </div>
               <div>
                 <span class="text-[10px] font-semibold text-slate-400 block uppercase">Zones</span>
-                <span class="text-xs font-black text-slate-800 dark:text-slate-200">{{ site.zonesCount }}</span>
+                <span class="text-xs font-black text-slate-800 dark:text-slate-200">{{ site.zonesCount ?? 0 }}</span>
               </div>
               <div>
                 <span class="text-[10px] font-semibold text-slate-400 block uppercase">Checkpoints</span>
-                <span class="text-xs font-black text-slate-800 dark:text-slate-200">{{ site.checkpointsCount }}</span>
+                <span class="text-xs font-black text-slate-800 dark:text-slate-200">{{ site.checkpointsCount ?? 0 }}</span>
               </div>
             </div>
 
@@ -103,13 +103,13 @@
             <div class="space-y-1.5 mb-2">
               <div class="flex items-center justify-between text-[11px] font-bold">
                 <span class="text-slate-600 dark:text-slate-400">Patrol Compliance</span>
-                <span class="text-indigo-600 dark:text-indigo-400 font-mono">{{ site.completionRate }}%</span>
+                <span class="text-indigo-600 dark:text-indigo-400 font-mono">{{ site.completionRate ?? 100 }}%</span>
               </div>
               <div class="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden">
                 <div
                   class="h-full rounded-full transition-all duration-500"
-                  :class="site.completionRate >= 95 ? 'bg-emerald-500' : site.completionRate >= 85 ? 'bg-amber-500' : 'bg-rose-500'"
-                  :style="{ width: `${site.completionRate}%` }"
+                  :class="(site.completionRate ?? 100) >= 95 ? 'bg-emerald-500' : (site.completionRate ?? 100) >= 85 ? 'bg-amber-500' : 'bg-rose-500'"
+                  :style="{ width: `${site.completionRate ?? 100}%` }"
                 />
               </div>
             </div>
@@ -118,7 +118,7 @@
           <!-- Bottom Action Row -->
           <div class="mt-4 pt-3 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-xs">
             <span class="text-[11px] font-semibold text-slate-400">
-              Radius: {{ site.geofence_radius }}m
+              Radius: {{ site.geofence_radius || 500 }}m
             </span>
             <span class="font-bold text-indigo-600 group-hover:translate-x-1 transition-transform flex items-center gap-1">
               Open Site Command →
@@ -431,6 +431,9 @@ import {
   ChevronDown, SlidersHorizontal, Check 
 } from 'lucide-vue-next';
 import { siteService } from '@/services/siteService';
+import { zoneService } from '@/services/zoneService';
+import { patrolService } from '@/services/patrolService';
+import { attendanceService } from '@/services/attendanceService';
 import { subscriptionService } from '@/services/subscriptionService';
 import { usePlanGuard } from '@/composables/usePlanGuard';
 import PlanLimitBanner from '@/components/common/PlanLimitBanner.vue';
@@ -661,8 +664,178 @@ const confirmLocationSelection = () => {
 };
 
 const loadSites = async () => {
-  sites.value = await siteService.fetchSites();
+  subscriptionService.clearCache();
+  const rawSites = await siteService.fetchSites();
   siteLimitInfo.value = await subscriptionService.checkLimit('sites');
+
+  try {
+    const [zonesRes, masterCpRes, generalCpRes, patrolsRes, attendanceRes] = await Promise.allSettled([
+      zoneService.fetchZones(null, null, true),
+      patrolService.getMasterCheckpoints(),
+      patrolService.getCheckpoints(),
+      patrolService.getPatrols(),
+      attendanceService.getTodayAttendance()
+    ]);
+
+    const allZones = zonesRes.status === 'fulfilled' && Array.isArray(zonesRes.value) ? zonesRes.value : [];
+    const allMasterCp = masterCpRes.status === 'fulfilled' && Array.isArray(masterCpRes.value) ? masterCpRes.value : [];
+    const allGeneralCp = generalCpRes.status === 'fulfilled' && Array.isArray(generalCpRes.value) ? generalCpRes.value : [];
+    const allPatrols = patrolsRes.status === 'fulfilled' && Array.isArray(patrolsRes.value) ? patrolsRes.value : [];
+    const allAttendance = attendanceRes.status === 'fulfilled' && Array.isArray(attendanceRes.value) ? attendanceRes.value : [];
+
+    // Distinct master checkpoints (deduplicate by checkpoint_id or name to avoid counting route duplicate copies)
+    const masterCpMap = new Map();
+    const sourceCpList = allMasterCp.length > 0 ? allMasterCp : allGeneralCp.filter(c => !c.group_id);
+    const fallbackList = sourceCpList.length > 0 ? sourceCpList : allGeneralCp;
+
+    fallbackList.forEach(cp => {
+      if (cp) {
+        const key = String(cp.checkpoint_id || cp.name || cp.id).trim().toLowerCase();
+        if (key && !masterCpMap.has(key)) {
+          let parsedZone = cp.zone;
+          if (!parsedZone && cp.instructions) {
+            const match = cp.instructions.match(/__ZONE_ASSIGNMENT__:(\d+)/);
+            if (match) parsedZone = Number(match[1]);
+          }
+          masterCpMap.set(key, { ...cp, zone: parsedZone });
+        }
+      }
+    });
+    const uniqueMasterCheckpoints = Array.from(masterCpMap.values());
+
+    const isSingleSite = rawSites.length === 1;
+
+    sites.value = rawSites.map(site => {
+      const siteIdStr = String(site.id || '');
+
+      // 1. Match zones for this site (or all tenant zones if single site)
+      const siteZones = allZones.filter(z => {
+        const zSiteId = String(z.site?.id || z.site || z.siteId || z.locationManagement || z.location || '');
+        if (zSiteId && zSiteId === siteIdStr) return true;
+        if (isSingleSite) return true;
+        const zSiteName = String(z.siteName || z.site_name || z.locationName || '').toLowerCase();
+        if (zSiteName && site.name && zSiteName.includes(site.name.toLowerCase())) return true;
+        if (!zSiteId && rawSites[0]?.id === site.id) return true;
+        return false;
+      });
+
+      const zoneIdsForSite = new Set(siteZones.map(z => String(z.id)));
+
+      // 2. Match unique checkpoints for this site
+      const siteCheckpoints = uniqueMasterCheckpoints.filter(cp => {
+        const cpSiteId = String(cp.site?.id || cp.site || cp.siteId || cp.location || '');
+        if (cpSiteId && cpSiteId === siteIdStr) return true;
+        const cpZoneId = String(typeof cp.zone === 'object' && cp.zone ? cp.zone.id : cp.zone || '');
+        if (cpZoneId && zoneIdsForSite.has(cpZoneId)) return true;
+        if (isSingleSite) return true;
+        if (!cpSiteId && !cpZoneId && rawSites[0]?.id === site.id) return true;
+        return false;
+      });
+
+      // 3. Match patrols for this site
+      const sitePatrols = allPatrols.filter(p => {
+        const pSiteId = String(p.site?.id || p.site || p.zoneId || p.siteId || '');
+        if (pSiteId && (pSiteId === siteIdStr || zoneIdsForSite.has(pSiteId))) return true;
+        if (isSingleSite) return true;
+        return false;
+      });
+
+      // 4. Extract DISTINCT Guards (both total roster and currently on-duty)
+      const totalGuardsSet = new Set();
+      const activeGuardsSet = new Set();
+
+      // From Attendance logs:
+      const siteAttendance = allAttendance.filter(r => {
+        const rSiteId = String(r.site?.id || r.site || r.siteId || '');
+        if (rSiteId && rSiteId === siteIdStr) return true;
+        if (isSingleSite) return true;
+        const rSiteName = String(r.site_name || '').toLowerCase();
+        if (rSiteName && site.name && rSiteName.includes(site.name.toLowerCase())) return true;
+        return false;
+      });
+
+      siteAttendance.forEach(r => {
+        const guardKey = String(
+          r.guard?.assignedUser?.id || 
+          r.guard?.id || 
+          r.guard_name || 
+          (typeof r.guard === 'string' && r.guard) || 
+          ''
+        ).trim().toLowerCase();
+
+        if (guardKey && !['security guard', 'guard', 'unknown'].includes(guardKey)) {
+          totalGuardsSet.add(guardKey);
+          const st = String(r.status || r.live_status || '').toLowerCase();
+          const isOnDuty = st === 'present' || st === 'on_duty' || st === 'checked_in' || (!r.check_out_time && r.check_in_time);
+          if (isOnDuty) {
+            activeGuardsSet.add(guardKey);
+          }
+        }
+      });
+
+      // From Patrol assignments:
+      sitePatrols.forEach(p => {
+        const gName = String(
+          p.guard_name || 
+          p.guardName || 
+          p.assigned_guard || 
+          p.assignedGuard || 
+          (typeof p.guard === 'string' ? p.guard : p.guard?.name) || 
+          ''
+        ).trim().toLowerCase();
+
+        if (gName && !['unassigned', 'security guard', 'guard', ''].includes(gName)) {
+          totalGuardsSet.add(gName);
+          const st = String(p.status || '').toLowerCase();
+          if (['active', 'in_progress', 'ongoing', 'started'].includes(st)) {
+            activeGuardsSet.add(gName);
+          }
+        }
+      });
+
+      // If site has registered user IDs in empIds:
+      if (Array.isArray(site.empIds)) {
+        site.empIds.forEach(id => {
+          if (id) totalGuardsSet.add(String(id).toLowerCase());
+        });
+      }
+
+      const activeGuards = activeGuardsSet.size;
+      const totalGuards = Math.max(totalGuardsSet.size, activeGuards);
+
+      // 5. Patrol Compliance calculation
+      const completedPatrols = sitePatrols.filter(p => String(p.status || '').toLowerCase() === 'completed');
+      const completionRate = sitePatrols.length > 0 
+        ? Math.round((completedPatrols.length / sitePatrols.length) * 100) 
+        : 100;
+
+      const healthStatus = site.healthStatus || (completionRate < 70 ? 'warning' : 'healthy');
+      const code = site.code || site.locCode || (site.name ? site.name.replace(/[^A-Za-z0-9]/g, '').slice(0, 4).toUpperCase() + '-' + String(site.id).slice(-2) : `STE-${site.id}`);
+
+      return {
+        ...site,
+        code,
+        healthStatus,
+        activeGuards,
+        totalGuards,
+        zonesCount: siteZones.length,
+        checkpointsCount: siteCheckpoints.length,
+        completionRate
+      };
+    });
+  } catch (err) {
+    console.error('Error enriching sites data:', err);
+    sites.value = rawSites.map(site => ({
+      ...site,
+      code: site.code || site.locCode || `STE-${site.id}`,
+      healthStatus: site.healthStatus || 'healthy',
+      activeGuards: site.activeGuards || 0,
+      totalGuards: site.totalGuards || 0,
+      zonesCount: site.zonesCount || 0,
+      checkpointsCount: site.checkpointsCount || 0,
+      completionRate: site.completionRate ?? 100
+    }));
+  }
 };
 
 const submitCreateSite = async () => {

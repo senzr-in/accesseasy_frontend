@@ -38,6 +38,16 @@
           <span>History</span>
         </button>
 
+        <!-- Pair Tablet QR Button -->
+        <button
+          class="h-10 px-3.5 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap shadow-sm cursor-pointer"
+          @click="openDevicePairingModal"
+          title="Pair Guard Mobile / Tablet Device"
+        >
+          <QrCode class="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+          <span>Pair Tablet QR</span>
+        </button>
+
         <!-- Overflow Dropdown Menu -->
         <div class="relative">
           <button
@@ -69,6 +79,15 @@
                 <span>Patrol Checkpoints</span>
               </button>
               
+              <!-- Pair Patrol Tablet QR -->
+              <button
+                class="w-full px-4 py-2.5 text-left text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50 flex items-center gap-2.5 transition-colors cursor-pointer border-0 bg-transparent"
+                @click="openDevicePairingModal(); showOverflowMenu = false;"
+              >
+                <QrCode class="w-4 h-4 text-indigo-500" />
+                <span>Pair Patrol Tablet (QR)</span>
+              </button>
+
               <!-- Download Checkpoint QR -->
               <button
                 class="w-full px-4 py-2.5 text-left text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50 flex items-center gap-2.5 transition-colors cursor-pointer border-0 bg-transparent"
@@ -99,7 +118,7 @@
             Emergency Alert Detected
           </h2>
           <p class="text-red-100 text-sm font-semibold">
-            Guard {{ activeAlerts[0].guard_name || 'Unknown' }} triggered an SOS in Zone: {{ activeAlerts[0].zone_name || 'Unknown' }}
+            Guard {{ activeAlerts[0].guard_name || activeAlerts[0].reported_by || 'Unknown Guard' }} triggered an SOS in: {{ activeAlerts[0].zone_name || activeAlerts[0].location || activeAlerts[0].site || 'Patrol Zone' }}
           </p>
         </div>
       </div>
@@ -325,6 +344,68 @@
           </div>
         </div>
       </transition>
+    </Teleport>
+
+    <!-- Device Pairing QR Modal -->
+    <Teleport to="body">
+      <div
+        v-if="showDevicePairingModal"
+        class="fixed inset-0 z-[160] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4"
+        @click.self="showDevicePairingModal = false"
+      >
+        <div class="w-full max-w-sm bg-white dark:bg-[#151c2c] rounded-2xl shadow-2xl p-6 border border-slate-200 dark:border-white/10 animate-in zoom-in-95 duration-150 text-center">
+          <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100 dark:border-white/5">
+            <h3 class="text-sm font-black text-slate-900 dark:text-white">Patrol Tablet Pairing QR</h3>
+            <button class="text-slate-400 hover:text-slate-600 p-1 cursor-pointer" @click="showDevicePairingModal = false">
+              <X class="w-4 h-4" />
+            </button>
+          </div>
+
+          <!-- Site Selector -->
+          <div class="mb-3 text-left">
+            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Target Property Site</label>
+            <select v-model="selectedPairingSiteId" class="ae-input w-full py-1.5 text-xs" @change="generateDeviceQR">
+              <option v-for="s in pairingSitesList" :key="s.id" :value="s.id">{{ s.name || s.locName || 'Property Site' }}</option>
+            </select>
+          </div>
+
+          <!-- Device Identifier -->
+          <div class="mb-4 text-left">
+            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Device ID / Terminal Code</label>
+            <input v-model="pairingDeviceId" placeholder="e.g. PATROL-TAB-001" class="ae-input w-full py-1.5 text-xs font-mono uppercase" @input="generateDeviceQR" />
+          </div>
+
+          <!-- QR Code Image -->
+          <div class="p-3 bg-white rounded-2xl border border-slate-200 inline-block shadow-inner mb-4">
+            <img v-if="deviceQrDataUrl" :src="deviceQrDataUrl" alt="Device Pairing QR" class="w-48 h-48 rounded-lg" />
+            <div v-else class="w-48 h-48 flex items-center justify-center text-slate-400 text-xs">Generating...</div>
+          </div>
+
+          <!-- Code Summary Box -->
+          <div class="bg-slate-50 dark:bg-slate-800/60 rounded-xl p-3 mb-4 text-left border border-slate-200 dark:border-white/5">
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-[10px] font-bold text-slate-400 uppercase">Site:</span>
+              <span class="font-bold text-emerald-600 dark:text-emerald-400 text-xs">{{ selectedPairingSiteName }}</span>
+            </div>
+            <div class="flex justify-between items-center pt-1.5 border-t border-slate-200 dark:border-white/10">
+              <span class="text-[10px] font-bold text-slate-400 uppercase">Pairing Code:</span>
+              <span class="font-black text-indigo-600 dark:text-indigo-400 text-sm tracking-wider font-mono">{{ devicePairingCode }}</span>
+            </div>
+          </div>
+
+          <p class="text-[11px] text-slate-500 mb-4 leading-relaxed">
+            Open the <strong>AccessEasy Patrol</strong> app on the tablet, tap <strong>Scan QR Code</strong>, and scan this QR code to bind the device.
+          </p>
+
+          <button
+            type="button"
+            class="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-600/20 cursor-pointer"
+            @click="showDevicePairingModal = false"
+          >
+            Done
+          </button>
+        </div>
+      </div>
     </Teleport>
   </div>
 </template>
@@ -808,13 +889,15 @@ const confirmDelete = async () => {
 
 async function load() {
   try {
-    const [patrols, groups, alerts] = await Promise.all([
+    const [patrols, groups, alerts, todayLogs] = await Promise.all([
       patrolService.getPatrols(),
       patrolService.fetchCheckpointGroups(),
-      patrolService.getAlerts()
+      patrolService.getAlerts(),
+      patrolService.getTodayPatrolLogs()
     ]);
     
-    const todayPatrols = patrols; // Removed date filter to show all patrols
+    const todayPatrols = patrols;
+    const logsList = Array.isArray(todayLogs) ? todayLogs : [];
     
     // Load checkpoints for today's patrols
     const cpMap = {};
@@ -823,34 +906,44 @@ async function load() {
       const gId = typeof p.groupId === 'object' && p.groupId ? p.groupId.id : p.groupId;
       if (!gId) return;
 
-      if (!globalRouteCache[gId] || (Date.now() - (globalRouteCache[gId].timestamp || 0) > 60000)) {
-        globalRouteCache[gId] = {
-          data: await patrolService.getCheckpointsForRoute(gId),
-          timestamp: Date.now()
-        };
-      }
-      const staticCps = globalRouteCache[gId].data || [];
+      const staticCps = await patrolService.getCheckpointsForRoute(gId);
       
-      // Bug #5: Scope checkpoint scan state to this patrol's time window.
-      // If a checkpoint was scanned before this patrol's scheduled start, treat it
-      // as 'pending' (it belongs to a previous round on the same route).
+      // Checkpoint logs matching this patrol ID
+      const patrolLogs = logsList.filter(l => String(l.patrol_id) === String(p.id));
+      
       cpMap[p.id] = staticCps.map(cp => {
-        const isScanned = cp.status === 'scanned' || cp.status === 'completed';
+        // Find matching scan log from mobile
+        const matchingLog = patrolLogs.find(l => 
+          String(l.checkpoint_id) === String(cp.id) || 
+          String(l.checkpoint_id) === String(cp.checkpoint_id) ||
+          (l.checkpoint_name && l.checkpoint_name === cp.name)
+        );
+
         let effectiveStatus = cp.status;
-        if (isScanned && p.scheduledTime && cp.scanned_at) {
-          const scannedAt = new Date(cp.scanned_at.includes('T') ? cp.scanned_at : cp.scanned_at.replace(' ', 'T'));
-          const patrolStart = new Date(p.scheduledTime);
-          if (scannedAt < patrolStart) {
-            effectiveStatus = 'pending'; // scan belongs to a previous patrol round
-          }
-        }
         let scanTime = null;
-        if (effectiveStatus === 'scanned' || effectiveStatus === 'completed') {
-          if (cp.scanned_at) {
-            const d = new Date(cp.scanned_at);
-            scanTime = !isNaN(d) ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : cp.scanned_at;
+
+        if (matchingLog) {
+          effectiveStatus = 'completed';
+          const dtStr = matchingLog.timestamp_device || matchingLog.date_created;
+          if (dtStr) {
+            const d = new Date(dtStr);
+            scanTime = !isNaN(d) ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : dtStr;
+          }
+        } else {
+          const isScanned = cp.status === 'scanned' || cp.status === 'completed';
+          if (isScanned && p.scheduledTime && cp.scanned_at) {
+            const scannedAt = new Date(cp.scanned_at.includes('T') ? cp.scanned_at : cp.scanned_at.replace(' ', 'T'));
+            const patrolStart = new Date(p.scheduledTime);
+            if (scannedAt >= patrolStart) {
+              effectiveStatus = cp.status;
+              const d = new Date(cp.scanned_at);
+              scanTime = !isNaN(d) ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : cp.scanned_at;
+            } else {
+              effectiveStatus = 'pending';
+            }
           }
         }
+
         return { ...cp, status: effectiveStatus, scanTime };
       });
 
@@ -858,6 +951,10 @@ async function load() {
       const hasScannedCps = cpMap[p.id].some(c => c.status === 'scanned' || c.status === 'completed');
       if (p.status === 'scheduled' && hasScannedCps) {
         p.status = 'active';
+      }
+      const allScanned = cpMap[p.id].length > 0 && cpMap[p.id].every(c => c.status === 'scanned' || c.status === 'completed');
+      if (allScanned && p.status === 'active') {
+        p.status = 'completed';
       }
     }));
     
@@ -882,7 +979,7 @@ const fetchStaticMetadata = async () => {
     const tenantId = authService.getTenantId();
     const apiUrl = import.meta.env.VITE_API_URL;
     
-    const roleRes = await fetch(`${apiUrl}/items/roleConfigurator?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][_and][1][accessType][_in]=accessEasy,accesseasy_patrol,patrol&filter[_and][0][_and][2][roleName][_contains]=guard&fields[]=id`, { headers: { Authorization: `Bearer ${token}` } });
+    const roleRes = await fetch(`${apiUrl}/items/roleConfigurator?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][_and][1][accessType][_in]=patrol,accesseasy_patrol&filter[_and][0][_and][2][roleName][_contains]=guard&fields[]=id`, { headers: { Authorization: `Bearer ${token}` } });
     let guardRoleId = null;
     if (roleRes.ok) {
       const roleData = await roleRes.json();
@@ -891,7 +988,7 @@ const fetchStaticMetadata = async () => {
 
     // Fetch users with that role
     let filterStr = `filter[tenant][_eq]=${tenantId}`;
-    if (guardRoleId) filterStr += `&filter[accesseasyRole][_eq]=${guardRoleId}`;
+    if (guardRoleId) filterStr += `&filter[_or][0][accesseasyPatrolRole][_eq]=${guardRoleId}&filter[_or][1][accesseasyRole][_eq]=${guardRoleId}`;
 
     const res = await fetch(
       `${apiUrl}/users?${filterStr}&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=phone&fields[]=status`,
@@ -935,7 +1032,7 @@ onMounted(async () => {
     } finally {
       isPolling = false;
     }
-  }, 30000);
+  }, 25000);
 });
 
 onUnmounted(() => {

@@ -287,6 +287,13 @@
       />
 
       <!-- Delete Confirmation Dialog -->
+      <!-- Patrol Terminal Live Telemetry Modal -->
+      <PatrolTerminalDetail
+        v-model="showPatrolDetail"
+        :device="selectedPatrolDevice"
+        @updated="fetchDeviceData"
+      />
+
       <ConfirmDeleteModal
         :show="showDeleteDialog"
         title="Delete Device"
@@ -306,11 +313,12 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from "vue";
-import { Zap, Network, Plus, Search, Loader2, Cpu, CheckCircle2, Clock, ShieldCheck, Settings2, DoorOpen, Trash2, Video, Activity } from "lucide-vue-next";
+import { ref, computed, watch, onMounted, onUnmounted } from "vue";
+import { Zap, Smartphone, Battery, BatteryCharging, Shield, Network, Plus, Search, Loader2, Cpu, CheckCircle2, Clock, ShieldCheck, Settings2, DoorOpen, Trash2, Video, Activity } from "lucide-vue-next";
 import { authService } from "@/services/authService";
 import { currentUserTenant } from "@/utils/currentUserTenant";
 import DeviceRegistrationDialog from "./deviceRegistrationDialog.vue";
+import PatrolTerminalDetail from "./patrolTerminalDetail.vue";
 import FrigateEventsDialog from "./frigateEventsDialog.vue";
 import ConfirmDeleteModal from "@/components/common/modals/ConfirmDeleteModal.vue";
 
@@ -326,6 +334,23 @@ const itemsPerPage = 10;
 const totalItems = ref(0);
 const activeStatusTab = ref("all");
 const showDialog = ref(false);
+const showPatrolDetail = ref(false);
+const selectedPatrolDevice = ref(null);
+
+const openPatrolDetail = (item) => {
+  selectedPatrolDevice.value = item;
+  showPatrolDetail.value = true;
+};
+
+const isDeviceOnline = (dev) => {
+  if (!dev) return false;
+  const lastSeen = dev.last_seen_at || dev.last_communicated_time;
+  if (lastSeen) {
+    const diffMs = Date.now() - new Date(lastSeen).getTime();
+    return diffMs < 2 * 60 * 1000;
+  }
+  return dev.controllerStatus === 'online' || dev.controllerStatus === 'successful';
+};
 const showFrigateEvents = ref(false);
 const selectedDevice = ref(null);
 
@@ -345,6 +370,17 @@ watch([page, activeStatusTab], () => {
     // Only fetch if tab changed (which resets page anyway usually, or page changed)
     fetchDeviceData();
   }
+});
+
+let telemetryInterval = null;
+
+onMounted(() => {
+  fetchDeviceData();
+  telemetryInterval = setInterval(fetchDeviceData, 30000);
+});
+
+onUnmounted(() => {
+  if (telemetryInterval) clearInterval(telemetryInterval);
 });
 
 watch(activeStatusTab, () => {

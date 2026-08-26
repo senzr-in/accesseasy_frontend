@@ -482,7 +482,7 @@
                     title="View attached photo"
                   >
                     <img
-                      :src="`http://localhost:8055/assets/${fileId}?fit=cover&width=50&height=50`"
+                      :src="getAttachmentUrl(fileId)"
                       class="w-full h-full object-cover"
                     >
                   </div>
@@ -552,6 +552,16 @@ const incident = ref({
 });
 
 const previousReports = ref([]);
+
+const apiUrl = import.meta.env.VITE_API_URL || 'https://appv1.fieldseasy.com/directus';
+const token = authService.getToken();
+
+const getAttachmentUrl = (fileId) => {
+  if (!fileId) return '';
+  if (typeof fileId === 'string' && fileId.startsWith('http')) return fileId;
+  return `${apiUrl}/assets/${fileId}?access_token=${token}&fit=cover&width=80&height=80`;
+};
+
 
 const getCurrentLocation = () => {
   if (!navigator.geolocation) {

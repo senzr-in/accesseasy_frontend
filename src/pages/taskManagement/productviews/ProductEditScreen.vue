@@ -503,7 +503,7 @@ export default {
         '#9C27B0', '#009688', '#E91E63', '#FFC107'
       ],
       
-      token: "bennGJlPG_qUNKhCSE9WFUo6G_RnQAts" || process.env.VUE_APP_API_TOKEN
+      token: (typeof process !== 'undefined' && process.env?.VUE_APP_API_TOKEN) || "bennGJlPG_qUNKhCSE9WFUo6G_RnQAts"
     }
   },
   computed: {
@@ -526,10 +526,10 @@ export default {
   },
   methods: {
     async loadProduct() {
-                const tenantId = currentUserTenant.getTenantId();
+      const tenantId = currentUserTenant.getTenantId();
 
       try {
-        const products = await this.productService.getProducts(this.tenantId);
+        const products = await this.productService.getProducts(tenantId);
         const product = products.find(p => p.id === this.id);
         
         if (!product) {
@@ -569,10 +569,10 @@ export default {
     },
     
     async loadCategories() {
-                const tenantId = currentUserTenant.getTenantId();
+      const tenantId = currentUserTenant.getTenantId();
 
       try {
-        this.categories = await this.categoryService.getCategories(this.tenantId);
+        this.categories = await this.categoryService.getCategories(tenantId);
       } catch (error) {
         console.error('Error loading categories:', error);
         this.imageError = `Failed to load categories: ${error.message}`;
@@ -709,7 +709,7 @@ export default {
     },
     
     async addCategory() {
-                const tenantId = currentUserTenant.getTenantId();
+      const tenantId = currentUserTenant.getTenantId();
 
       if (!this.newCategoryName) return;
       
@@ -718,7 +718,7 @@ export default {
       try {
         const newCategory = new ProductCategory({
           categoryName: this.newCategoryName,
-          tenant: this.tenantId,
+          tenant: tenantId,
           icon: this.selectedIcon ? this.iconOptions.indexOf(this.selectedIcon).toString() : null,
           color: this.selectedColor ? this.selectedColor.substring(1) : null
         });
@@ -827,7 +827,7 @@ export default {
             productName: this.productName,
             productId: this.modelNumber || null,
             category: this.selectedCategoryId,
-            tenant: this.tenantId,
+            tenant: tenantId,
             userCreated: this.userId,
             serialNumber: this.serialNumber || null,
             variant: this.variant || null,

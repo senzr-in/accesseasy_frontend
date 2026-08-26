@@ -1,11 +1,11 @@
 <template>
   <div class="face-embedding-container">
-    <div class="tabs-container">
+    <div class="tabs-container flex items-center justify-between px-4">
       <v-tabs
         v-model="activeTab"
         show-arrows
         background-color="transparent"
-        class="custom-tabs"
+        class="custom-tabs flex-1"
       >
         <v-tab
           value="ai"
@@ -26,7 +26,23 @@
           Mobile Face Embedding
         </v-tab>
       </v-tabs>
+
+      <v-btn
+        color="primary"
+        variant="elevated"
+        prepend-icon="mdi-camera-plus"
+        size="small"
+        class="rounded-lg text-capitalize font-weight-bold"
+        @click="showEnrollModal = true"
+      >
+        Enroll Face from Photo
+      </v-btn>
     </div>
+
+    <!-- Web Face Enrollment Modal -->
+    <WebEnrollmentModal
+      v-model="showEnrollModal"
+    />
 
     <div class="tab-content">
       <router-view />
@@ -37,10 +53,12 @@
 <script setup>
 import { ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import WebEnrollmentModal from "@/pages/faceEmbedding/webUploadFaceEmbedding/WebEnrollmentModal.vue";
 
 const route = useRoute();
 const router = useRouter();
 const activeTab = ref("ai");
+const showEnrollModal = ref(false);
 
 // Watch for route changes to update active tab
 watch(

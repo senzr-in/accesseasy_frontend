@@ -54,7 +54,7 @@ const ALL_PATROL_FEATURES = [
 const CACHE_KEY_PLAN = "patrol_plan_v2";
 const CACHE_KEY_LIMITS = "patrol_limits_v2";
 const CACHE_KEY_USAGE = "patrol_usage_v2";
-const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+const CACHE_TTL_MS = 15 * 1000; // 15 seconds live cache
 
 function cacheSet(key, value) {
   try {
@@ -94,9 +94,11 @@ class SubscriptionService {
    * Returns the current organization's active subscription row.
    * Checks Directus `plans` table first, falls back to `currentUserTenant` or defaults to 7-Day Free Trial.
    */
-  async getSubscription() {
-    const cached = cacheGet(CACHE_KEY_PLAN);
-    if (cached) return cached;
+  async getSubscription(force = false) {
+    if (!force) {
+      const cached = cacheGet(CACHE_KEY_PLAN);
+      if (cached) return cached;
+    }
 
     const tenantId = currentUserTenant.getTenantId() || authService.getTenantId();
     if (!tenantId) {
@@ -127,9 +129,16 @@ class SubscriptionService {
       // 1. Query Directus `plans` collection
       try {
         const res = await authService.protectedApi.get(
-          `/items/plans?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&sort=-id&limit=5`
+          `/items/plans?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&sort=-id&limit=20`
         );
         const rows = res.data?.data || [];
+
+        // Sort to prioritize row with userapp === 'patrol'
+        rows.sort((a, b) => {
+          const isPatrolA = String(a.userapp || '').toLowerCase() === 'patrol' ? 1 : 0;
+          const isPatrolB = String(b.userapp || '').toLowerCase() === 'patrol' ? 1 : 0;
+          return isPatrolB - isPatrolA;
+        });
 
         for (const row of rows) {
           let currentPlanMap = row.currentplan;
@@ -140,11 +149,11 @@ class SubscriptionService {
           }
 
           if (currentPlanMap && typeof currentPlanMap === "object") {
-            // Check for ez_patrol_platform or ez_access_platform in map
+            // Check for ez_patrol_platform in map, or check userapp === 'patrol'
+            const isPatrolRow = String(row.userapp || '').toLowerCase() === 'patrol' || String(row.userapp || '').toLowerCase() === 'accesseasy_patrol';
             const targetPlan =
               currentPlanMap.ez_patrol_platform ||
-              currentPlanMap.ez_access_platform ||
-              (currentPlanMap.plan_key ? currentPlanMap : Object.values(currentPlanMap)[0]);
+              (isPatrolRow ? (currentPlanMap.plan_key ? currentPlanMap : Object.values(currentPlanMap)[0]) : null);
 
             if (targetPlan) {
               const now = Date.now();
@@ -152,16 +161,18 @@ class SubscriptionService {
               const isTrial = targetPlan.is_trial === true || targetPlan.billing_cycle === "trial" || targetPlan.status === "trial";
               const isExpired = expTime ? expTime <= now : false;
 
+              const sitesLimit = Number(targetPlan.sites || targetPlan.sites_count || row.max_sites || 1);
+
               const formatted = {
                 id: row.id,
                 plan_key: targetPlan.plan_key || "ez_patrol_platform",
-                plan_name: targetPlan.plan_name || "AccessEasy Patrol Platform",
+                plan_name: targetPlan.plan_name || row.name || "AccessEasy Patrol Platform",
                 status: isExpired ? "expired" : targetPlan.status || (isTrial ? "trial" : "active"),
                 is_trial: isTrial,
                 is_expired: isExpired,
-                sites: Number(targetPlan.sites || targetPlan.sites_count || 1),
-                billing_cycle: targetPlan.billing_cycle || "monthly",
-                currency: targetPlan.currency || "INR",
+                sites: sitesLimit,
+                billing_cycle: targetPlan.billing_cycle || row.billing_period || "monthly",
+                currency: targetPlan.currency || row.currency || "INR",
                 start_date: targetPlan.start_date,
                 active_until: targetPlan.active_until,
                 renewal_date: targetPlan.active_until,
@@ -202,7 +213,7 @@ class SubscriptionService {
         return subFromTenant;
       }
 
-      // 3. Default fallback: 7-Day Free Trial (1 Site)
+      // 3. Default fallback: 7-Day Free Trial (1 Site) & Auto-persist to Directus plans table
       const now = new Date();
       const trialEnd = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
       const defaultTrial = {
@@ -217,6 +228,46 @@ class SubscriptionService {
         active_until: trialEnd.toISOString(),
         renewal_date: trialEnd.toISOString(),
       };
+
+      // Auto-insert row into Directus `plans` table for this tenant in background
+      if (tenantId && authService.getToken()) {
+        try {
+          const planPayload = {
+            tenant: tenantId,
+            userapp: "patrol",
+            name: "AccessEasy Patrol 7-Day Free Trial",
+            tier: "trial",
+            billing_period: "trial",
+            price: 0,
+            currency: "INR",
+            max_sites: 1,
+            active: true,
+            currentplan: {
+              ez_patrol_platform: {
+                plan_key: "ez_patrol_platform",
+                plan_name: "AccessEasy Patrol 7-Day Free Trial",
+                status: "trial",
+                is_trial: true,
+                sites: 1,
+                billing_cycle: "trial",
+                currency: "INR",
+                start_date: defaultTrial.start_date,
+                active_until: defaultTrial.active_until
+              }
+            },
+            date_created: now.toISOString()
+          };
+
+          authService.protectedApi.post("/items/plans", planPayload).then(res => {
+            if (res.data?.data?.id) {
+              defaultTrial.id = res.data.data.id;
+            }
+          }).catch(e => {
+            console.warn("[SubscriptionService] Auto-create plan in Directus:", e.message);
+          });
+        } catch (_) {}
+      }
+
       cacheSet(CACHE_KEY_PLAN, defaultTrial);
       return defaultTrial;
     } catch (err) {

@@ -587,18 +587,13 @@
 
 <script setup>
 import { ref, onMounted, computed, watch } from "vue";
-import { useRouter, useRoute } from "vue-router";
 import { authService } from "@/services/authService";
 import BaseButton from "@/components/common/buttons/BaseButton.vue";
 import ToastContainer from "@/components/common/notifications/ToastContainer.vue";
 import { Plus, Trash2 } from "lucide-vue-next";
-import { currentUserTenant } from "@/utils/currentUserTenant";
 import ActionButton from "@/components/common/buttons/ActionButton.vue";
 
-const tenantId = currentUserTenant.getTenantId();
 const token = authService.getToken();
-const router = useRouter();
-const route = useRoute();
 
 const props = defineProps({
   id: { type: [String, Number], required: true },
@@ -1211,8 +1206,8 @@ watch(
 );
 
 onMounted(async () => {
-  if (date.value) {
-    const [year, month] = date.value.split("-");
+  if (props.effectiveMonth) {
+    const [year, month] = props.effectiveMonth.split("-");
     fetchSalaryBreakdown(year, month);
   }
 

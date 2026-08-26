@@ -396,7 +396,7 @@ import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { authService } from "@/services/authService";
 import { 
-  Lock, Mail, Phone, ArrowRight, ShieldCheck, 
+  Mail, Phone, ArrowRight, ShieldCheck, 
   Radio, AlertCircle, Zap, CheckCircle2,
   ScanFace, Smartphone, Globe,
   QrCode, Nfc, IdCard, AlertTriangle, Building2
@@ -502,7 +502,7 @@ async function onPhoneSubmit() {
       return;
     }
 
-    const user = await authService.getUserByPhone(fullPhoneNumber);
+    await authService.getUserByPhone(fullPhoneNumber);
     localStorage.setItem("userPhone", digits);
     await proceedToOtpVerification(fullPhoneNumber);
   } catch (error) {

@@ -340,6 +340,7 @@
 
               <div class="card-content">
                 <EmptyState
+                  v-if="assignedCards.length === 0"
                   title="No active cards assigned"
                   :show-default-actions="false"
                   class="empty-state-small"

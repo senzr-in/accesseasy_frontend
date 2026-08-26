@@ -101,6 +101,38 @@
                 </select>
               </div>
 
+              <!-- Patrol Terminal Stationing (Site & Post) -->
+              <div
+                v-if="formData.controllerType === 'patrol_terminal' || formData.attendanceMode === 'Patrol Terminal'"
+                class="col-span-2 grid grid-cols-2 gap-4 p-4 rounded-xl bg-blue-50/50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900/40"
+              >
+                <div class="space-y-1.5">
+                  <label class="text-[10px] font-black text-blue-800 dark:text-blue-300 uppercase tracking-widest">
+                    Assigned Site / Facility
+                  </label>
+                  <select
+                    v-model="formData.location"
+                    class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 text-foreground"
+                  >
+                    <option value="">Select Station Site</option>
+                    <option v-for="s in sites" :key="s.id" :value="s.id">
+                      {{ s.locName || 'Site ' + s.id }}
+                    </option>
+                  </select>
+                </div>
+                <div class="space-y-1.5">
+                  <label class="text-[10px] font-black text-blue-800 dark:text-blue-300 uppercase tracking-widest">
+                    Post / Gate Name
+                  </label>
+                  <input
+                    v-model="formData.timerMode"
+                    type="text"
+                    placeholder="e.g. Main Gate, North Gate"
+                    class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 text-foreground"
+                  >
+                </div>
+              </div>
+
               <!-- Camera Selection Dropdown (Only show for doors controllers, not NVRs themselves) -->
               <div
                 v-if="formData.controllerType && formData.controllerType !== 'frigate_nvr'"
@@ -298,6 +330,7 @@ const emit = defineEmits(['update:modelValue', 'success']);
 
 const loading = ref(false);
 const cameras = ref([]);
+const sites = ref([]);
 
 // Network Scanner state
 const showNetworkScanner = ref(false);
@@ -312,7 +345,10 @@ const formData = ref({
   useIpProtocol: false,
   serverIp: '',
   macAddress: '',
-  linkedCamera: ''
+  linkedCamera: '',
+        location: '',
+        timerMode: 'Main Gate',
+        attendanceMode: ''
 });
 
 watch(() => props.modelValue, (isOpen) => {
@@ -325,6 +361,7 @@ watch(() => props.modelValue, (isOpen) => {
     }
     
     fetchCameras();
+    fetchSites();
     
     if (props.device) {
       formData.value = {
@@ -334,7 +371,10 @@ watch(() => props.modelValue, (isOpen) => {
         useIpProtocol: !!props.device.serverIp,
         serverIp: props.device.serverIp || '',
         macAddress: props.device.macAddress || '',
-        linkedCamera: props.device.linkedCamera || ''
+        linkedCamera: props.device.linkedCamera || '',
+        location: props.device.location?.id || props.device.location || '',
+        timerMode: props.device.timerMode || 'Main Gate',
+        attendanceMode: props.device.attendanceMode || ''
       };
     } else {
       formData.value = {
@@ -353,6 +393,23 @@ watch(() => props.modelValue, (isOpen) => {
 
 const close = () => {
   emit('update:modelValue', false);
+};
+
+const fetchSites = async () => {
+  try {
+    const token = authService.getToken();
+    const tenantId = await currentUserTenant.getTenantIdAsync();
+    const res = await fetch(
+      `${import.meta.env.VITE_API_URL}/items/locationManagement?filter[tenant][tenantId][_eq]=${tenantId}&fields=id,locName,locAddress&limit=100`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (res.ok) {
+      const data = await res.json();
+      sites.value = data.data || [];
+    }
+  } catch (err) {
+    console.error("Failed to fetch sites:", err);
+  }
 };
 
 const fetchCameras = async () => {
@@ -422,6 +479,7 @@ const selectDiscoveredDevice = (dev) => {
 };
 
 const handleSubmit = async () => {
+  const isPatrolTerminal = formData.value.controllerType === 'patrol_terminal';
   loading.value = true;
   try {
     const token = authService.getToken();
@@ -440,7 +498,10 @@ const handleSubmit = async () => {
     const payload = {
       controllerName: formData.value.controllerName,
       sn: formData.value.sn,
-      controllerType: formData.value.controllerType,
+      controllerType: isPatrolTerminal ? 1 : formData.value.controllerType,
+        attendanceMode: isPatrolTerminal ? 'Patrol Terminal' : (formData.value.attendanceMode || null),
+        location: formData.value.location || null,
+        timerMode: formData.value.timerMode || 'Main Gate',
       tenant: tenantId,
       status: isEdit ? (props.device.status || 'unApproved') : 'approved',
       controllerStatus: isEdit ? (props.device.controllerStatus || 'offline') : 'online',

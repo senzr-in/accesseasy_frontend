@@ -249,30 +249,31 @@ const handleCodeDecoded = async (qrString) => {
   const abortController = new AbortController();
   const timeoutId = setTimeout(() => abortController.abort(), 10000);
   
+  // Helper to post audit logs natively to Directus
+  const postVerificationLog = async (status, empId = null, actionType = "in", customName = null) => {
+    try {
+      const tenantId = await currentUserTenant.getTenantIdAsync();
+      const payload = {
+        tenant: tenantId,
+        employeeId: typeof empId === 'object' ? empId?.id : empId,
+        ValidLogs: status, // "authorized" or "unAuthorized"
+        action: actionType,
+        mode: "throughApp",
+        name: customName || embeddedName || undefined, // Save extracted name to log
+        date: new Date().toISOString().split('T')[0],
+        timeStamp: new Date().toTimeString().split(' ')[0]
+      };
+      
+      if (!payload.employeeId) delete payload.employeeId;
+
+      await authService.protectedApi.post('/items/logs', payload);
+    } catch(e) {
+      console.error("Failed to post live log", e);
+    }
+  };
+
   try {
     const tenantId = await currentUserTenant.getTenantIdAsync();
-    
-    // Helper to post audit logs natively to Directus
-    const postVerificationLog = async (status, empId = null, actionType = "in", customName = null) => {
-      try {
-        const payload = {
-          tenant: tenantId,
-          employeeId: typeof empId === 'object' ? empId?.id : empId,
-          ValidLogs: status, // "authorized" or "unAuthorized"
-          action: actionType,
-          mode: "throughApp",
-          name: customName || embeddedName || undefined, // Save extracted name to log
-          date: new Date().toISOString().split('T')[0],
-          timeStamp: new Date().toTimeString().split(' ')[0]
-        };
-        
-        if (!payload.employeeId) delete payload.employeeId;
-
-        await authService.protectedApi.post('/items/logs', payload);
-      } catch(e) {
-        console.error("Failed to post live log", e);
-      }
-    };
 
     // Explicitly request nested user structures and access level info
     const res = await authService.protectedApi.get('/items/qrgenerate', {

@@ -11,7 +11,7 @@
             <Users class="w-6 h-6 text-emerald-600 dark:text-emerald-500" />
           </h1>
           <p class="text-slate-500 dark:text-slate-400 mt-1">
-            Manage AI biometric face templates for secure identification.
+            Manage AI biometric face templates (192-d vectors) for secure mobile patrol & access control.
           </p>
         </div>
       </div>
@@ -24,12 +24,18 @@
           <Download class="w-4 h-4" />
           Import
         </button>
-        <button class="h-9 px-4 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-2 text-sm font-medium shadow-lg shadow-emerald-600/20 transition-all active:scale-95">
+        <button
+          class="h-9 px-4 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-2 text-sm font-medium shadow-lg shadow-emerald-600/20 transition-all active:scale-95 cursor-pointer"
+          @click="showEnrollModal = true"
+        >
           <Plus class="w-4 h-4" />
-          Add Face
+          Enroll Face from Photo
         </button>
-        <button class="h-9 w-9 rounded-full flex items-center justify-center text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-500 transition-colors">
-          <RefreshCw class="w-4 h-4" />
+        <button
+          class="h-9 w-9 rounded-full flex items-center justify-center text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-500 transition-colors"
+          @click="fetchFaceData"
+        >
+          <RefreshCw class="w-4 h-4" :class="{ 'animate-spin': loading }" />
         </button>
       </div>
     </div>
@@ -48,19 +54,19 @@
       <!-- High Quality -->
       <div class="rounded-xl border border-emerald-200 dark:border-emerald-500/20 bg-white dark:bg-slate-900 p-4 shadow-sm">
         <p class="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider mb-1">
-          High Quality
+          High Quality (≥0.90)
         </p>
         <p class="text-2xl font-black text-emerald-600 dark:text-emerald-500">
-          {{ embeddings.filter(e => e.qualityScore > 0.9).length }}
+          {{ embeddings.filter(e => e.qualityScore >= 0.9).length }}
         </p>
       </div>
-      <!-- AI Generated -->
+      <!-- Web Enrolled -->
       <div class="rounded-xl border border-emerald-200 dark:border-emerald-500/20 bg-white dark:bg-slate-900 p-4 shadow-sm">
         <p class="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider mb-1">
-          AI Generated
+          Web Uploaded
         </p>
         <p class="text-2xl font-black text-blue-600 dark:text-blue-500">
-          {{ embeddings.filter(e => e.captureMethod === 'AI').length }}
+          {{ embeddings.filter(e => e.captureMethod === 'Web Portal' || e.captureMethod === 'WEB_UPLOAD').length }}
         </p>
       </div>
       <!-- Mobile Enrolled -->
@@ -69,7 +75,7 @@
           Mobile Enrolled
         </p>
         <p class="text-2xl font-black text-amber-600 dark:text-amber-500">
-          {{ embeddings.filter(e => e.captureMethod === 'MOBILE').length }}
+          {{ embeddings.filter(e => e.captureMethod === 'Mobile Patrol Device').length }}
         </p>
       </div>
     </div>
@@ -79,7 +85,7 @@
       <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <h2 class="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
           <Scan class="w-5 h-5 text-emerald-500" />
-          Biometric Templates
+          Biometric Templates (MobileFaceNet 192-d)
         </h2>
         <div class="relative w-full md:w-72">
           <Search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -97,10 +103,13 @@
           <thead class="bg-slate-50 dark:bg-slate-950">
             <tr>
               <th class="px-6 py-4 text-xs font-semibold text-slate-600 dark:text-slate-400">
-                Employee
+                Photo & Employee
               </th>
               <th class="px-6 py-4 text-xs font-semibold text-slate-600 dark:text-slate-400">
-                Method
+                Enrolled Source
+              </th>
+              <th class="px-6 py-4 text-xs font-semibold text-slate-600 dark:text-slate-400">
+                Raw Image (Base64)
               </th>
               <th class="px-6 py-4 text-xs font-semibold text-slate-600 dark:text-slate-400">
                 Quality
@@ -114,12 +123,18 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 dark:divide-slate-800/50">
-            <tr v-if="filteredEmbeddings.length === 0">
+            <tr v-if="loading">
+              <td colspan="6" class="px-6 py-12 text-center text-slate-500 dark:text-slate-400 text-sm">
+                <Loader2 class="w-6 h-6 animate-spin mx-auto text-emerald-600 mb-2" />
+                Loading biometric templates...
+              </td>
+            </tr>
+            <tr v-else-if="filteredEmbeddings.length === 0">
               <td
-                colspan="5"
+                colspan="6"
                 class="px-6 py-12 text-center text-slate-500 dark:text-slate-400 italic text-sm"
               >
-                No biometric templates found.
+                No biometric templates found. Click "Enroll Face from Photo" to add one.
               </td>
             </tr>
             <tr 
@@ -130,8 +145,15 @@
             >
               <td class="px-6 py-4">
                 <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-500/10 flex items-center justify-center shrink-0">
-                    <UserCheck class="w-4 h-4 text-emerald-600 dark:text-emerald-500" />
+                  <!-- Photo Thumbnail -->
+                  <div class="w-10 h-10 rounded-full overflow-hidden bg-emerald-100 dark:bg-emerald-500/10 flex items-center justify-center shrink-0 border border-emerald-300 dark:border-emerald-700">
+                    <img
+                      v-if="emb.photoUrl"
+                      :src="emb.photoUrl"
+                      alt="Face"
+                      class="w-full h-full object-cover"
+                    >
+                    <UserCheck v-else class="w-5 h-5 text-emerald-600 dark:text-emerald-500" />
                   </div>
                   <div>
                     <div class="font-bold text-sm text-slate-900 dark:text-white">
@@ -145,11 +167,21 @@
               </td>
               <td class="px-6 py-4">
                 <span 
-                  class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-black border"
-                  :class="emb.captureMethod === 'AI' ? 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-500/5 dark:border-blue-500/20' : 'bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-500/5 dark:border-amber-500/20'"
+                  class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black border"
+                  :class="emb.captureMethod === 'Web Portal' ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:border-blue-700 dark:text-blue-300' : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:border-amber-700 dark:text-amber-300'"
                 >
                   {{ emb.captureMethod }}
                 </span>
+              </td>
+              <td class="px-6 py-4">
+                <span 
+                  v-if="emb.hasRawImage"
+                  class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-300"
+                >
+                  <CheckCircle class="w-3 h-3 text-emerald-600" />
+                  Base64 Saved
+                </span>
+                <span v-else class="text-xs text-slate-400 italic">No Base64</span>
               </td>
               <td class="px-6 py-4">
                 <div class="flex items-center gap-2">
@@ -179,6 +211,12 @@
         </table>
       </div>
     </div>
+
+    <!-- Web Face Enrollment Modal -->
+    <WebEnrollmentModal
+      v-model="showEnrollModal"
+      @enrolled="handleEnrolled"
+    />
   </div>
 </template>
 
@@ -186,78 +224,73 @@
 import { ref, computed, onMounted } from 'vue';
 import { 
   Users, ArrowLeft, Scan, Trash2, Search, Plus, 
-  UserCheck, RefreshCw, Download, Share2, Loader2 
+  UserCheck, RefreshCw, Download, Share2, Loader2, CheckCircle 
 } from 'lucide-vue-next';
-import { authService } from "@/services/authService";
+import { biometricService } from "@/services/biometricService";
+import WebEnrollmentModal from "@/pages/faceEmbedding/webUploadFaceEmbedding/WebEnrollmentModal.vue";
 
 const embeddings = ref([]);
 const loading = ref(true);
 const searchQuery = ref("");
+const showEnrollModal = ref(false);
 
 const fetchFaceData = async () => {
   loading.value = true;
   try {
-    const tenantId = authService.getTenantId();
-    const token = authService.getToken();
+    const rawProfiles = await biometricService.getTenantFaceProfiles();
     
-    const params = new URLSearchParams({
-      fields: [
-        "id", "assignedTo.id", "assignedTo.employeeId", 
-        "assignedTo.assignedUser.first_name", "assignedTo.assignedUser.last_name",
-        "base64Data", "date_created"
-      ].join(","),
-      "filter[tenant][tenantId][_eq]": tenantId,
-      limit: "-1",
-      sort: "-date_created"
-    });
+    embeddings.value = rawProfiles.map(item => {
+      const assignedUser = item.assignedTo?.assignedUser || {};
+      const firstName = assignedUser.first_name || item.assignedTo?.personName || "Unknown";
+      const lastName = assignedUser.last_name || "";
+      const employeeId = item.assignedTo?.employeeId || item.assignedTo?.id || "N/A";
+      
+      const photoId = item.referencePhoto?.id || item.referencePhoto || item.photo?.id || item.photo;
+      const photoUrl = item.rawImage || (photoId ? biometricService.getFacePhotoUrl(photoId) : null);
 
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/items/aiFaceId?${params.toString()}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      embeddings.value = data.data.map(item => ({
+      return {
         id: item.id,
         employee: { 
-          firstName: item.assignedTo?.assignedUser?.first_name || "Unknown", 
-          lastName: item.assignedTo?.assignedUser?.last_name || "", 
-          employeeId: item.assignedTo?.employeeId || "N/A" 
+          firstName,
+          lastName,
+          employeeId
         },
-        captureMethod: "AI", // Defaulting as specific method field might vary
-        qualityScore: 0.95, // Mocked as API might not return this directly
-        createdAt: item.date_created
-      })) || [];
-    }
+        captureMethod: item.deviceEnrolled || (item.rawImage ? 'Web Portal' : 'Mobile Patrol Device'),
+        qualityScore: item.qualityScore || 0.98,
+        createdAt: item.date_created || item.date_updated || new Date().toISOString(),
+        photoUrl,
+        hasRawImage: !!item.rawImage
+      };
+    });
   } catch (error) {
-    console.error("Error fetching face data:", error);
+    console.error("Error fetching face profiles:", error);
   } finally {
     loading.value = false;
   }
 };
 
 const filteredEmbeddings = computed(() => {
-    return embeddings.value.filter(emb => 
-        emb.employee.firstName.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        emb.employee.lastName.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        emb.employee.employeeId.toLowerCase().includes(searchQuery.value.toLowerCase())
-    );
+  return embeddings.value.filter(emb => 
+    emb.employee.firstName.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+    emb.employee.lastName.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+    String(emb.employee.employeeId).toLowerCase().includes(searchQuery.value.toLowerCase())
+  );
 });
 
+const handleEnrolled = () => {
+  fetchFaceData();
+};
+
 const handleDelete = async (emb) => {
-    if(confirm(`Are you sure you want to delete the face template for ${emb.employee.firstName}?`)) {
-        try {
-          const token = authService.getToken();
-          await fetch(`${import.meta.env.VITE_API_URL}/items/aiFaceId/${emb.id}`, {
-            method: 'DELETE',
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          fetchFaceData();
-        } catch (error) {
-          console.error("Error deleting face template:", error);
-        }
+  if (confirm(`Are you sure you want to delete the face template for ${emb.employee.firstName}?`)) {
+    try {
+      await biometricService.deleteFaceProfile(emb.id);
+      fetchFaceData();
+    } catch (error) {
+      console.error("Error deleting face template:", error);
     }
-}
+  }
+};
 
 onMounted(() => {
   fetchFaceData();

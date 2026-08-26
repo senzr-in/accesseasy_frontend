@@ -2094,27 +2094,16 @@ const loadDashboardData = async () => {
     // 2. Fetch Guards from /users
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/users?filter[_and][0][tenant][tenantId][_eq]=${tenantId}&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=status&fields[]=accesseasyRole.*&fields[]=tenant.userApp`,
+        `${import.meta.env.VITE_API_URL}/users?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=status&fields[]=title&fields[]=role.name&fields[]=avatar&limit=500`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (res.ok) {
         const udata = await res.json();
         const usersList = (udata.data || []).filter(u => {
-          if (!u.tenant) return false;
-          let apps = u.tenant.userApp;
-          if (typeof apps === 'string') {
-            try { apps = JSON.parse(apps); } catch (e) { apps = []; }
-          }
-          return Array.isArray(apps) && apps.some(a => a.userApp === 'accesseasy' || a.userApp === 'accesseasy_patrol');
+          const roleName = (u.role?.name || '').toLowerCase();
+          return !roleName.includes('admin') && !roleName.includes('administrator');
         });
-
-        // Filter for security guard roles (or all assigned force if roles are generic)
-        const guardRoles = usersList.filter(u => {
-          const roleName = u.accesseasyRole?.roleName?.toLowerCase() || '';
-          return roleName.includes('guard') || roleName.includes('security') || roleName.includes('patrol') || !roleName.includes('admin');
-        });
-
-        allGuards.value = guardRoles.length > 0 ? guardRoles : usersList;
+        allGuards.value = usersList;
       }
     } catch (e) {
       console.warn("Could not fetch guards for metrics:", e);

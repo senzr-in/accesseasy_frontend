@@ -568,7 +568,7 @@ const handleItemsPerPageChange = (newItemsPerPage) => {
 };
 
 const getStatusCount = (status) => {
-  if (!hasActiveFilters.value && selectedStatus.value === "all") {
+  if (!hasActiveFilters.value && activeTab.value === "all") {
     return 0;
   }
 };
@@ -681,9 +681,9 @@ const deleteItem = async (item) => {
         throw new Error("Failed to delete device");
       }
 
-      const index = deviceData.value.findIndex((dev) => dev.id === item.id);
+      const index = items.value.findIndex((dev) => dev.id === item.id);
       if (index !== -1) {
-        deviceData.value.splice(index, 1);
+        items.value.splice(index, 1);
       }
 
       alert("Device deleted successfully");
@@ -726,7 +726,7 @@ const deleteSelected = async () => {
       const allSuccessful = responses.every((response) => response.ok);
 
       if (allSuccessful) {
-        deviceData.value = deviceData.value.filter(
+        items.value = items.value.filter(
           (dev) => !itemsToDelete.includes(dev.id),
         );
 

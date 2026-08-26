@@ -1446,12 +1446,6 @@ export default {
       }
     };
     
-    // Get random status
-    const getRandomStatus = () => {
-      const statuses = ['assigned', 'unassigned', 'maintenance'];
-      return statuses[Math.floor(Math.random() * statuses.length)];
-    };
-    
     // Go back
     const goBack = () => {
       router.back();

@@ -203,7 +203,6 @@ class PaymentService {
     } catch (error) {
       console.warn("[PaymentService] start-trial endpoint warning, fallback direct tenant patch:", error.message);
       // Fallback Directus update if offline/dev mode
-      const token = authService.getToken();
       const today = new Date();
       const endDate = new Date(today.getTime() + days * 24 * 60 * 60 * 1000);
 
@@ -230,8 +229,6 @@ class PaymentService {
           price: 0,
           currency: "INR",
           max_sites: 1,
-          max_checkpoints: 25,
-          max_patrols_per_day: 50,
           currentplan: planData,
           date_created: new Date().toISOString()
         });

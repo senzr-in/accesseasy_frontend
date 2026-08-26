@@ -2257,8 +2257,6 @@ onMounted(async () => {
   await Promise.all([
     fetchEmployeeData(),
     fetchRoles(),
-    fetchAadhaarData(),
-
     fetchReportingTo(),
   ]);
   setDefaultDOB();

@@ -36,14 +36,6 @@
             <span>Export CSV</span>
           </button>
         </FeatureGate>
-
-        <button
-          class="h-9 px-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition-all flex items-center gap-1.5 cursor-pointer"
-          @click="openManualClockInModal"
-        >
-          <UserCheck class="w-3.5 h-3.5" />
-          <span>Manual Check-In</span>
-        </button>
       </div>
     </div>
 
@@ -94,13 +86,13 @@
         <!-- Status Filter -->
         <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
           <button
-            v-for="st in ['all', 'present', 'late', 'absent', 'on_break', 'off_duty']"
+            v-for="st in ['all', 'present', 'on_break', 'off_duty', 'absent']"
             :key="st"
             class="px-2.5 py-1 rounded-md text-[11px] font-bold capitalize transition-all"
             :class="statusFilter === st ? 'bg-white dark:bg-slate-900 text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:hover:text-white'"
             @click="statusFilter = st"
           >
-            {{ st === 'all' ? 'All Guards' : st.replace('_', ' ') }}
+            {{ statusFilterLabel(st) }}
           </button>
         </div>
 
@@ -151,11 +143,11 @@
             <tr>
               <th class="px-5 py-3.5">Security Guard</th>
               <th class="px-4 py-3.5">Site / Estate</th>
-              <th class="px-4 py-3.5">Scheduled Shift</th>
-              <th class="px-4 py-3.5">Check-In Time</th>
-              <th class="px-4 py-3.5">Check-Out Time</th>
+              <th class="px-4 py-3.5">Check-In</th>
+              <th class="px-4 py-3.5">Live State</th>
+              <th class="px-4 py-3.5">Check-Out</th>
+              <th class="px-4 py-3.5">Verification</th>
               <th class="px-4 py-3.5 text-center">Status</th>
-              <th class="px-4 py-3.5 text-right">Actions</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 dark:divide-white/5">
@@ -183,12 +175,7 @@
                 <span v-if="record.zone_name" class="block text-[10px] text-slate-400">{{ record.zone_name }}</span>
               </td>
 
-              <!-- Scheduled Shift -->
-              <td class="px-4 py-3.5 text-slate-600 dark:text-slate-300 font-mono">
-                {{ record.shift_start || '08:00' }} - {{ record.shift_end || '16:00' }}
-              </td>
-
-              <!-- Check-In Time & GPS Accuracy -->
+              <!-- Check-In Time -->
               <td class="px-4 py-3.5">
                 <div v-if="record.check_in_time">
                   <span class="font-mono font-bold text-slate-800 dark:text-slate-200">
@@ -198,7 +185,37 @@
                     GPS ±{{ record.check_in_accuracy_m }}m
                   </span>
                 </div>
-                <span v-else class="text-slate-400 italic">Not Checked In</span>
+                <span v-else class="text-slate-400 italic">—</span>
+              </td>
+
+              <!-- Live State (from mobile app logs) -->
+              <td class="px-4 py-3.5">
+                <!-- On Break -->
+                <div v-if="record.live_status === 'on_break' || record.status === 'on_break'"
+                  class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 text-amber-700 dark:text-amber-400 text-[10px] font-bold"
+                >
+                  <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0"></span>
+                  On Break
+                  <span v-if="record.last_log_time" class="text-amber-500/70 font-normal ml-0.5">· {{ formatTime(record.last_log_time) }}</span>
+                </div>
+                <!-- Checked In -->
+                <div v-else-if="record.live_status === 'checked_in' || (record.check_in_time && !record.check_out_time && !record.live_status)"
+                  class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold"
+                >
+                  <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+                  On Duty
+                  <span v-if="record.check_in_time" class="text-emerald-600/60 font-normal ml-0.5">· {{ formatTime(record.check_in_time) }}</span>
+                </div>
+                <!-- Checked Out -->
+                <div v-else-if="record.live_status === 'checked_out' || record.check_out_time"
+                  class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 text-[10px] font-bold"
+                >
+                  <span class="w-2 h-2 rounded-full bg-slate-400 shrink-0"></span>
+                  Checked Out
+                  <span v-if="record.check_out_time" class="text-slate-400 font-normal ml-0.5">· {{ formatTime(record.check_out_time) }}</span>
+                </div>
+                <!-- No activity yet -->
+                <span v-else class="text-slate-400 text-[10px]">No punch yet</span>
               </td>
 
               <!-- Check-Out Time -->
@@ -206,10 +223,27 @@
                 <span v-if="record.check_out_time" class="font-mono text-slate-800 dark:text-slate-200">
                   {{ formatTime(record.check_out_time) }}
                 </span>
-                <span v-else-if="record.check_in_time" class="text-emerald-600 font-semibold flex items-center gap-1">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> On Shift
-                </span>
                 <span v-else class="text-slate-400">—</span>
+              </td>
+
+              <!-- Verification Method Column -->
+              <td class="px-4 py-3.5">
+                <div v-if="record.verification_mode === 'face_ai'" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30 text-[10px] font-bold shadow-sm">
+                  <ScanFace class="w-3 h-3" />
+                  <span>Face AI {{ record.confidence_score ? `(${record.confidence_score}%)` : '' }}</span>
+                </div>
+                <div v-else-if="record.verification_mode === 'nfc'" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-500/30 text-[10px] font-bold">
+                  <Radio class="w-3 h-3" />
+                  <span>NFC Badge</span>
+                </div>
+                <div v-else-if="record.verification_mode === 'pin'" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-500/30 text-[10px] font-bold">
+                  <KeyRound class="w-3 h-3" />
+                  <span>PIN Auth</span>
+                </div>
+                <div v-else class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-medium">
+                  <UserCheck class="w-3 h-3" />
+                  <span>Manual</span>
+                </div>
               </td>
 
               <!-- Status Badge -->
@@ -222,49 +256,6 @@
                   {{ record.status ? record.status.replace('_', ' ') : 'Present' }}
                   <span v-if="record.late_by_mins" class="ml-0.5">({{ record.late_by_mins }}m)</span>
                 </span>
-              </td>
-
-              <!-- Action Buttons (Clock Out, Break, Replacement) -->
-              <td class="px-4 py-3.5 text-right">
-                <div class="flex items-center justify-end gap-1.5">
-                  <!-- Check-Out action if on duty -->
-                  <button
-                    v-if="record.check_in_time && !record.check_out_time"
-                    class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold transition-colors cursor-pointer"
-                    @click="handleCheckOut(record)"
-                  >
-                    Clock Out
-                  </button>
-
-                  <!-- Pro Break Action -->
-                  <FeatureGate feature="attendance.breaks">
-                    <button
-                      v-if="record.status === 'present'"
-                      class="px-2 py-1 rounded-lg bg-blue-50 text-blue-700 text-[11px] font-bold hover:bg-blue-100 transition-colors cursor-pointer"
-                      @click="handleStartBreak(record)"
-                    >
-                      Start Break
-                    </button>
-                    <button
-                      v-else-if="record.status === 'on_break'"
-                      class="px-2 py-1 rounded-lg bg-emerald-50 text-emerald-700 text-[11px] font-bold hover:bg-emerald-100 transition-colors cursor-pointer"
-                      @click="handleEndBreak(record)"
-                    >
-                      End Break
-                    </button>
-                  </FeatureGate>
-
-                  <!-- Pro Replacement Trigger (for Absent guards) -->
-                  <FeatureGate feature="attendance.replacement">
-                    <button
-                      v-if="record.status === 'absent'"
-                      class="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold transition-colors cursor-pointer"
-                      @click="openReplacementModal(record)"
-                    >
-                      Reassign
-                    </button>
-                  </FeatureGate>
-                </div>
               </td>
             </tr>
           </tbody>
@@ -393,9 +384,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { 
-  Clock, RefreshCw, Download, UserCheck, Search, Loader2, X 
+  Clock, RefreshCw, Download, UserCheck, Search, Loader2, X,
+  ScanFace, Radio, KeyRound
 } from 'lucide-vue-next';
 import { attendanceService } from '@/services/attendanceService';
 import { siteService } from '@/services/siteService';
@@ -429,11 +421,28 @@ const manualForm = ref({
 
 const replacementGuardName = ref('');
 const replacementReason = ref('');
+let pollInterval = null;
+let _pollLocked = false;
+
+// Map live_status → web status so filters work across both
+const normalizeStatus = (r) => {
+  // Prefer live_status from app logs if present
+  const ls = r.live_status;
+  if (ls === 'on_break') return 'on_break';
+  if (ls === 'checked_out') return 'off_duty';
+  if (ls === 'checked_in') return 'present';
+  return r.status || 'absent';
+};
+
+const statusFilterLabel = (st) => {
+  const labels = { all: 'All Guards', present: 'On Duty', on_break: 'On Break', off_duty: 'Off Duty', absent: 'Absent' };
+  return labels[st] || st.replace('_', ' ');
+};
 
 const filteredList = computed(() => {
   let list = attendanceList.value;
   if (statusFilter.value !== 'all') {
-    list = list.filter(r => r.status === statusFilter.value);
+    list = list.filter(r => normalizeStatus(r) === statusFilter.value);
   }
   if (selectedSiteFilter.value) {
     list = list.filter(r => String(r.site?.id || r.site) === String(selectedSiteFilter.value));
@@ -451,8 +460,19 @@ const filteredList = computed(() => {
 
 const formatTime = (isoString) => {
   if (!isoString) return '';
-  const d = new Date(isoString);
-  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  if (typeof isoString === 'string' && /^\d{2}:\d{2}(:\d{2})?$/.test(isoString.trim())) {
+    const parts = isoString.trim().split(':');
+    const d = new Date();
+    d.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), parseInt(parts[2] || 0, 10));
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+  try {
+    const d = new Date(isoString);
+    if (isNaN(d.getTime())) return isoString;
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  } catch (_) {
+    return isoString;
+  }
 };
 
 const getStatusBadgeClass = (status) => {
@@ -481,37 +501,54 @@ const getStatusDotClass = (status) => {
   }
 };
 
-const loadAttendanceData = async () => {
-  loading.value = true;
+const loadAttendanceData = async (silent = false) => {
+  // Prevent concurrent polling calls stacking up
+  if (silent && _pollLocked) return;
+  if (silent) _pollLocked = true;
+  if (!silent) loading.value = true;
   try {
     const [att, st, sites] = await Promise.all([
       attendanceService.getTodayAttendance(),
       attendanceService.getAttendanceStats(),
       siteService.fetchSites()
     ]);
-    attendanceList.value = att;
-    stats.value = st;
-    sitesList.value = sites;
+    attendanceList.value = att || [];
+    stats.value = st || stats.value;
+    if (sites && sites.length > 0) {
+      sitesList.value = sites;
+    }
   } catch (error) {
     console.error("Error loading attendance data:", error);
   } finally {
-    loading.value = false;
+    if (!silent) loading.value = false;
   }
 };
 
 const handleCheckOut = async (record) => {
-  await attendanceService.checkOut(record.id);
-  await loadAttendanceData();
+  try {
+    await attendanceService.checkOut(record.id);
+    await loadAttendanceData(true);
+  } catch (e) {
+    console.error("Failed to check out guard:", e);
+  }
 };
 
 const handleStartBreak = async (record) => {
-  await attendanceService.startBreak(record.id);
-  await loadAttendanceData();
+  try {
+    await attendanceService.startBreak(record.id);
+    await loadAttendanceData(true);
+  } catch (e) {
+    console.error("Failed to start break:", e);
+  }
 };
 
 const handleEndBreak = async (record) => {
-  await attendanceService.endBreak(record.id);
-  await loadAttendanceData();
+  try {
+    await attendanceService.endBreak(record.id);
+    await loadAttendanceData(true);
+  } catch (e) {
+    console.error("Failed to end break:", e);
+  }
 };
 
 const openManualClockInModal = () => {
@@ -524,14 +561,18 @@ const openManualClockInModal = () => {
 };
 
 const submitManualCheckIn = async () => {
-  await attendanceService.checkIn(
-    manualForm.value.guardName,
-    manualForm.value.siteId,
-    null,
-    { accuracy: 10 }
-  );
-  showManualModal.value = false;
-  await loadAttendanceData();
+  try {
+    await attendanceService.checkIn(
+      manualForm.value.guardName,
+      manualForm.value.siteId,
+      null,
+      { accuracy: 10 }
+    );
+    showManualModal.value = false;
+    await loadAttendanceData(true);
+  } catch (e) {
+    console.error("Failed to submit manual check-in:", e);
+  }
 };
 
 const openReplacementModal = (record) => {
@@ -543,15 +584,19 @@ const openReplacementModal = (record) => {
 
 const submitReplacement = async () => {
   if (!selectedAbsentRecord.value) return;
-  await attendanceService.requestGuardReplacement(
-    selectedAbsentRecord.value.guard?.id || selectedAbsentRecord.value.guard_name,
-    selectedAbsentRecord.value.site?.id || selectedAbsentRecord.value.site,
-    replacementGuardName.value,
-    replacementReason.value
-  );
-  showReplacementModal.value = false;
-  alert(`Replacement assigned successfully to ${replacementGuardName.value}`);
-  await loadAttendanceData();
+  try {
+    await attendanceService.requestGuardReplacement(
+      selectedAbsentRecord.value.guard?.id || selectedAbsentRecord.value.guard_name,
+      selectedAbsentRecord.value.site?.id || selectedAbsentRecord.value.site,
+      replacementGuardName.value,
+      replacementReason.value
+    );
+    showReplacementModal.value = false;
+    alert(`Replacement assigned successfully to ${replacementGuardName.value}`);
+    await loadAttendanceData(true);
+  } catch (e) {
+    console.error("Failed to submit replacement:", e);
+  }
 };
 
 const exportCSV = () => {
@@ -577,5 +622,22 @@ const exportCSV = () => {
 
 onMounted(async () => {
   await loadAttendanceData();
+  // Poll every 30s — prevents API flood. 304s are fine (server-side cache hit)
+  pollInterval = setInterval(async () => {
+    if (_pollLocked) return;
+    _pollLocked = true;
+    try {
+      await loadAttendanceData(true);
+    } finally {
+      _pollLocked = false;
+    }
+  }, 30000);
+});
+
+onUnmounted(() => {
+  if (pollInterval) {
+    clearInterval(pollInterval);
+    pollInterval = null;
+  }
 });
 </script>

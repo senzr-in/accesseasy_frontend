@@ -19,6 +19,10 @@
   "dependencies": {
     "@lottiefiles/dotlottie-web": "^0.48.0",
     "@mdi/font": "^7.4.47",
+    "@mediapipe/face_detection": "^0.4.1646425229",
+    "@tensorflow-models/face-detection": "^1.0.3",
+    "@tensorflow/tfjs": "^4.22.0",
+    "@tensorflow/tfjs-tflite": "^0.0.1-alpha.10",
     "@vueuse/core": "^12.0.0",
     "apexcharts": "^5.16.0",
     "axios": "^1.7.9",

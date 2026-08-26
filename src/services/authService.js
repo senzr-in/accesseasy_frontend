@@ -487,7 +487,7 @@ class AuthService {
       localStorage.setItem("userData", JSON.stringify(userData));
       const tid = userData?.tenant?.tenantId || userData?.tenant?.id;
       const uid = userData?.id;
-      const appName = userData?.userApp || "accesseasy";
+      const appName = userData?.userApp || "patrol";
 
       if (tid && uid) {
         this.ensureTenantUserApp(tid, uid, appName).catch(err =>
@@ -758,7 +758,7 @@ class AuthService {
       const response = await this.knApi.post("/auth-service", {
         action: "generate-otp",
         phone: cleanPhone,
-        userApp: "accesseasy",
+        userApp: "patrol",
       });
       console.log("  ✅ OTP sent response:", response.data);
 
@@ -843,20 +843,38 @@ class AuthService {
       if (response?.data?.success && response.data.userData) {
         const userData = response.data.userData;
 
-        // Auto-attach to accesseasy/patrol/accesseasypatrol if they exist but aren't on this app yet
-        const currentAppStr = String(userData.userApp || "").toLowerCase();
-        if (!currentAppStr.includes("accesseasy") && !currentAppStr.includes("patrol") && !currentAppStr.includes("accesseasypatrol")) {
-          console.log("[getUserByPhone] User found but not on accesseasypatrol. Attaching...");
-          const newAppStr = currentAppStr ? `${currentAppStr}, accesseasypatrol` : "accesseasypatrol";
+        // Auto-attach to patrol if they exist but aren't on this app yet
+        let userAppsList = userData.userApp;
+        if (typeof userAppsList === "string") {
+          try {
+            userAppsList = JSON.parse(userAppsList);
+          } catch (_) {
+            userAppsList = userAppsList.split(",").map(s => ({ userApp: s.trim() }));
+          }
+        }
+        if (!Array.isArray(userAppsList)) {
+          userAppsList = userAppsList ? [{ userApp: String(userAppsList) }] : [];
+        }
 
-          this.api.patch(`/users/${userData.id}`, { userApp: newAppStr }).catch(e =>
-            console.warn("[getUserByPhone] User patch failed:", e.message)
-          );
-          userData.userApp = newAppStr;
+        const hasPatrol = userAppsList.some(a => {
+          const name = String(a.userApp || a || "").toLowerCase();
+          return name === "patrol" || name === "accesseasy_patrol";
+        });
+
+        if (!hasPatrol) {
+          console.log("[getUserByPhone] Appending patrol to userApp array...");
+          const updatedApps = [...userAppsList, { userApp: "patrol", date: new Date().toISOString() }];
+
+          if (this.getToken()) {
+            this.protectedApi.patch(`/users/${userData.id}`, { userApp: updatedApps }).catch(e =>
+              console.warn("[getUserByPhone] User patch (non-fatal):", e.message)
+            );
+          }
+          userData.userApp = updatedApps;
 
           const tId = userData.tenant?.tenantId || userData.tenant?.id;
           if (tId) {
-            this.ensureTenantUserApp(tId, userData.id, "accesseasypatrol").catch(e =>
+            this.ensureTenantUserApp(tId, userData.id, "patrol").catch(e =>
               console.warn("[getUserByPhone] Tenant patch failed:", e.message)
             );
           }
@@ -872,7 +890,7 @@ class AuthService {
     }
   }
 
-  async ensureTenantUserApp(tenantId, userId, appName = "accesseasypatrol") {
+  async ensureTenantUserApp(tenantId, userId, appName = "patrol") {
     // Tenant-app associations are managed server-side by /auth-service.
     // Client-side direct reads/patches to /items/tenant with end-user JWTs trigger 401 Unauthorized.
     return;
@@ -914,20 +932,38 @@ class AuthService {
       if (response?.data?.success && response.data.userData) {
         const userData = response.data.userData;
 
-        // Auto-attach to accesseasy/patrol/accesseasypatrol if they exist but aren't on this app yet
-        const currentAppStr = String(userData.userApp || "").toLowerCase();
-        if (!currentAppStr.includes("accesseasy") && !currentAppStr.includes("patrol") && !currentAppStr.includes("accesseasypatrol")) {
-          console.log("[getUserByEmail] User found but not on accesseasypatrol. Attaching...");
-          const newAppStr = currentAppStr ? `${currentAppStr}, accesseasypatrol` : "accesseasypatrol";
+        // Auto-attach to patrol if they exist but aren't on this app yet
+        let userAppsList = userData.userApp;
+        if (typeof userAppsList === "string") {
+          try {
+            userAppsList = JSON.parse(userAppsList);
+          } catch (_) {
+            userAppsList = userAppsList.split(",").map(s => ({ userApp: s.trim() }));
+          }
+        }
+        if (!Array.isArray(userAppsList)) {
+          userAppsList = userAppsList ? [{ userApp: String(userAppsList) }] : [];
+        }
 
-          this.api.patch(`/users/${userData.id}`, { userApp: newAppStr }).catch(e =>
-            console.warn("[getUserByEmail] User patch failed:", e.message)
-          );
-          userData.userApp = newAppStr;
+        const hasPatrol = userAppsList.some(a => {
+          const name = String(a.userApp || a || "").toLowerCase();
+          return name === "patrol" || name === "accesseasy_patrol";
+        });
+
+        if (!hasPatrol) {
+          console.log("[getUserByEmail] Appending patrol to userApp array...");
+          const updatedApps = [...userAppsList, { userApp: "patrol", date: new Date().toISOString() }];
+
+          if (this.getToken()) {
+            this.protectedApi.patch(`/users/${userData.id}`, { userApp: updatedApps }).catch(e =>
+              console.warn("[getUserByEmail] User patch (non-fatal):", e.message)
+            );
+          }
+          userData.userApp = updatedApps;
 
           const tId = userData.tenant?.tenantId || userData.tenant?.id;
           if (tId) {
-            this.ensureTenantUserApp(tId, userData.id, "accesseasypatrol").catch(e =>
+            this.ensureTenantUserApp(tId, userData.id, "patrol").catch(e =>
               console.warn("[getUserByEmail] Tenant patch failed:", e.message)
             );
           }
@@ -953,7 +989,7 @@ class AuthService {
         action: "login-with-session",
         email,
         sessionUuid,
-        userApp: "accesseasy",
+        userApp: "patrol",
       });
 
       if (!response.data || !response.data.token) {
@@ -1030,7 +1066,7 @@ class AuthService {
     }
   }
 
-  async forgotPin({ phone, email, userApp = "accesseasy" }) {
+  async forgotPin({ phone, email, userApp = "patrol" }) {
     try {
       const payload = {
         action: "update-pin",
@@ -1091,6 +1127,7 @@ class AuthService {
     try {
       const response = await this.knApi.post("/auth-service", {
         action: "register",
+        userApp: "patrol",
         ...params,
       });
       return response.data;
@@ -1105,7 +1142,7 @@ class AuthService {
       const response = await this.knApi.post("/auth-service", {
         action: "google-login",
         email,
-        userApp: "accesseasy",
+        userApp: "patrol",
       });
       return response.data;
     } catch (error) {
@@ -1119,7 +1156,7 @@ class AuthService {
       const response = await this.knApi.post("/auth-service", {
         action: "generate-email-otp",
         email,
-        userApp: "accesseasy",
+        userApp: "patrol",
       });
       return response.data;
     } catch (error) {

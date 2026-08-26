@@ -61,7 +61,7 @@
       return {
         isHovering: false,
         imageError: false,
-        token:"bennGJlPG_qUNKhCSE9WFUo6G_RnQAts" || ""
+        token: "bennGJlPG_qUNKhCSE9WFUo6G_RnQAts"
       }
     },
     methods: {

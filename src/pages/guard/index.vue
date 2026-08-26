@@ -92,11 +92,11 @@
           <div class="relative z-10 flex flex-col items-center mt-2 mb-4">
             <div class="w-16 h-16 rounded-full overflow-hidden bg-slate-50 dark:bg-slate-800/50 border-2 border-slate-100 dark:border-slate-700 shadow-sm mb-3 flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold text-xl">
               <img
-                v-if="guard.avatar"
-                :src="getAvatarUrl(guard.avatar)"
+                v-if="guard.facePhoto || guard.avatar"
+                :src="getAvatarUrl(guard.facePhoto || guard.avatar)"
                 :alt="guard.first_name"
                 class="w-full h-full object-cover"
-                @error="guard.avatar = null"
+                @error="(e) => { console.warn('[Avatar] img error for', guard.first_name, e.target?.src?.substring(0,80)); guard.facePhoto = null; guard.avatar = null; }"
               >
               <span v-else>{{ guard.first_name?.charAt(0).toUpperCase() || '?' }}</span>
             </div>
@@ -357,14 +357,33 @@
               accept="image/*"
               @change="onFileChange"
             >
-            <div class="text-center flex flex-col items-center">
-              <p class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-                Guard Photo
-              </p>
+            <div class="text-center flex flex-col items-center mt-1.5">
+              <div class="flex items-center gap-1.5">
+                <p class="text-[10px] font-bold text-slate-700 dark:text-slate-200 uppercase tracking-widest">
+                  Guard Photo & Biometrics
+                </p>
+                <span
+                  v-if="form.avatarPreview || (editingGuard?.avatar && !form.removeAvatar)"
+                  class="inline-flex items-center gap-0.5 px-1.5 py-0.2 rounded-full text-[8px] font-extrabold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
+                >
+                  <CheckCircle2 class="w-2.5 h-2.5" /> Enrolled
+                </span>
+              </div>
               <p class="text-[9px] text-slate-400 mt-0.5">
-                Click to upload or change image
+                Uploaded photo automatically enrolls 192-d face biometrics for mobile Face ID recognition
               </p>
             </div>
+          </div>
+
+          <!-- Employee ID -->
+          <div class="space-y-1.5">
+            <label class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Employee ID</label>
+            <input
+              v-model="form.employee_id"
+              type="text"
+              placeholder="e.g. GRD-001"
+              class="w-full h-9 px-3 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-slate-900 dark:text-slate-100 shadow-sm focus:border-emerald-500 transition-all"
+            >
           </div>
 
           <div class="grid grid-cols-2 gap-4">
@@ -433,25 +452,39 @@
               </select>
             </div>
 
-            <!-- Assigned Security Zone -->
+            <!-- Assigned Site Selector -->
             <div class="space-y-1.5">
-              <label class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Assigned Zone</label>
+              <label class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Assigned Site</label>
               <select
-                v-model="form.assigned_door"
+                v-model="form.site_id"
                 class="w-full h-9 px-3 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-slate-900 dark:text-slate-100 shadow-sm focus:border-emerald-500 transition-all"
               >
-                <option :value="null">
-                  Unassigned
-                </option>
-                <option
-                  v-for="door in doors"
-                  :key="door.id"
-                  :value="door.id"
-                >
-                  {{ door.doorName || 'Unnamed Zone' }}
+                <option :value="null">All Sites / Unassigned</option>
+                <option v-for="s in sites" :key="s.id" :value="s.id">
+                  {{ s.locName || s.name || s.branchName || `Site ${s.id}` }}
                 </option>
               </select>
             </div>
+          </div>
+
+          <!-- Assigned Security Zone -->
+          <div class="space-y-1.5">
+            <label class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Assigned Zone</label>
+            <select
+              v-model="form.assigned_door"
+              class="w-full h-9 px-3 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-slate-900 dark:text-slate-100 shadow-sm focus:border-emerald-500 transition-all"
+            >
+              <option :value="null">
+                Unassigned
+              </option>
+              <option
+                v-for="zone in availableZones"
+                :key="zone.id"
+                :value="zone.id"
+              >
+                {{ zone.zoneName || zone.name || zone.doorName || `Zone ${zone.id}` }}
+              </option>
+            </select>
           </div>
 
           <!-- Share Login Link via Email Option -->
@@ -506,6 +539,25 @@
     </div>
     </Teleport>
 
+    <!-- Image Preview Modal -->
+    <Teleport to="body">
+      <div
+        v-if="previewImage"
+        class="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 backdrop-blur-md p-4"
+        @click="previewImage = null"
+      >
+        <div class="relative max-w-xl max-h-[90vh] bg-transparent flex flex-col items-center">
+          <img :src="previewImage" class="max-w-full max-h-[85vh] rounded-2xl shadow-2xl object-contain border border-white/20">
+          <button
+            class="mt-4 px-4 py-1.5 rounded-full bg-white/20 hover:bg-white/30 text-white text-xs font-bold transition-colors"
+            @click="previewImage = null"
+          >
+            Close Preview
+          </button>
+        </div>
+      </div>
+    </Teleport>
+
     <!-- Message Guard Modal -->
     <GuardMessageModal 
       v-model:show="showMessageModal"
@@ -529,17 +581,17 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-const isMounted = ref(false);
-onMounted(() => {
-  isMounted.value = true;
-});
+import { ref, onMounted, computed } from 'vue';
+
 import { 
   Users, UserPlus, Phone, Mail, FileText, ChevronRight, CheckCircle2, 
-  Clock, AlertTriangle, Search, Filter, MoreVertical, X, Shield, History, MapPin, Edit, ArrowLeft, MessageSquare, Pencil, Trash2, Camera, Loader2, RefreshCw
+  Clock, AlertTriangle, Search, Filter, MoreVertical, X, Shield, History, MapPin, Edit, ArrowLeft, MessageSquare, Pencil, Trash2, Camera, Loader2, RefreshCw, ScanFace
 } from 'lucide-vue-next';
 import { authService } from '@/services/authService';
 import { currentUserTenant } from '@/utils/currentUserTenant';
+import { biometricService } from '@/services/biometricService';
+import { siteService } from '@/services/siteService';
+import { zoneService } from '@/services/zoneService';
 import GuardMessageModal from '@/components/guard/GuardMessageModal.vue';
 import ConfirmDeleteModal from '@/components/common/modals/ConfirmDeleteModal.vue';
 
@@ -554,7 +606,22 @@ const guardToDelete = ref(null);
 const isDeleting = ref(false);
 const editingGuard = ref(null);
 const doors = ref([]);
+const sites = ref([]);
+const zones = ref([]);
 const fileInput = ref(null);
+
+const availableZones = computed(() => {
+  if (zones.value.length > 0) {
+    if (form.value.site_id) {
+      const filtered = zones.value.filter(z => !z.site || z.site == form.value.site_id || z.siteId == form.value.site_id);
+      return filtered.length > 0 ? filtered : zones.value;
+    }
+    return zones.value;
+  }
+  return doors.value;
+});
+
+
 
 const countryCodes = [
   { code: '+91', country: 'IN', flag: '🇮🇳', name: 'India (+91)' },
@@ -579,14 +646,16 @@ const availableRoles = ref([
 ]);
 
 const form = ref({ 
+  employee_id: '',
   first_name: '', 
   last_name: '', 
   email: '', 
   country_code: '+91',
   phone: '',
   role_id: 4940,
-  send_login_link: true,
+  site_id: null,
   assigned_door: null,
+  send_login_link: true,
   avatarFile: null,
   avatarPreview: null,
   removeAvatar: false
@@ -644,6 +713,9 @@ const triggerFileUpload = () => {
 
 const getAvatarUrl = (avatarId) => {
   if (!avatarId) return '';
+  if (typeof avatarId === 'string' && (avatarId.startsWith('data:image/') || avatarId.startsWith('http://') || avatarId.startsWith('https://') || avatarId.startsWith('blob:'))) {
+    return avatarId;
+  }
   const token = authService.getToken();
   return `${apiUrl}/assets/${avatarId}?access_token=${token}&width=100&height=100&fit=cover`;
 };
@@ -651,12 +723,14 @@ const getAvatarUrl = (avatarId) => {
 const openAddDialog = () => {
   editingGuard.value = null;
   form.value = { 
+    employee_id: `GRD-${Date.now().toString().slice(-5)}`,
     first_name: '', 
     last_name: '', 
     email: '', 
     country_code: '+91',
     phone: '',
     role_id: availableRoles.value[0]?.id || guardRoleId.value || null,
+    site_id: sites.value[0]?.id || null,
     send_login_link: true,
     assigned_door: null,
     avatarFile: null,
@@ -682,12 +756,14 @@ const editGuard = async (guard) => {
   }
 
   form.value = {
+    employee_id: guard.employee_id || '',
     first_name: guard.first_name || '',
     last_name: guard.last_name || '',
     email: (guard.email && !guard.email.includes('@accesseasy.app')) ? guard.email : '',
     country_code: matchedCode,
     phone: cleanPhone,
     role_id: guard.accesseasyRole?.id || guard.accesseasyRole || availableRoles.value[0]?.id || guardRoleId.value || null,
+    site_id: null,
     send_login_link: false,
     assigned_door: null,
     avatarFile: null,
@@ -698,7 +774,7 @@ const editGuard = async (guard) => {
   
   try {
     const token = authService.getToken();
-    const pmRes = await fetch(`${apiUrl}/items/personalModule?filter[assignedUser][_eq]=${guard.id}&fields[]=id&fields[]=assigned_door`, {
+    const pmRes = await fetch(`${apiUrl}/items/personalModule?filter[assignedUser][_eq]=${guard.id}&fields[]=id&fields[]=employeeId&fields[]=assigned_door&fields[]=branchLocation`, {
         headers: { Authorization: `Bearer ${token}` }
     });
     if (pmRes.ok) {
@@ -706,6 +782,10 @@ const editGuard = async (guard) => {
         if (pmData.data && pmData.data.length > 0) {
             const pm = pmData.data[0];
             form.value.assigned_door = typeof pm.assigned_door === 'object' && pm.assigned_door !== null ? pm.assigned_door.id || pm.assigned_door : pm.assigned_door;
+            form.value.site_id = typeof pm.branchLocation === 'object' && pm.branchLocation !== null ? pm.branchLocation.id || pm.branchLocation : pm.branchLocation;
+            if (pm.employeeId) {
+              form.value.employee_id = pm.employeeId;
+            }
             editingGuard.value.personalModuleId = pm.id;
         }
     }
@@ -739,16 +819,41 @@ const confirmDelete = async () => {
   }
 };
 
+const fetchSitesAndZones = async () => {
+  try {
+    const [fetchedSites, fetchedZones] = await Promise.all([
+      siteService.fetchSites().catch(() => []),
+      zoneService.fetchZones().catch(() => [])
+    ]);
+    sites.value = fetchedSites || [];
+    zones.value = fetchedZones || [];
+  } catch (err) {
+    console.error('Failed to fetch sites/zones:', err);
+  }
+  await fetchDoors();
+};
+
 const fetchDoors = async () => {
   try {
     const token = authService.getToken();
     if (!token || !authService.isAuthenticated()) return;
-    const tenantId = await currentUserTenant.getTenantIdAsync();
-    if (!tenantId) return;
-    const res = await fetch(`${apiUrl}/items/doors?filter[tenant][_eq]=${tenantId}&filter[status][_neq]=archived&fields[]=id&fields[]=doorName`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    if (res.ok) {
+    let tenantId = authService.getTenantId();
+    if (!tenantId) {
+      try { tenantId = await currentUserTenant.getTenantIdAsync(); } catch (_) {}
+    }
+    
+    let res = null;
+    if (tenantId) {
+      res = await fetch(`${apiUrl}/items/doors?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&filter[status][_neq]=archived&fields[]=id&fields[]=doorName`, {
+        headers: { Authorization: `Bearer ${token}` }
+      }).catch(() => null);
+    }
+    if (!res || !res.ok) {
+      res = await fetch(`${apiUrl}/items/doors?filter[status][_neq]=archived&fields[]=id&fields[]=doorName&limit=100`, {
+        headers: { Authorization: `Bearer ${token}` }
+      }).catch(() => null);
+    }
+    if (res && res.ok) {
       const data = await res.json();
       doors.value = data.data || [];
     }
@@ -761,21 +866,36 @@ const fetchGuardRoleId = async () => {
   try {
     const token = authService.getToken();
     if (!token || !authService.isAuthenticated()) return null;
-    const tenantId = await currentUserTenant.getTenantIdAsync();
-    if (!tenantId) return null;
-    const res = await fetch(
-      `${apiUrl}/items/roleConfigurator?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][_and][1][accessType][_in]=accessEasy,accesseasy_patrol,patrol&fields[]=id&fields[]=roleName`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    if (res.ok) {
+    let tenantId = authService.getTenantId();
+    if (!tenantId) {
+      try { tenantId = await currentUserTenant.getTenantIdAsync(); } catch (_) {}
+    }
+    
+    let res = null;
+    if (tenantId) {
+      res = await fetch(
+        `${apiUrl}/items/roleConfigurator?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&fields[]=id&fields[]=roleName`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      ).catch(() => null);
+    }
+    if (!res || !res.ok) {
+      res = await fetch(
+        `${apiUrl}/items/roleConfigurator?limit=50&fields[]=id&fields[]=roleName`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      ).catch(() => null);
+    }
+    if (res && res.ok) {
       const data = await res.json();
       if (data.data && data.data.length > 0) {
         availableRoles.value = data.data;
-        guardRoleId.value = data.data[0].id;
-        if (!form.value.role_id) {
-          form.value.role_id = data.data[0].id;
+        const guardRole = data.data.find(r => /guard|security|patrol|officer/i.test(r.roleName));
+        if (guardRole) {
+          guardRoleId.value = guardRole.id;
+          if (!form.value.role_id) {
+            form.value.role_id = guardRole.id;
+          }
+          return guardRole.id;
         }
-        return data.data[0].id;
       }
     }
   } catch (err) {
@@ -789,48 +909,120 @@ const fetchGuards = async () => {
   if (!token || !authService.isAuthenticated()) return;
   loading.value = true;
   try {
-    const tenantId = await currentUserTenant.getTenantIdAsync();
-    if (!tenantId) return;
+    let tenantId = authService.getTenantId();
+    if (!tenantId) {
+      try { tenantId = await currentUserTenant.getTenantIdAsync(); } catch (_) {}
+    }
     
-    let roleId = guardRoleId.value;
-    if (!roleId) {
-      roleId = await fetchGuardRoleId();
+    // Query users for this tenant
+    const queryUrls = [];
+    if (tenantId) {
+      queryUrls.push(`${apiUrl}/users?filter[tenant][_eq]=${tenantId}&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=email&fields[]=phone&fields[]=status&fields[]=title&fields[]=avatar&fields[]=role.name&limit=500`);
     }
+    queryUrls.push(`${apiUrl}/users?fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=email&fields[]=phone&fields[]=status&fields[]=title&fields[]=avatar&fields[]=role.name&limit=500`);
 
-    let filterString = `filter[tenant][_eq]=${tenantId}`;
-    if (roleId) {
-      filterString += `&filter[accesseasyRole][_eq]=${roleId}`;
-    }
-
-    const res = await fetch(
-      `${apiUrl}/users?${filterString}&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=email&fields[]=phone&fields[]=status&fields[]=title&fields[]=avatar&fields[]=accesseasyRole.*&fields[]=tenant.userApp`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    if (res.ok) {
-      const data = await res.json();
-      items.value = (data.data || []).map(u => ({
-        ...u,
-        employee_id: u.title || null
-      }));
-      
-      const guardIds = items.value.map(g => g.id).join(',');
-      if (guardIds) {
-        const pmRes = await fetch(`${apiUrl}/items/personalModule?filter[assignedUser][_in]=${guardIds}&fields[]=assignedUser&fields[]=assigned_door.doorName`, {
-           headers: { Authorization: `Bearer ${token}` }
-        });
-        if (pmRes.ok) {
-           const pmData = await pmRes.json();
-           const zoneMap = {};
-           pmData.data.forEach(pm => {
-              if (pm.assignedUser && pm.assigned_door && pm.assigned_door.doorName) {
-                  zoneMap[pm.assignedUser] = pm.assigned_door.doorName;
-              }
-           });
-           items.value.forEach(g => {
-              if (zoneMap[g.id]) g.assigned_zone_name = zoneMap[g.id];
-           });
+    let rawUsers = [];
+    for (const url of queryUrls) {
+      try {
+        const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.data && Array.isArray(data.data) && data.data.length > 0) {
+            rawUsers = data.data;
+            break;
+          }
         }
+      } catch (_) {}
+    }
+
+    const currentUserId = authService.getUserId?.() || authService.getUserData?.()?.id;
+
+    // Filter for guards & patrol officers, excluding system administrators
+    const guardsOnly = rawUsers.filter(u => {
+      if (currentUserId && String(u.id) === String(currentUserId)) {
+        const myRole = (authService.getUserRole?.() || '').toLowerCase();
+        if (myRole.includes('admin') || myRole.includes('owner')) return false;
       }
+      const roleName = (u.role?.name || u.title || '').toLowerCase();
+      if (roleName.includes('administrator') || roleName.includes('public')) return false;
+      return true;
+    });
+
+    items.value = guardsOnly.map(u => ({
+      id: u.id,
+      first_name: u.first_name || '',
+      last_name: u.last_name || '',
+      email: u.email || '',
+      phone: u.phone || '',
+      status: u.status || 'active',
+      employee_id: u.title || null,
+      avatar: u.avatar || null,
+      assigned_zone_name: null
+    }));
+
+    // Step 2: Enrich with personalModule data (zone, employeeId)
+    const userIds = items.value.map(g => g.id).filter(Boolean).join(',');
+    if (userIds) {
+      try {
+        const pmRes = await fetch(
+          `${apiUrl}/items/personalModule?filter[assignedUser][_in]=${userIds}&fields[]=id&fields[]=assignedUser&fields[]=employeeId&fields[]=assigned_door.doorName`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (pmRes.ok) {
+          const pmData = await pmRes.json();
+          const pmMap = {};
+          (pmData.data || []).forEach(pm => {
+            if (pm.assignedUser) {
+              pmMap[pm.assignedUser] = {
+                zone: pm.assigned_door?.doorName || null,
+                employeeId: pm.employeeId || null,
+                personalModuleId: pm.id || null
+              };
+            }
+          });
+          items.value.forEach(g => {
+            const pm = pmMap[g.id];
+            if (pm) {
+              g.assigned_zone_name = pm.zone;
+              g.employee_id = g.employee_id || pm.employeeId;
+              g.personalModuleId = pm.personalModuleId;
+            }
+          });
+        }
+      } catch (pmErr) {
+        console.warn('Personal module enrichment notice:', pmErr);
+      }
+    }
+
+    // Step 3: Enrich with faceId biometric photos
+    try {
+      const faceProfiles = await biometricService.getTenantFaceProfiles();
+      items.value.forEach(g => {
+        const gId = String(g.id);
+        const gPmId = g.personalModuleId ? String(g.personalModuleId) : null;
+        const matchingProfile = faceProfiles.find(fp => {
+          const atId = fp.assignedTo ? String(fp.assignedTo?.id ?? fp.assignedTo) : null;
+          const atUserId = fp.assignedTo?.assignedUser ? String(fp.assignedTo.assignedUser?.id ?? fp.assignedTo.assignedUser) : null;
+          return (atUserId && atUserId === gId) ||
+                 (atId && gPmId && atId === gPmId) ||
+                 (atId && atId === gId);
+        });
+        if (matchingProfile) {
+          let photoUrl = matchingProfile.rawImage || null;
+          if (!photoUrl && matchingProfile.referencePhoto) {
+            photoUrl = biometricService.getFacePhotoUrl(matchingProfile.referencePhoto?.id || matchingProfile.referencePhoto);
+          }
+          if (photoUrl && !photoUrl.startsWith('data:') && !photoUrl.startsWith('http') && !photoUrl.startsWith('blob:') && photoUrl.length > 100) {
+            photoUrl = `data:image/jpeg;base64,${photoUrl}`;
+          }
+          if (photoUrl) {
+            g.avatar = photoUrl;
+            g.facePhoto = photoUrl;
+          }
+        }
+      });
+    } catch (faceErr) {
+      console.warn('Face profile enrichment notice:', faceErr);
     }
   } catch (err) {
     console.error('Fetch error', err);
@@ -845,34 +1037,46 @@ const saveGuard = async () => {
   if (!cleanDigits || cleanDigits.length < 7) return alert("Valid mobile number is required");
   
   saving.value = true;
+  let targetPmId = null;
   try {
     const token = authService.getToken();
-    const tenantId = await currentUserTenant.getTenantIdAsync();
+    let tenantId = authService.getTenantId();
+    if (!tenantId) {
+      try { tenantId = await currentUserTenant.getTenantIdAsync(); } catch (_) {}
+    }
     
-    const roleRes = await fetch(`${apiUrl}/roles?filter[name][_eq]=Employee`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    const roleData = await roleRes.json();
-    const employeeRoleId = roleData?.data?.[0]?.id;
+    let employeeRoleId = null;
+    try {
+      const roleRes = await fetch(`${apiUrl}/roles?filter[name][_icontains]=Employee`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const roleData = await roleRes.json();
+      employeeRoleId = roleData?.data?.[0]?.id;
+    } catch (_) {}
 
     const fullPhone = `${form.value.country_code || '+91'}${cleanDigits}`;
 
     const payload = {
       first_name: form.value.first_name,
-      last_name: form.value.last_name,
+      last_name: form.value.last_name || '-',
       phone: fullPhone,
+      title: form.value.employee_id?.trim() || undefined,
+      status: 'active',
+      appAccess: true,
     };
     
     if (form.value.email) {
       payload.email = form.value.email;
     }
     
+    payload.userApp = 'accesseasy';
+    payload.appAccess = true;
+    payload.status = 'active';
+
     if (!editingGuard.value) {
-      payload.userApp = 'accesseasy_patrol';
-      payload.accesseasyRole = form.value.role_id || guardRoleId.value || null;
       payload.accesseasyPatrolRole = form.value.role_id || guardRoleId.value || null;
-      payload.tenant = tenantId;
-      payload.role = employeeRoleId;
+      if (tenantId) payload.tenant = tenantId;
+      if (employeeRoleId) payload.role = employeeRoleId;
       if (!payload.email) payload.email = `guard_${Date.now()}@accesseasy.app`;
     }
 
@@ -918,10 +1122,10 @@ const saveGuard = async () => {
       const newUserId = userData.data?.id;
 
       // Personal Module for Guard
+      const guardEmpId = form.value.employee_id?.trim() || `GRD-${Date.now().toString().slice(-5)}`;
       if (!editingGuard.value && newUserId) {
-        const generatedEmpId = `GRD-${Date.now().toString().slice(-5)}`;
         const personalPayload = {
-          employeeId: generatedEmpId,
+          employeeId: guardEmpId,
           firstName: form.value.first_name,
           lastName: form.value.last_name || '-',
           personalPhone: payload.phone,
@@ -929,14 +1133,15 @@ const saveGuard = async () => {
           designation: 'Guard',
           status: 'true',
           accessOn: true,
-          uniqueId: `${tenantId}-${generatedEmpId}`,
+          uniqueId: `${tenantId}-${guardEmpId}`,
           tenant: tenantId,
           assignedUser: newUserId,
-          assigned_door: form.value.assigned_door,
+          branchLocation: form.value.site_id || null,
+          assigned_door: form.value.assigned_door || null,
           mobilePermissions: { enable_incidents: true, enable_patrols: true }
         };
 
-        await fetch(`${apiUrl}/items/personalModule`, {
+        const pmCreateRes = await fetch(`${apiUrl}/items/personalModule`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
@@ -944,8 +1149,13 @@ const saveGuard = async () => {
           },
           body: JSON.stringify(personalPayload),
         });
+        if (pmCreateRes.ok) {
+          const pmData = await pmCreateRes.json();
+          targetPmId = pmData.data?.id;
+        }
       } else if (editingGuard.value && editingGuard.value.personalModuleId) {
-        // Update assigned_door and email
+        targetPmId = editingGuard.value.personalModuleId;
+        // Update assigned_door, branchLocation, email, phone and employeeId
         await fetch(`${apiUrl}/items/personalModule/${editingGuard.value.personalModuleId}`, {
           method: 'PATCH',
           headers: { 
@@ -953,10 +1163,34 @@ const saveGuard = async () => {
             Authorization: `Bearer ${token}`
           },
           body: JSON.stringify({
-             assigned_door: form.value.assigned_door,
-             personalEmail: form.value.email
+             employeeId: form.value.employee_id?.trim() || undefined,
+             branchLocation: form.value.site_id || null,
+             assigned_door: form.value.assigned_door || null,
+             personalEmail: form.value.email || undefined,
+             personalPhone: payload.phone,
+             firstName: form.value.first_name,
+             lastName: form.value.last_name || '-',
           }),
         });
+      }
+
+      // Automatically sync Face ID & Biometrics if avatar picture was updated
+      if (form.value.avatarFile && targetPmId) {
+        try {
+          const { webFaceEmbeddingService } = await import('@/services/webFaceEmbeddingService');
+          const extraction = await webFaceEmbeddingService.processImageFile(form.value.avatarFile);
+          if (extraction && extraction.embedding) {
+            await biometricService.enrollFaceWithPhoto({
+              personalModuleId: targetPmId,
+              file: form.value.avatarFile,
+              base64Image: extraction.base64Image,
+              embeddingVector: extraction.embedding
+            });
+            console.log('[FaceSync] Face biometrics updated successfully for guard');
+          }
+        } catch (faceSyncErr) {
+          console.warn('[FaceSync] Non-blocking face embedding notice:', faceSyncErr);
+        }
       }
 
       showAddDialog.value = false;
@@ -976,7 +1210,8 @@ const saveGuard = async () => {
 onMounted(() => {
   if (authService.isAuthenticated() && authService.getToken()) {
     fetchGuards();
-    fetchDoors();
+    fetchSitesAndZones();
+    fetchGuardRoleId();
   }
 });
 </script>

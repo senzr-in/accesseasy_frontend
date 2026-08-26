@@ -135,7 +135,7 @@
                   {{ cp.status !== 'inactive' ? 'Active' : 'Inactive' }}
                 </span>
               </td>
-              <!-- Actions (with QR) -->
+              <!-- Actions (with QR, Edit, Delete) -->
               <td class="py-3.5 px-4 text-right">
                 <div class="flex items-center justify-end gap-2">
                   <!-- QR Download -->
@@ -145,11 +145,19 @@
                   </div>
                   <!-- Edit Button -->
                   <button
-                    class="w-8 h-8 rounded-full border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shadow-sm cursor-pointer"
+                    class="w-8 h-8 rounded-full border border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shadow-sm cursor-pointer"
                     title="Edit Details"
                     @click.stop="selectCheckpoint(cp)"
                   >
                     <Pencil class="w-3.5 h-3.5" />
+                  </button>
+                  <!-- Delete Button -->
+                  <button
+                    class="w-8 h-8 rounded-full border border-rose-200 dark:border-rose-500/20 flex items-center justify-center text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors shadow-sm cursor-pointer"
+                    title="Delete Checkpoint"
+                    @click.stop="confirmDeleteRow(cp)"
+                  >
+                    <Trash2 class="w-3.5 h-3.5" />
                   </button>
                 </div>
               </td>
@@ -375,6 +383,75 @@
       </div>
     </Teleport>
 
+      <!-- ── Custom Delete Confirmation Modal ── -->
+      <Teleport to="body">
+        <div
+          v-if="checkpointToDelete"
+          class="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200"
+        >
+          <div class="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden p-6 text-center animate-in zoom-in-95 duration-200">
+            <!-- Danger Icon -->
+            <div class="w-14 h-14 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center justify-center mx-auto mb-4 shadow-sm">
+              <Trash2 class="w-7 h-7" />
+            </div>
+
+            <h3 class="text-base font-black text-slate-900 dark:text-white mb-2">
+              Delete Checkpoint?
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-6">
+              Are you sure you want to delete <span class="font-bold text-slate-800 dark:text-slate-200">"{{ checkpointToDelete.name }}"</span>? This will permanently remove it from all master lists.
+            </p>
+
+            <!-- Buttons -->
+            <div class="flex items-center gap-3 justify-center">
+              <button
+                class="flex-1 py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 font-bold text-xs transition-colors cursor-pointer"
+                :disabled="deleting"
+                @click="checkpointToDelete = null"
+              >
+                Cancel
+              </button>
+              <button
+                class="flex-1 py-2.5 px-4 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-700 hover:to-red-700 text-white font-bold text-xs shadow-lg shadow-rose-600/20 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60"
+                :disabled="deleting"
+                @click="executeDeleteCheckpoint"
+              >
+                <Loader2 v-if="deleting" class="w-4 h-4 animate-spin" />
+                <span>{{ deleting ? 'Deleting...' : 'Yes, Delete' }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </Teleport>
+
+      <!-- ── Custom Error / Notice Modal ── -->
+      <Teleport to="body">
+        <div
+          v-if="errorMessage"
+          class="fixed inset-0 z-[160] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200"
+        >
+          <div class="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden p-6 text-center animate-in zoom-in-95 duration-200">
+            <div class="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto mb-4 shadow-sm">
+              <AlertTriangle class="w-7 h-7" />
+            </div>
+
+            <h3 class="text-base font-black text-slate-900 dark:text-white mb-2">
+              Notice
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-6">
+              {{ errorMessage }}
+            </p>
+
+            <button
+              class="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
+              @click="errorMessage = ''"
+            >
+              Got It
+            </button>
+          </div>
+        </div>
+      </Teleport>
+
   </div>
 </template>
 
@@ -383,7 +460,7 @@ import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 import {
   Search, Plus, MapPin, Loader2, X, Trash2, Wifi, Clock,
-  ArrowRight, Download, Check, AlertCircle, Settings, Layers, Building2, Pencil
+  ArrowRight, Download, Check, AlertCircle, Settings, Layers, Building2, Pencil, AlertTriangle
 } from 'lucide-vue-next';
 import QRCode from 'qrcode';
 import { patrolService } from '@/services/patrolService';
@@ -440,6 +517,9 @@ watch(checkpoints, async (newList) => {
 const showAddZoneModal = ref(false);
 const newZoneName = ref('');
 const creatingZone = ref(false);
+const checkpointToDelete = ref(null);
+const deleting = ref(false);
+const errorMessage = ref('');
 
 const qrCanvas = ref(null);
 
@@ -537,10 +617,27 @@ const closeEditor = () => {
 };
 
 const saveCheckpoint = async () => {
-  if (!editingCp.value.name) return;
+  if (!editingCp.value.name || !editingCp.value.name.trim()) return;
+
+  const trimmedName = editingCp.value.name.trim().toLowerCase();
+  const currentId = editingCp.value.id;
+  const currentZone = String(editingCp.value.zone || '');
+
+  // Check for duplicate name within the same zone/tenant
+  const duplicate = checkpoints.value.find(cp => 
+    cp.id !== currentId && 
+    cp.name.trim().toLowerCase() === trimmedName &&
+    String(cp.zone || '') === currentZone
+  );
+
+  if (duplicate) {
+    errorMessage.value = `A checkpoint named "${editingCp.value.name.trim()}" already exists in this zone. Please choose a unique name.`;
+    return;
+  }
+
   saving.value = true;
   try {
-    const payload = { ...editingCp.value };
+    const payload = { ...editingCp.value, name: editingCp.value.name.trim() };
     let cleanInst = payload.instructions || '';
     cleanInst = cleanInst.replace(/__ZONE_ASSIGNMENT__:\d+\s*/g, '');
     if (payload.zone) {
@@ -550,8 +647,11 @@ const saveCheckpoint = async () => {
     }
     delete payload.zone;
 
-    const updatedList = await patrolService.saveMasterCheckpoint(payload);
-    if (updatedList) {
+    await patrolService.saveMasterCheckpoint(payload);
+    
+    // Refresh master checkpoint list
+    const updatedList = await patrolService.getMasterCheckpoints();
+    if (updatedList && Array.isArray(updatedList)) {
       updatedList.forEach(cp => {
         const match = cp.instructions?.match(/__ZONE_ASSIGNMENT__:(\d+)/);
         cp.zone = match ? Number(match[1]) : null;
@@ -559,11 +659,12 @@ const saveCheckpoint = async () => {
           cp.instructions = cp.instructions.replace(/__ZONE_ASSIGNMENT__:\d+\s*/g, '');
         }
       });
+      checkpoints.value = updatedList;
     }
-    checkpoints.value = updatedList || [];
     closeEditor();
   } catch (err) {
     console.error(`Failed to save checkpoint: ${err.message}`);
+    errorMessage.value = err?.message || "Failed to save checkpoint";
   } finally {
     saving.value = false;
   }
@@ -579,19 +680,32 @@ const toggleCheckpointStatus = async (cp) => {
   }
 };
 
-const deleteCheckpoint = async () => {
-  if (!editingCp.value || !editingCp.value.id) return;
-  if (!confirm(`Are you sure you want to delete ${editingCp.value.name}?`)) return;
+const confirmDeleteRow = (cp) => {
+  checkpointToDelete.value = cp;
+};
+
+const deleteCheckpoint = () => {
+  if (editingCp.value) {
+    checkpointToDelete.value = { ...editingCp.value };
+  }
+};
+
+const executeDeleteCheckpoint = async () => {
+  if (!checkpointToDelete.value || !checkpointToDelete.value.id) return;
   
-  saving.value = true;
+  deleting.value = true;
   try {
-    const updatedList = await patrolService.deleteMasterCheckpoint(editingCp.value.id);
+    const updatedList = await patrolService.deleteMasterCheckpoint(checkpointToDelete.value.id);
     checkpoints.value = updatedList || [];
-    closeEditor();
+    if (editingCp.value && editingCp.value.id === checkpointToDelete.value.id) {
+      closeEditor();
+    }
+    checkpointToDelete.value = null;
   } catch (err) {
     console.error(`Failed to delete checkpoint: ${err.message}`);
+    errorMessage.value = err?.message || "Failed to delete checkpoint";
   } finally {
-    saving.value = false;
+    deleting.value = false;
   }
 };
 

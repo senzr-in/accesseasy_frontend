@@ -1679,8 +1679,8 @@ const downloadFile = (
               designation:
                 payrollData.fieldsData[0]?.employee?.assignedUser
                   ?.designation || "",
-              startDate: item.startDate || "",
-              endDate: item.endDate || "",
+              startDate: startDate || "",
+              endDate: endDate || "",
               ctc: payrollData.aggregateData[0]?.sum?.ctc || 0,
 
               employerlwf: payrollData.aggregateData[0]?.sum?.employerlwf || 0,

@@ -15,6 +15,7 @@
 
 import { ref, reactive, computed } from "vue";
 import { subscriptionService } from "@/services/subscriptionService";
+import { authService } from "@/services/authService";
 
 // ─── Singleton state ──────────────────────────────────────────────────────────
 const plan         = ref("normal");

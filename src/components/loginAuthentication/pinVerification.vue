@@ -537,8 +537,6 @@ const pageHeader = computed(() =>
           ? "Set Up Your PIN"
           : "Create Your PIN",
 );
-const contactType = computed(() => (userEmail.value ? "Email" : "Phone"));
-const userContact = computed(() => userEmail.value || userPhone.value);
 const displayContact = computed(() =>
   userEmail.value ? userEmail.value : displayPhone.value,
 );
@@ -757,16 +755,6 @@ function setErrorMessage(msg) {
 }
 function goToAlternateLogin() {
   router.push("/alternate-login");
-}
-function quickBypassDev() {
-  authService.setPinVerified(true);
-  localStorage.setItem("pinVerifiedInSession", "true");
-  router.push("/dashboard");
-}
-function resetPinOnlyMode() {
-  maxAttemptsReached.value = false;
-  attempts.value = 0;
-  pinDigits.value = Array(4).fill("");
 }
 
 /* ------------------------------------------------------------------ */

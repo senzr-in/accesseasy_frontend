@@ -10,6 +10,62 @@
         <!-- 7-Day Free Trial Notification Banner -->
         <TrialBanner />
 
+        <!-- Real-Time Emergency SOS Panic Alert Banner -->
+        <transition
+          enter-active-class="transition-all ease-out duration-300"
+          enter-from-class="transform -translate-y-4 opacity-0"
+          enter-to-class="transform translate-y-0 opacity-100"
+          leave-active-class="transition-all ease-in duration-200"
+          leave-from-class="transform translate-y-0 opacity-100"
+          leave-to-class="transform -translate-y-4 opacity-0"
+        >
+          <div
+            v-if="topSosAlert"
+            class="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white px-4 py-2.5 shadow-lg shadow-red-500/20 border-b border-red-500 flex flex-wrap items-center justify-between gap-3 shrink-0 z-30 animate-pulse"
+          >
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center shrink-0">
+                <AlertTriangle class="w-5 h-5 text-white animate-bounce" />
+              </div>
+              <div class="flex flex-col min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="text-xs font-black uppercase tracking-wider bg-black/20 px-2 py-0.5 rounded">
+                    EMERGENCY SOS PANIC
+                  </span>
+                  <span class="text-xs font-bold truncate">
+                    {{ topSosAlert.title || 'Guard SOS Distress Signal' }}
+                  </span>
+                </div>
+                <p class="text-[11px] text-red-100 truncate">
+                  Officer: <strong>{{ topSosAlert.reported_by || topSosAlert.guard_name || 'Guard' }}</strong> · Location: <strong>{{ topSosAlert.location || topSosAlert.site || topSosAlert.zone_name || 'Patrol Site' }}</strong> · {{ getFormattedAlertTime(topSosAlert.date_created) }}
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+              <button
+                @click="openAlertDetails(topSosAlert)"
+                class="px-3 py-1 bg-white text-red-700 hover:bg-red-50 rounded-lg text-xs font-black uppercase tracking-wider shadow-sm transition-all cursor-pointer"
+              >
+                View Details
+              </button>
+              <button
+                @click="navigateTo('/dashboard/settings/escalation')"
+                class="px-3 py-1 bg-red-950/40 hover:bg-red-950/60 text-white border border-white/20 rounded-lg text-xs font-bold transition-all cursor-pointer"
+              >
+                Escalation Matrix
+              </button>
+              <button
+                @click="resolveAlert(topSosAlert.id)"
+                class="p-1 hover:bg-white/20 rounded-lg text-white transition-colors cursor-pointer"
+                title="Dismiss Alert"
+              >
+                <X class="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </transition>
+
         <!-- Onboarding Banner -->
         <OnboardingBanner />
 
@@ -32,13 +88,13 @@
           <!-- Header (Red for SOS, Amber for Missed) -->
           <div
             class="px-6 py-5 flex items-center gap-3 border-b"
-            :class="selectedAlertForDetail.type?.toLowerCase() === 'sos' ? 'bg-red-505/10 bg-red-500/10 border-red-500/20 text-red-700 dark:text-red-400' : 'bg-amber-500/10 border-amber-500/20 text-amber-700 dark:text-amber-400'"
+            :class="(selectedAlertForDetail.type?.toLowerCase() === 'sos' || selectedAlertForDetail.severity?.toLowerCase() === 'critical' || selectedAlertForDetail.title?.toLowerCase().includes('sos')) ? 'bg-red-500/10 border-red-500/20 text-red-700 dark:text-red-400' : 'bg-amber-500/10 border-amber-500/20 text-amber-700 dark:text-amber-400'"
           >
-            <AlertTriangle v-if="selectedAlertForDetail.type?.toLowerCase() === 'sos'" class="w-6 h-6 animate-pulse" />
+            <AlertTriangle v-if="(selectedAlertForDetail.type?.toLowerCase() === 'sos' || selectedAlertForDetail.severity?.toLowerCase() === 'critical' || selectedAlertForDetail.title?.toLowerCase().includes('sos'))" class="w-6 h-6 animate-pulse" />
             <Clock v-else class="w-6 h-6" />
             <div>
               <h3 class="text-sm font-black uppercase tracking-wider leading-none">
-                {{ selectedAlertForDetail.type?.toLowerCase() === 'sos' ? 'SOS Emergency Alert' : 'Missed Patrol Alert' }}
+                {{ (selectedAlertForDetail.type?.toLowerCase() === 'sos' || selectedAlertForDetail.severity?.toLowerCase() === 'critical' || selectedAlertForDetail.title?.toLowerCase().includes('sos')) ? 'SOS Emergency Alert' : 'Missed Patrol Alert' }}
               </h3>
               <p class="text-[9px] text-slate-400 dark:text-slate-500 font-mono font-bold mt-1.5 uppercase tracking-wider">
                 ID: {{ selectedAlertForDetail.id }}
@@ -50,12 +106,12 @@
           <div class="p-6 space-y-4">
             <div class="space-y-3 text-xs">
               <div class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-white/5">
-                <span class="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[9px]">Guard Name</span>
-                <span class="font-bold text-slate-800 dark:text-slate-200">{{ selectedAlertForDetail.guard_name || 'Unassigned' }}</span>
+                <span class="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[9px]">Guard / Officer</span>
+                <span class="font-bold text-slate-800 dark:text-slate-200">{{ selectedAlertForDetail.reported_by || selectedAlertForDetail.guard_name || 'Unassigned' }}</span>
               </div>
               <div class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-white/5">
-                <span class="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[9px]">Security Zone</span>
-                <span class="font-bold text-slate-800 dark:text-slate-200">{{ selectedAlertForDetail.zone_name || 'Unknown Zone' }}</span>
+                <span class="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[9px]">Location / Zone</span>
+                <span class="font-bold text-slate-800 dark:text-slate-200">{{ selectedAlertForDetail.location || selectedAlertForDetail.site || selectedAlertForDetail.zone_name || 'Unknown Location' }}</span>
               </div>
               <div class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-white/5">
                 <span class="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[9px]">Occurred Time</span>
@@ -64,7 +120,7 @@
               <div class="flex justify-between items-center py-2 border-b border-slate-100 dark:border-white/5">
                 <span class="text-slate-400 dark:text-slate-500 font-bold uppercase tracking-wider text-[9px]">Current Status</span>
                 <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-extrabold uppercase bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400">
-                  Unresolved
+                  {{ selectedAlertForDetail.status || 'Unresolved' }}
                 </span>
               </div>
             </div>
@@ -72,9 +128,9 @@
             <!-- Description -->
             <div class="bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 rounded-xl p-4 text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
               <p class="font-bold text-slate-800 dark:text-slate-200 mb-1">Alert Description:</p>
-              {{ selectedAlertForDetail.type?.toLowerCase() === 'sos'
-                  ? `Guard ${selectedAlertForDetail.guard_name || 'Unknown'} triggered a panic alarm (SOS) from the guard mobile application. Please dispatch support immediately to ${selectedAlertForDetail.zone_name || 'the designated zone'}.`
-                  : `The scheduled patrol round for ${selectedAlertForDetail.zone_name || 'the designated zone'} was missed by the assigned guard. No check-ins were registered.`
+              {{ (selectedAlertForDetail.type?.toLowerCase() === 'sos' || selectedAlertForDetail.severity?.toLowerCase() === 'critical' || selectedAlertForDetail.title?.toLowerCase().includes('sos'))
+                  ? `Guard ${selectedAlertForDetail.reported_by || selectedAlertForDetail.guard_name || 'Unknown'} triggered a panic alarm (SOS) from the guard mobile application. Location: ${selectedAlertForDetail.location || selectedAlertForDetail.site || selectedAlertForDetail.zone_name || 'Patrol Area'}. ${selectedAlertForDetail.description ? 'Notes: ' + selectedAlertForDetail.description : ''}`
+                  : `The scheduled patrol round for ${selectedAlertForDetail.zone_name || selectedAlertForDetail.location || 'the designated zone'} was missed by the assigned guard. No check-ins were registered.`
               }}
             </div>
           </div>
@@ -133,6 +189,22 @@ const activeAlertsList = ref([]);
 const activeAlertsCount = computed(() => activeAlertsList.value.length);
 const hasSeenAlerts = ref(false);
 
+const topSosAlert = computed(() => {
+  return activeAlertsList.value.find(a => {
+    if (!a || a.status === 'resolved' || a.status === 'closed') return false;
+    const sev = (a.severity || '').toLowerCase();
+    const typeStr = (a.type || '').toLowerCase();
+    const titleStr = (a.title || '').toLowerCase();
+    return sev === 'critical' || 
+      typeStr.includes('sos') || 
+      titleStr.includes('sos') || 
+      titleStr.includes('emergency') || 
+      titleStr.includes('threat') || 
+      titleStr.includes('intruder') ||
+      titleStr.includes('duress');
+  }) || null;
+});
+
 const getDismissedAlertIds = () => {
   try {
     const raw = localStorage.getItem('accesseasy_dismissed_alerts');
@@ -157,7 +229,7 @@ const fetchAlerts = async () => {
   try {
     const alerts = await patrolService.getAlerts();
     const dismissedIds = new Set(getDismissedAlertIds());
-    const unresolved = (alerts || []).filter(a => a && a.status !== 'resolved' && !dismissedIds.has(a.id));
+    const unresolved = (alerts || []).filter(a => a && a.status !== 'resolved' && a.status !== 'closed' && !dismissedIds.has(a.id));
     
     // Reset seen state if a new alert arrives
     const currentIds = new Set(activeAlertsList.value.map(a => a.id));
@@ -358,8 +430,23 @@ const autoGenerateEmployeeQr = async () => {
   }
 };
 
+let alertsPollTimer = null;
+let isFetchingAlerts = false;
+
 onMounted(() => {
   window.addEventListener('keydown', handleKeyDown);
+  fetchAlerts();
+  // Poll every 20 seconds for SOS and patrol alerts
+  alertsPollTimer = setInterval(async () => {
+    if (isFetchingAlerts) return;
+    isFetchingAlerts = true;
+    try {
+      await fetchAlerts();
+    } finally {
+      isFetchingAlerts = false;
+    }
+  }, 20000);
+
   const role = authService.getUserRole();
   if (role === 'Admin' && !onboardingService.isCompleted() && !onboardingService.hasStarted()) {
     // router.push('/onboarding');
@@ -371,6 +458,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('keydown', handleKeyDown);
+  if (alertsPollTimer) clearInterval(alertsPollTimer);
 });
 
 const currentPageTitle = computed(() => {
