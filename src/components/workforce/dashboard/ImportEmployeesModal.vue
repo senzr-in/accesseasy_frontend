@@ -9,8 +9,12 @@
         <!-- Header -->
         <div class="px-6 py-4 border-b border-[#E8E8E8] flex items-center justify-between">
           <div>
-            <h3 class="text-sm font-bold text-[#171717]">Import Employees</h3>
-            <p class="text-xs text-[#6B6B6B] mt-0.5">Upload CSV file for batch employee provisioning</p>
+            <h3 class="text-sm font-bold text-[#171717]">
+              {{ showDuplicateModal ? 'Duplicate Records Found' : 'Import Employees' }}
+            </h3>
+            <p class="text-xs text-[#6B6B6B] mt-0.5">
+              {{ showDuplicateModal ? 'Choose how to handle existing workforce profiles' : 'Upload CSV file for batch employee provisioning' }}
+            </p>
           </div>
           <button
             class="w-7 h-7 rounded-md border border-[#E8E8E8] flex items-center justify-center text-[#6B6B6B] hover:text-[#171717] hover:bg-[#F7F7F8] transition-colors cursor-pointer"
@@ -20,8 +24,54 @@
           </button>
         </div>
 
-        <!-- Body -->
-        <div class="p-6 space-y-4 text-xs">
+        <!-- In-App Duplicate Resolution View -->
+        <div v-if="showDuplicateModal" class="p-6 space-y-4 text-xs">
+          <div class="p-4 rounded-xl bg-amber-50 border border-amber-200 space-y-2">
+            <div class="flex items-center gap-2 text-amber-800 font-bold text-xs">
+              <AlertTriangle class="w-4 h-4 text-amber-600 shrink-0" />
+              <span>Found {{ duplicateInfo.count }} Duplicate Record(s)</span>
+            </div>
+            <p class="text-[11px] text-amber-700">
+              The following employee IDs / emails already exist in your workforce directory:
+            </p>
+            <div class="flex flex-wrap gap-1.5 pt-1 max-h-28 overflow-y-auto">
+              <span
+                v-for="name in duplicateInfo.sample"
+                :key="name"
+                class="px-2 py-0.5 rounded bg-amber-100 text-amber-900 text-[10px] font-mono border border-amber-200"
+              >
+                {{ name }}
+              </span>
+              <span v-if="duplicateInfo.count > duplicateInfo.sample.length" class="text-[10px] text-amber-700 font-medium self-center">
+                +{{ duplicateInfo.count - duplicateInfo.sample.length }} more
+              </span>
+            </div>
+          </div>
+
+          <p class="text-xs text-[#525252] leading-relaxed">
+            Select an action to proceed with the batch import:
+          </p>
+
+          <div class="pt-3 border-t border-[#E8E8E8] flex items-center justify-end gap-2.5">
+            <button
+              type="button"
+              class="px-4 py-2 rounded-lg border border-[#E8E8E8] font-semibold text-xs text-[#171717] hover:bg-[#F7F7F8] transition-colors cursor-pointer"
+              @click="handleDuplicateChoice('skip')"
+            >
+              Skip Duplicates
+            </button>
+            <button
+              type="button"
+              class="px-4 py-2 rounded-lg bg-[#171717] text-[#FFFFFF] font-semibold text-xs hover:bg-[#2D2D2D] transition-colors cursor-pointer"
+              @click="handleDuplicateChoice('edit')"
+            >
+              Update Existing Records
+            </button>
+          </div>
+        </div>
+
+        <!-- Normal Import Upload View -->
+        <div v-else class="p-6 space-y-4 text-xs">
           <!-- Drop Area -->
           <div
             class="border-2 border-dashed border-[#E8E8E8] hover:border-[#3478F6] rounded-xl p-8 text-center transition-colors cursor-pointer bg-[#F7F7F8]"
@@ -87,7 +137,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import { X, UploadCloud, FileSpreadsheet } from 'lucide-vue-next';
+import { X, UploadCloud, FileSpreadsheet, AlertTriangle } from 'lucide-vue-next';
 import { processCSVImport } from '@/utils/helpers/importHelper';
 import { currentUserTenant } from '@/utils/currentUserTenant';
 
@@ -101,7 +151,16 @@ const selectedFile = ref(null);
 const isImporting = ref(false);
 const importError = ref('');
 
+const showDuplicateModal = ref(false);
+const duplicateInfo = ref({ count: 0, sample: [] });
+let duplicateResolver = null;
+
 const close = () => {
+  if (duplicateResolver) {
+    duplicateResolver('skip');
+    duplicateResolver = null;
+  }
+  showDuplicateModal.value = false;
   emit('update:isOpen', false);
   selectedFile.value = null;
   importError.value = '';
@@ -125,6 +184,14 @@ const downloadTemplate = () => {
   document.body.removeChild(link);
 };
 
+const handleDuplicateChoice = (choice) => {
+  showDuplicateModal.value = false;
+  if (duplicateResolver) {
+    duplicateResolver(choice);
+    duplicateResolver = null;
+  }
+};
+
 const processImport = async () => {
   if (!selectedFile.value) return;
   isImporting.value = true;
@@ -132,7 +199,15 @@ const processImport = async () => {
 
   try {
     const tenantId = await currentUserTenant.getTenantIdAsync();
-    await processCSVImport(selectedFile.value, 'personalModule', tenantId);
+    await processCSVImport(selectedFile.value, 'personalModule', tenantId, {
+      onDuplicateFound: ({ duplicateRecords, count }) => {
+        return new Promise((resolve) => {
+          duplicateInfo.value = { count, sample: duplicateRecords.slice(0, 10) };
+          duplicateResolver = resolve;
+          showDuplicateModal.value = true;
+        });
+      }
+    });
     emit('success');
     close();
   } catch (err) {
