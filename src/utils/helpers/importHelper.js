@@ -306,22 +306,19 @@ export const processCSVImport = async (file, collectionName, userTenant, options
           await sendImportRequest(validRecords, collectionName);
         }
 
-        if (validRecords.length === 0 && updatedCount === 0) {
-          throw new Error("No records were imported or updated.");
-        }
+        const skippedCount = userChoice === 'skip' ? duplicateItems.length : duplicateItems.length - updatedCount;
 
         resolve({
           success: true,
-          message: `Import completed: ${validRecords.length} new record(s) created, ${updatedCount} existing record(s) updated, ${userChoice === 'skip' ? duplicateItems.length : duplicateItems.length - updatedCount} skipped.`,
+          message: `Import completed: ${validRecords.length} new record(s) created, ${updatedCount} existing record(s) updated, ${skippedCount} skipped.`,
           data: {
             newRecords: validRecords,
             updatedCount,
-            skippedCount: userChoice === 'skip' ? duplicateItems.length : duplicateItems.length - updatedCount
+            skippedCount
           }
         });
 
       } catch (error) {
-        alert(error.message);
         reject(error);
       }
     };
