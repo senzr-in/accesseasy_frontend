@@ -73,7 +73,7 @@ const checkBatchDuplicates = async (collectionName, batch, userTenant) => {
         params.append('filter[tenant][_eq]', userTenant);
       }
       params.append('limit', batch.length.toString());
-      params.append('fields', `id,${checkKey}`);
+      params.append('fields', collectionName === 'personalModule' ? `id,${checkKey},assignedUser.id,assignedUser.email` : `id,${checkKey}`);
 
       const response = await fetch(`${API_URL}/items/${collectionName}?${params.toString()}`, {
         headers: getHeaders()
@@ -103,7 +103,7 @@ const checkBatchDuplicates = async (collectionName, batch, userTenant) => {
         const emailParams = new URLSearchParams();
         emailParams.append('filter[assignedUser][email][_in]', emailsToCheck.join(','));
         emailParams.append('limit', batch.length.toString());
-        emailParams.append('fields', 'id,uniqueId,assignedUser.email');
+        emailParams.append('fields', 'id,uniqueId,assignedUser.id,assignedUser.email');
 
         const emailRes = await fetch(`${API_URL}/items/personalModule?${emailParams.toString()}`, {
           headers: getHeaders()
@@ -244,7 +244,20 @@ export const processCSVImport = async (file, collectionName, userTenant, options
         if (userChoice === 'edit' && duplicateItems.length > 0) {
           for (const item of duplicateItems) {
             try {
-              await sendPatchRequest(item.existingRecord.id, item.data, collectionName);
+              const patchPayload = { ...item.data };
+              if (collectionName === 'personalModule' && patchPayload.assignedUser) {
+                const existingUserObj = item.existingRecord?.assignedUser;
+                const existingUserId = typeof existingUserObj === 'object' ? existingUserObj?.id : existingUserObj;
+                if (existingUserId) {
+                  patchPayload.assignedUser = {
+                    id: existingUserId,
+                    ...patchPayload.assignedUser
+                  };
+                } else {
+                  delete patchPayload.assignedUser;
+                }
+              }
+              await sendPatchRequest(item.existingRecord.id, patchPayload, collectionName);
               updatedCount++;
             } catch (err) {
               console.error(`Failed to update duplicate record ${item.name}:`, err);
