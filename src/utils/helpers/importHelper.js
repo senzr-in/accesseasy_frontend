@@ -92,13 +92,14 @@ const checkBatchDuplicates = async (collectionName, batch, userTenant) => {
     }
   }
 
-  // 2. Additional check for personalModule emails to catch duplicate user emails
+  // 2. Additional check for personalModule emails against both personalModule AND directus_users
   if (collectionName === 'personalModule') {
     const emailsToCheck = batch
       .map(d => d.assignedUser?.email || d.personalEmail)
       .filter(val => val !== undefined && val !== null && val !== '');
 
     if (emailsToCheck.length) {
+      // 2a. Check personalModule collection
       try {
         const emailParams = new URLSearchParams();
         emailParams.append('filter[assignedUser][email][_in]', emailsToCheck.join(','));
@@ -117,7 +118,32 @@ const checkBatchDuplicates = async (collectionName, batch, userTenant) => {
           });
         }
       } catch (err) {
-        console.error('Error in batch duplicate check (emails):', err);
+        console.error('Error in batch duplicate check (personalModule emails):', err);
+      }
+
+      // 2b. Check directus_users collection directly to prevent user duplicate email constraint crashes
+      try {
+        const userParams = new URLSearchParams();
+        userParams.append('filter[email][_in]', emailsToCheck.join(','));
+        userParams.append('limit', batch.length.toString());
+        userParams.append('fields', 'id,email');
+
+        const userRes = await fetch(`${API_URL}/users?${userParams.toString()}`, {
+          headers: getHeaders()
+        });
+        if (userRes.ok) {
+          const userData = await userRes.json();
+          (userData.data || []).forEach(u => {
+            if (u.email) {
+              const emailKey = u.email.toString().trim().toLowerCase();
+              if (!resultMap.has(emailKey)) {
+                resultMap.set(emailKey, { id: null, assignedUser: u });
+              }
+            }
+          });
+        }
+      } catch (err) {
+        console.error('Error in batch duplicate check (directus_users emails):', err);
       }
     }
   }
@@ -245,9 +271,11 @@ export const processCSVImport = async (file, collectionName, userTenant, options
           for (const item of duplicateItems) {
             try {
               const patchPayload = { ...item.data };
+              const existingRecordId = item.existingRecord?.id;
+              const existingUserObj = item.existingRecord?.assignedUser;
+              const existingUserId = typeof existingUserObj === 'object' ? existingUserObj?.id : existingUserObj;
+
               if (collectionName === 'personalModule' && patchPayload.assignedUser) {
-                const existingUserObj = item.existingRecord?.assignedUser;
-                const existingUserId = typeof existingUserObj === 'object' ? existingUserObj?.id : existingUserObj;
                 if (existingUserId) {
                   patchPayload.assignedUser = {
                     id: existingUserId,
@@ -257,8 +285,16 @@ export const processCSVImport = async (file, collectionName, userTenant, options
                   delete patchPayload.assignedUser;
                 }
               }
-              await sendPatchRequest(item.existingRecord.id, patchPayload, collectionName);
-              updatedCount++;
+
+              if (existingRecordId) {
+                await sendPatchRequest(existingRecordId, patchPayload, collectionName);
+                updatedCount++;
+              } else if (existingUserId) {
+                // User exists in /users but has no personalModule item yet
+                patchPayload.assignedUser = existingUserId;
+                await sendImportRequest([patchPayload], collectionName);
+                updatedCount++;
+              }
             } catch (err) {
               console.error(`Failed to update duplicate record ${item.name}:`, err);
             }
