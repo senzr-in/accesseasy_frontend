@@ -178,6 +178,11 @@ const checkpoints = ref([]);
 const loading = ref(true);
 
 const fetchCheckpoints = async () => {
+  if (Array.isArray(props.patrol?.checkpoints) && props.patrol.checkpoints.length > 0) {
+    checkpoints.value = props.patrol.checkpoints;
+    loading.value = false;
+    return;
+  }
   loading.value = true;
   try {
     const details = await patrolService.getPatrolDetails(props.patrol.id);

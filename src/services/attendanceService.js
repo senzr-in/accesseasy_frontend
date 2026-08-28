@@ -294,16 +294,20 @@ class AttendanceService {
       return Object.entries(byEmployee).map(([empId, { logs, empObj }]) => {
         // logs are sorted newest first
         const latestLog = logs[0];
-        const action = latestLog?.action?.toLowerCase();
+        const rawAction = (latestLog?.action || '').toLowerCase().trim();
 
         let liveStatus = 'unknown';
-        if (action === 'in') liveStatus = 'checked_in';
-        else if (action === 'out') liveStatus = 'checked_out';
-        else if (action === 'break') liveStatus = 'on_break';
+        if (['in', 'clock_in', 'check_in', 'resume', 'break_end', 'active'].includes(rawAction)) {
+          liveStatus = 'checked_in';
+        } else if (['out', 'clock_out', 'check_out', 'off_duty', 'exit'].includes(rawAction)) {
+          liveStatus = 'checked_out';
+        } else if (['break', 'break_start', 'on_break', 'pause'].includes(rawAction)) {
+          liveStatus = 'on_break';
+        }
 
         // Find check-in time (first 'in' log of the day)
-        const inLog = [...logs].reverse().find(l => l.action?.toLowerCase() === 'in');
-        const outLog = logs.find(l => l.action?.toLowerCase() === 'out');
+        const inLog = [...logs].reverse().find(l => ['in', 'clock_in', 'check_in'].includes((l.action || '').toLowerCase().trim()));
+        const outLog = logs.find(l => ['out', 'clock_out', 'check_out'].includes((l.action || '').toLowerCase().trim()));
 
         const toISO = (log) => {
           if (!log) return null;
@@ -317,18 +321,22 @@ class AttendanceService {
         const lastName = assignedUser?.last_name || '';
         const guardName = `${firstName} ${lastName}`.trim() || `Employee #${empId}`;
 
+        // Site resolution from log or employee
+        const logSite = latestLog?.site_name || latestLog?.location || (typeof latestLog?.site === 'string' ? latestLog.site : null);
+
         return {
           employeeId: empId,
           userId: assignedUser?.id || null,
           assignedUser: assignedUser || null,
           guardName,
           phone: assignedUser?.phone || 'No phone',
-          siteName: null,
+          siteName: logSite || null,
           liveStatus,
-          lastAction: action,
+          lastAction: rawAction,
           lastLogTime: toISO(latestLog),
           checkInTime: toISO(inLog),
           checkOutTime: toISO(outLog),
+          mode: latestLog?.mode || 'app',
           allLogs: logs.map(l => ({ id: l.id, action: l.action, time: toISO(l) }))
         };
       });

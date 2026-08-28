@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-500">
-    
+
     <!-- Top Header & Actions -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 p-5 rounded-2xl shadow-sm">
       <div class="flex items-center gap-3.5">
@@ -8,11 +8,17 @@
           <Clock class="w-5 h-5" />
         </div>
         <div>
-          <h2 class="text-base font-black text-slate-900 dark:text-white tracking-tight">
-            Guard Attendance & Roster
-          </h2>
+          <div class="flex items-center gap-2">
+            <h2 class="text-base font-black text-slate-900 dark:text-white tracking-tight">
+              Guard Attendance & Live Monitoring
+            </h2>
+            <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 border border-emerald-200 dark:border-emerald-500/30 flex items-center gap-1">
+              <Smartphone class="w-3 h-3" />
+              Mobile App Sync Live
+            </span>
+          </div>
           <p class="text-xs text-slate-500 font-medium mt-0.5">
-            Real-time clock-in monitoring, shift compliance, and workforce availability
+            Real-time live status tracking & multi-session punch history recorded via the Mobile Patrol App
           </p>
         </div>
       </div>
@@ -42,47 +48,71 @@
     <!-- Pro: Advanced Operations Center Dashboard Strip -->
     <FeatureGate feature="attendance.advanced">
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        <!-- Total Roster -->
+        <!-- Total Unique Guards -->
         <div class="bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-xl p-3.5 shadow-sm">
           <span class="text-[10px] font-bold text-slate-400 uppercase block">Total Roster</span>
-          <p class="text-xl font-black text-slate-900 dark:text-white mt-1">{{ stats.totalGuards }} <span class="text-[10px] text-slate-400 font-normal">Guards</span></p>
+          <p class="text-xl font-black text-slate-900 dark:text-white mt-1">
+            {{ uniqueGuardsCount }} <span class="text-[10px] text-slate-400 font-normal">Guards</span>
+          </p>
         </div>
 
-        <!-- On Duty -->
+        <!-- Total Active Guards -->
         <div class="bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-xl p-3.5 shadow-sm border-l-4 border-l-emerald-500">
-          <span class="text-[10px] font-bold text-slate-400 uppercase block">On Duty</span>
-          <p class="text-xl font-black text-emerald-600 mt-1">{{ stats.onDuty }} <span class="text-[10px] text-emerald-500 font-bold">Active</span></p>
+          <span class="text-[10px] font-bold text-slate-400 uppercase block">On Duty (Active)</span>
+          <p class="text-xl font-black text-emerald-600 mt-1">
+            {{ activeGuardsCount }} <span class="text-[10px] text-emerald-500 font-bold">Guards</span>
+          </p>
+        </div>
+
+        <!-- On Break -->
+        <div class="bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-xl p-3.5 shadow-sm border-l-4 border-l-amber-500">
+          <span class="text-[10px] font-bold text-slate-400 uppercase block">On Break</span>
+          <p class="text-xl font-black text-amber-600 mt-1">{{ onBreakCount }}</p>
+        </div>
+
+        <!-- Total Sessions Today -->
+        <div class="bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-xl p-3.5 shadow-sm">
+          <span class="text-[10px] font-bold text-slate-400 uppercase block">Total Punches</span>
+          <p class="text-xl font-black text-indigo-600 mt-1">{{ attendanceList.length }} <span class="text-[10px] text-indigo-400 font-normal">Sessions</span></p>
         </div>
 
         <!-- Off Duty -->
         <div class="bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-xl p-3.5 shadow-sm">
           <span class="text-[10px] font-bold text-slate-400 uppercase block">Off Duty</span>
-          <p class="text-xl font-black text-slate-600 dark:text-slate-300 mt-1">{{ stats.offDuty }}</p>
-        </div>
-
-        <!-- Late Arrival -->
-        <div class="bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-xl p-3.5 shadow-sm border-l-4 border-l-amber-500">
-          <span class="text-[10px] font-bold text-slate-400 uppercase block">Late</span>
-          <p class="text-xl font-black text-amber-600 mt-1">{{ stats.late }} <span class="text-[10px] text-amber-500 font-medium">Alerts</span></p>
-        </div>
-
-        <!-- Absent -->
-        <div class="bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-xl p-3.5 shadow-sm border-l-4 border-l-rose-500">
-          <span class="text-[10px] font-bold text-slate-400 uppercase block">Absent</span>
-          <p class="text-xl font-black text-rose-600 mt-1">{{ stats.absent }}</p>
+          <p class="text-xl font-black text-slate-600 dark:text-slate-300 mt-1">{{ offDutyCount }}</p>
         </div>
 
         <!-- Shift Compliance % -->
         <div class="bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-xl p-3.5 shadow-sm">
           <span class="text-[10px] font-bold text-slate-400 uppercase block">Compliance</span>
-          <p class="text-xl font-black text-indigo-600 mt-1">{{ stats.complianceRate }}%</p>
+          <p class="text-xl font-black text-emerald-600 mt-1">{{ stats.complianceRate }}%</p>
         </div>
       </div>
     </FeatureGate>
 
-    <!-- Filters & Search Toolbar -->
+    <!-- Filters, Search & View Mode Switcher -->
     <div class="flex flex-wrap items-center justify-between gap-3 bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 p-3 rounded-xl shadow-sm text-xs">
       <div class="flex items-center gap-2 flex-wrap">
+        <!-- View Mode: Grouped by Person vs Flat Punch Sessions -->
+        <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg border border-slate-200 dark:border-slate-700">
+          <button
+            class="px-3 py-1 rounded-md text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+            :class="viewMode === 'grouped' ? 'bg-white dark:bg-slate-900 text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:hover:text-white'"
+            @click="viewMode = 'grouped'"
+          >
+            <Users class="w-3.5 h-3.5" />
+            <span>Grouped by Guard (Multi-Session)</span>
+          </button>
+          <button
+            class="px-3 py-1 rounded-md text-[11px] font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+            :class="viewMode === 'flat' ? 'bg-white dark:bg-slate-900 text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:hover:text-white'"
+            @click="viewMode = 'flat'"
+          >
+            <ListFilter class="w-3.5 h-3.5" />
+            <span>All Punch Logs ({{ filteredList.length }})</span>
+          </button>
+        </div>
+
         <!-- Status Filter -->
         <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg">
           <button
@@ -96,7 +126,7 @@
           </button>
         </div>
 
-        <!-- Site Filter (Pro / Multi-site) -->
+        <!-- Site Filter -->
         <select
           v-model="selectedSiteFilter"
           class="h-8 px-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-xs font-semibold outline-none"
@@ -120,8 +150,126 @@
       </div>
     </div>
 
-    <!-- Attendance Table -->
-    <div class="bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-2xl shadow-sm overflow-hidden">
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- VIEW A: GROUPED BY EMPLOYEE (MULTI-SESSION VIEW)             -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div v-if="viewMode === 'grouped'" class="space-y-3.5">
+      <div v-if="loading" class="p-16 flex justify-center items-center gap-3 text-slate-400 text-xs bg-white dark:bg-[#151c2c] rounded-2xl border border-slate-200 dark:border-white/10">
+        <Loader2 class="w-5 h-5 animate-spin text-indigo-600" />
+        <span>Loading attendance records from mobile app...</span>
+      </div>
+
+      <div v-else-if="groupedGuards.length === 0" class="p-16 text-center text-slate-500 dark:text-slate-400 bg-white dark:bg-[#151c2c] rounded-2xl border border-slate-200 dark:border-white/10">
+        <Smartphone class="h-10 w-10 mx-auto mb-3 text-slate-300 dark:text-slate-600" />
+        <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-1">No Guard Attendance Records</h3>
+        <p class="text-xs text-slate-500">Attendance punches recorded on the mobile app will automatically appear here.</p>
+      </div>
+
+      <!-- Grouped Guard Cards -->
+      <div
+        v-else
+        v-for="guardGroup in groupedGuards"
+        :key="guardGroup.guardKey"
+        class="bg-white dark:bg-[#151c2c] border border-slate-200/90 dark:border-white/10 rounded-2xl p-5 shadow-sm hover:border-indigo-400/60 dark:hover:border-indigo-500/30 transition-all space-y-4"
+      >
+        <!-- Top Row: Guard Identity & Status Indicator -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3.5 border-b border-slate-100 dark:border-white/5">
+          <div class="flex items-center gap-3.5">
+            <div class="w-11 h-11 rounded-2xl bg-indigo-100 dark:bg-indigo-500/20 border border-indigo-200 dark:border-indigo-500/30 flex items-center justify-center font-black text-sm text-indigo-700 dark:text-indigo-300 shadow-sm shrink-0">
+              {{ (guardGroup.guardName || 'G')[0] }}
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="font-black text-sm text-slate-900 dark:text-white">{{ guardGroup.guardName }}</h3>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                  {{ guardGroup.sessions.length }} {{ guardGroup.sessions.length === 1 ? 'Session' : 'Sessions Today' }}
+                </span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30 flex items-center gap-1">
+                  <Smartphone class="w-2.5 h-2.5" /> Mobile App Logged
+                </span>
+              </div>
+              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-2 font-medium">
+                <span>{{ guardGroup.phone }}</span>
+                <span>&bull;</span>
+                <span class="text-slate-700 dark:text-slate-300 font-semibold">{{ guardGroup.siteName }}</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- Read-Only Status Indicator & Audit History -->
+          <div class="flex items-center gap-2.5">
+            <!-- Current Live Status Badge -->
+            <span
+              class="text-xs font-extrabold uppercase px-3 py-1 rounded-full inline-flex items-center gap-1.5 shadow-sm"
+              :class="getStatusBadgeClass(guardGroup.currentStatus)"
+            >
+              <span class="w-2 h-2 rounded-full" :class="getStatusDotClass(guardGroup.currentStatus)" />
+              {{ guardGroup.currentStatus ? guardGroup.currentStatus.replace('_', ' ') : 'Present' }}
+            </span>
+
+            <!-- Audit History Details Button -->
+            <button
+              class="h-8 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-colors"
+              title="View full punch timeline from mobile"
+              @click="openAuditModal(guardGroup)"
+            >
+              <History class="w-3.5 h-3.5 text-indigo-500" />
+              <span>Punch Timeline</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Middle Row: Sessions Timeline Breakdown -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div
+            v-for="(session, sIdx) in guardGroup.sessions"
+            :key="session.id"
+            class="p-3.5 rounded-xl border transition-all relative overflow-hidden"
+            :class="session.check_out_time 
+              ? 'bg-slate-50/70 dark:bg-slate-900/40 border-slate-200/80 dark:border-white/5' 
+              : 'bg-emerald-50/30 dark:bg-emerald-500/5 border-emerald-200 dark:border-emerald-500/30 ring-1 ring-emerald-500/20'"
+          >
+            <!-- Session Header -->
+            <div class="flex items-center justify-between text-xs mb-2">
+              <span class="font-black text-slate-900 dark:text-white flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full" :class="session.check_out_time ? 'bg-slate-400' : 'bg-emerald-500 animate-pulse'"></span>
+                Session #{{ sIdx + 1 }}
+              </span>
+              <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full" :class="session.check_out_time ? 'bg-slate-200/70 text-slate-600 dark:bg-slate-800 dark:text-slate-400' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300'">
+                {{ session.check_out_time ? 'Checked Out' : (session.status === 'on_break' ? 'On Break' : 'On Duty') }}
+              </span>
+            </div>
+
+            <!-- Timestamps Grid -->
+            <div class="grid grid-cols-2 gap-2 text-[11px] pt-1 border-t border-slate-100 dark:border-white/5">
+              <div>
+                <span class="text-[10px] font-bold text-slate-400 block uppercase">Check-In</span>
+                <span class="font-mono font-bold text-slate-800 dark:text-slate-200">
+                  {{ formatTime(session.check_in_time) || '—' }}
+                </span>
+              </div>
+              <div>
+                <span class="text-[10px] font-bold text-slate-400 block uppercase">Check-Out</span>
+                <span class="font-mono font-bold text-slate-800 dark:text-slate-200">
+                  {{ formatTime(session.check_out_time) || (session.check_in_time ? 'In Progress' : '—') }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Break Info If Present -->
+            <div v-if="session.break_started_at || session.status === 'on_break'" class="mt-2 pt-2 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-[10px] text-amber-600 dark:text-amber-400 font-semibold">
+              <span class="flex items-center gap-1"><Coffee class="w-3 h-3" /> Break Logged</span>
+              <span>{{ session.break_started_at ? formatTime(session.break_started_at) : 'Active Break' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- VIEW B: ALL PUNCH LOGS TABLE (FLAT RAW LOGS)                 -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <div v-else class="bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-2xl shadow-sm overflow-hidden">
       <div v-if="loading" class="p-16 flex justify-center items-center gap-3 text-slate-400 text-xs">
         <Loader2 class="w-5 h-5 animate-spin text-indigo-600" />
         <span>Loading attendance logs...</span>
@@ -129,12 +277,8 @@
 
       <div v-else-if="filteredList.length === 0" class="p-16 text-center text-slate-500 dark:text-slate-400">
         <Clock class="h-10 w-10 mx-auto mb-3 text-slate-300 dark:text-slate-600" />
-        <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-1">
-          No Attendance Records Found
-        </h3>
-        <p class="text-xs text-slate-500">
-          Try clearing filters or click Manual Check-In to record a guard attendance.
-        </p>
+        <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-1">No Attendance Records Found</h3>
+        <p class="text-xs text-slate-500">Attendance punches recorded on the mobile app will appear here.</p>
       </div>
 
       <div v-else class="overflow-x-auto custom-scrollbar">
@@ -143,11 +287,12 @@
             <tr>
               <th class="px-5 py-3.5">Security Guard</th>
               <th class="px-4 py-3.5">Site / Estate</th>
-              <th class="px-4 py-3.5">Check-In</th>
-              <th class="px-4 py-3.5">Live State</th>
-              <th class="px-4 py-3.5">Check-Out</th>
+              <th class="px-4 py-3.5">Check-In Time</th>
+              <th class="px-4 py-3.5">Live Break State</th>
+              <th class="px-4 py-3.5">Check-Out Time</th>
               <th class="px-4 py-3.5">Verification</th>
               <th class="px-4 py-3.5 text-center">Status</th>
+              <th class="px-4 py-3.5 text-right">Source</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 dark:divide-white/5">
@@ -188,34 +333,21 @@
                 <span v-else class="text-slate-400 italic">—</span>
               </td>
 
-              <!-- Live State (from mobile app logs) -->
+              <!-- Live Break State -->
               <td class="px-4 py-3.5">
-                <!-- On Break -->
-                <div v-if="record.live_status === 'on_break' || record.status === 'on_break'"
+                <div v-if="record.status === 'on_break' || record.live_status === 'on_break'"
                   class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 text-amber-700 dark:text-amber-400 text-[10px] font-bold"
                 >
                   <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0"></span>
                   On Break
-                  <span v-if="record.last_log_time" class="text-amber-500/70 font-normal ml-0.5">· {{ formatTime(record.last_log_time) }}</span>
                 </div>
-                <!-- Checked In -->
-                <div v-else-if="record.live_status === 'checked_in' || (record.check_in_time && !record.check_out_time && !record.live_status)"
+                <div v-else-if="record.status === 'present' || record.live_status === 'checked_in'"
                   class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold"
                 >
                   <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
                   On Duty
-                  <span v-if="record.check_in_time" class="text-emerald-600/60 font-normal ml-0.5">· {{ formatTime(record.check_in_time) }}</span>
                 </div>
-                <!-- Checked Out -->
-                <div v-else-if="record.live_status === 'checked_out' || record.check_out_time"
-                  class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 text-[10px] font-bold"
-                >
-                  <span class="w-2 h-2 rounded-full bg-slate-400 shrink-0"></span>
-                  Checked Out
-                  <span v-if="record.check_out_time" class="text-slate-400 font-normal ml-0.5">· {{ formatTime(record.check_out_time) }}</span>
-                </div>
-                <!-- No activity yet -->
-                <span v-else class="text-slate-400 text-[10px]">No punch yet</span>
+                <span v-else class="text-slate-400 text-[10px]">Off Duty</span>
               </td>
 
               <!-- Check-Out Time -->
@@ -236,13 +368,9 @@
                   <Radio class="w-3 h-3" />
                   <span>NFC Badge</span>
                 </div>
-                <div v-else-if="record.verification_mode === 'pin'" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-500/30 text-[10px] font-bold">
-                  <KeyRound class="w-3 h-3" />
-                  <span>PIN Auth</span>
-                </div>
                 <div v-else class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-medium">
                   <UserCheck class="w-3 h-3" />
-                  <span>Manual</span>
+                  <span>Manual / Pin</span>
                 </div>
               </td>
 
@@ -254,7 +382,14 @@
                 >
                   <span class="w-1.5 h-1.5 rounded-full" :class="getStatusDotClass(record.status)" />
                   {{ record.status ? record.status.replace('_', ' ') : 'Present' }}
-                  <span v-if="record.late_by_mins" class="ml-0.5">({{ record.late_by_mins }}m)</span>
+                </span>
+              </td>
+
+              <!-- Mobile Source Badge -->
+              <td class="px-4 py-3.5 text-right">
+                <span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 inline-flex items-center gap-1 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
+                  <Smartphone class="w-3 h-3 text-indigo-500" />
+                  Mobile App
                 </span>
               </td>
             </tr>
@@ -263,139 +398,92 @@
       </div>
     </div>
 
-    <!-- Manual Check-In Modal -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- AUDIT MODAL: DETAILED PUNCH SESSIONS TIMELINE                -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
     <Teleport to="body">
       <div
-        v-if="showManualModal"
+        v-if="showAuditModal && selectedGuardAudit"
         class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto"
-        @click.self="showManualModal = false"
+        @click.self="showAuditModal = false"
       >
-        <div class="w-full max-w-md bg-white dark:bg-[#151c2c] rounded-2xl shadow-2xl p-6 border border-slate-200 dark:border-white/10 animate-in zoom-in-95 duration-150">
-          <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 dark:border-white/5">
-            <h3 class="text-sm font-black text-slate-900 dark:text-white">Manual Guard Check-In</h3>
-            <button class="text-slate-400 hover:text-slate-600 p-1 cursor-pointer" @click="showManualModal = false">
+        <div class="w-full max-w-lg bg-white dark:bg-[#151c2c] rounded-2xl shadow-2xl p-6 border border-slate-200 dark:border-white/10 animate-in zoom-in-95 duration-150 space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/5">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-sm">
+                {{ selectedGuardAudit.guardName[0] }}
+              </div>
+              <div>
+                <h3 class="text-sm font-black text-slate-900 dark:text-white">{{ selectedGuardAudit.guardName }}</h3>
+                <p class="text-xs text-slate-500">Mobile Punch Audit Trail &bull; {{ selectedGuardAudit.sessions.length }} Total Sessions</p>
+              </div>
+            </div>
+            <button class="text-slate-400 hover:text-slate-600 p-1 cursor-pointer" @click="showAuditModal = false">
               <X class="w-4 h-4" />
             </button>
           </div>
 
-          <form @submit.prevent="submitManualCheckIn" class="space-y-3.5 text-xs">
-            <div class="space-y-1">
-              <label class="font-bold text-slate-700 dark:text-slate-300">Select Site *</label>
-              <select v-model="manualForm.siteId" required class="ae-input w-full py-2">
-                <option v-for="site in sitesList" :key="site.id" :value="site.id">{{ site.name }}</option>
-              </select>
-            </div>
-            <div class="space-y-1">
-              <label class="font-bold text-slate-700 dark:text-slate-300">Guard Name / ID *</label>
-              <input
-                v-model="manualForm.guardName"
-                required
-                placeholder="e.g. Kumar S (G-01)"
-                class="ae-input w-full"
-              />
-            </div>
-            <div class="space-y-1">
-              <label class="font-bold text-slate-700 dark:text-slate-300">Assigned Zone / Sector</label>
-              <input
-                v-model="manualForm.zoneName"
-                placeholder="e.g. Main Entrance Gate"
-                class="ae-input w-full"
-              />
-            </div>
+          <!-- Timeline Sessions List -->
+          <div class="space-y-3 max-h-[400px] overflow-y-auto custom-scrollbar p-1">
+            <div
+              v-for="(session, sIdx) in selectedGuardAudit.sessions"
+              :key="session.id"
+              class="p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-900/40 space-y-2.5"
+            >
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-black text-slate-800 dark:text-slate-200">Session #{{ sIdx + 1 }}</span>
+                <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full" :class="session.check_out_time ? 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300'">
+                  {{ session.check_out_time ? 'Checked Out' : 'Active Duty' }}
+                </span>
+              </div>
 
-            <div class="mt-5 pt-3 border-t border-slate-100 dark:border-white/5 flex gap-2 justify-end">
-              <button
-                type="button"
-                class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs hover:bg-slate-200 cursor-pointer"
-                @click="showManualModal = false"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-600/20 cursor-pointer"
-              >
-                Confirm Clock-In
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </Teleport>
+              <div class="grid grid-cols-2 gap-3 text-xs">
+                <div>
+                  <span class="text-[10px] font-bold text-slate-400 block uppercase">Check-In</span>
+                  <span class="font-mono font-bold">{{ formatTime(session.check_in_time) }}</span>
+                </div>
+                <div>
+                  <span class="text-[10px] font-bold text-slate-400 block uppercase">Check-Out</span>
+                  <span class="font-mono font-bold">{{ formatTime(session.check_out_time) || 'In Progress' }}</span>
+                </div>
+              </div>
 
-    <!-- Guard Replacement Modal (Pro) -->
-    <Teleport to="body">
-      <div
-        v-if="showReplacementModal"
-        class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4"
-        @click.self="showReplacementModal = false"
-      >
-        <div class="w-full max-w-md bg-white dark:bg-[#151c2c] rounded-2xl shadow-2xl p-6 border border-slate-200 dark:border-white/10 animate-in zoom-in-95 duration-150">
-          <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 dark:border-white/5">
-            <h3 class="text-sm font-black text-slate-900 dark:text-white">Assign Guard Replacement</h3>
-            <button class="text-slate-400 hover:text-slate-600 p-1 cursor-pointer" @click="showReplacementModal = false">
-              <X class="w-4 h-4" />
+              <div class="text-[11px] text-slate-500 pt-2 border-t border-slate-200 dark:border-slate-800 flex justify-between">
+                <span>Verification: <strong>{{ session.verification_mode || 'Manual' }}</strong></span>
+                <span>Site: <strong>{{ session.site_name || 'Main Site' }}</strong></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-slate-100 dark:border-white/5 flex justify-end">
+            <button class="px-4 py-2 rounded-xl bg-indigo-600 text-white font-bold text-xs cursor-pointer" @click="showAuditModal = false">
+              Close Audit Trail
             </button>
           </div>
-
-          <div class="p-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl mb-4 text-xs text-amber-800 dark:text-amber-300">
-            <strong>Absent Guard:</strong> {{ selectedAbsentRecord?.guard_name }} at {{ selectedAbsentRecord?.site_name }}
-          </div>
-
-          <form @submit.prevent="submitReplacement" class="space-y-3.5 text-xs">
-            <div class="space-y-1">
-              <label class="font-bold text-slate-700 dark:text-slate-300">Select Replacement Guard *</label>
-              <input
-                v-model="replacementGuardName"
-                required
-                placeholder="e.g. Arun D (Available Reserve)"
-                class="ae-input w-full"
-              />
-            </div>
-            <div class="space-y-1">
-              <label class="font-bold text-slate-700 dark:text-slate-300">Reason for Replacement</label>
-              <input
-                v-model="replacementReason"
-                placeholder="e.g. Emergency leave, unreached on phone"
-                class="ae-input w-full"
-              />
-            </div>
-
-            <div class="mt-5 pt-3 border-t border-slate-100 dark:border-white/5 flex gap-2 justify-end">
-              <button
-                type="button"
-                class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs"
-                @click="showReplacementModal = false"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-600/20"
-              >
-                Assign Replacement
-              </button>
-            </div>
-          </form>
         </div>
       </div>
     </Teleport>
+
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, computed } from 'vue';
-import { 
-  Clock, RefreshCw, Download, UserCheck, Search, Loader2, X,
-  ScanFace, Radio, KeyRound
+import { ref, computed, onMounted, onUnmounted } from 'vue';
+import {
+  Clock, RefreshCw, Download, Users, Check, X,
+  Search, ScanFace, Radio, UserCheck, Loader2,
+  Coffee, History, ListFilter, Smartphone
 } from 'lucide-vue-next';
 import { attendanceService } from '@/services/attendanceService';
 import { siteService } from '@/services/siteService';
 import FeatureGate from '@/components/common/FeatureGate.vue';
 
-const loading = ref(true);
+// State
+const loading = ref(false);
 const attendanceList = ref([]);
 const sitesList = ref([]);
+const viewMode = ref('grouped'); // 'grouped' (by person) or 'flat' (all punches)
+
 const stats = ref({
   totalGuards: 0,
   onDuty: 0,
@@ -409,28 +497,18 @@ const statusFilter = ref('all');
 const selectedSiteFilter = ref('');
 const searchQuery = ref('');
 
-const showManualModal = ref(false);
-const showReplacementModal = ref(false);
-const selectedAbsentRecord = ref(null);
+const showAuditModal = ref(false);
+const selectedGuardAudit = ref(null);
 
-const manualForm = ref({
-  siteId: '',
-  guardName: '',
-  zoneName: ''
-});
-
-const replacementGuardName = ref('');
-const replacementReason = ref('');
 let pollInterval = null;
 let _pollLocked = false;
 
-// Map live_status → web status so filters work across both
+// Normalize status
 const normalizeStatus = (r) => {
-  // Prefer live_status from app logs if present
   const ls = r.live_status;
-  if (ls === 'on_break') return 'on_break';
-  if (ls === 'checked_out') return 'off_duty';
-  if (ls === 'checked_in') return 'present';
+  if (ls === 'on_break' || r.status === 'on_break') return 'on_break';
+  if (ls === 'checked_out' || r.status === 'off_duty' || r.check_out_time) return 'off_duty';
+  if (ls === 'checked_in' || r.status === 'present' || r.check_in_time) return 'present';
   return r.status || 'absent';
 };
 
@@ -439,6 +517,7 @@ const statusFilterLabel = (st) => {
   return labels[st] || st.replace('_', ' ');
 };
 
+// Flat list filter
 const filteredList = computed(() => {
   let list = attendanceList.value;
   if (statusFilter.value !== 'all') {
@@ -457,6 +536,65 @@ const filteredList = computed(() => {
   }
   return list;
 });
+
+// ── GROUPED BY EMPLOYEE (MULTI-SESSION MODEL) ─────────────────────────────────
+const groupedGuards = computed(() => {
+  const map = {};
+
+  attendanceList.value.forEach(record => {
+    // Determine unique guard identifier
+    const guardKey = String(record.guard?.assignedUser?.id || record.guard?.id || record.guard_name || record.guard || 'Unknown');
+    if (!map[guardKey]) {
+      map[guardKey] = {
+        guardKey,
+        guardName: record.guard_name || 'Security Guard',
+        phone: record.guard?.phone || record.phone || 'No phone',
+        siteName: record.site_name || 'Main Site',
+        sessions: [],
+        currentStatus: 'off_duty',
+        activeSession: null
+      };
+    }
+
+    map[guardKey].sessions.push(record);
+  });
+
+  // Determine current status & active session for each guard
+  const result = Object.values(map).map(group => {
+    // Sort sessions chronologically (oldest to newest)
+    group.sessions.sort((a, b) => new Date(a.check_in_time || a.date_created) - new Date(b.check_in_time || b.date_created));
+
+    // Find any open session (no check-out time)
+    const openSession = group.sessions.find(s => !s.check_out_time);
+    if (openSession) {
+      group.activeSession = openSession;
+      group.currentStatus = normalizeStatus(openSession);
+    } else {
+      const lastSession = group.sessions[group.sessions.length - 1];
+      group.activeSession = null;
+      group.currentStatus = lastSession ? normalizeStatus(lastSession) : 'off_duty';
+    }
+
+    return group;
+  });
+
+  // Apply filters to grouped result
+  return result.filter(g => {
+    if (statusFilter.value !== 'all' && g.currentStatus !== statusFilter.value) return false;
+    if (selectedSiteFilter.value && !g.sessions.some(s => String(s.site?.id || s.site) === String(selectedSiteFilter.value))) return false;
+    if (searchQuery.value.trim()) {
+      const q = searchQuery.value.toLowerCase();
+      return g.guardName.toLowerCase().includes(q) || g.phone.includes(q) || g.siteName.toLowerCase().includes(q);
+    }
+    return true;
+  });
+});
+
+// Aggregate Counts
+const uniqueGuardsCount = computed(() => Object.keys(groupedGuards.value).length);
+const activeGuardsCount = computed(() => groupedGuards.value.filter(g => g.currentStatus === 'present').length);
+const onBreakCount = computed(() => groupedGuards.value.filter(g => g.currentStatus === 'on_break').length);
+const offDutyCount = computed(() => groupedGuards.value.filter(g => g.currentStatus === 'off_duty').length);
 
 const formatTime = (isoString) => {
   if (!isoString) return '';
@@ -478,16 +616,16 @@ const formatTime = (isoString) => {
 const getStatusBadgeClass = (status) => {
   switch (status) {
     case 'present':
-      return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200';
+      return 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30';
     case 'late':
-      return 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 border border-amber-200';
+      return 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 border border-amber-200 dark:border-amber-500/30';
     case 'absent':
-      return 'bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400 border border-rose-200';
+      return 'bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30';
     case 'on_break':
-      return 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 border border-blue-200';
+      return 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 border border-amber-200 dark:border-amber-500/30';
     case 'off_duty':
     default:
-      return 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-200';
+      return 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-200 dark:border-slate-700';
   }
 };
 
@@ -496,13 +634,13 @@ const getStatusDotClass = (status) => {
     case 'present': return 'bg-emerald-500';
     case 'late': return 'bg-amber-500';
     case 'absent': return 'bg-rose-500';
-    case 'on_break': return 'bg-blue-500';
+    case 'on_break': return 'bg-amber-400 animate-pulse';
     default: return 'bg-slate-400';
   }
 };
 
+// Data Loading
 const loadAttendanceData = async (silent = false) => {
-  // Prevent concurrent polling calls stacking up
   if (silent && _pollLocked) return;
   if (silent) _pollLocked = true;
   if (!silent) loading.value = true;
@@ -524,79 +662,9 @@ const loadAttendanceData = async (silent = false) => {
   }
 };
 
-const handleCheckOut = async (record) => {
-  try {
-    await attendanceService.checkOut(record.id);
-    await loadAttendanceData(true);
-  } catch (e) {
-    console.error("Failed to check out guard:", e);
-  }
-};
-
-const handleStartBreak = async (record) => {
-  try {
-    await attendanceService.startBreak(record.id);
-    await loadAttendanceData(true);
-  } catch (e) {
-    console.error("Failed to start break:", e);
-  }
-};
-
-const handleEndBreak = async (record) => {
-  try {
-    await attendanceService.endBreak(record.id);
-    await loadAttendanceData(true);
-  } catch (e) {
-    console.error("Failed to end break:", e);
-  }
-};
-
-const openManualClockInModal = () => {
-  manualForm.value = {
-    siteId: sitesList.value[0]?.id || 'site-01',
-    guardName: '',
-    zoneName: ''
-  };
-  showManualModal.value = true;
-};
-
-const submitManualCheckIn = async () => {
-  try {
-    await attendanceService.checkIn(
-      manualForm.value.guardName,
-      manualForm.value.siteId,
-      null,
-      { accuracy: 10 }
-    );
-    showManualModal.value = false;
-    await loadAttendanceData(true);
-  } catch (e) {
-    console.error("Failed to submit manual check-in:", e);
-  }
-};
-
-const openReplacementModal = (record) => {
-  selectedAbsentRecord.value = record;
-  replacementGuardName.value = '';
-  replacementReason.value = 'Guard Absent / Unresponsive';
-  showReplacementModal.value = true;
-};
-
-const submitReplacement = async () => {
-  if (!selectedAbsentRecord.value) return;
-  try {
-    await attendanceService.requestGuardReplacement(
-      selectedAbsentRecord.value.guard?.id || selectedAbsentRecord.value.guard_name,
-      selectedAbsentRecord.value.site?.id || selectedAbsentRecord.value.site,
-      replacementGuardName.value,
-      replacementReason.value
-    );
-    showReplacementModal.value = false;
-    alert(`Replacement assigned successfully to ${replacementGuardName.value}`);
-    await loadAttendanceData(true);
-  } catch (e) {
-    console.error("Failed to submit replacement:", e);
-  }
+const openAuditModal = (guardGroup) => {
+  selectedGuardAudit.value = guardGroup;
+  showAuditModal.value = true;
 };
 
 const exportCSV = () => {
@@ -622,7 +690,6 @@ const exportCSV = () => {
 
 onMounted(async () => {
   await loadAttendanceData();
-  // Poll every 30s — prevents API flood. 304s are fine (server-side cache hit)
   pollInterval = setInterval(async () => {
     if (_pollLocked) return;
     _pollLocked = true;
@@ -631,7 +698,7 @@ onMounted(async () => {
     } finally {
       _pollLocked = false;
     }
-  }, 30000);
+  }, 10000); // 10s auto-refresh from mobile app punches
 });
 
 onUnmounted(() => {
@@ -641,3 +708,20 @@ onUnmounted(() => {
   }
 });
 </script>
+
+<style scoped>
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(148, 163, 184, 0.3);
+  border-radius: 99px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(100, 116, 139, 0.5);
+}
+</style>

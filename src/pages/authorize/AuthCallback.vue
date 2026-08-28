@@ -117,6 +117,16 @@ onMounted(async () => {
         statusMessage.value = "Account found! Logging you in...";
       } else {
         statusMessage.value = "Account created! Finalizing login...";
+        if (tenantId) {
+          authService.knApi.post("/initial-settings", {
+            tenantId,
+            tenantName: tenantName || currentUserData?.first_name || "Google User",
+            userApp: "patrol",
+            source: "Google SSO Web"
+          }).catch(err => {
+            console.warn("[AuthCallback] initial-settings notification error (non-fatal):", err.message);
+          });
+        }
       }
 
       if (userEmail) {

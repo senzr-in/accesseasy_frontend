@@ -98,6 +98,15 @@
                 <Download v-else class="w-4 h-4 text-emerald-500" />
                 <span>{{ downloadingQRs ? 'Downloading...' : 'Download Checkpoint QR' }}</span>
               </button>
+
+              <!-- Shift Handovers Audit -->
+              <button
+                class="w-full px-4 py-2.5 text-left text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50 flex items-center gap-2.5 transition-colors cursor-pointer border-0 bg-transparent"
+                @click="openHandoversModal(); showOverflowMenu = false;"
+              >
+                <Users class="w-4 h-4 text-amber-500" />
+                <span>Shift Handovers</span>
+              </button>
             </div>
           </Teleport>
         </div>
@@ -408,6 +417,97 @@
       </div>
     </Teleport>
   </div>
+
+    <!-- Shift Handovers Audit Modal -->
+    <Teleport to="body">
+      <div
+        v-if="showHandoverModal"
+        class="fixed inset-0 z-[160] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4"
+        @click.self="showHandoverModal = false"
+      >
+        <div class="w-full max-w-2xl bg-white dark:bg-[#151c2c] rounded-2xl shadow-2xl p-6 border border-slate-200 dark:border-white/10 animate-in zoom-in-95 duration-150 max-h-[85vh] flex flex-col">
+          <!-- Modal Header -->
+          <div class="flex items-center justify-between pb-4 border-b border-slate-200 dark:border-slate-800 shrink-0">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500">
+                <Users class="w-5 h-5" />
+              </div>
+              <div>
+                <h3 class="text-sm font-black text-slate-900 dark:text-white">
+                  Guard Shift Handovers
+                </h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400">
+                  Mobile guard equipment checklist & shift transfers
+                </p>
+              </div>
+            </div>
+            <button
+              class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
+              @click="showHandoverModal = false"
+            >
+              <X class="w-4 h-4" />
+            </button>
+          </div>
+
+          <!-- Modal Body -->
+          <div class="flex-1 overflow-y-auto py-4 space-y-3 custom-scrollbar">
+            <div v-if="loadingHandovers" class="py-12 flex flex-col items-center justify-center gap-3 text-slate-400">
+              <Loader2 class="w-6 h-6 animate-spin text-indigo-500" />
+              <span class="text-xs font-semibold">Loading shift handovers...</span>
+            </div>
+
+            <div v-else-if="!handoversList.length" class="py-12 flex flex-col items-center justify-center gap-2 text-slate-400 text-center">
+              <Users class="w-8 h-8 text-slate-300 dark:text-slate-600" />
+              <span class="text-xs font-bold text-slate-600 dark:text-slate-300">No Shift Handovers Recorded Yet</span>
+              <span class="text-[11px] text-slate-400 max-w-xs">When guards complete shift transfers on the mobile app, handover records will appear here.</span>
+            </div>
+
+            <div
+              v-else
+              v-for="h in handoversList"
+              :key="h.id"
+              class="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 space-y-2.5"
+            >
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold text-slate-900 dark:text-white">
+                    From: {{ h.from_guard_name || h.from_guard_id || 'Outgoing Guard' }}
+                  </span>
+                  <span class="text-slate-400 text-xs">→</span>
+                  <span class="text-xs font-bold text-indigo-600 dark:text-indigo-400">
+                    To: {{ h.to_guard_name || h.to_guard_id || 'Incoming Guard' }}
+                  </span>
+                </div>
+                <span class="text-[11px] font-medium text-slate-400">
+                  {{ h.timestamp ? new Date(h.timestamp).toLocaleString() : 'Recent' }}
+                </span>
+              </div>
+
+              <!-- Checklist items -->
+              <div v-if="h.checklist" class="text-xs text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 p-2.5 rounded-lg border border-slate-100 dark:border-slate-700">
+                <div class="font-semibold text-[11px] text-slate-400 uppercase tracking-wider mb-1">Checklist & Equipment:</div>
+                <div class="text-xs">{{ typeof h.checklist === 'object' ? JSON.stringify(h.checklist) : h.checklist }}</div>
+              </div>
+
+              <!-- Notes -->
+              <div v-if="h.notes" class="text-xs text-slate-500 dark:text-slate-400 italic">
+                "{{ h.notes }}"
+              </div>
+            </div>
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-end">
+            <button
+              class="px-4 py-2 text-xs font-bold rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer"
+              @click="showHandoverModal = false"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
 </template>
 
 <script setup>
@@ -437,6 +537,68 @@ const route = useRoute();
 const router = useRouter();
 
 const downloadingQRs = ref(false);
+const showHandoverModal = ref(false);
+
+// Device Pairing Modal State
+const showDevicePairingModal = ref(false);
+const pairingSitesList = ref([]);
+const selectedPairingSiteId = ref('');
+const pairingDeviceId = ref('PATROL-TAB-001');
+const deviceQrDataUrl = ref('');
+
+const openDevicePairingModal = async () => {
+  showDevicePairingModal.value = true;
+  try {
+    const sites = await zoneService.getSites();
+    pairingSitesList.value = sites || [];
+    if (pairingSitesList.value.length > 0 && !selectedPairingSiteId.value) {
+      selectedPairingSiteId.value = pairingSitesList.value[0].id;
+    }
+  } catch (err) {
+    console.error('Failed to load sites for pairing:', err);
+  }
+  await generateDeviceQR();
+};
+
+const generateDeviceQR = async () => {
+  try {
+    const tenantId = authService.getTenantId();
+    const site = pairingSitesList.value.find(s => String(s.id) === String(selectedPairingSiteId.value)) || {};
+    const payload = {
+      type: 'device_pairing',
+      version: '1.0',
+      tenant: tenantId || 'default',
+      site_id: String(selectedPairingSiteId.value || 'site-1'),
+      site_name: site.name || site.locName || 'Main Facility',
+      device_id: pairingDeviceId.value || 'PATROL-TAB-001',
+      api_url: import.meta.env.VITE_API_URL || 'https://appv1.fieldseasy.com/directus',
+      mqtt_broker: 'mqtt.fieldseasy.com',
+      timestamp: new Date().toISOString()
+    };
+    deviceQrDataUrl.value = await QRCode.toDataURL(JSON.stringify(payload), {
+      width: 240,
+      margin: 1,
+      color: { dark: '#0F172A', light: '#FFFFFF' }
+    });
+  } catch (e) {
+    console.error('Failed to generate device QR code:', e);
+  }
+};
+const loadingHandovers = ref(false);
+const handoversList = ref([]);
+
+const openHandoversModal = async () => {
+  showHandoverModal.value = true;
+  loadingHandovers.value = true;
+  try {
+    handoversList.value = await patrolService.getGuardHandovers();
+  } catch (e) {
+    console.error('Failed to load shift handovers:', e);
+    handoversList.value = [];
+  } finally {
+    loadingHandovers.value = false;
+  }
+};
 
 const downloadCheckpointQRs = async () => {
   downloadingQRs.value = true;

@@ -1130,6 +1130,20 @@ class AuthService {
         userApp: "patrol",
         ...params,
       });
+
+      // Trigger Knative initial-settings to create tenant resources and send Admin notification & Welcome emails
+      if (response.data?.tenantId) {
+        this.knApi.post("/initial-settings", {
+          tenantId: response.data.tenantId,
+          tenantName: params.companyName || params.fullName,
+          userApp: "patrol",
+          source: params.source || "AccessEasy Web",
+          companyAddress: params.companyAddress || "Not provided"
+        }).catch(err => {
+          console.warn("[AuthService] initial-settings notification error (non-fatal):", err.message);
+        });
+      }
+
       return response.data;
     } catch (error) {
       console.error("Error in register:", error);

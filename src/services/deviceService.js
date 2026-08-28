@@ -2,8 +2,19 @@ import { authService } from "@/services/authService";
 
 class DeviceService {
   constructor() {
-    // Track collections that returned 403 to avoid hammering them on every call
     this._blockedCollections = new Set();
+  }
+
+  getApiUrl() {
+    return import.meta.env.VITE_API_URL || "https://appv1.fieldseasy.com/directus";
+  }
+
+  getHeaders() {
+    const token = authService.getToken();
+    return {
+      "Content-Type": "application/json",
+      ...(token ? { "Authorization": `Bearer ${token}` } : {})
+    };
   }
 
   getDefaultDevices() {
@@ -11,7 +22,7 @@ class DeviceService {
   }
 
   /**
-   * Fetch all registered hardware devices with dynamically derived active guards
+   * Fetch all registered hardware devices for the logged-in tenant using standard fetch
    */
   async fetchDevices(siteId = null) {
     try {
@@ -19,118 +30,110 @@ class DeviceService {
       if (!tenantId) return [];
 
       let list = [];
+      const apiUrl = this.getApiUrl();
+      const headers = this.getHeaders();
 
-      // 1. Fetch from patrol_devices collection
-      if (!this._blockedCollections.has('patrol_devices')) {
-        try {
-          let endpoint = `/items/patrol_devices?filter[tenant][_eq]=${tenantId}&sort=-last_seen`;
-          if (siteId) endpoint += `&filter[site_id][_eq]=${siteId}`;
-          const res = await authService.protectedApi.get(endpoint);
-          if (res.data?.data && res.data.data.length > 0) {
-            list = res.data.data;
+      try {
+        // Standard Directus tenant query using native fetch
+        let url = `${apiUrl}/items/controllers?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&fields=*&sort=-date_updated&limit=100`;
+        if (siteId) {
+          url += `&filter[location][_eq]=${siteId}`;
+        }
+
+        const res = await fetch(url, { headers });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.data && Array.isArray(json.data)) {
+            list = json.data;
           }
-        } catch (e) {
-          if (e?.response?.status === 403) {
-            this._blockedCollections.add('patrol_devices');
+        } else {
+          // Fallback query
+          const resFallback = await fetch(`${apiUrl}/items/controllers?fields=*&limit=100`, { headers });
+          if (resFallback.ok) {
+            const jsonFallback = await resFallback.json();
+            if (jsonFallback.data && Array.isArray(jsonFallback.data)) {
+              list = jsonFallback.data.filter(d => {
+                const t = typeof d.tenant === 'object' ? (d.tenant?.tenantId || d.tenant?.id) : d.tenant;
+                return !t || String(t) === String(tenantId);
+              });
+            }
           }
         }
+      } catch (err) {
+        console.warn("[deviceService] Fetch error, checking local store:", err);
       }
 
-      // 2. Fallback to lowercase controllers if patrol_devices has no records
-      if (list.length === 0) {
-        try {
-          let endpoint = `/items/controllers?filter[tenant][_eq]=${tenantId}`;
-          if (siteId) endpoint += `&filter[branchDetails][_eq]=${siteId}`;
-          const res = await authService.protectedApi.get(endpoint);
-          if (res.data?.data && res.data.data.length > 0) list = res.data.data;
-        } catch (e) {
-          try {
-            let endpoint = `/items/Controllers?filter[tenant][_eq]=${tenantId}&sort=-last_communicated_time`;
-            if (siteId) endpoint += `&filter[branchDetails][_eq]=${siteId}`;
-            const res = await authService.protectedApi.get(endpoint);
-            if (res.data?.data) list = res.data.data;
-          } catch (_) {}
-        }
-      }
-
-      // 3. Merge locally registered devices from local storage
+      // Merge locally stored devices if any
       try {
         const localData = localStorage.getItem(`accesseasy_devices_${tenantId}`);
         if (localData) {
           const localDevices = JSON.parse(localData);
           if (Array.isArray(localDevices)) {
             localDevices.forEach(ld => {
-              const exists = list.some(d => (d.id && d.id === ld.id) || (d.device_id && d.device_id === ld.device_id) || (d.sn && d.sn === ld.device_id));
+              const exists = list.some(d => (d.id && String(d.id) === String(ld.id)) || (d.sn && String(d.sn) === String(ld.device_id || ld.sn)));
               if (!exists) {
-                if (!siteId || String(ld.site_id) === String(siteId)) {
-                  list.unshift(ld);
-                }
+                list.unshift(ld);
               }
             });
           }
         }
       } catch (_) {}
 
-      // 4. Fetch active guard sessions (skip if collection is 403-blocked)
-      let activeSessionsMap = {};
-      if (!this._blockedCollections.has('patrol_guard_sessions')) {
-        try {
-          const sessRes = await authService.protectedApi.get(
-            `/items/patrol_guard_sessions?filter[status][_eq]=active&filter[tenant][_eq]=${tenantId}&fields=id,guard_id,guard_name,device_id,login_time`
-          );
-          if (sessRes.data?.data) {
-            sessRes.data.data.forEach(sess => {
-              if (sess.device_id) activeSessionsMap[sess.device_id] = sess;
-            });
-          }
-        } catch (e) {
-          if (e?.response?.status === 403) {
-            this._blockedCollections.add('patrol_guard_sessions');
-            console.warn('[DeviceService] patrol_guard_sessions: 403 — skipping future requests');
-          }
-        }
-      }
-
       // Normalize fields to device dashboard interface
-      return list.map(d => {
-        const devId = d.device_id || d.sn || d.mac_id || d.macAddress || d.imei || `DEV-${d.id}`;
-        const activeSession = activeSessionsMap[devId] || activeSessionsMap[d.id] || null;
-
-        return {
-          ...d,
-          id: d.id || devId,
-          device_id: devId,
-          device_name: d.device_name || d.controllerName || d.deviceName || `Terminal ${d.id}`,
-          device_model: d.device_model || d.deviceGroup || 'Patrol Tablet / Handheld',
-          imei: d.imei || d.mac_id || devId,
-          status: (d.status || d.controllerStatus || 'online').toLowerCase(),
-          last_heartbeat: d.last_seen || d.last_communicated_time || d.last_heartbeat || d.date_updated || new Date().toISOString(),
-          battery_level: d.battery_level !== undefined ? Number(d.battery_level) : 100,
-          battery_charging: Boolean(d.battery_charging),
-          site_id: d.site_id || d.branchDetails?.id || d.branchDetails || '',
-          site_name: d.site_name || d.branchDetails?.branchName || d.branchDetails?.locName || 'Main Site',
-          zone_id: d.zone_id || '',
-          zone_name: d.zone_name || '',
-          app_version: d.app_version || 'v1.0.0',
-          os_version: d.os_version || 'Android',
-          pairing_code: d.pairing_code || this.generatePairingCode(devId),
-          pairing_token: d.pairing_token || d.id || devId,
-          active_guard: activeSession ? {
-            guard_id: activeSession.guard_id,
-            guard_name: activeSession.guard_name || 'Guard Officer',
-            login_time: activeSession.login_time,
-          } : null,
-        };
-      });
+      return list.map(d => this.normalizeDevice(d));
     } catch (error) {
-      console.error("Error fetching devices:", error);
+      console.error('Error fetching devices for tenant:', error);
       return [];
     }
   }
 
   /**
-   * Helper to generate a 6-character pairing code e.g. ABC-9421
+   * Fetch single device details by ID
    */
+  async getDeviceById(deviceId) {
+    try {
+      const res = await fetch(`${this.getApiUrl()}/items/controllers/${deviceId}?fields=*`, {
+        headers: this.getHeaders()
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.data) return this.normalizeDevice(json.data);
+      }
+      return null;
+    } catch (err) {
+      console.error('Error fetching device by ID:', err);
+      return null;
+    }
+  }
+
+  normalizeDevice(d) {
+    const devId = d.sn || d.device_id || d.mac_id || d.macAddress || d.mac || d.imei || `DEV-${d.id}`;
+    const siteIdVal = d.site_id || d.location?.id || (typeof d.location === 'string' || typeof d.location === 'number' ? d.location : '') || d.branchDetails?.id || (typeof d.branchDetails === 'string' ? d.branchDetails : '') || '';
+    const siteNameVal = d.site_name || d.location?.locName || d.location?.locationName || d.location?.name || d.branchDetails?.branchName || d.branchDetails?.locName || d.timerMode || 'Main Facility';
+
+    return {
+      ...d,
+      id: d.id || devId,
+      device_id: devId,
+      device_name: d.controllerName || d.device_name || d.deviceName || `Terminal ${devId}`,
+      device_model: d.serverIp || d.device_model || d.deviceGroup || 'Patrol Tablet / Handheld',
+      imei: d.imei || d.mac_id || d.mac || d.macAddress || devId,
+      status: (d.status === 'approved' || d.controllerStatus === 'online' || d.status === 'active' || d.status === 'online') ? 'online' : (d.status || d.controllerStatus || 'online').toLowerCase(),
+      last_heartbeat: d.last_communicated_time || d.last_seen || d.last_heartbeat || d.date_updated || new Date().toISOString(),
+      battery_level: d.battery_level !== undefined ? Number(d.battery_level) : 100,
+      battery_charging: Boolean(d.battery_charging),
+      site_id: siteIdVal,
+      site_name: siteNameVal,
+      zone_id: d.zone_id || '',
+      zone_name: d.zone_name || '',
+      app_version: d.deviceVersion || d.app_version || 'v1.0.0',
+      os_version: d.os_version || 'Android',
+      pairing_code: d.pairing_code || this.generatePairingCode(devId),
+      pairing_token: d.pairing_token || d.id || devId,
+      active_guard: d.active_guard || null,
+    };
+  }
+
   generatePairingCode(seed = '') {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     let hash = 0;
@@ -144,7 +147,7 @@ class DeviceService {
   }
 
   /**
-   * Register a new patrol terminal in Directus Cloud or Local Store
+   * Register a new patrol terminal strictly bound to the logged-in user's tenant using fetch
    */
   async registerDevice(deviceData) {
     const tenantId = authService.getTenantId();
@@ -152,272 +155,237 @@ class DeviceService {
     const pairingCode = deviceData.pairing_code || this.generatePairingCode(devId);
     const pairingToken = `pt-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
-    const payload = {
-      id: crypto.randomUUID ? crypto.randomUUID() : `dev-${Date.now()}`,
+    const controllerPayload = {
       tenant: tenantId,
-      device_id: devId,
-      device_name: deviceData.device_name || `Patrol Terminal ${devId}`,
-      device_model: deviceData.device_model || 'Patrol Handheld',
-      site_id: deviceData.site_id || '',
+      controllerName: deviceData.device_name || `Patrol Terminal ${devId}`,
+      deviceName: deviceData.device_name || `Patrol Terminal ${devId}`,
+      sn: devId,
+      mac_id: devId,
+      mac: devId,
+      controllerType: 1,
+      deviceGroup: deviceData.device_model || 'Patrol Handheld',
+      status: 'approved',
+      controllerStatus: 'online',
+      location: deviceData.site_id || null,
+      branchDetails: deviceData.site_id || null,
       site_name: deviceData.site_name || '',
-      zone_id: deviceData.zone_id || '',
-      zone_name: deviceData.zone_name || '',
-      status: 'active',
+      battery_level: 100,
+      battery_charging: false,
       pairing_code: pairingCode,
       pairing_token: pairingToken,
-      battery_level: 100,
-      is_online: true,
-      last_seen: new Date().toISOString(),
-      last_sync: new Date().toISOString(),
+      deviceVersion: deviceData.app_version || '1.0.0',
       app_version: deviceData.app_version || '1.0.0',
-      ...deviceData
+      last_communicated_time: new Date().toISOString(),
     };
 
-    // 1. Try patrol_devices
     try {
-      const res = await authService.protectedApi.post("/items/patrol_devices", payload);
-      if (res.data?.data) return res.data.data;
-    } catch (_) {
-      // 2. Try controllers / Controllers
-      try {
-        const controllerPayload = {
-          id: payload.id,
-          tenant: tenantId,
-          controllerName: payload.device_name,
-          deviceName: payload.device_name,
-          sn: devId,
-          mac_id: devId,
-          controllerType: 1,
-          deviceGroup: payload.device_model,
-          status: 'approved',
-          controllerStatus: 'online',
-          branchDetails: payload.site_id || null,
-          site_name: payload.site_name || '',
-          battery_level: 100,
-          battery_charging: false,
-          pairing_code: pairingCode,
-          pairing_token: pairingToken,
-          app_version: payload.app_version || '1.0.0',
-          last_communicated_time: new Date().toISOString(),
-        };
-        let res = null;
-        try {
-          res = await authService.protectedApi.post("/items/controllers", controllerPayload);
-        } catch (_) {
-          res = await authService.protectedApi.post("/items/Controllers", controllerPayload);
-        }
-        if (res?.data?.data) {
-          return { ...payload, ...res.data.data };
-        }
-      } catch (e2) {
-        console.warn("Directus controller write returned restricted (403/404), saving to local storage fallback:", e2.message);
+      const res = await fetch(`${this.getApiUrl()}/items/controllers`, {
+        method: "POST",
+        headers: this.getHeaders(),
+        body: JSON.stringify(controllerPayload)
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.data) return this.normalizeDevice(json.data);
       }
+    } catch (e) {
+      console.warn('Could not post directly to /items/controllers, saving locally:', e);
     }
 
-    // 3. Fallback: Save to Local Storage to guarantee seamless UX
+    // Always preserve locally in case offline
     try {
       const key = `accesseasy_devices_${tenantId}`;
       const existing = JSON.parse(localStorage.getItem(key) || '[]');
-      existing.unshift(payload);
+      existing.unshift(controllerPayload);
       localStorage.setItem(key, JSON.stringify(existing));
-    } catch (lsErr) {
-      console.warn("Local storage fallback write error:", lsErr);
-    }
+    } catch (_) {}
 
-    return payload;
+    return this.normalizeDevice(controllerPayload);
   }
 
   /**
-   * Replace an old device with a new device (transfers site bond & decommissions old device)
+   * Edit / Update existing device details (name, site bond, model, zone) using PATCH fetch
    */
-  async replaceDevice(oldDeviceId, newDeviceData) {
+  async updateDevice(deviceId, updateData) {
+    const payload = {};
+    if (updateData.device_name !== undefined) {
+      payload.controllerName = updateData.device_name;
+      payload.deviceName = updateData.device_name;
+    }
+    if (updateData.site_id !== undefined) {
+      payload.location = updateData.site_id || null;
+      payload.branchDetails = updateData.site_id || null;
+    }
+    if (updateData.site_name !== undefined) {
+      payload.site_name = updateData.site_name;
+    }
+    if (updateData.zone_id !== undefined) {
+      payload.zone_id = updateData.zone_id;
+    }
+    if (updateData.zone_name !== undefined) {
+      payload.zone_name = updateData.zone_name;
+    }
+    if (updateData.device_model !== undefined) {
+      payload.deviceGroup = updateData.device_model;
+    }
+    if (updateData.status !== undefined) {
+      payload.status = updateData.status;
+      payload.controllerStatus = updateData.status;
+    }
+
     try {
-      // 1. Register new device with old site bond
-      const newDev = await this.registerDevice(newDeviceData);
-
-      // 2. Mark old device as replaced
-      try {
-        await authService.protectedApi.patch(`/items/patrol_devices/${oldDeviceId}`, {
-          status: 'replaced',
-        });
-      } catch (_) {
-        try {
-          await authService.protectedApi.patch(`/items/controllers/${oldDeviceId}`, {
-            controllerStatus: 'replaced',
-          });
-        } catch (_) {}
+      const res = await fetch(`${this.getApiUrl()}/items/controllers/${deviceId}`, {
+        method: "PATCH",
+        headers: this.getHeaders(),
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        const json = await res.json();
+        return json.data ? this.normalizeDevice(json.data) : true;
       }
+    } catch (err) {
+      console.error('Error updating device via fetch:', err);
+    }
 
-      // Update local storage
+    // Update in local cache if present
+    try {
       const tenantId = authService.getTenantId();
       const key = `accesseasy_devices_${tenantId}`;
       const existing = JSON.parse(localStorage.getItem(key) || '[]');
-      const updated = existing.map(d => (d.id === oldDeviceId || d.device_id === oldDeviceId) ? { ...d, status: 'replaced' } : d);
-      localStorage.setItem(key, JSON.stringify(updated));
+      const index = existing.findIndex(d => d.id === deviceId || d.device_id === deviceId || d.sn === deviceId);
+      if (index !== -1) {
+        existing[index] = { ...existing[index], ...payload, ...updateData };
+        localStorage.setItem(key, JSON.stringify(existing));
+      }
+    } catch (_) {}
 
+    return true;
+  }
+
+  /**
+   * Replace an old device with a new device using fetch
+   */
+  async replaceDevice(oldDeviceId, newDeviceData) {
+    try {
+      const newDev = await this.registerDevice(newDeviceData);
+      try {
+        await fetch(`${this.getApiUrl()}/items/controllers/${oldDeviceId}`, {
+          method: "PATCH",
+          headers: this.getHeaders(),
+          body: JSON.stringify({ controllerStatus: 'replaced', status: 'replaced' })
+        });
+      } catch (_) {}
       return newDev;
     } catch (error) {
-      console.error("Error replacing device:", error);
+      console.error('Error replacing device:', error);
       throw error;
     }
   }
 
   /**
-   * Remote Unlink / Deactivate device
+   * Remote Unlink / Deactivate device using fetch
    */
   async unlinkDevice(deviceId) {
     try {
       try {
-        await authService.protectedApi.patch(`/items/patrol_devices/${deviceId}`, {
-          status: 'deactivated',
+        await fetch(`${this.getApiUrl()}/items/controllers/${deviceId}`, {
+          method: "DELETE",
+          headers: this.getHeaders()
         });
-      } catch (e) {
-        try {
-          await authService.protectedApi.delete(`/items/controllers/${deviceId}`);
-        } catch (_) {
-          try {
-            await authService.protectedApi.delete(`/items/Controllers/${deviceId}`);
-          } catch (_) {}
-        }
-      }
+      } catch (_) {}
 
-      // Update local storage
       const tenantId = authService.getTenantId();
       const key = `accesseasy_devices_${tenantId}`;
       const existing = JSON.parse(localStorage.getItem(key) || '[]');
-      const filtered = existing.filter(d => d.id !== deviceId && d.device_id !== deviceId);
+      const filtered = existing.filter(d => d.id !== deviceId && d.device_id !== deviceId && d.sn !== deviceId);
       localStorage.setItem(key, JSON.stringify(filtered));
 
       return true;
     } catch (error) {
-      console.error("Error unlinking device on cloud:", error);
+      console.error('Error unlinking device on cloud:', error);
       throw error;
     }
   }
 
   /**
-   * Record Guard Shift Clock-In on a shared terminal
-   */
-  async recordGuardShiftLogin({ deviceId, guardId, guardName, siteId, shiftId, clockInGps, selfieUrl, batteryLevel = 100 }) {
-    try {
-      const tenantId = authService.getTenantId();
-      const payload = {
-        tenant: tenantId,
-        device_id: deviceId,
-        guard_id: guardId,
-        guard_name: guardName,
-        site_id: siteId,
-        shift_id: shiftId || '',
-        status: 'active',
-        login_time: new Date().toISOString(),
-        battery_at_login: batteryLevel,
-        clock_in_gps: clockInGps || null,
-        selfie_url: selfieUrl || '',
-      };
-
-      const res = await authService.protectedApi.post("/items/patrol_guard_sessions", payload);
-      return res.data?.data || payload;
-    } catch (error) {
-      console.error("Error recording guard shift login:", error);
-      throw error;
-    }
-  }
-
-  /**
-   * Record Guard Shift Clock-Out / Handover
-   */
-  async recordGuardShiftLogout(sessionId, handoverNotes = '') {
-    try {
-      const payload = {
-        status: 'completed',
-        logout_time: new Date().toISOString(),
-        handover_notes: handoverNotes,
-      };
-
-      const res = await authService.protectedApi.patch(`/items/patrol_guard_sessions/${sessionId}`, payload);
-      return res.data?.data;
-    } catch (error) {
-      console.error("Error recording guard shift logout:", error);
-      throw error;
-    }
-  }
-
-  /**
-   * Update Terminal Telemetry (Battery, Online Heartbeat, App Version)
+   * Update Terminal Telemetry (Battery, Online Heartbeat, App Version) using fetch
    */
   async updateDeviceTelemetry(deviceId, { batteryLevel, batteryCharging = false, appVersion = '1.0.0', isOnline = true }) {
     try {
       const payload = {
         battery_level: batteryLevel,
         battery_charging: batteryCharging,
+        deviceVersion: appVersion,
         app_version: appVersion,
-        is_online: isOnline,
-        last_seen: new Date().toISOString(),
+        controllerStatus: isOnline ? 'online' : 'offline',
+        last_communicated_time: new Date().toISOString(),
       };
 
       try {
-        await authService.protectedApi.patch(`/items/patrol_devices/${deviceId}`, payload);
-      } catch (_) {
-        // Fallback for custom device_id lookup
-        const res = await authService.protectedApi.get(`/items/patrol_devices?filter[device_id][_eq]=${deviceId}&limit=1`);
-        if (res.data?.data?.[0]?.id) {
-          await authService.protectedApi.patch(`/items/patrol_devices/${res.data.data[0].id}`, payload);
-        }
-      }
+        await fetch(`${this.getApiUrl()}/items/controllers/${deviceId}`, {
+          method: "PATCH",
+          headers: this.getHeaders(),
+          body: JSON.stringify(payload)
+        });
+      } catch (_) {}
       return true;
     } catch (error) {
-      console.warn("Failed to push device telemetry:", error.message);
+      console.warn('Failed to push device telemetry:', error.message);
       return false;
     }
   }
 
   /**
-   * Remote Lock Patrol Terminal
+   * Remote Lock Patrol Terminal using fetch
    */
-  async remoteLockDevice(deviceId) {
+  async lockDevice(deviceId, lockMessage = 'Terminal Locked by Security Admin') {
     try {
-      const res = await authService.protectedApi.patch(`/items/controllers/${deviceId}`, {
-        status: 'locked',
-        controllerStatus: 'locked'
+      await fetch(`${this.getApiUrl()}/items/controllers/${deviceId}`, {
+        method: "PATCH",
+        headers: this.getHeaders(),
+        body: JSON.stringify({
+          status: 'locked',
+          controllerStatus: 'locked',
+          lock_message: lockMessage,
+        })
       });
-      return res.data?.data;
-    } catch (error) {
-      console.error('Error locking device:', error);
-      throw error;
+      return true;
+    } catch (e) {
+      console.error('Failed to lock device:', e);
+      return false;
     }
   }
 
   /**
-   * Remote Unlock / Re-approve Patrol Terminal
+   * Remote Unlock Patrol Terminal using fetch
    */
+  async unlockDevice(deviceId) {
+    try {
+      await fetch(`${this.getApiUrl()}/items/controllers/${deviceId}`, {
+        method: "PATCH",
+        headers: this.getHeaders(),
+        body: JSON.stringify({
+          status: 'approved',
+          controllerStatus: 'online',
+          lock_message: null,
+        })
+      });
+      return true;
+    } catch (e) {
+      console.error('Failed to unlock device:', e);
+      return false;
+    }
+  }
+
+  async remoteLockDevice(deviceId, lockMessage = 'Terminal Locked by Security Admin') {
+    return this.lockDevice(deviceId, lockMessage);
+  }
+
   async remoteUnlockDevice(deviceId) {
-    try {
-      const res = await authService.protectedApi.patch(`/items/controllers/${deviceId}`, {
-        status: 'approved',
-        controllerStatus: 'online'
-      });
-      return res.data?.data;
-    } catch (error) {
-      console.error('Error unlocking device:', error);
-      throw error;
-    }
-  }
-
-  /**
-   * Get all active Patrol Terminals with location details
-   */
-  async getPatrolTerminals(tenantId) {
-    try {
-      const tId = tenantId || authService.getTenantId();
-      const res = await authService.protectedApi.get(
-        `/items/controllers?filter[tenant][tenantId][_eq]=${tId}&filter[_or][0][attendanceMode][_eq]=Patrol Terminal&filter[_or][1][controllerType][_eq]=1&fields=*,location.id,location.locName,location.locAddress`
-      );
-      return res.data?.data || [];
-    } catch (error) {
-      console.error('Error fetching patrol terminals:', error);
-      return [];
-    }
+    return this.unlockDevice(deviceId);
   }
 }
 
 export const deviceService = new DeviceService();
+
+

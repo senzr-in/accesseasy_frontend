@@ -335,7 +335,8 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { Play, Pause, RotateCcw, Check, X, Clock } from 'lucide-vue-next';
-import { Loader } from '@googlemaps/js-api-loader';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 const props = defineProps({
   patrolDetails: {
@@ -531,228 +532,159 @@ const resetPlayback = () => {
   updateMapMarkerPosition();
 };
 
-// Map implementation
+// Map implementation (Leaflet 100% Reliable, Zero Quotas)
+let leafletMap = null;
+let leafletMarkers = [];
+let guardMarkerLeaflet = null;
+let leafletPolyline = null;
+
 const initGoogleMap = async () => {
   if (!mapContainer.value) return;
-  const apiKey = 'AIzaSyCwp-gBFBiutZVlE-a-84hHnA2XeMRGE1g';
-  const loader = new Loader({ apiKey, version: 'weekly' });
 
   try {
-    await loader.load();
-    if (!mapContainer.value) return; // Check again in case component unmounted during load
-    
+    if (leafletMap) {
+      leafletMap.remove();
+      leafletMap = null;
+      leafletMarkers = [];
+      guardMarkerLeaflet = null;
+      leafletPolyline = null;
+    }
+
     // Get the first location from the GPS tracking or any outdoor checkpoint
     const firstGpsPoint = currentPoints.value.find(pt => pt.latitude !== null && pt.longitude !== null);
     const firstOutdoorCp = checkpoints.value.find(cp => cp.latitude && cp.longitude);
     
-    let fallbackCenter = { lat: 12.9716, lng: 77.5946 };
+    let fallbackCenter = [12.9716, 77.5946];
     if (patrol.value.currentLat && patrol.value.currentLng) {
-      fallbackCenter = { lat: parseFloat(patrol.value.currentLat), lng: parseFloat(patrol.value.currentLng) };
+      fallbackCenter = [parseFloat(patrol.value.currentLat), parseFloat(patrol.value.currentLng)];
     }
     
     const centerPos = firstGpsPoint 
-      ? { lat: parseFloat(firstGpsPoint.latitude), lng: parseFloat(firstGpsPoint.longitude) }
-      : (firstOutdoorCp ? { lat: parseFloat(firstOutdoorCp.latitude), lng: parseFloat(firstOutdoorCp.longitude) } : fallbackCenter);
+      ? [parseFloat(firstGpsPoint.latitude), parseFloat(firstGpsPoint.longitude)]
+      : (firstOutdoorCp ? [parseFloat(firstOutdoorCp.latitude), parseFloat(firstOutdoorCp.longitude)] : fallbackCenter);
 
-    googleMap = new google.maps.Map(mapContainer.value, {
+    leafletMap = L.map(mapContainer.value, {
       center: centerPos,
       zoom: 17,
-      mapId: 'REPLAY_MAP_ID',
-      mapTypeId: 'roadmap',
-      zoomControl: true,
-      mapTypeControl: false,
-      streetViewControl: false,
-      fullscreenControl: false
+      zoomControl: false,
+      attributionControl: false
     });
 
-    // Draw GPS path trail
-    pathPolyline = new google.maps.Polyline({
-      path: [], // Start empty, fills progressively during playback
-      geodesic: true,
-      strokeColor: '#38bdf8',
-      strokeOpacity: 1.0,
-      strokeWeight: 4,
-      map: googleMap
-    });
+    L.control.zoom({ position: 'bottomright' }).addTo(leafletMap);
 
-    // Fat invisible polyline for much easier mouse hovering
-    hoverPolyline = new google.maps.Polyline({
-      path: [],
-      strokeOpacity: 0.0,
-      strokeWeight: 20,
-      zIndex: 10,
-      map: googleMap
-    });
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19,
+      subdomains: 'abcd',
+      keepBuffer: 6,
+      updateWhenIdle: true,
+      updateWhenZooming: false
+    }).addTo(leafletMap);
 
-    hoverInfoWindow = new google.maps.InfoWindow({ disableAutoPan: true });
-
-    hoverPolyline.addListener('mousemove', (e) => {
-      const hoverLat = e.latLng.lat();
-      const hoverLng = e.latLng.lng();
-      
-      const idx = Math.min(currentPointIndex.value, currentPoints.value.length - 1);
-      const visiblePoints = currentPoints.value.slice(0, idx + 1).filter(p => p.latitude && p.longitude);
-      
-      if (visiblePoints.length === 0) return;
-
-      let closestPoint = null;
-      let minDistance = Infinity;
-      let closestGlobalIndex = 0;
-      
-      visiblePoints.forEach((p, i) => {
-        const dLat = parseFloat(p.latitude) - hoverLat;
-        const dLng = parseFloat(p.longitude) - hoverLng;
-        const dist = dLat * dLat + dLng * dLng;
-        if (dist < minDistance) {
-          minDistance = dist;
-          closestPoint = p;
-          closestGlobalIndex = i;
-        }
-      });
-      
-      if (closestPoint) {
-         let timeLabel = '';
-         if (closestPoint.timestamp) {
-            timeLabel = new Date(closestPoint.timestamp).toLocaleTimeString();
-         } else {
-            // Calculate simulated time offset for playback
-            const patrolStartStr = patrol.value.startTime || patrol.value.scheduledTime;
-            // Fake a base date if only time is provided (e.g. '08:00')
-            let baseTime = new Date();
-            if (patrolStartStr && patrolStartStr.includes(':')) {
-               const parts = patrolStartStr.split(':');
-               baseTime.setHours(parseInt(parts[0]), parseInt(parts[1]), 0);
-            }
-            const pointTime = new Date(baseTime.getTime() + (closestGlobalIndex * 2000)); // 2 seconds per tick
-            timeLabel = pointTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
-         }
-
-         const content = `
-           <div style="padding: 2px 6px; font-family: 'Inter', sans-serif; color: #0f172a; text-align: center; min-width: 90px;">
-             <div style="font-size: 9px; font-weight: 900; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Recorded Time</div>
-             <div style="font-size: 13px; font-weight: 800; margin-top: 1px;">${timeLabel}</div>
-           </div>
-         `;
-         hoverInfoWindow.setContent(content);
-         hoverInfoWindow.setPosition(e.latLng);
-         hoverInfoWindow.open(googleMap);
-      }
-    });
-
-    hoverPolyline.addListener('mouseout', () => {
-      hoverInfoWindow.close();
-    });
-
-    // Import AdvancedMarkerElement to create rich HTML markers
-    const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
-
-    clickInfoWindow = new google.maps.InfoWindow();
+    // Draw GPS path polyline
+    leafletPolyline = L.polyline([], {
+      color: '#38bdf8',
+      weight: 4,
+      opacity: 0.95,
+      smoothFactor: 1
+    }).addTo(leafletMap);
 
     // Checkpoint markers
     checkpoints.value.forEach((cp, index) => {
       if (cp.latitude && cp.longitude) {
-        const el = document.createElement('div');
-        el.className = `w-7 h-7 rounded-full flex items-center justify-center font-bold text-[11px] text-white shadow-lg border-[2px] border-white cursor-pointer hover:scale-110 transition-transform ${
-          (cp.status === 'scanned' || cp.status === 'completed') ? 'bg-emerald-500' : 'bg-slate-400'
-        }`;
-        el.innerText = (index + 1).toString();
+        const isScanned = (cp.status === 'scanned' || cp.status === 'completed');
+        const iconHtml = `
+          <div style="width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 11px; color: white; border: 2px solid white; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3); background: ${isScanned ? '#10b981' : '#64748b'}; cursor: pointer;">
+            ${index + 1}
+          </div>
+        `;
 
-        const marker = new AdvancedMarkerElement({
-          position: { lat: parseFloat(cp.latitude), lng: parseFloat(cp.longitude) },
-          map: googleMap,
-          title: cp.name,
-          content: el
+        const customIcon = L.divIcon({
+          html: iconHtml,
+          className: 'custom-checkpoint-pin',
+          iconSize: [28, 28],
+          iconAnchor: [14, 14]
         });
-        
-        marker.addListener('click', () => {
-          const timeHtml = (cp.status === 'scanned' || cp.status === 'completed') 
-            ? `<p style="color: #10b981; font-weight: 800; font-size: 11px; margin-top: 4px;">Scanned: ${cp.scanTime || 'Yes'}</p>` 
-            : `<p style="color: #ef4444; font-weight: 800; font-size: 11px; margin-top: 4px;">Status: ${cp.status}</p>`;
-          
-          clickInfoWindow.setContent(`
-            <div style="padding: 6px; font-family: 'Inter', sans-serif; color: #0f172a; min-width: 120px;">
-              <h4 style="margin: 0; font-size: 14px; font-weight: 900;">${cp.name}</h4>
+
+        const timeHtml = isScanned 
+          ? `<p style="color: #10b981; font-weight: 800; font-size: 11px; margin: 4px 0 0 0;">Scanned: ${cp.scanTime || 'Yes'}</p>` 
+          : `<p style="color: #ef4444; font-weight: 800; font-size: 11px; margin: 4px 0 0 0;">Status: ${cp.status}</p>`;
+
+        const marker = L.marker([parseFloat(cp.latitude), parseFloat(cp.longitude)], { icon: customIcon })
+          .addTo(leafletMap)
+          .bindPopup(`
+            <div style="padding: 4px; font-family: 'Inter', sans-serif; min-width: 130px;">
+              <h4 style="margin: 0; font-size: 13px; font-weight: 900; color: #0f172a;">${cp.name}</h4>
               <p style="margin: 2px 0 0 0; font-size: 11px; color: #64748b; font-weight: 600;">Checkpoint #${index + 1}</p>
               ${timeHtml}
             </div>
           `);
-          clickInfoWindow.open({ anchor: marker, map: googleMap, shouldFocus: false });
-        });
 
-        mapMarkers.push(marker);
+        leafletMarkers.push(marker);
       }
     });
 
     // Moving Guard marker (glowing avatar)
-    let avatarHtml = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
-    if (patrol.value.avatarUrl) {
-      avatarHtml = `<img src="${patrol.value.avatarUrl}" class="w-full h-full object-cover" />`;
-    }
-
-    const guardEl = document.createElement('div');
-    guardEl.className = 'relative flex items-center justify-center -translate-y-1/2 cursor-pointer hover:scale-110 transition-transform';
-    guardEl.innerHTML = `
-      <span class="animate-ping absolute h-12 w-12 rounded-full opacity-50 bg-indigo-500 pointer-events-none"></span>
-      <div class="relative w-8 h-8 rounded-full border-2 border-white shadow-xl bg-indigo-600 text-white flex items-center justify-center z-10 overflow-hidden transition-transform duration-300">
-        ${avatarHtml}
+    const guardIconHtml = `
+      <div style="position: relative; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+        <span style="position: absolute; width: 36px; height: 36px; border-radius: 50%; background: #6366f1; opacity: 0.5; animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;"></span>
+        <div style="width: 30px; height: 30px; border-radius: 50%; border: 2.5px solid white; background: #4f46e5; color: white; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3); z-index: 10;">
+          ${(patrol.value.guardName || 'G').charAt(0).toUpperCase()}
+        </div>
       </div>
     `;
 
-    // Find the first valid GPS point to place the guard initially
-    const firstGps = currentPoints.value.find(pt => pt.latitude !== null && pt.longitude !== null);
-    const startPos = firstGps ? { lat: parseFloat(firstGps.latitude), lng: parseFloat(firstGps.longitude) } : centerPos;
-
-    guardMarker = new AdvancedMarkerElement({
-      position: startPos,
-      map: googleMap,
-      content: guardEl
+    const guardIcon = L.divIcon({
+      html: guardIconHtml,
+      className: 'guard-replay-pin',
+      iconSize: [36, 36],
+      iconAnchor: [18, 18]
     });
 
-    guardMarker.addListener('gmp-click', () => {
-      const statusColor = patrol.value.status === 'active' ? '#10b981' : (patrol.value.status === 'completed' ? '#3b82f6' : '#f59e0b');
-      clickInfoWindow.setContent(`
-        <div style="padding: 8px; font-family: 'Inter', sans-serif; color: #0f172a; min-width: 160px;">
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <div style="width: 28px; height: 28px; border-radius: 50%; background: #4f46e5; color: white; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: bold;">
-              ${patrol.value.guardName?.charAt(0).toUpperCase() || '?'}
-            </div>
-            <div>
-              <h4 style="margin: 0; font-size: 14px; font-weight: 900; line-height: 1;">${patrol.value.guardName || 'Unknown Guard'}</h4>
-              <p style="margin: 3px 0 0 0; font-size: 9px; color: #64748b; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px;">Security Officer</p>
-            </div>
-          </div>
-          <div style="margin-top: 12px; border-top: 1px solid #e2e8f0; padding-top: 10px;">
-            <p style="margin: 0; font-size: 11px; color: #475569;">Zone: <b style="color: #0f172a;">${patrol.value.zoneName || 'N/A'}</b></p>
-            <p style="margin: 4px 0 0 0; font-size: 11px; color: #475569;">Route: <b style="color: #0f172a;">${patrol.value.routeName || 'Standard Group'}</b></p>
-            <p style="margin: 4px 0 0 0; font-size: 11px; color: #475569;">Status: <b style="color: ${statusColor}; text-transform: uppercase;">${patrol.value.status}</b></p>
+    const startPos = firstGpsPoint ? [parseFloat(firstGpsPoint.latitude), parseFloat(firstGpsPoint.longitude)] : centerPos;
+    guardMarkerLeaflet = L.marker(startPos, { icon: guardIcon })
+      .addTo(leafletMap)
+      .bindPopup(`
+        <div style="padding: 6px; font-family: 'Inter', sans-serif; min-width: 150px;">
+          <h4 style="margin: 0; font-size: 13px; font-weight: 900; color: #0f172a;">${patrol.value.guardName || 'Guard'}</h4>
+          <p style="margin: 2px 0 0 0; font-size: 10px; color: #64748b; text-transform: uppercase; font-weight: 800;">Security Officer</p>
+          <div style="margin-top: 8px; border-top: 1px solid #e2e8f0; padding-top: 6px; font-size: 11px; color: #475569;">
+            <p style="margin: 0;">Zone: <b>${patrol.value.zoneName || 'N/A'}</b></p>
+            <p style="margin: 3px 0 0 0;">Route: <b>${patrol.value.routeName || 'Standard'}</b></p>
           </div>
         </div>
       `);
-      clickInfoWindow.open({ anchor: guardMarker, map: googleMap, shouldFocus: false });
-    });
+
+    // Center bounds to fit all points & checkpoints
+    const allValidCoords = [
+      ...currentPoints.value.filter(p => p.latitude && p.longitude).map(p => [parseFloat(p.latitude), parseFloat(p.longitude)]),
+      ...checkpoints.value.filter(c => c.latitude && c.longitude).map(c => [parseFloat(c.latitude), parseFloat(c.longitude)])
+    ];
+
+    if (allValidCoords.length > 1) {
+      leafletMap.fitBounds(L.latLngBounds(allValidCoords), { padding: [40, 40] });
+    }
   } catch (err) {
-    console.error('Error loading Google Map for Replay:', err);
+    console.error('Error loading Map for Replay:', err);
   }
 };
 
 const updateMapMarkerPosition = () => {
-  if (!googleMap || !guardMarker || currentPoints.value.length === 0) return;
+  if (!leafletMap || !guardMarkerLeaflet || currentPoints.value.length === 0) return;
   const idx = Math.min(currentPointIndex.value, currentPoints.value.length - 1);
   const pt = currentPoints.value[idx];
   
   if (pt.latitude && pt.longitude) {
-    const newPos = { lat: parseFloat(pt.latitude), lng: parseFloat(pt.longitude) };
-    guardMarker.position = newPos; 
-    googleMap.panTo(newPos);
+    const newPos = [parseFloat(pt.latitude), parseFloat(pt.longitude)];
+    guardMarkerLeaflet.setLatLng(newPos);
+    leafletMap.panTo(newPos);
     
     // Progressively draw the tracking line
-    if (pathPolyline) {
+    if (leafletPolyline) {
       const pathCoords = currentPoints.value
         .slice(0, idx + 1)
         .filter(p => p.latitude && p.longitude)
-        .map(p => ({ lat: parseFloat(p.latitude), lng: parseFloat(p.longitude) }));
-      pathPolyline.setPath(pathCoords);
-      if (hoverPolyline) hoverPolyline.setPath(pathCoords);
+        .map(p => [parseFloat(p.latitude), parseFloat(p.longitude)]);
+      leafletPolyline.setLatLngs(pathCoords);
     }
   }
 };
@@ -760,14 +692,6 @@ const updateMapMarkerPosition = () => {
 watch(() => props.patrolDetails, (newVal) => {
   if (newVal) {
     resetPlayback();
-    if (googleMap) {
-      mapMarkers.forEach(m => { m.map = null; });
-      mapMarkers = [];
-      if (guardMarker) { guardMarker.map = null; guardMarker = null; }
-      if (pathPolyline) { pathPolyline.setMap(null); pathPolyline = null; }
-      if (hoverPolyline) { hoverPolyline.setMap(null); hoverPolyline = null; }
-      googleMap = null;
-    }
     initGoogleMap();
   }
 }, { deep: true });
@@ -778,6 +702,10 @@ onMounted(() => {
 
 onUnmounted(() => {
   clearInterval(playTimer.value);
+  if (leafletMap) {
+    leafletMap.remove();
+    leafletMap = null;
+  }
 });
 </script>
 

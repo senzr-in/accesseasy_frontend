@@ -23,16 +23,35 @@ class ZoneService {
    * Fetch doors from Directus for access control binding
    */
   async fetchDoors() {
-    try {
-      const tenantId = authService.getTenantId();
-      const response = await authService.protectedApi.get(
-        `/items/doors?filter[tenant][tenantId][_eq]=${tenantId}&fields[]=id&fields[]=doorNumber&fields[]=doorName`
-      );
-      return response.data.data;
-    } catch (error) {
-      console.warn("Error fetching doors:", error.message);
-      return [];
+    const tenantId = authService.getTenantId();
+    const cacheKey = `doors_${tenantId}`;
+    const cached = this._zonesCache.get(cacheKey);
+    if (cached && Date.now() < cached.expiry) {
+      return cached.data;
     }
+
+    if (this._inFlightPromises.has(cacheKey)) {
+      return this._inFlightPromises.get(cacheKey);
+    }
+
+    const promise = (async () => {
+      try {
+        const response = await authService.protectedApi.get(
+          `/items/doors?filter[tenant][tenantId][_eq]=${tenantId}&fields[]=id&fields[]=doorNumber&fields[]=doorName`
+        );
+        const data = response.data?.data || [];
+        this._zonesCache.set(cacheKey, { data, expiry: Date.now() + 5 * 60 * 1000 });
+        return data;
+      } catch (error) {
+        console.warn("Error fetching doors:", error.message);
+        return [];
+      } finally {
+        this._inFlightPromises.delete(cacheKey);
+      }
+    })();
+
+    this._inFlightPromises.set(cacheKey, promise);
+    return promise;
   }
 
   /**

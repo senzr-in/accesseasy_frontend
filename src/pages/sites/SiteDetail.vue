@@ -237,7 +237,8 @@ import { zoneService } from '@/services/zoneService';
 import { subscriptionService } from '@/services/subscriptionService';
 import FeatureGate from '@/components/common/FeatureGate.vue';
 import UpgradeModal from '@/components/common/UpgradeModal.vue';
-import { Loader } from '@googlemaps/js-api-loader';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 const route = useRoute();
 const router = useRouter();
@@ -297,41 +298,42 @@ onMounted(async () => {
   siteZones.value = await zoneService.fetchZonesBySite(siteId);
 
   await nextTick();
-  const apiKey = 'AIzaSyCwp-gBFBiutZVlE-a-84hHnA2XeMRGE1g';
-  const loader = new Loader({ apiKey, version: 'weekly' });
-  try {
-    await loader.load();
-    if (siteMapRef.value) {
-      const lat = siteData.value.latitude || 12.9716;
-      const lng = siteData.value.longitude || 80.2435;
-      const map = new google.maps.Map(siteMapRef.value, {
-        center: { lat, lng },
+  if (siteMapRef.value) {
+    try {
+      const lat = Number(siteData.value.latitude) || 12.9716;
+      const lng = Number(siteData.value.longitude) || 80.2435;
+      const radius = Number(siteData.value.geofence_radius) || 500;
+
+      const map = L.map(siteMapRef.value, {
+        center: [lat, lng],
         zoom: 16,
-        disableDefaultUI: true,
-        zoomControl: true,
+        zoomControl: false,
+        attributionControl: false
       });
+
+      L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19,
+        subdomains: 'abcd'
+      }).addTo(map);
 
       // Add Geofence circle
-      new google.maps.Circle({
-        strokeColor: '#4f46e5',
-        strokeOpacity: 0.8,
-        strokeWeight: 2,
+      L.circle([lat, lng], {
+        radius: radius,
+        color: '#4f46e5',
         fillColor: '#4f46e5',
         fillOpacity: 0.15,
-        map,
-        center: { lat, lng },
-        radius: siteData.value.geofence_radius || 500,
-      });
+        weight: 2
+      }).addTo(map);
 
       // Add Center Marker
-      new google.maps.Marker({
-        position: { lat, lng },
-        map,
-        title: siteData.value.name,
-      });
+      L.marker([lat, lng])
+        .addTo(map)
+        .bindPopup(`<b>${siteData.value.name || 'Site Center'}</b><br>Property Center`);
+    } catch (e) {
+      console.error('Site map load error', e);
     }
-  } catch (e) {
-    console.error('Site map load error', e);
   }
 });
 </script>

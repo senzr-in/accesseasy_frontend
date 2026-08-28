@@ -54,7 +54,9 @@ const ALL_PATROL_FEATURES = [
 const CACHE_KEY_PLAN = "patrol_plan_v2";
 const CACHE_KEY_LIMITS = "patrol_limits_v2";
 const CACHE_KEY_USAGE = "patrol_usage_v2";
-const CACHE_TTL_MS = 15 * 1000; // 15 seconds live cache
+const CACHE_TTL_MS = 60 * 1000; // 60 seconds live cache
+
+const _subInFlight = new Map();
 
 function cacheSet(key, value) {
   try {
@@ -78,6 +80,7 @@ function cacheClear() {
   [CACHE_KEY_PLAN, CACHE_KEY_LIMITS, CACHE_KEY_USAGE].forEach((k) =>
     sessionStorage.removeItem(k)
   );
+  _subInFlight.clear();
 }
 
 function isPlanActive(planJson) {
@@ -100,37 +103,42 @@ class SubscriptionService {
       if (cached) return cached;
     }
 
-    const tenantId = currentUserTenant.getTenantId() || authService.getTenantId();
-    if (!tenantId) {
-      const defaultAnon = {
-        plan: "trial",
-        status: "trial",
-        is_trial: true,
-        sites: 1,
-        plan_name: "AccessEasy Patrol 7-Day Free Trial",
-        plan_key: "ez_patrol_platform",
-      };
-      return defaultAnon;
+    if (_subInFlight.has(CACHE_KEY_PLAN)) {
+      return _subInFlight.get(CACHE_KEY_PLAN);
     }
 
-    // Do not attempt cloud plan lookup unless a valid JWT token is available
-    if (!authService.getToken()) {
-      return {
-        plan_key: "ez_patrol_platform",
-        plan_name: "AccessEasy Patrol 7-Day Free Trial",
-        plan: "trial",
-        status: "trial",
-        is_trial: true,
-        sites: 1,
-      };
-    }
-
-    try {
-      // 1. Query Directus `plans` collection
+    const promise = (async () => {
       try {
-        const res = await authService.protectedApi.get(
-          `/items/plans?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&sort=-id&limit=20`
-        );
+        const tenantId = currentUserTenant.getTenantId() || authService.getTenantId();
+        if (!tenantId) {
+          const defaultAnon = {
+            plan: "trial",
+            status: "trial",
+            is_trial: true,
+            sites: 1,
+            plan_name: "AccessEasy Patrol 7-Day Free Trial",
+            plan_key: "ez_patrol_platform",
+          };
+          return defaultAnon;
+        }
+
+        // Do not attempt cloud plan lookup unless a valid JWT token is available
+        if (!authService.getToken()) {
+          return {
+            plan_key: "ez_patrol_platform",
+            plan_name: "AccessEasy Patrol 7-Day Free Trial",
+            plan: "trial",
+            status: "trial",
+            is_trial: true,
+            sites: 1,
+          };
+        }
+
+        // 1. Query Directus `plans` collection
+        try {
+          const res = await authService.protectedApi.get(
+            `/items/plans?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&sort=-id&limit=20`
+          );
         const rows = res.data?.data || [];
 
         // Sort to prioritize row with userapp === 'patrol'
@@ -279,8 +287,14 @@ class SubscriptionService {
         is_trial: true,
         sites: 1,
       };
+    } finally {
+      _subInFlight.delete(CACHE_KEY_PLAN);
     }
-  }
+  })();
+
+  _subInFlight.set(CACHE_KEY_PLAN, promise);
+  return promise;
+}
 
   /**
    * Returns the plan limits for this organization's active tier.
@@ -323,72 +337,83 @@ class SubscriptionService {
     const cached = cacheGet(CACHE_KEY_USAGE);
     if (cached) return cached;
 
-    try {
-      const tenantId = currentUserTenant.getTenantId() || authService.getTenantId();
-      // Guard: don't query APIs without a token (e.g. during login flow)
-      if (!tenantId || !authService.getToken()) {
-        return { site_count: 0, zone_count: 0, guard_count: 0, patrol_route_count: 0, checkpoint_count: 0 };
-      }
-
-      let siteCount = 0;
-      let zoneCount = 0;
-      let guardCount = 0;
-      let checkpointCount = 0;
-      let patrolRouteCount = 0;
-
-      // Sites (Location Management) count
-      try {
-        const res = await authService.protectedApi.get(
-          `/items/locationManagement?filter[tenant][_eq]=${tenantId}&fields[]=id&limit=500`
-        );
-        if (res.data?.data) siteCount = res.data.data.length;
-      } catch (_) {
-        const stored = localStorage.getItem(`accesseasy_sites_${tenantId}`);
-        if (stored) {
-          try { siteCount = JSON.parse(stored).length; } catch (_) {}
-        }
-      }
-
-      // Checkpoints count
-      try {
-        const res = await authService.protectedApi.get(
-          `/items/checkpoints?filter[tenant][_eq]=${tenantId}&fields[]=id&limit=1000`
-        );
-        if (res.data?.data) checkpointCount = res.data.data.length;
-      } catch (_) {}
-
-      // Patrol routes / groups count
-      try {
-        const res = await authService.protectedApi.get(
-          `/items/checkpoint_groups?filter[tenant][_eq]=${tenantId}&fields[]=id&limit=500`
-        );
-        if (res.data?.data) patrolRouteCount = res.data.data.length;
-      } catch (_) {}
-
-      // Guards count — use aggregate to avoid requiring Admin-level /users access
-      try {
-        const res = await authService.protectedApi.get(
-          `/users?filter[tenant][_eq]=${tenantId}&aggregate[count]=id&groupBy[]=tenant`
-        );
-        const row = res.data?.data?.[0];
-        guardCount = row ? Number(row.count?.id || 0) : 0;
-      } catch (_) {}
-
-      const usage = {
-        site_count: siteCount,
-        zone_count: zoneCount,
-        guard_count: guardCount,
-        patrol_route_count: patrolRouteCount,
-        checkpoint_count: checkpointCount,
-        admin_user_count: 1,
-      };
-
-      cacheSet(CACHE_KEY_USAGE, usage);
-      return usage;
-    } catch (err) {
-      console.warn("[SubscriptionService] Could not fetch live usage:", err.message);
-      return { site_count: 0, guard_count: 0, checkpoint_count: 0, patrol_route_count: 0 };
+    if (_subInFlight.has(CACHE_KEY_USAGE)) {
+      return _subInFlight.get(CACHE_KEY_USAGE);
     }
+
+    const promise = (async () => {
+      try {
+        const tenantId = currentUserTenant.getTenantId() || authService.getTenantId();
+        // Guard: don't query APIs without a token (e.g. during login flow)
+        if (!tenantId || !authService.getToken()) {
+          return { site_count: 0, zone_count: 0, guard_count: 0, patrol_route_count: 0, checkpoint_count: 0 };
+        }
+
+        let siteCount = 0;
+        let zoneCount = 0;
+        let guardCount = 0;
+        let checkpointCount = 0;
+        let patrolRouteCount = 0;
+
+        // Sites (Location Management) count
+        try {
+          const res = await authService.protectedApi.get(
+            `/items/locationManagement?filter[tenant][_eq]=${tenantId}&fields[]=id&limit=500`
+          );
+          if (res.data?.data) siteCount = res.data.data.length;
+        } catch (_) {
+          const stored = localStorage.getItem(`accesseasy_sites_${tenantId}`);
+          if (stored) {
+            try { siteCount = JSON.parse(stored).length; } catch (_) {}
+          }
+        }
+
+        // Checkpoints count
+        try {
+          const res = await authService.protectedApi.get(
+            `/items/checkpoints?filter[tenant][_eq]=${tenantId}&fields[]=id&limit=1000`
+          );
+          if (res.data?.data) checkpointCount = res.data.data.length;
+        } catch (_) {}
+
+        // Patrol routes / groups count
+        try {
+          const res = await authService.protectedApi.get(
+            `/items/checkpoint_groups?filter[tenant][_eq]=${tenantId}&fields[]=id&limit=500`
+          );
+          if (res.data?.data) patrolRouteCount = res.data.data.length;
+        } catch (_) {}
+
+        // Guards count — use aggregate to avoid requiring Admin-level /users access
+        try {
+          const res = await authService.protectedApi.get(
+            `/users?filter[tenant][_eq]=${tenantId}&aggregate[count]=id&groupBy[]=tenant`
+          );
+          const row = res.data?.data?.[0];
+          guardCount = row ? Number(row.count?.id || 0) : 0;
+        } catch (_) {}
+
+        const usage = {
+          site_count: siteCount,
+          zone_count: zoneCount,
+          guard_count: guardCount,
+          patrol_route_count: patrolRouteCount,
+          checkpoint_count: checkpointCount,
+          admin_user_count: 1,
+        };
+
+        cacheSet(CACHE_KEY_USAGE, usage);
+        return usage;
+      } catch (err) {
+        console.warn("[SubscriptionService] Could not fetch live usage:", err.message);
+        return { site_count: 0, guard_count: 0, checkpoint_count: 0, patrol_route_count: 0 };
+      } finally {
+        _subInFlight.delete(CACHE_KEY_USAGE);
+      }
+    })();
+
+    _subInFlight.set(CACHE_KEY_USAGE, promise);
+    return promise;
   }
 
   /**
