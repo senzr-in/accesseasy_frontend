@@ -958,13 +958,14 @@ const getEmployeeAccessName = (emp) => {
   if (!emp) return 'No Access Group';
   const al1 = emp.assignedAccessLevels?.[0]?.accesslevels_id?.accessLevelName;
   if (al1) return al1;
-  const al2 = typeof emp.assignedAccessLevel === 'object' ? emp.assignedAccessLevel?.accessLevelName : null;
+  const al2 = typeof emp.assignedAccessLevel === 'object' ? (emp.assignedAccessLevel?.accessLevelName || emp.assignedAccessLevel?.groupName || emp.assignedAccessLevel?.name) : null;
   if (al2) return al2;
   const rawId = emp.assignedAccessLevel?.id || emp.assignedAccessLevel || emp.assignedAccessLevels?.[0]?.accesslevels_id || emp.assignedAccessLevels?.[0];
-  if (rawId) {
+  if (rawId !== undefined && rawId !== null && rawId !== '') {
     const idStr = typeof rawId === 'object' ? String(rawId.id || rawId._id || '') : String(rawId);
-    const found = availableAccessLevels.value.find(a => String(a.id) === idStr);
-    if (found) return found.accessLevelName || found.name || found.groupName;
+    const found = availableAccessLevels.value.find(a => String(a.id) === idStr || String(a.accessLevelNumber) === idStr);
+    if (found) return found.accessLevelName || found.name || found.groupName || `Group #${found.id}`;
+    return `Group #${idStr}`;
   }
   return 'No Access Group';
 };
@@ -1323,10 +1324,71 @@ const executeBulkAssign = async () => {
           })
         });
       }
+
+      // Broadcast permission sync to controller hardware devices
+      try {
+        bulkAssignProgress.statusText = "Broadcasting permissions to devices...";
+        const alRes = await fetch(`${import.meta.env.VITE_API_URL}/items/accesslevels/${bulkAssignForm.accessLevelId}?fields=*,assignedDoors.doors_id.*`, {
+          headers: { Authorization: `Bearer ${activeToken}` }
+        });
+        if (alRes.ok) {
+          const alData = await alRes.json();
+          const doors = alData.data?.assignedDoors || [];
+          const deviceUuids = [...new Set(doors.map(d => d.doors_id?.deviceUuid || d.doors_id?.uniqueId).filter(Boolean))];
+
+          for (let i = 0; i < idsToUpdate.length; i += chunkSize) {
+            const chunk = idsToUpdate.slice(i, i + chunkSize);
+            const empRes = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule?filter[id][_in]=${chunk.join(',')}&fields=id,employeeId,assignedCards.cardManagement_id.rfidCard,assignedCards.cardManagement_id.type`, {
+              headers: { Authorization: `Bearer ${activeToken}` }
+            });
+            if (empRes.ok) {
+              const empData = await empRes.json();
+              const employees = empData.data || [];
+
+              for (const uuid of deviceUuids) {
+                const payloadData = [];
+                employees.forEach(emp => {
+                  const cards = emp.assignedCards || [];
+                  cards.forEach((cItem, idx) => {
+                    const cardNo = cItem.cardManagement_id?.rfidCard;
+                    if (cardNo) {
+                      payloadData.push({
+                        id: String(cardNo),
+                        type: 200,
+                        code: String(cardNo),
+                        index: idx + 1,
+                        time: { type: 0 },
+                        extra: { name: emp.employeeId }
+                      });
+                    }
+                  });
+                });
+
+                if (payloadData.length > 0) {
+                  await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-mqtt`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      action: "insertPermission",
+                      uuid: uuid,
+                      data: payloadData
+                    })
+                  });
+                }
+              }
+            }
+          }
+        }
+      } catch (syncErr) {
+        console.error("Bulk MQTT permission broadcast error:", syncErr);
+      }
     }
 
-    messageHandler.showSuccess(`Successfully updated ${idsToUpdate.length} employee(s)`);
+    messageHandler.showSuccess(`Successfully updated & synced ${idsToUpdate.length} employee(s)`);
     selectedEmployeeIds.value = [];
+    bulkAssignForm.accessLevelId = "";
+    bulkAssignForm.roleId = "";
+    showBulkAssignModal.value = false;
     fetchEmployeeData();
   } catch (err) {
     console.error("Bulk assign error:", err);
