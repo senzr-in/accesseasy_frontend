@@ -58,40 +58,71 @@ const checkBatchDuplicates = async (collectionName, batch, userTenant) => {
 
   if (!checkKey) return new Map();
 
+  const resultMap = new Map();
+
+  // 1. Primary field duplicate check using filter[_in] (efficient & avoids 400 Bad Request)
   const valuesToCheck = batch
     .map(data => (collectionName === 'personalModule' ? data.uniqueId : data[checkKey]))
     .filter(val => val !== undefined && val !== null && val !== '');
 
-  if (!valuesToCheck.length) return new Map();
-
-  const params = new URLSearchParams();
-  valuesToCheck.forEach((val, idx) => {
-    params.append(`filter[_or][${idx}][${checkKey}][_eq]`, val.toString());
-  });
-
-  if (collectionName !== "personalModule") {
-    params.append('filter[tenant][_eq]', userTenant);
-  }
-  params.append('limit', batch.length.toString());
-  params.append('fields', `id,${checkKey}`);
-
-  try {
-    const response = await fetch(`${API_URL}/items/${collectionName}?${params.toString()}`, {
-      headers: getHeaders()
-    });
-    const existingData = await response.json();
-    const records = existingData.data || [];
-    const resultMap = new Map();
-    records.forEach(r => {
-      if (r[checkKey]) {
-        resultMap.set(r[checkKey].toString().trim().toLowerCase(), r);
+  if (valuesToCheck.length) {
+    try {
+      const params = new URLSearchParams();
+      params.append(`filter[${checkKey}][_in]`, valuesToCheck.join(','));
+      if (collectionName !== "personalModule") {
+        params.append('filter[tenant][_eq]', userTenant);
       }
-    });
-    return resultMap;
-  } catch (error) {
-    console.error('Error in batch duplicate check:', error);
-    return new Map();
+      params.append('limit', batch.length.toString());
+      params.append('fields', `id,${checkKey}`);
+
+      const response = await fetch(`${API_URL}/items/${collectionName}?${params.toString()}`, {
+        headers: getHeaders()
+      });
+      if (response.ok) {
+        const existingData = await response.json();
+        const records = existingData.data || [];
+        records.forEach(r => {
+          if (r[checkKey]) {
+            resultMap.set(r[checkKey].toString().trim().toLowerCase(), r);
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error in batch duplicate check (primary):', error);
+    }
   }
+
+  // 2. Additional check for personalModule emails to catch duplicate user emails
+  if (collectionName === 'personalModule') {
+    const emailsToCheck = batch
+      .map(d => d.assignedUser?.email || d.personalEmail)
+      .filter(val => val !== undefined && val !== null && val !== '');
+
+    if (emailsToCheck.length) {
+      try {
+        const emailParams = new URLSearchParams();
+        emailParams.append('filter[assignedUser][email][_in]', emailsToCheck.join(','));
+        emailParams.append('limit', batch.length.toString());
+        emailParams.append('fields', 'id,uniqueId,assignedUser.email');
+
+        const emailRes = await fetch(`${API_URL}/items/personalModule?${emailParams.toString()}`, {
+          headers: getHeaders()
+        });
+        if (emailRes.ok) {
+          const emailData = await emailRes.json();
+          (emailData.data || []).forEach(r => {
+            if (r.assignedUser?.email) {
+              resultMap.set(r.assignedUser.email.toString().trim().toLowerCase(), r);
+            }
+          });
+        }
+      } catch (err) {
+        console.error('Error in batch duplicate check (emails):', err);
+      }
+    }
+  }
+
+  return resultMap;
 };
 
 const sendPatchRequest = async (itemId, data, collectionName) => {
@@ -165,12 +196,14 @@ export const processCSVImport = async (file, collectionName, userTenant, options
 
             let checkVal = collectionName === 'personalModule' ? data.uniqueId : data[nameField];
             let normalizedVal = checkVal?.toString().trim().toLowerCase();
+            let emailVal = collectionName === 'personalModule' ? (data.assignedUser?.email || data.personalEmail)?.toString().trim().toLowerCase() : null;
 
-            if (normalizedVal && existingMap.has(normalizedVal)) {
-              const existingRecord = existingMap.get(normalizedVal);
+            const existingRecord = (normalizedVal && existingMap.get(normalizedVal)) || (emailVal && existingMap.get(emailVal));
+
+            if (existingRecord) {
               duplicateItems.push({
                 data,
-                name: data[nameField] || data.employeeId,
+                name: data[nameField] || data.employeeId || data.assignedUser?.email,
                 existingRecord
               });
             } else {
