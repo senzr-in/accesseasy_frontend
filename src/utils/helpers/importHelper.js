@@ -1,3 +1,15 @@
+import { authService } from '@/services/authService';
+
+const API_URL = import.meta.env.VITE_API_URL || 'https://appv1.fieldseasy.com/directus';
+
+const getHeaders = (extraHeaders = {}) => {
+  const token = authService.getToken();
+  return {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...extraHeaders
+  };
+};
+
 const exportHeaders = {
   doors: ["door Number", "door Name"],
   personalModule: ["Profile", "Employee ID", "person Name", "Phone", "Email", "Assigned Cards", "Assigned Tags"],
@@ -64,7 +76,9 @@ const checkBatchDuplicates = async (collectionName, batch, userTenant) => {
   params.append('fields', `id,${checkKey}`);
 
   try {
-    const response = await fetch(`/items/${collectionName}?${params.toString()}`);
+    const response = await fetch(`${API_URL}/items/${collectionName}?${params.toString()}`, {
+      headers: getHeaders()
+    });
     const existingData = await response.json();
     const records = existingData.data || [];
     const resultMap = new Map();
@@ -81,9 +95,9 @@ const checkBatchDuplicates = async (collectionName, batch, userTenant) => {
 };
 
 const sendPatchRequest = async (itemId, data, collectionName) => {
-  const response = await fetch(`/items/${collectionName}/${itemId}`, {
+  const response = await fetch(`${API_URL}/items/${collectionName}/${itemId}`, {
     method: "PATCH",
-    headers: { "Content-Type": "application/json" },
+    headers: getHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify(data),
   });
   if (!response.ok) {
@@ -269,7 +283,25 @@ const transformDoorData = (rowData, userTenant) => {
 };
 
 const transformPersonalModuleData = (rowData, userTenant) => {
-  const { "employee id": employeeId, "person name": name, phone, email, "assigned cards": assignedCards, "assigned tags": assignedTag} = rowData;
+  const employeeId = rowData["employee id"] || rowData["employeeid"] || rowData["id"] || rowData["emp id"] || "";
+  const rawFirstName = rowData["first name"] || rowData["firstname"] || "";
+  const rawLastName = rowData["last name"] || rowData["lastname"] || "";
+  const rawFullName = rowData["person name"] || rowData["name"] || rowData["full name"] || "";
+  const email = rowData["email"] || rowData["official work email"] || rowData["work email"] || rowData["personal email"] || "";
+  const phone = rowData["phone"] || rowData["mobile"] || rowData["personal phone"] || "";
+  const designation = rowData["designation"] || rowData["title"] || "";
+  const assignedCards = rowData["assigned cards"] || rowData["cards"] || "";
+  const assignedTag = rowData["assigned tags"] || rowData["tags"] || "";
+
+  let firstName = rawFirstName.trim();
+  let lastName = rawLastName.trim();
+
+  if (!firstName && rawFullName) {
+    const parts = rawFullName.trim().split(" ");
+    firstName = parts[0] || "";
+    lastName = parts.slice(1).join(" ") || "";
+  }
+
   const cards = assignedCards ?
     assignedCards.split(",")
       .map(card => card.trim())
@@ -280,7 +312,7 @@ const transformPersonalModuleData = (rowData, userTenant) => {
       .map(number => ({ cardManagement_id: { rfidCard: number, type: "tag" } }))
     : [];
 
-    const tags = assignedTag ?
+  const tags = assignedTag ?
     assignedTag.split(",")
       .map(tags => tags.trim())
       .filter(Boolean)
@@ -290,15 +322,18 @@ const transformPersonalModuleData = (rowData, userTenant) => {
       .map(number => ({ cardManagement_id: { rfidCard: number, type: "rfid" } }))
     : [];
 
-
   const payload = {
-    employeeId,
+    employeeId: employeeId?.trim() || "",
+    firstName: firstName,
+    lastName: lastName,
+    designation: designation?.trim() || "",
     status: "active",
     accessOn: "true",
     assignedUser: {
-      first_name: name?.trim() || "",
+      first_name: firstName || "Employee",
+      last_name: lastName || "-",
       email: email?.trim() || "",
-      phone: phone?.trim() || "",
+      phone: phone?.trim() ? (phone.trim().startsWith("+91") ? phone.trim() : `+91${phone.trim()}`) : "",
       avatar: null,
       tenant: userTenant,
       role: null,
@@ -391,8 +426,9 @@ const sendImportRequest = async (transformedData, collectionName) => {
   const formData = new FormData();
   formData.append("file", new Blob([JSON.stringify(transformedData)], { type: "application/json" }), "data.json");
 
-  const response = await fetch(`/utils/import/${collectionName}`, {
+  const response = await fetch(`${API_URL}/utils/import/${collectionName}`, {
     method: "POST",
+    headers: getHeaders(),
     body: formData,
   });
 
@@ -405,10 +441,10 @@ const sendImportRequest = async (transformedData, collectionName) => {
 };
 
 async function generateSequentialAccessLevelNumber(userTenant) {
- 
   try {
     const response = await fetch(
-      `/items/accesslevels?filter[tenant][tenantId][_eq]=${userTenant}&sort[]=-accessLevelNumber&limit=1`
+      `${API_URL}/items/accesslevels?filter[tenant][tenantId][_eq]=${userTenant}&sort[]=-accessLevelNumber&limit=1`,
+      { headers: getHeaders() }
     );
     const data = await response.json();
 
@@ -428,7 +464,8 @@ async function generateSequentialAccessLevelNumber(userTenant) {
 async function generateSequentialBranchId(userTenant) {
   try {
     const response = await fetch(
-      `/items/branch?filter[tenant][tenantId][_eq]=${userTenant}&sort[]=-branchId&limit=1`
+      `${API_URL}/items/branch?filter[tenant][tenantId][_eq]=${userTenant}&sort[]=-branchId&limit=1`,
+      { headers: getHeaders() }
     );
     const data = await response.json();
 
@@ -448,7 +485,8 @@ async function generateSequentialBranchId(userTenant) {
 async function generateSequentialDepartmentId(userTenant) {
   try {
     const response = await fetch(
-      `/items/department?filter[tenant][tenantId][_eq]=${userTenant}&sort[]=-departmentId&limit=1`
+      `${API_URL}/items/department?filter[tenant][tenantId][_eq]=${userTenant}&sort[]=-departmentId&limit=1`,
+      { headers: getHeaders() }
     );
     const data = await response.json();
 
@@ -463,11 +501,13 @@ async function generateSequentialDepartmentId(userTenant) {
     return "1";
   }
 };
- // Add new door number generator
+
+// Add new door number generator
 async function generateSequentialDoorNumber(userTenant) {
   try {
     const response = await fetch(
-      `/items/doors?filter[tenant][tenantId][_eq]=${userTenant}&sort[]=-doorNumber&limit=1`
+      `${API_URL}/items/doors?filter[tenant][tenantId][_eq]=${userTenant}&sort[]=-doorNumber&limit=1`,
+      { headers: getHeaders() }
     );
     const data = await response.json();
 
