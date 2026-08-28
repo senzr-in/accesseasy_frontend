@@ -363,13 +363,15 @@ const transformDoorData = (rowData, userTenant) => {
 
 const transformPersonalModuleData = (rowData, userTenant) => {
   const employeeId = rowData["employee id"] || rowData["employeeid"] || rowData["id"] || rowData["emp id"] || "";
-  const rawFirstName = rowData["first name"] || rowData["firstname"] || "";
-  const rawLastName = rowData["last name"] || rowData["lastname"] || "";
+  const rawFirstName = rowData["firstname"] || rowData["first name"] || "";
+  const rawLastName = rowData["lastname"] || rowData["last name"] || "";
+  const middleName = rowData["middlename"] || rowData["middle name"] || "";
+  const gender = rowData["gender"] || "";
   const rawFullName = rowData["person name"] || rowData["name"] || rowData["full name"] || "";
   const email = rowData["email"] || rowData["official work email"] || rowData["work email"] || rowData["personal email"] || "";
   const phone = rowData["phone"] || rowData["mobile"] || rowData["personal phone"] || "";
   const designation = rowData["designation"] || rowData["title"] || "";
-  const assignedCards = rowData["assigned cards"] || rowData["cards"] || "";
+  const rfidCardVal = rowData["rfidcard"] || rowData["rfid card"] || rowData["rfid"] || rowData["assigned cards"] || rowData["cards"] || "";
   const assignedTag = rowData["assigned tags"] || rowData["tags"] || "";
 
   let firstName = rawFirstName.trim();
@@ -381,33 +383,37 @@ const transformPersonalModuleData = (rowData, userTenant) => {
     lastName = parts.slice(1).join(" ") || "";
   }
 
-  const cards = assignedCards ?
-    assignedCards.split(",")
+  const cards = rfidCardVal ?
+    rfidCardVal.toString().split(",")
       .map(card => card.trim())
       .filter(Boolean)
-      .map(card => parseInt(card.replace(/['"\\]/g, ""), 10))
-      .filter(num => !isNaN(num))
+      .map(card => card.replace(/['"\\]/g, ""))
+      .filter(val => val)
       .slice(0, 4)
-      .map(number => ({ cardManagement_id: { rfidCard: number, type: "tag" } }))
+      .map(number => ({ cardManagement_id: { rfidCard: number, type: "rfid" } }))
     : [];
 
   const tags = assignedTag ?
-    assignedTag.split(",")
+    assignedTag.toString().split(",")
       .map(tags => tags.trim())
       .filter(Boolean)
-      .map(tags => parseInt(tags.replace(/['"\\]/g, ""), 10))
-      .filter(num => !isNaN(num))
+      .map(tags => tags.replace(/['"\\]/g, ""))
+      .filter(val => val)
       .slice(0, 4)
-      .map(number => ({ cardManagement_id: { rfidCard: number, type: "rfid" } }))
+      .map(number => ({ cardManagement_id: { rfidCard: number, type: "tag" } }))
     : [];
 
   const payload = {
     employeeId: employeeId?.trim() || "",
     firstName: firstName,
     lastName: lastName,
+    middleName: middleName?.trim() || "",
+    gender: gender?.trim() || "",
     designation: designation?.trim() || "",
-    status: "active",
-    accessOn: "true",
+    personalPhone: phone?.trim() || null,
+    personalEmail: email?.trim() || null,
+    status: "true",
+    accessOn: true,
     assignedUser: {
       first_name: firstName || "Employee",
       last_name: lastName || "-",
