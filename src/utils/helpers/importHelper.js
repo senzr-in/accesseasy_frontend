@@ -268,36 +268,41 @@ export const processCSVImport = async (file, collectionName, userTenant, options
 
         let updatedCount = 0;
         if (userChoice === 'edit' && duplicateItems.length > 0) {
-          for (const item of duplicateItems) {
-            try {
-              const patchPayload = { ...item.data };
-              const existingRecordId = item.existingRecord?.id;
-              const existingUserObj = item.existingRecord?.assignedUser;
-              const existingUserId = typeof existingUserObj === 'object' ? existingUserObj?.id : existingUserObj;
+          const PATCH_CONCURRENCY = 15;
+          for (let i = 0; i < duplicateItems.length; i += PATCH_CONCURRENCY) {
+            const chunk = duplicateItems.slice(i, i + PATCH_CONCURRENCY);
+            await Promise.all(chunk.map(async (item) => {
+              try {
+                const patchPayload = { ...item.data };
+                const existingRecordId = item.existingRecord?.id;
+                const existingUserObj = item.existingRecord?.assignedUser;
+                const existingUserId = typeof existingUserObj === 'object' ? existingUserObj?.id : existingUserObj;
 
-              if (collectionName === 'personalModule' && patchPayload.assignedUser) {
-                if (existingUserId) {
-                  patchPayload.assignedUser = {
-                    id: existingUserId,
-                    ...patchPayload.assignedUser
-                  };
-                } else {
-                  delete patchPayload.assignedUser;
+                if (collectionName === 'personalModule' && patchPayload.assignedUser) {
+                  if (existingUserId) {
+                    patchPayload.assignedUser = {
+                      id: existingUserId,
+                      ...patchPayload.assignedUser
+                    };
+                  } else {
+                    delete patchPayload.assignedUser;
+                  }
                 }
-              }
 
-              if (existingRecordId) {
-                await sendPatchRequest(existingRecordId, patchPayload, collectionName);
-                updatedCount++;
-              } else if (existingUserId) {
-                // User exists in /users but has no personalModule item yet
-                patchPayload.assignedUser = existingUserId;
-                await sendImportRequest([patchPayload], collectionName);
-                updatedCount++;
+                if (existingRecordId) {
+                  await sendPatchRequest(existingRecordId, patchPayload, collectionName);
+                  updatedCount++;
+                } else if (existingUserId) {
+                  // User exists in /users but has no personalModule item yet
+                  patchPayload.assignedUser = existingUserId;
+                  await sendImportRequest([patchPayload], collectionName);
+                  updatedCount++;
+                }
+              } catch (err) {
+                console.error(`Failed to update duplicate record ${item.name}:`, err);
               }
-            } catch (err) {
-              console.error(`Failed to update duplicate record ${item.name}:`, err);
-            }
+            }));
+            console.log(`Updated duplicates progress: ${Math.min(i + PATCH_CONCURRENCY, duplicateItems.length)}/${duplicateItems.length}`);
           }
         }
 
