@@ -1061,6 +1061,10 @@ onMounted(() => {
   fetchEmployeeData();
 });
 
+watch(page, () => {
+  fetchEmployeeData();
+});
+
 onUnmounted(() => {
   window.removeEventListener('click', handleClickOutside);
 });
