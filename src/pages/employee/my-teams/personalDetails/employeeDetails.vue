@@ -828,6 +828,7 @@ import {
 } from "lucide-vue-next";
 import { authService } from "@/services/authService";
 import { currentUserTenant } from "@/utils/currentUserTenant";
+import { mqttService } from "@/services/mqttService";
 import DeleteProgressModal from "@/components/common/modals/DeleteProgressModal.vue";
 import AddEmployeeDialog from "./addEmployeeDialog.vue";
 import ExportEmployees from "./report/exportEmployees.vue";
@@ -1328,13 +1329,38 @@ const executeBulkAssign = async () => {
       // Broadcast permission sync to controller hardware devices
       try {
         bulkAssignProgress.statusText = "Broadcasting permissions to devices...";
-        const alRes = await fetch(`${import.meta.env.VITE_API_URL}/items/accesslevels/${bulkAssignForm.accessLevelId}?fields=*,assignedDoors.doors_id.*`, {
-          headers: { Authorization: `Bearer ${activeToken}` }
-        });
-        if (alRes.ok) {
-          const alData = await alRes.json();
-          const doors = alData.data?.assignedDoors || [];
-          const deviceUuids = [...new Set(doors.map(d => d.doors_id?.deviceUuid || d.doors_id?.uniqueId).filter(Boolean))];
+        let deviceUuids = [];
+
+        try {
+          const alRes = await fetch(`${import.meta.env.VITE_API_URL}/items/accesslevels/${bulkAssignForm.accessLevelId}?fields=*,assignedDoors.doors_id.*`, {
+            headers: { Authorization: `Bearer ${activeToken}` }
+          });
+          if (alRes.ok) {
+            const alData = await alRes.json();
+            const doors = alData.data?.assignedDoors || [];
+            deviceUuids = [...new Set(doors.map(d => d.doors_id?.deviceUuid || d.doors_id?.uniqueId).filter(Boolean))];
+          }
+        } catch (e) {
+          console.warn("Failed to fetch access level doors:", e);
+        }
+
+        // Fallback: If access level has no linked doors, query all tenant doors for device UUIDs
+        if (deviceUuids.length === 0) {
+          try {
+            const doorsRes = await fetch(`${import.meta.env.VITE_API_URL}/items/doors?limit=-1&fields=id,deviceUuid,uniqueId`, {
+              headers: { Authorization: `Bearer ${activeToken}` }
+            });
+            if (doorsRes.ok) {
+              const doorsData = await doorsRes.json();
+              deviceUuids = [...new Set((doorsData.data || []).map(d => d.deviceUuid || d.uniqueId).filter(Boolean))];
+            }
+          } catch (e) {
+            console.warn("Failed to fetch tenant doors:", e);
+          }
+        }
+
+        if (deviceUuids.length > 0) {
+          mqttService.connect();
 
           for (let i = 0; i < idsToUpdate.length; i += chunkSize) {
             const chunk = idsToUpdate.slice(i, i + chunkSize);
@@ -1365,15 +1391,7 @@ const executeBulkAssign = async () => {
                 });
 
                 if (payloadData.length > 0) {
-                  await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-mqtt`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      action: "insertPermission",
-                      uuid: uuid,
-                      data: payloadData
-                    })
-                  });
+                  await mqttService.publishCommand(uuid, 'insertPermission', payloadData);
                 }
               }
             }
