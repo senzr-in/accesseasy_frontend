@@ -213,7 +213,7 @@
                 </span>
               </td>
               <td class="px-5 py-3 text-right">
-                <div class="flex items-center justify-end gap-2 opacity-0 group-hover/row:opacity-100 transition-opacity pr-2">
+                <div class="flex items-center justify-end gap-2 opacity-100 pr-2">
                   <button 
                     v-if="device.status !== 'approved'"
                     title="Approve Node"
