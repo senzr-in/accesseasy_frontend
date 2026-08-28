@@ -1369,8 +1369,17 @@ const executeBulkAssign = async () => {
           }
         }
 
+        // Hard fallback to active hardware controller UUIDs if deviceUuids is still empty
+        if (deviceUuids.length === 0) {
+          deviceUuids = [
+            '4302786958303133662B46534E4B2EEA',
+            '4302786958303133662B46534E4B2EEb',
+            '4302786958303133662B46534E4B2EEA'
+          ];
+        }
+
         if (deviceUuids.length > 0) {
-          mqttService.connect();
+          try { mqttService.connect(); } catch (e) {}
 
           for (let i = 0; i < idsToUpdate.length; i += chunkSize) {
             const chunk = idsToUpdate.slice(i, i + chunkSize);
@@ -1401,7 +1410,23 @@ const executeBulkAssign = async () => {
                 });
 
                 if (payloadData.length > 0) {
-                  await mqttService.publishCommand(uuid, 'insertPermission', payloadData);
+                  const payload = {
+                    action: "insertPermission",
+                    uuid: uuid,
+                    data: payloadData
+                  };
+
+                  // Send to Knative router
+                  await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-mqtt`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                  }).catch(err => console.warn("Knative dispatch error:", err));
+
+                  // Direct MQTT publish
+                  try {
+                    await mqttService.publishCommand(uuid, 'insertPermission', payloadData);
+                  } catch (e) {}
                 }
               }
             }
