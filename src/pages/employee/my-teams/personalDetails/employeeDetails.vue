@@ -371,10 +371,20 @@
               </td>
 
               <!-- Access Level -->
-              <td class="py-2.5 px-3.5 font-medium text-[#475569]">
-                <p class="truncate max-w-[130px] text-xs" :title="getEmployeeAccessName(emp)">
-                  {{ getEmployeeAccessName(emp) }}
-                </p>
+              <td class="py-2.5 px-3.5 font-medium">
+                <div
+                  class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg border font-medium text-[11px] transition-all"
+                  :class="[
+                    getEmployeeAccessName(emp) !== 'No Access Group'
+                      ? 'bg-[#EFF6FF] text-[#1D4ED8] border-[#BFDBFE]'
+                      : 'bg-[#F8FAFC] text-[#94A3B8] border-[#E2E8F0]'
+                  ]"
+                >
+                  <Shield class="w-3 h-3 shrink-0" :class="getEmployeeAccessName(emp) !== 'No Access Group' ? 'text-[#2563EB]' : 'text-[#94A3B8]'" />
+                  <span class="truncate max-w-[130px]" :title="getEmployeeAccessName(emp)">
+                    {{ getEmployeeAccessName(emp) }}
+                  </span>
+                </div>
               </td>
 
               <!-- Status Indicator -->
@@ -717,7 +727,7 @@
               v-model="bulkAssignForm.accessLevelId"
               class="w-full h-9 px-2.5 bg-[#FFFFFF] border border-[#E2E8F0] rounded-xl text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
             >
-              <option value="">-- No Change (Keep Existing) --</option>
+              <option value="">-- Select Access Group to Assign --</option>
               <option v-for="al in availableAccessLevels" :key="al.id" :value="al.id">
                 {{ al.groupName || al.name || al.title || al.accessLevelName }}
               </option>
