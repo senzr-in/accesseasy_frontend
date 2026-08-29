@@ -1,4 +1,6 @@
 import { authService } from '@/services/authService';
+import { mqttService } from '@/services/mqttService';
+import { currentUserTenant } from '@/utils/currentUserTenant';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://appv1.fieldseasy.com/directus';
 
@@ -227,15 +229,28 @@ export const processCSVImport = async (file, collectionName, userTenant, options
             const existingRecord = (normalizedVal && existingMap.get(normalizedVal)) || (emailVal && existingMap.get(emailVal));
 
             if (existingRecord) {
-              duplicateItems.push({
-                data,
-                name: data[nameField] || data.employeeId || data.assignedUser?.email,
-                existingRecord
-              });
+              if (collectionName === 'personalModule' && existingRecord.id === null && existingRecord.assignedUser?.id) {
+                // User exists in /users but has no personalModule record in directory. Auto-reuse user ID!
+                data.assignedUser = existingRecord.assignedUser.id;
+                data[`personalModuleId`] = currentNumber.toString();
+                if (!data.uniqueId) {
+                  data.uniqueId = `${userTenant}-${data.employeeId || currentNumber}`;
+                }
+                currentNumber++;
+                validRecords.push(data);
+              } else {
+                duplicateItems.push({
+                  data,
+                  name: data[nameField] || data.employeeId || data.assignedUser?.email,
+                  existingRecord
+                });
+              }
             } else {
               // Assign sequence number and uniqueId
               data[`${collectionName === 'accesslevels' ? 'accessLevelNumber' : collectionName.slice(0, -1) + 'Id'}`] = currentNumber.toString();
-              data.uniqueId = `${userTenant}-${currentNumber}`;
+              if (!data.uniqueId) {
+                data.uniqueId = `${userTenant}-${data.employeeId || currentNumber}`;
+              }
               currentNumber++;
               validRecords.push(data);
             }
@@ -309,6 +324,100 @@ export const processCSVImport = async (file, collectionName, userTenant, options
         // Import valid (new) records
         if (validRecords.length > 0) {
           await sendImportRequest(validRecords, collectionName);
+        }
+
+        // Automatically sync imported RFID cards to hardware controllers over MQTT
+        if (collectionName === 'personalModule') {
+          try {
+            const importedRecords = userChoice === 'edit'
+              ? [...validRecords, ...duplicateItems.map(d => d.data)]
+              : validRecords;
+
+            const cardPayloads = [];
+            importedRecords.forEach((item, idx) => {
+              let rfidNo = item.rfidCardVal || item.rfidCard;
+              if (!rfidNo && item.assignedCards?.create?.[0]?.cardManagement_id?.rfidCard) {
+                rfidNo = item.assignedCards.create[0].cardManagement_id.rfidCard;
+              }
+              if (rfidNo) {
+                const cardStr = String(rfidNo).trim();
+                cardPayloads.push({
+                  id: cardStr,
+                  type: 200,
+                  code: cardStr,
+                  index: idx + 1,
+                  time: { type: 0 },
+                  extra: { name: String(item.employeeId || item.firstName || `EMP-${idx + 1}`) }
+                });
+              }
+            });
+
+            if (cardPayloads.length > 0) {
+              console.log(`Syncing ${cardPayloads.length} imported RFID cards to physical hardware controllers over MQTT...`);
+
+              let deviceUuids = [];
+              try {
+                const currentTenantId = currentUserTenant.getTenantId();
+                const doorsRes = await fetch(`${API_URL}/items/doors?limit=-1&fields=id,deviceUuid,uniqueId,tenant.tenantId,tenant`, {
+                  headers: getHeaders()
+                });
+                if (doorsRes.ok) {
+                  const doorsData = await doorsRes.json();
+                  const tenantDoors = (doorsData.data || []).filter(d => {
+                    const tId = d.tenant?.tenantId || d.tenant?.id || d.tenant;
+                    return currentTenantId && String(tId) === String(currentTenantId);
+                  });
+                  deviceUuids = [...new Set(tenantDoors.map(d => d.deviceUuid || d.uniqueId).filter(Boolean))];
+                }
+              } catch (e) {
+                console.warn("Failed to query doors for MQTT sync:", e);
+              }
+
+              // Always ensure physical 4-Door Controller UUIDs receive the insertPermission command
+              const HARDWARE_CONTROLLER_UUIDS = [
+                '4302786958303133662B46534E4B2EEA',
+                '4302786958303133662B46534E4B2EEb'
+              ];
+
+              HARDWARE_CONTROLLER_UUIDS.forEach(hwUuid => {
+                if (!deviceUuids.includes(hwUuid)) {
+                  deviceUuids.push(hwUuid);
+                }
+              });
+
+              console.log("Target Controller UUIDs for insertPermission broadcast:", deviceUuids);
+
+              try { mqttService.connect(); } catch (e) {}
+
+              const MQTT_CHUNK_SIZE = 50;
+              for (let i = 0; i < cardPayloads.length; i += MQTT_CHUNK_SIZE) {
+                const batchChunk = cardPayloads.slice(i, i + MQTT_CHUNK_SIZE);
+                for (const uuid of deviceUuids) {
+                  const payload = {
+                    action: "insertPermission",
+                    uuid: uuid,
+                    data: batchChunk
+                  };
+
+                  console.log(`[MQTT Broadcast] Sending insertPermission (${batchChunk.length} cards) to controller ${uuid}...`);
+
+                  // Send via Knative Router HTTP Endpoint
+                  await fetch(`${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-mqtt`, {
+                    method: "POST",
+                    headers: getHeaders({ "Content-Type": "application/json" }),
+                    body: JSON.stringify(payload)
+                  }).catch(err => console.warn("Knative router import sync error:", err));
+
+                  // Direct MQTT Broker Publish
+                  try {
+                    await mqttService.publishCommand(uuid, 'insertPermission', batchChunk);
+                  } catch (e) {}
+                }
+              }
+            }
+          } catch (syncError) {
+            console.error("Failed to sync imported cards to hardware device over MQTT:", syncError);
+          }
         }
 
         const skippedCount = userChoice === 'skip' ? duplicateItems.length : duplicateItems.length - updatedCount;
@@ -430,6 +539,7 @@ const transformPersonalModuleData = (rowData, userTenant) => {
     },
     assignedCards: { create: cards, update: [], delete: [] },
     assignedTag: { create: tags, update: [], delete: [] },
+    rfidCardVal: rfidCardVal ? rfidCardVal.toString().trim() : null,
     uniqueId: `${userTenant}-${employeeId}`,
   };
   console.log("payload", payload);
