@@ -844,16 +844,14 @@ async function handleNewPinAction() {
       return;
     }
     await savePin(newPinDigits.value.join(""));
-    try {
-      const userData =
-        props.contactType === "email"
-          ? await authService.getUserByEmail(userEmail.value).catch(() => null)
-          : await authService.getUserByPhone(userPhone.value).catch(() => null);
-      if (userData) authService.setUserData(userData);
-    } catch (e) {}
+    const userData =
+      props.contactType === "email"
+        ? await authService.getUserByEmail(userEmail.value)
+        : await authService.getUserByPhone(userPhone.value);
+    authService.setUserData(userData);
     authService.setPinVerified(true);
     setSuccessMessage(`PIN created successfully! Redirecting...`);
-    setTimeout(() => router.push("/dashboard"), 1200);
+    setTimeout(() => router.push("/taskManagement/taskcomponents"), 2000);
   } catch (e) {
     setErrorMessage(e.message || "Failed to create PIN");
   } finally {
@@ -880,27 +878,22 @@ async function checkUserPin() {
     let user;
     if (props.contactType === "email") {
       userEmail.value = props.contactValue;
-      user = await authService.getUserByEmail(userEmail.value).catch(() => null);
+      user = await authService.getUserByEmail(userEmail.value);
     } else {
       userPhone.value = props.contactValue;
       displayPhone.value = formatPhoneForDisplay(
         userPhone.value.replace("+91", ""),
       );
-      user = await authService.getUserByPhone(userPhone.value).catch(() => null);
-    }
-    if (!user) {
-      user = authService.getUserData();
+      user = await authService.getUserByPhone(userPhone.value);
     }
     if (user) {
-      userId.value = user.id || "local-user-id";
+      userId.value = user.id;
       userPin.value = user.userPin;
       return !!user.userPin;
     }
-    userId.value = "local-user-id";
     return false;
   } catch (e) {
     console.error(e);
-    userId.value = "local-user-id";
     return false;
   }
 }
@@ -923,10 +916,10 @@ async function verifyPin() {
       ? decryptData(dbPin).trim()
       : dbPin.toString().trim();
 
-    if (currentPin.value === dbPin || currentPin.value === "0000" || !dbPin) {
+    if (currentPin.value === dbPin) {
       setSuccessMessage("PIN verified successfully");
       authService.setPinVerified(true);
-      setTimeout(() => router.push("/dashboard"), 1200);
+      setTimeout(() => router.push("/taskManagement/taskcomponents"), 1500);
       return;
     }
 
@@ -948,18 +941,32 @@ async function verifyPin() {
 }
 
 async function savePin(pin) {
-  const encrypted = encryptData(pin);
-  localStorage.setItem("userPin", encrypted);
-  if (userId.value && userId.value !== "local-user-id") {
-    try {
-      await authService.protectedApi.patch(
-        `/users/${userId.value}`,
-        { userPin: encrypted },
-      );
-    } catch (e) {
-      console.warn("Could not patch userPin to remote backend:", e.message);
+  if (!userId.value) {
+    const storedUser = authService.getUserData();
+    if (storedUser && storedUser.id) {
+      userId.value = storedUser.id;
+    } else {
+      const contactVal = props.contactValue || route.params.phone || route.params.email;
+      if (contactVal) {
+        try {
+          const user = props.contactType === "email"
+            ? await authService.getUserByEmail(contactVal)
+            : await authService.getUserByPhone(contactVal);
+          if (user && user.id) userId.value = user.id;
+        } catch (e) {
+          console.warn("[savePin] Failed to resolve user by contact:", e);
+        }
+      }
     }
   }
+
+  if (!userId.value) throw new Error("User ID not found");
+  const encrypted = encryptData(pin);
+  const { status } = await authService.protectedApi.patch(
+    `/users/${userId.value}`,
+    { userPin: encrypted },
+  );
+  if (status !== 200) throw new Error("Failed to save PIN");
 }
 
 /* ------------------------------------------------------------------ */

@@ -12,7 +12,9 @@ export default defineConfig(({ mode }) => {
     plugins: [vue(), tailwindcss()],
     resolve: { alias: { "@": path.resolve(__dirname, "./src") } },
     define: { 
-      VITE_API_URL: JSON.stringify(env.VITE_API_URL),
+      VITE_API_URL: JSON.stringify(env.VITE_API_URL || 'https://appv1.fieldseasy.com/directus'),
+      VITE_KN_API_URL: JSON.stringify(env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'),
+      VITE_API_TOKEN: JSON.stringify(env.VITE_API_TOKEN || 'p2pJHhZAjca6jQea0RbPVwNWRyrJG29X'),
       'import.meta.env.VITE_APP_MODE': JSON.stringify('workforce')
     },
     build: { outDir: path.resolve(__dirname, 'dist/workforce'), emptyOutDir: true },

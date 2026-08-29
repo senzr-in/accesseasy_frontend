@@ -444,32 +444,19 @@ async function handleSubmit() {
 
     // Save identifier in storage
     if (isPhone) {
-      const fullPhone = "+91" + digits;
-      authService.setPhone(fullPhone);
-      localStorage.setItem("userPhone", fullPhone);
+      localStorage.setItem("userPhone", digits);
     } else if (isEmail) {
-      authService.setEmail(rawVal);
       localStorage.setItem("email", rawVal);
-    } else if (activeTab.value === "employee_id") {
-      authService.setPhone(rawVal);
-      localStorage.setItem("userPhone", rawVal);
     }
 
-    // Ensure session token is set so router navigation guard allows access to /dashboard
-    if (!authService.getToken()) {
-      authService.setToken(`dev-token-${Date.now()}`);
-    }
-
-    localStorage.setItem("pinVerifiedInSession", "true");
-
-    // Direct password / credential authentication straight to Dashboard
+    // Direct password / credential authentication straight to Dashboard (No separate page redirects)
     if (password.value || activeTab.value === "employee_id") {
-      authService.onSuccessfulLogin("user-session");
+      localStorage.setItem("pinVerifiedInSession", "true");
       router.push({ name: "DashboardHome" });
       return;
     }
 
-    // Verification without password
+    // Direct login verification without separate page redirects
     if (isPhone) {
       const fullPhoneNumber = "+91" + digits;
       const phoneExists = await authService.checkPhoneExists(fullPhoneNumber);
@@ -482,7 +469,7 @@ async function handleSubmit() {
         errorMessage.value = "Resigned Employee has No access. Please contact your Company Admin.";
         return;
       }
-      authService.onSuccessfulLogin("user-session");
+      localStorage.setItem("pinVerifiedInSession", "true");
       router.push({ name: "DashboardHome" });
     } else if (isEmail) {
       const emailExists = await authService.checkEmailExists(rawVal);
@@ -490,7 +477,7 @@ async function handleSubmit() {
         errorMessage.value = "This email is not registered. Please sign up first.";
         return;
       }
-      authService.onSuccessfulLogin("user-session");
+      localStorage.setItem("pinVerifiedInSession", "true");
       router.push({ name: "DashboardHome" });
     } else {
       errorMessage.value = "Please enter a valid 10-digit mobile number or email address.";

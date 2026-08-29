@@ -7,7 +7,7 @@ class AuthService {
     this.logoutListeners = [];
 
     this.api = axios.create({
-      baseURL: import.meta.env.VITE_API_URL,
+      baseURL: import.meta.env.VITE_API_URL || "https://appv1.fieldseasy.com/directus",
       headers: {
         "Content-Type": "application/json",
       },
@@ -15,7 +15,7 @@ class AuthService {
     });
 
     this.knApi = axios.create({
-      baseURL: import.meta.env.VITE_KN_API_URL,
+      baseURL: import.meta.env.VITE_KN_API_URL || "https://appv1.fieldseasy.com/kn",
       headers: {
         "Content-Type": "application/json",
       },
@@ -23,7 +23,7 @@ class AuthService {
     });
 
     this.protectedApi = axios.create({
-      baseURL: import.meta.env.VITE_API_URL,
+      baseURL: import.meta.env.VITE_API_URL || "https://appv1.fieldseasy.com/directus",
       headers: {
         "Content-Type": "application/json",
       },
@@ -716,9 +716,12 @@ class AuthService {
       console.warn("[getUserByPhone] Knative lookup failed, attempting Directus fallback...", err.message);
     }
 
+    const token = this.getToken();
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
     // 2. Directus /users collection fallback (phone with or without +91)
     try {
-      const userRes = await this.api.get(`/users?filter[_or][0][phone][_eq]=${encodeURIComponent(formattedPhone)}&filter[_or][1][phone][_eq]=${encodeURIComponent(plainPhone)}&filter[_or][2][phone][_icontains]=${encodeURIComponent(plainPhone)}`);
+      const userRes = await this.api.get(`/users?filter[_or][0][phone][_eq]=${encodeURIComponent(formattedPhone)}&filter[_or][1][phone][_eq]=${encodeURIComponent(plainPhone)}&filter[_or][2][phone][_icontains]=${encodeURIComponent(plainPhone)}`, { headers });
       const directusUser = userRes.data?.data?.[0];
       if (directusUser) {
         this.setUserData(directusUser);
@@ -730,7 +733,7 @@ class AuthService {
 
     // 3. Directus /items/personalModule fallback
     try {
-      const pmRes = await this.api.get(`/items/personalModule?filter[_or][0][personalPhone][_icontains]=${encodeURIComponent(plainPhone)}&filter[_or][1][assignedUser][phone][_icontains]=${encodeURIComponent(plainPhone)}&fields=*,assignedUser.*`);
+      const pmRes = await this.api.get(`/items/personalModule?filter[_or][0][personalPhone][_icontains]=${encodeURIComponent(plainPhone)}&filter[_or][1][assignedUser][phone][_icontains]=${encodeURIComponent(plainPhone)}&fields=*,assignedUser.*`, { headers });
       const pmItem = pmRes.data?.data?.[0];
       if (pmItem) {
         const resolvedUser = pmItem.assignedUser || {
@@ -749,7 +752,13 @@ class AuthService {
       console.warn("[getUserByPhone] Directus /personalModule query failed:", e.message);
     }
 
-    throw new Error("User not found");
+    // 4. Stored session user state fallback
+    const currentUser = this.getUserData();
+    if (currentUser && currentUser.id) {
+      return currentUser;
+    }
+
+    throw new Error("User ID not found");
   }
 
   async ensureTenantUserApp(tenantId, userId, appName = "accesseasy") {
