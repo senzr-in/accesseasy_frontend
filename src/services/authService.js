@@ -685,42 +685,71 @@ class AuthService {
   }
 
   async getUserByPhone(phone) {
+    const rawPhone = phone?.toString().trim() || "";
+    if (!rawPhone) throw new Error("Phone number is required");
+
+    const formattedPhone = rawPhone.startsWith("+91") ? rawPhone : `+91${rawPhone}`;
+    const plainPhone = rawPhone.replace("+91", "").trim();
+
+    // 1. Try Knative API service
     try {
       const response = await this.knApi.post("/auth-service", {
         action: "get-user-profile",
-        phone,
+        phone: formattedPhone,
       });
 
       if (response?.data?.success && response.data.userData) {
         const userData = response.data.userData;
-
-        // Auto-attach to accesseasy if they exist but aren't on this app yet
         const currentAppStr = String(userData.userApp || "").toLowerCase();
         if (!currentAppStr.includes("accesseasy")) {
           console.log("[getUserByPhone] User found but not on accesseasy. Attaching...");
           const newAppStr = currentAppStr ? `${currentAppStr}, accesseasy` : "accesseasy";
-
           this.api.patch(`/users/${userData.id}`, { userApp: newAppStr }).catch(e =>
             console.warn("[getUserByPhone] User patch failed:", e.message)
           );
           userData.userApp = newAppStr;
-
-          const tId = userData.tenant?.tenantId || userData.tenant?.id;
-          if (tId) {
-            this.ensureTenantUserApp(tId, userData.id, "accesseasy").catch(e =>
-              console.warn("[getUserByPhone] Tenant patch failed:", e.message)
-            );
-          }
         }
         this.setUserData(userData);
         return userData;
       }
-      throw new Error("User not found");
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      if (error.message === "User not found") throw error;
-      throw new Error("Failed to fetch user data");
+    } catch (err) {
+      console.warn("[getUserByPhone] Knative lookup failed, attempting Directus fallback...", err.message);
     }
+
+    // 2. Directus /users collection fallback (phone with or without +91)
+    try {
+      const userRes = await this.api.get(`/users?filter[_or][0][phone][_eq]=${encodeURIComponent(formattedPhone)}&filter[_or][1][phone][_eq]=${encodeURIComponent(plainPhone)}&filter[_or][2][phone][_icontains]=${encodeURIComponent(plainPhone)}`);
+      const directusUser = userRes.data?.data?.[0];
+      if (directusUser) {
+        this.setUserData(directusUser);
+        return directusUser;
+      }
+    } catch (e) {
+      console.warn("[getUserByPhone] Directus /users query failed:", e.message);
+    }
+
+    // 3. Directus /items/personalModule fallback
+    try {
+      const pmRes = await this.api.get(`/items/personalModule?filter[_or][0][personalPhone][_icontains]=${encodeURIComponent(plainPhone)}&filter[_or][1][assignedUser][phone][_icontains]=${encodeURIComponent(plainPhone)}&fields=*,assignedUser.*`);
+      const pmItem = pmRes.data?.data?.[0];
+      if (pmItem) {
+        const resolvedUser = pmItem.assignedUser || {
+          id: pmItem.id,
+          phone: pmItem.personalPhone,
+          first_name: pmItem.firstName,
+          last_name: pmItem.lastName,
+          userPin: pmItem.userPin
+        };
+        if (resolvedUser) {
+          this.setUserData(resolvedUser);
+          return resolvedUser;
+        }
+      }
+    } catch (e) {
+      console.warn("[getUserByPhone] Directus /personalModule query failed:", e.message);
+    }
+
+    throw new Error("User not found");
   }
 
   async ensureTenantUserApp(tenantId, userId, appName = "accesseasy") {
