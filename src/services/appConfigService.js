@@ -34,7 +34,7 @@ class AppConfigService {
 
       // Notifications & Admin Alerts
       notifications: {
-        adminNotifyEmail: 'sudheesh@iwinxdital.com'
+        adminNotifyEmail: import.meta.env.VITE_ADMIN_NOTIFY_EMAIL || 'sudheesh@iwinxdigital.com'
       },
 
       // Real-time MQTT Broker

@@ -1132,25 +1132,37 @@ class AuthService {
         ...params,
       });
 
-      // Trigger Knative initial-settings to create tenant resources and send Admin notification & Welcome emails
-      if (response.data?.tenantId) {
-        this.knApi.post("/initial-settings", {
-          tenantId: response.data.tenantId,
-          tenantName: params.companyName || params.fullName,
-          fullName: params.fullName,
-          email: params.email,
-          recipientEmail: params.email,
-          phone: params.phone,
-          adminNotifyEmail: appConfigService.getAdminNotifyEmail(),
-          notifyEmail: appConfigService.getAdminNotifyEmail(),
-          adminEmail: appConfigService.getAdminNotifyEmail(),
-          userApp: "patrol",
-          source: params.source || "AccessEasy Web",
-          companyAddress: params.companyAddress || "Not provided"
-        }).catch(err => {
-          console.warn("[AuthService] initial-settings notification error (non-fatal):", err.message);
-        });
-      }
+      // Robustly extract tenant ID from any response shape
+      const tenantId = 
+        response.data?.tenantId || 
+        response.data?.tenant_id || 
+        response.data?.tenant?.tenantId || 
+        response.data?.tenant?.id || 
+        response.data?.data?.tenantId || 
+        response.data?.data?.tenant_id || 
+        response.data?.id;
+
+      // Trigger Knative initial-settings to create tenant defaults and send Admin Notification + Welcome emails
+      const adminEmail = appConfigService.getAdminNotifyEmail();
+      this.knApi.post("/initial-settings", {
+        tenantId: tenantId || "auto",
+        tenant_id: tenantId || "auto",
+        tenantName: params.companyName || params.fullName,
+        fullName: params.fullName,
+        email: params.email,
+        recipientEmail: params.email,
+        phone: params.phone,
+        adminNotifyEmail: adminEmail,
+        notifyEmail: adminEmail,
+        adminEmail: adminEmail,
+        userApp: "patrol",
+        source: params.source || "AccessEasy Patrol Web",
+        companyAddress: params.companyAddress || "Not provided",
+        app_name: "AccessEasy Patrol",
+        appName: "AccessEasy Patrol"
+      }).catch(err => {
+        console.warn("[AuthService] initial-settings notification error (non-fatal):", err.message);
+      });
 
       return response.data;
     } catch (error) {
