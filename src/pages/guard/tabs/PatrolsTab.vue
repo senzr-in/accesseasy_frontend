@@ -48,6 +48,26 @@
           <span>Pair Tablet QR</span>
         </button>
 
+        <!-- Get Patrol App (Play Store) -->
+        <button
+          class="h-10 px-3.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-black dark:hover:bg-slate-100 text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap shadow-sm cursor-pointer"
+          @click="showAppDownloadModal = true"
+          title="Download Patrol Mobile App on Google Play Store"
+        >
+          <Smartphone class="w-4 h-4 text-indigo-400 dark:text-indigo-600" />
+          <span>Get Patrol App</span>
+        </button>
+
+        <!-- WhatsApp Support Button -->
+        <button
+          class="h-10 px-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap shadow-sm cursor-pointer"
+          @click="openWhatsAppSupport"
+          title="Chat with AccessEasy 24/7 WhatsApp Support"
+        >
+          <MessageCircle class="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+          <span>WhatsApp Support</span>
+        </button>
+
         <!-- Overflow Dropdown Menu -->
         <div class="relative">
           <button
@@ -68,8 +88,28 @@
             <div
               v-if="showOverflowMenu"
               :style="dropdownStyle"
-              class="w-56 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-[150] overflow-hidden py-1.5 animate-in slide-in-from-top-1 duration-100"
+              class="w-60 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl z-[150] overflow-hidden py-1.5 animate-in slide-in-from-top-1 duration-100"
             >
+              <!-- Get App on Play Store -->
+              <button
+                class="w-full px-4 py-2.5 text-left text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50 flex items-center gap-2.5 transition-colors cursor-pointer border-0 bg-transparent"
+                @click="showAppDownloadModal = true; showOverflowMenu = false;"
+              >
+                <Smartphone class="w-4 h-4 text-indigo-500" />
+                <span>Download App (Play Store)</span>
+              </button>
+
+              <!-- WhatsApp Support -->
+              <button
+                class="w-full px-4 py-2.5 text-left text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 flex items-center gap-2.5 transition-colors cursor-pointer border-0 bg-transparent"
+                @click="openWhatsAppSupport(); showOverflowMenu = false;"
+              >
+                <MessageCircle class="w-4 h-4 text-emerald-500" />
+                <span>WhatsApp Live Support</span>
+              </button>
+
+              <div class="h-[1px] bg-slate-100 dark:bg-slate-800 my-1"></div>
+
               <!-- Patrol Checkpoints -->
               <button
                 class="w-full px-4 py-2.5 text-left text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50 flex items-center gap-2.5 transition-colors cursor-pointer border-0 bg-transparent"
@@ -416,7 +456,6 @@
         </div>
       </div>
     </Teleport>
-  </div>
 
     <!-- Shift Handovers Audit Modal -->
     <Teleport to="body">
@@ -508,6 +547,10 @@
         </div>
       </div>
     </Teleport>
+  
+    <!-- App Download on Google Play Store Modal -->
+    <AppDownloadModal v-model="showAppDownloadModal" />
+  </div>
 </template>
 
 <script setup>
@@ -517,7 +560,8 @@ import {
   ArrowLeft, AlertTriangle, ShieldAlert, Users,
   MapPin, Clock, CheckCircle, XCircle, Search, Calendar,
   MoreVertical, ShieldCheck, ChevronRight, Play, CheckCircle2, Loader2, PlayCircle, Filter, 
-  Map as MapIcon, X, Maximize2, Minimize2, Eye, ExternalLink, Activity, ScanLine, QrCode, Settings, BarChart3, History as HistoryIcon, CheckCheck, PlusCircle, Download
+  Map as MapIcon, X, Maximize2, Minimize2, Eye, ExternalLink, Activity, ScanLine, QrCode, Settings, BarChart3, History as HistoryIcon, CheckCheck, PlusCircle, Download,
+  MessageCircle, Smartphone
 } from "lucide-vue-next";
 import { useRoute, useRouter } from 'vue-router';
 import { patrolService } from '@/services/patrolService';
@@ -533,12 +577,19 @@ import PatrolReports from './components/PatrolReports.vue';
 import PatrolCreator from './components/PatrolCreator.vue';
 import EditPatrolModal from './components/EditPatrolModal.vue';
 import ConfirmDeleteModal from '@/components/common/modals/ConfirmDeleteModal.vue';
+import AppDownloadModal from '@/components/common/AppDownloadModal.vue';
 
 const route = useRoute();
 const router = useRouter();
 
 const downloadingQRs = ref(false);
 const showHandoverModal = ref(false);
+const showAppDownloadModal = ref(false);
+
+const openWhatsAppSupport = () => {
+  const text = 'Hi AccessEasy Support Team, I need assistance with our Security & Patrol platform.';
+  window.open(`https://wa.me/919442566276?text=${encodeURIComponent(text)}`, '_blank');
+};
 
 // Device Pairing Modal State
 const showDevicePairingModal = ref(false);

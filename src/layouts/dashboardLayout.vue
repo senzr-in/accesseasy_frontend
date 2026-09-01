@@ -153,6 +153,33 @@
         </div>
       </div>
     </Teleport>
+
+    <!-- Floating WhatsApp Support & App Download Hub -->
+    <div class="fixed bottom-4 right-4 z-40 flex items-center gap-2">
+      <!-- Get App Pill -->
+      <button
+        @click="showDownloadAppModal = true"
+        class="h-10 px-3.5 rounded-full bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-white hover:border-indigo-300 dark:hover:border-indigo-500/30 text-xs font-bold shadow-lg flex items-center gap-2 transition-all cursor-pointer group"
+        title="Download AccessEasy Patrol App on Google Play Store"
+      >
+        <Smartphone class="w-4 h-4 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform" />
+        <span class="hidden sm:inline">Get Mobile App</span>
+      </button>
+
+      <!-- WhatsApp Live Support Floating Button -->
+      <button
+        @click="openGlobalWhatsAppSupport"
+        class="h-10 px-4 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-lg shadow-emerald-600/30 flex items-center gap-2 transition-all cursor-pointer hover:scale-105 active:scale-95 group"
+        title="24/7 WhatsApp Support"
+      >
+        <MessageCircle class="w-4 h-4 text-white group-hover:rotate-12 transition-transform" />
+        <span>WhatsApp Support</span>
+        <span class="w-2 h-2 rounded-full bg-emerald-300 animate-ping"></span>
+      </button>
+    </div>
+
+    <!-- App Download Modal -->
+    <AppDownloadModal v-model="showDownloadAppModal" />
   </div>
 </template>
 
@@ -160,18 +187,26 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { onClickOutside } from '@vueuse/core';
-import { Building, Shield, MapPin, ChevronDown, ChevronRight, Search, Bell, Sun, Moon, User, Settings, Lock, LogOut, HelpCircle, AlertCircle, Clock, X, AlertTriangle, CheckCheck } from 'lucide-vue-next';
+import { Building, Shield, MapPin, ChevronDown, ChevronRight, Search, Bell, Sun, Moon, User, Settings, Lock, LogOut, HelpCircle, AlertCircle, Clock, X, AlertTriangle, CheckCheck, MessageCircle, Smartphone } from 'lucide-vue-next';
 import SecuritySidebar from '@/components/layout/SecuritySidebar.vue';
 import WorkforceSidebar from '@/components/layout/WorkforceSidebar.vue';
 import OnboardingBanner from '@/components/layout/OnboardingBanner.vue';
 import TrialBanner from '@/components/layout/TrialBanner.vue';
 import TrialWelcomeModal from '@/components/layout/TrialWelcomeModal.vue';
+import AppDownloadModal from '@/components/common/AppDownloadModal.vue';
 import { authService } from '@/services/authService';
 import { patrolService } from '@/services/patrolService';
 import { onboardingService } from '@/services/onboardingService';
 import { currentUserTenant } from '@/utils/currentUserTenant';
 import { generateEncryptedQrToken } from '@/utils/security/access-control';
 import { useZoneFilter } from '@/composables/useZoneFilter';
+
+const showDownloadAppModal = ref(false);
+
+const openGlobalWhatsAppSupport = () => {
+  const text = 'Hi AccessEasy Support Team, I need assistance with our Security & Patrol platform.';
+  window.open(`https://wa.me/919442566276?text=${encodeURIComponent(text)}`, '_blank');
+};
 
 const route = useRoute();
 const router = useRouter();

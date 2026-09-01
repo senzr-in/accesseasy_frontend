@@ -117,6 +117,31 @@
       class="shrink-0 border-t border-slate-100 dark:border-white/5 space-y-1"
       :class="isCollapsed ? 'p-2' : 'p-3'"
     >
+      <!-- Quick Action: Get Mobile App & WhatsApp Support -->
+      <div v-if="!isCollapsed" class="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-white/5 space-y-1 mb-1">
+        <button
+          class="w-full py-1.5 px-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-[11px] font-bold flex items-center justify-between transition-colors cursor-pointer"
+          @click="openWhatsAppSupport"
+        >
+          <div class="flex items-center gap-2">
+            <MessageCircle class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <span>WhatsApp Support</span>
+          </div>
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        </button>
+
+        <button
+          class="w-full py-1.5 px-2 rounded-lg bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-500/10 dark:hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-[11px] font-bold flex items-center justify-between transition-colors cursor-pointer"
+          @click="showDownloadModal = true"
+        >
+          <div class="flex items-center gap-2">
+            <Smartphone class="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
+            <span>Get Patrol App</span>
+          </div>
+          <Download class="w-3 h-3 opacity-70" />
+        </button>
+      </div>
+
       <!-- Settings link -->
       <router-link
         v-if="userRole === 'Admin'"
@@ -155,6 +180,9 @@
         />
       </button>
     </div>
+
+    <!-- App Download Modal -->
+    <AppDownloadModal v-model="showDownloadModal" />
   </aside>
 </template>
 
@@ -163,10 +191,19 @@ import { computed, ref } from 'vue';
 import { useRouter, RouterLink } from 'vue-router';
 import {
   LayoutDashboard, Users, Shield, ShieldCheck, MapPin, 
-  Settings, LogOut, ChevronLeft, ChevronRight, ClipboardList, Building2
+  Settings, LogOut, ChevronLeft, ChevronRight, ClipboardList, Building2,
+  MessageCircle, Smartphone, Download
 } from 'lucide-vue-next';
 import { authService } from '@/services/authService';
 import logoPatrol from '@/assets/images/logoPatrol.png';
+import AppDownloadModal from '@/components/common/AppDownloadModal.vue';
+
+const showDownloadModal = ref(false);
+
+const openWhatsAppSupport = () => {
+  const text = 'Hi AccessEasy Support Team, I need assistance with our Security & Patrol platform.';
+  window.open(`https://wa.me/919442566276?text=${encodeURIComponent(text)}`, '_blank');
+};
 
 const router = useRouter();
 const rawUser = authService.getUserData();

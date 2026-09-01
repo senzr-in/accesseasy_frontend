@@ -224,6 +224,49 @@
         >Settings Hub</span>
       </router-link>
 
+      <!-- Quick Action: Get Mobile App & WhatsApp Support -->
+      <div v-if="!isCollapsed" class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-white/5 space-y-1.5 mb-1">
+        <button
+          class="w-full py-1.5 px-2.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-[11px] font-bold flex items-center justify-between transition-colors cursor-pointer"
+          @click="openWhatsAppSupport"
+        >
+          <div class="flex items-center gap-2">
+            <MessageCircle class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+            <span>WhatsApp Support</span>
+          </div>
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        </button>
+
+        <button
+          class="w-full py-1.5 px-2.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-500/10 dark:hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-[11px] font-bold flex items-center justify-between transition-colors cursor-pointer"
+          @click="showDownloadModal = true"
+        >
+          <div class="flex items-center gap-2">
+            <Smartphone class="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
+            <span>Patrol App (Play Store)</span>
+          </div>
+          <Download class="w-3 h-3 opacity-70" />
+        </button>
+      </div>
+
+      <!-- Collapsed Quick Buttons -->
+      <div v-else class="space-y-1 py-1 flex flex-col items-center">
+        <button
+          class="w-8 h-8 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center transition-colors cursor-pointer"
+          title="WhatsApp Live Support"
+          @click="openWhatsAppSupport"
+        >
+          <MessageCircle class="w-4 h-4" />
+        </button>
+        <button
+          class="w-8 h-8 rounded-lg bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center transition-colors cursor-pointer"
+          title="Download App on Google Play"
+          @click="showDownloadModal = true"
+        >
+          <Smartphone class="w-4 h-4" />
+        </button>
+      </div>
+
       <!-- User Profile Dropdown -->
       <div 
         ref="profileDropdownRef"
@@ -257,22 +300,29 @@
           >
             <button
               @click="router.push('/dashboard/profile'); isDropdownOpen = false"
-              class="flex w-full items-center gap-3 px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+              class="flex w-full items-center gap-3 px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer"
             >
               <Users class="w-4 h-4 text-slate-400" />
               My Profile
             </button>
             <button
-              @click="router.push('/dashboard/help'); isDropdownOpen = false"
-              class="flex w-full items-center gap-3 px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+              @click="showDownloadModal = true; isDropdownOpen = false"
+              class="flex w-full items-center gap-3 px-4 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors cursor-pointer"
             >
-              <HelpCircle class="w-4 h-4 text-slate-400" />
-              Help & Support
+              <Smartphone class="w-4 h-4 text-indigo-500" />
+              Get Patrol App (Play Store)
+            </button>
+            <button
+              @click="openWhatsAppSupport(); isDropdownOpen = false"
+              class="flex w-full items-center gap-3 px-4 py-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 transition-colors cursor-pointer"
+            >
+              <MessageCircle class="w-4 h-4 text-emerald-500" />
+              WhatsApp Live Support
             </button>
             <div class="h-[1px] bg-slate-100 dark:bg-slate-700 my-1"></div>
             <button
               @click="handleSignOut"
-              class="flex w-full items-center gap-3 px-4 py-2 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
+              class="flex w-full items-center gap-3 px-4 py-2 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors cursor-pointer"
             >
               <LogOut class="w-4 h-4" />
               Logout
@@ -281,6 +331,9 @@
         </transition>
       </div>
     </div>
+
+    <!-- App Download Modal -->
+    <AppDownloadModal v-model="showDownloadModal" />
   </aside>
 </template>
 
@@ -294,14 +347,22 @@ import {
   ChevronLeft, ChevronRight, Clock,
   ShieldAlert, AlertCircle, Building2, QrCode, Activity,
   UserCheck, Siren, Calendar, Smartphone, ScrollText, CreditCard,
-  Globe, CheckCircle
+  Globe, CheckCircle, MessageCircle, Download
 } from 'lucide-vue-next';
 import { authService } from '@/services/authService';
 import logoPatrol from '@/assets/images/logoPatrol.png';
+import AppDownloadModal from '@/components/common/AppDownloadModal.vue';
 
 const router = useRouter();
 const appMode = import.meta.env.VITE_APP_MODE || 'workforce';
 const route = useRoute();
+
+const showDownloadModal = ref(false);
+
+const openWhatsAppSupport = () => {
+  const text = 'Hi AccessEasy Support Team, I need assistance with our Security & Patrol platform.';
+  window.open(`https://wa.me/919442566276?text=${encodeURIComponent(text)}`, '_blank');
+};
 
 const profileDropdownRef = ref(null);
 onClickOutside(profileDropdownRef, () => {
