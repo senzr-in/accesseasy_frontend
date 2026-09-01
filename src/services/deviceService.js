@@ -34,21 +34,7 @@ class DeviceService {
       const headers = this.getHeaders();
 
       try {
-        // 1. Query Directus /items/controllers
-        let urlControllers = `${apiUrl}/items/controllers?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&fields=*&sort=-date_updated&limit=100`;
-        if (siteId) {
-          urlControllers += `&filter[location][_eq]=${siteId}`;
-        }
-
-        const resControllers = await fetch(urlControllers, { headers });
-        if (resControllers.ok) {
-          const json = await resControllers.json();
-          if (json.data && Array.isArray(json.data)) {
-            list.push(...json.data);
-          }
-        }
-
-        // 2. Query Directus /items/devices
+        // 1. Query Directus /items/devices (Primary collection for mobile patrol tablets & phones)
         let urlDevices = `${apiUrl}/items/devices?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&fields=*&sort=-date_updated&limit=100`;
         if (siteId) {
           urlDevices += `&filter[site][_eq]=${siteId}`;
@@ -58,25 +44,25 @@ class DeviceService {
         if (resDevices.ok) {
           const jsonDev = await resDevices.json();
           if (jsonDev.data && Array.isArray(jsonDev.data)) {
-            jsonDev.data.forEach(d => {
+            list.push(...jsonDev.data);
+          }
+        }
+
+        // 2. Query Directus /items/controllers (Strictly for this tenant)
+        let urlControllers = `${apiUrl}/items/controllers?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&fields=*&sort=-date_updated&limit=100`;
+        if (siteId) {
+          urlControllers += `&filter[location][_eq]=${siteId}`;
+        }
+
+        const resControllers = await fetch(urlControllers, { headers });
+        if (resControllers.ok) {
+          const json = await resControllers.json();
+          if (json.data && Array.isArray(json.data)) {
+            json.data.forEach(d => {
               if (!list.some(item => (item.id && String(item.id) === String(d.id)) || (item.sn && String(item.sn) === String(d.sn || d.device_id)))) {
                 list.push(d);
               }
             });
-          }
-        }
-
-        // 3. Fallback query if tenant filter is empty
-        if (list.length === 0) {
-          const resFallback = await fetch(`${apiUrl}/items/controllers?fields=*&limit=100`, { headers });
-          if (resFallback.ok) {
-            const jsonFallback = await resFallback.json();
-            if (jsonFallback.data && Array.isArray(jsonFallback.data)) {
-              list = jsonFallback.data.filter(d => {
-                const t = typeof d.tenant === 'object' ? (d.tenant?.tenantId || d.tenant?.id) : d.tenant;
-                return !t || String(t) === String(tenantId);
-              });
-            }
           }
         }
       } catch (err) {
@@ -99,35 +85,10 @@ class DeviceService {
         }
       } catch (_) {}
 
-      // Normalize and filter strictly for Patrol terminals & Mobile devices
-      const normalized = list.map(d => this.normalizeDevice(d));
-
-      // Filter out legacy door controllers (e.g. "main door", "ss4", door relays)
-      const patrolDevices = normalized.filter(d => {
-        const name = (d.device_name || '').toLowerCase();
-        const model = (d.device_model || '').toLowerCase();
-        const id = (d.device_id || '').toLowerCase();
-        
-        // Exclude obvious door access control hardware
-        if (name.includes('door') || name.includes('turnstile') || name.includes('gate barrier') || name === 'ss4') {
-          return false;
-        }
-
-        // Include patrol tablets, mobile devices, PATROL-* hardware, or newly registered devices
-        return id.startsWith('patrol-') || 
-               model.includes('patrol') || 
-               model.includes('tablet') || 
-               model.includes('samsung') || 
-               model.includes('android') || 
-               model.includes('handheld') || 
-               name.includes('terminal') || 
-               name.includes('patrol') || 
-               name.includes('guard') || 
-               d.current_guard_name ||
-               d.is_mobile;
-      });
-
-      return patrolDevices;
+      // Normalize and return all mobile devices and patrol terminals
+      return list
+        .map(d => this.normalizeDevice(d))
+        .filter(d => Boolean(d.device_id || d.id));
     } catch (error) {
       console.error('Error fetching devices for tenant:', error);
       return [];
