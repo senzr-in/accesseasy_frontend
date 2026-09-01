@@ -175,6 +175,25 @@
                       <QrCode class="w-3 h-3" />
                       <span>Pair / QR</span>
                     </button>
+                    <!-- Lock / Unlock Toggle -->
+                    <button
+                      v-if="dev.status !== 'locked'"
+                      class="px-2.5 py-1 rounded-lg bg-amber-50 dark:bg-amber-900/30 hover:bg-amber-100 text-amber-700 dark:text-amber-300 font-bold text-[11px] transition-colors flex items-center gap-1 cursor-pointer"
+                      @click="lockDevice(dev)"
+                      title="Remotely lock this terminal"
+                    >
+                      <Lock class="w-3 h-3" />
+                      <span>Lock</span>
+                    </button>
+                    <button
+                      v-else
+                      class="px-2.5 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 text-emerald-700 dark:text-emerald-300 font-bold text-[11px] transition-colors flex items-center gap-1 cursor-pointer"
+                      @click="unlockDevice(dev)"
+                      title="Remove remote lock from this terminal"
+                    >
+                      <Unlock class="w-3 h-3" />
+                      <span>Unlock</span>
+                    </button>
                     <button
                       class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 font-bold text-[11px] transition-colors flex items-center gap-1 cursor-pointer"
                       @click="openReplaceModal(dev)"
@@ -391,7 +410,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { Smartphone, Plus, RefreshCw, X, QrCode, Copy, Check } from 'lucide-vue-next';
+import { Smartphone, Plus, RefreshCw, X, QrCode, Copy, Check, Lock, Unlock } from 'lucide-vue-next';
 import QrcodeVue from 'qrcode.vue';
 import { deviceService } from '@/services/deviceService';
 import { siteService } from '@/services/siteService';
@@ -530,6 +549,18 @@ const openReplaceModal = (dev) => {
     device_model: dev.device_model || 'Patrol Tablet',
   };
   showReplaceModal.value = true;
+};
+
+const lockDevice = async (dev) => {
+  if (confirm(`Lock "${dev.device_name}"?\nThe mobile terminal will show a lock screen immediately on next heartbeat (within 45 seconds).`)) {
+    await deviceService.lockDevice(dev.id);
+    await loadData();
+  }
+};
+
+const unlockDevice = async (dev) => {
+  await deviceService.unlockDevice(dev.id);
+  await loadData();
 };
 
 const unlinkDevice = async (deviceId) => {
