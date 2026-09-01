@@ -99,8 +99,35 @@ class DeviceService {
         }
       } catch (_) {}
 
-      // Normalize fields to device dashboard interface
-      return list.map(d => this.normalizeDevice(d));
+      // Normalize and filter strictly for Patrol terminals & Mobile devices
+      const normalized = list.map(d => this.normalizeDevice(d));
+
+      // Filter out legacy door controllers (e.g. "main door", "ss4", door relays)
+      const patrolDevices = normalized.filter(d => {
+        const name = (d.device_name || '').toLowerCase();
+        const model = (d.device_model || '').toLowerCase();
+        const id = (d.device_id || '').toLowerCase();
+        
+        // Exclude obvious door access control hardware
+        if (name.includes('door') || name.includes('turnstile') || name.includes('gate barrier') || name === 'ss4') {
+          return false;
+        }
+
+        // Include patrol tablets, mobile devices, PATROL-* hardware, or newly registered devices
+        return id.startsWith('patrol-') || 
+               model.includes('patrol') || 
+               model.includes('tablet') || 
+               model.includes('samsung') || 
+               model.includes('android') || 
+               model.includes('handheld') || 
+               name.includes('terminal') || 
+               name.includes('patrol') || 
+               name.includes('guard') || 
+               d.current_guard_name ||
+               d.is_mobile;
+      });
+
+      return patrolDevices;
     } catch (error) {
       console.error('Error fetching devices for tenant:', error);
       return [];
