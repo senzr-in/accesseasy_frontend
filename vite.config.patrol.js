@@ -23,7 +23,20 @@ export default defineConfig(({ mode }) => {
     build: { 
       outDir: path.resolve(__dirname, 'dist/patrol'), 
       emptyOutDir: true,
-      chunkSizeWarningLimit: 1000,
+      target: 'esnext',
+      chunkSizeWarningLimit: 3000,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('@tensorflow')) {
+              return 'tfjs-vendor';
+            }
+            if (id.includes('node_modules/vue') || id.includes('node_modules/vue-router') || id.includes('node_modules/pinia')) {
+              return 'vue-vendor';
+            }
+          }
+        }
+      }
     },
     optimizeDeps: {
       include: ['@tensorflow/tfjs-tflite']
