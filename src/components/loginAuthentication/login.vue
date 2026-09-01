@@ -260,16 +260,23 @@
                 Phone number
               </label>
               <div class="flex items-center rounded-xl bg-slate-100/90 border border-slate-300/80 focus-within:border-blue-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-blue-500/20 shadow-inner overflow-hidden transition-all h-12">
-                <div class="px-3.5 h-full flex items-center justify-center bg-slate-200/70 border-r border-slate-300/80 text-xs font-bold text-slate-700 select-none shrink-0 whitespace-nowrap">
-                  IN +91
+                <!-- Country Code Dropdown -->
+                <div class="relative shrink-0">
+                  <select
+                    v-model="selectedCountry"
+                    class="h-12 pl-3 pr-8 bg-slate-200/70 border-r border-slate-300/80 text-xs font-bold text-slate-700 outline-none cursor-pointer appearance-none hover:bg-slate-300/60 transition-colors"
+                    style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E&quot;); background-repeat: no-repeat; background-position: right 6px center;"
+                  >
+                    <option v-for="c in countryCodes" :key="c.code" :value="c">{{ c.flag }} {{ c.dialCode }}</option>
+                  </select>
                 </div>
                 <input
                   v-model.trim="phoneRaw"
                   type="tel"
                   inputmode="numeric"
-                  maxlength="10"
+                  :maxlength="selectedCountry.maxLength"
                   required
-                  placeholder="10-digit number"
+                  :placeholder="selectedCountry.maxLength + '-digit number'"
                   class="flex-1 h-full px-3.5 bg-transparent outline-none text-sm font-bold text-slate-900 placeholder:text-slate-400"
                   @input="sanitizePhone"
                   @keyup.enter="onPhoneSubmit"
@@ -425,6 +432,31 @@ const emailError = ref("");
 const emailLoading = ref(false);
 const googleLoading = ref(false);
 
+// Country code list (comprehensive)
+const countryCodes = [
+  { code: 'IN', name: 'India', dialCode: '+91', flag: '🇮🇳', maxLength: 10 },
+  { code: 'AE', name: 'UAE', dialCode: '+971', flag: '🇦🇪', maxLength: 9 },
+  { code: 'US', name: 'USA', dialCode: '+1', flag: '🇺🇸', maxLength: 10 },
+  { code: 'GB', name: 'UK', dialCode: '+44', flag: '🇬🇧', maxLength: 10 },
+  { code: 'SA', name: 'Saudi Arabia', dialCode: '+966', flag: '🇸🇦', maxLength: 9 },
+  { code: 'QA', name: 'Qatar', dialCode: '+974', flag: '🇶🇦', maxLength: 8 },
+  { code: 'KW', name: 'Kuwait', dialCode: '+965', flag: '🇰🇼', maxLength: 8 },
+  { code: 'BH', name: 'Bahrain', dialCode: '+973', flag: '🇧🇭', maxLength: 8 },
+  { code: 'OM', name: 'Oman', dialCode: '+968', flag: '🇴🇲', maxLength: 8 },
+  { code: 'SG', name: 'Singapore', dialCode: '+65', flag: '🇸🇬', maxLength: 8 },
+  { code: 'MY', name: 'Malaysia', dialCode: '+60', flag: '🇲🇾', maxLength: 9 },
+  { code: 'AU', name: 'Australia', dialCode: '+61', flag: '🇦🇺', maxLength: 9 },
+  { code: 'CA', name: 'Canada', dialCode: '+1', flag: '🇨🇦', maxLength: 10 },
+  { code: 'DE', name: 'Germany', dialCode: '+49', flag: '🇩🇪', maxLength: 11 },
+  { code: 'FR', name: 'France', dialCode: '+33', flag: '🇫🇷', maxLength: 9 },
+  { code: 'NP', name: 'Nepal', dialCode: '+977', flag: '🇳🇵', maxLength: 10 },
+  { code: 'LK', name: 'Sri Lanka', dialCode: '+94', flag: '🇱🇰', maxLength: 9 },
+  { code: 'PK', name: 'Pakistan', dialCode: '+92', flag: '🇵🇰', maxLength: 10 },
+  { code: 'BD', name: 'Bangladesh', dialCode: '+880', flag: '🇧🇩', maxLength: 10 },
+  { code: 'PH', name: 'Philippines', dialCode: '+63', flag: '🇵🇭', maxLength: 10 },
+];
+const selectedCountry = ref(countryCodes[0]); // Default India
+
 // Security Guard Modalities & Mobile App Badges
 const authMethods = [
   { name: "Guard App", sub: "Mobile Tour App", icon: Smartphone },
@@ -461,12 +493,12 @@ function setMode(next) {
 }
 
 function sanitizePhone() {
-  phoneRaw.value = (phoneRaw.value || "").replace(/\D/g, "").slice(0, 10);
+  phoneRaw.value = (phoneRaw.value || "").replace(/\D/g, "").slice(0, selectedCountry.value.maxLength);
   if (phoneError.value) phoneError.value = "";
 }
 
 function validPhone(num) {
-  return /^\d{10}$/.test(num);
+  return num.length >= 7 && num.length <= selectedCountry.value.maxLength;
 }
 
 function validEmail(e) {
@@ -478,7 +510,7 @@ async function onPhoneSubmit() {
   const digits = (phoneRaw.value || "").replace(/\D/g, "");
 
   if (!validPhone(digits)) {
-    phoneError.value = "Please enter a valid 10-digit mobile number.";
+    phoneError.value = `Please enter a valid ${selectedCountry.value.maxLength}-digit mobile number.`;
     return;
   }
 
@@ -488,7 +520,7 @@ async function onPhoneSubmit() {
     localStorage.removeItem("pinVerifiedInSession");
     localStorage.removeItem("fromOtp");
 
-    const fullPhoneNumber = "+91" + digits;
+    const fullPhoneNumber = selectedCountry.value.dialCode + digits;
 
     const phoneExists = await authService.checkPhoneExists(fullPhoneNumber);
     if (!phoneExists) {

@@ -229,19 +229,25 @@
                 <label class="block text-xs font-bold text-slate-800">
                   Phone Number
                 </label>
-                <div class="relative group">
-                  <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-600 transition-colors">
-                    <Phone class="w-4 h-4" />
+                <div class="flex items-center rounded-xl bg-slate-100/80 border border-slate-300/80 focus-within:bg-white focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/20 shadow-inner transition-all h-11 overflow-hidden">
+                  <div class="relative shrink-0">
+                    <select
+                      v-model="selectedCountry"
+                      class="h-11 pl-2.5 pr-7 bg-slate-200/70 border-r border-slate-300/80 text-xs font-bold text-slate-700 outline-none cursor-pointer appearance-none hover:bg-slate-300/60 transition-colors"
+                      style="background-image: url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E&quot;); background-repeat: no-repeat; background-position: right 5px center;"
+                    >
+                      <option v-for="c in countryCodes" :key="c.code" :value="c">{{ c.flag }} {{ c.dialCode }}</option>
+                    </select>
                   </div>
                   <input
                     v-model="mobileNumber"
                     type="tel"
                     inputmode="numeric"
                     required
-                    placeholder="10-digit number"
-                    maxlength="10"
-                    class="w-full h-11 pl-10 pr-3 rounded-xl bg-slate-100/80 border border-slate-300/80 focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 shadow-inner transition-all outline-none text-xs font-bold text-slate-900 placeholder:text-slate-400"
-                    @input="mobileNumber = $event.target.value.replace(/\D/g, '')"
+                    :placeholder="selectedCountry.maxLength + '-digit number'"
+                    :maxlength="selectedCountry.maxLength"
+                    class="flex-1 h-full px-3 bg-transparent outline-none text-xs font-bold text-slate-900 placeholder:text-slate-400"
+                    @input="mobileNumber = $event.target.value.replace(/\D/g, '').slice(0, selectedCountry.maxLength)"
                   />
                 </div>
               </div>
@@ -446,6 +452,31 @@ const email = ref("");
 const mobileNumber = ref("");
 const employeeId = ref("");
 
+// Country code list
+const countryCodes = [
+  { code: 'IN', name: 'India', dialCode: '+91', flag: '🇮🇳', maxLength: 10, currency: 'INR', currName: 'Indian Rupee', currSymbol: '₹' },
+  { code: 'AE', name: 'UAE', dialCode: '+971', flag: '🇦🇪', maxLength: 9, currency: 'AED', currName: 'UAE Dirham', currSymbol: 'د.إ' },
+  { code: 'US', name: 'USA', dialCode: '+1', flag: '🇺🇸', maxLength: 10, currency: 'USD', currName: 'US Dollar', currSymbol: '$' },
+  { code: 'GB', name: 'UK', dialCode: '+44', flag: '🇬🇧', maxLength: 10, currency: 'GBP', currName: 'British Pound', currSymbol: '£' },
+  { code: 'SA', name: 'Saudi Arabia', dialCode: '+966', flag: '🇸🇦', maxLength: 9, currency: 'SAR', currName: 'Saudi Riyal', currSymbol: '﷼' },
+  { code: 'QA', name: 'Qatar', dialCode: '+974', flag: '🇶🇦', maxLength: 8, currency: 'QAR', currName: 'Qatari Riyal', currSymbol: '﷼' },
+  { code: 'KW', name: 'Kuwait', dialCode: '+965', flag: '🇰🇼', maxLength: 8, currency: 'KWD', currName: 'Kuwaiti Dinar', currSymbol: 'KD' },
+  { code: 'BH', name: 'Bahrain', dialCode: '+973', flag: '🇧🇭', maxLength: 8, currency: 'BHD', currName: 'Bahraini Dinar', currSymbol: 'BD' },
+  { code: 'OM', name: 'Oman', dialCode: '+968', flag: '🇴🇲', maxLength: 8, currency: 'OMR', currName: 'Omani Rial', currSymbol: 'OMR' },
+  { code: 'SG', name: 'Singapore', dialCode: '+65', flag: '🇸🇬', maxLength: 8, currency: 'SGD', currName: 'Singapore Dollar', currSymbol: 'S$' },
+  { code: 'MY', name: 'Malaysia', dialCode: '+60', flag: '🇲🇾', maxLength: 9, currency: 'MYR', currName: 'Malaysian Ringgit', currSymbol: 'RM' },
+  { code: 'AU', name: 'Australia', dialCode: '+61', flag: '🇦🇺', maxLength: 9, currency: 'AUD', currName: 'Australian Dollar', currSymbol: 'A$' },
+  { code: 'CA', name: 'Canada', dialCode: '+1', flag: '🇨🇦', maxLength: 10, currency: 'CAD', currName: 'Canadian Dollar', currSymbol: 'C$' },
+  { code: 'DE', name: 'Germany', dialCode: '+49', flag: '🇩🇪', maxLength: 11, currency: 'EUR', currName: 'Euro', currSymbol: '€' },
+  { code: 'FR', name: 'France', dialCode: '+33', flag: '🇫🇷', maxLength: 9, currency: 'EUR', currName: 'Euro', currSymbol: '€' },
+  { code: 'NP', name: 'Nepal', dialCode: '+977', flag: '🇳🇵', maxLength: 10, currency: 'NPR', currName: 'Nepalese Rupee', currSymbol: 'Rs' },
+  { code: 'LK', name: 'Sri Lanka', dialCode: '+94', flag: '🇱🇰', maxLength: 9, currency: 'LKR', currName: 'Sri Lankan Rupee', currSymbol: 'Rs' },
+  { code: 'PK', name: 'Pakistan', dialCode: '+92', flag: '🇵🇰', maxLength: 10, currency: 'PKR', currName: 'Pakistani Rupee', currSymbol: 'Rs' },
+  { code: 'BD', name: 'Bangladesh', dialCode: '+880', flag: '🇧🇩', maxLength: 10, currency: 'BDT', currName: 'Bangladeshi Taka', currSymbol: '৳' },
+  { code: 'PH', name: 'Philippines', dialCode: '+63', flag: '🇵🇭', maxLength: 10, currency: 'PHP', currName: 'Philippine Peso', currSymbol: '₱' },
+];
+const selectedCountry = ref(countryCodes[0]); // Default India
+
 const toasts = ref([]);
 
 // Security Guard Modalities & Mobile App Badges
@@ -474,14 +505,15 @@ const showSuccess = (message, duration = 3000) => addToast(message, "success", d
 const showError = (message, duration = 5000) => addToast(message, "error", duration);
 
 const isFormValid = computed(() => {
+  const digits = mobileNumber.value.trim();
   return (
     companyName.value.trim() !== "" &&
     fullName.value.trim() !== "" &&
     email.value.trim() !== "" &&
-    mobileNumber.value.trim() !== "" &&
+    digits.length >= 7 &&
+    digits.length <= selectedCountry.value.maxLength &&
     employeeId.value.trim() !== "" &&
-    isValidEmail(email.value) &&
-    /^\d{10}$/.test(mobileNumber.value)
+    isValidEmail(email.value)
   );
 });
 
@@ -503,7 +535,8 @@ async function validateRegistration() {
       return false;
     }
 
-    const phoneExists = await authService.checkPhoneExists(`+91${mobileNumber.value.trim()}`);
+    const fullPhone = `${selectedCountry.value.dialCode}${mobileNumber.value.trim()}`;
+    const phoneExists = await authService.checkPhoneExists(fullPhone);
     if (phoneExists) {
       showError("This phone number is already registered");
       return false;
@@ -599,27 +632,28 @@ async function handleRegistration() {
   }
 
   try {
+    const fullPhone = `${selectedCountry.value.dialCode}${mobileNumber.value.trim()}`;
     const regResult = await authService.register({
       fullName: fullName.value.trim(),
       companyName: companyName.value.trim(),
-      phone: `+91${mobileNumber.value.trim()}`,
+      phone: fullPhone,
       email: email.value.trim().toLowerCase(),
       employeeId: employeeId.value.trim(),
-      userApp: "accesseasy, patrol",
-      countryName: "India",
-      countryCode: "IN",
+      userApp: "patrol",
+      countryName: selectedCountry.value.name,
+      countryCode: selectedCountry.value.code,
       currencyInfo: {
-        currency: "INR",
-        currency_name: "Indian Rupee",
-        currency_symbol: "₹",
+        currency: selectedCountry.value.currency || "INR",
+        currency_name: selectedCountry.value.currName || "Indian Rupee",
+        currency_symbol: selectedCountry.value.currSymbol || "₹",
       },
-      deviceName: "AccessEasy Web Console",
-      source: "AccessEasy Web",
+      deviceName: "AccessEasy Patrol Console",
+      source: "AccessEasy Patrol Web",
     });
 
     showSuccess("Registration successful! Initiating login...", 3000);
 
-    const registeredPhoneNumber = `+91${mobileNumber.value.trim()}`;
+    const registeredPhoneNumber = fullPhone;
     localStorage.setItem("justRegisteredPhone", registeredPhoneNumber);
     localStorage.setItem("fromRegistration", "true");
 
