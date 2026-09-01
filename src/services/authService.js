@@ -12,7 +12,7 @@ class AuthService {
       headers: {
         "Content-Type": "application/json",
       },
-      timeout: 30000,
+      timeout: 10000,
     });
 
     this.knApi = axios.create({
@@ -20,7 +20,7 @@ class AuthService {
       headers: {
         "Content-Type": "application/json",
       },
-      timeout: 45000,
+      timeout: 30000,
     });
 
     this.protectedApi = axios.create({
@@ -28,7 +28,7 @@ class AuthService {
       headers: {
         "Content-Type": "application/json",
       },
-      timeout: 30000,
+      timeout: 10000,
     });
 
     // Global Error Interceptor for "Worst Case" Handling
@@ -37,7 +37,7 @@ class AuthService {
         error.message = "Unable to connect. Please check your internet.";
       }
       if (error.code === "ECONNABORTED" || error.message.includes("timeout")) {
-        error.message = "Request timed out (30s). Please try again.";
+        error.message = "Request timed out (10s). Please try again.";
       }
       if (error.response?.status === 429) {
         error.message = "Too many requests. Please wait a moment.";

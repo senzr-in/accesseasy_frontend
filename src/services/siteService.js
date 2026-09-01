@@ -41,58 +41,21 @@ class SiteService {
         if (!tenantId || !authService.getToken()) return [];
 
         let rawData = [];
-
-        // Fast path: use previously verified working strategy
-        if (this._workingStrategy) {
+        try {
+          const res = await authService.protectedApi.get(
+            `/items/locationManagement?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&sort=locName&limit=200`,
+            { timeout: 6000 }
+          );
+          rawData = res.data?.data || [];
+        } catch (err) {
+          // Fallback to simple tenant query if OR filter is not supported
           try {
-            let endpoint = `/items/locationManagement?sort=locName`;
-            if (this._workingStrategy === 'or') {
-              endpoint = `/items/locationManagement?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&sort=locName`;
-            } else if (this._workingStrategy === 'tenant') {
-              endpoint = `/items/locationManagement?filter[tenant][_eq]=${tenantId}&sort=locName`;
-            } else if (this._workingStrategy === 'tenantId') {
-              endpoint = `/items/locationManagement?filter[tenant][tenantId][_eq]=${tenantId}&sort=locName`;
-            } else {
-              endpoint = `/items/locationManagement?limit=500`;
-            }
-            const res = await authService.protectedApi.get(endpoint);
-            rawData = res.data?.data || [];
-          } catch (e) {
-            this._workingStrategy = null; // Reset strategy if schema changed
-          }
-        }
-
-        // Discovery path: attempt most specific filter first, remember success
-        if (rawData.length === 0 && !this._workingStrategy) {
-          try {
-            const res1 = await authService.protectedApi.get(
-              `/items/locationManagement?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&sort=locName`
+            const fallbackRes = await authService.protectedApi.get(
+              `/items/locationManagement?filter[tenant][_eq]=${tenantId}&sort=locName&limit=200`,
+              { timeout: 5000 }
             );
-            rawData = res1.data?.data || [];
-            this._workingStrategy = 'or';
-          } catch (e1) {
-            try {
-              const res2 = await authService.protectedApi.get(
-                `/items/locationManagement?filter[tenant][_eq]=${tenantId}&sort=locName`
-              );
-              rawData = res2.data?.data || [];
-              this._workingStrategy = 'tenant';
-            } catch (e2) {
-              try {
-                const res3 = await authService.protectedApi.get(
-                  `/items/locationManagement?filter[tenant][tenantId][_eq]=${tenantId}&sort=locName`
-                );
-                rawData = res3.data?.data || [];
-                this._workingStrategy = 'tenantId';
-              } catch (e3) {
-                try {
-                  const res4 = await authService.protectedApi.get(`/items/locationManagement?limit=500`);
-                  rawData = res4.data?.data || [];
-                  this._workingStrategy = 'plain';
-                } catch (e4) {}
-              }
-            }
-          }
+            rawData = fallbackRes.data?.data || [];
+          } catch (_) {}
         }
 
         const mapped = rawData.map(loc => ({
@@ -105,11 +68,11 @@ class SiteService {
         }));
 
         this._sitesCache = mapped;
-        this._cacheExpiry = Date.now() + 30000; // 30s TTL
+        this._cacheExpiry = Date.now() + 60000; // 60s TTL
         return mapped;
       } catch (error) {
         console.error("Error in fetchSites:", error);
-        return [];
+        return this._sitesCache || [];
       } finally {
         this._inFlightPromise = null;
       }

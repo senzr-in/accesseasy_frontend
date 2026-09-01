@@ -668,16 +668,15 @@ const getStatusDotClass = (status) => {
 // Data Loading
 const loadAttendanceData = async (silent = false) => {
   if (silent && _pollLocked) return;
-  if (silent) _pollLocked = true;
+  _pollLocked = true;
   if (!silent) loading.value = true;
   try {
-    const [att, st, sites] = await Promise.all([
+    const [att, sites] = await Promise.all([
       attendanceService.getTodayAttendance(),
-      attendanceService.getAttendanceStats(),
       siteService.fetchSites()
     ]);
     attendanceList.value = att || [];
-    stats.value = st || stats.value;
+    stats.value = attendanceService.calculateStats(att || []) || stats.value;
     if (sites && sites.length > 0) {
       sitesList.value = sites;
     }
@@ -685,6 +684,7 @@ const loadAttendanceData = async (silent = false) => {
     console.error("Error loading attendance data:", error);
   } finally {
     if (!silent) loading.value = false;
+    _pollLocked = false;
   }
 };
 
@@ -716,27 +716,36 @@ const exportCSV = () => {
 
 let unsubMqttAttendance = null;
 let unsubMqttDevice = null;
+let _debouncedMqttTimer = null;
+
+const triggerDebouncedReload = () => {
+  if (_debouncedMqttTimer) clearTimeout(_debouncedMqttTimer);
+  _debouncedMqttTimer = setTimeout(() => {
+    loadAttendanceData(true);
+  }, 2500);
+};
 
 onMounted(async () => {
   await loadAttendanceData();
 
-  // Instant real-time update on mobile punches / breaks / check-ins
+  // Instant real-time update on mobile punches / breaks / check-ins (debounced)
   mqttService.connect();
-  unsubMqttAttendance = mqttService.on('patrol/#', () => loadAttendanceData(true));
-  unsubMqttDevice = mqttService.on('device/#', () => loadAttendanceData(true));
+  unsubMqttAttendance = mqttService.on('patrol/+/log', triggerDebouncedReload);
+  unsubMqttDevice = mqttService.on('patrol/+/alert', triggerDebouncedReload);
 
   pollInterval = setInterval(async () => {
     if (_pollLocked) return;
-    _pollLocked = true;
     try {
       await loadAttendanceData(true);
-    } finally {
-      _pollLocked = false;
-    }
-  }, 10000); // 10s auto-refresh fallback from mobile app punches
+    } catch (_) {}
+  }, 15000); // 15s auto-refresh fallback
 });
 
 onUnmounted(() => {
+  if (_debouncedMqttTimer) {
+    clearTimeout(_debouncedMqttTimer);
+    _debouncedMqttTimer = null;
+  }
   if (pollInterval) {
     clearInterval(pollInterval);
     pollInterval = null;

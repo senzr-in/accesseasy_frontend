@@ -124,78 +124,68 @@ class AttendanceService {
 
       let allRecords = [];
 
-      // 3. Query /items/guard_attendance — max 2 attempts (tenant-filtered, then open fallback)
-      const queryAttempts = [];
+      // 3. Query /items/guard_attendance (fast flat query)
       if (tenantId) {
-        queryAttempts.push(`/items/guard_attendance?filter[tenant][_eq]=${tenantId}&sort=-check_in_time&limit=100&fields=*,guard.*,guard.assignedUser.*,site.*,zone.*`);
-      }
-      queryAttempts.push(`/items/guard_attendance?sort=-check_in_time,-date_created&limit=100&fields=*,guard.*,guard.assignedUser.*,site.*,zone.*`);
-      queryAttempts.push(`/items/guard_attendance?sort=-check_in_time,-date_created&limit=100&fields=*.*`);
-      queryAttempts.push(`/items/guard_attendance?sort=-check_in_time,-date_created&limit=100&fields=*`);
-
-      for (const endpoint of queryAttempts) {
         try {
-          let url = endpoint;
+          let url = `/items/guard_attendance?filter[tenant][_eq]=${tenantId}&sort=-check_in_time&limit=100&fields=*`;
           if (siteId && siteId !== 'all') {
             url += `&filter[site][_eq]=${siteId}`;
           }
-          const res = await authService.protectedApi.get(url);
+          const res = await authService.protectedApi.get(url, { timeout: 6000 });
           if (res.data?.data && Array.isArray(res.data.data) && res.data.data.length > 0) {
             allRecords = res.data.data;
-            break;
           }
-        } catch (e) {
-          // Fall through to next query attempt
-        }
+        } catch (_) {}
       }
 
       // 4. Fetch live multi-session punch records from mobile-app logs (/items/logs)
       //    Prioritized as source of truth for mobile patrol app punches
-      const liveStates = await this.getLiveGuardStates();
+      try {
+        const liveStates = await this.getLiveGuardStates();
 
-      // Add actual live multi-sessions from mobile logs
-      liveStates.forEach(ls => {
-        if (ls.sessions && ls.sessions.length > 0) {
-          ls.sessions.forEach(sess => {
-            if (!allRecords.some(r => String(r.id) === String(sess.id))) {
-              allRecords.push(sess);
-            }
-          });
-        } else if (ls.checkInTime || ls.checkOutTime) {
-          const sessId = `log-${ls.userId || ls.employeeId || 'sess'}`;
-          if (!allRecords.some(r => String(r.id) === String(sessId))) {
-            allRecords.push({
-              id: sessId,
-              guard: { id: ls.userId || ls.employeeId, assignedUser: ls.assignedUser },
-              guard_name: ls.guardName,
-              phone: ls.phone,
-              site_name: ls.siteName || 'App Check-In',
-              zone_name: '',
-              check_in_time: ls.checkInTime,
-              check_out_time: ls.checkOutTime,
-              status: ls.liveStatus === 'checked_out' ? 'off_duty' : (ls.liveStatus === 'on_break' ? 'on_break' : 'present'),
-              verification_mode: ls.mode || 'face_ai',
-              live_status: ls.liveStatus,
-              last_log_time: ls.lastLogTime,
-              last_log_action: ls.lastAction,
-              date_created: ls.checkInTime || new Date().toISOString()
+        // Add actual live multi-sessions from mobile logs
+        liveStates.forEach(ls => {
+          if (ls.sessions && ls.sessions.length > 0) {
+            ls.sessions.forEach(sess => {
+              if (!allRecords.some(r => String(r.id) === String(sess.id))) {
+                allRecords.push(sess);
+              }
             });
+          } else if (ls.checkInTime || ls.checkOutTime) {
+            const sessId = `log-${ls.userId || ls.employeeId || 'sess'}`;
+            if (!allRecords.some(r => String(r.id) === String(sessId))) {
+              allRecords.push({
+                id: sessId,
+                guard: { id: ls.userId || ls.employeeId, assignedUser: ls.assignedUser },
+                guard_name: ls.guardName,
+                phone: ls.phone,
+                site_name: ls.siteName || 'App Check-In',
+                zone_name: '',
+                check_in_time: ls.checkInTime,
+                check_out_time: ls.checkOutTime,
+                status: ls.liveStatus === 'checked_out' ? 'off_duty' : (ls.liveStatus === 'on_break' ? 'on_break' : 'present'),
+                verification_mode: ls.mode || 'face_ai',
+                live_status: ls.liveStatus,
+                last_log_time: ls.lastLogTime,
+                last_log_action: ls.lastAction,
+                date_created: ls.checkInTime || new Date().toISOString()
+              });
+            }
           }
-        }
-      });
+        });
+      } catch (_) {}
 
       // 5. Also check /items/attendance (workforce/general attendance collection)
-      //    Only add valid non-empty punches that are not already covered by live mobile sessions
-      if (tenantId) {
+      if (tenantId && allRecords.length === 0) {
         try {
-          const attUrl = `/items/attendance?filter[tenant][_eq]=${tenantId}&sort=-date,-inTime&limit=100&fields=*,employeeId.*,employeeId.assignedUser.*`;
-          const res = await authService.protectedApi.get(attUrl);
+          const attUrl = `/items/attendance?filter[tenant][_eq]=${tenantId}&sort=-date,-inTime&limit=100&fields=*`;
+          const res = await authService.protectedApi.get(attUrl, { timeout: 6000 });
           if (res.data?.data && Array.isArray(res.data.data) && res.data.data.length > 0) {
             const attMapped = res.data.data
               .filter(item => (item.inTime && item.inTime !== '00:00:00') || (item.outTime && item.outTime !== '00:00:00'))
               .map(item => {
-                const emp = item.employeeId || {};
-                const user = emp.assignedUser || {};
+                const empId = typeof item.employeeId === 'object' ? item.employeeId?.id : item.employeeId;
+                const mappedUser = userMap[String(empId)] || {};
                 const dateStr = item.date || new Date().toISOString().split('T')[0];
                 const inTimeStr = item.inTime ? (item.inTime.includes('T') ? item.inTime : `${dateStr}T${item.inTime}`) : null;
                 const outTimeStr = item.outTime ? (item.outTime.includes('T') ? item.outTime : `${dateStr}T${item.outTime}`) : null;
@@ -203,9 +193,9 @@ class AttendanceService {
 
                 return {
                   id: `att-${item.id}`,
-                  guard: user.id || emp.id || item.employeeId,
-                  guard_name: `${emp.firstName || user.first_name || ''} ${emp.lastName || user.last_name || ''}`.trim() || emp.personalEmail || 'Security Guard',
-                  phone: emp.personalPhone || user.phone || 'No phone',
+                  guard: empId,
+                  guard_name: mappedUser.name || 'Security Guard',
+                  phone: mappedUser.phone || 'No phone',
                   site_name: siteName || 'Main Site',
                   zone_name: typeof item.door === 'string' ? item.door : '',
                   check_in_time: inTimeStr,
@@ -217,12 +207,7 @@ class AttendanceService {
               });
 
             attMapped.forEach(am => {
-              const alreadyCovered = allRecords.some(r => {
-                const rUserId = r.guard?.assignedUser?.id || r.guard?.id || r.guard;
-                const amUserId = am.guard?.assignedUser?.id || am.guard?.id || am.guard;
-                return String(rUserId) === String(amUserId);
-              });
-              if (!alreadyCovered && !allRecords.some(r => String(r.id) === String(am.id))) {
+              if (!allRecords.some(r => String(r.id) === String(am.id))) {
                 allRecords.push(am);
               }
             });
@@ -251,24 +236,24 @@ class AttendanceService {
       const today = new Date().toISOString().split('T')[0];
 
       let logsData = [];
-      const logsAttempts = [];
-      if (tenantId) {
-        logsAttempts.push(
-          `/items/logs?filter[tenant][_eq]=${tenantId}&filter[date][_eq]=${today}&sort=date_created,timeStamp&limit=200&fields=id,action,status,date,timeStamp,mode,date_created,employeeId.id,employeeId.employeeId,employeeId.assignedUser.id,employeeId.assignedUser.first_name,employeeId.assignedUser.last_name,employeeId.assignedUser.phone,employeeId.assignedUser.avatar`
-        );
-      }
-      if (!tenantId) {
-        logsAttempts.push(
-          `/items/logs?filter[date][_eq]=${today}&sort=date_created,timeStamp&limit=200&fields=id,action,status,date,timeStamp,mode,date_created,employeeId.id,employeeId.employeeId,employeeId.assignedUser.id,employeeId.assignedUser.first_name,employeeId.assignedUser.last_name,employeeId.assignedUser.phone`
-        );
-      }
-
-      for (const url of logsAttempts) {
+      try {
+        let url = `/items/logs?filter[tenant][_eq]=${tenantId}&filter[date][_eq]=${today}&sort=date_created,timeStamp&limit=200&fields=id,action,status,date,timeStamp,mode,date_created,employeeId,site_name,location`;
+        if (!tenantId) {
+          url = `/items/logs?filter[date][_eq]=${today}&sort=date_created,timeStamp&limit=200&fields=id,action,status,date,timeStamp,mode,date_created,employeeId,site_name,location`;
+        }
+        const res = await authService.protectedApi.get(url, { timeout: 6000 });
+        if (res.data?.data && Array.isArray(res.data.data)) {
+          logsData = res.data.data;
+        }
+      } catch (err) {
+        // Fallback without date filter if date is stored with time
         try {
-          const res = await authService.protectedApi.get(url);
-          if (res.data?.data && res.data.data.length > 0) {
+          const res = await authService.protectedApi.get(
+            `/items/logs?filter[tenant][_eq]=${tenantId}&sort=-date_created&limit=100&fields=id,action,status,date,timeStamp,mode,date_created,employeeId,site_name,location`,
+            { timeout: 5000 }
+          );
+          if (res.data?.data && Array.isArray(res.data.data)) {
             logsData = res.data.data;
-            break;
           }
         } catch (_) {}
       }
@@ -408,8 +393,7 @@ class AttendanceService {
     }
   }
 
-  async getAttendanceStats(siteId = null) {
-    const list = await this.getTodayAttendance(siteId);
+  calculateStats(list = []) {
     const total = list.length;
     const onDuty = list.filter(a => a.status === 'present' || a.status === 'late').length;
     const offDuty = list.filter(a => a.status === 'off_duty' || a.check_out_time).length;
@@ -430,6 +414,11 @@ class AttendanceService {
       offline,
       complianceRate: Math.max(0, complianceRate)
     };
+  }
+
+  async getAttendanceStats(siteId = null, existingList = null) {
+    const list = existingList || await this.getTodayAttendance(siteId);
+    return this.calculateStats(list);
   }
 
   /**

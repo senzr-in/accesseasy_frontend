@@ -40,13 +40,15 @@ class DeviceService {
           urlDevices += `&filter[site][_eq]=${siteId}`;
         }
 
-        const resDevices = await fetch(urlDevices, { headers });
-        if (resDevices.ok) {
-          const jsonDev = await resDevices.json();
-          if (jsonDev.data && Array.isArray(jsonDev.data)) {
-            list.push(...jsonDev.data);
+        try {
+          const resDevices = await fetch(urlDevices, { headers, signal: AbortSignal.timeout ? AbortSignal.timeout(6000) : undefined });
+          if (resDevices.ok) {
+            const jsonDev = await resDevices.json();
+            if (jsonDev.data && Array.isArray(jsonDev.data)) {
+              list.push(...jsonDev.data);
+            }
           }
-        }
+        } catch (_) {}
 
         // 2. Query Directus /items/controllers (Strictly for this tenant)
         let urlControllers = `${apiUrl}/items/controllers?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&fields=*&sort=-date_updated&limit=100`;
@@ -54,17 +56,19 @@ class DeviceService {
           urlControllers += `&filter[location][_eq]=${siteId}`;
         }
 
-        const resControllers = await fetch(urlControllers, { headers });
-        if (resControllers.ok) {
-          const json = await resControllers.json();
-          if (json.data && Array.isArray(json.data)) {
-            json.data.forEach(d => {
-              if (!list.some(item => (item.id && String(item.id) === String(d.id)) || (item.sn && String(item.sn) === String(d.sn || d.device_id)))) {
-                list.push(d);
-              }
-            });
+        try {
+          const resControllers = await fetch(urlControllers, { headers, signal: AbortSignal.timeout ? AbortSignal.timeout(6000) : undefined });
+          if (resControllers.ok) {
+            const json = await resControllers.json();
+            if (json.data && Array.isArray(json.data)) {
+              json.data.forEach(d => {
+                if (!list.some(item => (item.id && String(item.id) === String(d.id)) || (item.sn && String(item.sn) === String(d.sn || d.device_id)))) {
+                  list.push(d);
+                }
+              });
+            }
           }
-        }
+        } catch (_) {}
       } catch (err) {
         console.warn("[deviceService] Fetch error, checking local store:", err);
       }
