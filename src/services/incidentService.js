@@ -101,6 +101,44 @@ class IncidentService {
     const nextStage = INCIDENT_STAGES[currentIndex + 1];
     return [nextStage];
   }
+
+  /**
+   * Trigger emergency SOS Panic Alert across Knative broadcast & Directus
+   */
+  async triggerSosAlert(payload) {
+    try {
+      const { knativeService } = await import('@/services/knativeService');
+      const tenantId = authService.getTenantId();
+
+      // 1. Broadcast over Knative serverless engine
+      try {
+        await knativeService.broadcastSosAlert(payload);
+      } catch (knErr) {
+        console.warn('[IncidentService] Knative SOS broadcast notice:', knErr?.message);
+      }
+
+      // 2. Persist to Directus patrol_alerts
+      const alertRecord = {
+        tenant: tenantId,
+        type: 'SOS_PANIC',
+        priority: 'CRITICAL',
+        status: 'reported',
+        guard: payload.guardId || payload.guardName,
+        location: payload.location || 'Patrol Perimeter',
+        latitude: payload.latitude,
+        longitude: payload.longitude,
+        notes: payload.notes || 'Emergency Panic Button Triggered from Mobile Patrol App',
+        date_created: new Date().toISOString()
+      };
+
+      const res = await authService.protectedApi.post('/items/patrol_alerts', alertRecord);
+      return res.data?.data || alertRecord;
+    } catch (error) {
+      console.error('[IncidentService] Error triggering SOS alert:', error);
+      throw error;
+    }
+  }
 }
 
 export const incidentService = new IncidentService();
+

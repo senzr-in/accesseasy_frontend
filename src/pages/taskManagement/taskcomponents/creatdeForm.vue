@@ -646,7 +646,7 @@ function deepCopy(obj) {
 }
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:1337/api"; // Fallback for VITE_API_URL
+  import.meta.env.VITE_API_URL || "https://appv1.fieldseasy.com/directus";
 
 const selectedTemplateId = ref(null);
 const formTemplates = ref([]);

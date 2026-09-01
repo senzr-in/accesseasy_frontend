@@ -1,6 +1,7 @@
 // authService.js;
 import axios from "axios";
 import Cookies from "js-cookie";
+import { appConfigService } from "@/services/appConfigService";
 
 class AuthService {
   constructor() {
@@ -1136,6 +1137,13 @@ class AuthService {
         this.knApi.post("/initial-settings", {
           tenantId: response.data.tenantId,
           tenantName: params.companyName || params.fullName,
+          fullName: params.fullName,
+          email: params.email,
+          recipientEmail: params.email,
+          phone: params.phone,
+          adminNotifyEmail: appConfigService.getAdminNotifyEmail(),
+          notifyEmail: appConfigService.getAdminNotifyEmail(),
+          adminEmail: appConfigService.getAdminNotifyEmail(),
           userApp: "patrol",
           source: params.source || "AccessEasy Web",
           companyAddress: params.companyAddress || "Not provided"
@@ -1181,10 +1189,14 @@ class AuthService {
 
   setPinVerified(value) {
     sessionStorage.setItem("pinVerifiedInSession", value ? "true" : "false");
+    localStorage.setItem("pinVerifiedInSession", value ? "true" : "false");
   }
 
   isPinVerified() {
-    return sessionStorage.getItem("pinVerifiedInSession") === "true";
+    return (
+      sessionStorage.getItem("pinVerifiedInSession") === "true" ||
+      localStorage.getItem("pinVerifiedInSession") === "true"
+    );
   }
 
   initInactivityTracking() {

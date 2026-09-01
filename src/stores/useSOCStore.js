@@ -73,29 +73,36 @@ const fetchAllData = async () => {
 
 const handleMqttLocation = (topic, payload) => {
   try {
-    const data = typeof payload === 'string' ? JSON.parse(payload) : payload;
+    const data = typeof payload === 'string' ? JSON.parse(payload) : (typeof payload?.toString === 'function' ? JSON.parse(payload.toString()) : payload);
     const parts = topic.split('/');
-    const deviceId = parts[2] || data.deviceId || data.device_id || 'unknown';
-    const guardId = data.guard_id || data.guardId || deviceId;
-    const guardName = data.guard_name || data.guardName || data.name || \Guard \;
-    const lat = parseFloat(data.latitude ?? data.lat);
-    const lng = parseFloat(data.longitude ?? data.lng);
+    
+    // Resolve device ID & guard ID from topic or payload
+    let deviceId = data.deviceId || data.device_id || (parts.length > 2 ? parts[parts.length - 1] : 'unknown');
+    let guardId = data.guard_id || data.guardId || data.employee_id || data.employeeId || data.userId || deviceId;
+    
+    if (parts[0] === 'patrol' && parts[1] === 'live') {
+      guardId = parts[3] || parts[2] || guardId;
+    }
+
+    const guardName = data.guard_name || data.guardName || data.name || (data.first_name ? `${data.first_name} ${data.last_name || ''}`.trim() : `Guard #${guardId}`);
+    const lat = parseFloat(data.latitude ?? data.lat ?? data.gps_lat);
+    const lng = parseFloat(data.longitude ?? data.lng ?? data.gps_lng);
 
     if (isNaN(lat) || isNaN(lng)) return;
 
-    const existingIdx = guards.value.findIndex(g => g.id === guardId || g.deviceId === deviceId);
+    const existingIdx = guards.value.findIndex(g => String(g.id) === String(guardId) || String(g.deviceId) === String(deviceId));
     const updatedGuard = {
       id: guardId,
       deviceId,
       name: guardName,
       latitude: lat,
       longitude: lng,
-      speed: data.speed || 0,
-      accuracy: data.accuracy || 5,
-      battery: data.battery || data.batteryLevel,
+      speed: parseFloat(data.speed || 0),
+      accuracy: parseFloat(data.accuracy || data.accuracy_meters || 5),
+      battery: data.battery ?? data.batteryLevel ?? data.battery_level,
       status: 'on_duty',
       lastSeen: new Date(),
-      timestamp: data.timestamp || new Date().toISOString()
+      timestamp: data.timestamp || data.last_heartbeat || new Date().toISOString()
     };
 
     if (existingIdx >= 0) {
@@ -111,8 +118,8 @@ const handleMqttLocation = (topic, payload) => {
 
 const handleMqttAlert = (topic, payload) => {
   try {
-    const data = typeof payload === 'string' ? JSON.parse(payload) : payload;
-    const alertId = data.id || \lert_\;
+    const data = typeof payload === 'string' ? JSON.parse(payload) : (typeof payload?.toString === 'function' ? JSON.parse(payload.toString()) : payload);
+    const alertId = data.id || `alert_${Date.now()}`;
     const existingIdx = alerts.value.findIndex(a => String(a.id) === String(alertId));
     
     if (existingIdx >= 0) {
@@ -124,8 +131,8 @@ const handleMqttAlert = (topic, payload) => {
         severity: data.severity || 'warning',
         status: data.status || 'open',
         location: data.location || 'Site Patrol',
-        description: data.description || '',
-        date_created: data.date_created || new Date().toISOString(),
+        description: data.description || data.notes || '',
+        date_created: data.date_created || data.timestamp || new Date().toISOString(),
         ...data
       });
     }
@@ -137,19 +144,19 @@ const handleMqttAlert = (topic, payload) => {
 
 const handleMqttSos = (topic, payload) => {
   try {
-    const data = typeof payload === 'string' ? JSON.parse(payload) : payload;
-    const alertId = data.id || \sos_\;
+    const data = typeof payload === 'string' ? JSON.parse(payload) : (typeof payload?.toString === 'function' ? JSON.parse(payload.toString()) : payload);
+    const alertId = data.id || `sos_${Date.now()}`;
     alerts.value.unshift({
       id: alertId,
       title: data.title || 'CRITICAL SOS ALERT',
       type: 'sos',
       severity: 'critical',
       status: 'open',
-      location: data.location || \Lat: \, Lng: \,
-      latitude: data.latitude,
-      longitude: data.longitude,
-      reported_by: data.reported_by || 'Guard',
-      date_created: new Date().toISOString(),
+      location: data.location || `Lat: ${data.latitude || data.lat || 0}, Lng: ${data.longitude || data.lng || 0}`,
+      latitude: data.latitude || data.lat,
+      longitude: data.longitude || data.lng,
+      reported_by: data.reported_by || data.guard_name || 'Guard',
+      date_created: data.date_created || data.timestamp || new Date().toISOString(),
       ...data
     });
     lastUpdated.value = new Date();
@@ -163,15 +170,21 @@ const handleMqttSos = (topic, payload) => {
   }
 };
 
+const unsubs = [];
+
 const setupMqttSubscriptions = () => {
   mqttService.connect();
-  if (unsubMqttLocation) unsubMqttLocation();
-  if (unsubMqttAlert) unsubMqttAlert();
-  if (unsubMqttSos) unsubMqttSos();
+  unsubs.forEach(u => typeof u === 'function' && u());
+  unsubs.length = 0;
 
-  unsubMqttLocation = mqttService.on('device/fieldeasy_mobile/+/location', handleMqttLocation);
-  unsubMqttAlert = mqttService.on('patrol/+/alert', handleMqttAlert);
-  unsubMqttSos = mqttService.on('patrol/+/sos', handleMqttSos);
+  // Multi-topic subscriptions covering all mobile app publish patterns
+  unsubs.push(mqttService.on('device/fieldeasy_mobile/+/location', handleMqttLocation));
+  unsubs.push(mqttService.on('device/location/+/+', handleMqttLocation));
+  unsubs.push(mqttService.on('patrol/live/+/+', handleMqttLocation));
+  unsubs.push(mqttService.on('patrol/+/alert', handleMqttAlert));
+  unsubs.push(mqttService.on('patrol/alerts/+', handleMqttAlert));
+  unsubs.push(mqttService.on('patrol/+/sos', handleMqttSos));
+  unsubs.push(mqttService.on('patrol/alerts/sos/+', handleMqttSos));
 };
 
 const stopPolling = () => {
@@ -179,9 +192,8 @@ const stopPolling = () => {
     clearInterval(socketInterval);
     socketInterval = null;
   }
-  if (unsubMqttLocation) { unsubMqttLocation(); unsubMqttLocation = null; }
-  if (unsubMqttAlert) { unsubMqttAlert(); unsubMqttAlert = null; }
-  if (unsubMqttSos) { unsubMqttSos(); unsubMqttSos = null; }
+  unsubs.forEach(u => typeof u === 'function' && u());
+  unsubs.length = 0;
   isConnected.value = false;
 };
 

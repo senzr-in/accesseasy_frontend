@@ -273,6 +273,7 @@ import { useZoneFilter } from '@/composables/useZoneFilter';
 import { patrolService } from '@/services/patrolService';
 import { zoneService } from '@/services/zoneService';
 import { Loader } from '@googlemaps/js-api-loader';
+import { appConfigService } from '@/services/appConfigService';
 
 let cachedGuardRoleId = null;
 
@@ -937,7 +938,7 @@ const lightMapStyles = [
 ];
 
 const initDashboardMap = async () => {
-  const apiKey = 'AIzaSyCwp-gBFBiutZVlE-a-84hHnA2XeMRGE1g';
+  const apiKey = appConfigService.getGoogleMapsApiKey();
   const loader = new Loader({ apiKey, version: 'weekly' });
   try {
     await loader.load();

@@ -877,7 +877,7 @@ async function handleNewPinAction() {
     }
     authService.setPinVerified(true);
     setSuccessMessage(`PIN created successfully! Redirecting...`);
-    setTimeout(() => router.push("/dashboard"), 1200);
+    setTimeout(goToDashboard, 500);
   } catch (e) {
     setErrorMessage(e.message || "Failed to create PIN");
   } finally {
@@ -932,6 +932,17 @@ async function checkUserPin() {
   }
 }
 
+function goToDashboard() {
+  authService.setPinVerified(true);
+  try {
+    router.push("/dashboard").catch(() => {
+      window.location.href = "/dashboard";
+    });
+  } catch (e) {
+    window.location.href = "/dashboard";
+  }
+}
+
 async function handlePinAction() {
   loading.value = true;
   scrollToCard();
@@ -953,7 +964,7 @@ async function verifyPin() {
     if (currentPin.value === dbPin || currentPin.value === "1234") {
       setSuccessMessage("PIN verified successfully");
       authService.setPinVerified(true);
-      setTimeout(() => router.push("/dashboard"), 800);
+      setTimeout(goToDashboard, 400);
       return;
     }
 
@@ -1000,7 +1011,7 @@ onMounted(async () => {
   if (fromReset) {
     authService.setPinVerified(true);
     await nextTick();
-    router.push("/dashboard");
+    goToDashboard();
     return;
   }
 

@@ -15,9 +15,12 @@
  */
 
 import mqtt from 'mqtt';
+import { appConfigService } from '@/services/appConfigService';
+
+const mqttConfig = appConfigService.getMqttConfig();
 
 const BROKER_URLS = [
-  'wss://mqtt.fieldseasy.com/mqtt',
+  mqttConfig.brokerUrl,
   'ws://mqtt.fieldseasy.com:9001/mqtt',
   'ws://mqtt.fieldseasy.com:8083/mqtt',
 ];
@@ -29,9 +32,14 @@ const TOPICS = [
   'frigate/+/license_plate/snapshot',
   'frigate/+/license_plate/snapshot/bytes/+',
   'device/fieldeasy_mobile/+/location',
+  'device/location/+/+',
+  'device/#',
   'patrol/+/alert',
   'patrol/+/sos',
-  'patrol/+/log'
+  'patrol/alerts/sos/+',
+  'patrol/live/+/+',
+  'patrol/+/log',
+  'patrol/#'
 ];
 
 const CLIENT_ID = 'accesseasy-' + Math.random().toString(36).slice(2, 8);
@@ -99,8 +107,8 @@ class MQTTService {
 
     this._client = mqtt.connect(url, {
       clientId:       CLIENT_ID,
-      username:       import.meta.env.VITE_MQTT_USERNAME || 'iot-device',
-      password:       import.meta.env.VITE_MQTT_PASSWORD || 'Senzr123',
+      username:       mqttConfig.username,
+      password:       mqttConfig.password,
       keepalive:      60,
       connectTimeout: 10000,
       reconnectPeriod: 0,

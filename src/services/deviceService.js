@@ -34,20 +34,40 @@ class DeviceService {
       const headers = this.getHeaders();
 
       try {
-        // Standard Directus tenant query using native fetch
-        let url = `${apiUrl}/items/controllers?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&fields=*&sort=-date_updated&limit=100`;
+        // 1. Query Directus /items/controllers
+        let urlControllers = `${apiUrl}/items/controllers?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&fields=*&sort=-date_updated&limit=100`;
         if (siteId) {
-          url += `&filter[location][_eq]=${siteId}`;
+          urlControllers += `&filter[location][_eq]=${siteId}`;
         }
 
-        const res = await fetch(url, { headers });
-        if (res.ok) {
-          const json = await res.json();
+        const resControllers = await fetch(urlControllers, { headers });
+        if (resControllers.ok) {
+          const json = await resControllers.json();
           if (json.data && Array.isArray(json.data)) {
-            list = json.data;
+            list.push(...json.data);
           }
-        } else {
-          // Fallback query
+        }
+
+        // 2. Query Directus /items/devices
+        let urlDevices = `${apiUrl}/items/devices?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&fields=*&sort=-date_updated&limit=100`;
+        if (siteId) {
+          urlDevices += `&filter[site][_eq]=${siteId}`;
+        }
+
+        const resDevices = await fetch(urlDevices, { headers });
+        if (resDevices.ok) {
+          const jsonDev = await resDevices.json();
+          if (jsonDev.data && Array.isArray(jsonDev.data)) {
+            jsonDev.data.forEach(d => {
+              if (!list.some(item => (item.id && String(item.id) === String(d.id)) || (item.sn && String(item.sn) === String(d.sn || d.device_id)))) {
+                list.push(d);
+              }
+            });
+          }
+        }
+
+        // 3. Fallback query if tenant filter is empty
+        if (list.length === 0) {
           const resFallback = await fetch(`${apiUrl}/items/controllers?fields=*&limit=100`, { headers });
           if (resFallback.ok) {
             const jsonFallback = await resFallback.json();
@@ -118,19 +138,20 @@ class DeviceService {
       device_name: d.controllerName || d.device_name || d.deviceName || `Terminal ${devId}`,
       device_model: d.serverIp || d.device_model || d.deviceGroup || 'Patrol Tablet / Handheld',
       imei: d.imei || d.mac_id || d.mac || d.macAddress || devId,
-      status: (d.status === 'approved' || d.controllerStatus === 'online' || d.status === 'active' || d.status === 'online') ? 'online' : (d.status || d.controllerStatus || 'online').toLowerCase(),
-      last_heartbeat: d.last_communicated_time || d.last_seen || d.last_heartbeat || d.date_updated || new Date().toISOString(),
-      battery_level: d.battery_level !== undefined ? Number(d.battery_level) : 100,
-      battery_charging: Boolean(d.battery_charging),
+      status: (d.status === 'approved' || d.controllerStatus === 'online' || d.status === 'active' || d.status === 'online') ? 'active' : (d.status || d.controllerStatus || 'idle').toLowerCase(),
+      last_heartbeat: d.last_seen_at || d.last_communicated_time || d.last_seen || d.last_heartbeat || d.date_updated || new Date().toISOString(),
+      last_seen: d.last_seen_at || d.last_communicated_time || d.last_seen || d.date_updated || 'Just now',
+      battery_level: d.battery_level !== undefined ? Number(d.battery_level) : (d.batteryLevel !== undefined ? Number(d.batteryLevel) : 95),
+      battery_charging: Boolean(d.is_charging || d.battery_charging),
       site_id: siteIdVal,
       site_name: siteNameVal,
       zone_id: d.zone_id || '',
       zone_name: d.zone_name || '',
-      app_version: d.deviceVersion || d.app_version || 'v1.0.0',
+      app_version: d.deviceVersion || d.app_version || d.appVersion || 'v2.4.0',
       os_version: d.os_version || 'Android',
       pairing_code: d.pairing_code || this.generatePairingCode(devId),
       pairing_token: d.pairing_token || d.id || devId,
-      active_guard: d.active_guard || null,
+      active_guard: d.active_guard || (d.current_guard_name ? { name: d.current_guard_name, id: d.current_guard_id, status: d.guard_status || 'on_duty' } : null),
     };
   }
 

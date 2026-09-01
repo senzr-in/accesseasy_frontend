@@ -245,6 +245,7 @@
 
 <script setup>
 import { ref, watch, onMounted, nextTick } from "vue";
+import { appConfigService } from "@/services/appConfigService";
 
 const props = defineProps({
   show: Boolean,
@@ -261,10 +262,8 @@ const mapContainer = ref(null);
 let mapInstance = null;
 let markerInstance = null;
 
-// Prefer env variable; fall back to existing key pattern if provided in project
-const GOOGLE_MAPS_API_KEY =
-  import.meta.env.VITE_GOOGLE_MAPS_API_KEY ||
-  "AIzaSyCwp-gBFBiutZVlE-a-84hHnA2XeMRGE1g";
+// Centralized Google Maps API key from appConfigService
+const GOOGLE_MAPS_API_KEY = appConfigService.getGoogleMapsApiKey();
 
 function loadGoogleMapsScript() {
   return new Promise((resolve, reject) => {

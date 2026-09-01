@@ -539,10 +539,11 @@ import axios from 'axios';
 import { authService } from '@/services/authService';
 import { currentUserTenant } from '@/utils/currentUserTenant';
 import { useRoute, useRouter } from 'vue-router';
+import { appConfigService } from '@/services/appConfigService';
 import polyline from 'google-polyline';
 
 // Constants
-const apiKey = 'AIzaSyCwp-gBFBiutZVlE-a-84hHnA2XeMRGE1g';
+const apiKey = appConfigService.getGoogleMapsApiKey();
 const route = useRoute();
 const router = useRouter();
 const employeeId = route.params.employeeId;

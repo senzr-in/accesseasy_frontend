@@ -576,6 +576,7 @@ import {
 import { useRoute, useRouter } from "vue-router";
 import { authService } from "@/services/authService";
 import { currentUserTenant } from "@/utils/currentUserTenant";
+import { appConfigService } from "@/services/appConfigService";
 import jsQR from "jsqr";
 
 // Toast notification state
@@ -643,7 +644,7 @@ const currentLocation = reactive({
   loading: false,
 });
 
-const GOOGLE_MAPS_API_KEY = "AIzaSyCwp-gBFBiutZVlE-a-84hHnA2XeMRGE1g";
+const GOOGLE_MAPS_API_KEY = appConfigService.getGoogleMapsApiKey();
 
 // Field type support mapping
 const SUPPORTED_FIELD_TYPES = {

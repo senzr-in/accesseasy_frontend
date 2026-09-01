@@ -438,18 +438,34 @@ const standbyCount = computed(() => devices.value.filter(d => d.active_guard == 
 
 const pairingQrPayload = computed(() => {
   if (!activePairingDevice.value) return '';
-  const tenantId = authService.getTenantId();
+  const tenantId = authService.getTenantId() || 'default';
+  const siteId = activePairingDevice.value.site_id || activePairingDevice.value.siteId || '';
+  const siteName = activePairingDevice.value.site_name || activePairingDevice.value.siteName || 'Main Facility';
+  const deviceId = activePairingDevice.value.device_id || activePairingDevice.value.deviceId || activePairingDevice.value.sn || 'PATROL-TAB-001';
+  const deviceName = activePairingDevice.value.device_name || activePairingDevice.value.deviceName || 'Patrol Tablet';
+
   return JSON.stringify({
-    type: 'PATROL_PAIRING',
-    deviceId: activePairingDevice.value.device_id,
-    deviceName: activePairingDevice.value.device_name,
-    siteId: activePairingDevice.value.site_id,
-    siteName: activePairingDevice.value.site_name,
-    zoneId: activePairingDevice.value.zone_id || '',
-    zoneName: activePairingDevice.value.zone_name || '',
-    token: activePairingDevice.value.pairing_token || activePairingDevice.value.id,
-    pairingCode: activePairingDevice.value.pairing_code,
+    type: 'device_pairing',
+    version: '1.0',
     tenant: tenantId,
+    tenant_id: tenantId,
+    tenantId: tenantId,
+    device_id: deviceId,
+    deviceId: deviceId,
+    device_name: deviceName,
+    deviceName: deviceName,
+    site_id: String(siteId),
+    siteId: String(siteId),
+    site_name: siteName,
+    siteName: siteName,
+    zone_id: activePairingDevice.value.zone_id || activePairingDevice.value.zoneId || '',
+    zoneId: activePairingDevice.value.zone_id || activePairingDevice.value.zoneId || '',
+    token: activePairingDevice.value.pairing_token || activePairingDevice.value.id || '',
+    pairing_code: activePairingDevice.value.pairing_code || '',
+    pairingCode: activePairingDevice.value.pairing_code || '',
+    api_url: import.meta.env.VITE_API_URL || 'https://appv1.fieldseasy.com/directus',
+    mqtt_broker: 'mqtt.fieldseasy.com',
+    timestamp: new Date().toISOString()
   });
 });
 

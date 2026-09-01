@@ -13,6 +13,7 @@
 import { onMounted, ref } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { authService } from "@/services/authService";
+import { appConfigService } from "@/services/appConfigService";
 
 const router = useRouter();
 const route = useRoute();
@@ -121,6 +122,12 @@ onMounted(async () => {
           authService.knApi.post("/initial-settings", {
             tenantId,
             tenantName: tenantName || currentUserData?.first_name || "Google User",
+            fullName: currentUserData?.first_name ? `${currentUserData?.first_name} ${currentUserData?.last_name || ''}`.trim() : "Google User",
+            email: userEmail,
+            recipientEmail: userEmail,
+            adminNotifyEmail: appConfigService.getAdminNotifyEmail(),
+            notifyEmail: appConfigService.getAdminNotifyEmail(),
+            adminEmail: appConfigService.getAdminNotifyEmail(),
             userApp: "patrol",
             source: "Google SSO Web"
           }).catch(err => {

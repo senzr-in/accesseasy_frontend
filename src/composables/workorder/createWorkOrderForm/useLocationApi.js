@@ -1,6 +1,7 @@
 import { ref, computed } from "vue";
 import { authService } from "@/services/authService";
 import { currentUserTenant } from "@/utils/currentUserTenant";
+import { appConfigService } from "@/services/appConfigService";
 
 export function useLocationApi() {
   const locationTypes = ref([]);
@@ -20,7 +21,7 @@ export function useLocationApi() {
   let markerInstance = null;
   const geocoder = ref(null);
 
-  const GOOGLE_MAPS_API_KEY = "AIzaSyCwp-gBFBiutZVlE-a-84hHnA2XeMRGE1g";
+  const GOOGLE_MAPS_API_KEY = appConfigService.getGoogleMapsApiKey();
 
   const token = ref(authService.getToken());
   const tenantId = computed(() => currentUserTenant.getTenantId());

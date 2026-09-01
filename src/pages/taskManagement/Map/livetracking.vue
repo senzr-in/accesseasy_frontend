@@ -466,9 +466,10 @@ import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import { Loader } from '@googlemaps/js-api-loader';
 import { authService } from "@/services/authService";
 import { currentUserTenant } from "@/utils/currentUserTenant";
+import { appConfigService } from "@/services/appConfigService";
 
 const tenantId = currentUserTenant.getTenantId();
-const apiKey = 'AIzaSyCwp-gBFBiutZVlE-a-84hHnA2XeMRGE1g';
+const apiKey = appConfigService.getGoogleMapsApiKey();
 
 // Reactive data
 const layers = ref({

@@ -149,89 +149,86 @@ class AttendanceService {
         }
       }
 
-      // 4. Also check /items/attendance (workforce/general attendance collection)
-      //    STRICT: only fetch if tenant-filtered — never pull unfiltered records
+      // 4. Fetch live multi-session punch records from mobile-app logs (/items/logs)
+      //    Prioritized as source of truth for mobile patrol app punches
+      const liveStates = await this.getLiveGuardStates();
+
+      // Add actual live multi-sessions from mobile logs
+      liveStates.forEach(ls => {
+        if (ls.sessions && ls.sessions.length > 0) {
+          ls.sessions.forEach(sess => {
+            if (!allRecords.some(r => String(r.id) === String(sess.id))) {
+              allRecords.push(sess);
+            }
+          });
+        } else if (ls.checkInTime || ls.checkOutTime) {
+          const sessId = `log-${ls.userId || ls.employeeId || 'sess'}`;
+          if (!allRecords.some(r => String(r.id) === String(sessId))) {
+            allRecords.push({
+              id: sessId,
+              guard: { id: ls.userId || ls.employeeId, assignedUser: ls.assignedUser },
+              guard_name: ls.guardName,
+              phone: ls.phone,
+              site_name: ls.siteName || 'App Check-In',
+              zone_name: '',
+              check_in_time: ls.checkInTime,
+              check_out_time: ls.checkOutTime,
+              status: ls.liveStatus === 'checked_out' ? 'off_duty' : (ls.liveStatus === 'on_break' ? 'on_break' : 'present'),
+              verification_mode: ls.mode || 'face_ai',
+              live_status: ls.liveStatus,
+              last_log_time: ls.lastLogTime,
+              last_log_action: ls.lastAction,
+              date_created: ls.checkInTime || new Date().toISOString()
+            });
+          }
+        }
+      });
+
+      // 5. Also check /items/attendance (workforce/general attendance collection)
+      //    Only add valid non-empty punches that are not already covered by live mobile sessions
       if (tenantId) {
         try {
           const attUrl = `/items/attendance?filter[tenant][_eq]=${tenantId}&sort=-date,-inTime&limit=100&fields=*,employeeId.*,employeeId.assignedUser.*`;
           const res = await authService.protectedApi.get(attUrl);
           if (res.data?.data && Array.isArray(res.data.data) && res.data.data.length > 0) {
-            const attMapped = res.data.data.map(item => {
-              const emp = item.employeeId || {};
-              const user = emp.assignedUser || {};
-              const dateStr = item.date || new Date().toISOString().split('T')[0];
-              const inTimeStr = item.inTime ? (item.inTime.includes('T') ? item.inTime : `${dateStr}T${item.inTime}`) : null;
-              const outTimeStr = item.outTime ? (item.outTime.includes('T') ? item.outTime : `${dateStr}T${item.outTime}`) : null;
-              
-              // item.location may be a JSON object (lat/lng) — only use if it's a string
-              const siteName = typeof item.location === 'string' ? item.location : (item.site_name || '');
+            const attMapped = res.data.data
+              .filter(item => (item.inTime && item.inTime !== '00:00:00') || (item.outTime && item.outTime !== '00:00:00'))
+              .map(item => {
+                const emp = item.employeeId || {};
+                const user = emp.assignedUser || {};
+                const dateStr = item.date || new Date().toISOString().split('T')[0];
+                const inTimeStr = item.inTime ? (item.inTime.includes('T') ? item.inTime : `${dateStr}T${item.inTime}`) : null;
+                const outTimeStr = item.outTime ? (item.outTime.includes('T') ? item.outTime : `${dateStr}T${item.outTime}`) : null;
+                const siteName = typeof item.location === 'string' ? item.location : (item.site_name || '');
 
-              return {
-                id: `att-${item.id}`,
-                guard: user.id || emp.id || item.employeeId,
-                guard_name: `${emp.firstName || user.first_name || ''} ${emp.lastName || user.last_name || ''}`.trim() || emp.personalEmail || 'Security Guard',
-                phone: emp.personalPhone || user.phone || 'No phone',
-                site_name: siteName || 'Main Site',
-                zone_name: typeof item.door === 'string' ? item.door : '',
-                check_in_time: inTimeStr,
-                check_out_time: outTimeStr,
-                status: item.attendance === 'present' || item.status === 'present' ? 'present' : (item.status || 'present'),
-                verification_mode: item.mode || 'manual',
-                date_created: inTimeStr || item.date_created || new Date().toISOString()
-              };
-            });
+                return {
+                  id: `att-${item.id}`,
+                  guard: user.id || emp.id || item.employeeId,
+                  guard_name: `${emp.firstName || user.first_name || ''} ${emp.lastName || user.last_name || ''}`.trim() || emp.personalEmail || 'Security Guard',
+                  phone: emp.personalPhone || user.phone || 'No phone',
+                  site_name: siteName || 'Main Site',
+                  zone_name: typeof item.door === 'string' ? item.door : '',
+                  check_in_time: inTimeStr,
+                  check_out_time: outTimeStr,
+                  status: item.attendance === 'present' || item.status === 'present' ? 'present' : (item.status || 'present'),
+                  verification_mode: item.mode || 'manual',
+                  date_created: inTimeStr || item.date_created || new Date().toISOString()
+                };
+              });
 
             attMapped.forEach(am => {
-              if (!allRecords.some(r => String(r.id) === String(am.id))) {
+              const alreadyCovered = allRecords.some(r => {
+                const rUserId = r.guard?.assignedUser?.id || r.guard?.id || r.guard;
+                const amUserId = am.guard?.assignedUser?.id || am.guard?.id || am.guard;
+                return String(rUserId) === String(amUserId);
+              });
+              if (!alreadyCovered && !allRecords.some(r => String(r.id) === String(am.id))) {
                 allRecords.push(am);
               }
             });
           }
         } catch (_) {}
       }
-
-      // 5. Fetch live guard states from mobile-app logs (/items/logs)
-      //    These records are written by the patrol app on check-in, check-out, break
-      const liveStates = await this.getLiveGuardStates();
-
-      // Merge: update existing records' live_status; add log-only guards not in guard_attendance
-      liveStates.forEach(ls => {
-        const existing = allRecords.find(r => {
-          const rUserId = r.guard?.assignedUser?.id || r.guard?.id;
-          return String(rUserId) === String(ls.userId) || String(r.guard) === String(ls.employeeId);
-        });
-        if (existing) {
-          existing.live_status = ls.liveStatus;
-          existing.last_log_time = ls.lastLogTime;
-          existing.last_log_action = ls.lastAction;
-          // Sync check-in time if missing
-          if (!existing.check_in_time && ls.checkInTime) existing.check_in_time = ls.checkInTime;
-          if (!existing.check_out_time && ls.checkOutTime) existing.check_out_time = ls.checkOutTime;
-          // Sync status with live state
-          if (ls.liveStatus === 'checked_out') existing.status = 'off_duty';
-          else if (ls.liveStatus === 'on_break') existing.status = 'on_break';
-          else if (ls.liveStatus === 'checked_in') existing.status = 'present';
-        } else {
-          // Guard only has app logs — only add if they have a valid assignedUser (registered guard)
-          if (!ls.userId || !ls.guardName || ls.guardName.startsWith('Employee #')) return;
-          allRecords.push({
-            id: `log-${ls.employeeId}`,
-            guard: { id: ls.userId, assignedUser: ls.assignedUser },
-            guard_name: ls.guardName,
-            phone: ls.phone,
-            site_name: 'App Check-In',
-            zone_name: '',
-            check_in_time: ls.checkInTime,
-            check_out_time: ls.checkOutTime,
-            status: ls.liveStatus === 'checked_out' ? 'off_duty' : (ls.liveStatus === 'on_break' ? 'on_break' : 'present'),
-            verification_mode: 'app',
-            live_status: ls.liveStatus,
-            last_log_time: ls.lastLogTime,
-            last_log_action: ls.lastAction,
-            date_created: ls.checkInTime || new Date().toISOString()
-          });
-        }
-      });
 
       if (allRecords && allRecords.length > 0) {
         return allRecords.map(r => this._mapAttendanceRecord(r, userMap, siteMap));
@@ -257,15 +254,12 @@ class AttendanceService {
       const logsAttempts = [];
       if (tenantId) {
         logsAttempts.push(
-          `/items/logs?filter[tenant][_eq]=${tenantId}&filter[date][_eq]=${today}&sort=-date_created,-timeStamp&limit=200` +
-          `&fields=id,action,status,date,timeStamp,mode,date_created,employeeId.id,employeeId.employeeId,employeeId.assignedUser.id,employeeId.assignedUser.first_name,employeeId.assignedUser.last_name,employeeId.assignedUser.phone,employeeId.assignedUser.avatar`
+          `/items/logs?filter[tenant][_eq]=${tenantId}&filter[date][_eq]=${today}&sort=date_created,timeStamp&limit=200&fields=id,action,status,date,timeStamp,mode,date_created,employeeId.id,employeeId.employeeId,employeeId.assignedUser.id,employeeId.assignedUser.first_name,employeeId.assignedUser.last_name,employeeId.assignedUser.phone,employeeId.assignedUser.avatar`
         );
       }
-      // Fallback: only skip tenant filter if tenantId is truly missing
       if (!tenantId) {
         logsAttempts.push(
-          `/items/logs?filter[date][_eq]=${today}&sort=-date_created&limit=200` +
-          `&fields=id,action,status,date,timeStamp,mode,date_created,employeeId.id,employeeId.employeeId,employeeId.assignedUser.id,employeeId.assignedUser.first_name,employeeId.assignedUser.last_name,employeeId.assignedUser.phone`
+          `/items/logs?filter[date][_eq]=${today}&sort=date_created,timeStamp&limit=200&fields=id,action,status,date,timeStamp,mode,date_created,employeeId.id,employeeId.employeeId,employeeId.assignedUser.id,employeeId.assignedUser.first_name,employeeId.assignedUser.last_name,employeeId.assignedUser.phone`
         );
       }
 
@@ -290,10 +284,15 @@ class AttendanceService {
         byEmployee[empId].logs.push(log);
       });
 
-      // For each guard determine current state from the latest log action
       return Object.entries(byEmployee).map(([empId, { logs, empObj }]) => {
-        // logs are sorted newest first
-        const latestLog = logs[0];
+        // Sort chronologically (oldest to newest)
+        const sortedLogs = [...logs].sort((a, b) => {
+          const tA = (a.date || today) + 'T' + (a.timeStamp || '00:00:00');
+          const tB = (b.date || today) + 'T' + (b.timeStamp || '00:00:00');
+          return tA.localeCompare(tB);
+        });
+
+        const latestLog = sortedLogs[sortedLogs.length - 1];
         const rawAction = (latestLog?.action || '').toLowerCase().trim();
 
         let liveStatus = 'unknown';
@@ -305,14 +304,17 @@ class AttendanceService {
           liveStatus = 'on_break';
         }
 
-        // Find check-in time (first 'in' log of the day)
-        const inLog = [...logs].reverse().find(l => ['in', 'clock_in', 'check_in'].includes((l.action || '').toLowerCase().trim()));
-        const outLog = logs.find(l => ['out', 'clock_out', 'check_out'].includes((l.action || '').toLowerCase().trim()));
-
         const toISO = (log) => {
           if (!log) return null;
           const d = log.date || today;
-          const t = log.timeStamp || log.date_created?.split('T')[1]?.slice(0,8) || '00:00:00';
+          let t = log.timeStamp || '';
+          if (!t && log.date_created && log.date_created.includes('T')) {
+            t = log.date_created.split('T')[1].slice(0, 8);
+          }
+          if (!t || t === '00:00:00') {
+            if (log.date_created) return log.date_created;
+            return `${d}T00:00:00`;
+          }
           return `${d}T${t}`;
         };
 
@@ -320,9 +322,68 @@ class AttendanceService {
         const firstName = assignedUser?.first_name || '';
         const lastName = assignedUser?.last_name || '';
         const guardName = `${firstName} ${lastName}`.trim() || `Employee #${empId}`;
-
-        // Site resolution from log or employee
         const logSite = latestLog?.site_name || latestLog?.location || (typeof latestLog?.site === 'string' ? latestLog.site : null);
+
+        // Build distinct session pairs
+        const sessions = [];
+        let cur = null;
+
+        for (const l of sortedLogs) {
+          const act = (l.action || '').toLowerCase().trim();
+          const t = toISO(l);
+          if (['in', 'clock_in', 'check_in'].includes(act)) {
+            if (cur && !cur.check_out_time) {
+              sessions.push(cur);
+            }
+            cur = {
+              id: `log-s-${empId}-${l.id || Math.random()}`,
+              guard: { id: assignedUser?.id || empId, assignedUser },
+              guard_name: guardName,
+              phone: assignedUser?.phone || 'No phone',
+              site_name: logSite || 'App Check-In',
+              zone_name: '',
+              check_in_time: t,
+              check_out_time: null,
+              status: 'present',
+              verification_mode: l.mode || 'face_ai',
+              live_status: 'checked_in',
+              last_log_time: t,
+              last_log_action: act,
+              date_created: t
+            };
+          } else if (['out', 'clock_out', 'check_out'].includes(act)) {
+            if (cur) {
+              cur.check_out_time = t;
+              cur.status = 'off_duty';
+              cur.live_status = 'checked_out';
+              sessions.push(cur);
+              cur = null;
+            } else {
+              sessions.push({
+                id: `log-s-${empId}-${l.id || Math.random()}`,
+                guard: { id: assignedUser?.id || empId, assignedUser },
+                guard_name: guardName,
+                phone: assignedUser?.phone || 'No phone',
+                site_name: logSite || 'App Check-In',
+                zone_name: '',
+                check_in_time: null,
+                check_out_time: t,
+                status: 'off_duty',
+                verification_mode: l.mode || 'face_ai',
+                live_status: 'checked_out',
+                last_log_time: t,
+                last_log_action: act,
+                date_created: t
+              });
+            }
+          }
+        }
+        if (cur) {
+          sessions.push(cur);
+        }
+
+        const inLog = sortedLogs.find(l => ['in', 'clock_in', 'check_in'].includes((l.action || '').toLowerCase().trim()));
+        const outLog = [...sortedLogs].reverse().find(l => ['out', 'clock_out', 'check_out'].includes((l.action || '').toLowerCase().trim()));
 
         return {
           employeeId: empId,
@@ -337,7 +398,8 @@ class AttendanceService {
           checkInTime: toISO(inLog),
           checkOutTime: toISO(outLog),
           mode: latestLog?.mode || 'app',
-          allLogs: logs.map(l => ({ id: l.id, action: l.action, time: toISO(l) }))
+          sessions,
+          allLogs: sortedLogs.map(l => ({ id: l.id, action: l.action, time: toISO(l) }))
         };
       });
     } catch (error) {
@@ -346,9 +408,6 @@ class AttendanceService {
     }
   }
 
-  /**
-   * Get KPI aggregate statistics for attendance dashboard
-   */
   async getAttendanceStats(siteId = null) {
     const list = await this.getTodayAttendance(siteId);
     const total = list.length;

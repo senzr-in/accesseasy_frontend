@@ -458,6 +458,60 @@
       </div>
     </Teleport>
 
+    <!-- Celebratory Payment Success Modal -->
+    <Teleport to="body">
+      <div
+        v-if="showSuccessModal"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-in fade-in duration-300"
+      >
+        <div class="relative w-full max-w-md bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5 text-center">
+          
+          <!-- Animated Checkmark -->
+          <div class="w-16 h-16 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 flex items-center justify-center mx-auto shadow-lg shadow-emerald-500/20">
+            <CheckCircle2 class="w-10 h-10 text-emerald-500 animate-bounce" />
+          </div>
+
+          <div>
+            <h3 class="text-xl font-black text-slate-900 dark:text-white tracking-tight">Payment Successful!</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              Your AccessEasy Patrol subscription for <strong>{{ paymentSuccessDetails.sites }} {{ paymentSuccessDetails.sites === 1 ? 'Site' : 'Sites' }}</strong> is now active.
+            </p>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 space-y-2 text-xs">
+            <div class="flex items-center justify-between text-slate-500">
+              <span>Amount Paid:</span>
+              <span class="font-bold text-slate-900 dark:text-white">{{ currencySymbol }}{{ paymentSuccessDetails.amount?.toLocaleString() }}</span>
+            </div>
+            <div class="flex items-center justify-between text-slate-500">
+              <span>Payment ID:</span>
+              <span class="font-mono font-bold text-indigo-600 dark:text-indigo-400">{{ paymentSuccessDetails.paymentId }}</span>
+            </div>
+            <div class="flex items-center justify-between text-slate-500">
+              <span>Status:</span>
+              <span class="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold text-[10px] uppercase">Active &amp; Verified</span>
+            </div>
+          </div>
+
+          <div class="space-y-2 pt-2">
+            <button
+              class="w-full h-11 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs uppercase tracking-wider transition-all shadow-md shadow-indigo-600/20 cursor-pointer"
+              @click="router.push('/dashboard')"
+            >
+              Go to Command Center →
+            </button>
+            <button
+              class="w-full h-10 rounded-2xl border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 text-slate-600 dark:text-slate-300 font-bold text-xs transition-all cursor-pointer"
+              @click="router.push('/dashboard/settings/subscription')"
+            >
+              View Subscription Details
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </Teleport>
+
   </div>
 </template>
 
@@ -483,6 +537,12 @@ const currency = ref('INR');
 const isProcessingPayment = ref(false);
 const isProcessingTrial = ref(false);
 const showPaymentModal = ref(false);
+const showSuccessModal = ref(false);
+const paymentSuccessDetails = ref({
+  amount: 1999,
+  sites: 1,
+  paymentId: ''
+});
 const paymentTab = ref('online');
 const copiedUpi = ref(false);
 
@@ -501,7 +561,7 @@ const formattedUnitPrice = computed(() => {
 });
 
 const totalPayable = computed(() => {
-  return PRICING[currency.value] * sitesCount.value;
+  return (Number(sitesCount.value) || 1) * PRICING[currency.value];
 });
 
 const isFreeTrialActive = computed(() => store.isTrial && !store.isExpired);
@@ -516,18 +576,15 @@ const keyPlatformFeatures = [
   { title: 'Unlimited Patrol Routes', desc: 'Design complex multi-checkpoint routes per facility.', icon: Route }
 ];
 
-const upiDeepLink = computed(() => {
-  return `upi://pay?pa=${UPI_ID}&pn=${UPI_NAME}&am=${totalPayable.value}&cu=INR&tn=Patrol_${sitesCount.value}Sites`;
-});
-
 const dynamicUpiQrUrl = computed(() => {
-  const encoded = encodeURIComponent(upiDeepLink.value);
-  return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encoded}`;
+  const upiUri = `upi://pay?pa=${UPI_ID}&pn=${UPI_NAME}&am=${totalPayable.value}&cu=INR&tn=AccessEasy+Patrol+Subscription`;
+  return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(upiUri)}`;
 });
 
 const whatsappProofLink = computed(() => {
-  const msg = encodeURIComponent(`Hi, I completed payment of ₹${totalPayable.value.toLocaleString()} for ${sitesCount.value} Sites on AccessEasy Patrol. Please activate.`);
-  return `https://wa.me/919876543210?text=${msg}`;
+  const tenantName = currentUserTenant.getTenantName() || 'Tenant';
+  const text = `Hi AccessEasy Team, I have completed the subscription payment of ${currencySymbol.value}${totalPayable.value.toLocaleString()} for ${sitesCount.value} sites for Organization: ${tenantName}. Attached is my payment confirmation screenshot.`;
+  return `https://wa.me/919442566276?text=${encodeURIComponent(text)}`;
 });
 
 function adjustSites(delta) {
@@ -544,16 +601,21 @@ function openCheckoutModal() {
 }
 
 function copyUpiId() {
-  navigator.clipboard.writeText(UPI_ID);
+  navigator.clipboard?.writeText(UPI_ID);
   copiedUpi.value = true;
-  setTimeout(() => (copiedUpi.value = false), 2500);
+  setTimeout(() => (copiedUpi.value = false), 2000);
 }
 
 async function handleStartFreeTrial() {
   isProcessingTrial.value = true;
   try {
     await paymentService.startFreeTrial({ sitesCount: 1, days: 7 });
-    alert('🎉 7-Day Free Trial activated for 1 site with full platform access.');
+    paymentSuccessDetails.value = {
+      amount: 0,
+      sites: 1,
+      paymentId: 'FREE_TRIAL_7_DAYS'
+    };
+    showSuccessModal.value = true;
     await currentUserTenant.refresh();
     await store.refreshPlan();
   } catch (error) {
@@ -602,10 +664,15 @@ async function initiateRazorpayPayment() {
           });
 
           showPaymentModal.value = false;
-          alert(`✅ Payment Successful! AccessEasy Patrol active for ${sitesCount.value} sites.`);
+          paymentSuccessDetails.value = {
+            amount: totalPayable.value,
+            sites: sitesCount.value,
+            paymentId: response.razorpay_payment_id
+          };
+          showSuccessModal.value = true;
+
           await currentUserTenant.refresh();
           await store.refreshPlan();
-          router.push('/dashboard/settings/subscription');
         } catch (verifyError) {
           alert(`❌ Payment verification failed: ${verifyError.message}`);
         } finally {

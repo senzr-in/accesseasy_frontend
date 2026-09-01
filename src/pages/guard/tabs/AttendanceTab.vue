@@ -476,6 +476,7 @@ import {
 } from 'lucide-vue-next';
 import { attendanceService } from '@/services/attendanceService';
 import { siteService } from '@/services/siteService';
+import { mqttService } from '@/services/mqttService';
 import FeatureGate from '@/components/common/FeatureGate.vue';
 
 // State
@@ -561,11 +562,22 @@ const groupedGuards = computed(() => {
 
   // Determine current status & active session for each guard
   const result = Object.values(map).map(group => {
+    // Deduplicate sessions by ID or identical timestamps
+    const uniqueSessions = [];
+    group.sessions.forEach(s => {
+      const isDup = uniqueSessions.some(u => 
+        (u.id && s.id && u.id === s.id) ||
+        (u.check_in_time && s.check_in_time && u.check_in_time === s.check_in_time && u.check_out_time === s.check_out_time)
+      );
+      if (!isDup) uniqueSessions.push(s);
+    });
+    group.sessions = uniqueSessions;
+
     // Sort sessions chronologically (oldest to newest)
     group.sessions.sort((a, b) => new Date(a.check_in_time || a.date_created) - new Date(b.check_in_time || b.date_created));
 
     // Find any open session (no check-out time)
-    const openSession = group.sessions.find(s => !s.check_out_time);
+    const openSession = group.sessions.find(s => !s.check_out_time && s.check_in_time);
     if (openSession) {
       group.activeSession = openSession;
       group.currentStatus = normalizeStatus(openSession);
@@ -598,18 +610,32 @@ const offDutyCount = computed(() => groupedGuards.value.filter(g => g.currentSta
 
 const formatTime = (isoString) => {
   if (!isoString) return '';
-  if (typeof isoString === 'string' && /^\d{2}:\d{2}(:\d{2})?$/.test(isoString.trim())) {
-    const parts = isoString.trim().split(':');
+  const str = String(isoString).trim();
+  if (!str || str === '00:00:00' || str === '00:00' || str.endsWith('T00:00:00') || str.endsWith('T00:00:00.000Z') || str.endsWith(' 00:00:00')) {
+    return '';
+  }
+  if (/^\d{2}:\d{2}(:\d{2})?$/.test(str)) {
+    const parts = str.split(':');
     const d = new Date();
     d.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), parseInt(parts[2] || 0, 10));
     return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
   try {
-    const d = new Date(isoString);
-    if (isNaN(d.getTime())) return isoString;
-    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    let parseStr = str;
+    if (parseStr.includes('T') && !parseStr.endsWith('Z') && !/[+-]\d{2}:?\d{2}$/.test(parseStr)) {
+      parseStr += 'Z';
+    } else if (parseStr.includes(' ') && !parseStr.includes('T')) {
+      parseStr = parseStr.replace(' ', 'T') + (parseStr.endsWith('Z') ? '' : 'Z');
+    }
+
+    const d = new Date(parseStr);
+    if (!isNaN(d.getTime())) {
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+    const dRaw = new Date(str);
+    return isNaN(dRaw.getTime()) ? str : dRaw.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   } catch (_) {
-    return isoString;
+    return str;
   }
 };
 
@@ -688,8 +714,17 @@ const exportCSV = () => {
   document.body.removeChild(link);
 };
 
+let unsubMqttAttendance = null;
+let unsubMqttDevice = null;
+
 onMounted(async () => {
   await loadAttendanceData();
+
+  // Instant real-time update on mobile punches / breaks / check-ins
+  mqttService.connect();
+  unsubMqttAttendance = mqttService.on('patrol/#', () => loadAttendanceData(true));
+  unsubMqttDevice = mqttService.on('device/#', () => loadAttendanceData(true));
+
   pollInterval = setInterval(async () => {
     if (_pollLocked) return;
     _pollLocked = true;
@@ -698,7 +733,7 @@ onMounted(async () => {
     } finally {
       _pollLocked = false;
     }
-  }, 10000); // 10s auto-refresh from mobile app punches
+  }, 10000); // 10s auto-refresh fallback from mobile app punches
 });
 
 onUnmounted(() => {
@@ -706,6 +741,8 @@ onUnmounted(() => {
     clearInterval(pollInterval);
     pollInterval = null;
   }
+  if (typeof unsubMqttAttendance === 'function') unsubMqttAttendance();
+  if (typeof unsubMqttDevice === 'function') unsubMqttDevice();
 });
 </script>
 
