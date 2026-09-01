@@ -110,16 +110,16 @@
                   <span v-if="dev.zone_name" class="block text-[10px] text-slate-400 font-normal">{{ dev.zone_name }}</span>
                 </td>
 
-                <!-- Current Active Guard (Dynamic) -->
+                <!-- Current Active Guard (Dynamic - from mobile heartbeat) -->
                 <td class="px-4 py-3.5">
-                  <div v-if="dev.active_guard" class="flex items-center gap-1.5">
+                  <div v-if="dev.current_guard_name || dev.active_guard" class="flex items-center gap-1.5">
                     <span class="relative flex h-2 w-2">
                       <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                       <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                     </span>
                     <div>
-                      <span class="font-bold text-slate-900 dark:text-white">{{ dev.active_guard.guard_name }}</span>
-                      <span class="block text-[10px] text-emerald-600 dark:text-emerald-400">Active Shift ({{ formatTime(dev.active_guard.login_time) }})</span>
+                      <span class="font-bold text-slate-900 dark:text-white">{{ dev.current_guard_name || dev.active_guard?.name || dev.active_guard?.guard_name }}</span>
+                      <span class="block text-[10px] text-emerald-600 dark:text-emerald-400">{{ dev.guard_status === 'on_break' ? 'On Break' : 'Active Shift' }}</span>
                     </div>
                   </div>
                   <div v-else class="text-slate-400 font-medium italic">
@@ -160,7 +160,7 @@
                     class="text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase"
                     :class="getStatusBadgeClass(dev.status)"
                   >
-                    {{ dev.status }}
+                    {{ dev.status === 'active' || dev.status === 'approved' || dev.status === 'online' ? 'ACTIVE' : dev.status === 'locked' ? 'LOCKED' : dev.status === 'offline' ? 'OFFLINE' : 'STANDBY' }}
                   </span>
                 </td>
 
