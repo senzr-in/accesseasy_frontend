@@ -716,6 +716,9 @@ const exportCSV = () => {
 
 let unsubMqttAttendance = null;
 let unsubMqttDevice = null;
+let unsubMqttLoc1 = null;
+let unsubMqttLoc2 = null;
+let unsubMqttLoc3 = null;
 let _debouncedMqttTimer = null;
 
 const triggerDebouncedReload = () => {
@@ -729,9 +732,14 @@ onMounted(async () => {
   await loadAttendanceData();
 
   // Instant real-time update on mobile punches / breaks / check-ins (debounced)
-  mqttService.connect();
-  unsubMqttAttendance = mqttService.on('patrol/+/log', triggerDebouncedReload);
-  unsubMqttDevice = mqttService.on('patrol/+/alert', triggerDebouncedReload);
+  try {
+    mqttService.connect();
+    unsubMqttAttendance = mqttService.on('patrol/+/log', triggerDebouncedReload);
+    unsubMqttDevice = mqttService.on('patrol/+/alert', triggerDebouncedReload);
+    unsubMqttLoc1 = mqttService.on('fieldeasy_mobile/+/location', triggerDebouncedReload);
+    unsubMqttLoc2 = mqttService.on('fieldeasy_mobile/+/+', triggerDebouncedReload);
+    unsubMqttLoc3 = mqttService.on('device/fieldeasy_mobile/+/location', triggerDebouncedReload);
+  } catch (_) {}
 
   pollInterval = setInterval(async () => {
     if (_pollLocked) return;
@@ -752,6 +760,9 @@ onUnmounted(() => {
   }
   if (typeof unsubMqttAttendance === 'function') unsubMqttAttendance();
   if (typeof unsubMqttDevice === 'function') unsubMqttDevice();
+  if (typeof unsubMqttLoc1 === 'function') unsubMqttLoc1();
+  if (typeof unsubMqttLoc2 === 'function') unsubMqttLoc2();
+  if (typeof unsubMqttLoc3 === 'function') unsubMqttLoc3();
 });
 </script>
 

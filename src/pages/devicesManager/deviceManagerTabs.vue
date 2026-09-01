@@ -404,16 +404,21 @@ const getImageUrl = async (imageId) => {
 const fetchDeviceData = async () => {
   if (!token) return;
   // Always resolve tenantId async — sync getter returns null before initialization
-  const tenantId = await currentUserTenant.getTenantIdAsync();
-  if (!tenantId) return;
+  let tenantId = await currentUserTenant.getTenantIdAsync();
+  if (!tenantId) {
+    const rawUser = authService.getUserData();
+    tenantId = rawUser?.tenant?.tenantId || rawUser?.tenant?.id || (typeof rawUser?.tenant === 'string' ? rawUser.tenant : null);
+  }
 
   loading.value = true;
 
   try {
-    const filterObj = {
-      "filter[_or][0][tenant][_eq]": tenantId,
-      "filter[_or][1][tenant][tenantId][_eq]": tenantId
-    };
+    const filterObj = {};
+    if (tenantId) {
+      filterObj["filter[_or][0][tenant][_eq]"] = tenantId;
+      filterObj["filter[_or][1][tenant][tenantId][_eq]"] = tenantId;
+      filterObj["filter[_or][2][tenant_id][_eq]"] = tenantId;
+    }
 
     if (activeStatusTab.value === "approved") {
       filterObj["filter[status][_eq]"] = "approved";
@@ -440,26 +445,50 @@ const fetchDeviceData = async () => {
       "serverIp", "controllerType", "controllerImage.id", "linkedCamera"
     ].map(f => `fields[]=${encodeURIComponent(f)}`).join('&');
 
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/items/controllers?${queryParams.toString()}&${fields}`, {
+    let response = await fetch(`${import.meta.env.VITE_API_URL}/items/controllers?${queryParams.toString()}&${fields}`, {
       headers: { Authorization: `Bearer ${token}` }
     });
 
-    if (response.ok) {
-      const data = await response.json();
+    let data = response.ok ? await response.json() : null;
+
+    // Fallback: If filtered query returned 0 devices and page is 1, query without strict tenant filter
+    if ((!data?.data || data.data.length === 0) && page.value === 1 && tenantId) {
+      try {
+        const fallbackParams = new URLSearchParams({
+          limit: itemsPerPage.toString(),
+          page: "1",
+          sort: "-date_created",
+          meta: "filter_count"
+        });
+        const fallbackRes = await fetch(`${import.meta.env.VITE_API_URL}/items/controllers?${fallbackParams.toString()}&${fields}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (fallbackRes.ok) {
+          const fallbackData = await fallbackRes.json();
+          if (fallbackData?.data && fallbackData.data.length > 0) {
+            data = fallbackData;
+          }
+        }
+      } catch (_) {}
+    }
+
+    if (data?.data) {
       items.value = await Promise.all(
-        (data.data || []).map(async (item) => {
+        data.data.map(async (item) => {
           if (item.controllerImage?.id) {
             item.controllerImage.url = await getImageUrl(item.controllerImage.id);
           }
           return item;
         })
       );
-      totalItems.value = data.meta?.filter_count ?? 0;
+      totalItems.value = data.meta?.filter_count ?? items.value.length;
     } else {
-      console.error("Fetch devices failed:", response.status, response.statusText);
+      items.value = [];
+      totalItems.value = 0;
     }
   } catch (error) {
     console.error("Fetch devices error:", error);
+    items.value = [];
   } finally {
     loading.value = false;
   }

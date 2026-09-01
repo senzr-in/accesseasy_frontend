@@ -1226,6 +1226,8 @@ let isPolling = false;
 
 let unsubLocation1 = null;
 let unsubLocation2 = null;
+let unsubLocation3 = null;
+let unsubLocation4 = null;
 let unsubAlert = null;
 
 onMounted(async () => {
@@ -1267,8 +1269,10 @@ onMounted(async () => {
       }
     };
 
-    unsubLocation1 = mqttService.on('device/fieldeasy_mobile/+/location', handleLocationUpdate);
-    unsubLocation2 = mqttService.on('device/location/+/+', handleLocationUpdate);
+    unsubLocation1 = mqttService.on('fieldeasy_mobile/+/location', handleLocationUpdate);
+    unsubLocation2 = mqttService.on('fieldeasy_mobile/+/+', handleLocationUpdate);
+    unsubLocation3 = mqttService.on('device/fieldeasy_mobile/+/location', handleLocationUpdate);
+    unsubLocation4 = mqttService.on('device/location/+/+', handleLocationUpdate);
     unsubAlert = mqttService.on('patrol/+/alert', () => { load(); });
   } catch (e) {
     console.warn('MQTT live subscription warning:', e);
@@ -1293,6 +1297,8 @@ onMounted(async () => {
 onUnmounted(() => {
   if (unsubLocation1) unsubLocation1();
   if (unsubLocation2) unsubLocation2();
+  if (unsubLocation3) unsubLocation3();
+  if (unsubLocation4) unsubLocation4();
   if (unsubAlert) unsubAlert();
   if (notificationInterval) clearInterval(notificationInterval);
   if (pollInterval) clearInterval(pollInterval);

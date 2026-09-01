@@ -178,6 +178,8 @@ const setupMqttSubscriptions = () => {
   unsubs.length = 0;
 
   // Multi-topic subscriptions covering all mobile app publish patterns
+  unsubs.push(mqttService.on('fieldeasy_mobile/+/location', handleMqttLocation));
+  unsubs.push(mqttService.on('fieldeasy_mobile/+/+', handleMqttLocation));
   unsubs.push(mqttService.on('device/fieldeasy_mobile/+/location', handleMqttLocation));
   unsubs.push(mqttService.on('device/location/+/+', handleMqttLocation));
   unsubs.push(mqttService.on('patrol/live/+/+', handleMqttLocation));

@@ -2481,6 +2481,8 @@ const setupDashboardMqtt = () => {
     } catch (_) {}
   };
 
+  unsubs.push(mqttService.on('fieldeasy_mobile/+/location', handleLiveGps));
+  unsubs.push(mqttService.on('fieldeasy_mobile/+/+', handleLiveGps));
   unsubs.push(mqttService.on('device/fieldeasy_mobile/+/location', handleLiveGps));
   unsubs.push(mqttService.on('device/location/+/+', handleLiveGps));
   unsubs.push(mqttService.on('patrol/live/+/+', handleLiveGps));

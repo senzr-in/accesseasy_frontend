@@ -26,11 +26,9 @@ const BROKER_URLS = [
 ];
 
 const TOPICS = [
-  'frigate/events',
-  'frigate/+/person',
-  'frigate/+/person/snapshot',
-  'frigate/+/license_plate/snapshot',
-  'frigate/+/license_plate/snapshot/bytes/+',
+  'fieldeasy_mobile/+/location',
+  'fieldeasy_mobile/+/+',
+  'fieldeasy_mobile/#',
   'device/fieldeasy_mobile/+/location',
   'device/location/+/+',
   'device/#',
@@ -39,7 +37,12 @@ const TOPICS = [
   'patrol/alerts/sos/+',
   'patrol/live/+/+',
   'patrol/+/log',
-  'patrol/#'
+  'patrol/#',
+  'frigate/events',
+  'frigate/+/person',
+  'frigate/+/person/snapshot',
+  'frigate/+/license_plate/snapshot',
+  'frigate/+/license_plate/snapshot/bytes/+'
 ];
 
 const CLIENT_ID = 'accesseasy-' + Math.random().toString(36).slice(2, 8);

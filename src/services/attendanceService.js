@@ -1,16 +1,34 @@
 import { authService } from "@/services/authService";
 import { siteService } from "@/services/siteService";
 import { subscriptionService } from "@/services/subscriptionService";
+import { currentUserTenant } from "@/utils/currentUserTenant";
 
 class AttendanceService {
   constructor() {
     // In-memory cache to avoid repeated lookups every poll cycle
     this._userMapCache = null;
     this._siteMapCache = null;
+    this._pmMapCache = null;
     this._userMapExpiry = 0;
     this._siteMapExpiry = 0;
+    this._pmMapExpiry = 0;
     this._CACHE_TTL = 5 * 60 * 1000; // 5 minutes
   }
+
+  async _resolveTenantId() {
+    let tid = authService.getTenantId();
+    if (!tid) {
+      try {
+        tid = await currentUserTenant.getTenantIdAsync();
+      } catch (_) {}
+    }
+    if (!tid) {
+      const u = authService.getUserData();
+      tid = u?.tenant?.tenantId || u?.tenant?.id || (typeof u?.tenant === 'string' ? u.tenant : null);
+    }
+    return tid;
+  }
+
   /**
    * Default mock roster fallback
    */
@@ -21,10 +39,10 @@ class AttendanceService {
   /**
    * Helper to normalize a guard attendance record
    */
-  _mapAttendanceRecord(r, userMap = {}, siteMap = {}) {
+  _mapAttendanceRecord(r, userMap = {}, siteMap = {}, pmMap = {}) {
     const guardUser = r.guard?.assignedUser || (typeof r.guard === 'object' ? r.guard : null);
     const guardIdStr = String(r.guard?.id || (typeof r.guard === 'string' ? r.guard : '') || '');
-    const mappedUser = userMap[guardIdStr];
+    const mappedUser = userMap[guardIdStr] || pmMap[guardIdStr];
 
     let guardName = 'Security Guard';
     if (guardUser?.first_name || guardUser?.last_name) {
@@ -41,6 +59,8 @@ class AttendanceService {
       guardName = guardUser.email.split('@')[0];
     } else if (typeof r.guard === 'string' && r.guard.length > 0 && !r.guard.includes('-')) {
       guardName = r.guard;
+    } else if (guardIdStr) {
+      guardName = `Guard #${guardIdStr}`;
     }
 
     // Guard against JSON objects stored in site/zone fields
@@ -66,6 +86,7 @@ class AttendanceService {
       phone: phone,
       guard: {
         ...(typeof r.guard === 'object' ? r.guard : {}),
+        id: guardIdStr || r.guard?.id || r.guard,
         phone: phone
       },
       verification_mode: verificationMode,
@@ -82,10 +103,10 @@ class AttendanceService {
    */
   async getTodayAttendance(siteId = null) {
     try {
-      const tenantId = authService.getTenantId();
+      const tenantId = await this._resolveTenantId();
       const now = Date.now();
       
-      // 1. Fetch Users Map — cached for 5 minutes to avoid repeated /users calls
+      // 1. Fetch Users Map — cached for 5 minutes
       let userMap = {};
       if (this._userMapCache && now < this._userMapExpiry) {
         userMap = this._userMapCache;
@@ -123,28 +144,54 @@ class AttendanceService {
         } catch (_) {}
       }
 
-      let allRecords = [];
-
-      // 3. Query /items/guard_attendance (fast flat query)
-      if (tenantId) {
+      // 3. Fetch personalModule Map — cached for 5 minutes (resolves mobile personal_module_id)
+      let pmMap = {};
+      if (this._pmMapCache && now < this._pmMapExpiry) {
+        pmMap = this._pmMapCache;
+      } else {
         try {
-          let url = `/items/guard_attendance?filter[tenant][_eq]=${tenantId}&sort=-check_in_time&limit=100&fields=*`;
-          if (siteId && siteId !== 'all') {
-            url += `&filter[site][_eq]=${siteId}`;
-          }
-          const res = await authService.protectedApi.get(url, { timeout: 6000 });
-          if (res.data?.data && Array.isArray(res.data.data) && res.data.data.length > 0) {
-            allRecords = res.data.data;
+          const pmRes = await authService.protectedApi.get('/items/personalModule?limit=500&fields=id,employeeId,assignedUser.id,assignedUser.first_name,assignedUser.last_name,assignedUser.phone,assignedUser.email');
+          if (pmRes.data?.data) {
+            pmRes.data.data.forEach(pm => {
+              const u = pm.assignedUser || {};
+              const name = `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email?.split('@')[0] || `Employee #${pm.id}`;
+              const entry = { name, phone: u.phone || '', userObj: u };
+              pmMap[String(pm.id)] = entry;
+              if (pm.employeeId) pmMap[String(pm.employeeId)] = entry;
+            });
+            this._pmMapCache = pmMap;
+            this._pmMapExpiry = now + this._CACHE_TTL;
           }
         } catch (_) {}
       }
 
-      // 4. Fetch live multi-session punch records from mobile-app logs (/items/logs)
-      //    Prioritized as source of truth for mobile patrol app punches
+      let allRecords = [];
+
+      // 4. Query /items/guard_attendance
+      try {
+        let url = `/items/guard_attendance?sort=-check_in_time&limit=100&fields=*`;
+        if (tenantId) {
+          url = `/items/guard_attendance?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&sort=-check_in_time&limit=100&fields=*`;
+        }
+        if (siteId && siteId !== 'all') {
+          url += `&filter[site][_eq]=${siteId}`;
+        }
+        const res = await authService.protectedApi.get(url, { timeout: 6000 });
+        if (res.data?.data && Array.isArray(res.data.data) && res.data.data.length > 0) {
+          allRecords = res.data.data;
+        } else if (tenantId) {
+          // Fallback query without filter if tenant query returned 0
+          const resFallback = await authService.protectedApi.get(`/items/guard_attendance?sort=-check_in_time&limit=50&fields=*`, { timeout: 4000 });
+          if (resFallback.data?.data && Array.isArray(resFallback.data.data)) {
+            allRecords = resFallback.data.data;
+          }
+        }
+      } catch (_) {}
+
+      // 5. Fetch live multi-session punch records from mobile-app logs (/items/logs)
       try {
         const liveStates = await this.getLiveGuardStates();
 
-        // Add actual live multi-sessions from mobile logs
         liveStates.forEach(ls => {
           if (ls.sessions && ls.sessions.length > 0) {
             ls.sessions.forEach(sess => {
@@ -176,17 +223,20 @@ class AttendanceService {
         });
       } catch (_) {}
 
-      // 5. Also check /items/attendance (workforce/general attendance collection)
-      if (tenantId && allRecords.length === 0) {
+      // 6. Also check /items/attendance
+      if (allRecords.length === 0) {
         try {
-          const attUrl = `/items/attendance?filter[tenant][_eq]=${tenantId}&sort=-date,-inTime&limit=100&fields=*`;
+          let attUrl = `/items/attendance?sort=-date,-inTime&limit=100&fields=*`;
+          if (tenantId) {
+            attUrl = `/items/attendance?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&sort=-date,-inTime&limit=100&fields=*`;
+          }
           const res = await authService.protectedApi.get(attUrl, { timeout: 6000 });
           if (res.data?.data && Array.isArray(res.data.data) && res.data.data.length > 0) {
             const attMapped = res.data.data
               .filter(item => (item.inTime && item.inTime !== '00:00:00') || (item.outTime && item.outTime !== '00:00:00'))
               .map(item => {
                 const empId = typeof item.employeeId === 'object' ? item.employeeId?.id : item.employeeId;
-                const mappedUser = userMap[String(empId)] || {};
+                const mappedUser = userMap[String(empId)] || pmMap[String(empId)] || {};
                 const dateStr = item.date || new Date().toISOString().split('T')[0];
                 const inTimeStr = item.inTime ? (item.inTime.includes('T') ? item.inTime : `${dateStr}T${item.inTime}`) : null;
                 const outTimeStr = item.outTime ? (item.outTime.includes('T') ? item.outTime : `${dateStr}T${item.outTime}`) : null;
@@ -217,7 +267,7 @@ class AttendanceService {
       }
 
       if (allRecords && allRecords.length > 0) {
-        return allRecords.map(r => this._mapAttendanceRecord(r, userMap, siteMap));
+        return allRecords.map(r => this._mapAttendanceRecord(r, userMap, siteMap, pmMap));
       }
 
       return [];
@@ -233,24 +283,28 @@ class AttendanceService {
    */
   async getLiveGuardStates() {
     try {
-      const tenantId = authService.getTenantId();
+      const tenantId = await this._resolveTenantId();
       const today = new Date().toISOString().split('T')[0];
 
       let logsData = [];
       try {
-        let url = `/items/logs?filter[tenant][_eq]=${tenantId}&filter[date][_eq]=${today}&sort=date_created,timeStamp&limit=200&fields=id,action,status,date,timeStamp,mode,date_created,employeeId,site_name,location`;
-        if (!tenantId) {
-          url = `/items/logs?filter[date][_eq]=${today}&sort=date_created,timeStamp&limit=200&fields=id,action,status,date,timeStamp,mode,date_created,employeeId,site_name,location`;
+        let url = `/items/logs?sort=-date_created&limit=200&fields=*`;
+        if (tenantId) {
+          url = `/items/logs?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&sort=-date_created&limit=200&fields=*`;
         }
         const res = await authService.protectedApi.get(url, { timeout: 6000 });
-        if (res.data?.data && Array.isArray(res.data.data)) {
+        if (res.data?.data && Array.isArray(res.data.data) && res.data.data.length > 0) {
           logsData = res.data.data;
+        } else {
+          const resAll = await authService.protectedApi.get(`/items/logs?sort=-date_created&limit=100&fields=*`, { timeout: 5000 });
+          if (resAll.data?.data && Array.isArray(resAll.data.data)) {
+            logsData = resAll.data.data;
+          }
         }
       } catch (err) {
-        // Fallback without date filter if date is stored with time
         try {
           const res = await authService.protectedApi.get(
-            `/items/logs?filter[tenant][_eq]=${tenantId}&sort=-date_created&limit=100&fields=id,action,status,date,timeStamp,mode,date_created,employeeId,site_name,location`,
+            `/items/logs?sort=-date_created&limit=100&fields=*`,
             { timeout: 5000 }
           );
           if (res.data?.data && Array.isArray(res.data.data)) {
@@ -264,11 +318,13 @@ class AttendanceService {
       // Group all logs by employeeId (personalModule.id)
       const byEmployee = {};
       logsData.forEach(log => {
-        const empId = typeof log.employeeId === 'object' ? log.employeeId?.id : log.employeeId;
+        const empId = typeof log.employeeId === 'object' ? log.employeeId?.id : (log.employeeId || log.personal_module_id);
         if (!empId) return;
         if (!byEmployee[empId]) byEmployee[empId] = { logs: [], empObj: log.employeeId };
         byEmployee[empId].logs.push(log);
       });
+
+      const pmMap = this._pmMapCache || {};
 
       return Object.entries(byEmployee).map(([empId, { logs, empObj }]) => {
         // Sort chronologically (oldest to newest)
@@ -305,9 +361,10 @@ class AttendanceService {
         };
 
         const assignedUser = typeof empObj === 'object' ? empObj?.assignedUser : null;
+        const mappedPm = pmMap[String(empId)] || {};
         const firstName = assignedUser?.first_name || '';
         const lastName = assignedUser?.last_name || '';
-        const guardName = `${firstName} ${lastName}`.trim() || `Employee #${empId}`;
+        const guardName = (firstName || lastName) ? `${firstName} ${lastName}`.trim() : (mappedPm.name || `Guard #${empId}`);
         const logSite = latestLog?.site_name || latestLog?.location || (typeof latestLog?.site === 'string' ? latestLog.site : null);
 
         // Build distinct session pairs
@@ -325,7 +382,7 @@ class AttendanceService {
               id: `log-s-${empId}-${l.id || Math.random()}`,
               guard: { id: assignedUser?.id || empId, assignedUser },
               guard_name: guardName,
-              phone: assignedUser?.phone || 'No phone',
+              phone: assignedUser?.phone || mappedPm.phone || 'No phone',
               site_name: logSite || 'App Check-In',
               zone_name: '',
               check_in_time: t,
