@@ -523,6 +523,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { patrolService } from '@/services/patrolService';
 import { zoneService } from '@/services/zoneService';
 import { authService } from '@/services/authService';
+import { mqttService } from '@/services/mqttService';
 import { currentUserTenant } from '@/utils/currentUserTenant';
 import ZoneScoreboard from './components/ZoneScoreboard.vue';
 import PatrolLiveFeed from './components/PatrolLiveFeed.vue';
@@ -1172,6 +1173,10 @@ const globalRouteCache = {};
 let pollInterval = null;
 let isPolling = false;
 
+let unsubLocation1 = null;
+let unsubLocation2 = null;
+let unsubAlert = null;
+
 onMounted(async () => {
   await requestNotificationPermission();
   await fetchStaticMetadata();
@@ -1179,6 +1184,43 @@ onMounted(async () => {
   
   if (route.query.filter) {
     statusFilter.value = route.query.filter;
+  }
+
+  // Connect and subscribe to live mobile guard telemetry & location updates
+  try {
+    mqttService.connect();
+    
+    // Handler for mobile GPS location updates
+    const handleLocationUpdate = (topic, payload) => {
+      try {
+        const rawStr = payload.toString();
+        const data = typeof rawStr === 'string' ? JSON.parse(rawStr) : rawStr;
+        const empId = String(data.personal_module_id || data.employee_id || data.guard_id || data.userId || '');
+        const lat = parseFloat(data.lat || data.latitude);
+        const lng = parseFloat(data.lng || data.longitude);
+
+        if (!isNaN(lat) && !isNaN(lng)) {
+          // Update matching active patrol records in memory immediately
+          allPatrols.value.forEach(p => {
+            const pGuardId = String(p.guardId || p.guard || (typeof p.guard === 'object' ? p.guard.id : '') || '');
+            const pPatrolId = String(p.id || '');
+            if ((empId && pGuardId === empId) || (data.patrol_id && String(data.patrol_id) === pPatrolId)) {
+              p.currentLat = lat;
+              p.currentLng = lng;
+              p.last_seen = new Date().toISOString();
+            }
+          });
+        }
+      } catch (err) {
+        // silent parse failure
+      }
+    };
+
+    unsubLocation1 = mqttService.on('device/fieldeasy_mobile/+/location', handleLocationUpdate);
+    unsubLocation2 = mqttService.on('device/location/+/+', handleLocationUpdate);
+    unsubAlert = mqttService.on('patrol/+/alert', () => { load(); });
+  } catch (e) {
+    console.warn('MQTT live subscription warning:', e);
   }
   
   notificationInterval = setInterval(() => {
@@ -1198,6 +1240,9 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
+  if (unsubLocation1) unsubLocation1();
+  if (unsubLocation2) unsubLocation2();
+  if (unsubAlert) unsubAlert();
   if (notificationInterval) clearInterval(notificationInterval);
   if (pollInterval) clearInterval(pollInterval);
 });

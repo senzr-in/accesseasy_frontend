@@ -410,7 +410,10 @@ const fetchDeviceData = async () => {
   loading.value = true;
 
   try {
-    const filterObj = { "filter[tenant][tenantId][_eq]": tenantId };
+    const filterObj = {
+      "filter[_or][0][tenant][_eq]": tenantId,
+      "filter[_or][1][tenant][tenantId][_eq]": tenantId
+    };
 
     if (activeStatusTab.value === "approved") {
       filterObj["filter[status][_eq]"] = "approved";
@@ -418,8 +421,8 @@ const fetchDeviceData = async () => {
       filterObj["filter[status][_eq]"] = "unApproved";
     }
     if (search.value) {
-      filterObj["filter[_or][0][controllerName][_icontains]"] = search.value;
-      filterObj["filter[_or][1][sn][_icontains]"] = search.value;
+      filterObj["filter[_and][0][_or][0][controllerName][_icontains]"] = search.value;
+      filterObj["filter[_and][0][_or][1][sn][_icontains]"] = search.value;
     }
 
     const queryParams = new URLSearchParams({
