@@ -714,6 +714,7 @@ const exportCSV = () => {
   document.body.removeChild(link);
 };
 
+let _attTabUnsubs = [];
 let unsubMqttAttendance = null;
 let unsubMqttDevice = null;
 let unsubMqttLoc1 = null;
@@ -734,11 +735,19 @@ onMounted(async () => {
   // Instant real-time update on mobile punches / breaks / check-ins (debounced)
   try {
     mqttService.connect();
-    unsubMqttAttendance = mqttService.on('patrol/+/log', triggerDebouncedReload);
-    unsubMqttDevice = mqttService.on('patrol/+/alert', triggerDebouncedReload);
-    unsubMqttLoc1 = mqttService.on('fieldeasy_mobile/+/location', triggerDebouncedReload);
-    unsubMqttLoc2 = mqttService.on('fieldeasy_mobile/+/+', triggerDebouncedReload);
-    unsubMqttLoc3 = mqttService.on('device/fieldeasy_mobile/+/location', triggerDebouncedReload);
+    // Canonical Contract Subscriptions
+    const attMqttUnsubs = [];
+    attMqttUnsubs.push(mqttService.on('accesseasy/+/sites/+/guards/+/location', triggerDebouncedReload));
+    attMqttUnsubs.push(mqttService.on('accesseasy/+/patrols/+/checkpoints', triggerDebouncedReload));
+    attMqttUnsubs.push(mqttService.on('accesseasy/+/patrols/+/status', triggerDebouncedReload));
+    attMqttUnsubs.push(mqttService.on('accesseasy/+/devices/+/telemetry', triggerDebouncedReload));
+    // Legacy fallback subscriptions
+    attMqttUnsubs.push(mqttService.on('patrol/+/log', triggerDebouncedReload));
+    attMqttUnsubs.push(mqttService.on('patrol/+/alert', triggerDebouncedReload));
+    attMqttUnsubs.push(mqttService.on('fieldeasy_mobile/+/location', triggerDebouncedReload));
+    attMqttUnsubs.push(mqttService.on('fieldeasy_mobile/+/+', triggerDebouncedReload));
+    attMqttUnsubs.push(mqttService.on('device/fieldeasy_mobile/+/location', triggerDebouncedReload));
+    _attTabUnsubs = attMqttUnsubs;
   } catch (_) {}
 
   pollInterval = setInterval(async () => {
@@ -758,6 +767,7 @@ onUnmounted(() => {
     clearInterval(pollInterval);
     pollInterval = null;
   }
+  if (_attTabUnsubs) { _attTabUnsubs.forEach(u => typeof u === 'function' && u()); _attTabUnsubs = []; }
   if (typeof unsubMqttAttendance === 'function') unsubMqttAttendance();
   if (typeof unsubMqttDevice === 'function') unsubMqttDevice();
   if (typeof unsubMqttLoc1 === 'function') unsubMqttLoc1();

@@ -67,11 +67,29 @@ class AuthService {
         this.updateLastActivity();
         return response;
       },
-      (error) => {
-        if (error.response?.status === 401) {
-          console.warn(
-            "Unauthorized access (401). Token might be invalid or missing for this resource.",
-          );
+      async (error) => {
+        const originalRequest = error.config;
+        if (error.response?.status === 401 && !originalRequest?._retried) {
+          originalRequest._retried = true;
+          const refreshToken = this.getRefreshToken();
+          if (refreshToken) {
+            try {
+              const directusBase = this.baseURL || 'https://api.fieldseasy.com';
+              const res = await axios.post(`${directusBase}/auth/refresh`, {
+                refresh_token: refreshToken,
+                mode: 'json'
+              });
+              if (res.data?.data) {
+                const { access_token, refresh_token: newRefresh } = res.data.data;
+                this.setToken(access_token, newRefresh);
+                originalRequest.headers['Authorization'] = `Bearer ${access_token}`;
+                return this.protectedApi(originalRequest);
+              }
+            } catch (refreshErr) {
+              console.warn('[AuthService] Token refresh failed:', refreshErr?.message);
+              this.softLogout();
+            }
+          }
         }
         return Promise.reject(error);
       },
@@ -416,14 +434,22 @@ class AuthService {
     }
   }
 
-  setToken(token) {
+  setToken(token, refreshToken = null) {
     if (!token) return;
     Cookies.set("userToken", token, { expires: 1 });
     sessionStorage.setItem("userToken", token);
     localStorage.setItem("userToken", token);
+    if (refreshToken) {
+      localStorage.setItem("ae_refresh_token", refreshToken);
+      Cookies.set("refreshToken", refreshToken, { expires: 7 });
+    }
     this.protectedApi.defaults.headers.common["Authorization"] =
       `Bearer ${token}`;
     this.updateLastActivity();
+  }
+
+  getRefreshToken() {
+    return localStorage.getItem("ae_refresh_token") || Cookies.get("refreshToken");
   }
 
   getToken() {

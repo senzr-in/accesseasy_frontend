@@ -1028,7 +1028,7 @@ const fetchGuards = async () => {
       queryUrls.push(`${import.meta.env.VITE_API_URL}/users?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&filter[_or][2][tenant][id][_eq]=${tenantId}&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=email&fields[]=phone&fields[]=status&fields[]=title&fields[]=avatar&fields[]=role.name&limit=500`);
       queryUrls.push(`${import.meta.env.VITE_API_URL}/users?filter[tenant][_eq]=${tenantId}&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=email&fields[]=phone&fields[]=status&fields[]=title&fields[]=avatar&fields[]=role.name&limit=500`);
     }
-    queryUrls.push(`${import.meta.env.VITE_API_URL}/users?fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=email&fields[]=phone&fields[]=status&fields[]=title&fields[]=avatar&fields[]=role.name&limit=500`);
+    // Strict multi-tenant isolation: Never execute unfiltered /users query
 
     for (const url of queryUrls) {
       try {

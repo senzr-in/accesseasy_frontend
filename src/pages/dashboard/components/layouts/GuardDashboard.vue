@@ -1501,6 +1501,7 @@ import { patrolService } from '@/services/patrolService';
 import { authService } from '@/services/authService';
 import { attendanceService } from '@/services/attendanceService';
 import { mqttService } from '@/services/mqttService';
+import { alertNotificationService } from '@/services/alertNotificationService';
 import { currentUserTenant } from '@/utils/currentUserTenant';
 import { Loader } from '@googlemaps/js-api-loader';
 import L from 'leaflet';
@@ -2052,6 +2053,7 @@ const flagGuards = computed(() => {
 const dashboardMapRef = ref(null);
 let mapInstance = null;
 let mapMarkers = [];
+const markerRegistry = new Map(); // guardId -> L.Marker (prevents DOM thrashing)
 
 const initMap = async () => {
   if (!dashboardMapRef.value) return;
@@ -2108,11 +2110,6 @@ const initMap = async () => {
 const renderGuardMarkers = () => {
   if (!mapInstance) return;
 
-  mapMarkers.forEach(m => {
-    if (m && m.remove) m.remove();
-  });
-  mapMarkers = [];
-
   const listToPlot = [];
 
   // 1. Add active running patrols
@@ -2134,7 +2131,7 @@ const renderGuardMarkers = () => {
     }
   });
 
-  // 2. Add all patrol guards (e.g. kumarr r from test00, Ramesh Kumar from test patrol)
+  // 2. Add all patrol guards
   allPatrols.value.forEach(p => {
     const gName = (typeof p.guardId === 'object' && (p.guardId?.first_name || p.guardId?.name)) 
       ? `${p.guardId.first_name || ''} ${p.guardId.last_name || ''}`.trim() 
@@ -2189,50 +2186,72 @@ const renderGuardMarkers = () => {
     }
   });
 
-  // Render Leaflet Markers
+  const seenIds = new Set();
+
+  // Render or smooth update Leaflet Markers via markerRegistry
   listToPlot.forEach(patrol => {
     if (!patrol.lat || !patrol.lng || isNaN(patrol.lat) || isNaN(patrol.lng)) return;
 
-    const iconHtml = `
-      <div style="position: relative; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-        <span style="position: absolute; width: 36px; height: 36px; border-radius: 50%; background: ${patrol.status === 'running' ? '#10b981' : '#f59e0b'}; opacity: 0.4; animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;"></span>
-        <div style="width: 28px; height: 28px; border-radius: 50%; border: 2.5px solid #ffffff; background: #4f46e5; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 11px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2); z-index: 10;">
-          ${(patrol.guardName || 'G').charAt(0).toUpperCase()}
+    const mId = String(patrol.id || patrol.guardName);
+    seenIds.add(mId);
+    const latLng = [Number(patrol.lat), Number(patrol.lng)];
+
+    if (markerRegistry.has(mId)) {
+      // Smooth update without DOM node recreation
+      const existingMarker = markerRegistry.get(mId);
+      existingMarker.setLatLng(latLng);
+    } else {
+      const iconHtml = `
+        <div style="position: relative; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+          <span style="position: absolute; width: 36px; height: 36px; border-radius: 50%; background: ${patrol.status === 'running' ? '#10b981' : '#f59e0b'}; opacity: 0.4; animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;"></span>
+          <div style="width: 28px; height: 28px; border-radius: 50%; border: 2.5px solid #ffffff; background: #4f46e5; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 11px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2); z-index: 10;">
+            ${(patrol.guardName || 'G').charAt(0).toUpperCase()}
+          </div>
         </div>
-      </div>
-    `;
+      `;
 
-    const customIcon = L.divIcon({
-      html: iconHtml,
-      className: 'guard-map-marker',
-      iconSize: [36, 36],
-      iconAnchor: [18, 18]
-    });
+      const customIcon = L.divIcon({
+        html: iconHtml,
+        className: 'guard-map-marker',
+        iconSize: [36, 36],
+        iconAnchor: [18, 18]
+      });
 
-    const marker = L.marker([Number(patrol.lat), Number(patrol.lng)], { icon: customIcon })
-      .addTo(mapInstance)
-      .bindPopup(`
-        <div style="font-family: 'Inter', sans-serif; padding: 4px; min-width: 140px;">
-          <h4 style="margin: 0; font-weight: 800; font-size: 13px; color: #0f172a;">${patrol.guardName}</h4>
-          <p style="margin: 2px 0 0 0; font-size: 11px; color: #64748b;">${patrol.siteName} &middot; ${patrol.routeName}</p>
-          <p style="margin: 4px 0 0 0; font-size: 11px; color: #4f46e5; font-weight: 700;">Status: ${patrol.nextCheckpoint}</p>
-        </div>
-      `);
+      const marker = L.marker(latLng, { icon: customIcon })
+        .addTo(mapInstance)
+        .bindPopup(`
+          <div style="font-family: 'Inter', sans-serif; padding: 4px; min-width: 140px;">
+            <h4 style="margin: 0; font-weight: 800; font-size: 13px; color: #0f172a;">${patrol.guardName}</h4>
+            <p style="margin: 2px 0 0 0; font-size: 11px; color: #64748b;">${patrol.siteName} &middot; ${patrol.routeName}</p>
+            <p style="margin: 4px 0 0 0; font-size: 11px; color: #4f46e5; font-weight: 700;">Status: ${patrol.nextCheckpoint}</p>
+          </div>
+        `);
 
-    marker.on('click', () => {
-      selectedMapGuard.value = {
-        name: patrol.guardName,
-        siteName: patrol.siteName,
-        routeName: patrol.routeName,
-        currentCheckpoint: patrol.nextCheckpoint,
-        battery: patrol.battery,
-        signal: patrol.signal,
-        patrolId: patrol.id
-      };
-    });
+      marker.on('click', () => {
+        selectedMapGuard.value = {
+          name: patrol.guardName,
+          siteName: patrol.siteName,
+          routeName: patrol.routeName,
+          currentCheckpoint: patrol.nextCheckpoint,
+          battery: patrol.battery,
+          signal: patrol.signal,
+          patrolId: patrol.id
+        };
+      });
 
-    mapMarkers.push(marker);
+      markerRegistry.set(mId, marker);
+    }
   });
+
+  // Remove markers for guards that are no longer active
+  for (const [mId, marker] of markerRegistry.entries()) {
+    if (!seenIds.has(mId)) {
+      if (marker && marker.remove) marker.remove();
+      markerRegistry.delete(mId);
+    }
+  }
+
+  mapMarkers = Array.from(markerRegistry.values());
 };
 
 const centerMapOnGuards = () => {
@@ -2421,11 +2440,23 @@ const setupDashboardMqtt = () => {
     try {
       const data = typeof payload === 'string' ? JSON.parse(payload) : (typeof payload?.toString === 'function' ? JSON.parse(payload.toString()) : payload);
       const parts = topic.split('/');
+      
+      // Tenant Boundary Check
+      const currentTenant = authService.getTenantId();
+      if (parts[0] === 'accesseasy') {
+        const topicTenant = parts[1];
+        if (currentTenant && topicTenant !== '+' && String(topicTenant) !== String(currentTenant)) {
+          return;
+        }
+      }
+
       let deviceId = data.deviceId || data.device_id || (parts.length > 2 ? parts[parts.length - 1] : 'unknown');
-      let guardId = data.guard_id || data.guardId || data.employee_id || data.employeeId || data.userId || deviceId;
+      let guardId = data.guard_id || data.guardId || data.employee_id || data.employeeId || data.personal_module_id || data.userId || deviceId;
       
       if (parts[0] === 'patrol' && parts[1] === 'live') {
         guardId = parts[3] || parts[2] || guardId;
+      } else if (parts[0] === 'accesseasy' && parts[4] === 'guards') {
+        guardId = parts[5] || guardId;
       }
 
       const lat = parseFloat(data.latitude ?? data.lat ?? data.gps_lat);
@@ -2445,7 +2476,7 @@ const setupDashboardMqtt = () => {
           id: `live-${guardId}`,
           guardId,
           guardName,
-          siteId: 'all',
+          siteId: data.site_id || 'all',
           siteName: data.siteName || data.site_name || 'Live Patrol Site',
           routeName: data.routeName || data.route_name || 'Patrol Route',
           status: 'running',
@@ -2481,6 +2512,27 @@ const setupDashboardMqtt = () => {
     } catch (_) {}
   };
 
+  // Canonical Contract Topics
+  unsubs.push(mqttService.on('accesseasy/+/sites/+/guards/+/location', handleLiveGps));
+  unsubs.push(mqttService.on('accesseasy/+/sites/+/alerts/+', (topic, payload) => {
+      try {
+        const data = typeof payload === 'string' ? JSON.parse(payload) : (typeof payload?.toString === 'function' ? JSON.parse(payload.toString()) : payload);
+        alertNotificationService.notify(data);
+      } catch (_) {}
+      loadDashboardData();
+    }));
+    unsubs.push(mqttService.on('accesseasy/+/sites/+/alerts/sos', (topic, payload) => {
+    try {
+      const data = typeof payload === 'string' ? JSON.parse(payload) : payload;
+      alertNotificationService.notify(data);
+      loadDashboardData();
+    } catch (_) {}
+  }));
+  unsubs.push(mqttService.on('accesseasy/+/patrols/+/checkpoints', handleCheckpointLog));
+  unsubs.push(mqttService.on('accesseasy/+/patrols/+/status', () => loadDashboardData()));
+  unsubs.push(mqttService.on('accesseasy/+/devices/+/telemetry', handleLiveGps));
+
+  // Legacy fallback topics
   unsubs.push(mqttService.on('fieldeasy_mobile/+/location', handleLiveGps));
   unsubs.push(mqttService.on('fieldeasy_mobile/+/+', handleLiveGps));
   unsubs.push(mqttService.on('device/fieldeasy_mobile/+/location', handleLiveGps));
@@ -2514,6 +2566,11 @@ onUnmounted(() => {
   if (dataPollTimer) clearInterval(dataPollTimer);
   unsubs.forEach(u => typeof u === 'function' && u());
   unsubs.length = 0;
+  for (const [_, marker] of markerRegistry.entries()) {
+    if (marker && marker.remove) marker.remove();
+  }
+  markerRegistry.clear();
+  mapMarkers = [];
 });
 </script>
 

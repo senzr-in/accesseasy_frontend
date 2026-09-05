@@ -92,7 +92,8 @@ class ZoneService {
             } else if (this._workingStrategy === 'tenantId') {
               q = `/items/zones?filter[tenant][tenantId][_eq]=${tenantId}&sort=zoneName`;
             } else {
-              q = `/items/zones?limit=500`;
+              this._workingStrategy = null;
+              return [];
             }
             if (siteId && siteId !== 'all') q += `&filter[site][_eq]=${siteId}`;
             const res = await authService.protectedApi.get(q);
@@ -125,13 +126,8 @@ class ZoneService {
                 rawData = res3.data?.data || [];
                 this._workingStrategy = 'tenantId';
               } catch (e3) {
-                try {
-                  let q = `/items/zones?limit=500`;
-                  if (siteId && siteId !== 'all') q += `&filter[site][_eq]=${siteId}`;
-                  const res4 = await authService.protectedApi.get(q);
-                  rawData = res4.data?.data || [];
-                  this._workingStrategy = 'plain';
-                } catch (e4) {}
+                console.error('[ZoneService] All tenant filter strategies exhausted. Returning empty — no unfiltered fallback.');
+                rawData = [];
               }
             }
           }

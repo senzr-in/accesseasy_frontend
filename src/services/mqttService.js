@@ -21,23 +21,25 @@ const mqttConfig = appConfigService.getMqttConfig();
 
 const BROKER_URLS = [
   mqttConfig.brokerUrl,
-  'ws://mqtt.fieldseasy.com:9001/mqtt',
-  'ws://mqtt.fieldseasy.com:8083/mqtt',
 ];
 
 const TOPICS = [
+  // Canonical Contract Topics
+  'accesseasy/+/sites/+/guards/+/location',
+  'accesseasy/+/sites/+/alerts/sos',
+  'accesseasy/+/sites/+/alerts/+',
+  'accesseasy/+/sites/+/alerts/incident',
+  'accesseasy/+/patrols/+/checkpoints',
+  'accesseasy/+/patrols/+/status',
+  'accesseasy/+/devices/+/telemetry',
+  // Backward compatibility legacy topics
   'fieldeasy_mobile/+/location',
-  'fieldeasy_mobile/+/+',
-  'fieldeasy_mobile/#',
   'device/fieldeasy_mobile/+/location',
-  'device/location/+/+',
-  'device/#',
   'patrol/+/alert',
   'patrol/+/sos',
   'patrol/alerts/sos/+',
   'patrol/live/+/+',
-  'patrol/+/log',
-  'patrol/#',
+  // Frigate Camera Events
   'frigate/events',
   'frigate/+/person',
   'frigate/+/person/snapshot',

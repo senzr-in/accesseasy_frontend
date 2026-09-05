@@ -334,6 +334,7 @@ const sendMessage = async () => {
     
     const tenantId = currentUserTenant.getTenantId();
     const mqttTopic = `accesseasy/tenant/${tenantId}/guards/${props.guard.id}/messages`;
+    const canonicalTopic = `accesseasy/${tenantId}/guards/${props.guard.id}/messages`;
     const mqttPayload = {
       type: mode.value === 'voice' ? 'audio' : 'text',
       text: textMessage.value,
@@ -345,6 +346,7 @@ const sendMessage = async () => {
     // Slight delay to ensure connection if just opened
     setTimeout(() => {
       mqttService.publish(mqttTopic, mqttPayload);
+      mqttService.publish(canonicalTopic, mqttPayload);
     }, 500);
     
     emit('sent');

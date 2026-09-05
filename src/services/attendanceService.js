@@ -628,11 +628,8 @@ class AttendanceService {
           return res.data.data.map(r => this._mapAttendanceRecord(r));
         }
       } catch (err) {
-        // Fallback shallow query
-        const fallbackRes = await authService.protectedApi.get(`/items/guard_attendance?sort=-check_in_time&limit=100&fields=*.*`);
-        if (fallbackRes.data?.data) {
-          return fallbackRes.data.data.map(r => this._mapAttendanceRecord(r));
-        }
+        console.error('[AttendanceService] Query failed — NOT falling back to prevent cross-tenant exposure:', err.message);
+        throw err;
       }
       return [];
     } catch (error) {

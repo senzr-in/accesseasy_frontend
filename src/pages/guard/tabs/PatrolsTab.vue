@@ -1224,6 +1224,7 @@ const globalRouteCache = {};
 let pollInterval = null;
 let isPolling = false;
 
+let _tabMqttUnsubs = [];
 let unsubLocation1 = null;
 let unsubLocation2 = null;
 let unsubLocation3 = null;
@@ -1269,11 +1270,22 @@ onMounted(async () => {
       }
     };
 
-    unsubLocation1 = mqttService.on('fieldeasy_mobile/+/location', handleLocationUpdate);
-    unsubLocation2 = mqttService.on('fieldeasy_mobile/+/+', handleLocationUpdate);
-    unsubLocation3 = mqttService.on('device/fieldeasy_mobile/+/location', handleLocationUpdate);
-    unsubLocation4 = mqttService.on('device/location/+/+', handleLocationUpdate);
-    unsubAlert = mqttService.on('patrol/+/alert', () => { load(); });
+    // Canonical Contract Subscriptions
+    const unsubs = [];
+    unsubs.push(mqttService.on('accesseasy/+/sites/+/guards/+/location', handleLocationUpdate));
+    unsubs.push(mqttService.on('accesseasy/+/patrols/+/checkpoints', () => { load(); }));
+    unsubs.push(mqttService.on('accesseasy/+/patrols/+/status', () => { load(); }));
+    unsubs.push(mqttService.on('accesseasy/+/sites/+/alerts/sos', () => { load(); }));
+    unsubs.push(mqttService.on('accesseasy/+/devices/+/telemetry', handleLocationUpdate));
+    // Legacy subscriptions
+    unsubs.push(mqttService.on('fieldeasy_mobile/+/location', handleLocationUpdate));
+    unsubs.push(mqttService.on('fieldeasy_mobile/+/+', handleLocationUpdate));
+    unsubs.push(mqttService.on('device/fieldeasy_mobile/+/location', handleLocationUpdate));
+    unsubs.push(mqttService.on('device/location/+/+', handleLocationUpdate));
+    unsubs.push(mqttService.on('patrol/+/alert', () => { load(); }));
+    unsubs.push(mqttService.on('patrol/+/log', () => { load(); }));
+    unsubs.push(mqttService.on('patrol/+/checkpoint', () => { load(); }));
+    _tabMqttUnsubs = unsubs;
   } catch (e) {
     console.warn('MQTT live subscription warning:', e);
   }
@@ -1295,6 +1307,7 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
+  if (_tabMqttUnsubs) { _tabMqttUnsubs.forEach(u => typeof u === 'function' && u()); _tabMqttUnsubs = []; }
   if (unsubLocation1) unsubLocation1();
   if (unsubLocation2) unsubLocation2();
   if (unsubLocation3) unsubLocation3();

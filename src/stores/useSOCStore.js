@@ -1,6 +1,7 @@
 import { ref, computed, reactive } from 'vue';
 import { patrolService } from '@/services/patrolService';
 import { mqttService } from '@/services/mqttService';
+import { alertNotificationService } from '@/services/alertNotificationService';
 
 // ==========================================
 // GLOBAL STATE (Singleton)
@@ -78,10 +79,12 @@ const handleMqttLocation = (topic, payload) => {
     
     // Resolve device ID & guard ID from topic or payload
     let deviceId = data.deviceId || data.device_id || (parts.length > 2 ? parts[parts.length - 1] : 'unknown');
-    let guardId = data.guard_id || data.guardId || data.employee_id || data.employeeId || data.userId || deviceId;
+    let guardId = data.guard_id || data.guardId || data.employee_id || data.employeeId || data.personal_module_id || data.userId || deviceId;
     
     if (parts[0] === 'patrol' && parts[1] === 'live') {
       guardId = parts[3] || parts[2] || guardId;
+    } else if (parts[0] === 'accesseasy' && parts[4] === 'guards') {
+      guardId = parts[5] || guardId;
     }
 
     const guardName = data.guard_name || data.guardName || data.name || (data.first_name ? `${data.first_name} ${data.last_name || ''}`.trim() : `Guard #${guardId}`);
@@ -160,11 +163,8 @@ const handleMqttSos = (topic, payload) => {
       ...data
     });
     lastUpdated.value = new Date();
-    // Play alert sound if available
-    try {
-      const audio = new Audio('/sounds/sos-alarm.mp3');
-      audio.play().catch(() => {});
-    } catch (_) {}
+    // Trigger desktop notification and alert tone via decoupled alert service
+    alertNotificationService.notify(data);
   } catch (e) {
     console.warn('[SOC Store] Failed to parse MQTT SOS payload:', e);
   }
@@ -176,6 +176,15 @@ const setupMqttSubscriptions = () => {
   mqttService.connect();
   unsubs.forEach(u => typeof u === 'function' && u());
   unsubs.length = 0;
+
+  // Canonical Contract Topics
+  unsubs.push(mqttService.on('accesseasy/+/sites/+/guards/+/location', handleMqttLocation));
+  unsubs.push(mqttService.on('accesseasy/+/sites/+/alerts/sos', handleMqttSos));
+  unsubs.push(mqttService.on('accesseasy/+/sites/+/alerts/+', handleMqttSos));
+  unsubs.push(mqttService.on('accesseasy/+/sites/+/alerts/incident', handleMqttSos));
+  unsubs.push(mqttService.on('accesseasy/+/patrols/+/checkpoints', handleMqttAlert));
+  unsubs.push(mqttService.on('accesseasy/+/patrols/+/status', handleMqttAlert));
+  unsubs.push(mqttService.on('accesseasy/+/devices/+/telemetry', handleMqttLocation));
 
   // Multi-topic subscriptions covering all mobile app publish patterns
   unsubs.push(mqttService.on('fieldeasy_mobile/+/location', handleMqttLocation));

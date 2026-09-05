@@ -766,7 +766,7 @@ const saveIncident = async () => {
       incidents.value[idx] = { ...form.value };
     }
   } else {
-    form.value.id = Date.now();
+    // ID managed by Directus on create
     incidents.value.unshift({ ...form.value });
   }
 
@@ -784,7 +784,7 @@ const saveIncident = async () => {
     await fetch(url, {
       method,
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ ...form.value, tenant: tenantId })
+      body: JSON.stringify((() => { const d = { ...form.value, tenant: tenantId }; if (!isEditing.value) delete d.id; return d; })())
     });
   } catch (e) {
     console.warn("API Sync deferred, saved locally:", e);

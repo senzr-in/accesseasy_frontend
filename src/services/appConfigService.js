@@ -40,13 +40,16 @@ class AppConfigService {
       // Real-time MQTT Broker
       mqtt: {
         brokerUrl: import.meta.env.VITE_MQTT_BROKER_URL || 'wss://mqtt.fieldseasy.com/mqtt',
-        username: import.meta.env.VITE_MQTT_USERNAME || 'iot-device',
-        password: import.meta.env.VITE_MQTT_PASSWORD || 'Senzr123',
+        username: import.meta.env.VITE_MQTT_USERNAME || '',
+        password: import.meta.env.VITE_MQTT_PASSWORD || '',
         reconnectPeriodMs: 5000,
         topicPatterns: {
-          livePatrol: (tenantId, guardId) => `patrol/live/${tenantId}/${guardId || '+'}`,
-          deviceLocation: (tenantId, deviceId) => `device/location/${tenantId}/${deviceId || '+'}`,
-          sosAlerts: (tenantId) => `patrol/alerts/sos/${tenantId || '+'}`
+          guardLocation: (tenantId, siteId, guardId) => `accesseasy/${tenantId || '+'}/sites/${siteId || '+'}/guards/${guardId || '+'}/location`,
+          sosAlerts: (tenantId, siteId) => `accesseasy/${tenantId || '+'}/sites/${siteId || '+'}/alerts/sos`,
+          checkpointScans: (tenantId, patrolId) => `accesseasy/${tenantId || '+'}/patrols/${patrolId || '+'}/checkpoints`,
+          patrolStatus: (tenantId, patrolId) => `accesseasy/${tenantId || '+'}/patrols/${patrolId || '+'}/status`,
+          deviceTelemetry: (tenantId, deviceId) => `accesseasy/${tenantId || '+'}/devices/${deviceId || '+'}/telemetry`,
+          deviceCommands: (tenantId, deviceId) => `accesseasy/${tenantId || '+'}/devices/${deviceId || '+'}/commands`
         }
       },
 
