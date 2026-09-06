@@ -66,8 +66,6 @@
           </div>
         </transition>
 
-        <!-- Onboarding Banner -->
-        <OnboardingBanner />
 
         <!-- Page Content -->
         <main class="flex-1 flex flex-col overflow-hidden relative p-4 sm:p-5">
@@ -190,7 +188,6 @@ import { onClickOutside } from '@vueuse/core';
 import { Building, Shield, MapPin, ChevronDown, ChevronRight, Search, Bell, Sun, Moon, User, Settings, Lock, LogOut, HelpCircle, AlertCircle, Clock, X, AlertTriangle, CheckCheck, MessageCircle, Smartphone } from 'lucide-vue-next';
 import SecuritySidebar from '@/components/layout/SecuritySidebar.vue';
 import WorkforceSidebar from '@/components/layout/WorkforceSidebar.vue';
-import OnboardingBanner from '@/components/layout/OnboardingBanner.vue';
 import TrialBanner from '@/components/layout/TrialBanner.vue';
 import TrialWelcomeModal from '@/components/layout/TrialWelcomeModal.vue';
 import AppDownloadModal from '@/components/common/AppDownloadModal.vue';

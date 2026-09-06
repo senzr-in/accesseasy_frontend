@@ -710,15 +710,16 @@ const fetchGuards = async () => {
     const token = authService.getToken();
     const tenantId = authService.getTenantId();
     if (!token || !tenantId) return;
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule?filter[tenant][_eq]=${tenantId}&fields=id,firstName,lastName,personalPhone&limit=100`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule?filter[assignedUser][tenant][_eq]=${tenantId}&fields=id,employeeId,assignedUser.id,assignedUser.first_name,assignedUser.last_name,assignedUser.phone&limit=100`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     if (res.ok) {
       const data = await res.json();
-      guardsList.value = (data.data || []).map(g => ({
-        id: g.id,
-        name: `${g.firstName || ''} ${g.lastName || ''}`.trim() || g.personalPhone || 'Guard'
-      }));
+      guardsList.value = (data.data || []).map(g => {
+        const u = g.assignedUser || {};
+        const name = `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.phone || g.employeeId || 'Guard';
+        return { id: g.id, name };
+      });
     } else {
       guardsList.value = [{ id: 1, name: userName }];
     }

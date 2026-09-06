@@ -43,15 +43,15 @@ class SiteService {
         let rawData = [];
         try {
           const res = await authService.protectedApi.get(
-            `/items/locationManagement?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&sort=locName&limit=200`,
+            `/items/locationManagement?filter[tenant][_eq]=${tenantId}&sort=locName&limit=200`,
             { timeout: 6000 }
           );
           rawData = res.data?.data || [];
         } catch (err) {
-          // Fallback to simple tenant query if OR filter is not supported
+          // Fallback to OR query if needed
           try {
             const fallbackRes = await authService.protectedApi.get(
-              `/items/locationManagement?filter[tenant][_eq]=${tenantId}&sort=locName&limit=200`,
+              `/items/locationManagement?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&sort=locName&limit=200`,
               { timeout: 5000 }
             );
             rawData = fallbackRes.data?.data || [];

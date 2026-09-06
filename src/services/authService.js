@@ -67,11 +67,28 @@ class AuthService {
         this.updateLastActivity();
         return response;
       },
-      (error) => {
-        if (error.response?.status === 401) {
-          console.warn(
-            "Unauthorized access (401). Token might be invalid or missing for this resource.",
-          );
+      async (error) => {
+        const originalRequest = error.config;
+        if (error.response?.status === 401 && !originalRequest?._retried) {
+          originalRequest._retried = true;
+          const refreshToken = this.getRefreshToken();
+          if (refreshToken) {
+            try {
+              const directusBase = import.meta.env.VITE_API_URL;
+              const res = await axios.post(`${directusBase}/auth/refresh`, {
+                refresh_token: refreshToken,
+                mode: 'json'
+              });
+              if (res.data?.data) {
+                const { access_token, refresh_token: newRefresh } = res.data.data;
+                this.setToken(access_token, newRefresh);
+                originalRequest.headers['Authorization'] = `Bearer ${access_token}`;
+                return this.protectedApi(originalRequest);
+              }
+            } catch (refreshErr) {
+              console.warn('[AuthService] Token refresh failed:', refreshErr?.message);
+            }
+          }
         }
         return Promise.reject(error);
       },
@@ -416,14 +433,22 @@ class AuthService {
     }
   }
 
-  setToken(token) {
+  setToken(token, refreshToken = null) {
     if (!token) return;
     Cookies.set("userToken", token, { expires: 1 });
     sessionStorage.setItem("userToken", token);
     localStorage.setItem("userToken", token);
+    if (refreshToken) {
+      localStorage.setItem("ae_refresh_token", refreshToken);
+      Cookies.set("refreshToken", refreshToken, { expires: 7 });
+    }
     this.protectedApi.defaults.headers.common["Authorization"] =
       `Bearer ${token}`;
     this.updateLastActivity();
+  }
+
+  getRefreshToken() {
+    return localStorage.getItem("ae_refresh_token") || Cookies.get("refreshToken");
   }
 
   getToken() {
@@ -602,6 +627,7 @@ class AuthService {
 
   logout() {
     Cookies.remove("userToken");
+    Cookies.remove("refreshToken");
     
     // Clear all localStorage keys except the theme preference
     const theme = localStorage.getItem("ae_theme");
@@ -623,6 +649,7 @@ class AuthService {
   // Clears auth state without redirecting (used by router guard before it redirects)
   softLogout() {
     Cookies.remove("userToken");
+    Cookies.remove("refreshToken");
     
     // Clear all localStorage keys except the theme preference
     const theme = localStorage.getItem("ae_theme");
@@ -639,7 +666,11 @@ class AuthService {
     this.triggerLogoutListeners();
   }
 
-  // Validates token against the server — returns true if valid, false if expired/invalid
+  // Validates token against the server.
+  // Recovery chain on 401/403:
+  //   1. Try Directus /auth/refresh with stored refresh token (native Directus refresh).
+  //   2. Try Knative auth-service refresh-token action (session-based refresh).
+  //   3. Return false → router redirects to /login?expired=true.
   async validateToken() {
     const token = this.getToken();
     if (!token) return false;
@@ -649,16 +680,42 @@ class AuthService {
         headers: { Authorization: `Bearer ${token}` },
         credentials: "omit",
       });
+
+      // Token is still valid — nothing to do.
+      if (res.ok) return true;
+
       if (res.status === 401 || res.status === 403) {
-        const localUser = this.getUserData();
-        if (localUser && (localUser.email || localUser.id)) {
-          return true;
+        console.warn("[AuthService] Token rejected by Directus — attempting silent refresh...");
+
+        // ── Tier 1: Directus native /auth/refresh ──────────────────────────
+        const storedRefresh = this.getRefreshToken();
+        if (storedRefresh) {
+          try {
+            const refreshRes = await axios.post(
+              `${import.meta.env.VITE_API_URL}/auth/refresh`,
+              { refresh_token: storedRefresh, mode: 'json' }
+            );
+            if (refreshRes.data?.data) {
+              const { access_token, refresh_token: newRefresh } = refreshRes.data.data;
+              this.setToken(access_token, newRefresh);
+              console.log("[AuthService] Directus token refresh succeeded.");
+              return true;
+            }
+          } catch (e) {
+            console.warn("[AuthService] Directus /auth/refresh failed:", e?.message);
+          }
         }
+
+        // ── Directus token expired/invalid — force re-login ───────────────
+        console.warn("[AuthService] Session unrecoverable. Forcing re-login.");
         return false;
       }
+
+      // 5xx or other — treat as transient, don't lock out
+      console.warn("[AuthService] Unexpected /users/me status:", res.status, "— allowing through.");
       return true;
     } catch (err) {
-      console.warn("[AuthService] Token validation failed due to network/offline state:", err);
+      console.warn("[AuthService] Token validation network error (offline?):", err);
       return true; // Avoid locking user out on temporary network glitch
     }
   }
@@ -801,10 +858,12 @@ class AuthService {
       }
 
       const { token, userData } = response.data;
+      const refreshToken = response.data.refresh_token || response.data.refreshToken || null;
       if (token) {
         this.softLogout();
-        this.setToken(token);
+        this.setToken(token, refreshToken);
         this.setPhone(phone);
+        if (sessionUuid) localStorage.setItem("activeSessionUuid", sessionUuid);
         localStorage.removeItem("sessionUuid");
         this.clearOtpMeta();
         if (userData) {
@@ -997,9 +1056,11 @@ class AuthService {
         throw new Error("Authentication failed: No token returned from flow");
       }
 
+      const refreshToken = response.data.refresh_token || response.data.refreshToken || null;
       this.softLogout();
-      this.setToken(response.data.token);
+      this.setToken(response.data.token, refreshToken);
       this.setEmail(email);
+      if (sessionUuid) localStorage.setItem("activeSessionUuid", sessionUuid);
 
       let uData = null;
       if (response.data.userData) {
@@ -1049,10 +1110,12 @@ class AuthService {
       }
 
       const { token, userData } = response.data;
+      const refreshToken = response.data.refresh_token || response.data.refreshToken || null;
       if (token) {
         this.softLogout();
-        this.setToken(token);
+        this.setToken(token, refreshToken);
         this.setEmail(email);
+        if (sessionUuid) localStorage.setItem("activeSessionUuid", sessionUuid);
         localStorage.removeItem("emailSessionUuid");
         this.clearOtpMeta();
         if (userData) {
