@@ -67,36 +67,11 @@ class AuthService {
         this.updateLastActivity();
         return response;
       },
-      async (error) => {
-        const originalRequest = error.config;
-        if (error.response?.status === 401 && !originalRequest?._retried) {
-          originalRequest._retried = true;
-          const refreshToken = this.getRefreshToken();
-          if (refreshToken) {
-            try {
-              const directusBase = import.meta.env.VITE_API_URL || 'https://appv1.fieldseasy.com/directus';
-              const res = await axios.post(`${directusBase}/auth/refresh`, {
-                refresh_token: refreshToken,
-                mode: 'json'
-              });
-              if (res.data?.data) {
-                const { access_token, refresh_token: newRefresh } = res.data.data;
-                this.setToken(access_token, newRefresh);
-                originalRequest.headers['Authorization'] = `Bearer ${access_token}`;
-                return this.protectedApi(originalRequest);
-              }
-            } catch (refreshErr) {
-              console.warn('[AuthService] Token refresh failed:', refreshErr?.message);
-            }
-          }
-
-          // Fallback to static system API token if session expired
-          const systemToken = import.meta.env.VITE_API_TOKEN || 'p2pJHhZAjca6jQea0RbPVwNWRyrJG29X';
-          if (systemToken && originalRequest.headers['Authorization'] !== `Bearer ${systemToken}`) {
-            console.log('[AuthService] 401 recovery: retrying with system API token');
-            originalRequest.headers['Authorization'] = `Bearer ${systemToken}`;
-            return this.protectedApi(originalRequest);
-          }
+      (error) => {
+        if (error.response?.status === 401) {
+          console.warn(
+            "Unauthorized access (401). Token might be invalid or missing for this resource.",
+          );
         }
         return Promise.reject(error);
       },
@@ -441,32 +416,18 @@ class AuthService {
     }
   }
 
-  setToken(token, refreshToken = null) {
+  setToken(token) {
     if (!token) return;
     Cookies.set("userToken", token, { expires: 1 });
     sessionStorage.setItem("userToken", token);
     localStorage.setItem("userToken", token);
-    if (refreshToken) {
-      localStorage.setItem("ae_refresh_token", refreshToken);
-      Cookies.set("refreshToken", refreshToken, { expires: 7 });
-    }
     this.protectedApi.defaults.headers.common["Authorization"] =
       `Bearer ${token}`;
     this.updateLastActivity();
   }
 
-  getRefreshToken() {
-    return localStorage.getItem("ae_refresh_token") || Cookies.get("refreshToken");
-  }
-
   getToken() {
-    return (
-      Cookies.get("userToken") ||
-      sessionStorage.getItem("userToken") ||
-      localStorage.getItem("userToken") ||
-      import.meta.env.VITE_API_TOKEN ||
-      "p2pJHhZAjca6jQea0RbPVwNWRyrJG29X"
-    );
+    return Cookies.get("userToken") || sessionStorage.getItem("userToken") || localStorage.getItem("userToken");
   }
 
   setPhone(phone) {
