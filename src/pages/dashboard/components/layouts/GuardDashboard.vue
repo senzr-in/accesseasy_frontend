@@ -272,10 +272,13 @@
             </span>
           </div>
           <div class="mt-3 pt-2.5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-[11px] font-semibold text-slate-600 dark:text-slate-400">
-            <span class="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> {{ currentMetrics.activeGuards }} Active
+            <span class="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1" title="Checked in and actively touring">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> {{ currentMetrics.guardsOnPatrol }} Touring
             </span>
-            <span>{{ currentMetrics.offDutyGuards }} Off Duty</span>
+            <span class="text-indigo-600 dark:text-indigo-400 font-bold flex items-center gap-1" title="Checked in today, awaiting tour dispatch">
+              <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> {{ currentMetrics.guardsOnStandby }} Standby
+            </span>
+            <span class="text-slate-400" title="Not checked in today">{{ currentMetrics.offDutyGuards }} Off</span>
           </div>
         </div>
 
@@ -521,6 +524,15 @@
 
             <div class="flex items-center gap-1.5 pointer-events-auto">
               <button
+                class="h-9 px-3 rounded-xl bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-white/10 shadow-md text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                :class="isSatelliteView ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-800' : 'text-slate-700 dark:text-slate-200 hover:text-indigo-600'"
+                @click="toggleMapLayer"
+                :title="isSatelliteView ? 'Switch to Street Map' : 'Switch to Satellite View'"
+              >
+                <Layers class="w-3.5 h-3.5 text-indigo-500" />
+                <span>{{ isSatelliteView ? 'Street Map' : 'Satellite' }}</span>
+              </button>
+              <button
                 class="h-9 px-3 rounded-xl bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-white/10 shadow-md text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-indigo-600 flex items-center gap-1.5 transition-colors cursor-pointer"
                 @click="centerMapOnGuards"
               >
@@ -539,6 +551,22 @@
 
           <!-- Map Container with explicit pixel height -->
           <div ref="dashboardMapRef" id="dashboard-live-map" style="height: 440px; min-height: 440px; width: 100%; position: relative;" class="w-full flex-1 bg-slate-100 dark:bg-slate-900 z-10"></div>
+
+          <!-- Live GPS status pill -->
+          <div
+            v-if="activeMapGuardsCount === 0"
+            class="absolute bottom-4 left-4 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm flex items-center gap-2 text-[11px] font-medium text-slate-500 dark:text-slate-400 pointer-events-none select-none"
+          >
+            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            <span>Standby · Awaiting live guard GPS signal</span>
+          </div>
+          <div
+            v-else
+            class="absolute bottom-4 left-4 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm flex items-center gap-2 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 pointer-events-none select-none"
+          >
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>{{ activeMapGuardsCount }} Active Guard GPS {{ activeMapGuardsCount === 1 ? 'Feed' : 'Feeds' }}</span>
+          </div>
 
           <!-- Interactive Guard Popup Overlay if selected -->
           <div
@@ -1765,9 +1793,13 @@ const submitQuickSite = async () => {
 
 // Direct Submission Handlers
 const submitQuickPatrol = () => {
-  mockActivePatrols.value.unshift({
+  const matchedSite = sitesList.value.find(s => s.name === quickPatrolForm.value.siteName) || sitesList.value[0];
+  const siteLat = matchedSite?.latitude ? Number(matchedSite.latitude) : null;
+  const siteLng = matchedSite?.longitude ? Number(matchedSite.longitude) : null;
+
+  liveActivePatrols.value.unshift({
     id: `pat-${Date.now()}`,
-    siteId: 'site-01',
+    siteId: matchedSite?.id || 'site-01',
     siteName: quickPatrolForm.value.siteName,
     guardName: quickPatrolForm.value.guardName,
     routeName: quickPatrolForm.value.routeName,
@@ -1777,10 +1809,10 @@ const submitQuickPatrol = () => {
     startedTime: 'Just now',
     lastScanTime: 'Just now',
     nextCheckpoint: 'Zone Entrance',
-    lat: 12.9716,
-    lng: 80.2435,
-    battery: '100%',
-    signal: '5G'
+    lat: siteLat,
+    lng: siteLng,
+    battery: null,
+    signal: 'Standby'
   });
   activeQuickModal.value = null;
   showToast(`Patrol dispatched for ${quickPatrolForm.value.guardName}!`);
@@ -1924,10 +1956,21 @@ const currentMetrics = computed(() => {
 
   const completionRate = totalP > 0 ? Math.round((completedP / totalP) * 100) : (completedP > 0 ? 100 : 0);
 
+  const activePatrolGuardIds = new Set(
+    filteredP
+      .filter(p => p.status === 'running' || p.status === 'in_progress' || p.status === 'active' || p.status === 'ongoing')
+      .map(p => String(p.guardId?.id || p.guardId || p.guard_id || p.guard))
+  );
+
+  const guardsOnPatrol = allGuards.value.filter(g => activePatrolGuardIds.has(String(g.id))).length || activeP;
+  const guardsOnStandby = Math.max(0, activeG - guardsOnPatrol);
+
   return {
     totalGuards: totalG,
     activeGuards: activeG,
     offDutyGuards: offDutyG,
+    guardsOnPatrol,
+    guardsOnStandby,
     totalPatrols: totalP,
     activePatrols: activeP,
     onTrackPatrols: onTrackP,
@@ -1946,11 +1989,11 @@ const currentMetrics = computed(() => {
 });
 
 // ── ACTIVE PATROLS STREAM ─────────────────────────────────────────────────────
-const mockActivePatrols = ref([]);
+const liveActivePatrols = ref([]);
 
 const filteredActivePatrols = computed(() => {
-  if (selectedSiteId.value === 'all') return mockActivePatrols.value;
-  return mockActivePatrols.value.filter(p => String(p.siteId) === String(selectedSiteId.value));
+  if (selectedSiteId.value === 'all') return liveActivePatrols.value;
+  return liveActivePatrols.value.filter(p => String(p.siteId) === String(selectedSiteId.value));
 });
 
 // ── ATTENTION REQUIRED & INCIDENTS ────────────────────────────────────────────
@@ -2053,7 +2096,43 @@ const flagGuards = computed(() => {
 const dashboardMapRef = ref(null);
 let mapInstance = null;
 let mapMarkers = [];
+let streetTileLayer = null;
+let satelliteTileLayer = null;
+const isSatelliteView = ref(false);
+const activeMapGuardsCount = ref(0);
 const markerRegistry = new Map(); // guardId -> L.Marker (prevents DOM thrashing)
+
+const toggleMapLayer = () => {
+  if (!mapInstance) return;
+  isSatelliteView.value = !isSatelliteView.value;
+
+  if (isSatelliteView.value) {
+    if (streetTileLayer && mapInstance.hasLayer(streetTileLayer)) {
+      mapInstance.removeLayer(streetTileLayer);
+    }
+    if (!satelliteTileLayer) {
+      satelliteTileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19,
+        attribution: 'Tiles &copy; Esri'
+      });
+    }
+    satelliteTileLayer.addTo(mapInstance);
+  } else {
+    if (satelliteTileLayer && mapInstance.hasLayer(satelliteTileLayer)) {
+      mapInstance.removeLayer(satelliteTileLayer);
+    }
+    if (!streetTileLayer) {
+      streetTileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        subdomains: 'abc',
+        keepBuffer: 6,
+        updateWhenIdle: true,
+        updateWhenZooming: false
+      });
+    }
+    streetTileLayer.addTo(mapInstance);
+  }
+};
 
 const initMap = async () => {
   if (!dashboardMapRef.value) return;
@@ -2067,24 +2146,26 @@ const initMap = async () => {
     const firstSite = sitesList.value.find(s => s.latitude && s.longitude);
     const defaultCenter = firstSite 
       ? [Number(firstSite.latitude), Number(firstSite.longitude)] 
-      : [12.9716, 80.2435];
+      : [20.5937, 78.9629]; // Geographic center (no mock pins)
+    const defaultZoom = firstSite ? 14 : 5;
 
     mapInstance = L.map(dashboardMapRef.value, {
       center: defaultCenter,
-      zoom: 15,
+      zoom: defaultZoom,
       zoomControl: false,
       attributionControl: false
     });
 
     L.control.zoom({ position: 'bottomright' }).addTo(mapInstance);
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    streetTileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
       subdomains: 'abc',
       keepBuffer: 6,
       updateWhenIdle: true,
       updateWhenZooming: false
-    }).addTo(mapInstance);
+    });
+    streetTileLayer.addTo(mapInstance);
 
     setTimeout(() => {
       if (mapInstance) {
@@ -2112,72 +2193,44 @@ const renderGuardMarkers = () => {
 
   const listToPlot = [];
 
-  // 1. Add active running patrols
+  // 1. Add active running patrols that have real verified GPS coordinates
   filteredActivePatrols.value.forEach(p => {
-    if (p.lat && p.lng && !isNaN(p.lat) && !isNaN(p.lng)) {
+    const lat = Number(p.lat);
+    const lng = Number(p.lng);
+    if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
       listToPlot.push({
         id: p.id,
         guardName: p.guardName || 'Security Guard',
         siteName: p.siteName || 'Main Site',
         routeName: p.routeName || 'Patrol Route',
-        nextCheckpoint: p.nextCheckpoint || 'Next Point',
+        nextCheckpoint: p.nextCheckpoint || 'Active Patrol',
         status: p.status || 'running',
-        battery: p.battery || 85,
-        signal: p.signal || 'Strong',
-        lat: Number(p.lat),
-        lng: Number(p.lng),
+        battery: p.battery || 'Live',
+        signal: p.signal || 'GPS',
+        lat,
+        lng,
         isPatrol: true
       });
     }
   });
 
-  // 2. Add all patrol guards
-  allPatrols.value.forEach(p => {
-    const gName = (typeof p.guardId === 'object' && (p.guardId?.first_name || p.guardId?.name)) 
-      ? `${p.guardId.first_name || ''} ${p.guardId.last_name || ''}`.trim() 
-      : (p.guard_name || p.guard || 'Guard');
-    
-    const exists = listToPlot.some(item => item.guardName === gName || String(item.id) === String(p.id));
-    if (!exists) {
-      const siteMatch = sitesList.value.find(s => String(s.id) === String(p.site || p.siteId)) || sitesList.value[0];
-      const lat = Number(p.currentLat || p.lat || p.latitude || siteMatch?.latitude || 12.9716);
-      const lng = Number(p.currentLng || p.lng || p.longitude || siteMatch?.longitude || 80.2435);
-      if (!isNaN(lat) && !isNaN(lng)) {
-        listToPlot.push({
-          id: p.id,
-          guardName: gName,
-          siteName: p.siteName || siteMatch?.name || 'Assigned Site',
-          routeName: (typeof p.groupId === 'object' && p.groupId?.name) || p.name || 'Patrol Route',
-          nextCheckpoint: p.status === 'completed' ? 'Shift Completed' : (p.status === 'missed' ? 'Missed Route' : 'Standby'),
-          status: p.status === 'running' ? 'running' : 'delayed',
-          battery: 95,
-          signal: '5G',
-          lat,
-          lng,
-          isPatrol: true
-        });
-      }
-    }
-  });
-
-  // 3. Add checked-in on-duty guards from attendance
+  // 2. Add checked-in on-duty guards who have real live GPS coordinates
   todayAttendance.value.forEach(att => {
     const gName = att.guard_name || 'Guard';
     const exists = listToPlot.some(p => p.guardName === gName || (att.guard?.id && String(p.id).includes(String(att.guard.id))));
     if (!exists) {
-      const siteMatch = sitesList.value.find(s => String(s.id) === String(att.site?.id || att.site) || s.name === att.site_name) || sitesList.value[0];
-      const lat = Number(att.latitude || siteMatch?.latitude || 12.9716);
-      const lng = Number(att.longitude || siteMatch?.longitude || 80.2435);
-      if (!isNaN(lat) && !isNaN(lng)) {
+      const lat = Number(att.latitude || att.lat);
+      const lng = Number(att.longitude || att.lng);
+      if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
         listToPlot.push({
           id: `att-${att.id || gName}`,
           guardName: gName,
-          siteName: att.site_name || siteMatch?.name || 'On-Duty Site',
+          siteName: att.site_name || 'On-Duty Site',
           routeName: 'Stationary / Standby',
           nextCheckpoint: 'Shift Active',
           status: 'running',
-          battery: 90,
-          signal: '5G',
+          battery: att.battery || 'Live',
+          signal: att.signal || 'GPS',
           lat,
           lng,
           isPatrol: false
@@ -2185,6 +2238,8 @@ const renderGuardMarkers = () => {
       }
     }
   });
+
+  activeMapGuardsCount.value = listToPlot.length;
 
   const seenIds = new Set();
 
@@ -2264,7 +2319,7 @@ const centerMapOnGuards = () => {
   }
   const firstSite = sitesList.value.find(s => s.latitude && s.longitude);
   if (firstSite) {
-    mapInstance.setView([Number(firstSite.latitude), Number(firstSite.longitude)], 15);
+    mapInstance.setView([Number(firstSite.latitude), Number(firstSite.longitude)], 14);
   }
 };
 
@@ -2341,7 +2396,7 @@ const loadDashboardData = async () => {
         p.status === 'running' || p.status === 'in_progress' || p.status === 'active' || p.status === 'ongoing'
       );
 
-      mockActivePatrols.value = activeRaw.map(p => {
+      liveActivePatrols.value = activeRaw.map(p => {
         const guardUser = (typeof p.guardId === 'object' && p.guardId) 
           ? p.guardId 
           : allGuards.value.find(g => String(g.id) === String(p.guardId || p.guard_id || p.guard));
@@ -2357,8 +2412,10 @@ const loadDashboardData = async () => {
         const scanned = Number(p.checkpointsVisited || p.scanned_checkpoints || 0);
         const total = Number(p.totalCheckpoints || p.total_checkpoints || p.checkpoints?.length || (scanned > 0 ? scanned + 1 : 4));
 
-        const lat = Number(p.currentLat || p.lat || p.latitude || guardUser?.currentLat || siteMatch?.latitude || 12.9716);
-        const lng = Number(p.currentLng || p.lng || p.longitude || guardUser?.currentLng || siteMatch?.longitude || 80.2435);
+        const rawLat = p.currentLat ?? p.lat ?? p.latitude ?? guardUser?.currentLat ?? siteMatch?.latitude;
+        const rawLng = p.currentLng ?? p.lng ?? p.longitude ?? guardUser?.currentLng ?? siteMatch?.longitude;
+        const lat = (rawLat !== undefined && rawLat !== null && !isNaN(Number(rawLat)) && Number(rawLat) !== 0) ? Number(rawLat) : null;
+        const lng = (rawLng !== undefined && rawLng !== null && !isNaN(Number(rawLng)) && Number(rawLng) !== 0) ? Number(rawLng) : null;
 
         const startedTime = p.startTime || p.scheduledTime 
           ? new Date(p.startTime || p.scheduledTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
@@ -2383,8 +2440,8 @@ const loadDashboardData = async () => {
           nextCheckpoint: p.nextCheckpoint || p.next_checkpoint || `Checkpoint ${Math.min(scanned + 1, total)}`,
           lat,
           lng,
-          battery: p.battery || 85,
-          signal: p.signal || 'Strong'
+          battery: p.battery || 'Live',
+          signal: p.signal || 'GPS'
         };
       });
 
@@ -2465,14 +2522,15 @@ const setupDashboardMqtt = () => {
 
       const guardName = data.guard_name || data.guardName || data.name || (data.first_name ? `${data.first_name} ${data.last_name || ''}`.trim() : `Guard #${guardId}`);
 
-      const existing = mockActivePatrols.value.find(p => String(p.guardId) === String(guardId) || String(p.id) === String(guardId) || String(p.guard_id) === String(guardId));
+      const existing = liveActivePatrols.value.find(p => String(p.guardId) === String(guardId) || String(p.id) === String(guardId) || String(p.guard_id) === String(guardId));
       if (existing) {
         existing.lat = lat;
         existing.lng = lng;
         existing.battery = data.battery ?? data.batteryLevel ?? existing.battery;
+        existing.signal = data.accuracy ? `±${Math.round(data.accuracy)}m` : (existing.signal || 'GPS');
         existing.lastScanTime = 'Just now';
       } else {
-        mockActivePatrols.value.unshift({
+        liveActivePatrols.value.unshift({
           id: `live-${guardId}`,
           guardId,
           guardName,
@@ -2487,8 +2545,8 @@ const setupDashboardMqtt = () => {
           nextCheckpoint: 'In Progress',
           lat,
           lng,
-          battery: data.battery ?? 100,
-          signal: '5G'
+          battery: data.battery ?? data.batteryLevel ?? 'Live',
+          signal: data.accuracy ? `±${Math.round(data.accuracy)}m` : 'GPS'
         });
       }
       renderGuardMarkers();
@@ -2502,7 +2560,7 @@ const setupDashboardMqtt = () => {
     try {
       const data = typeof payload === 'string' ? JSON.parse(payload) : (typeof payload?.toString === 'function' ? JSON.parse(payload.toString()) : payload);
       const guardId = data.guard_id || data.guardId || data.employee_id;
-      const target = mockActivePatrols.value.find(p => String(p.guardId) === String(guardId) || String(p.id) === String(guardId));
+      const target = liveActivePatrols.value.find(p => String(p.guardId) === String(guardId) || String(p.id) === String(guardId));
       if (target) {
         target.scannedCheckpoints = (target.scannedCheckpoints || 0) + 1;
         target.lastScanTime = 'Just now';

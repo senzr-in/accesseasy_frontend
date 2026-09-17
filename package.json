@@ -4,15 +4,14 @@
   "type": "module",
   "version": "0.0.0",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --config vite.config.patrol.js",
     "dev:patrol": "vite --config vite.config.patrol.js",
     "dev:security": "vite --config vite.config.security.js",
     "dev:workforce": "vite --config vite.config.workforce.js",
-    "build": "vite build --config vite.config.patrol.js",
-    "build:patrol": "vite build --config vite.config.patrol.js",
+    "build": "node --max-old-space-size=4096 --no-incremental-marking ./node_modules/vite/bin/vite.js build --config vite.config.patrol.js",
+    "build:patrol": "node --max-old-space-size=4096 --no-incremental-marking ./node_modules/vite/bin/vite.js build --config vite.config.patrol.js",
     "build:security": "vite build --config vite.config.security.js",
     "build:workforce": "vite build --config vite.config.workforce.js",
-    "build:all": "npm run build:patrol && npm run build:security && npm run build:workforce",
     "preview": "vite preview",
     "lint": "eslint . --fix"
   },

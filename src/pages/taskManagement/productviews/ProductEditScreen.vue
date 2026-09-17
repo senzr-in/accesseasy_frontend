@@ -503,7 +503,7 @@ export default {
         '#9C27B0', '#009688', '#E91E63', '#FFC107'
       ],
       
-      token: (typeof process !== 'undefined' && process.env?.VUE_APP_API_TOKEN) || "bennGJlPG_qUNKhCSE9WFUo6G_RnQAts"
+      token: import.meta.env.VITE_TASK_API_TOKEN || ''
     }
   },
   computed: {

@@ -87,7 +87,11 @@ class AuthService {
               }
             } catch (refreshErr) {
               console.warn('[AuthService] Token refresh failed:', refreshErr?.message);
+              this.handleSessionExpired();
             }
+          } else {
+            // No refresh token available to recover session
+            this.handleSessionExpired();
           }
         }
         return Promise.reject(error);

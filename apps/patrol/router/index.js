@@ -13,39 +13,41 @@ const PinVerification = () => import("@/components/loginAuthentication/pinVerifi
 const EmailVerification = () => import("@/components/loginAuthentication/emailVerification.vue");
 const AlternateLogin = () => import("@/components/loginAuthentication/alternateLogin.vue");
 const AuthCallback = () => import("@/pages/authorize/AuthCallback.vue");
+const DevLogin = () => import("@/components/loginAuthentication/devLogin.vue");
 
 // Layout
 const DashboardLayout = () => import("@/layouts/dashboardLayout.vue");
 
-// Superadmin (esslAdmin) Dashboard
-const EsslDashboard = () => import("@/pages/dealers/dashboard/esslDashboard.vue");
-
-// Visitor Portal
-const VisitorPortalView = () => import("@/pages/visitorPortals/VisitorPortalView.vue");
-
-// DEV ONLY: Dev quick login bypass
-const DevLogin = () => import("@/components/loginAuthentication/devLogin.vue");
-
-// Placeholders / Ports
-const DashboardHome = () => import("@/pages/dashboard/index.vue");
-const Doors = () => import("@/pages/devicesManager/doors/doorsVue.vue");
+// Superadmin / Unused removed for Patrol-only mode
+const PatrolsTab = () => import("@/pages/guard/tabs/PatrolsTab.vue");
+const CreatePatrol = () => import("@/pages/guard/CreatePatrol.vue");
+const Checkpoints = () => import("@/pages/guard/Checkpoints.vue");
+const PatrolHistory = () => import("@/pages/guard/History.vue");
+const Guards = () => import("@/pages/guard/index.vue");
+const GuardAttendance = () => import("@/pages/guard/tabs/AttendanceTab.vue");
+const Incidents = () => import("@/pages/incidents/index.vue");
+const Sites = () => import("@/pages/sites/index.vue");
+const SiteDetail = () => import("@/pages/sites/SiteDetail.vue");
+const SiteGeofenceEditor = () => import("@/pages/sites/SiteGeofenceEditor.vue");
 const Zones = () => import("@/pages/zones/index.vue");
+const ZoneDetail = () => import("@/pages/zones/ZoneDetail.vue");
+const CheckpointSettings = () => import("@/pages/settings/checkpoints/index.vue");
+const EscalationPolicies = () => import("@/pages/settings/escalation/EscalationPolicies.vue");
+const DeviceDashboard = () => import("@/pages/settings/devices/DeviceDashboard.vue");
+const ShiftScheduler = () => import("@/pages/settings/shifts/ShiftScheduler.vue");
+const AuditLog = () => import("@/pages/settings/AuditLog.vue");
+const SubscriptionPage = () => import("@/pages/settings/subscription/SubscriptionPage.vue");
+const Plans = () => import("@/pages/settings/plans/plans.vue");
 const Logs = () => import("@/pages/logs/logTab.vue");
-const OnboardingPage = () => import("@/pages/onboarding/index.vue");
-const BranchConfiguration = () => import("@/pages/settings/configuration/branch/branchConfiguration.vue");
-const BranchAddForm = () => import("@/pages/settings/configuration/branch/branchAddForm.vue");
-const BranchEditForm = () => import("@/pages/settings/configuration/branch/branchEditForm.vue");
-const AppearanceSettings = () => import("@/pages/settings/appearance.vue");
-
+const Reports = () => import("@/pages/reports/index.vue");
+const SettingsHub = () => import("@/pages/settings/SettingsHub.vue");
+const Profile = () => import("@/pages/profile/index.vue");
+const HelpSupport = () => import("@/pages/help/index.vue");
 
 // ─── Role → Home Route map ───────────────────────────────────────────────────
 const getRoleHome = () => {
   if (!authService.isAuthenticated()) return "/login";
-  const role = authService.getUserRole();
-  if (role === "esslAdmin")  return "/dealer-dashboard";
-  if (role === "Guard")      return "/dashboard/patrols";    // Patrol App home
-  if (role === "Employee")   return "/dashboard/my-access";
-  return "/dashboard"; // Admin & Manager → Command Center
+  return "/dashboard/patrols";
 };
 
 const routes = [
@@ -54,7 +56,6 @@ const routes = [
     name: "Landing",
     component: LandingPage2,
     beforeEnter: (to, from, next) => {
-      // If already authenticated, skip the landing page and go to the appropriate home
       if (authService.isAuthenticated()) {
         next(getRoleHome());
       } else {
@@ -66,33 +67,6 @@ const routes = [
     path: "/landing",
     name: "LandingPage",
     component: LandingPage2,
-  },
-  {
-    path: "/landing-2",
-    redirect: "/",
-  },
-  {
-    path: "/landing-v2",
-    redirect: "/",
-  },
-  {
-    path: "/landing-3d",
-    redirect: "/",
-  },
-  {
-    path: "/dealer-dashboard",
-    name: "DealerDashboard",
-    component: EsslDashboard,
-    meta: { requiresAuth: true },
-    beforeEnter: (to, from, next) => {
-      const role = authService.getUserRole();
-      if (role === "esslAdmin") {
-        next();
-      } else {
-        // Non-superadmin trying to access this page → send to main dashboard
-        next("/dashboard");
-      }
-    },
   },
   {
     path: "/login",
@@ -125,24 +99,17 @@ const routes = [
       }
     },
   },
-  // Onboarding welcome page (full-page, no sidebar)
-  {
-    path: "/onboarding",
-    name: "Onboarding",
-    component: OnboardingPage,
-    meta: { requiresAuth: true },
-  },
   {
     path: "/register",
     name: "Register",
     component: Register,
   },
-  // ⚠ DEV ONLY — Remove before production deployment
-  {
+  // DEV ONLY — Hidden in production deployment
+  ...(import.meta.env.DEV ? [{
     path: "/dev-login",
     name: "DevLogin",
     component: DevLogin,
-  },
+  }] : []),
   {
     path: "/verification/:phoneNumber",
     name: "Verification",
@@ -179,26 +146,147 @@ const routes = [
       {
         path: "",
         name: "DashboardHome",
-        component: DashboardHome,
+        component: PatrolsTab,
         meta: { roles: ["Admin", "Manager", "Guard"] }
       },
       {
-        path: "settings",
-        name: "SettingsHub",
-        component: () => import("@/pages/settings/SettingsHub.vue"),
+        path: "patrols",
+        name: "Patrols",
+        component: PatrolsTab,
+        meta: { roles: ["Admin", "Manager", "Guard"] }
+      },
+      {
+        path: "patrols/create",
+        name: "CreatePatrol",
+        component: CreatePatrol,
+        meta: { roles: ["Admin", "Manager", "Guard"] }
+      },
+      {
+        path: "patrols/checkpoints",
+        name: "PatrolCheckpoints",
+        component: Checkpoints,
+        meta: { roles: ["Admin", "Manager", "Guard"] }
+      },
+      {
+        path: "patrols/history",
+        name: "PatrolHistory",
+        component: PatrolHistory,
+        meta: { roles: ["Admin", "Manager", "Guard"] }
+      },
+      {
+        path: "guards",
+        name: "Guards",
+        component: Guards,
         meta: { roles: ["Admin", "Manager"] }
       },
       {
-        path: "settings/appearance",
-        name: "SettingsAppearance",
-        component: AppearanceSettings,
-        meta: { roles: ["Admin"] }
+        path: "guards/attendance",
+        name: "GuardAttendance",
+        component: GuardAttendance,
+        meta: { roles: ["Admin", "Manager", "Guard"], feature: "attendance.basic" }
       },
       {
-        path: "settings/ai-events",
-        name: "SettingsAiEvents",
-        component: () => import("@/pages/settings/aiEvents.vue"),
+        path: "incidents",
+        name: "Incidents",
+        component: Incidents,
         meta: { roles: ["Admin", "Manager", "Guard"] }
+      },
+      {
+        path: "sites",
+        name: "Sites",
+        component: Sites,
+        meta: { roles: ["Admin", "Manager"] }
+      },
+      {
+        path: "sites/:id",
+        name: "SiteDetail",
+        component: SiteDetail,
+        meta: { roles: ["Admin", "Manager"] }
+      },
+      {
+        path: "sites/:id/geofence",
+        name: "SiteGeofenceEditor",
+        component: SiteGeofenceEditor,
+        meta: { roles: ["Admin", "Manager"], feature: "geofence.site" }
+      },
+      {
+        path: "reports",
+        name: "Reports",
+        component: Reports,
+        meta: { roles: ["Admin", "Manager"] }
+      },
+      {
+        path: "profile",
+        name: "Profile",
+        component: Profile,
+        meta: { roles: ["Admin", "Manager", "Guard"] }
+      },
+      {
+        path: "help",
+        name: "HelpSupport",
+        component: HelpSupport,
+        meta: { roles: ["Admin", "Manager", "Guard"] }
+      },
+      // ─── Settings Hub & Patrol Sub-modules ────────────────────────────────
+      {
+        path: "settings",
+        name: "SettingsHub",
+        component: SettingsHub,
+        meta: { roles: ["Admin", "Manager"] }
+      },
+      {
+        path: "settings/zones",
+        name: "SettingsZones",
+        component: Zones,
+        meta: { roles: ["Admin", "Manager"] }
+      },
+      {
+        path: "settings/zones/:id",
+        name: "SettingsZoneDetail",
+        component: ZoneDetail,
+        meta: { roles: ["Admin", "Manager"] }
+      },
+      {
+        path: "settings/checkpoints",
+        name: "SettingsCheckpoints",
+        component: CheckpointSettings,
+        meta: { roles: ["Admin", "Manager"] }
+      },
+      {
+        path: "settings/escalation",
+        name: "EscalationPolicies",
+        component: EscalationPolicies,
+        meta: { roles: ["Admin", "Manager"] }
+      },
+      {
+        path: "settings/devices",
+        name: "SettingsDevices",
+        component: DeviceDashboard,
+        meta: { roles: ["Admin", "Manager"], feature: "ops.operations_center" }
+      },
+      {
+        path: "settings/patrol-devices",
+        name: "PatrolDevices",
+        component: DeviceDashboard,
+        meta: { roles: ["Admin", "Manager"] }
+      },
+      {
+        path: "settings/shifts",
+        name: "Shifts",
+        component: ShiftScheduler,
+        meta: { roles: ["Admin", "Manager"] }
+      },
+      {
+        path: "settings/patrol-shifts",
+        name: "PatrolShifts",
+        component: ShiftScheduler,
+        meta: { roles: ["Admin", "Manager"] }
+      },
+      {
+        path: "settings/audit-log",
+        name: "AuditLog",
+        component: AuditLog,
+        meta: { roles: ["Admin"] }
       },
       {
         path: "settings/logs",
@@ -207,241 +295,20 @@ const routes = [
         meta: { roles: ["Admin", "Manager", "Guard"] }
       },
       {
-        path: "settings/zones",
-        name: "SettingsZones",
-        component: Zones,
-        meta: { roles: ["Admin"] }
-      },
-      {
-        path: "settings/zones/:id",
-        name: "SettingsZoneDetail",
-        component: () => import("@/pages/zones/ZoneDetail.vue"),
-        meta: { roles: ["Admin", "Manager"] }
-      },
-      {
-        path: "sites",
-        name: "Sites",
-        component: () => import("@/pages/sites/index.vue"),
-        meta: { roles: ["Admin", "Manager"] }
-      },
-      {
-        path: "sites/:id",
-        name: "SiteDetail",
-        component: () => import("@/pages/sites/SiteDetail.vue"),
-        meta: { roles: ["Admin", "Manager"] }
-      },
-      {
-        path: "sites/:id/geofence",
-        name: "SiteGeofenceEditor",
-        component: () => import("@/pages/sites/SiteGeofenceEditor.vue"),
-        meta: { roles: ["Admin", "Manager"], feature: "geofence.site" }
-      },
-      {
-        path: "settings/checkpoints",
-        name: "SettingsCheckpoints",
-        component: () => import("@/pages/settings/checkpoints/index.vue"),
-        meta: { roles: ["Admin", "Manager"] }
-      },
-      {
-        path: "settings/branches",
-        name: "SettingsBranches",
-        component: BranchConfiguration,
-        meta: { roles: ["Admin"] }
-      },
-      {
-        path: "settings/branches/add",
-        name: "SettingsBranchAdd",
-        component: BranchAddForm,
-        meta: { roles: ["Admin"] }
-      },
-      {
-        path: "settings/branches/:id/edit",
-        name: "SettingsBranchEdit",
-        component: BranchEditForm,
-        meta: { roles: ["Admin"] }
-      },
-      {
-        path: "settings/devices",
-        name: "SettingsDevices",
-        component: () => import("@/pages/settings/devices/DeviceDashboard.vue"),
-        meta: { roles: ["Admin", "Manager"], feature: "ops.operations_center" }
-      },
-      {
-        path: "access-control/doors",
-        name: "Doors",
-        component: Doors,
-        meta: { roles: ["Admin"] }
-      },
-      {
-        path: "access-control/schedules",
-        name: "Schedules",
-        component: () => import("@/pages/schedules/index.vue"),
-        meta: { roles: ["Admin", "Manager"] }
-      },
-      {
-        path: "access-control/rules",
-        name: "Rules",
-        component: () => import("@/pages/rules/index.vue"),
-        meta: { roles: ["Admin"] }
-      },
-      {
-        path: "guards",
-        name: "Guards",
-        component: () => import("@/pages/guard/index.vue"),
-        meta: { roles: ["Admin", "Manager"] }
-      },
-      {
-        path: "guards/attendance",
-        name: "GuardAttendance",
-        component: () => import("@/pages/guard/tabs/AttendanceTab.vue"),
-        meta: { roles: ["Admin", "Manager", "Guard"], feature: "attendance.basic" }
-      },
-      {
-        path: "patrols",
-        name: "Patrols",
-        component: () => import("@/pages/guard/tabs/PatrolsTab.vue"),
-        meta: { roles: ["Admin", "Manager", "Guard"] }
-      },
-      {
-        path: "patrols/create",
-        name: "CreatePatrol",
-        component: () => import("@/pages/guard/CreatePatrol.vue"),
-        meta: { roles: ["Admin", "Manager", "Guard"] }
-      },
-      {
-        path: "patrols/checkpoints",
-        name: "PatrolCheckpoints",
-        component: () => import("@/pages/guard/Checkpoints.vue"),
-        meta: { roles: ["Admin", "Manager", "Guard"] }
-      },
-      {
-        path: "patrols/history",
-        name: "PatrolHistory",
-        component: () => import("@/pages/guard/History.vue"),
-        meta: { roles: ["Admin", "Manager", "Guard"] }
-      },
-      {
-        path: "authorize",
-        name: "Authorize",
-        component: () => import("@/pages/authorize/index.vue"),
-        meta: { roles: ["Admin", "Guard"] }
-      },
-      {
-        path: "visitors",
-        name: "Visitors",
-        component: () => import("@/pages/visitors/index.vue"),
-        meta: { roles: ["Admin", "Guard"] }
-      },
-      {
-        path: "visitor-portals",
-        name: "VisitorPortals",
-        component: () => import("@/pages/visitorPortals/index.vue"),
-        meta: { roles: ["Admin"] }
-      },
-      {
-        path: "visitor-portals/builder/:id?",
-        name: "VisitorPortalBuilder",
-        component: () => import("@/pages/visitorPortals/builder.vue"),
-        meta: { roles: ["Admin"] }
-      },
-      {
-        path: "monitoring",
-        name: "Monitoring",
-        component: () => import("@/pages/monitoring/index.vue"),
-        meta: { roles: ["Admin", "Manager"] }
-      },
-      {
-        path: "reports",
-        name: "Reports",
-        component: () => import("@/pages/reports/index.vue"),
-        meta: { roles: ["Admin", "Manager"] }
-      },
-      {
-        path: "incidents",
-        name: "Incidents",
-        component: () => import("@/pages/incidents/index.vue"),
-        meta: { roles: ["Admin", "Manager", "Guard"] }
-      },
-      {
-        path: "help",
-        name: "HelpSupport",
-        component: () => import("@/pages/help/index.vue"),
-        meta: { roles: ["Admin", "Manager", "Employee", "Guard"] }
-      },
-      {
-        path: "settings/roles",
-        name: "Roles",
-        component: () => import("@/pages/roles/index.vue"),
-        meta: { roles: ["Admin", "Manager"] }
-      },
-      {
-        path: "settings/shifts",
-        name: "Shifts",
-        component: () => import("@/pages/shifts/index.vue"),
-        meta: { roles: ["Admin", "Manager"] }
-      },
-      {
-        path: "settings/permissions",
-        name: "Permissions",
-        component: () => import("@/pages/permissions/index.vue"),
-        meta: { roles: ["Admin"] }
-      },
-      {
-        path: "profile",
-        name: "Profile",
-        component: () => import("@/pages/profile/index.vue"),
-        meta: { roles: ["Admin", "Manager", "Employee", "Guard"] }
-      },
-      // ─── Subscription & Plan ─────────────────────────────────────────────
-      {
         path: "settings/subscription",
         name: "Subscription",
-        component: () => import("@/pages/settings/subscription/SubscriptionPage.vue"),
+        component: SubscriptionPage,
         meta: { roles: ["Admin", "Manager"] }
       },
       {
         path: "settings/plans",
         name: "PatrolPlans",
-        component: () => import("@/pages/settings/plans/plans.vue"),
+        component: Plans,
         meta: { roles: ["Admin", "Manager"] }
-      },
-      // ─── Escalation Policies ─────────────────────────────────────────────
-      {
-        path: "settings/escalation",
-        name: "EscalationPolicies",
-        component: () => import("@/pages/settings/escalation/EscalationPolicies.vue"),
-        meta: { roles: ["Admin", "Manager"] }
-      },
-      // ─── Device Management ────────────────────────────────────────────────
-      {
-        path: "settings/patrol-devices",
-        name: "PatrolDevices",
-        component: () => import("@/pages/settings/devices/DeviceDashboard.vue"),
-        meta: { roles: ["Admin", "Manager"] }
-      },
-      // ─── Shifts ───────────────────────────────────────────────────────────
-      {
-        path: "settings/patrol-shifts",
-        name: "PatrolShifts",
-        component: () => import("@/pages/settings/shifts/ShiftScheduler.vue"),
-        meta: { roles: ["Admin", "Manager"] }
-      },
-      // ─── Audit Log ────────────────────────────────────────────────────────
-      {
-        path: "settings/audit-log",
-        name: "AuditLog",
-        component: () => import("@/pages/settings/AuditLog.vue"),
-        meta: { roles: ["Admin"] }
       }
     ]
   },
-  // Visitor Portal Route
-  {
-    path: "/visit/:id",
-    name: "VisitorPortalView",
-    component: VisitorPortalView
-  },
-  // Catch-all — send to role-appropriate home
+  // Catch-all — send to patrol home
   {
     path: "/:pathMatch(.*)*",
     redirect: getRoleHome

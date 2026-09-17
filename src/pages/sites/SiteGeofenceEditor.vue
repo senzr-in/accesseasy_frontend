@@ -50,7 +50,19 @@
                 Radius: {{ currentRadius }}m
               </span>
             </div>
-            <span class="text-xs text-slate-400">💡 Click map to set test GPS pin</span>
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                class="px-2.5 py-1 rounded-lg text-xs font-bold border transition-colors flex items-center gap-1.5 cursor-pointer shadow-sm"
+                :class="isSatelliteView ? 'bg-indigo-50 border-indigo-200 text-indigo-600 dark:bg-indigo-900/30 dark:border-indigo-700 dark:text-indigo-400' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700'"
+                @click="toggleMapLayer"
+                :title="isSatelliteView ? 'Switch to Street Map' : 'Switch to Satellite View'"
+              >
+                <Layers class="w-3.5 h-3.5 text-indigo-500" />
+                <span>{{ isSatelliteView ? 'Street Map' : 'Satellite View' }}</span>
+              </button>
+              <span class="text-xs text-slate-400 hidden sm:inline">💡 Click map to set test GPS pin</span>
+            </div>
           </div>
 
           <!-- Leaflet Map Container -->
@@ -195,7 +207,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { ArrowLeft, Save, Activity, MapPin } from 'lucide-vue-next';
+import { ArrowLeft, Save, Activity, MapPin, Layers } from 'lucide-vue-next';
 import { siteService } from '@/services/siteService';
 import { geofenceService } from '@/services/geofenceService';
 import FeatureGate from '@/components/common/FeatureGate.vue';
@@ -210,11 +222,39 @@ const siteData = ref({});
 const violations = ref([]);
 const currentRadius = ref(500);
 const mapContainer = ref(null);
+const isSatelliteView = ref(false);
 
 let leafletMap = null;
+let streetLayer = null;
+let satelliteLayer = null;
 let perimeterCircle = null;
 let centerMarker = null;
 let testMarker = null;
+
+const toggleMapLayer = () => {
+  if (!leafletMap) return;
+  isSatelliteView.value = !isSatelliteView.value;
+
+  if (isSatelliteView.value) {
+    if (streetLayer) leafletMap.removeLayer(streetLayer);
+    if (!satelliteLayer) {
+      satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 19,
+        attribution: 'Tiles &copy; Esri'
+      });
+    }
+    satelliteLayer.addTo(leafletMap);
+  } else {
+    if (satelliteLayer) leafletMap.removeLayer(satelliteLayer);
+    if (!streetLayer) {
+      streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap'
+      });
+    }
+    streetLayer.addTo(leafletMap);
+  }
+};
 
 const testForm = ref({
   guardLat: 12.9725,
@@ -279,17 +319,19 @@ const saveGeofenceSettings = async () => {
 
 const initMap = () => {
   if (!mapContainer.value) return;
-  const lat = siteData.value.latitude || 12.9716;
-  const lng = siteData.value.longitude || 80.2435;
+  const lat = siteData.value.latitude ? Number(siteData.value.latitude) : 20.5937;
+  const lng = siteData.value.longitude ? Number(siteData.value.longitude) : 78.9629;
+  const initialZoom = siteData.value.latitude && siteData.value.longitude ? 16 : 5;
 
-  leafletMap = L.map(mapContainer.value).setView([lat, lng], 16);
+  leafletMap = L.map(mapContainer.value).setView([lat, lng], initialZoom);
 
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '© OpenStreetMap'
-  }).addTo(leafletMap);
+  });
+  streetLayer.addTo(leafletMap);
 
-  centerMarker = L.marker([lat, lng]).addTo(leafletMap).bindPopup(`<b>${siteData.value.name}</b><br>Property Center`);
+  centerMarker = L.marker([lat, lng]).addTo(leafletMap).bindPopup(`<b>${siteData.value.name || 'Site'}</b><br>Property Center`);
 
   perimeterCircle = L.circle([lat, lng], {
     radius: currentRadius.value,
@@ -309,8 +351,10 @@ const initMap = () => {
 onMounted(async () => {
   siteData.value = await siteService.getSiteById(siteId);
   currentRadius.value = siteData.value.geofence_radius || 500;
-  testForm.value.guardLat = parseFloat(((siteData.value.latitude || 12.9716) + 0.0012).toFixed(6));
-  testForm.value.guardLng = parseFloat(((siteData.value.longitude || 80.2435) + 0.0015).toFixed(6));
+  if (siteData.value.latitude && siteData.value.longitude) {
+    testForm.value.guardLat = parseFloat((Number(siteData.value.latitude) + 0.0012).toFixed(6));
+    testForm.value.guardLng = parseFloat((Number(siteData.value.longitude) + 0.0015).toFixed(6));
+  }
   violations.value = await geofenceService.fetchViolations(siteId);
 
   await nextTick();
@@ -323,5 +367,7 @@ onUnmounted(() => {
     leafletMap.remove();
     leafletMap = null;
   }
+  streetLayer = null;
+  satelliteLayer = null;
 });
 </script>

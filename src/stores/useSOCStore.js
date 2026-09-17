@@ -2,6 +2,7 @@ import { ref, computed, reactive } from 'vue';
 import { patrolService } from '@/services/patrolService';
 import { mqttService } from '@/services/mqttService';
 import { alertNotificationService } from '@/services/alertNotificationService';
+import { authService } from '@/services/authService';
 
 // ==========================================
 // GLOBAL STATE (Singleton)
@@ -60,12 +61,32 @@ const kpiMetrics = computed(() => {
 
 const fetchAllData = async () => {
   try {
-    const [patrolData, alertData] = await Promise.all([
+    const [patrolData, alertData, dbGuardLocations] = await Promise.all([
       patrolService.getPatrols(),
-      patrolService.getAlerts()
+      patrolService.getAlerts(),
+      patrolService.getActiveGuardLocations().catch(() => [])
     ]);
     patrols.value = patrolData || [];
     alerts.value = alertData || [];
+
+    // Pre-seed guard markers from database so the map is populated immediately
+    // on load, before the first MQTT location packet arrives.
+    // MQTT updates (source: 'mqtt') always take precedence over database seeds.
+    if (dbGuardLocations && dbGuardLocations.length > 0) {
+      dbGuardLocations.forEach(dbGuard => {
+        const existingIdx = guards.value.findIndex(
+          g => String(g.id) === String(dbGuard.id) || String(g.patrolId) === String(dbGuard.patrolId)
+        );
+        if (existingIdx >= 0) {
+          // Only update if we don't already have a fresher MQTT position
+          if (guards.value[existingIdx].source !== 'mqtt') {
+            guards.value[existingIdx] = { ...guards.value[existingIdx], ...dbGuard };
+          }
+        } else {
+          guards.value.push(dbGuard);
+        }
+      });
+    }
   } catch (e) {
     console.error('SOC Store: Failed to fetch data', e);
     throw e;
@@ -76,6 +97,13 @@ const handleMqttLocation = (topic, payload) => {
   try {
     const data = typeof payload === 'string' ? JSON.parse(payload) : (typeof payload?.toString === 'function' ? JSON.parse(payload.toString()) : payload);
     const parts = topic.split('/');
+
+    // Tenant isolation verification
+    const currentTenant = authService.getTenantId();
+    const payloadTenant = data.tenant || data.tenant_id || data.tenantId || (parts[0] === 'accesseasy' && parts[1] !== '+' ? parts[1] : null);
+    if (currentTenant && payloadTenant && String(payloadTenant) !== String(currentTenant)) {
+      return;
+    }
     
     // Resolve device ID & guard ID from topic or payload
     let deviceId = data.deviceId || data.device_id || (parts.length > 2 ? parts[parts.length - 1] : 'unknown');
@@ -104,6 +132,7 @@ const handleMqttLocation = (topic, payload) => {
       accuracy: parseFloat(data.accuracy || data.accuracy_meters || 5),
       battery: data.battery ?? data.batteryLevel ?? data.battery_level,
       status: 'on_duty',
+      source: 'mqtt',
       lastSeen: new Date(),
       timestamp: data.timestamp || data.last_heartbeat || new Date().toISOString()
     };
@@ -122,6 +151,15 @@ const handleMqttLocation = (topic, payload) => {
 const handleMqttAlert = (topic, payload) => {
   try {
     const data = typeof payload === 'string' ? JSON.parse(payload) : (typeof payload?.toString === 'function' ? JSON.parse(payload.toString()) : payload);
+    const parts = topic.split('/');
+
+    // Tenant isolation verification
+    const currentTenant = authService.getTenantId();
+    const payloadTenant = data.tenant || data.tenant_id || data.tenantId || (parts[0] === 'accesseasy' && parts[1] !== '+' ? parts[1] : null);
+    if (currentTenant && payloadTenant && String(payloadTenant) !== String(currentTenant)) {
+      return;
+    }
+
     const alertId = data.id || `alert_${Date.now()}`;
     const existingIdx = alerts.value.findIndex(a => String(a.id) === String(alertId));
     
@@ -148,7 +186,22 @@ const handleMqttAlert = (topic, payload) => {
 const handleMqttSos = (topic, payload) => {
   try {
     const data = typeof payload === 'string' ? JSON.parse(payload) : (typeof payload?.toString === 'function' ? JSON.parse(payload.toString()) : payload);
+    const parts = topic.split('/');
+
+    // Tenant isolation verification
+    const currentTenant = authService.getTenantId();
+    const payloadTenant = data.tenant || data.tenant_id || data.tenantId || (parts[0] === 'accesseasy' && parts[1] !== '+' ? parts[1] : null);
+    if (currentTenant && payloadTenant && String(payloadTenant) !== String(currentTenant)) {
+      return;
+    }
+
     const alertId = data.id || `sos_${Date.now()}`;
+
+    // Deduplicate alerts
+    if (alerts.value.some(a => String(a.id) === String(alertId))) {
+      return;
+    }
+
     alerts.value.unshift({
       id: alertId,
       title: data.title || 'CRITICAL SOS ALERT',
@@ -177,14 +230,16 @@ const setupMqttSubscriptions = () => {
   unsubs.forEach(u => typeof u === 'function' && u());
   unsubs.length = 0;
 
-  // Canonical Contract Topics
-  unsubs.push(mqttService.on('accesseasy/+/sites/+/guards/+/location', handleMqttLocation));
-  unsubs.push(mqttService.on('accesseasy/+/sites/+/alerts/sos', handleMqttSos));
-  unsubs.push(mqttService.on('accesseasy/+/sites/+/alerts/+', handleMqttSos));
-  unsubs.push(mqttService.on('accesseasy/+/sites/+/alerts/incident', handleMqttSos));
-  unsubs.push(mqttService.on('accesseasy/+/patrols/+/checkpoints', handleMqttAlert));
-  unsubs.push(mqttService.on('accesseasy/+/patrols/+/status', handleMqttAlert));
-  unsubs.push(mqttService.on('accesseasy/+/devices/+/telemetry', handleMqttLocation));
+  const tenant = authService.getTenantId() || '+';
+
+  // Canonical Contract Topics scoped to tenant
+  unsubs.push(mqttService.on(`accesseasy/${tenant}/sites/+/guards/+/location`, handleMqttLocation));
+  unsubs.push(mqttService.on(`accesseasy/${tenant}/sites/+/alerts/sos`, handleMqttSos));
+  unsubs.push(mqttService.on(`accesseasy/${tenant}/sites/+/alerts/+`, handleMqttSos));
+  unsubs.push(mqttService.on(`accesseasy/${tenant}/sites/+/alerts/incident`, handleMqttSos));
+  unsubs.push(mqttService.on(`accesseasy/${tenant}/patrols/+/checkpoints`, handleMqttAlert));
+  unsubs.push(mqttService.on(`accesseasy/${tenant}/patrols/+/status`, handleMqttAlert));
+  unsubs.push(mqttService.on(`accesseasy/${tenant}/devices/+/telemetry`, handleMqttLocation));
 
   // Multi-topic subscriptions covering all mobile app publish patterns
   unsubs.push(mqttService.on('fieldeasy_mobile/+/location', handleMqttLocation));

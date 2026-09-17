@@ -552,7 +552,7 @@ export default {
     const successMessage = ref('');
     
     // Constants
-    const token = "bennGJlPG_qUNKhCSE9WFUo6G_RnQAts";
+    const token = import.meta.env.VITE_TASK_API_TOKEN || '';
     const tabs = ['Asset Information', 'Documents', 'QR Code'];
     const tabValues = ['details', 'documents', 'qrcode'];
     

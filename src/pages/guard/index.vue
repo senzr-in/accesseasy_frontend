@@ -585,7 +585,7 @@ import { ref, onMounted, computed } from 'vue';
 
 import { 
   Users, UserPlus, Phone, Mail, FileText, ChevronRight, CheckCircle2, 
-  Clock, AlertTriangle, Search, Filter, MoreVertical, X, Shield, History, MapPin, Edit, ArrowLeft, MessageSquare, Pencil, Trash2, Camera, Loader2, RefreshCw, ScanFace
+  Clock, AlertTriangle, Search, Filter, MoreVertical, X, Shield, ShieldCheck, History, MapPin, Edit, ArrowLeft, MessageSquare, Pencil, Trash2, Camera, Loader2, RefreshCw, ScanFace
 } from 'lucide-vue-next';
 import { authService } from '@/services/authService';
 import { currentUserTenant } from '@/utils/currentUserTenant';
@@ -804,16 +804,53 @@ const confirmDelete = async () => {
   isDeleting.value = true;
   try {
     const token = authService.getToken();
-    await fetch(`${apiUrl}/users/${guardToDelete.value.id}`, {
+    const guardId = guardToDelete.value.id;
+
+    // 1. Delete associated personalModule record if it exists to prevent foreign key constraint block
+    try {
+      const pmRes = await fetch(`${apiUrl}/items/personalModule?filter[assignedUser][_eq]=${guardId}&fields[]=id`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (pmRes.ok) {
+        const pmData = await pmRes.json();
+        if (pmData.data && Array.isArray(pmData.data) && pmData.data.length > 0) {
+          for (const pm of pmData.data) {
+            await fetch(`${apiUrl}/items/personalModule/${pm.id}`, {
+              method: 'DELETE',
+              headers: { Authorization: `Bearer ${token}` }
+            }).catch(() => {});
+          }
+        }
+      }
+    } catch (_) {}
+
+    // 2. Delete user account from Directus users
+    const res = await fetch(`${apiUrl}/users/${guardId}`, {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` }
     });
+
+    if (res.ok || res.status === 204 || res.status === 200) {
+      items.value = items.value.filter(g => String(g.id) !== String(guardId));
+      if (selectedGuard.value && String(selectedGuard.value.id) === String(guardId)) {
+        selectedGuard.value = null;
+      }
+    } else {
+      // If hard delete was blocked by foreign key constraints (e.g. past patrol logs), archive the guard
+      await fetch(`${apiUrl}/users/${guardId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ status: 'archived' })
+      }).catch(() => {});
+      items.value = items.value.filter(g => String(g.id) !== String(guardId));
+    }
+
     await fetchGuards();
     showDeleteModal.value = false;
     guardToDelete.value = null;
   } catch (err) {
     console.error('Delete error', err);
-    alert('Failed to delete guard');
+    alert('Failed to delete guard. Please try again.');
   } finally {
     isDeleting.value = false;
   }

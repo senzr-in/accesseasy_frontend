@@ -321,13 +321,77 @@
                   </div>
 
                   <div>
-                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">NFC UID (Optional)</label>
-                    <input
-                      v-model="inlineForm.nfc_tag_id"
-                      type="text"
-                      class="w-full h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-900 dark:text-slate-100 shadow-sm font-mono"
-                      placeholder="e.g. 04:A2:3E:C5"
-                    />
+                    <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Verification Method</label>
+                    <div class="grid grid-cols-3 gap-2 mb-3">
+                      <button
+                        type="button"
+                        class="p-2 rounded-xl border text-xs font-bold flex flex-col items-center gap-1 transition-all cursor-pointer"
+                        :class="inlineForm.type === 'qr' ? 'border-purple-500 bg-purple-50 text-purple-700 dark:bg-purple-500/10 dark:text-purple-300' : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400'"
+                        @click="inlineForm.type = 'qr'"
+                      >
+                        <QrCode class="w-4 h-4 text-purple-600" />
+                        <span>QR Code</span>
+                      </button>
+                      <button
+                        type="button"
+                        class="p-2 rounded-xl border text-xs font-bold flex flex-col items-center gap-1 transition-all cursor-pointer"
+                        :class="inlineForm.type === 'nfc' ? 'border-blue-500 bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300' : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400'"
+                        @click="inlineForm.type = 'nfc'"
+                      >
+                        <Radio class="w-4 h-4 text-blue-600" />
+                        <span>NFC Tag</span>
+                      </button>
+                      <button
+                        type="button"
+                        class="p-2 rounded-xl border text-xs font-bold flex flex-col items-center gap-1 transition-all cursor-pointer"
+                        :class="inlineForm.type === 'gps' ? 'border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300' : 'border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400'"
+                        @click="inlineForm.type = 'gps'"
+                      >
+                        <Navigation class="w-4 h-4 text-emerald-600" />
+                        <span>GPS Geofence</span>
+                      </button>
+                    </div>
+
+                    <div v-if="inlineForm.type === 'nfc'">
+                      <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">NFC Hardware Tag UID *</label>
+                      <input
+                        v-model="inlineForm.nfc_tag_id"
+                        type="text"
+                        class="w-full h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-900 dark:text-slate-100 shadow-sm font-mono"
+                        placeholder="e.g. 04:A2:3E:C5"
+                      />
+                    </div>
+                    <div v-else-if="inlineForm.type === 'qr'">
+                      <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">QR Code Value / Identifier (Optional)</label>
+                      <input
+                        v-model="inlineForm.qr_code"
+                        type="text"
+                        class="w-full h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-900 dark:text-slate-100 shadow-sm font-mono"
+                        placeholder="Leave blank to auto-generate"
+                      />
+                    </div>
+                    <div v-else-if="inlineForm.type === 'gps'" class="grid grid-cols-2 gap-3">
+                      <div>
+                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Latitude</label>
+                        <input
+                          v-model.number="inlineForm.latitude"
+                          type="number"
+                          step="any"
+                          class="w-full h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-900 dark:text-slate-100 shadow-sm font-mono"
+                          placeholder="e.g. 13.0827"
+                        />
+                      </div>
+                      <div>
+                        <label class="block text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1.5">Longitude</label>
+                        <input
+                          v-model.number="inlineForm.longitude"
+                          type="number"
+                          step="any"
+                          class="w-full h-10 px-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-slate-900 dark:text-slate-100 shadow-sm font-mono"
+                          placeholder="e.g. 80.2707"
+                        />
+                      </div>
+                    </div>
                   </div>
 
                   <div>
@@ -381,14 +445,26 @@
                 <GripVertical class="w-5 h-5" />
               </div>
               <div class="flex-1 flex items-center gap-3">
-                <div class="w-7 h-7 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
-                  <MapPin class="w-3.5 h-3.5 text-slate-500" />
+                <div class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
+                  <Radio v-if="getCheckpointTypeInfo(cp).icon === 'nfc'" class="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  <QrCode v-else-if="getCheckpointTypeInfo(cp).icon === 'qr'" class="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                  <Navigation v-else-if="getCheckpointTypeInfo(cp).icon === 'gps'" class="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <MapPin v-else class="w-4 h-4 text-slate-500" />
                 </div>
                 <div>
-                  <span class="text-sm font-bold text-slate-800 dark:text-slate-200">{{ cp.name }}</span>
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm font-bold text-slate-800 dark:text-slate-200">{{ cp.name }}</span>
+                    <span 
+                      class="text-[10px] font-bold px-2 py-0.5 rounded-md border flex items-center gap-1"
+                      :class="getCheckpointTypeInfo(cp).colorClass"
+                    >
+                      {{ getCheckpointTypeInfo(cp).label }}
+                    </span>
+                  </div>
                   <div class="flex items-center gap-2 mt-0.5">
                     <span class="text-[10px] font-mono text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 px-1 rounded">{{ cp.checkpoint_id || 'CP-AUTO' }}</span>
                     <span v-if="cp.zone" class="text-[10px] text-slate-400">{{ getZoneName(cp.zone) }}</span>
+                    <span v-if="cp.nfc_tag_id" class="text-[10px] font-mono text-slate-400">UID: {{ cp.nfc_tag_id }}</span>
                   </div>
                 </div>
               </div>
@@ -649,15 +725,30 @@
                   @change="toggleModalCpSelection(cp.id)"
                   class="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                 />
+                <div class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
+                  <Radio v-if="getCheckpointTypeInfo(cp).icon === 'nfc'" class="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                  <QrCode v-else-if="getCheckpointTypeInfo(cp).icon === 'qr'" class="w-3.5 h-3.5 text-purple-600 dark:text-purple-400" />
+                  <Navigation v-else-if="getCheckpointTypeInfo(cp).icon === 'gps'" class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                  <MapPin v-else class="w-3.5 h-3.5 text-slate-500" />
+                </div>
                 <div>
-                  <p class="text-xs font-bold text-slate-900 dark:text-white">{{ cp.name }}</p>
+                  <div class="flex items-center gap-2">
+                    <p class="text-xs font-bold text-slate-900 dark:text-white">{{ cp.name }}</p>
+                    <span 
+                      class="text-[9px] font-bold px-1.5 py-0.2 rounded border flex items-center gap-1"
+                      :class="getCheckpointTypeInfo(cp).colorClass"
+                    >
+                      {{ getCheckpointTypeInfo(cp).label }}
+                    </span>
+                  </div>
                   <div class="flex items-center gap-2 mt-0.5">
                     <span class="text-[10px] font-mono text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-500/10 px-1.5 py-0.2 rounded">{{ cp.checkpoint_id || 'CP-AUTO' }}</span>
                     <span class="text-[10px] text-slate-400">{{ getZoneName(cp.zone) }}</span>
+                    <span v-if="cp.nfc_tag_id" class="text-[10px] font-mono text-slate-400">UID: {{ cp.nfc_tag_id }}</span>
                   </div>
                 </div>
               </div>
-              <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">{{ cp.type || 'QR Code' }}</span>
+              <span class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">{{ getCheckpointTypeInfo(cp).label }}</span>
             </label>
 
             <div v-if="modalFilteredCheckpoints.length === 0" class="py-10 text-center text-xs text-slate-400">
@@ -947,7 +1038,7 @@ import { useRouter } from 'vue-router';
 import { 
   ShieldPlus, GripVertical, Trash2, Info, Clock, 
   Plus, ArrowDown, AlertCircle, Play, Check, MapPin, ArrowLeft,
-  ListFilter, Search, X, UserPlus, Layers
+  ListFilter, Search, X, UserPlus, Layers, QrCode, Radio, Navigation
 } from 'lucide-vue-next';
 import { patrolService } from '@/services/patrolService';
 import { zoneService } from '@/services/zoneService';
@@ -1003,9 +1094,48 @@ const isCreatingInline = ref(false);
 const savingInline = ref(false);
 const inlineForm = ref({
   name: '',
+  type: 'qr',
   zoneId: '',
+  building: '',
+  floor: '',
+  dwell_time: 0,
+  status: 'active',
+  nfc_tag_id: '',
+  qr_code: '',
+  latitude: null,
+  longitude: null,
   expectedOffset: 5
 });
+
+const getCheckpointTypeInfo = (cp) => {
+  const typeStr = (cp?.type || '').toLowerCase();
+  if (cp?.nfc_tag_id || typeStr === 'nfc') {
+    return {
+      label: 'NFC Tag',
+      colorClass: 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 border-blue-200 dark:border-blue-500/20',
+      icon: 'nfc'
+    };
+  }
+  if (cp?.qr_code || typeStr === 'qr' || typeStr.includes('qr')) {
+    return {
+      label: 'QR Code',
+      colorClass: 'bg-purple-50 text-purple-700 dark:bg-purple-500/10 dark:text-purple-400 border-purple-200 dark:border-purple-500/20',
+      icon: 'qr'
+    };
+  }
+  if ((cp?.latitude && cp?.longitude) || typeStr === 'gps' || typeStr === 'geofence') {
+    return {
+      label: 'GPS Geofence',
+      colorClass: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/20',
+      icon: 'gps'
+    };
+  }
+  return {
+    label: cp?.type || 'QR Code',
+    colorClass: 'bg-purple-50 text-purple-700 dark:bg-purple-500/10 dark:text-purple-400 border-purple-200 dark:border-purple-500/20',
+    icon: 'qr'
+  };
+};
 
 const form = ref({
   name: '',
@@ -1297,12 +1427,16 @@ const getZoneName = (zoneId) => {
 const openInlineCreate = () => {
   inlineForm.value = {
     name: '',
+    type: 'qr',
     zoneId: form.value.zoneId || (zones.value[0]?.id || ''),
     building: '',
     floor: '',
     dwell_time: 0,
     status: 'active',
     nfc_tag_id: '',
+    qr_code: '',
+    latitude: null,
+    longitude: null,
     expectedOffset: (selectedCheckpoints.value.length + 1) * 5
   };
   isCreatingInline.value = true;
@@ -1363,12 +1497,16 @@ const createInlineCheckpoint = async () => {
     const payload = {
       name: inlineForm.value.name,
       checkpoint_id: 'CP' + Math.floor(1000 + Math.random() * 9000),
+      type: inlineForm.value.type || 'qr',
       instructions: targetZoneId ? `__ZONE_ASSIGNMENT__:${targetZoneId}` : '',
       zone: targetZoneId || null,
       building_id: inlineForm.value.building || null,
       floor: inlineForm.value.floor || null,
       dwell_time: inlineForm.value.dwell_time || 0,
-      nfc_tag_id: inlineForm.value.nfc_tag_id || null,
+      nfc_tag_id: inlineForm.value.type === 'nfc' ? (inlineForm.value.nfc_tag_id || null) : null,
+      qr_code: inlineForm.value.type === 'qr' ? (inlineForm.value.qr_code || null) : null,
+      latitude: inlineForm.value.type === 'gps' ? inlineForm.value.latitude : null,
+      longitude: inlineForm.value.type === 'gps' ? inlineForm.value.longitude : null,
       status: inlineForm.value.status || 'active'
     };
     const savedCp = await patrolService.saveMasterCheckpoint(payload);
@@ -1529,11 +1667,16 @@ const submit = async () => {
     const patrolRounds = timings.map(time => ({
       site: form.value.siteId || null,
       siteId: form.value.siteId || null,
+      zone: form.value.zoneId || null,
       zoneId: form.value.zoneId,
       zoneName: z?.zoneName || z?.name || 'Security Zone',
       groupId: group.id,
+      name: form.value.name.trim(),
       routeName: form.value.name.trim(),
+      guard: form.value.guardId || null,
+      guard_id: form.value.guardId || null,
       guardId: form.value.guardId || null,
+      assignedGuard: form.value.guardId || null,
       guardName: form.value.guardId
         ? (guards.value.find(g => g.id === form.value.guardId)?.name || 'Assigned Guard')
         : 'Unassigned',

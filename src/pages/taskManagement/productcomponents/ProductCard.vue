@@ -9,7 +9,7 @@
     <div class="product-image">
       <img 
         v-if="product.imageUrl" 
-        :src="`${product.imageUrl}?access_token=bennGJlPG_qUNKhCSE9WFUo6G_RnQAts`" 
+        :src="`${product.imageUrl}?access_token=${token}`" 
         :alt="product.productName"
         @error="handleImageError"
       >
@@ -61,7 +61,7 @@
       return {
         isHovering: false,
         imageError: false,
-        token: "bennGJlPG_qUNKhCSE9WFUo6G_RnQAts"
+        token: import.meta.env.VITE_TASK_API_TOKEN || ''
       }
     },
     methods: {

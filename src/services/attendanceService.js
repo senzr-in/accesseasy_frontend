@@ -112,7 +112,10 @@ class AttendanceService {
         userMap = this._userMapCache;
       } else {
         try {
-          const usersRes = await authService.protectedApi.get('/users?limit=500&fields=id,first_name,last_name,email,phone,avatar');
+          const usersUrl = tenantId 
+            ? `/users?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][id][_eq]=${tenantId}&limit=500&fields=id,first_name,last_name,email,phone,avatar`
+            : `/users?limit=500&fields=id,first_name,last_name,email,phone,avatar`;
+          const usersRes = await authService.protectedApi.get(usersUrl);
           if (usersRes.data?.data) {
             usersRes.data.data.forEach(u => {
               userMap[String(u.id)] = {
@@ -150,7 +153,10 @@ class AttendanceService {
         pmMap = this._pmMapCache;
       } else {
         try {
-          const pmRes = await authService.protectedApi.get('/items/personalModule?limit=500&fields=id,employeeId,assignedUser.id,assignedUser.first_name,assignedUser.last_name,assignedUser.phone,assignedUser.email');
+          const pmUrl = tenantId
+            ? `/items/personalModule?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][id][_eq]=${tenantId}&limit=500&fields=id,employeeId,assignedUser.id,assignedUser.first_name,assignedUser.last_name,assignedUser.phone,assignedUser.email`
+            : `/items/personalModule?limit=500&fields=id,employeeId,assignedUser.id,assignedUser.first_name,assignedUser.last_name,assignedUser.phone,assignedUser.email`;
+          const pmRes = await authService.protectedApi.get(pmUrl);
           if (pmRes.data?.data) {
             pmRes.data.data.forEach(pm => {
               const u = pm.assignedUser || {};
@@ -171,22 +177,27 @@ class AttendanceService {
       try {
         let url = `/items/guard_attendance?sort=-check_in_time&limit=100&fields=*`;
         if (tenantId) {
-          url = `/items/guard_attendance?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&sort=-check_in_time&limit=100&fields=*`;
+          url = `/items/guard_attendance?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][id][_eq]=${tenantId}&sort=-check_in_time&limit=100&fields=*`;
         }
         if (siteId && siteId !== 'all') {
           url += `&filter[site][_eq]=${siteId}`;
         }
-        const res = await authService.protectedApi.get(url, { timeout: 6000 });
+        const res = await authService.protectedApi.get(url, { timeout: 15000 });
         if (res.data?.data && Array.isArray(res.data.data) && res.data.data.length > 0) {
           allRecords = res.data.data;
-        } else if (tenantId) {
-          // Fallback query without filter if tenant query returned 0
-          const resFallback = await authService.protectedApi.get(`/items/guard_attendance?sort=-check_in_time&limit=50&fields=*`, { timeout: 4000 });
-          if (resFallback.data?.data && Array.isArray(resFallback.data.data)) {
-            allRecords = resFallback.data.data;
-          }
         }
-      } catch (_) {}
+      } catch (err) {
+        // Fallback to simple tenant filter if relational join timed out
+        if (tenantId) {
+          try {
+            const fallbackUrl = `/items/guard_attendance?filter[tenant][_eq]=${tenantId}&sort=-check_in_time&limit=100&fields=*`;
+            const res2 = await authService.protectedApi.get(fallbackUrl, { timeout: 15000 });
+            if (res2.data?.data && Array.isArray(res2.data.data) && res2.data.data.length > 0) {
+              allRecords = res2.data.data;
+            }
+          } catch (_) {}
+        }
+      }
 
       // 5. Fetch live multi-session punch records from mobile-app logs (/items/logs)
       try {
@@ -223,14 +234,12 @@ class AttendanceService {
         });
       } catch (_) {}
 
-      // 6. Also check /items/attendance
-      if (allRecords.length === 0) {
+      // 6. Workforce attendance fallback (only in workforce mode when guard_attendance has no data)
+      const isPatrolMode = import.meta.env.VITE_APP_MODE === 'patrol';
+      if (!isPatrolMode && allRecords.length === 0) {
         try {
-          let attUrl = `/items/attendance?sort=-date,-inTime&limit=100&fields=*`;
-          if (tenantId) {
-            attUrl = `/items/attendance?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&sort=-date,-inTime&limit=100&fields=*`;
-          }
-          const res = await authService.protectedApi.get(attUrl, { timeout: 6000 });
+          let attUrl = `/items/attendance?filter[tenant][_eq]=${tenantId}&sort=-date,-inTime&limit=50&fields=id,employeeId,date,inTime,outTime,status,attendance,location,door,mode`;
+          const res = await authService.protectedApi.get(attUrl, { timeout: 3000 });
           if (res.data?.data && Array.isArray(res.data.data) && res.data.data.length > 0) {
             const attMapped = res.data.data
               .filter(item => (item.inTime && item.inTime !== '00:00:00') || (item.outTime && item.outTime !== '00:00:00'))
@@ -290,27 +299,15 @@ class AttendanceService {
       try {
         let url = `/items/logs?sort=-date_created&limit=200&fields=*`;
         if (tenantId) {
-          url = `/items/logs?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&sort=-date_created&limit=200&fields=*`;
+          url = `/items/logs?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][id][_eq]=${tenantId}&sort=-date_created&limit=200&fields=*`;
         }
-        const res = await authService.protectedApi.get(url, { timeout: 6000 });
-        if (res.data?.data && Array.isArray(res.data.data) && res.data.data.length > 0) {
+        const res = await authService.protectedApi.get(url, { timeout: 15000 });
+        if (res.data?.data && Array.isArray(res.data.data)) {
           logsData = res.data.data;
-        } else {
-          const resAll = await authService.protectedApi.get(`/items/logs?sort=-date_created&limit=100&fields=*`, { timeout: 5000 });
-          if (resAll.data?.data && Array.isArray(resAll.data.data)) {
-            logsData = resAll.data.data;
-          }
         }
       } catch (err) {
-        try {
-          const res = await authService.protectedApi.get(
-            `/items/logs?sort=-date_created&limit=100&fields=*`,
-            { timeout: 5000 }
-          );
-          if (res.data?.data && Array.isArray(res.data.data)) {
-            logsData = res.data.data;
-          }
-        } catch (_) {}
+        console.warn('[AttendanceService] getLiveGuardStates query error:', err?.message);
+        logsData = [];
       }
 
       if (!logsData.length) return [];

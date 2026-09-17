@@ -1,13 +1,11 @@
-/**
+﻿/**
  * mqttService.js  -  Singleton MQTT client (WebSocket) for AccessEasy.
  *
  * Broker: mqtt.fieldseasy.com
  * Topics:
  *   frigate/events                           - person & plate detection events
  *   frigate/+/person                         - live person count per camera
- *   frigate/+/person/snapshot                - JPEG bytes (person snapshot)
- *   frigate/+/license_plate/snapshot         - LP snapshot filename
- *   frigate/+/license_plate/snapshot/bytes/+ - base64 annotated LP JPEG
+ *   NOTE: JPEG snapshot topics are excluded from Patrol subscriptions
  *   device/fieldeasy_mobile/+/location       - live guard GPS telemetry from mobile app
  *   patrol/+/alert                           - live patrol alerts & incident updates
  *   patrol/+/sos                             - instant SOS panic alerts
@@ -39,24 +37,26 @@ const TOPICS = [
   'patrol/+/sos',
   'patrol/alerts/sos/+',
   'patrol/live/+/+',
-  // Frigate Camera Events
-  'frigate/events',
-  'frigate/+/person',
-  'frigate/+/person/snapshot',
-  'frigate/+/license_plate/snapshot',
-  'frigate/+/license_plate/snapshot/bytes/+'
+  // Frigate Camera Events – metadata/counts only (no binary snapshot bytes)
+  // 'frigate/events',
+  // 'frigate/+/person',
+  // NOTE: 'frigate/+/person/snapshot', 'frigate/+/license_plate/snapshot',
+  // and 'frigate/+/license_plate/snapshot/bytes/+' are intentionally excluded
+  // from Patrol subscriptions to prevent MB-scale JPEG/base64 payloads from
+  // flooding the guard WebSocket connection.  These topics are only subscribed
+  // by the Security/CCTV command center via its own dedicated MQTT client.
 ];
 
 const CLIENT_ID = 'accesseasy-' + Math.random().toString(36).slice(2, 8);
 
 class MQTTService {
   constructor() {
-    this._client      = null;
-    this._urlIdx      = 0;
-    this._retryTimer  = null;
-    this._status      = 'disconnected';
-    this._statusCbs   = new Set();
-    this._listeners   = new Map();
+    this._client = null;
+    this._urlIdx = 0;
+    this._retryTimer = null;
+    this._status = 'disconnected';
+    this._statusCbs = new Set();
+    this._listeners = new Map();
   }
 
   connect() {
@@ -111,13 +111,14 @@ class MQTTService {
     this._setStatus('connecting');
 
     this._client = mqtt.connect(url, {
-      clientId:       CLIENT_ID,
-      username:       mqttConfig.username,
-      password:       mqttConfig.password,
-      keepalive:      60,
+      clientId: CLIENT_ID,
+      username: mqttConfig.username,
+      password: mqttConfig.password,
+      keepalive: 60,
       connectTimeout: 10000,
-      reconnectPeriod: 0,
-      clean:          true,
+      // 5 s exponential-backoff auto-reconnect (was 0 = disabled).
+      reconnectPeriod: 5000,
+      clean: true,
     });
 
     this._client.on('connect', () => {

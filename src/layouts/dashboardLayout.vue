@@ -69,7 +69,7 @@
 
         <!-- Page Content -->
         <main class="flex-1 flex flex-col overflow-hidden relative p-4 sm:p-5">
-          <router-view class="flex-1 min-h-0" />
+          <router-view />
         </main>
       </div>
     </div>
@@ -182,21 +182,16 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { onClickOutside } from '@vueuse/core';
-import { Building, Shield, MapPin, ChevronDown, ChevronRight, Search, Bell, Sun, Moon, User, Settings, Lock, LogOut, HelpCircle, AlertCircle, Clock, X, AlertTriangle, CheckCheck, MessageCircle, Smartphone } from 'lucide-vue-next';
+
+import { Clock, X, AlertTriangle, CheckCheck, MessageCircle, Smartphone } from 'lucide-vue-next';
 import SecuritySidebar from '@/components/layout/SecuritySidebar.vue';
-import WorkforceSidebar from '@/components/layout/WorkforceSidebar.vue';
 import TrialBanner from '@/components/layout/TrialBanner.vue';
 import TrialWelcomeModal from '@/components/layout/TrialWelcomeModal.vue';
 import AppDownloadModal from '@/components/common/AppDownloadModal.vue';
 import { authService } from '@/services/authService';
 import { patrolService } from '@/services/patrolService';
-import { onboardingService } from '@/services/onboardingService';
-import { currentUserTenant } from '@/utils/currentUserTenant';
-import { generateEncryptedQrToken } from '@/utils/security/access-control';
-import { useZoneFilter } from '@/composables/useZoneFilter';
 
 const showDownloadAppModal = ref(false);
 
@@ -207,19 +202,9 @@ const openGlobalWhatsAppSupport = () => {
 
 const route = useRoute();
 const router = useRouter();
-const { selectedZone, zones } = useZoneFilter();
-
-
-
-const isDropdownOpen = ref(false);
-const profileDropdownRef = ref(null);
-const searchInput = ref(null);
 
 const isNotificationsOpen = ref(false);
-const notificationsDropdownRef = ref(null);
 const activeAlertsList = ref([]);
-const activeAlertsCount = computed(() => activeAlertsList.value.length);
-const hasSeenAlerts = ref(false);
 
 const topSosAlert = computed(() => {
   return activeAlertsList.value.find(a => {
@@ -276,11 +261,7 @@ const fetchAlerts = async () => {
   }
 };
 
-watch(isNotificationsOpen, (isOpen) => {
-  if (isOpen) {
-    hasSeenAlerts.value = true;
-  }
-});
+
 
 const resolveAlert = async (alertId) => {
   saveDismissedAlertId(alertId);
@@ -314,15 +295,7 @@ const getFormattedDateTime = (dateStr) => {
   }
 };
 
-const resolveAllAlerts = async () => {
-  try {
-    const promises = activeAlertsList.value.map(a => patrolService.updateAlertStatus(a.id, 'resolved'));
-    await Promise.all(promises);
-    activeAlertsList.value = [];
-  } catch (error) {
-    console.error("Failed to clear all alerts:", error);
-  }
-};
+
 
 const getFormattedAlertTime = (dateStr) => {
   if (!dateStr) return 'just now';
@@ -341,132 +314,29 @@ const getFormattedAlertTime = (dateStr) => {
   }
 };
 
-onClickOutside(profileDropdownRef, () => {
-  isDropdownOpen.value = false;
-});
-
-onClickOutside(notificationsDropdownRef, () => {
-  isNotificationsOpen.value = false;
-});
-
-const handleKeyDown = (e) => {
-  if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
-    e.preventDefault();
-    searchInput.value?.focus();
-  }
-};
-
 const navigateTo = (path) => {
-  isDropdownOpen.value = false;
   router.push(path);
 };
 
-const expandedSection = ref('');
-const toggleSection = (sec) => {
-  expandedSection.value = expandedSection.value === sec ? '' : sec;
-};
 
-const selectedLanguage = ref('English');
-const selectedTimeZone = ref('Asia/Kolkata');
-const notificationsOn = ref(true);
 
-const currentPassword = ref('');
-const newPassword = ref('');
-const confirmPassword = ref('');
-
-const submitPasswordChange = () => {
-  if (!currentPassword.value || !newPassword.value || !confirmPassword.value) {
-    alert('Please fill in all password fields');
-    return;
-  }
-  if (newPassword.value !== confirmPassword.value) {
-    alert('New password and confirm password do not match');
-    return;
-  }
-  alert('Password updated successfully!');
-  currentPassword.value = '';
-  newPassword.value = '';
-  confirmPassword.value = '';
-};
-
-const formattedLastLogin = computed(() => {
-  return _userData?.last_login 
-    ? new Date(_userData.last_login).toLocaleString() 
-    : new Date().toLocaleDateString();
-});
-
-const appMode = import.meta.env.VITE_APP_MODE || 'workforce';
-const activeSidebar = computed(() => (appMode === 'security' || appMode === 'patrol') ? SecuritySidebar : WorkforceSidebar);
+const activeSidebar = SecuritySidebar;
 
 const _userData = authService.getUserData();
-const userRole = ref(authService.getUserRole() || 'Employee');
-const tenantName = ref(_userData?.tenant?.tenantName || authService.getTenantName() || '');
 const userName = computed(() => {
   if (!_userData) return 'Admin User';
   return `${_userData.first_name || ''} ${_userData.last_name || ''}`.trim() || 'Admin User';
 });
-const userInitials = computed(() => userName.value.charAt(0).toUpperCase());
 
 const handleSignOut = async () => {
   authService.logout();
   router.push('/login');
 };
 
-
-// IN-04: Silently auto-generate QR for Employee users on first dashboard load
-const autoGenerateEmployeeQr = async () => {
-  try {
-    const token = authService.getToken();
-    const apiUrl = import.meta.env.VITE_API_URL;
-    const tenantId = currentUserTenant.getTenantId();
-    if (!token || !tenantId) return;
-
-    const existing = await fetch(
-      `${apiUrl}/items/qrgenerate?filter[qraccess][_eq]=true&filter[tenant][_eq]=${tenantId}&fields=id,expires_at,qraccess&limit=1`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    if (existing.ok) {
-      const existData = await existing.json();
-      const activeToken = existData.data?.[0];
-      if (activeToken && (!activeToken.expires_at || new Date(activeToken.expires_at) > new Date())) {
-        return;
-      }
-    }
-
-    const empRes = await fetch(
-      `${apiUrl}/items/personalModule?filter[assignedUser][_eq]=${_userData?.id}&filter[assignedUser][tenant][tenantId][_eq]=${tenantId}&fields=id,assignedAccessLevel&limit=1`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    if (!empRes.ok) return;
-    const empData = await empRes.json();
-    const emp = empData.data?.[0];
-    if (!emp) return;
-
-    const rawToken = generateEncryptedQrToken(emp.id, emp.assignedAccessLevel || 'default');
-    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
-
-    await fetch(`${apiUrl}/items/qrgenerate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({
-        tenant: tenantId,
-        employeeId: emp.id,
-        accessLevelsId: emp.assignedAccessLevel || null,
-        qrcode: rawToken,
-        qraccess: true,
-        expires_at: expiresAt
-      })
-    });
-  } catch (e) {
-    console.warn('IN-04: Auto QR generation failed silently.', e);
-  }
-};
-
 let alertsPollTimer = null;
 let isFetchingAlerts = false;
 
 onMounted(() => {
-  window.addEventListener('keydown', handleKeyDown);
   fetchAlerts();
   // Poll every 20 seconds for SOS and patrol alerts
   alertsPollTimer = setInterval(async () => {
@@ -478,51 +348,35 @@ onMounted(() => {
       isFetchingAlerts = false;
     }
   }, 20000);
-
-  const role = authService.getUserRole();
-  if (role === 'Admin' && !onboardingService.isCompleted() && !onboardingService.hasStarted()) {
-    // router.push('/onboarding');
-  }
-  if (role === 'Employee') {
-    autoGenerateEmployeeQr();
-  }
 });
 
 onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeyDown);
   if (alertsPollTimer) clearInterval(alertsPollTimer);
 });
 
 const currentPageTitle = computed(() => {
   const path = route.path;
-  if (path.includes('/dashboard/settings/devices')) return 'Devices';
-  if (path.includes('/dashboard/settings/ai-events')) return 'AI Cam Events';
+  if (path.includes('/dashboard/settings/devices') || path.includes('/dashboard/settings/patrol-devices')) return 'Device Fleet';
+  if (path.includes('/dashboard/settings/escalation')) return 'Emergency Escalation';
+  if (path.includes('/dashboard/settings/patrol-shifts') || path.includes('/dashboard/settings/shifts')) return 'Shift Scheduler';
+  if (path.includes('/dashboard/settings/audit-log')) return 'Audit Trail';
+  if (path.includes('/dashboard/settings/subscription') || path.includes('/dashboard/settings/plans')) return 'Subscription & Plans';
   if (path.includes('/dashboard/settings/logs')) return 'Event Logs';
   if (path.includes('/dashboard/settings/zones')) return 'Zones & Access Points';
-  if (path.includes('/dashboard/settings/timezones')) return 'Timezones';
-  if (path.includes('/dashboard/settings/appearance')) return 'Admin Settings';
+  if (path.includes('/dashboard/settings/checkpoints')) return 'Checkpoints';
   if (path.includes('/dashboard/settings')) return 'Settings';
-  if (path.includes('/dashboard/visitor-portals/builder')) return 'Portal Builder';
-  if (path.includes('/dashboard/visitor-portals')) return 'Visitor Portals';
-  if (path.includes('/dashboard/visitors')) return 'Visitor Console';
-  if (path.includes('/dashboard/visitors')) return 'Visitors';
-  if (path.includes('/dashboard/access-control/doors')) return 'Doors';
-  if (path.includes('/dashboard/easy-access/employees')) return 'Employees';
-  if (path.includes('/dashboard/easy-access/configurators/access-levels')) return 'Access Groups';
-  if (path.includes('/dashboard/easy-access/biometrics/face')) return 'Face Enrollment';
-  if (path.includes('/dashboard/easy-access/biometrics/fingerprint')) return 'Fingerprint';
-  if (path.includes('/dashboard/easy-access/biometrics/qr')) return 'QR Generation';
-  if (path.includes('/dashboard/guards')) return 'Guards';
+  if (path.includes('/dashboard/sites')) return 'Sites & Geofences';
+  if (path.includes('/dashboard/guards/attendance')) return 'Guard Attendance';
+  if (path.includes('/dashboard/guards')) return 'Guards & Staff';
+  if (path.includes('/dashboard/patrols/checkpoints')) return 'Patrol Checkpoints';
+  if (path.includes('/dashboard/patrols/history')) return 'Patrol History';
+  if (path.includes('/dashboard/patrols/create')) return 'Create Patrol';
   if (path.includes('/dashboard/patrols')) return 'Patrol Command';
   if (path.includes('/dashboard/incidents')) return 'Incident Management';
-  if (path.includes('/dashboard/authorize')) return 'Scan & Authorize';
-  if (path.includes('/dashboard/my-access')) return 'My Access';
-  if (path.includes('/dashboard/my-attendance')) return 'My Attendance';
-  if (path.includes('/dashboard/my-logs')) return 'My Logs';
+  if (path.includes('/dashboard/reports')) return 'Reports & Analytics';
   if (path.includes('/dashboard/profile')) return 'Profile';
-  if (path.includes('/dashboard/report-automation')) return 'Scheduled Reports';
-  if (path.includes('/dashboard/monitoring')) return 'Monitoring';
-  return 'Dashboard';
+  if (path.includes('/dashboard/help')) return 'Help & Support';
+  return 'Patrol Command';
 });
 </script>
 

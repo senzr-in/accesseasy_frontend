@@ -10,7 +10,12 @@ export default defineConfig(({ mode }) => {
     envDir: path.resolve(__dirname),
     base: '/',
     plugins: [vue(), tailwindcss()],
-    resolve: { alias: { "@": path.resolve(__dirname, "./src") } },
+    resolve: { 
+      alias: { 
+        "@": path.resolve(__dirname, "./src"),
+        "@tensorflow/tfjs-tflite": path.resolve(__dirname, "./node_modules/@tensorflow/tfjs-tflite/dist/tf-tflite.fesm.js")
+      } 
+    },
     define: { 
       VITE_API_URL: JSON.stringify(env.VITE_API_URL),
       'import.meta.env.VITE_APP_MODE': JSON.stringify('workforce')

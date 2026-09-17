@@ -152,6 +152,13 @@ class AppConfigService {
   getAdminNotifyEmail() {
     return this._config.notifications.adminNotifyEmail;
   }
+
+  /**
+   * Get Directus backend API config (used for REST fallback from Knative)
+   */
+  getDirectusConfig() {
+    return this._config.api;
+  }
 }
 
 export const appConfigService = new AppConfigService();

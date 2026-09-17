@@ -112,6 +112,9 @@ class ZoneService {
             rawData = res1.data?.data || [];
             this._workingStrategy = 'or';
           } catch (e1) {
+            if (e1.response?.status === 401) {
+              return [];
+            }
             try {
               let q = `/items/zones?filter[tenant][_eq]=${tenantId}&sort=zoneName`;
               if (siteId && siteId !== 'all') q += `&filter[site][_eq]=${siteId}`;
@@ -119,6 +122,9 @@ class ZoneService {
               rawData = res2.data?.data || [];
               this._workingStrategy = 'tenant';
             } catch (e2) {
+              if (e2.response?.status === 401) {
+                return [];
+              }
               try {
                 let q = `/items/zones?filter[tenant][tenantId][_eq]=${tenantId}&sort=zoneName`;
                 if (siteId && siteId !== 'all') q += `&filter[site][_eq]=${siteId}`;
@@ -126,7 +132,9 @@ class ZoneService {
                 rawData = res3.data?.data || [];
                 this._workingStrategy = 'tenantId';
               } catch (e3) {
-                console.error('[ZoneService] All tenant filter strategies exhausted. Returning empty — no unfiltered fallback.');
+                if (e3.response?.status !== 401) {
+                  console.error('[ZoneService] All tenant filter strategies exhausted. Returning empty — no unfiltered fallback.');
+                }
                 rawData = [];
               }
             }

@@ -641,21 +641,19 @@ const closedCount = computed(() => filteredList.value.filter(inc => inc.status =
 const fetchIncidents = async () => {
   if (!incidents.value.length) loading.value = true;
   try {
-    const token = authService.getToken();
     const tenantId = authService.getTenantId();
-    if (!token) return;
+    if (!tenantId) {
+      loadFromLocalStorage();
+      return;
+    }
     
     // Fetch from Directus API (patrol_alerts collection)
-    const endpoint = tenantId 
-      ? `${import.meta.env.VITE_API_URL}/items/patrol_alerts?filter[tenant][_eq]=${tenantId}&sort=-date_created&limit=100`
-      : `${import.meta.env.VITE_API_URL}/items/patrol_alerts?sort=-date_created&limit=100`;
+    const endpoint = `/items/patrol_alerts?filter[tenant][_eq]=${tenantId}&sort=-date_created&limit=100`;
 
-    const res = await fetch(endpoint, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    const res = await authService.protectedApi.get(endpoint);
     
-    if (res.ok) {
-      const data = await res.json();
+    if (res && res.data) {
+      const data = res.data;
       incidents.value = (data.data || []).map(alert => {
         const titleStr = (alert.title || alert.type || alert.alert_type || '').toLowerCase();
         const isCritical = alert.severity?.toLowerCase() === 'critical' || 
@@ -688,8 +686,13 @@ const fetchIncidents = async () => {
   }
 };
 
+const getLocalStorageKey = () => {
+  const tenantId = authService.getTenantId();
+  return `accesseasy_incidents_${tenantId || 'anon'}`;
+};
+
 const loadFromLocalStorage = () => {
-  const data = localStorage.getItem('local_incident_reports');
+  const data = localStorage.getItem(getLocalStorageKey());
   if (data) {
     try {
       incidents.value = JSON.parse(data);
@@ -702,19 +705,16 @@ const loadFromLocalStorage = () => {
 };
 
 const saveToLocalStorage = () => {
-  localStorage.setItem('local_incident_reports', JSON.stringify(incidents.value));
+  localStorage.setItem(getLocalStorageKey(), JSON.stringify(incidents.value));
 };
 
 const fetchGuards = async () => {
   try {
-    const token = authService.getToken();
     const tenantId = authService.getTenantId();
-    if (!token || !tenantId) return;
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule?filter[assignedUser][tenant][_eq]=${tenantId}&fields=id,employeeId,assignedUser.id,assignedUser.first_name,assignedUser.last_name,assignedUser.phone&limit=100`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    if (res.ok) {
-      const data = await res.json();
+    if (!tenantId) return;
+    const res = await authService.protectedApi.get(`/items/personalModule?filter[assignedUser][tenant][_eq]=${tenantId}&fields=id,employeeId,assignedUser.id,assignedUser.first_name,assignedUser.last_name,assignedUser.phone&limit=100`);
+    if (res && res.data) {
+      const data = res.data;
       guardsList.value = (data.data || []).map(g => {
         const u = g.assignedUser || {};
         const name = `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.phone || g.employeeId || 'Guard';
@@ -775,18 +775,22 @@ const saveIncident = async () => {
   
   // Try sending to API
   try {
-    const token = authService.getToken();
     const tenantId = authService.getTenantId();
-    const method = isEditing.value ? 'PATCH' : 'POST';
-    const url = isEditing.value 
-      ? `${import.meta.env.VITE_API_URL}/items/patrol_alerts/${form.value.id}`
-      : `${import.meta.env.VITE_API_URL}/items/patrol_alerts`;
+    const endpoint = isEditing.value 
+      ? `/items/patrol_alerts/${form.value.id}`
+      : `/items/patrol_alerts`;
     
-    await fetch(url, {
-      method,
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify((() => { const d = { ...form.value, tenant: tenantId }; if (!isEditing.value) delete d.id; return d; })())
-    });
+    const payload = (() => {
+      const d = { ...form.value, tenant: tenantId };
+      if (!isEditing.value) delete d.id;
+      return d;
+    })();
+
+    if (isEditing.value) {
+      await authService.protectedApi.patch(endpoint, payload);
+    } else {
+      await authService.protectedApi.post(endpoint, payload);
+    }
   } catch (e) {
     console.warn("API Sync deferred, saved locally:", e);
   }
@@ -801,11 +805,10 @@ const closeIncident = async (inc) => {
   saveToLocalStorage();
   
   try {
-    const token = authService.getToken();
-    await fetch(`${import.meta.env.VITE_API_URL}/items/patrol_alerts/${inc.id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ status: 'closed', closedBy: userName, closedTime: inc.closedTime })
+    await authService.protectedApi.patch(`/items/patrol_alerts/${inc.id}`, {
+      status: 'closed',
+      closedBy: userName,
+      closedTime: inc.closedTime
     });
   } catch {}
 };
@@ -817,11 +820,10 @@ const reopenIncident = async (inc) => {
   saveToLocalStorage();
 
   try {
-    const token = authService.getToken();
-    await fetch(`${import.meta.env.VITE_API_URL}/items/patrol_alerts/${inc.id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-      body: JSON.stringify({ status: 'open', closedBy: '', closedTime: '' })
+    await authService.protectedApi.patch(`/items/patrol_alerts/${inc.id}`, {
+      status: 'open',
+      closedBy: '',
+      closedTime: ''
     });
   } catch {}
 };

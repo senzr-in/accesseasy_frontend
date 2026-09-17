@@ -119,12 +119,12 @@ const routes = [
     name: "Register",
     component: Register,
   },
-  // ⚠ DEV ONLY — Remove before production deployment
-  {
+  // ⚠ DEV ONLY — Hidden in production deployment
+  ...(import.meta.env.DEV ? [{
     path: "/dev-login",
     name: "DevLogin",
     component: DevLogin,
-  },
+  }] : []),
   {
     path: "/verification/:phoneNumber",
     name: "Verification",

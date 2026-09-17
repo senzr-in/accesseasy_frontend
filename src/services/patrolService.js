@@ -88,6 +88,47 @@ class PatrolService {
     }, 30 * 1000); // 30s cache for active patrols
   }
 
+  /**
+   * Fetch active guard GPS positions from the database.
+   * Used to pre-seed the SOC map before the first MQTT packet arrives,
+   * ensuring guard markers show up immediately on Command Center load.
+   */
+  async getActiveGuardLocations() {
+    const tenantId = authService.getTenantId();
+    const cacheKey = `active_guard_locations_${tenantId}`;
+
+    return this._fetchDeduplicated(cacheKey, async () => {
+      try {
+        const endpoint = `/items/patrols`
+          + `?filter[tenant][_eq]=${tenantId}`
+          + `&filter[status][_in]=active,in_progress`
+          + `&filter[currentLat][_nnull]=true`
+          + `&fields=id,guardId,guardName,currentLat,currentLng,date_updated,zoneName,site`
+          + `&limit=200`;
+        const response = await authService.protectedApi.get(endpoint);
+        const patrols = response.data?.data || [];
+        return patrols
+          .filter(p => p.currentLat && p.currentLng)
+          .map(p => ({
+            id:        p.guardId || p.id,
+            patrolId:  p.id,
+            name:      p.guardName || `Guard #${p.guardId || p.id}`,
+            latitude:  parseFloat(p.currentLat),
+            longitude: parseFloat(p.currentLng),
+            speed:     0,
+            accuracy:  5,
+            status:    'on_duty',
+            lastSeen:  new Date(p.date_updated || Date.now()),
+            timestamp: p.date_updated || new Date().toISOString(),
+            source:    'database',
+          }));
+      } catch (error) {
+        console.warn('[PatrolService] getActiveGuardLocations failed:', error?.message);
+        return [];
+      }
+    }, 20 * 1000); // 20s cache – refreshed every polling cycle
+  }
+
   async fetchCheckpointGroups(siteId = null) {
     const tenantId = authService.getTenantId();
     const cacheKey = `checkpoint_groups_${tenantId}_${siteId || 'all'}`;
@@ -342,13 +383,13 @@ class PatrolService {
 
   async getAlerts(siteId = null) {
     const tenantId = authService.getTenantId();
+    const token = authService.getToken();
+    if (!tenantId || !token) return [];
     const cacheKey = `patrol_alerts_${tenantId}_${siteId || 'all'}`;
 
     return this._fetchDeduplicated(cacheKey, async () => {
       try {
-        let endpoint = tenantId 
-          ? `/items/patrol_alerts?filter[tenant][_eq]=${tenantId}&sort=-date_created`
-          : `/items/patrol_alerts?sort=-date_created`;
+        let endpoint = `/items/patrol_alerts?filter[tenant][_eq]=${tenantId}&sort=-date_created`;
         const response = await authService.protectedApi.get(endpoint);
         if (response.data?.data) {
           const alerts = response.data.data;
@@ -403,6 +444,7 @@ class PatrolService {
   async getTodayPatrolLogs(siteId = null) {
     try {
       const tenantId = authService.getTenantId();
+      if (!tenantId) return [];
       const today = new Date().toISOString().split('T')[0];
       let endpoint = `/items/patrol_logs?filter[tenant][_eq]=${tenantId}&filter[date_created][_gte]=${today}T00:00:00&sort=-date_created&limit=500`;
       if (siteId) {
@@ -412,8 +454,8 @@ class PatrolService {
         const response = await authService.protectedApi.get(endpoint);
         return response.data?.data || [];
       } catch (e) {
-        const res = await authService.protectedApi.get(`/items/patrol_logs?filter[date_created][_gte]=${today}T00:00:00&sort=-date_created&limit=500`);
-        return res.data?.data || [];
+        console.warn("[PatrolService] Error fetching today's patrol logs for tenant:", e?.message);
+        return [];
       }
     } catch (error) {
       console.error("Error fetching today's patrol logs:", error);

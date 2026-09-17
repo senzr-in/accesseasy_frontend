@@ -48,14 +48,16 @@ class SiteService {
           );
           rawData = res.data?.data || [];
         } catch (err) {
-          // Fallback to OR query if needed
-          try {
-            const fallbackRes = await authService.protectedApi.get(
-              `/items/locationManagement?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&sort=locName&limit=200`,
-              { timeout: 5000 }
-            );
-            rawData = fallbackRes.data?.data || [];
-          } catch (_) {}
+          if (err.response?.status !== 401) {
+            // Fallback to OR query if needed
+            try {
+              const fallbackRes = await authService.protectedApi.get(
+                `/items/locationManagement?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&sort=locName&limit=200`,
+                { timeout: 5000 }
+              );
+              rawData = fallbackRes.data?.data || [];
+            } catch (_) {}
+          }
         }
 
         const mapped = rawData.map(loc => ({
@@ -85,16 +87,23 @@ class SiteService {
    * Get Site details by ID
    */
   async getSiteById(siteId) {
+    if (!siteId) return null;
+    const tenantId = authService.getTenantId();
     try {
       const response = await authService.protectedApi.get(`/items/locationManagement/${siteId}`);
       if (response.data?.data) {
         const loc = response.data.data;
+        const locTenant = loc.tenant?.tenantId || loc.tenant?.id || (typeof loc.tenant === 'string' ? loc.tenant : null);
+        if (tenantId && locTenant && String(locTenant) !== String(tenantId)) {
+          console.warn('[SiteService] Cross-tenant site access prevented:', siteId);
+          return null;
+        }
         return { ...loc, name: loc.locName, address: loc.locAddress };
       }
     } catch (e) {}
 
     const sites = await this.fetchSites();
-    return sites.find(s => String(s.id) === String(siteId)) || sites[0] || null;
+    return sites.find(s => String(s.id) === String(siteId)) || null;
   }
 
   /**

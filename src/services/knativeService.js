@@ -3,6 +3,8 @@ import { authService } from '@/services/authService';
 import { webFaceEmbeddingService } from '@/services/webFaceEmbeddingService';
 import { appConfigService } from '@/services/appConfigService';
 
+const DIRECTUS_FALLBACK_URL = appConfigService.getDirectusConfig().baseUrl;
+
 /**
  * Unified Knative Serverless Client Service
  * Bridges Web App with Knative serverless microservices hosted at VITE_KN_API_URL
@@ -136,22 +138,51 @@ class KnativeService {
    * High-velocity GPS ingestion and live breadcrumb calculation
    */
   async ingestPatrolTelemetry(telemetryPayload) {
-    try {
-      const tenantId = authService.getTenantId();
-      const payload = {
-        tenantId,
-        ...telemetryPayload,
-        timestamp: telemetryPayload.timestamp || new Date().toISOString()
-      };
+    const tenantId = authService.getTenantId();
+    const payload = {
+      tenantId,
+      ...telemetryPayload,
+      timestamp: telemetryPayload.timestamp || new Date().toISOString()
+    };
 
+    try {
       const res = await axios.post(`${this.baseUrl}/patrol-telemetry-ingest`, payload, {
         headers: this.getHeaders(),
         timeout: 5000
       });
       return res.data;
-    } catch (error) {
-      console.warn('[KnativeService] /patrol-telemetry-ingest notice:', error?.message);
-      return { success: false, error: error?.message };
+    } catch (knativeErr) {
+      // Knative cold start / pod scaling – fall back to Directus REST
+      const isRetriable = !knativeErr.response || [502, 503, 504].includes(knativeErr.response?.status);
+      if (isRetriable) {
+        console.warn('[KnativeService] /patrol-telemetry-ingest cold start – falling back to Directus REST:', knativeErr?.message);
+        try {
+          const directusPayload = {
+            patrol_id:  payload.patrolId || payload.patrol_id,
+            tenant:     tenantId,
+            latitude:   payload.latitude  ?? payload.lat,
+            longitude:  payload.longitude ?? payload.lng,
+            heading:    payload.heading,
+            speed:      payload.speed,
+            accuracy:   payload.accuracy,
+            steps:      payload.steps,
+            timestamp:  payload.timestamp,
+            guard_id:   payload.guardId   || payload.guard_id,
+            device_id:  payload.deviceId  || payload.device_id,
+          };
+          const fallback = await axios.post(
+            `${DIRECTUS_FALLBACK_URL}/items/tracking_points`,
+            directusPayload,
+            { headers: this.getHeaders(), timeout: 8000 }
+          );
+          return { success: true, source: 'directus_fallback', data: fallback.data };
+        } catch (fallbackErr) {
+          console.error('[KnativeService] Directus telemetry fallback also failed:', fallbackErr?.message);
+          return { success: false, error: fallbackErr?.message };
+        }
+      }
+      console.warn('[KnativeService] /patrol-telemetry-ingest notice:', knativeErr?.message);
+      return { success: false, error: knativeErr?.message };
     }
   }
 
@@ -160,23 +191,54 @@ class KnativeService {
    * Dispatches emergency takeover banners and push notifications
    */
   async broadcastSosAlert(alertPayload) {
-    try {
-      const tenantId = authService.getTenantId();
-      const payload = {
-        tenantId,
-        priority: 'CRITICAL_EMERGENCY',
-        triggeredAt: new Date().toISOString(),
-        ...alertPayload
-      };
+    const tenantId = authService.getTenantId();
+    const payload = {
+      tenantId,
+      priority: 'CRITICAL_EMERGENCY',
+      triggeredAt: new Date().toISOString(),
+      ...alertPayload
+    };
 
+    try {
       const res = await axios.post(`${this.baseUrl}/sos-alert-broadcast`, payload, {
         headers: this.getHeaders(),
         timeout: 8000
       });
       return res.data;
-    } catch (error) {
-      console.error('[KnativeService] /sos-alert-broadcast failed:', error);
-      throw error;
+    } catch (knativeErr) {
+      // Knative cold start / pod scaling – fall back to Directus REST
+      const isRetriable = !knativeErr.response || [502, 503, 504].includes(knativeErr.response?.status);
+      if (isRetriable) {
+        console.warn('[KnativeService] /sos-alert-broadcast cold start – falling back to Directus REST:', knativeErr?.message);
+        try {
+          const directusPayload = {
+            tenant:       tenantId,
+            title:        payload.title        || 'CRITICAL SOS ALERT',
+            type:         'sos',
+            severity:     'critical',
+            status:       'open',
+            latitude:     payload.latitude     ?? payload.lat,
+            longitude:    payload.longitude    ?? payload.lng,
+            guard_id:     payload.guardId      || payload.guard_id,
+            guard_name:   payload.guardName    || payload.guard_name,
+            patrol_id:    payload.patrolId     || payload.patrol_id,
+            device_id:    payload.deviceId     || payload.device_id,
+            site_id:      payload.siteId       || payload.site_id,
+            triggered_at: payload.triggeredAt,
+          };
+          const fallback = await axios.post(
+            `${DIRECTUS_FALLBACK_URL}/items/patrol_alerts`,
+            directusPayload,
+            { headers: this.getHeaders(), timeout: 10000 }
+          );
+          return { success: true, source: 'directus_fallback', data: fallback.data };
+        } catch (fallbackErr) {
+          console.error('[KnativeService] Directus SOS fallback also failed:', fallbackErr?.message);
+          throw fallbackErr;
+        }
+      }
+      console.error('[KnativeService] /sos-alert-broadcast failed:', knativeErr);
+      throw knativeErr;
     }
   }
 
