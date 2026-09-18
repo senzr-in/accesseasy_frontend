@@ -84,16 +84,7 @@ class SiteService {
           };
         });
 
-        // Merge locally persisted custom sites if any
-        try {
-          const storedKey = `accesseasy_custom_sites_${tenantId}`;
-          const localCustom = JSON.parse(localStorage.getItem(storedKey) || '[]');
-          localCustom.forEach(cs => {
-            if (!mapped.some(m => String(m.id) === String(cs.id))) {
-              mapped.unshift(cs);
-            }
-          });
-        } catch (_) {}
+        // Note: localStorage fallback removed — Directus is the single source of truth.
 
         this._sitesCache = mapped;
         this._cacheExpiry = Date.now() + 60000; // 60s TTL
@@ -171,39 +162,9 @@ class SiteService {
         payload.tenant = tenantId;
       }
 
-      let createdLoc = null;
-      try {
-        const response = await authService.protectedApi.post("/items/branch", payload);
-        createdLoc = response.data?.data;
-      } catch (apiErr) {
-        console.warn("[SiteService] Directus branch POST failed:", apiErr?.response?.status, apiErr?.message);
-        // Fallback for restricted permissions (403): persist locally so the session and forms work seamlessly
-        const localId = `site-loc-${Date.now()}`;
-        createdLoc = {
-          id: localId,
-          branchName: name,
-          name: name,
-          locName: name,
-          address: address,
-          locAddress: address,
-          workingRange: String(radius),
-          geofence_radius: radius,
-          branchId: code,
-          code: code,
-          lat: lat,
-          lng: lng,
-          latitude: lat,
-          longitude: lng,
-          status: 'active',
-          tenant: tenantId
-        };
-        try {
-          const storedKey = `accesseasy_custom_sites_${tenantId}`;
-          const currentCustom = JSON.parse(localStorage.getItem(storedKey) || '[]');
-          currentCustom.unshift(createdLoc);
-          localStorage.setItem(storedKey, JSON.stringify(currentCustom));
-        } catch (_) {}
-      }
+      const response = await authService.protectedApi.post("/items/branch", payload);
+      const createdLoc = response.data?.data;
+      if (!createdLoc) throw new Error('No data returned from Directus after site creation.');
 
       this.invalidateCache();
       subscriptionService.clearCache();
@@ -247,17 +208,7 @@ class SiteService {
         console.warn(`[SiteService] Update site ${siteId} API fallback:`, patchErr?.message);
       }
 
-      // Also update in local storage if present
-      const tenantId = authService.getTenantId();
-      const storedKey = `accesseasy_custom_sites_${tenantId}`;
-      try {
-        const currentCustom = JSON.parse(localStorage.getItem(storedKey) || '[]');
-        const idx = currentCustom.findIndex(s => String(s.id) === String(siteId));
-        if (idx !== -1) {
-          currentCustom[idx] = { ...currentCustom[idx], ...siteData };
-          localStorage.setItem(storedKey, JSON.stringify(currentCustom));
-        }
-      } catch (_) {}
+
 
       this.invalidateCache();
       return { ...(loc || {}), id: siteId, name: siteData.name || loc?.branchName, address: siteData.address || loc?.address };
@@ -276,13 +227,7 @@ class SiteService {
     } catch (error) {
       console.warn(`[SiteService] Delete site ${siteId} API fallback:`, error?.message);
     }
-    const tenantId = authService.getTenantId();
-    const storedKey = `accesseasy_custom_sites_${tenantId}`;
-    try {
-      const currentCustom = JSON.parse(localStorage.getItem(storedKey) || '[]');
-      const filtered = currentCustom.filter(s => String(s.id) !== String(siteId));
-      localStorage.setItem(storedKey, JSON.stringify(filtered));
-    } catch (_) {}
+
     this.invalidateCache();
     subscriptionService.clearCache();
   }

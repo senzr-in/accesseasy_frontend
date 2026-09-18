@@ -22,8 +22,6 @@ import EsslDashboard from "@/pages/dealers/dashboard/esslDashboard.vue";
 // Visitor Portal
 import VisitorPortalView from "@/pages/visitorPortals/VisitorPortalView.vue";
 
-// DEV ONLY: Dev quick login bypass
-import DevLogin from "@/components/loginAuthentication/devLogin.vue";
 
 // Placeholders / Ports
 import DashboardHome from "@/pages/dashboard/index.vue";
@@ -158,18 +156,6 @@ const routes = [
     component: LandingPage2,
   },
   {
-    path: "/landing-2",
-    redirect: "/landing",
-  },
-  {
-    path: "/landing-v2",
-    redirect: "/landing",
-  },
-  {
-    path: "/landing-3d",
-    redirect: "/landing",
-  },
-  {
     path: "/dealer-dashboard",
     name: "DealerDashboard",
     component: EsslDashboard,
@@ -227,12 +213,6 @@ const routes = [
     name: "Register",
     component: Register,
   },
-  // ⚠ DEV ONLY — Hidden in production deployment
-  ...(import.meta.env.DEV ? [{
-    path: "/dev-login",
-    name: "DevLogin",
-    component: DevLogin,
-  }] : []),
   {
     path: "/verification/:phoneNumber",
     name: "Verification",

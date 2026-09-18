@@ -674,12 +674,18 @@ async function signupWithGoogle() {
   try {
     sessionStorage.setItem("connector_type", "google");
     googleLoading.value = true;
-    
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 45000);
+
+    const redirectUri = `${import.meta.env.VITE_UI_URL || window.location.origin}/auth/callback`;
     const response = await fetch(`${import.meta.env.VITE_KN_API_URL}/google-accesseasy`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: "google" }),
+      body: JSON.stringify({ type: "google", redirect_uri: redirectUri }),
+      signal: controller.signal,
     });
+    clearTimeout(timeoutId);
 
     const data = await response.json();
     if (data.success && data.url) {
@@ -689,7 +695,11 @@ async function signupWithGoogle() {
     }
   } catch (error) {
     console.error("Google signup error:", error);
-    showError(error.message || "Failed to connect to Google");
+    showError(
+      error.name === "AbortError"
+        ? "Google service is unavailable. Please try phone/email signup."
+        : error.message || "Failed to connect to Google"
+    );
     googleLoading.value = false;
   }
 }

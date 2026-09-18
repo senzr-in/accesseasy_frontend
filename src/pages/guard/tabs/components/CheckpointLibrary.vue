@@ -605,9 +605,10 @@ const loadCheckpoints = async () => {
     // Bust any stale "forbidden" cache so we always try the real API
     patrolService.invalidateCache(`master_checkpoints_${tenantId}_all_all`);
     patrolService.invalidateCache(`checkpoint_groups_${tenantId}_all`);
+    zoneService.invalidateCache(); // force fresh zone list every time
     const [list, fetchedZones, fetchedGroups, clonedRes] = await Promise.all([
       patrolService.getMasterCheckpoints(),
-      zoneService.fetchZones(),
+      zoneService.fetchZones(null, null, true), // forceRefresh = true
       patrolService.fetchCheckpointGroups(),
       authService.protectedApi.get(
         `/items/checkpoints?filter[tenant][_eq]=${tenantId}&filter[group_id][_nnull]=true&limit=500`
