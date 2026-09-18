@@ -552,13 +552,116 @@
         </div>
       </div>
     </Teleport>
+
+    <!-- ============================================================ -->
+    <!-- MODAL 5: ADD GUARD POPUP -->
+    <!-- ============================================================ -->
+    <Teleport to="body">
+      <div
+        v-if="showGuardModal"
+        class="fixed inset-0 z-[120] flex items-center justify-center bg-slate-950/70 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+      >
+        <div class="relative w-full max-w-lg bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+          <div class="px-6 py-4 border-b border-slate-150 dark:border-white/10 flex items-center justify-between bg-slate-50 dark:bg-slate-800/30">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                <UserRound class="w-5 h-5" />
+              </div>
+              <div>
+                <h3 class="text-sm font-black text-slate-900 dark:text-white">Add Security Guard</h3>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">Register a new guard officer to your roster</p>
+              </div>
+            </div>
+            <button
+              class="w-7 h-7 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 flex items-center justify-center transition-colors cursor-pointer"
+              @click="showGuardModal = false"
+            >
+              <X class="w-4 h-4" />
+            </button>
+          </div>
+
+          <form @submit.prevent="submitAddGuard" class="p-6 space-y-3.5 text-xs text-slate-800 dark:text-slate-200">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="space-y-1">
+                <label class="font-bold text-slate-700 dark:text-slate-300">First Name *</label>
+                <input
+                  v-model="guardForm.first_name"
+                  required
+                  placeholder="e.g. Ravi"
+                  class="w-full h-9 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-medium outline-none focus:border-indigo-500 shadow-sm"
+                />
+              </div>
+              <div class="space-y-1">
+                <label class="font-bold text-slate-700 dark:text-slate-300">Last Name</label>
+                <input
+                  v-model="guardForm.last_name"
+                  placeholder="e.g. Kumar"
+                  class="w-full h-9 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-medium outline-none focus:border-indigo-500 shadow-sm"
+                />
+              </div>
+            </div>
+
+            <div class="space-y-1">
+              <label class="font-bold text-slate-700 dark:text-slate-300">Email Address *</label>
+              <input
+                v-model="guardForm.email"
+                type="email"
+                required
+                placeholder="e.g. ravi.kumar@company.com"
+                class="w-full h-9 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-medium outline-none focus:border-indigo-500 shadow-sm"
+              />
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div class="space-y-1">
+                <label class="font-bold text-slate-700 dark:text-slate-300">Phone Number</label>
+                <input
+                  v-model="guardForm.phone"
+                  type="tel"
+                  placeholder="e.g. +91 98765 43210"
+                  class="w-full h-9 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-medium outline-none focus:border-indigo-500 shadow-sm"
+                />
+              </div>
+              <div class="space-y-1">
+                <label class="font-bold text-slate-700 dark:text-slate-300">Temporary Password</label>
+                <input
+                  v-model="guardForm.password"
+                  type="password"
+                  placeholder="Leave blank to auto-generate"
+                  class="w-full h-9 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-medium outline-none focus:border-indigo-500 shadow-sm"
+                />
+              </div>
+            </div>
+
+            <div class="mt-5 pt-3 border-t border-slate-150 dark:border-white/10 flex justify-end gap-2">
+              <button
+                type="button"
+                class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs hover:bg-slate-200 cursor-pointer"
+                @click="showGuardModal = false"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                :disabled="isSubmittingGuard"
+                class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-600/20 cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
+              >
+                <Loader2 v-if="isSubmittingGuard" class="w-3.5 h-3.5 animate-spin" />
+                <UserRound v-else class="w-3.5 h-3.5" />
+                <span>Add Guard</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { 
-  Building2, Layers, QrCode, Calendar, MapPin, X, Loader2 
+  Building2, Layers, QrCode, Calendar, MapPin, X, Loader2, UserRound
 } from 'lucide-vue-next';
 import { siteService } from '@/services/siteService';
 import { zoneService } from '@/services/zoneService';
@@ -571,7 +674,7 @@ const props = defineProps({
   patrolsCount: { type: Number, default: 0 }
 });
 
-const emit = defineEmits(['openPairing', 'refreshData']);
+const emit = defineEmits(['refreshData']);
 
 const isDismissed = ref(false);
 const totalCheckpoints = ref(0);
@@ -580,18 +683,21 @@ const totalCheckpoints = ref(0);
 const localSitesCount = ref(0);
 const localZonesCount = ref(0);
 const localPatrolsCount = ref(0);
+const localGuardsCount = ref(0);
 
 // Modals visibility state
 const showSiteModal = ref(false);
 const showZoneModal = ref(false);
 const showCheckpointModal = ref(false);
 const showScheduleModal = ref(false);
+const showGuardModal = ref(false);
 
 // Submitting state
 const isSubmittingSite = ref(false);
 const isSubmittingZone = ref(false);
 const isSubmittingCheckpoint = ref(false);
 const isSubmittingSchedule = ref(false);
+const isSubmittingGuard = ref(false);
 
 // Data lists for select dropdowns
 const availableSites = ref([]);
@@ -631,6 +737,14 @@ const patrolForm = ref({
   guardId: '',
   frequency: '1',
   maxDuration: 45
+});
+
+const guardForm = ref({
+  first_name: '',
+  last_name: '',
+  email: '',
+  phone: '',
+  password: ''
 });
 
 const fetchMetadata = async () => {
@@ -821,10 +935,51 @@ const submitSchedulePatrol = async () => {
   }
 };
 
+const submitAddGuard = async () => {
+  if (!guardForm.value.first_name.trim() || !guardForm.value.email.trim()) return;
+  isSubmittingGuard.value = true;
+  try {
+    const token = authService.getToken();
+    const tenantId = authService.getTenantId();
+    const apiUrl = import.meta.env.VITE_API_URL;
+    const res = await fetch(`${apiUrl}/users`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        first_name: guardForm.value.first_name.trim(),
+        last_name: guardForm.value.last_name.trim(),
+        email: guardForm.value.email.trim(),
+        phone: guardForm.value.phone.trim() || undefined,
+        password: guardForm.value.password || undefined,
+        tenant: tenantId,
+        role: 'guard',
+        status: 'active'
+      })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err?.errors?.[0]?.message || `HTTP ${res.status}`);
+    }
+    localGuardsCount.value++;
+    showGuardModal.value = false;
+    guardForm.value = { first_name: '', last_name: '', email: '', phone: '', password: '' };
+    emit('refreshData');
+    await fetchMetadata();
+  } catch (err) {
+    alert(`Failed to add guard: ${err.message}`);
+  } finally {
+    isSubmittingGuard.value = false;
+  }
+};
+
 const hasSites = computed(() => (props.sitesCount + localSitesCount.value) > 0 || availableSites.value.length > 0);
 const hasZones = computed(() => (props.zonesCount + localZonesCount.value) > 0 || availableZones.value.length > 0);
 const hasCheckpoints = computed(() => totalCheckpoints.value > 0);
 const hasPatrols = computed(() => (props.patrolsCount + localPatrolsCount.value) > 0);
+const hasGuards = computed(() => (localGuardsCount.value > 0) || availableGuards.value.length > 0);
 
 const steps = computed(() => [
   {
@@ -868,11 +1023,14 @@ const steps = computed(() => [
     }
   },
   {
-    title: '5. Pair Tablet / App',
-    desc: 'Link guard mobile devices via instant QR sync.',
-    completed: false,
-    buttonText: 'Pair Device',
-    action: () => emit('openPairing')
+    title: '5. Add Guard',
+    desc: 'Register security officers to your roster.',
+    completed: hasGuards.value,
+    buttonText: 'Add Guard',
+    action: () => {
+      fetchMetadata();
+      showGuardModal.value = true;
+    }
   }
 ]);
 
@@ -880,6 +1038,6 @@ const completedCount = computed(() => steps.value.filter(s => s.completed).lengt
 
 const isVisible = computed(() => {
   if (isDismissed.value) return false;
-  return completedCount.value < 5;
+  return completedCount.value < steps.value.length;
 });
 </script>

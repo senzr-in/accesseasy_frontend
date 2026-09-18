@@ -81,6 +81,11 @@ const trialDaysRemaining = computed(() => {
     }
   }
 
+  // For 7-day free trial, cap at 7 days max
+  if (isTrial.value) {
+    return Math.min(7, Math.max(0, diffDays));
+  }
+
   return Math.max(0, diffDays);
 });
 

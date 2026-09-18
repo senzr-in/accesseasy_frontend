@@ -144,8 +144,33 @@ onMounted(async () => {
       // 1. ALWAYS call Knative auth-service google-login first with userEmail to get the true Directus JWT and Directus refresh token
       if (userEmail) {
         try {
-          const loginResult = await authService.googleLogin(userEmail);
+          let loginResult = await authService.googleLogin(userEmail);
           console.log("[AuthCallback] Knative googleLogin response:", loginResult);
+
+          // If user not found (first-time Google Sign Up), auto-register the account
+          if (!loginResult?.success && (loginResult?.message?.includes("not found") || loginResult?.message === "User not found")) {
+            statusMessage.value = "Creating your AccessEasy account...";
+            const fullName = currentUserData?.first_name 
+              ? `${currentUserData?.first_name} ${currentUserData?.last_name || ''}`.trim()
+              : (currentUserData?.name || data.name || "Google User");
+            const companyName = tenantName || data.tenant_name || `${fullName}'s Organization`;
+
+            try {
+              const regResult = await authService.register({
+                email: userEmail,
+                fullName: fullName,
+                companyName: companyName,
+                userApp: "patrol",
+                source: "Google SSO Web"
+              });
+              console.log("[AuthCallback] Auto-register result:", regResult);
+
+              // Now log in to get the Directus token
+              loginResult = await authService.googleLogin(userEmail);
+            } catch (regErr) {
+              console.error("[AuthCallback] Auto-register failed:", regErr);
+            }
+          }
 
           if (loginResult && loginResult.success && loginResult.token) {
             const loginRefresh = loginResult.refresh_token || loginResult.refreshToken || null;
@@ -181,7 +206,7 @@ onMounted(async () => {
         }
       }
 
-      if (authSuccessful || authService.isAuthenticated()) {
+      if (authSuccessful) {
         localStorage.setItem("fromEmailOtp", "true");
         authService.setPinVerified(true);
 
@@ -195,6 +220,7 @@ onMounted(async () => {
         return;
       }
 
+      authService.softLogout();
       router.push("/login?error=auth_failed");
     } else {
       statusMessage.value = data.message || "Authentication failed";

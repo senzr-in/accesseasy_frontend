@@ -386,39 +386,21 @@
 
       </section>
 
-      <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- 2.5 ONBOARDING NOTICE (CLEAN ENTERPRISE BANNER WHEN NO SITES) -->
-      <!-- ═══════════════════════════════════════════════════════════ -->
-      <section v-if="sitesList.length === 0" class="bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/50 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
-        <div>
-          <h2 class="text-sm font-bold text-blue-950 dark:text-blue-200">
-            Getting Started: Initialize Security Infrastructure
-          </h2>
-          <p class="text-xs text-blue-700 dark:text-blue-300 mt-0.5">
-            Add your primary property location, set up security checkpoints, register officers, and launch your first scheduled patrol.
-          </p>
-        </div>
-        <div class="flex flex-wrap items-center gap-2 shrink-0">
-          <button
-            class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition-colors cursor-pointer"
-            @click="openQuickCreateModal('add_site')"
-          >
-            1. Add Property
-          </button>
-          <button
-            class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-50 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
-            @click="openQuickCreateModal('add_checkpoint')"
-          >
-            2. Add Checkpoint
-          </button>
-          <button
-            class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-50 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
-            @click="openQuickCreateModal('add_guard')"
-          >
-            3. Enrol Officer
-          </button>
-        </div>
-      </section>
+      <!-- New user nudge: only visible when no sites are set up yet -->
+      <div
+        v-if="sitesList.length === 0"
+        class="flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/50 shrink-0"
+      >
+        <p class="text-xs text-indigo-700 dark:text-indigo-300 font-medium">
+          👋 Welcome! Complete your security setup to activate live monitoring.
+        </p>
+        <button
+          class="shrink-0 px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xs font-bold transition-all cursor-pointer shadow-sm shadow-indigo-600/30"
+          @click="$router.push({ name: 'Guards' })"
+        >
+          Get Started →
+        </button>
+      </div>
 
       <!-- ═══════════════════════════════════════════════════════════ -->
       <!-- 3. MAIN WORKSPACE: BALANCED 60% MAP / 40% OPERATIONS DECK   -->
