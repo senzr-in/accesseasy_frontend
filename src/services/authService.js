@@ -74,7 +74,7 @@ class AuthService {
         if (error.response?.status === 401 && !originalRequest?._retried) {
           originalRequest._retried = true;
           const refreshToken = this.getRefreshToken();
-          if (refreshToken) {
+          if (refreshToken && !refreshToken.startsWith("1//")) {
             try {
               if (!this._refreshPromise) {
                 const directusBase = import.meta.env.VITE_API_URL;
@@ -100,12 +100,39 @@ class AuthService {
               }
             } catch (refreshErr) {
               console.warn('[AuthService] Token refresh failed:', refreshErr?.message);
-              this.handleSessionExpired();
             }
-          } else {
-            // No refresh token available to recover session
-            this.handleSessionExpired();
           }
+
+          // Tier 2: Knative silent re-auth if email exists
+          const email = this.getEmail();
+          if (email) {
+            try {
+              if (!this._refreshPromise) {
+                this._refreshPromise = this.googleLogin(email).then(knRes => {
+                  if (knRes && knRes.success && knRes.token) {
+                    const ref = knRes.refresh_token || knRes.refreshToken || null;
+                    this.setToken(knRes.token, ref);
+                    if (knRes.userData) this.setUserData(knRes.userData);
+                    return knRes.token;
+                  }
+                  throw new Error('Knative re-auth failed');
+                }).finally(() => {
+                  this._refreshPromise = null;
+                });
+              }
+
+              const newAccessToken = await this._refreshPromise;
+              if (newAccessToken) {
+                originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
+                return this.protectedApi(originalRequest);
+              }
+            } catch (knErr) {
+              console.warn('[AuthService] Knative re-auth failed in interceptor:', knErr?.message);
+            }
+          }
+
+          // Unrecoverable — trigger session expired
+          this.handleSessionExpired();
         }
         return Promise.reject(error);
       },
@@ -455,10 +482,14 @@ class AuthService {
 
   setToken(token, refreshToken = null) {
     if (!token) return;
+    if (token.startsWith("ya29.")) {
+      console.warn("[AuthService] Ignoring Google OAuth access token in setToken — Directus session token required.");
+      return;
+    }
     Cookies.set("userToken", token, { expires: 1 });
     sessionStorage.setItem("userToken", token);
     localStorage.setItem("userToken", token);
-    if (refreshToken) {
+    if (refreshToken && !refreshToken.startsWith("1//")) {
       localStorage.setItem("ae_refresh_token", refreshToken);
       Cookies.set("refreshToken", refreshToken, { expires: 7 });
     }
@@ -703,6 +734,24 @@ class AuthService {
     const token = this.getToken();
     if (!token) return false;
     if (token.startsWith("dev-token-")) return true;
+    if (token.startsWith("ya29.")) {
+      console.warn("[AuthService] Found Google OAuth token instead of Directus token — triggering silent re-auth...");
+      const email = this.getEmail();
+      if (email) {
+        try {
+          const knRes = await this.googleLogin(email);
+          if (knRes && knRes.success && knRes.token) {
+            const ref = knRes.refresh_token || knRes.refreshToken || null;
+            this.setToken(knRes.token, ref);
+            if (knRes.userData) this.setUserData(knRes.userData);
+            return true;
+          }
+        } catch (e) {
+          console.warn("[AuthService] Silent re-auth failed:", e.message);
+        }
+      }
+      return false;
+    }
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/users/me?fields=id`, {
         headers: { Authorization: `Bearer ${token}` },

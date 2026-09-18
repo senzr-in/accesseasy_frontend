@@ -662,11 +662,10 @@ async function loginWithGoogle() {
       }
     }, 5000);
 
-    const redirectUri = `${import.meta.env.VITE_UI_URL || window.location.origin}/auth/callback`;
     const response = await fetch(`${import.meta.env.VITE_KN_API_URL}/google-accesseasy`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: "google", redirect_uri: redirectUri }),
+      body: JSON.stringify({ type: "google" }),
       signal: controller.signal
     });
     clearTimeout(timeoutId);

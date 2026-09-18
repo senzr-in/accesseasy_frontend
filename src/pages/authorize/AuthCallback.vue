@@ -86,14 +86,11 @@ onMounted(async () => {
   try {
     statusMessage.value = `Completing ${connectorType || "Google"} authentication...`;
 
-    const redirectUri = `${import.meta.env.VITE_UI_URL || window.location.origin}/auth/callback`;
     const payload = {
       tenantId: storedTenantId === "new" ? "" : (storedTenantId || ""),
       code: code,
       type: connectorType || "google",
       action: "token",
-      redirect_uri: redirectUri,
-      redirectUri: redirectUri,
     };
 
     const apiUrl = `${import.meta.env.VITE_KN_API_URL}/google-accesseasy`;
@@ -144,46 +141,44 @@ onMounted(async () => {
         }
       }
 
-      const primaryToken = data.token || data.tokens?.access_token;
-      const primaryRefresh = data.refresh_token || data.tokens?.refresh_token || data.refreshToken || null;
-
-      let authSuccessful = false;
-
-      // 1. If direct token returned from google-accesseasy, store it
-      if (primaryToken) {
-        authService.setToken(primaryToken, primaryRefresh);
-        if (currentUserData) authService.setUserData(currentUserData);
-        if (tenantId) authService.setTenantData({ tenantId, tenantName });
-        authSuccessful = true;
-      }
-
-      // 2. Also try/reinforce with googleLogin to ensure Directus access token is valid
-      if (userEmail && (!primaryToken || !primaryRefresh)) {
+      // 1. ALWAYS call Knative auth-service google-login first with userEmail to get the true Directus JWT and Directus refresh token
+      if (userEmail) {
         try {
           const loginResult = await authService.googleLogin(userEmail);
+          console.log("[AuthCallback] Knative googleLogin response:", loginResult);
+
           if (loginResult && loginResult.success && loginResult.token) {
-            const loginRefresh = loginResult.refresh_token || loginResult.refreshToken || primaryRefresh;
+            const loginRefresh = loginResult.refresh_token || loginResult.refreshToken || null;
             authService.setToken(loginResult.token, loginRefresh);
-            if (loginResult.userData) {
-              authService.setUserData(loginResult.userData);
+            
+            const resolvedUser = loginResult.userData || currentUserData;
+            if (resolvedUser) {
+              authService.setUserData(resolvedUser);
             }
-            if (tenantId) {
-              authService.setTenantData({ tenantId, tenantName });
+            
+            const resolvedTenantId = loginResult.tenantId || loginResult.tenant_id || tenantId;
+            const resolvedTenantName = loginResult.tenantName || loginResult.tenant_name || tenantName;
+            if (resolvedTenantId) {
+              authService.setTenantData({ tenantId: resolvedTenantId, tenantName: resolvedTenantName });
             }
+            
             authSuccessful = true;
           }
-        } catch (genError) {
-          console.warn("[AuthCallback] Knative googleLogin check:", genError);
+        } catch (loginErr) {
+          console.error("[AuthCallback] Knative google-login error:", loginErr);
         }
       }
 
-      // 3. Fallback token check
-      const fallbackToken = data.token || data.tokens?.access_token;
-      if (!authSuccessful && fallbackToken) {
-        authService.setToken(fallbackToken, primaryRefresh);
-        if (currentUserData) authService.setUserData(currentUserData);
-        if (tenantId) authService.setTenantData({ tenantId, tenantName });
-        authSuccessful = true;
+      // 2. Only if googleLogin was not successful, check if data.token is a Directus token (NOT a Google ya29.* token)
+      if (!authSuccessful) {
+        const candidateToken = data.token;
+        if (candidateToken && !candidateToken.startsWith("ya29.")) {
+          const candidateRefresh = (data.refresh_token && !data.refresh_token.startsWith("1//")) ? data.refresh_token : null;
+          authService.setToken(candidateToken, candidateRefresh);
+          if (currentUserData) authService.setUserData(currentUserData);
+          if (tenantId) authService.setTenantData({ tenantId, tenantName });
+          authSuccessful = true;
+        }
       }
 
       if (authSuccessful || authService.isAuthenticated()) {
