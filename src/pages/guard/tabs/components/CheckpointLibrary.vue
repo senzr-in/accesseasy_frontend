@@ -602,6 +602,9 @@ const loadCheckpoints = async () => {
   loading.value = true;
   try {
     const tenantId = authService.getTenantId();
+    // Bust any stale "forbidden" cache so we always try the real API
+    patrolService.invalidateCache(`master_checkpoints_${tenantId}_all_all`);
+    patrolService.invalidateCache(`checkpoint_groups_${tenantId}_all`);
     const [list, fetchedZones, fetchedGroups, clonedRes] = await Promise.all([
       patrolService.getMasterCheckpoints(),
       zoneService.fetchZones(),

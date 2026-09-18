@@ -7,33 +7,7 @@ class PatrolService {
     this._cache = {};
     this._cacheExpiry = {};
     this._inFlight = new Map();
-    // Pre-seed restricted collections so the app NEVER fires failing 403 requests to Directus
-    this._forbiddenCollections = new Map([
-      ['patrols', Infinity],
-      ['patrol_alerts', Infinity],
-      ['patrol_logs', Infinity],
-      ['checkpoint_groups', Infinity],
-      ['checkpoints', Infinity],
-      ['roleConfigurator', Infinity],
-      ['tracking_points', Infinity]
-    ]);
     this._TTL = 5 * 60 * 1000; // 5 minutes
-  }
-
-  _isForbidden(collection) {
-    const expiry = this._forbiddenCollections.get(collection);
-    if (expiry && Date.now() < expiry) {
-      return true;
-    }
-    if (expiry) {
-      this._forbiddenCollections.delete(collection);
-    }
-    return false;
-  }
-
-  _markForbidden(collection, durationMs = 5 * 60 * 1000) {
-    this._forbiddenCollections.set(collection, Date.now() + durationMs);
-    console.warn(`[PatrolService] Collection '${collection}' returned 403 Forbidden. Using local offline cache / safe defaults for ${durationMs / 1000}s.`);
   }
 
   _getCache(key) {
@@ -57,7 +31,6 @@ class PatrolService {
       this._cache = {};
       this._cacheExpiry = {};
       this._inFlight.clear();
-      this._forbiddenCollections.clear();
     }
   }
 
@@ -104,9 +77,6 @@ class PatrolService {
   async getPatrols(siteId = null) {
     const tenantId = authService.getTenantId();
     if (!tenantId) return [];
-    if (this._isForbidden('patrols')) {
-      return this._getStoredPatrols(tenantId, siteId);
-    }
     const cacheKey = `patrols_${tenantId}_${siteId || 'all'}`;
 
     return this._fetchDeduplicated(cacheKey, async () => {
@@ -128,9 +98,7 @@ class PatrolService {
           return patrols;
         }
       } catch (error) {
-        if (error.response?.status === 403) {
-          this._markForbidden('patrols');
-        }
+        console.warn('[PatrolService] getPatrols failed:', error?.message);
       }
       return this._getStoredPatrols(tenantId, siteId);
     }, 15 * 1000); // 15s cache for active patrols
@@ -188,17 +156,6 @@ class PatrolService {
   async fetchCheckpointGroups(siteId = null) {
     const tenantId = authService.getTenantId();
     if (!tenantId) return [];
-    if (this._isForbidden('checkpoint_groups')) {
-      const stored = localStorage.getItem(`accesseasy_checkpoint_groups_${tenantId}`);
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          if (siteId) return parsed.filter(g => String(g.site) === String(siteId));
-          return parsed;
-        } catch (e) {}
-      }
-      return [];
-    }
     const cacheKey = `checkpoint_groups_${tenantId}_${siteId || 'all'}`;
 
     return this._fetchDeduplicated(cacheKey, async () => {
@@ -206,15 +163,10 @@ class PatrolService {
         let endpoint = `/items/checkpoint_groups?filter[tenant][_eq]=${tenantId}&sort=-date_created`;
         if (siteId) endpoint += `&filter[site][_eq]=${siteId}`;
         const response = await authService.protectedApi.get(endpoint);
-        if (response.data?.data) {
-          return response.data.data;
-        }
+        if (response.data?.data) return response.data.data;
       } catch (error) {
-        if (error.response?.status === 403) {
-          this._markForbidden('checkpoint_groups');
-        }
+        console.warn('[PatrolService] fetchCheckpointGroups failed:', error?.message);
       }
-
       const stored = localStorage.getItem(`accesseasy_checkpoint_groups_${tenantId}`);
       if (stored) {
         try {
@@ -251,18 +203,6 @@ class PatrolService {
 
   async getMasterCheckpoints(siteId = null, zoneId = null) {
     const tenantId = authService.getTenantId();
-    if (this._isForbidden('checkpoints')) {
-      const stored = localStorage.getItem(`accesseasy_checkpoints_${tenantId}`);
-      if (stored) {
-        try {
-          let parsed = JSON.parse(stored);
-          if (siteId) parsed = parsed.filter(c => String(c.site) === String(siteId));
-          if (zoneId) parsed = parsed.filter(c => String(c.zone) === String(zoneId));
-          if (parsed.length > 0) return parsed;
-        } catch (e) {}
-      }
-      return this._getCheckpointsFromDoors(siteId, zoneId);
-    }
     const cacheKey = `master_checkpoints_${tenantId}_${siteId || 'all'}_${zoneId || 'all'}`;
 
     return this._fetchDeduplicated(cacheKey, async () => {
@@ -270,13 +210,10 @@ class PatrolService {
         let endpoint = `/items/checkpoints?filter[tenant][_eq]=${tenantId}&filter[group_id][_null]=true&sort=-date_created`;
         if (siteId) endpoint += `&filter[site][_eq]=${siteId}`;
         if (zoneId) endpoint += `&filter[zone][_eq]=${zoneId}`;
-        
         const response = await authService.protectedApi.get(endpoint);
         if (response.data?.data) return response.data.data;
       } catch (error) {
-        if (error.response?.status === 403) {
-          this._markForbidden('checkpoints');
-        }
+        console.warn('[PatrolService] getMasterCheckpoints failed:', error?.message);
       }
       return this._getCheckpointsFromDoors(siteId, zoneId);
     });
@@ -284,17 +221,6 @@ class PatrolService {
 
   async getCheckpoints(siteId = null) {
     const tenantId = authService.getTenantId();
-    if (this._isForbidden('checkpoints')) {
-      const stored = localStorage.getItem(`accesseasy_checkpoints_${tenantId}`);
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          if (siteId) return parsed.filter(c => String(c.site) === String(siteId));
-          if (parsed.length > 0) return parsed;
-        } catch (e) {}
-      }
-      return this._getCheckpointsFromDoors(siteId, null);
-    }
     const cacheKey = `checkpoints_${tenantId}_${siteId || 'all'}`;
 
     return this._fetchDeduplicated(cacheKey, async () => {
@@ -302,13 +228,9 @@ class PatrolService {
         let endpoint = `/items/checkpoints?filter[tenant][_eq]=${tenantId}&limit=250`;
         if (siteId) endpoint += `&filter[site][_eq]=${siteId}`;
         const response = await authService.protectedApi.get(endpoint);
-        if (response.data?.data) {
-          return response.data.data;
-        }
+        if (response.data?.data) return response.data.data;
       } catch (error) {
-        if (error.response?.status === 403) {
-          this._markForbidden('checkpoints');
-        }
+        console.warn('[PatrolService] getCheckpoints failed:', error?.message);
       }
       return this._getCheckpointsFromDoors(siteId, null);
     });
@@ -317,17 +239,6 @@ class PatrolService {
   async getCheckpointsByZone(zoneId) {
     if (!zoneId) return [];
     const tenantId = authService.getTenantId();
-    if (this._isForbidden('checkpoints')) {
-      const stored = localStorage.getItem(`accesseasy_checkpoints_${tenantId}`);
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          const filtered = parsed.filter(c => String(c.zone) === String(zoneId));
-          if (filtered.length > 0) return filtered;
-        } catch (e) {}
-      }
-      return this._getCheckpointsFromDoors(null, zoneId);
-    }
     const cacheKey = `checkpoints_zone_${tenantId}_${zoneId}`;
 
     return this._fetchDeduplicated(cacheKey, async () => {
@@ -337,9 +248,7 @@ class PatrolService {
         );
         if (response.data?.data) return response.data.data;
       } catch (error) {
-        if (error.response?.status === 403) {
-          this._markForbidden('checkpoints');
-        }
+        console.warn('[PatrolService] getCheckpointsByZone failed:', error?.message);
       }
       return this._getCheckpointsFromDoors(null, zoneId);
     });
@@ -348,30 +257,16 @@ class PatrolService {
   async getCheckpointsForRoute(groupId) {
     if (!groupId) return [];
     const tenantId = authService.getTenantId();
-    if (this._isForbidden('checkpoints')) {
-      const stored = localStorage.getItem(`accesseasy_checkpoints_${tenantId}`);
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          return parsed.filter(c => String(c.group_id) === String(groupId));
-        } catch (e) {}
-      }
-      return [];
-    }
     const cacheKey = `route_checkpoints_${tenantId}_${groupId}`;
 
     return this._fetchDeduplicated(cacheKey, async () => {
       try {
         let endpoint = `/items/checkpoints?filter[group_id][_eq]=${groupId}&sort=sort_order&limit=250`;
-        if (tenantId) {
-          endpoint += `&filter[tenant][_eq]=${tenantId}`;
-        }
+        if (tenantId) endpoint += `&filter[tenant][_eq]=${tenantId}`;
         const response = await authService.protectedApi.get(endpoint);
         return response.data?.data || [];
       } catch (e) {
-        if (e.response?.status === 403) {
-          this._markForbidden('checkpoints');
-        }
+        console.warn('[PatrolService] getCheckpointsForRoute failed:', e?.message);
         return [];
       }
     }, 60 * 1000);
@@ -385,29 +280,19 @@ class PatrolService {
     const tenantId = authService.getTenantId();
     const result = {};
     validGroupIds.forEach(id => { result[id] = []; });
-    if (this._isForbidden('checkpoints')) {
-      return result;
-    }
 
     try {
       let endpoint = `/items/checkpoints?filter[group_id][_in]=${validGroupIds.join(',')}&sort=sort_order&limit=500`;
-      if (tenantId) {
-        endpoint += `&filter[tenant][_eq]=${tenantId}`;
-      }
+      if (tenantId) endpoint += `&filter[tenant][_eq]=${tenantId}`;
       const response = await authService.protectedApi.get(endpoint);
       const allCps = response.data?.data || [];
-
       allCps.forEach(cp => {
         const gId = cp.group_id;
-        if (gId && result[gId]) {
-          result[gId].push(cp);
-        }
+        if (gId && result[gId]) result[gId].push(cp);
       });
       return result;
     } catch (e) {
-      if (e.response?.status === 403) {
-        this._markForbidden('checkpoints');
-      }
+      console.warn('[PatrolService] getCheckpointsForMultipleRoutes failed:', e?.message);
       return result;
     }
   }
@@ -589,9 +474,6 @@ class PatrolService {
     const tenantId = authService.getTenantId();
     const token = authService.getToken();
     if (!tenantId || !token) return [];
-    if (this._isForbidden('patrol_alerts')) {
-      return this._getStoredAlerts(tenantId, siteId);
-    }
     const cacheKey = `patrol_alerts_${tenantId}_${siteId || 'all'}`;
 
     return this._fetchDeduplicated(cacheKey, async () => {
@@ -612,9 +494,7 @@ class PatrolService {
           return alerts;
         }
       } catch (error) {
-        if (error.response?.status === 403) {
-          this._markForbidden('patrol_alerts');
-        }
+        console.warn('[PatrolService] getAlerts failed:', error?.message);
       }
       return this._getStoredAlerts(tenantId, siteId);
     }, 10 * 1000);
@@ -651,31 +531,21 @@ class PatrolService {
   async getTodayPatrolLogs(siteId = null) {
     try {
       const tenantId = authService.getTenantId();
-      if (!tenantId || this._isForbidden('patrol_logs')) return [];
+      if (!tenantId) return [];
       const today = new Date().toISOString().split('T')[0];
       let endpoint = `/items/patrol_logs?filter[tenant][_eq]=${tenantId}&filter[date_created][_gte]=${today}T00:00:00&sort=-date_created&limit=500`;
-      if (siteId) {
-        endpoint += `&filter[site_id][_eq]=${siteId}`;
-      }
-      try {
-        const response = await authService.protectedApi.get(endpoint);
-        return response.data?.data || [];
-      } catch (e) {
-        if (e.response?.status === 403) {
-          this._markForbidden('patrol_logs');
-        } else {
-          console.warn("[PatrolService] Error fetching today's patrol logs for tenant:", e?.message);
-        }
-        return [];
-      }
-    } catch (error) {
+      if (siteId) endpoint += `&filter[site_id][_eq]=${siteId}`;
+      const response = await authService.protectedApi.get(endpoint);
+      return response.data?.data || [];
+    } catch (e) {
+      console.warn("[PatrolService] getTodayPatrolLogs failed:", e?.message);
       return [];
     }
   }
 
   async getPatrolLogs(patrolId = null) {
     const tenantId = authService.getTenantId();
-    if (!tenantId || this._isForbidden('patrol_logs')) return [];
+    if (!tenantId) return [];
     const cacheKey = `patrol_logs_${tenantId}_${patrolId || 'all'}`;
 
     return this._fetchDeduplicated(cacheKey, async () => {
@@ -687,11 +557,7 @@ class PatrolService {
         const response = await authService.protectedApi.get(endpoint);
         return response.data?.data || [];
       } catch (error) {
-        if (error.response?.status === 403) {
-          this._markForbidden('patrol_logs');
-        } else {
-          console.warn("Error fetching patrol logs for tenant:", error?.message);
-        }
+        console.warn("[PatrolService] getPatrolLogs failed:", error?.message);
         return [];
       }
     }, 15 * 1000);
@@ -858,7 +724,7 @@ class PatrolService {
   }
   
   async getTrackingPoints(patrolId) {
-    if (!patrolId || this._isForbidden('tracking_points')) return [];
+    if (!patrolId) return [];
     const cacheKey = `tracking_points_${patrolId}`;
     return this._fetchDeduplicated(cacheKey, async () => {
       try {
@@ -867,9 +733,7 @@ class PatrolService {
         );
         return response.data?.data || [];
       } catch (error) {
-        if (error.response?.status === 403 || error.response?.status === 404) {
-          this._markForbidden('tracking_points', Infinity);
-        }
+        console.warn('[PatrolService] getTrackingPoints failed:', error?.message);
         return [];
       }
     }, 30 * 1000);

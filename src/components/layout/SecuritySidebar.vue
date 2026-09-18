@@ -268,19 +268,40 @@
         ref="profileDropdownRef"
         class="relative pt-2 mt-1 border-t border-slate-100 dark:border-white/5"
       >
-        <div 
-          class="flex items-center gap-2.5 px-2 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg py-1.5 transition-colors" 
-          :class="isCollapsed ? 'justify-center' : ''"
-          @click="isDropdownOpen = !isDropdownOpen"
-        >
-          <div class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center border border-indigo-200 dark:border-indigo-500/30 shadow-sm shrink-0">
+        <div class="flex items-center gap-2 px-2 py-1.5" :class="isCollapsed ? 'justify-center' : ''">
+          <!-- Avatar (click to open dropdown) -->
+          <div
+            class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center border border-indigo-200 dark:border-indigo-500/30 shadow-sm shrink-0 cursor-pointer hover:ring-2 hover:ring-indigo-300 dark:hover:ring-indigo-700 transition-all"
+            @click="isDropdownOpen = !isDropdownOpen"
+            :title="isCollapsed ? userName : ''"
+          >
             <span class="text-xs font-bold text-indigo-700 dark:text-indigo-400">{{ userName.charAt(0).toUpperCase() }}</span>
           </div>
-          <div v-if="!isCollapsed" class="flex flex-col flex-1 min-w-0">
+          <!-- Name & Role -->
+          <div v-if="!isCollapsed" class="flex flex-col flex-1 min-w-0 cursor-pointer" @click="isDropdownOpen = !isDropdownOpen">
             <span class="text-xs font-bold text-slate-900 dark:text-white truncate">{{ userName }}</span>
             <span class="text-[9px] font-semibold text-slate-400 dark:text-slate-500 truncate">{{ userRole }}</span>
           </div>
+          <!-- Logout Button (always visible) -->
+          <button
+            v-if="!isCollapsed"
+            @click="handleSignOut"
+            title="Logout"
+            class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 dark:hover:text-rose-400 transition-colors cursor-pointer shrink-0"
+          >
+            <LogOut class="w-3.5 h-3.5" />
+          </button>
+          <!-- Collapsed: logout icon only -->
+          <button
+            v-else
+            @click="handleSignOut"
+            title="Logout"
+            class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 dark:hover:text-rose-400 transition-colors cursor-pointer"
+          >
+            <LogOut class="w-3.5 h-3.5" />
+          </button>
         </div>
+
 
         <transition
           enter-active-class="transition ease-out duration-100"

@@ -652,7 +652,15 @@ async function loginWithGoogle() {
     phoneError.value = "";
     
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 12000);
+    // Knative cold-start can take ~25-30s — give it 45s before giving up
+    const timeoutId = setTimeout(() => controller.abort(), 45000);
+
+    // Show a "warming up" hint after 5s so the user doesn't think it's frozen
+    const warmupHintId = setTimeout(() => {
+      if (googleLoading.value) {
+        phoneError.value = "⏳ Google service is warming up, please wait...";
+      }
+    }, 5000);
 
     const response = await fetch(`${import.meta.env.VITE_KN_API_URL}/google-accesseasy`, {
       method: "POST",
@@ -661,6 +669,8 @@ async function loginWithGoogle() {
       signal: controller.signal
     });
     clearTimeout(timeoutId);
+    clearTimeout(warmupHintId);
+    phoneError.value = "";
 
     const data = await response.json();
     if (data.success && data.url) {
@@ -671,11 +681,12 @@ async function loginWithGoogle() {
   } catch (error) {
     console.error("Google login error:", error);
     phoneError.value = error.name === 'AbortError' 
-      ? "Google service took too long to respond. Please try phone/email login." 
+      ? "Google service is unavailable. Please try phone/email login." 
       : (error.message || "Failed to connect to Google");
     googleLoading.value = false;
   }
 }
+
 
 function goToRegister() {
   router.push({ name: "Register" });
