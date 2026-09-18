@@ -734,6 +734,23 @@ class AuthService {
           }
         }
 
+        // ── Tier 2: Knative re-auth using stored email ──────────────────────
+        const email = this.getEmail();
+        if (email) {
+          try {
+            const knRes = await this.googleLogin(email);
+            if (knRes && knRes.success && knRes.token) {
+              const ref = knRes.refresh_token || knRes.refreshToken || null;
+              this.setToken(knRes.token, ref);
+              if (knRes.userData) this.setUserData(knRes.userData);
+              console.log("[AuthService] Knative re-auth succeeded.");
+              return true;
+            }
+          } catch (knErr) {
+            console.warn("[AuthService] Knative re-auth failed:", knErr?.message);
+          }
+        }
+
         // ── Directus token expired/invalid — force re-login ───────────────
         console.warn("[AuthService] Session unrecoverable. Forcing re-login.");
         return false;

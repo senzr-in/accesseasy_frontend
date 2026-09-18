@@ -79,18 +79,21 @@ onMounted(async () => {
     return;
   }
 
-  // Create an AbortController for fetch timeout
+  // Create an AbortController for fetch timeout (45s for Knative cold starts)
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 second timeout
+  const timeoutId = setTimeout(() => controller.abort(), 45000);
 
   try {
     statusMessage.value = `Completing ${connectorType || "Google"} authentication...`;
 
+    const redirectUri = `${import.meta.env.VITE_UI_URL || window.location.origin}/auth/callback`;
     const payload = {
-      tenantId: storedTenantId === "new" ? "" : storedTenantId,
+      tenantId: storedTenantId === "new" ? "" : (storedTenantId || ""),
       code: code,
       type: connectorType || "google",
       action: "token",
+      redirect_uri: redirectUri,
+      redirectUri: redirectUri,
     };
 
     const apiUrl = `${import.meta.env.VITE_KN_API_URL}/google-accesseasy`;
@@ -104,6 +107,7 @@ onMounted(async () => {
 
     clearTimeout(timeoutId);
     const data = await response.json();
+    console.log("[AuthCallback] Exchange response:", data);
 
     if (response.ok && data.success) {
       const isNewUser = !!(data.signup && data.signup.is_new !== false);
@@ -111,8 +115,12 @@ onMounted(async () => {
       
       // Extract user data
       const tenantId = data.tenant_id || data.signup?.tenant_id || "";
-      const userEmail = currentUserData?.email || "";
+      const userEmail = currentUserData?.email || data.email || "";
       const tenantName = data.tenant_name || "";
+
+      if (userEmail) {
+        authService.setEmail(userEmail);
+      }
 
       if (!isNewUser) {
         statusMessage.value = "Account found! Logging you in...";
@@ -136,64 +144,58 @@ onMounted(async () => {
         }
       }
 
-      if (userEmail) {
-        // Set email in authService immediately
-        authService.setEmail(userEmail);
+      const primaryToken = data.token || data.tokens?.access_token;
+      const primaryRefresh = data.refresh_token || data.tokens?.refresh_token || data.refreshToken || null;
 
+      let authSuccessful = false;
+
+      // 1. If direct token returned from google-accesseasy, store it
+      if (primaryToken) {
+        authService.setToken(primaryToken, primaryRefresh);
+        if (currentUserData) authService.setUserData(currentUserData);
+        if (tenantId) authService.setTenantData({ tenantId, tenantName });
+        authSuccessful = true;
+      }
+
+      // 2. Also try/reinforce with googleLogin to ensure Directus access token is valid
+      if (userEmail && (!primaryToken || !primaryRefresh)) {
         try {
           const loginResult = await authService.googleLogin(userEmail);
-
           if (loginResult && loginResult.success && loginResult.token) {
-            authService.setToken(loginResult.token);
+            const loginRefresh = loginResult.refresh_token || loginResult.refreshToken || primaryRefresh;
+            authService.setToken(loginResult.token, loginRefresh);
             if (loginResult.userData) {
               authService.setUserData(loginResult.userData);
             }
             if (tenantId) {
-              authService.setTenantData({ tenantId: tenantId, tenantName: tenantName });
+              authService.setTenantData({ tenantId, tenantName });
             }
-
-            localStorage.setItem("fromEmailOtp", "true");
-            authService.setPinVerified(true);
-
-            if (loginResult.userData) {
-              authService.onSuccessfulLogin(loginResult.userData.id);
-            }
-
-            statusMessage.value = "Login successful! Redirecting...";
-            clearSessionAndRedirect();
-            return;
-          } else {
-            throw new Error(loginResult.message || "Google login failed");
+            authSuccessful = true;
           }
         } catch (genError) {
-          console.warn("Knative google-login failed, trying fallback...", genError);
+          console.warn("[AuthCallback] Knative googleLogin check:", genError);
         }
       }
 
-      // Fallback
+      // 3. Fallback token check
       const fallbackToken = data.token || data.tokens?.access_token;
-      if (fallbackToken) {
-        authService.setToken(fallbackToken);
-        if (userEmail) authService.setEmail(userEmail);
+      if (!authSuccessful && fallbackToken) {
+        authService.setToken(fallbackToken, primaryRefresh);
         if (currentUserData) authService.setUserData(currentUserData);
-        if (tenantId) authService.setTenantData({ tenantId: tenantId, tenantName: tenantName });
-        
+        if (tenantId) authService.setTenantData({ tenantId, tenantName });
+        authSuccessful = true;
+      }
+
+      if (authSuccessful || authService.isAuthenticated()) {
         localStorage.setItem("fromEmailOtp", "true");
         authService.setPinVerified(true);
 
-        if (currentUserData) {
-          authService.onSuccessfulLogin(currentUserData.id);
+        const finalUser = authService.getUserData() || currentUserData;
+        if (finalUser?.id) {
+          authService.onSuccessfulLogin(finalUser.id);
         }
 
         statusMessage.value = "Login successful! Redirecting...";
-        clearSessionAndRedirect();
-        return;
-      }
-
-      // If we got here, we have no token but maybe we are already authenticated?
-      if (authService.isAuthenticated()) {
-        localStorage.setItem("fromEmailOtp", "true");
-        authService.setPinVerified(true);
         clearSessionAndRedirect();
         return;
       }
