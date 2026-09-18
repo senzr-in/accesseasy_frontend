@@ -10,8 +10,14 @@
           7-DAY TRIAL
         </div>
         <div class="trial-message">
-          <strong>Free Trial Active:</strong> 1 Site Included with all features unlocked.
-          <span class="days-badge">{{ store.trialDaysRemaining }} {{ store.trialDaysRemaining === 1 ? 'day' : 'days' }} left</span>
+          <template v-if="store.trialDaysRemaining > 0">
+            <strong>Free Trial Active:</strong> 1 Site Included with all features unlocked.
+            <span class="days-badge">{{ store.trialDaysRemaining }} {{ store.trialDaysRemaining === 1 ? 'day' : 'days' }} left</span>
+          </template>
+          <template v-else>
+            <strong>Free Trial Expired:</strong> Upgrade to continue monitoring and managing sites.
+            <span class="days-badge font-black">0 days left</span>
+          </template>
         </div>
       </div>
 

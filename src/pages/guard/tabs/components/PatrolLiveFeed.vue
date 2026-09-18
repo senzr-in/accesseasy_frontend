@@ -216,6 +216,68 @@
           </div>
         </div>
 
+        <!-- Operational Quick-Actions Toolbar -->
+        <div class="px-4 py-2.5 bg-indigo-50/60 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between flex-wrap gap-2 text-xs shrink-0">
+          <div class="flex items-center gap-2 flex-wrap">
+            <!-- Start Now (if scheduled or delayed) -->
+            <button
+              v-if="['scheduled', 'delayed'].includes(activePatrol?.status)"
+              :disabled="actionLoading"
+              class="h-7 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer disabled:opacity-50"
+              title="Force start patrol immediately"
+              @click="handleForceStart(activePatrol)"
+            >
+              <Play class="w-3 h-3 fill-current" />
+              <span>Start Now</span>
+            </button>
+
+            <!-- Extend 15m -->
+            <button
+              v-if="['scheduled', 'active', 'delayed'].includes(activePatrol?.status)"
+              :disabled="actionLoading"
+              class="h-7 px-3 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-400 hover:bg-amber-100 font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer disabled:opacity-50"
+              title="Add 15 minutes grace period"
+              @click="handleExtendWindow(activePatrol)"
+            >
+              <Clock class="w-3 h-3" />
+              <span>+15m Grace</span>
+            </button>
+
+            <!-- Reassign Guard -->
+            <button
+              :disabled="actionLoading"
+              class="h-7 px-3 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer disabled:opacity-50"
+              title="Reassign to another active guard"
+              @click="openReassignModal(activePatrol)"
+            >
+              <UserCheck class="w-3 h-3 text-indigo-500" />
+              <span>Reassign Guard</span>
+            </button>
+
+            <!-- Complete Patrol -->
+            <button
+              v-if="activePatrol?.status === 'active'"
+              :disabled="actionLoading"
+              class="h-7 px-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer disabled:opacity-50"
+              title="Mark route as completed"
+              @click="handleCompletePatrol(activePatrol)"
+            >
+              <CheckCircle2 class="w-3 h-3 text-emerald-600" />
+              <span>Mark Done</span>
+            </button>
+          </div>
+
+          <!-- Print Route Badges -->
+          <button
+            class="h-7 px-3 rounded-lg bg-slate-900 dark:bg-slate-700 hover:bg-black text-white font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
+            title="Print QR Badges for this Route"
+            @click="printRouteBadges"
+          >
+            <QrCode class="w-3 h-3 text-indigo-400" />
+            <span>Print Route Badges</span>
+          </button>
+        </div>
+
         <!-- Scrollable Content: Vitals, Timeline, Map -->
         <div class="flex-1 min-h-0 flex flex-col overflow-y-auto custom-scrollbar">
           
@@ -351,30 +413,84 @@
           </div>
 
         </div>
-
       </div>
-
     </div>
 
+    <!-- Reassign Guard Modal -->
+    <Teleport to="body">
+      <div
+        v-if="showReassignModal"
+        class="fixed inset-0 z-[160] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4"
+        @click.self="showReassignModal = false"
+      >
+        <div class="w-full max-w-sm bg-white dark:bg-slate-900 rounded-2xl shadow-2xl p-5 border border-slate-200 dark:border-slate-800 animate-in zoom-in-95 duration-150">
+          <div class="flex items-center justify-between mb-4 pb-2 border-b border-slate-100 dark:border-slate-800">
+            <h3 class="text-xs font-black uppercase text-slate-900 dark:text-white flex items-center gap-2">
+              <UserCheck class="w-4 h-4 text-indigo-500" />
+              Reassign Patrol Guard
+            </h3>
+            <button class="text-slate-400 hover:text-slate-600 p-1 cursor-pointer" @click="showReassignModal = false">
+              <X class="w-4 h-4" />
+            </button>
+          </div>
+
+          <div class="space-y-3">
+            <p class="text-xs text-slate-500 dark:text-slate-400">
+              Select a guard to assign to <strong>{{ activePatrol ? getGroupName(activePatrol) : 'Patrol Route' }}</strong>:
+            </p>
+
+            <select
+              v-model="selectedNewGuardId"
+              class="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-xs font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none"
+            >
+              <option value="" disabled>Choose an active security guard...</option>
+              <option v-for="g in availableGuards" :key="g.id" :value="g.id">
+                {{ g.first_name ? `${g.first_name} ${g.last_name || ''}` : (g.name || g.email || g.id) }}
+              </option>
+            </select>
+
+            <div class="flex justify-end gap-2 pt-2">
+              <button
+                class="px-3.5 py-2 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 cursor-pointer"
+                @click="showReassignModal = false"
+              >
+                Cancel
+              </button>
+              <button
+                :disabled="!selectedNewGuardId || actionLoading"
+                class="px-4 py-2 text-xs font-bold rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-1.5 shadow-md shadow-indigo-600/20 cursor-pointer disabled:opacity-50"
+                @click="submitReassign"
+              >
+                <Loader2 v-if="actionLoading" class="w-3.5 h-3.5 animate-spin" />
+                <span>Confirm Assignment</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup>
 import { computed, ref, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
+import QRCode from 'qrcode';
 import { 
   Shield, MapPin, Navigation, CheckCheck, X, AlertTriangle, 
-  Pencil, Trash2, Activity, Loader2, Search, Clock, Plus
+  Pencil, Trash2, Activity, Loader2, Search, Clock, Plus,
+  Play, UserCheck, CheckCircle2, QrCode
 } from 'lucide-vue-next';
 import { patrolService } from '@/services/patrolService';
 import { zoneService } from '@/services/zoneService';
 import { authService } from '@/services/authService';
+import { toast } from '@/stores/useToastStore';
 import PatrolMapReplay from './PatrolMapReplay.vue';
 
 const props = defineProps({
   patrols: { type: Array, default: () => [] },
   checkpointMap: { type: Object, default: () => ({}) },
-  checkpointGroups: { type: Array, default: () => [] },
+  checkpointGroups: { type: [Array, Object, Map], default: () => [] },
   selectedZoneId: { type: [String, Number], default: null },
   zones: { type: Array, default: () => [] },
   statusFilter: { type: String, default: 'all' }
@@ -642,15 +758,203 @@ function getDisplayTime(patrol) {
 }
 
 function getGroupName(patrol) {
+  if (!patrol) return 'Standard Patrol';
   if (patrol.routeName) return patrol.routeName;
   if (patrol.groupId && patrol.groupId.name) return patrol.groupId.name;
   const gId = typeof patrol.groupId === 'object' ? patrol.groupId?.id : patrol.groupId;
   if (gId && props.checkpointGroups) {
-    const group = props.checkpointGroups.find(g => g.id === gId);
-    if (group && group.name) return group.name;
+    let group = null;
+    if (Array.isArray(props.checkpointGroups)) {
+      group = props.checkpointGroups.find(g => g && (g.id === gId || g.groupId === gId));
+    } else if (props.checkpointGroups instanceof Map) {
+      if (props.checkpointGroups.has(gId)) {
+        group = props.checkpointGroups.get(gId);
+      } else {
+        for (const [key, val] of props.checkpointGroups.entries()) {
+          if (Array.isArray(val)) {
+            const match = val.find(item => item && (item.id === gId || item.groupId === gId || item.routeName));
+            if (match) { group = match; break; }
+          } else if (val && (val.id === gId || val.groupId === gId)) {
+            group = val;
+            break;
+          }
+        }
+      }
+    } else if (typeof props.checkpointGroups === 'object') {
+      group = props.checkpointGroups[gId];
+    }
+    if (group) {
+      return group.name || group.routeName || group.title || 'Standard Patrol';
+    }
   }
   return 'Standard Patrol';
 }
+
+const actionLoading = ref(false);
+const showReassignModal = ref(false);
+const availableGuards = ref([]);
+const selectedNewGuardId = ref('');
+
+const handleForceStart = async (patrol) => {
+  if (!patrol?.id) return;
+  const prevStatus = patrol.status;
+  patrol.status = 'active';
+  actionLoading.value = true;
+  try {
+    await patrolService.forceStartPatrol(patrol.id);
+    toast.success(`Patrol "${getGroupName(patrol)}" is now Active`);
+  } catch (err) {
+    patrol.status = prevStatus; // rollback
+    console.error('Failed to force-start patrol:', err);
+    toast.error(err?.message || 'Failed to start patrol');
+  } finally {
+    actionLoading.value = false;
+  }
+};
+
+const handleExtendWindow = async (patrol) => {
+  if (!patrol?.id) return;
+  actionLoading.value = true;
+  try {
+    await patrolService.extendPatrolWindow(patrol.id, 15);
+    toast.success(`Added 15 minutes grace period for "${getGroupName(patrol)}"`);
+  } catch (err) {
+    console.error('Failed to extend window:', err);
+    toast.error(err?.message || 'Failed to extend patrol window');
+  } finally {
+    actionLoading.value = false;
+  }
+};
+
+const handleCompletePatrol = async (patrol) => {
+  if (!patrol?.id) return;
+  const prevStatus = patrol.status;
+  patrol.status = 'completed';
+  actionLoading.value = true;
+  try {
+    await patrolService.updatePatrolStatus(patrol.id, 'completed');
+    toast.success(`Patrol "${getGroupName(patrol)}" marked as Completed`);
+  } catch (err) {
+    patrol.status = prevStatus; // rollback
+    console.error('Failed to complete patrol:', err);
+    toast.error(err?.message || 'Failed to complete patrol');
+  } finally {
+    actionLoading.value = false;
+  }
+};
+
+const openReassignModal = async (patrol) => {
+  if (!patrol) return;
+  showReassignModal.value = true;
+  selectedNewGuardId.value = '';
+  try {
+    const res = await authService.protectedApi.get('/users?fields=id,first_name,last_name,email&limit=100');
+    availableGuards.value = res.data?.data || [];
+  } catch (err) {
+    console.error('Failed to load guards for reassignment:', err);
+    availableGuards.value = [];
+  }
+};
+
+const submitReassign = async () => {
+  if (!activePatrol.value || !selectedNewGuardId.value) return;
+  const prevGuardName = activePatrol.value.guardName;
+  const prevGuardId = activePatrol.value.guardId;
+  actionLoading.value = true;
+  try {
+    const guardObj = availableGuards.value.find(g => g.id === selectedNewGuardId.value);
+    const guardName = guardObj ? `${guardObj.first_name || ''} ${guardObj.last_name || ''}`.trim() || guardObj.email : 'Assigned Guard';
+    activePatrol.value.guardName = guardName;
+    activePatrol.value.guardId = selectedNewGuardId.value;
+    await patrolService.reassignPatrolGuard(activePatrol.value.id, selectedNewGuardId.value, guardName);
+    toast.success(`Patrol reassigned to ${guardName}`);
+    showReassignModal.value = false;
+  } catch (err) {
+    activePatrol.value.guardName = prevGuardName; // rollback
+    activePatrol.value.guardId = prevGuardId;
+    console.error('Failed to reassign guard:', err);
+    toast.error(err?.message || 'Failed to reassign guard');
+  } finally {
+    actionLoading.value = false;
+  }
+};
+
+const printRouteBadges = async () => {
+  const cps = selectedPatrolDetails.value?.checkpoints || [];
+  if (cps.length === 0) {
+    toast.warning('No checkpoints configured for this route to print.');
+    return;
+  }
+
+  try {
+    const tenantId = authService.getTenantId();
+    let htmlContent = '';
+
+    for (const cp of cps) {
+      const cpId = cp.checkpoint_id || cp.id;
+      const rawString = `${cpId}-${tenantId}-AccessEasy2026`;
+      const signature = btoa(unescape(encodeURIComponent(rawString))).replace(/=/g, '');
+      const qrData = `ACPT::${cpId}::${signature}`;
+      let qrDataUrl = '';
+      try {
+        qrDataUrl = await QRCode.toDataURL(qrData, {
+          width: 200, margin: 1, color: { dark: '#0F172A', light: '#FFFFFF' }
+        });
+      } catch {}
+
+      htmlContent += `
+      <div class="card">
+        <div class="brand">AccessEasy<div style="font-size:10px;font-weight:normal;margin-top:2px;">Route Checkpoint Badge</div></div>
+        ${qrDataUrl ? `<img src="${qrDataUrl}" class="qr" />` : ''}
+        <div class="name">${cp.name}</div>
+        <div class="id">${cpId}</div>
+        <div class="meta">
+          <div class="meta-item"><label>Floor</label><span>${cp.floor || '—'}</span></div>
+          <div class="meta-item"><label>Route</label><span>${getGroupName(activePatrol.value)}</span></div>
+        </div>
+      </div>`;
+    }
+
+    const html = `
+    <html>
+      <head>
+        <title>Route Badges - ${getGroupName(activePatrol.value)}</title>
+        <style>
+          * { box-sizing: border-box; margin: 0; padding: 0; }
+          body { font-family: monospace, system-ui, sans-serif; background: #fff; color: #000; padding: 20px; display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
+          .card { width: 58mm; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 10px; border: 1px dashed #ccc; page-break-inside: avoid; margin-bottom: 20px; }
+          .brand { font-size: 14px; font-weight: 800; text-transform: uppercase; border-bottom: 1px dashed #000; width: 100%; padding-bottom: 4px; margin-bottom: 8px; }
+          .qr { width: 45mm; height: 45mm; margin-bottom: 8px; }
+          .name { font-size: 14px; font-weight: bold; margin-bottom: 4px; word-break: break-word; max-width: 100%; }
+          .id { font-size: 11px; margin-bottom: 8px; word-break: break-all; }
+          .meta { width: 100%; display: flex; justify-content: space-between; border-top: 1px dashed #000; padding-top: 8px; margin-bottom: 8px; }
+          .meta-item { display: flex; flex-direction: column; text-align: center; width: 50%; }
+          .meta-item label { font-size: 10px; text-transform: uppercase; }
+          .meta-item span { font-weight: bold; font-size: 12px; }
+          @media print { 
+            body { padding: 0; display: block; }
+            .card { float: left; margin: 10px; border: 1px solid #eee; }
+          }
+        </style>
+      </head>
+      <body>
+        ${htmlContent}
+        <script>window.onload = () => { setTimeout(() => { window.print(); window.close(); }, 500); };<\/script>
+      </body>
+    </html>`;
+
+    const win = window.open('', '_blank');
+    if (!win) {
+      toast.warning('Pop-up was blocked. Please allow pop-ups for this site to print badges.');
+      return;
+    }
+    win.document.write(html);
+    win.document.close();
+  } catch (err) {
+    console.error('Failed to print route badges:', err);
+    toast.error('Failed to generate badges');
+  }
+};
 
 onMounted(() => {
   loadZones();

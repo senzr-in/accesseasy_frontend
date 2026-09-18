@@ -1,4 +1,4 @@
-﻿/**
+/**
  * mqttService.js  -  Singleton MQTT client (WebSocket) for AccessEasy.
  *
  * Broker: mqtt.fieldseasy.com
@@ -57,9 +57,19 @@ class MQTTService {
     this._status = 'disconnected';
     this._statusCbs = new Set();
     this._listeners = new Map();
+    this._retryCount = 0;
+    this._maxConsecutiveRetries = 5;
   }
 
   connect() {
+    // Port 1883 is used directly by the native mobile app via TCP.
+    // In web browsers, raw TCP sockets are unsupported without a WebSocket gateway.
+    // Keep web client in graceful offline status without throwing 404 network errors.
+    const brokerUrl = import.meta.env.VITE_MQTT_BROKER_URL || '';
+    if (!brokerUrl || brokerUrl.includes('mqtt.fieldseasy.com/mqtt')) {
+      this._setStatus('offline');
+      return;
+    }
     if (this._client) {
       return;
     }
@@ -75,6 +85,7 @@ class MQTTService {
       this._client.end(true);
       this._client = null;
     }
+    this._retryCount = 0;
     this._setStatus('disconnected');
   }
 
@@ -106,23 +117,57 @@ class MQTTService {
 
   get status() { return this._status; }
 
+  _scheduleRetry() {
+    if (this._retryTimer) return;
+    this._retryCount++;
+    if (this._retryCount >= 2) {
+      this._setStatus('offline');
+      // Broker is offline or unreachable; cleanly pause to keep console clean
+      return;
+    }
+
+    this._retryTimer = setTimeout(() => {
+      this._retryTimer = null;
+      this._attemptConnect();
+    }, 10000);
+  }
+
   _attemptConnect() {
+    if (this._retryCount >= 2) {
+      this._setStatus('offline');
+      return;
+    }
+
     const url = BROKER_URLS[this._urlIdx];
     this._setStatus('connecting');
 
-    this._client = mqtt.connect(url, {
-      clientId: CLIENT_ID,
-      username: mqttConfig.username,
-      password: mqttConfig.password,
-      keepalive: 60,
-      connectTimeout: 10000,
-      // 5 s exponential-backoff auto-reconnect (was 0 = disabled).
-      reconnectPeriod: 5000,
-      clean: true,
-    });
+    if (this._client) {
+      try { this._client.end(false); } catch (_) {}
+      this._client = null;
+    }
+
+    try {
+      this._client = mqtt.connect(url, {
+        clientId: CLIENT_ID,
+        username: mqttConfig.username,
+        password: mqttConfig.password,
+        keepalive: 60,
+        connectTimeout: 6000,
+        reconnectPeriod: 0, // Managed via controlled _scheduleRetry
+        clean: true,
+      });
+    } catch (e) {
+      this._setStatus('offline');
+      return;
+    }
 
     this._client.on('connect', () => {
       this._setStatus('connected');
+      this._retryCount = 0;
+      if (this._retryTimer) {
+        clearTimeout(this._retryTimer);
+        this._retryTimer = null;
+      }
       TOPICS.forEach(t => {
         this._client.subscribe(t, { qos: 0 });
       });
@@ -148,22 +193,20 @@ class MQTTService {
     this._client.on('error', (err) => {
       this._setStatus('error');
       if (this._client) {
-        this._client.end(true);
+        try { this._client.end(false); } catch (_) {}
         this._client = null;
       }
-      this._urlIdx = (this._urlIdx + 1) % BROKER_URLS.length;
-      this._retryTimer = setTimeout(() => this._attemptConnect(), 4000);
+      this._scheduleRetry();
     });
 
     this._client.on('close', () => {
-      if (this._status !== 'disconnected') {
+      if (this._status !== 'disconnected' && this._status !== 'offline') {
         this._setStatus('disconnected');
-        if (!this._retryTimer) {
-          this._retryTimer = setTimeout(() => {
-            this._retryTimer = null;
-            if (!this._client) this._attemptConnect();
-          }, 5000);
+        if (this._client) {
+          try { this._client.end(false); } catch (_) {}
+          this._client = null;
         }
+        this._scheduleRetry();
       }
     });
   }

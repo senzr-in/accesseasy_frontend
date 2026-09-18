@@ -680,8 +680,9 @@ async function initiateRazorpayPayment() {
         }
       },
       prefill: {
-        name: currentUserTenant.getTenantName() || 'AccessEasy Patrol Tenant',
+        name: currentUserTenant.getTenantName() || authService.getUserData()?.first_name || 'AccessEasy Patrol Tenant',
         email: authService.getUserEmail() || '',
+        contact: authService.getUserPhone() || '',
       },
       theme: { color: '#2563eb' },
       modal: {

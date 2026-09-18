@@ -20,7 +20,7 @@
           leave-to-class="transform -translate-y-4 opacity-0"
         >
           <div
-            v-if="topSosAlert"
+            v-if="topSosAlert && appMode === 'patrol'"
             class="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 text-white px-4 py-2.5 shadow-lg shadow-red-500/20 border-b border-red-500 flex flex-wrap items-center justify-between gap-3 shrink-0 z-30 animate-pulse"
           >
             <div class="flex items-center gap-3 min-w-0">
@@ -67,9 +67,77 @@
         </transition>
 
 
-        <!-- Page Content -->
-        <main class="flex-1 flex flex-col overflow-hidden relative p-4 sm:p-5">
-          <router-view />
+                <!-- Top Nano Loading Progress Bar -->
+        <div
+          v-if="isPageNavigating"
+          class="h-[3px] w-full bg-slate-200/50 dark:bg-slate-800 overflow-hidden shrink-0 relative z-50"
+        >
+          <div
+            class="h-full bg-gradient-to-r from-indigo-500 via-sky-400 to-indigo-600 transition-all duration-300 ease-out shadow-sm shadow-indigo-500/50"
+            :style="{ width: pageNavProgress + '%' }"
+          ></div>
+        </div>
+
+        <!-- Sleek Operational Sub-Header -->
+        <header class="h-11 px-4 sm:px-6 bg-white/75 dark:bg-[#111827]/75 backdrop-blur-md border-b border-slate-200/70 dark:border-white/5 flex items-center justify-between gap-3 shrink-0 z-20 transition-colors">
+          <!-- Left: Breadcrumb Navigation -->
+          <div class="flex items-center gap-2 min-w-0">
+            <nav class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 min-w-0">
+              <router-link
+                to="/dashboard"
+                class="hover:text-indigo-600 dark:hover:text-indigo-400 font-medium transition-colors flex items-center gap-1 shrink-0"
+              >
+                <Shield class="w-3.5 h-3.5 text-indigo-500" />
+                <span class="hidden sm:inline font-semibold">Workforce</span>
+              </router-link>
+              <ChevronRight class="w-3 h-3 text-slate-300 dark:text-slate-600 shrink-0" />
+              <span class="font-bold text-slate-800 dark:text-slate-100 truncate text-[11px] sm:text-xs tracking-tight">
+                {{ currentPageTitle }}
+              </span>
+            </nav>
+          </div>
+
+          <!-- Right: Status, Refresh & Support -->
+          <div class="flex items-center gap-2 sm:gap-2.5 shrink-0">
+            <!-- Live Operational Heartbeat Badge -->
+            <div class="hidden sm:flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200/60 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-[10.5px] font-bold">
+              <span class="relative flex h-1.5 w-1.5">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+              </span>
+              <span>Live System</span>
+            </div>
+
+            <!-- Fast View Refresh Button -->
+            <button
+              @click="triggerManualRefresh"
+              :disabled="isRefreshing"
+              class="h-7 px-2 sm:px-2.5 rounded-lg border border-slate-200/80 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-[11px] font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+              title="Refresh Current View"
+            >
+              <RotateCw class="w-3 h-3" :class="{ 'animate-spin text-indigo-500': isRefreshing }" />
+              <span class="hidden md:inline">{{ isRefreshing ? 'Refreshing...' : 'Refresh' }}</span>
+            </button>
+
+            <!-- WhatsApp Support Shortcut -->
+            <button
+              @click="openGlobalWhatsAppSupport"
+              class="h-7 px-2 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 hover:bg-emerald-100 dark:hover:bg-emerald-500/20 border border-emerald-200/60 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-[11px] font-bold flex items-center gap-1 transition-all cursor-pointer"
+              title="Live WhatsApp Support"
+            >
+              <MessageCircle class="w-3 h-3" />
+              <span class="hidden lg:inline">Support</span>
+            </button>
+          </div>
+        </header>
+
+        <!-- Page Content with Smooth Micro-Transition -->
+        <main class="flex-1 flex flex-col overflow-hidden relative p-3 sm:p-5">
+          <router-view v-slot="{ Component, route }">
+            <div :key="route.path" class="w-full h-full flex-1 flex flex-col overflow-hidden animate-page-enter">
+              <component :is="Component" />
+            </div>
+          </router-view>
         </main>
       </div>
     </div>
@@ -152,29 +220,6 @@
       </div>
     </Teleport>
 
-    <!-- Floating WhatsApp Support & App Download Hub -->
-    <div class="fixed bottom-4 right-4 z-40 flex items-center gap-2">
-      <!-- Get App Pill -->
-      <button
-        @click="showDownloadAppModal = true"
-        class="h-10 px-3.5 rounded-full bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-white hover:border-indigo-300 dark:hover:border-indigo-500/30 text-xs font-bold shadow-lg flex items-center gap-2 transition-all cursor-pointer group"
-        title="Download AccessEasy Patrol App on Google Play Store"
-      >
-        <Smartphone class="w-4 h-4 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform" />
-        <span class="hidden sm:inline">Get Mobile App</span>
-      </button>
-
-      <!-- WhatsApp Live Support Floating Button -->
-      <button
-        @click="openGlobalWhatsAppSupport"
-        class="h-10 px-4 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-lg shadow-emerald-600/30 flex items-center gap-2 transition-all cursor-pointer hover:scale-105 active:scale-95 group"
-        title="24/7 WhatsApp Support"
-      >
-        <MessageCircle class="w-4 h-4 text-white group-hover:rotate-12 transition-transform" />
-        <span>WhatsApp Support</span>
-        <span class="w-2 h-2 rounded-full bg-emerald-300 animate-ping"></span>
-      </button>
-    </div>
 
     <!-- App Download Modal -->
     <AppDownloadModal v-model="showDownloadAppModal" />
@@ -185,8 +230,9 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import { Clock, X, AlertTriangle, CheckCheck, MessageCircle, Smartphone } from 'lucide-vue-next';
+import { Clock, X, AlertTriangle, CheckCheck, MessageCircle, Smartphone, Shield, ChevronRight, RotateCw, CheckCircle2 } from 'lucide-vue-next';
 import SecuritySidebar from '@/components/layout/SecuritySidebar.vue';
+import WorkforceSidebar from '@/components/layout/WorkforceSidebar.vue';
 import TrialBanner from '@/components/layout/TrialBanner.vue';
 import TrialWelcomeModal from '@/components/layout/TrialWelcomeModal.vue';
 import AppDownloadModal from '@/components/common/AppDownloadModal.vue';
@@ -202,6 +248,50 @@ const openGlobalWhatsAppSupport = () => {
 
 const route = useRoute();
 const router = useRouter();
+
+const isPageNavigating = ref(false);
+const pageNavProgress = ref(0);
+let navProgressTimer = null;
+
+const startNavProgress = () => {
+  isPageNavigating.value = true;
+  pageNavProgress.value = 15;
+  if (navProgressTimer) clearInterval(navProgressTimer);
+  navProgressTimer = setInterval(() => {
+    if (pageNavProgress.value < 85) {
+      pageNavProgress.value += Math.floor(Math.random() * 15) + 10;
+    }
+  }, 80);
+};
+
+const completeNavProgress = () => {
+  pageNavProgress.value = 100;
+  if (navProgressTimer) clearInterval(navProgressTimer);
+  setTimeout(() => {
+    isPageNavigating.value = false;
+    pageNavProgress.value = 0;
+  }, 220);
+};
+
+let unhookRouterBefore = null;
+let unhookRouterAfter = null;
+
+const isRefreshing = ref(false);
+const triggerManualRefresh = async () => {
+  if (isRefreshing.value) return;
+  isRefreshing.value = true;
+  startNavProgress();
+  try {
+    await fetchAlerts();
+    window.dispatchEvent(new CustomEvent('accesseasy:refresh'));
+  } finally {
+    completeNavProgress();
+    setTimeout(() => {
+      isRefreshing.value = false;
+    }, 350);
+  }
+};
+
 
 const isNotificationsOpen = ref(false);
 const activeAlertsList = ref([]);
@@ -320,7 +410,13 @@ const navigateTo = (path) => {
 
 
 
-const activeSidebar = SecuritySidebar;
+const appMode = import.meta.env.VITE_APP_MODE || 'workforce';
+const activeSidebar = computed(() => {
+  if (appMode === 'patrol' || appMode === 'security') return SecuritySidebar;
+  return WorkforceSidebar;
+});
+
+
 
 const _userData = authService.getUserData();
 const userName = computed(() => {
@@ -337,6 +433,16 @@ let alertsPollTimer = null;
 let isFetchingAlerts = false;
 
 onMounted(() => {
+  unhookRouterBefore = router.beforeEach((to, from, next) => {
+    if (to.path !== from.path) {
+      startNavProgress();
+    }
+    next();
+  });
+  unhookRouterAfter = router.afterEach(() => {
+    completeNavProgress();
+  });
+
   fetchAlerts();
   // Poll every 20 seconds for SOS and patrol alerts
   alertsPollTimer = setInterval(async () => {
@@ -351,15 +457,28 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+  if (unhookRouterBefore) unhookRouterBefore();
+  if (unhookRouterAfter) unhookRouterAfter();
+  if (navProgressTimer) clearInterval(navProgressTimer);
   if (alertsPollTimer) clearInterval(alertsPollTimer);
 });
 
 const currentPageTitle = computed(() => {
-  const path = route.path;
+  const path = route.path || '';
+
+  if (path.includes('/dashboard/employee')) return 'Employees';
+  if (path.includes('/dashboard/attendance') || path.includes('/dashboard/myAttendance')) return 'Attendance';
+  if (path.includes('/dashboard/leave')) return 'Leave Management';
+  if (path.includes('/dashboard/doors') || path.includes('/dashboard/door')) return 'Access Doors';
+  if (path.includes('/dashboard/devices') || path.includes('/dashboard/device')) return 'Device Fleet';
+  if (path.includes('/dashboard/accesslevel')) return 'Access Levels';
+  if (path.includes('/dashboard/task')) return 'Task Management';
+  if (path.includes('/dashboard/payroll')) return 'Payroll';
+  if (path.includes('/dashboard/schedules')) return 'Schedules';
+  if (path.includes('/dashboard/rules')) return 'Access Rules';
   if (path.includes('/dashboard/settings/devices') || path.includes('/dashboard/settings/patrol-devices')) return 'Device Fleet';
   if (path.includes('/dashboard/settings/escalation')) return 'Emergency Escalation';
   if (path.includes('/dashboard/settings/patrol-shifts') || path.includes('/dashboard/settings/shifts')) return 'Shift Scheduler';
-  if (path.includes('/dashboard/settings/audit-log')) return 'Audit Trail';
   if (path.includes('/dashboard/settings/subscription') || path.includes('/dashboard/settings/plans')) return 'Subscription & Plans';
   if (path.includes('/dashboard/settings/logs')) return 'Event Logs';
   if (path.includes('/dashboard/settings/zones')) return 'Zones & Access Points';
@@ -371,7 +490,7 @@ const currentPageTitle = computed(() => {
   if (path.includes('/dashboard/patrols/checkpoints')) return 'Patrol Checkpoints';
   if (path.includes('/dashboard/patrols/history')) return 'Patrol History';
   if (path.includes('/dashboard/patrols/create')) return 'Create Patrol';
-  if (path.includes('/dashboard/patrols')) return 'Patrol Command';
+  if (path.includes('/dashboard/patrols')) return 'Workforce Dashboard';
   if (path.includes('/dashboard/incidents')) return 'Incident Management';
   if (path.includes('/dashboard/reports')) return 'Reports & Analytics';
   if (path.includes('/dashboard/profile')) return 'Profile';
@@ -385,4 +504,20 @@ const currentPageTitle = computed(() => {
 .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
 .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 99px; }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+/* Smooth Page Navigation Keyframe Animation */
+@keyframes pageEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-page-enter {
+  animation: pageEnter 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
 </style>

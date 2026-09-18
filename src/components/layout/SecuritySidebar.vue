@@ -71,7 +71,7 @@
       <div>
         <p
           v-if="!isCollapsed"
-          class="px-3 mb-1.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 whitespace-nowrap"
+          class="px-3 mb-1.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500 whitespace-nowrap"
         >
           Operations
         </p>
@@ -84,7 +84,7 @@
             :class="[
               isItemActive(item)
                 ? 'bg-indigo-50/90 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 font-bold border border-indigo-200/80 dark:border-indigo-800/50 shadow-xs'
-                : 'text-slate-800 dark:text-slate-200 font-semibold hover:bg-slate-100/70 dark:hover:bg-slate-800/60 hover:text-indigo-600 dark:hover:text-white',
+                : 'text-slate-700 dark:text-slate-200 font-semibold hover:bg-slate-100/70 dark:hover:bg-slate-800/60 hover:text-indigo-600 dark:hover:text-white',
               isCollapsed ? 'justify-center py-2.5' : 'px-3.5 py-2'
             ]"
             :title="isCollapsed ? item.name : ''"
@@ -93,7 +93,7 @@
               <component
                 :is="item.icon"
                 class="w-4 h-4 shrink-0 transition-colors"
-                :class="isItemActive(item) ? 'text-indigo-600 dark:text-indigo-400' : (item.iconClass || 'text-slate-600 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-white')"
+                :class="isItemActive(item) ? 'text-indigo-600 dark:text-indigo-400' : (item.iconClass || 'text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-white')"
               />
               <span
                 v-if="!isCollapsed"
@@ -111,13 +111,13 @@
         </div>
       </div>
 
-      <!-- FLEET & PERIMETER -->
+      <!-- SITES & DEVICES -->
       <div v-if="setupNav.length > 0">
         <p
           v-if="!isCollapsed"
-          class="px-3 mb-1.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 whitespace-nowrap"
+          class="px-3 mb-1.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500 whitespace-nowrap"
         >
-          Fleet & Perimeter
+          Sites &amp; Devices
         </p>
         <div class="space-y-1">
           <router-link
@@ -128,7 +128,7 @@
             :class="[
               isItemActive(item)
                 ? 'bg-indigo-50/90 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 font-bold border border-indigo-200/80 dark:border-indigo-800/50 shadow-xs'
-                : 'text-slate-800 dark:text-slate-200 font-semibold hover:bg-slate-100/70 dark:hover:bg-slate-800/60 hover:text-indigo-600 dark:hover:text-white',
+                : 'text-slate-700 dark:text-slate-200 font-semibold hover:bg-slate-100/70 dark:hover:bg-slate-800/60 hover:text-indigo-600 dark:hover:text-white',
               isCollapsed ? 'justify-center py-2.5' : 'px-3.5 py-2'
             ]"
             :title="isCollapsed ? item.name : ''"
@@ -137,7 +137,7 @@
               <component
                 :is="item.icon"
                 class="w-4 h-4 shrink-0 transition-colors"
-                :class="isItemActive(item) ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-white'"
+                :class="isItemActive(item) ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-white'"
               />
               <span
                 v-if="!isCollapsed"
@@ -155,13 +155,13 @@
         </div>
       </div>
 
-      <!-- GOVERNANCE & AUDIT -->
+      <!-- INSIGHTS & AUDIT -->
       <div>
         <p
           v-if="!isCollapsed"
-          class="px-3 mb-1.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400 whitespace-nowrap"
+          class="px-3 mb-1.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500 whitespace-nowrap"
         >
-          Governance & Logs
+          Insights
         </p>
         <div class="space-y-1">
           <router-link
@@ -172,7 +172,7 @@
             :class="[
               isItemActive(item)
                 ? 'bg-indigo-50/90 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 font-bold border border-indigo-200/80 dark:border-indigo-800/50 shadow-xs'
-                : 'text-slate-800 dark:text-slate-200 font-semibold hover:bg-slate-100/70 dark:hover:bg-slate-800/60 hover:text-indigo-600 dark:hover:text-white',
+                : 'text-slate-700 dark:text-slate-200 font-semibold hover:bg-slate-100/70 dark:hover:bg-slate-800/60 hover:text-indigo-600 dark:hover:text-white',
               isCollapsed ? 'justify-center py-2.5' : 'px-3.5 py-2'
             ]"
             :title="isCollapsed ? item.name : ''"
@@ -181,7 +181,7 @@
               <component
                 :is="item.icon"
                 class="w-4 h-4 shrink-0 transition-colors"
-                :class="isItemActive(item) ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-white'"
+                :class="isItemActive(item) ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-white'"
               />
               <span
                 v-if="!isCollapsed"
@@ -210,42 +210,38 @@
         to="/dashboard/settings"
         class="flex items-center rounded-xl text-xs transition-all group"
         :class="[
-          $route.path === '/dashboard/settings'
+          $route.path === '/dashboard/settings' || $route.path.startsWith('/dashboard/settings/')
             ? 'bg-indigo-50/90 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 font-bold border border-indigo-200/80 dark:border-indigo-800/50 shadow-xs'
-            : 'text-slate-800 dark:text-slate-200 font-semibold hover:bg-slate-100/70 dark:hover:bg-slate-800/60 hover:text-indigo-600 dark:hover:text-white',
+            : 'text-slate-700 dark:text-slate-200 font-semibold hover:bg-slate-100/70 dark:hover:bg-slate-800/60 hover:text-indigo-600 dark:hover:text-white',
           isCollapsed ? 'justify-center py-2.5' : 'gap-3 px-3.5 py-2'
         ]"
-        :title="isCollapsed ? 'Settings' : ''"
+        :title="isCollapsed ? 'Settings Hub' : ''"
       >
-        <Settings class="w-4 h-4 text-slate-600 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-white shrink-0" />
+        <Settings class="w-4 h-4 text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-white shrink-0" />
         <span
           v-if="!isCollapsed"
           class="truncate font-semibold text-xs"
         >Settings Hub</span>
       </router-link>
 
-      <!-- Quick Action: Get Mobile App & WhatsApp Support -->
-      <div v-if="!isCollapsed" class="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-white/5 space-y-1.5 mb-1">
+      <!-- Sleek Support & Mobile App Pill -->
+      <div v-if="!isCollapsed" class="grid grid-cols-2 gap-1.5 p-1.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/70 dark:border-white/5 my-1">
         <button
-          class="w-full py-1.5 px-2.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-[11px] font-bold flex items-center justify-between transition-colors cursor-pointer"
+          class="py-1.5 px-2 rounded-lg bg-white dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 text-slate-600 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-400 text-[10.5px] font-bold flex items-center justify-center gap-1.5 border border-slate-200/60 dark:border-white/5 transition-all shadow-xs cursor-pointer"
           @click="openWhatsAppSupport"
+          title="Direct WhatsApp Support"
         >
-          <div class="flex items-center gap-2">
-            <MessageCircle class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
-            <span>WhatsApp Support</span>
-          </div>
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <MessageCircle class="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+          <span>Support</span>
         </button>
 
         <button
-          class="w-full py-1.5 px-2.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-500/10 dark:hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 text-[11px] font-bold flex items-center justify-between transition-colors cursor-pointer"
+          class="py-1.5 px-2 rounded-lg bg-white dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 text-slate-600 dark:text-slate-300 hover:text-indigo-700 dark:hover:text-indigo-400 text-[10.5px] font-bold flex items-center justify-center gap-1.5 border border-slate-200/60 dark:border-white/5 transition-all shadow-xs cursor-pointer"
           @click="showDownloadModal = true"
+          title="Download Patrol Mobile App"
         >
-          <div class="flex items-center gap-2">
-            <Smartphone class="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
-            <span>Patrol App (Play Store)</span>
-          </div>
-          <Download class="w-3 h-3 opacity-70" />
+          <Smartphone class="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+          <span>App</span>
         </button>
       </div>
 
@@ -346,7 +342,7 @@ import {
   Settings, HelpCircle, LogOut,
   ChevronLeft, ChevronRight, Clock,
   ShieldAlert, AlertCircle, Building2, QrCode, Activity,
-  UserCheck, Siren, Calendar, Smartphone, ScrollText, CreditCard,
+  UserCheck, Siren, Calendar, Smartphone, CreditCard,
   Globe, CheckCircle, MessageCircle, Download
 } from 'lucide-vue-next';
 import { authService } from '@/services/authService';
@@ -414,9 +410,8 @@ const operationsNav = computed(() => {
   if (appMode === 'patrol') {
     return [
       { name: 'Patrol Command', href: '/dashboard/patrols', icon: ShieldAlert },
-      { name: 'Guard Attendance', href: '/dashboard/guards/attendance', icon: UserCheck },
-      { name: 'Incidents', href: '/dashboard/incidents', icon: AlertCircle },
-      { name: 'Emergency Escalation', href: '/dashboard/settings/escalation', icon: Siren, iconClass: 'text-rose-500 group-hover:text-rose-600', badge: 'SOS', badgeClass: 'bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400 font-black' }
+      { name: 'Guards & Attendance', href: '/dashboard/guards', icon: Users },
+      { name: 'Incidents', href: '/dashboard/incidents', icon: AlertCircle }
     ];
   }
   return [
@@ -429,27 +424,17 @@ const operationsNav = computed(() => {
 const setupNav = computed(() => {
   if (appMode === 'patrol') {
     return [
-      { name: 'Sites & Geofences', href: '/dashboard/sites', icon: Building2 },
-      { name: 'Zones', href: '/dashboard/settings/zones', icon: MapIcon },
-      { name: 'Checkpoints', href: '/dashboard/settings/checkpoints', icon: QrCode },
-      { name: 'Guards & Staff', href: '/dashboard/guards', icon: Users },
-      { name: 'Shift Scheduler', href: '/dashboard/settings/patrol-shifts', icon: Calendar, badge: '24/7', badgeClass: 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400' },
-      { name: 'Device Fleet', href: '/dashboard/settings/devices', icon: Smartphone }
+      { name: 'Sites & Locations', href: '/dashboard/sites', icon: Building2 },
+      { name: 'Patrol Checkpoints', href: '/dashboard/settings/checkpoints', icon: QrCode },
+      { name: 'Guard Devices', href: '/dashboard/settings/devices', icon: Smartphone }
     ];
   }
   return [];
 });
 
 const analyticsNav = computed(() => {
-  if (appMode === 'patrol') {
-    return [
-      { name: 'Reports & Analytics', href: '/dashboard/reports', icon: BarChart2 },
-      { name: 'Audit Trail', href: '/dashboard/settings/audit-log', icon: ScrollText },
-      { name: 'Plan & Quotas', href: '/dashboard/settings/subscription', icon: CreditCard, badge: 'Tiers', badgeClass: 'bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400' }
-    ];
-  }
   return [
-    { name: 'Reports', href: '/dashboard/reports', icon: BarChart2 }
+    { name: 'Reports & Analytics', href: '/dashboard/reports', icon: BarChart2 }
   ];
 });
 </script>

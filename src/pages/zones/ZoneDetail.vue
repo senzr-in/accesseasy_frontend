@@ -107,11 +107,21 @@
               </span>
             </div>
             <p class="text-[11px] text-slate-500 mb-2">{{ cp.location_description || 'No location notes' }}</p>
-            <div class="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-white/5 text-[10px] font-semibold text-slate-400">
-              <span v-if="cp.requires_nfc" class="text-indigo-600 font-bold">NFC Required</span>
-              <span v-else>QR Verification</span>
-              <span>·</span>
-              <span v-if="cp.requires_photo" class="text-amber-600">Photo Required</span>
+            <div class="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-white/5 text-[10px] font-semibold text-slate-400">
+              <div class="flex items-center gap-2">
+                <span v-if="cp.requires_nfc" class="text-indigo-600 font-bold">NFC</span>
+                <span v-else>QR Code</span>
+                <span>·</span>
+                <span v-if="cp.requires_photo" class="text-amber-600">Photo Req</span>
+              </div>
+              <button
+                class="px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 font-bold text-[10px] flex items-center gap-1 cursor-pointer transition-colors"
+                title="Print QR Badge for this checkpoint"
+                @click="printSingleCheckpointBadge(cp)"
+              >
+                <QrCode class="w-3 h-3" />
+                <span>Print Badge</span>
+              </button>
             </div>
           </div>
         </div>
@@ -215,12 +225,15 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { ArrowLeft, Building2, MapPin, X } from 'lucide-vue-next';
+import QRCode from 'qrcode';
+import { ArrowLeft, Building2, MapPin, X, QrCode } from 'lucide-vue-next';
 import { zoneService } from '@/services/zoneService';
 import { siteService } from '@/services/siteService';
 import { patrolService } from '@/services/patrolService';
+import { authService } from '@/services/authService';
 import { subscriptionService } from '@/services/subscriptionService';
 import UpgradeModal from '@/components/common/UpgradeModal.vue';
+import { toast } from '@/stores/useToastStore';
 
 const route = useRoute();
 const router = useRouter();
@@ -275,6 +288,7 @@ const submitCreateCheckpoint = async () => {
       site: zoneData.value.site || parentSite.value?.id
     });
     showCpModal.value = false;
+    toast.success(`Checkpoint "${newCpForm.value.checkpoint_name}" created successfully`);
     await loadZoneDetails();
   } catch (error) {
     if (error.code === 'PLAN_LIMIT_EXCEEDED') {
@@ -282,7 +296,7 @@ const submitCreateCheckpoint = async () => {
       upgradeMsg.value = error.message;
       showUpgradeModal.value = true;
     } else {
-      alert(error.message || "Failed to create checkpoint.");
+      toast.error(error.message || "Failed to create checkpoint.");
     }
   }
 };
@@ -306,6 +320,67 @@ const loadZoneDetails = async () => {
     console.error("Error loading zone details:", e);
   } finally {
     loading.value = false;
+  }
+};
+
+const printSingleCheckpointBadge = async (cp) => {
+  try {
+    const tenantId = authService.getTenantId();
+    const cpId = cp.checkpoint_id || cp.id;
+    const rawString = `${cpId}-${tenantId}-AccessEasy2026`;
+    const signature = btoa(unescape(encodeURIComponent(rawString))).replace(/=/g, '');
+    const qrData = `ACPT::${cpId}::${signature}`;
+    const qrDataUrl = await QRCode.toDataURL(qrData, {
+      width: 240, margin: 1, color: { dark: '#0F172A', light: '#FFFFFF' }
+    });
+
+    const html = `
+    <html>
+      <head>
+        <title>Checkpoint Badge - ${cp.checkpoint_name || cp.name}</title>
+        <style>
+          * { box-sizing: border-box; margin: 0; padding: 0; }
+          body { font-family: monospace, system-ui, sans-serif; background: #fff; color: #000; padding: 40px; display: flex; justify-content: center; }
+          .card { width: 68mm; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 14px; border: 2px dashed #0F172A; border-radius: 12px; }
+          .brand { font-size: 15px; font-weight: 900; text-transform: uppercase; border-bottom: 1px dashed #000; width: 100%; padding-bottom: 6px; margin-bottom: 12px; }
+          .qr { width: 50mm; height: 50mm; margin-bottom: 10px; }
+          .name { font-size: 15px; font-weight: bold; margin-bottom: 4px; word-break: break-word; max-width: 100%; }
+          .id { font-size: 12px; font-family: monospace; margin-bottom: 10px; color: #334155; word-break: break-all; }
+          .meta { width: 100%; display: flex; justify-content: space-between; border-top: 1px dashed #000; padding-top: 8px; margin-top: 4px; }
+          .meta-item { display: flex; flex-direction: column; text-align: center; width: 50%; }
+          .meta-item label { font-size: 9px; text-transform: uppercase; color: #64748B; }
+          .meta-item span { font-weight: bold; font-size: 12px; }
+          @media print { 
+            body { padding: 0; }
+            .card { border: 1px solid #000; }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <div class="brand">AccessEasy<div style="font-size:10px;font-weight:normal;margin-top:2px;">Security Checkpoint</div></div>
+          <img src="${qrDataUrl}" class="qr" />
+          <div class="name">${cp.checkpoint_name || cp.name}</div>
+          <div class="id">${cpId}</div>
+          <div class="meta">
+            <div class="meta-item"><label>Zone</label><span>${zoneData.value.zoneName || zoneData.value.name || 'Zone'}</span></div>
+            <div class="meta-item"><label>Site</label><span>${parentSiteName.value}</span></div>
+          </div>
+        </div>
+        <script>window.onload = () => { setTimeout(() => { window.print(); window.close(); }, 500); };<\/script>
+      </body>
+    </html>`;
+
+    const win = window.open('', '_blank');
+    if (!win) {
+      toast.warning('Pop-up was blocked. Please allow pop-ups for this site to print badges.');
+      return;
+    }
+    win.document.write(html);
+    win.document.close();
+  } catch (err) {
+    console.error('Failed to print badge:', err);
+    toast.error('Failed to generate badge.');
   }
 };
 

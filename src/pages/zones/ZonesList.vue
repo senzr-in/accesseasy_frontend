@@ -282,18 +282,27 @@ const deleteItem = (item) => {
   deleteDialog.value = true;
 };
 
+import { toast } from "@/stores/useToastStore";
+
+const deleting = ref(false);
+
 /**
  * Confirm delete action
  */
 const confirmDelete = async () => {
+  if (!itemToDelete.value) return;
+  deleting.value = true;
   try {
     await zoneService.deleteZone(itemToDelete.value.id);
     deleteDialog.value = false;
+    toast.success(`Zone "${itemToDelete.value.zoneName || itemToDelete.value.name || ''}" deleted successfully`);
     itemToDelete.value = null;
     await fetchZonesData();
   } catch (error) {
     console.error("Error deleting zone:", error);
-    alert("Error deleting zone");
+    toast.error(error.message || "Failed to delete zone");
+  } finally {
+    deleting.value = false;
   }
 };
 

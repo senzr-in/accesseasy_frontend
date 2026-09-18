@@ -99,7 +99,13 @@ class IncidentService {
     if (currentIndex === -1 || currentIndex >= stageKeys.length - 1) return [];
 
     const nextStage = INCIDENT_STAGES[currentIndex + 1];
-    return [nextStage];
+    const roleNormalized = String(userRole || 'Admin').toLowerCase();
+    const allowedNormalized = (nextStage.allowedRoles || []).map(r => r.toLowerCase());
+
+    if (allowedNormalized.length === 0 || allowedNormalized.includes(roleNormalized) || roleNormalized === 'admin') {
+      return [nextStage];
+    }
+    return [];
   }
 
   /**
@@ -127,8 +133,7 @@ class IncidentService {
         location: payload.location || 'Patrol Perimeter',
         latitude: payload.latitude,
         longitude: payload.longitude,
-        notes: payload.notes || 'Emergency Panic Button Triggered from Mobile Patrol App',
-        date_created: new Date().toISOString()
+        notes: payload.notes || 'Emergency Panic Button Triggered from Mobile Patrol App'
       };
 
       const res = await authService.protectedApi.post('/items/patrol_alerts', alertRecord);

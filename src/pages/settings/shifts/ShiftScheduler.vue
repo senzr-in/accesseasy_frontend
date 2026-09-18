@@ -6,15 +6,22 @@
       <!-- Top Banner -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 p-5 rounded-2xl shadow-sm">
         <div class="flex items-center gap-3.5">
+          <button
+            @click="router.push('/dashboard/settings')"
+            class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer shrink-0"
+            title="Back to Settings"
+          >
+            <ArrowLeft class="w-4 h-4" />
+          </button>
           <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-600/20 shrink-0">
             <Calendar class="w-5 h-5" />
           </div>
           <div>
             <h1 class="text-base font-black text-slate-900 dark:text-white tracking-tight">
-              Guard Shift Scheduler & Rotation Roster
+              Shift Schedules
             </h1>
             <p class="text-xs text-slate-500 font-medium mt-0.5">
-              Plan weekly 24/7 security rotations, assign shift slots, and detect fatigue conflicts
+              Duty shift timings, hours, and weekly rosters
             </p>
           </div>
         </div>
@@ -195,9 +202,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { Calendar, Download, Plus, X } from 'lucide-vue-next';
+import { useRouter } from 'vue-router';
+import { Calendar, Download, Plus, X, ArrowLeft } from 'lucide-vue-next';
 import { shiftService } from '@/services/shiftService';
 import FeatureGate from '@/components/common/FeatureGate.vue';
+
+const router = useRouter();
 
 const daysList = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const rosterList = ref([]);

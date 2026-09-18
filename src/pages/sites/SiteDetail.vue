@@ -237,6 +237,7 @@ import { zoneService } from '@/services/zoneService';
 import { subscriptionService } from '@/services/subscriptionService';
 import FeatureGate from '@/components/common/FeatureGate.vue';
 import UpgradeModal from '@/components/common/UpgradeModal.vue';
+import { toast } from '@/stores/useToastStore';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -280,6 +281,7 @@ const submitCreateZone = async () => {
       site: siteData.value.id
     });
     showZoneModal.value = false;
+    toast.success(`Zone "${newZoneForm.value.name}" created successfully`);
     siteZones.value = await zoneService.fetchZonesBySite(siteData.value.id);
   } catch (error) {
     if (error.code === 'PLAN_LIMIT_EXCEEDED') {
@@ -287,7 +289,7 @@ const submitCreateZone = async () => {
       upgradeTriggerMsg.value = error.message;
       showUpgradeModal.value = true;
     } else {
-      alert(error.message || "Failed to create zone.");
+      toast.error(error.message || "Failed to create zone.");
     }
   }
 };

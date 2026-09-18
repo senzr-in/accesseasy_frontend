@@ -57,8 +57,30 @@ const trialDaysRemaining = computed(() => {
   const sub = subscription.value;
   const end = sub?.active_until || sub?.end_date || sub?.renewal_date;
   if (!end) return 7;
-  const diffTime = new Date(end) - new Date();
+
+  // Normalize string dates (like 'YYYY-MM-DD') to end of the day (23:59:59) so current day is counted
+  const endDate = new Date(end);
+  if (typeof end === "string" && /^\d{4}-\d{2}-\d{2}$/.test(end.trim())) {
+    endDate.setHours(23, 59, 59, 999);
+  }
+
+  const diffTime = endDate.getTime() - Date.now();
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  // If a trial account was registered recently (within 7 days), don't show 0 due to date/time-zone truncation
+  if (diffDays <= 0 && isTrial.value) {
+    const createdRaw = sub?.start_date || sub?.date_created;
+    if (createdRaw) {
+      const created = new Date(createdRaw);
+      if (!isNaN(created.getTime())) {
+        const daysSince = Math.floor((Date.now() - created.getTime()) / (1000 * 60 * 60 * 24));
+        if (daysSince >= 0 && daysSince < 7) {
+          return Math.max(1, 7 - daysSince);
+        }
+      }
+    }
+  }
+
   return Math.max(0, diffDays);
 });
 
@@ -66,7 +88,11 @@ const daysRemaining = computed(() => {
   const sub = subscription.value;
   const end = sub?.active_until || sub?.end_date || sub?.renewal_date;
   if (!end) return null;
-  const diffTime = new Date(end) - new Date();
+  const endDate = new Date(end);
+  if (typeof end === "string" && /^\d{4}-\d{2}-\d{2}$/.test(end.trim())) {
+    endDate.setHours(23, 59, 59, 999);
+  }
+  const diffTime = endDate.getTime() - Date.now();
   return Math.max(0, Math.ceil(diffTime / (1000 * 60 * 60 * 24)));
 });
 

@@ -9,7 +9,7 @@ class InterlockService {
     try {
       const tenantId = authService.getTenantId();
       const response = await authService.protectedApi.get(
-        `/items/interlockMode?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}`
+        `/items/interlockMode?filter[tenant][_eq]=${tenantId}`
       );
       return response.data.data;
     } catch (error) {

@@ -62,6 +62,8 @@ class AuthService {
       );
     });
 
+    this._refreshPromise = null;
+
     this.protectedApi.interceptors.response.use(
       (response) => {
         this.updateLastActivity();
@@ -74,15 +76,26 @@ class AuthService {
           const refreshToken = this.getRefreshToken();
           if (refreshToken) {
             try {
-              const directusBase = import.meta.env.VITE_API_URL;
-              const res = await axios.post(`${directusBase}/auth/refresh`, {
-                refresh_token: refreshToken,
-                mode: 'json'
-              });
-              if (res.data?.data) {
-                const { access_token, refresh_token: newRefresh } = res.data.data;
-                this.setToken(access_token, newRefresh);
-                originalRequest.headers['Authorization'] = `Bearer ${access_token}`;
+              if (!this._refreshPromise) {
+                const directusBase = import.meta.env.VITE_API_URL;
+                this._refreshPromise = axios.post(`${directusBase}/auth/refresh`, {
+                  refresh_token: refreshToken,
+                  mode: 'json'
+                }).then(res => {
+                  if (res.data?.data) {
+                    const { access_token, refresh_token: newRefresh } = res.data.data;
+                    this.setToken(access_token, newRefresh);
+                    return access_token;
+                  }
+                  throw new Error('Invalid refresh response structure');
+                }).finally(() => {
+                  this._refreshPromise = null;
+                });
+              }
+
+              const newAccessToken = await this._refreshPromise;
+              if (newAccessToken) {
+                originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
                 return this.protectedApi(originalRequest);
               }
             } catch (refreshErr) {
@@ -110,6 +123,9 @@ class AuthService {
             console.warn("[AuthService] Different user logged in on another tab. Invalidating session.");
             this.handleConcurrentLogin();
           }
+        } else if (event.data?.type === "LOGOUT") {
+          console.warn("[AuthService] Logout detected on another tab. Invalidating local session.");
+          this.handleSessionExpired();
         }
       };
     }
@@ -475,7 +491,15 @@ class AuthService {
   }
 
   getEmail() {
-    return localStorage.getItem("email");
+    return localStorage.getItem("email") || this.getUserData()?.email || "";
+  }
+
+  getUserEmail() {
+    return this.getEmail();
+  }
+
+  getUserPhone() {
+    return this.getPhone() || this.getUserData()?.phone || "";
   }
 
   // Add tenant-related methods

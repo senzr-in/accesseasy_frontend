@@ -1,7 +1,9 @@
 <template>
-  <AdminDashboard v-if="appMode === 'security'" />
-  <GuardDashboard v-else-if="appMode === 'patrol'" />
-  <WorkforceDashboard v-else />
+  <div class="h-full w-full">
+    <AdminDashboard v-if="appMode === 'security'" />
+    <GuardDashboard v-else-if="appMode === 'patrol'" />
+    <WorkforceDashboard v-else />
+  </div>
 </template>
 
 <script setup>

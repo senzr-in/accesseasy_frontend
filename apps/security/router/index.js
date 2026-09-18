@@ -224,6 +224,18 @@ const routes = [
         meta: { roles: ["Admin"] }
       },
       {
+        path: "settings/checkpoints",
+        name: "SettingsCheckpoints",
+        component: () => import("@/pages/settings/checkpoints/index.vue"),
+        meta: { roles: ["Admin", "Manager", "Guard"] }
+      },
+      {
+        path: "patrols/checkpoints",
+        name: "PatrolCheckpoints",
+        component: () => import("@/pages/guard/Checkpoints.vue"),
+        meta: { roles: ["Admin", "Manager", "Guard"] }
+      },
+      {
         path: "access-control/doors",
         name: "Doors",
         component: Doors,

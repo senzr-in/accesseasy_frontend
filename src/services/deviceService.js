@@ -34,24 +34,8 @@ class DeviceService {
       const headers = this.getHeaders();
 
       try {
-        // 1. Query Directus /items/devices (Primary collection for mobile patrol tablets & phones)
-        let urlDevices = `${apiUrl}/items/devices?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&fields=*&sort=-date_updated&limit=100`;
-        if (siteId) {
-          urlDevices += `&filter[site][_eq]=${siteId}`;
-        }
-
-        try {
-          const resDevices = await fetch(urlDevices, { headers, signal: AbortSignal.timeout ? AbortSignal.timeout(6000) : undefined });
-          if (resDevices.ok) {
-            const jsonDev = await resDevices.json();
-            if (jsonDev.data && Array.isArray(jsonDev.data)) {
-              list.push(...jsonDev.data);
-            }
-          }
-        } catch (_) {}
-
-        // 2. Query Directus /items/controllers (Strictly for this tenant)
-        let urlControllers = `${apiUrl}/items/controllers?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&fields=*&sort=-date_updated&limit=100`;
+        // Query Directus /items/controllers (single source of truth for patrol terminals & mobile devices)
+        let urlControllers = `${apiUrl}/items/controllers?filter[tenant][_eq]=${tenantId}&fields=*&sort=-date_updated&limit=100`;
         if (siteId) {
           urlControllers += `&filter[location][_eq]=${siteId}`;
         }
@@ -61,11 +45,7 @@ class DeviceService {
           if (resControllers.ok) {
             const json = await resControllers.json();
             if (json.data && Array.isArray(json.data)) {
-              json.data.forEach(d => {
-                if (!list.some(item => (item.id && String(item.id) === String(d.id)) || (item.sn && String(item.sn) === String(d.sn || d.device_id)))) {
-                  list.push(d);
-                }
-              });
+              list.push(...json.data);
             }
           }
         } catch (_) {}
@@ -141,7 +121,7 @@ class DeviceService {
       zone_name: d.zone_name || '',
       app_version: d.deviceVersion || d.app_version || d.appVersion || 'v2.4.0',
       os_version: d.os_version || 'Android',
-      pairing_code: d.pairing_code || this.generatePairingCode(devId),
+      pairing_code: (d.pairing_code && !String(d.pairing_code).includes('undefined')) ? d.pairing_code : this.generatePairingCode(devId),
       pairing_token: d.pairing_token || d.id || devId,
       active_guard: d.active_guard || (d.current_guard_name ? { name: d.current_guard_name, id: d.current_guard_id, status: d.guard_status || 'on_duty' } : null),
     };
@@ -150,12 +130,15 @@ class DeviceService {
   generatePairingCode(seed = '') {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     let hash = 0;
-    const str = seed + Date.now().toString();
+    const str = String(seed || '') + Date.now().toString();
     for (let i = 0; i < str.length; i++) {
       hash = (hash * 31 + str.charCodeAt(i)) >>> 0;
     }
-    const part1 = chars[hash % chars.length] + chars[(hash >> 4) % chars.length] + chars[(hash >> 8) % chars.length];
-    const part2 = String(1000 + (hash % 9000));
+    const idx1 = Math.abs(hash) % chars.length;
+    const idx2 = Math.abs(hash >>> 4) % chars.length;
+    const idx3 = Math.abs(hash >>> 8) % chars.length;
+    const part1 = `${chars[idx1]}${chars[idx2]}${chars[idx3]}`;
+    const part2 = String(1000 + (Math.abs(hash) % 9000));
     return `${part1}-${part2}`;
   }
 

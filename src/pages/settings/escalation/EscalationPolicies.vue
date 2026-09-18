@@ -6,27 +6,27 @@
       <!-- Top Banner -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 p-5 rounded-2xl shadow-sm">
         <div class="flex items-center gap-3.5">
+          <button
+            @click="router.push('/dashboard/settings')"
+            class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer shrink-0"
+            title="Back to Settings"
+          >
+            <ArrowLeft class="w-4 h-4" />
+          </button>
           <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-600/20 shrink-0">
             <Volume2 class="w-5 h-5" />
           </div>
           <div>
             <h1 class="text-base font-black text-slate-900 dark:text-white tracking-tight">
-              Emergency Escalation Policies & Fallback Matrix
+              Emergency Alert Rules
             </h1>
             <p class="text-xs text-slate-500 font-medium mt-0.5">
-              Automated multi-tier alert dispatch if on-duty personnel fail to acknowledge critical alerts
+              Automated alerts for SOS alarms and missed patrols
             </p>
           </div>
         </div>
 
         <div class="flex items-center gap-2.5">
-          <button
-            class="h-9 px-3.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
-            @click="openSimulatorModal"
-          >
-            <Zap class="w-3.5 h-3.5 text-amber-500" />
-            <span>Simulate Trigger</span>
-          </button>
           <button
             class="h-9 px-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/20 transition-all flex items-center gap-1.5 cursor-pointer"
             @click="openAddPolicyModal"
@@ -105,19 +105,41 @@
                 </div>
                 <div>
                   <h4 class="text-sm font-black text-slate-900 dark:text-white">{{ policy.name }}</h4>
-                  <span class="text-[10px] text-slate-400 font-medium">Trigger: <strong>{{ policy.trigger_type.replace('_', ' ').toUpperCase() }}</strong> · Scope: {{ policy.site_name }}</span>
+                  <span class="text-[10px] text-slate-400 font-medium">Trigger: <strong>{{ (policy.trigger_type || 'sos_emergency').replace('_', ' ').toUpperCase() }}</strong> · Scope: {{ policy.site_name || 'All Sites (Global)' }}</span>
                 </div>
               </div>
 
-              <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200">
-                Active
-              </span>
+              <div class="flex items-center gap-2">
+                <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200">
+                  Active
+                </span>
+
+                <button
+                  type="button"
+                  @click="openEditPolicyModal(policy)"
+                  class="h-7 px-2.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+                  title="Edit Policy"
+                >
+                  <Pencil class="w-3 h-3 text-indigo-600 dark:text-indigo-400" />
+                  <span>Edit</span>
+                </button>
+
+                <button
+                  type="button"
+                  @click="deletePolicyAction(policy)"
+                  class="h-7 px-2.5 rounded-lg border border-rose-200 dark:border-rose-900/40 hover:bg-rose-50 dark:hover:bg-rose-900/20 text-rose-600 dark:text-rose-400 text-xs font-bold transition-all flex items-center gap-1 cursor-pointer"
+                  title="Delete Policy"
+                >
+                  <Trash2 class="w-3 h-3" />
+                  <span>Delete</span>
+                </button>
+              </div>
             </div>
 
             <!-- Multi-Tier Levels Visual Chain -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div v-if="getPolicyLevels(policy).length" class="grid grid-cols-1 md:grid-cols-3 gap-3">
               <div
-                v-for="lvl in policy.levels"
+                v-for="lvl in getPolicyLevels(policy)"
                 :key="lvl.level"
                 class="p-3.5 rounded-xl border border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-slate-900/40 space-y-2 relative overflow-hidden"
               >
@@ -134,9 +156,9 @@
                 <p class="text-[11px] text-slate-500 leading-relaxed">{{ lvl.action }}</p>
 
                 <!-- Channels Chips -->
-                <div class="flex items-center gap-1.5 flex-wrap pt-1 text-[9px] font-bold text-slate-600 dark:text-slate-300">
+                <div v-if="lvl.channels?.length" class="flex items-center gap-1.5 flex-wrap pt-1 text-[9px] font-bold text-slate-600 dark:text-slate-300">
                   <span v-for="ch in lvl.channels" :key="ch" class="px-1.5 py-0.5 rounded bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 uppercase">
-                    {{ ch.replace('_', ' ') }}
+                    {{ String(ch).replace('_', ' ') }}
                   </span>
                 </div>
               </div>
@@ -146,61 +168,6 @@
       </div>
 
     </FeatureGate>
-
-    <!-- Simulator Modal -->
-    <Teleport to="body">
-      <div
-        v-if="showSimModal"
-        class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4"
-        @click.self="showSimModal = false"
-      >
-        <div class="w-full max-w-md bg-white dark:bg-[#151c2c] rounded-2xl shadow-2xl p-6 border border-slate-200 dark:border-white/10 animate-in zoom-in-95 duration-150 text-xs">
-          <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 dark:border-white/5">
-            <h3 class="text-sm font-black text-slate-900 dark:text-white">Simulate Alert Escalation</h3>
-            <button class="text-slate-400 hover:text-slate-600 p-1 cursor-pointer" @click="showSimModal = false">
-              <X class="w-4 h-4" />
-            </button>
-          </div>
-
-          <div class="space-y-3">
-            <label class="font-bold text-slate-700 dark:text-slate-300 block">Select Trigger Scenario</label>
-            <div class="space-y-2">
-              <button
-                v-for="sc in [
-                  { key: 'sos_emergency', label: 'Guard SOS Panic Trigger', desc: 'Guard activated emergency button on mobile' },
-                  { key: 'missed_patrol', label: 'Missed Patrol Overdue > 15m', desc: 'Scheduled round failed to commence' },
-                  { key: 'geofence_breach', label: 'Perimeter Geofence Violation', desc: 'Scan attempt outside property boundary' }
-                ]"
-                :key="sc.key"
-                class="w-full p-3 rounded-xl border text-left transition-all cursor-pointer"
-                :class="selectedSimType === sc.key ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 font-bold' : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50'"
-                @click="selectedSimType = sc.key"
-              >
-                <span class="block font-bold">{{ sc.label }}</span>
-                <span class="text-[10px] text-slate-500">{{ sc.desc }}</span>
-              </button>
-            </div>
-          </div>
-
-          <div class="mt-6 pt-3 border-t border-slate-100 dark:border-white/5 flex gap-2 justify-end">
-            <button
-              type="button"
-              class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 font-bold text-xs"
-              @click="showSimModal = false"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              class="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md shadow-rose-600/20 cursor-pointer"
-              @click="runSimulationTrigger"
-            >
-              Launch Alert Simulation
-            </button>
-          </div>
-        </div>
-      </div>
-    </Teleport>
 
     <!-- Create / Edit Policy Modal -->
     <Teleport to="body">
@@ -376,17 +343,17 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue';
-import { Volume2, Plus, Zap, ShieldAlert, X } from 'lucide-vue-next';
+import { useRouter } from 'vue-router';
+import { Volume2, Plus, ShieldAlert, X, ArrowLeft, Pencil, Trash2 } from 'lucide-vue-next';
 import { escalationService } from '@/services/escalationService';
 import { siteService } from '@/services/siteService';
 import FeatureGate from '@/components/common/FeatureGate.vue';
 
+const router = useRouter();
+
 const policies = ref([]);
 const activeEscalations = ref([]);
 const sites = ref([]);
-
-const showSimModal = ref(false);
-const selectedSimType = ref('sos_emergency');
 
 const showPolicyModal = ref(false);
 const isSavingPolicy = ref(false);
@@ -413,6 +380,14 @@ const editingPolicy = ref({
   ]
 });
 
+const getPolicyLevels = (policy) => {
+  let lvls = policy?.levels;
+  if (typeof lvls === 'string') {
+    try { lvls = JSON.parse(lvls); } catch (e) { lvls = []; }
+  }
+  return Array.isArray(lvls) ? lvls : [];
+};
+
 const loadData = async () => {
   policies.value = await escalationService.fetchPolicies();
   activeEscalations.value = await escalationService.fetchActiveEscalations();
@@ -429,17 +404,6 @@ const getMinutesLeft = (nextAt) => {
 
 const handleAcknowledge = async (esc) => {
   await escalationService.acknowledgeEscalation(esc.id, 'Central SOC Officer');
-  await loadData();
-};
-
-const openSimulatorModal = () => {
-  selectedSimType.value = 'sos_emergency';
-  showSimModal.value = true;
-};
-
-const runSimulationTrigger = async () => {
-  await escalationService.simulateTrigger(selectedSimType.value);
-  showSimModal.value = false;
   await loadData();
 };
 
@@ -469,6 +433,39 @@ const openAddPolicyModal = () => {
   showPolicyModal.value = true;
 };
 
+const openEditPolicyModal = (policy) => {
+  let lvls = getPolicyLevels(policy);
+  if (!lvls.length) {
+    lvls = [
+      {
+        level: 1,
+        delay_minutes: 0,
+        target_role: 'On-Duty Shift Supervisor',
+        action: 'Immediate in-app push notification + SMS alert dispatch',
+        channels: ['in_app_push', 'sms']
+      }
+    ];
+  }
+  editingPolicy.value = {
+    id: policy.id,
+    name: policy.name || '',
+    trigger_type: policy.trigger_type || 'sos_emergency',
+    site_name: policy.site_name || 'All Sites (Global)',
+    levels: JSON.parse(JSON.stringify(lvls))
+  };
+  showPolicyModal.value = true;
+};
+
+const deletePolicyAction = async (policy) => {
+  if (!confirm(`Are you sure you want to delete "${policy.name}"?`)) return;
+  try {
+    await escalationService.deletePolicy(policy.id);
+    await loadData();
+  } catch (err) {
+    console.error("Failed to delete policy:", err);
+  }
+};
+
 const addLevel = () => {
   const nextLvl = editingPolicy.value.levels.length + 1;
   const lastDelay = editingPolicy.value.levels[editingPolicy.value.levels.length - 1]?.delay_minutes || 0;
@@ -476,7 +473,7 @@ const addLevel = () => {
     level: nextLvl,
     delay_minutes: lastDelay + 5,
     target_role: nextLvl === 3 ? 'Director of Security / VP' : 'Operations Lead',
-    action: 'Executive notification & webhook webhook trigger',
+    action: 'Executive notification & webhook alert dispatch',
     channels: ['in_app_push', 'sms', 'webhook']
   });
 };
@@ -497,7 +494,6 @@ const savePolicySubmit = async () => {
     await loadData();
   } catch (err) {
     console.error("Failed to save policy:", err);
-    alert(`Failed to save policy: ${err.message || 'Unknown error'}`);
   } finally {
     isSavingPolicy.value = false;
   }

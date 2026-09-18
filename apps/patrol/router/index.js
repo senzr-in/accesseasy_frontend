@@ -19,6 +19,7 @@ const DevLogin = () => import("@/components/loginAuthentication/devLogin.vue");
 const DashboardLayout = () => import("@/layouts/dashboardLayout.vue");
 
 // Superadmin / Unused removed for Patrol-only mode
+const DashboardHome = () => import("@/pages/dashboard/index.vue");
 const PatrolsTab = () => import("@/pages/guard/tabs/PatrolsTab.vue");
 const CreatePatrol = () => import("@/pages/guard/CreatePatrol.vue");
 const Checkpoints = () => import("@/pages/guard/Checkpoints.vue");
@@ -146,7 +147,7 @@ const routes = [
       {
         path: "",
         name: "DashboardHome",
-        component: PatrolsTab,
+        component: DashboardHome,
         meta: { roles: ["Admin", "Manager", "Guard"] }
       },
       {
@@ -177,98 +178,106 @@ const routes = [
         path: "guards",
         name: "Guards",
         component: Guards,
-        meta: { roles: ["Admin", "Manager"] }
+        meta: { roles: ["Admin", "Manager", "Guard", "Employee"] }
       },
       {
         path: "guards/attendance",
         name: "GuardAttendance",
         component: GuardAttendance,
-        meta: { roles: ["Admin", "Manager", "Guard"], feature: "attendance.basic" }
+        meta: { roles: ["Admin", "Manager", "Guard", "Employee"], feature: "attendance.basic" }
       },
       {
         path: "incidents",
         name: "Incidents",
         component: Incidents,
-        meta: { roles: ["Admin", "Manager", "Guard"] }
+        meta: { roles: ["Admin", "Manager", "Guard", "Employee"] }
       },
       {
         path: "sites",
         name: "Sites",
         component: Sites,
-        meta: { roles: ["Admin", "Manager"] }
+        meta: { roles: ["Admin", "Manager", "Guard", "Employee"] }
       },
       {
         path: "sites/:id",
         name: "SiteDetail",
         component: SiteDetail,
-        meta: { roles: ["Admin", "Manager"] }
+        meta: { roles: ["Admin", "Manager", "Guard", "Employee"] }
       },
       {
         path: "sites/:id/geofence",
         name: "SiteGeofenceEditor",
         component: SiteGeofenceEditor,
-        meta: { roles: ["Admin", "Manager"], feature: "geofence.site" }
+        meta: { roles: ["Admin", "Manager", "Guard", "Employee"], feature: "geofence.site" }
       },
       {
         path: "reports",
         name: "Reports",
         component: Reports,
-        meta: { roles: ["Admin", "Manager"] }
+        meta: { roles: ["Admin", "Manager", "Guard", "Employee"] }
       },
       {
         path: "profile",
         name: "Profile",
         component: Profile,
-        meta: { roles: ["Admin", "Manager", "Guard"] }
+        meta: { roles: ["Admin", "Manager", "Guard", "Employee"] }
       },
       {
         path: "help",
         name: "HelpSupport",
         component: HelpSupport,
-        meta: { roles: ["Admin", "Manager", "Guard"] }
+        meta: { roles: ["Admin", "Manager", "Guard", "Employee"] }
       },
       // ─── Settings Hub & Patrol Sub-modules ────────────────────────────────
       {
         path: "settings",
         name: "SettingsHub",
         component: SettingsHub,
-        meta: { roles: ["Admin", "Manager"] }
+        meta: { roles: ["Admin", "Manager", "Guard", "Employee"] }
+      },
+      {
+        path: "settings/sites",
+        redirect: "/dashboard/sites"
+      },
+      {
+        path: "settings/sites/:id",
+        redirect: to => `/dashboard/sites/${to.params.id}`
       },
       {
         path: "settings/zones",
         name: "SettingsZones",
         component: Zones,
-        meta: { roles: ["Admin", "Manager"] }
+        meta: { roles: ["Admin", "Manager", "Guard", "Employee"] }
       },
       {
         path: "settings/zones/:id",
         name: "SettingsZoneDetail",
         component: ZoneDetail,
-        meta: { roles: ["Admin", "Manager"] }
+        meta: { roles: ["Admin", "Manager", "Guard", "Employee"] }
       },
       {
         path: "settings/checkpoints",
         name: "SettingsCheckpoints",
         component: CheckpointSettings,
-        meta: { roles: ["Admin", "Manager"] }
+        meta: { roles: ["Admin", "Manager", "Guard", "Employee"] }
       },
       {
         path: "settings/escalation",
         name: "EscalationPolicies",
         component: EscalationPolicies,
-        meta: { roles: ["Admin", "Manager"] }
+        meta: { roles: ["Admin", "Manager", "Guard", "Employee"] }
       },
       {
         path: "settings/devices",
         name: "SettingsDevices",
         component: DeviceDashboard,
-        meta: { roles: ["Admin", "Manager"], feature: "ops.operations_center" }
+        meta: { roles: ["Admin", "Manager", "Guard", "Employee"], feature: "ops.operations_center" }
       },
       {
         path: "settings/patrol-devices",
         name: "PatrolDevices",
         component: DeviceDashboard,
-        meta: { roles: ["Admin", "Manager"] }
+        meta: { roles: ["Admin", "Manager", "Guard", "Employee"] }
       },
       {
         path: "settings/shifts",
@@ -407,7 +416,9 @@ router.beforeEach(async (to, from, next) => {
       }
     }
 
-    if (userRole && !requiredRoles.includes(userRole)) {
+    const normalizedUserRole = (userRole || '').toLowerCase();
+    const hasRole = requiredRoles.some(r => r.toLowerCase() === normalizedUserRole);
+    if (userRole && !hasRole) {
       const homePath = getRoleHome();
       if (to.path === homePath) {
         next('/login');

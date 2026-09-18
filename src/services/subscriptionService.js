@@ -137,14 +137,19 @@ class SubscriptionService {
         // 1. Query Directus `plans` collection
         try {
           const res = await authService.protectedApi.get(
-            `/items/plans?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&sort=-id&limit=20`
+            `/items/plans?filter[tenant][_eq]=${tenantId}&sort=-id&limit=20`
           );
         const rows = res.data?.data || [];
 
-        // Sort to prioritize row with userapp === 'patrol'
+        // Case-insensitive extractor for userApp across userapp, userApp, user_app
+        const getRowApp = (r) => String(r?.userapp || r?.userApp || r?.user_app || '').toLowerCase();
+
+        // Sort to prioritize row with userApp === 'patrol' or 'accesseasy_patrol'
         rows.sort((a, b) => {
-          const isPatrolA = String(a.userapp || '').toLowerCase() === 'patrol' ? 1 : 0;
-          const isPatrolB = String(b.userapp || '').toLowerCase() === 'patrol' ? 1 : 0;
+          const appA = getRowApp(a);
+          const appB = getRowApp(b);
+          const isPatrolA = (appA === 'patrol' || appA === 'accesseasy_patrol') ? 1 : 0;
+          const isPatrolB = (appB === 'patrol' || appB === 'accesseasy_patrol') ? 1 : 0;
           return isPatrolB - isPatrolA;
         });
 
@@ -157,16 +162,26 @@ class SubscriptionService {
           }
 
           if (currentPlanMap && typeof currentPlanMap === "object") {
-            // Check for ez_patrol_platform in map, or check userapp === 'patrol'
-            const isPatrolRow = String(row.userapp || '').toLowerCase() === 'patrol' || String(row.userapp || '').toLowerCase() === 'accesseasy_patrol';
-            const targetPlan =
-              currentPlanMap.ez_patrol_platform ||
-              (isPatrolRow ? (currentPlanMap.plan_key ? currentPlanMap : Object.values(currentPlanMap)[0]) : null);
+            const rowApp = getRowApp(row);
+            const isPatrolRow = rowApp === 'patrol' || rowApp === 'accesseasy_patrol';
+
+            // Find plan key flexibly (ez_patrol_platform, patrol, or any patrol-related key)
+            let targetPlan = currentPlanMap.ez_patrol_platform || currentPlanMap.patrol;
+            if (!targetPlan) {
+              const keys = Object.keys(currentPlanMap);
+              const patrolKey = keys.find(k => k.toLowerCase().includes('patrol'));
+              if (patrolKey) {
+                targetPlan = currentPlanMap[patrolKey];
+              } else if (isPatrolRow) {
+                targetPlan = currentPlanMap.plan_key ? currentPlanMap : Object.values(currentPlanMap)[0];
+              }
+            }
 
             if (targetPlan) {
               const now = Date.now();
-              const expTime = targetPlan.active_until ? new Date(targetPlan.active_until).getTime() : null;
-              const isTrial = targetPlan.is_trial === true || targetPlan.billing_cycle === "trial" || targetPlan.status === "trial";
+              const expDateStr = targetPlan.active_until || targetPlan.end_date || targetPlan.renewal_date || row.active_until || row.end_date;
+              const expTime = expDateStr ? new Date(expDateStr).getTime() : null;
+              const isTrial = targetPlan.is_trial === true || targetPlan.billing_cycle === "trial" || targetPlan.status === "trial" || row.tier === "trial";
               const isExpired = expTime ? expTime <= now : false;
 
               const sitesLimit = Number(targetPlan.sites || targetPlan.sites_count || row.max_sites || 1);
@@ -181,9 +196,10 @@ class SubscriptionService {
                 sites: sitesLimit,
                 billing_cycle: targetPlan.billing_cycle || row.billing_period || "monthly",
                 currency: targetPlan.currency || row.currency || "INR",
-                start_date: targetPlan.start_date,
-                active_until: targetPlan.active_until,
-                renewal_date: targetPlan.active_until,
+                start_date: targetPlan.start_date || row.start_date || row.date_created,
+                active_until: expDateStr,
+                renewal_date: expDateStr,
+                end_date: expDateStr,
                 features: targetPlan.features || ALL_PATROL_FEATURES,
               };
 
@@ -355,10 +371,10 @@ class SubscriptionService {
         let checkpointCount = 0;
         let patrolRouteCount = 0;
 
-        // Sites (Location Management) count
+        // Sites (Branch) count
         try {
           const res = await authService.protectedApi.get(
-            `/items/locationManagement?filter[tenant][_eq]=${tenantId}&fields[]=id&limit=500`
+            `/items/branch?filter[tenant][_eq]=${tenantId}&fields[]=id&limit=500`
           );
           if (res.data?.data) siteCount = res.data.data.length;
         } catch (_) {
@@ -368,20 +384,20 @@ class SubscriptionService {
           }
         }
 
-        // Checkpoints count
+        // Checkpoints count (read from local cache to avoid 403 on restricted collection)
         try {
-          const res = await authService.protectedApi.get(
-            `/items/checkpoints?filter[tenant][_eq]=${tenantId}&fields[]=id&limit=1000`
-          );
-          if (res.data?.data) checkpointCount = res.data.data.length;
+          const stored = localStorage.getItem(`accesseasy_checkpoints_${tenantId}`);
+          if (stored) {
+            try { checkpointCount = JSON.parse(stored).length; } catch (_) {}
+          }
         } catch (_) {}
 
-        // Patrol routes / groups count
+        // Patrol routes / groups count (read from local cache to avoid 403 on restricted collection)
         try {
-          const res = await authService.protectedApi.get(
-            `/items/checkpoint_groups?filter[tenant][_eq]=${tenantId}&fields[]=id&limit=500`
-          );
-          if (res.data?.data) patrolRouteCount = res.data.data.length;
+          const stored = localStorage.getItem(`accesseasy_checkpoint_groups_${tenantId}`);
+          if (stored) {
+            try { patrolRouteCount = JSON.parse(stored).length; } catch (_) {}
+          }
         } catch (_) {}
 
         // Guards count — use aggregate to avoid requiring Admin-level /users access

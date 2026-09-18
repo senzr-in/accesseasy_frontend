@@ -65,7 +65,7 @@ if (appMode === 'security') {
     { path: "settings/zones", name: "SettingsZones", component: Zones, meta: { roles: ["Admin"] } },
     { path: "settings/escalation", name: "SettingsEscalation", component: () => import("@/pages/settings/escalation/EscalationPolicies.vue"), meta: { roles: ["Admin", "Manager"] } },
     { path: "settings/patrol-shifts", name: "SettingsPatrolShifts", component: () => import("@/pages/settings/shifts/ShiftScheduler.vue"), meta: { roles: ["Admin", "Manager"] } },
-    { path: "settings/audit-log", name: "SettingsAuditLog", component: () => import("@/pages/settings/AuditLog.vue"), meta: { roles: ["Admin", "Manager"] } },
+
     { path: "settings/subscription", name: "SettingsSubscription", component: () => import("@/pages/settings/subscription/SubscriptionPage.vue"), meta: { roles: ["Admin", "Manager"] } },
     { path: "settings/plans", name: "SettingsPlans", component: () => import("@/pages/settings/plans/plans.vue"), meta: { roles: ["Admin", "Manager"] } },
     { path: "sites", name: "Sites", component: () => import("@/pages/sites/index.vue"), meta: { roles: ["Admin", "Manager"] } },
@@ -98,7 +98,7 @@ if (appMode === 'security') {
     { path: "settings/zones", name: "SettingsZones", component: Zones, meta: { roles: ["Admin"] } },
     { path: "settings/escalation", name: "SettingsEscalation", component: () => import("@/pages/settings/escalation/EscalationPolicies.vue"), meta: { roles: ["Admin", "Manager"] } },
     { path: "settings/patrol-shifts", name: "SettingsPatrolShifts", component: () => import("@/pages/settings/shifts/ShiftScheduler.vue"), meta: { roles: ["Admin", "Manager"] } },
-    { path: "settings/audit-log", name: "SettingsAuditLog", component: () => import("@/pages/settings/AuditLog.vue"), meta: { roles: ["Admin", "Manager"] } },
+
     { path: "settings/subscription", name: "SettingsSubscription", component: () => import("@/pages/settings/subscription/SubscriptionPage.vue"), meta: { roles: ["Admin", "Manager"] } },
     { path: "settings/plans", name: "SettingsPlans", component: () => import("@/pages/settings/plans/plans.vue"), meta: { roles: ["Admin", "Manager"] } },
     { path: "settings/timezones", name: "SettingsTimezones", component: Timerzones, meta: { roles: ["Admin"] } },

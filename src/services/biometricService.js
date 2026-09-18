@@ -26,20 +26,12 @@ class BiometricService {
       const tenantId = authService.getTenantId();
       if (!tenantId) return [];
 
-      const query = `/items/personalModule?filter[_and][0][assignedUser][tenant][tenantId][_eq]=${tenantId}&fields=id,employeeId,personName,assignedUser.id,assignedUser.first_name,assignedUser.last_name,assignedUser.email,assignedUser.avatar&limit=500&sort=assignedUser.first_name`;
+      const query = `/items/personalModule?filter[tenant][_eq]=${tenantId}&fields=id,employeeId,personName,assignedUser.id,assignedUser.first_name,assignedUser.last_name,assignedUser.email,assignedUser.avatar&limit=500&sort=assignedUser.first_name`;
       const res = await authService.protectedApi.get(query);
       return res.data?.data || [];
     } catch (error) {
       console.warn("Could not fetch employees for enrollment:", error);
-      // Fallback without deep nesting
-      try {
-        const tenantId = authService.getTenantId();
-        const res = await authService.protectedApi.get(`/items/personalModule?filter[tenant][_eq]=${tenantId}&fields=id,employeeId,personName,assignedUser.*&limit=500`);
-        return res.data?.data || [];
-      } catch (err2) {
-        console.error("Fallback employee fetch failed:", err2);
-        return [];
-      }
+      return [];
     }
   }
 

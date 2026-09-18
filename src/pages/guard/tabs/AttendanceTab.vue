@@ -436,7 +436,6 @@
                   {{ session.check_out_time ? 'Checked Out' : 'Active Duty' }}
                 </span>
               </div>
-
               <div class="grid grid-cols-2 gap-3 text-xs">
                 <div>
                   <span class="text-[10px] font-bold text-slate-400 block uppercase">Check-In</span>
@@ -543,7 +542,6 @@ const groupedGuards = computed(() => {
   const map = {};
 
   attendanceList.value.forEach(record => {
-    // Determine unique guard identifier
     const guardKey = String(record.guard?.assignedUser?.id || record.guard?.id || record.guard_name || record.guard || 'Unknown');
     if (!map[guardKey]) {
       map[guardKey] = {
@@ -560,9 +558,7 @@ const groupedGuards = computed(() => {
     map[guardKey].sessions.push(record);
   });
 
-  // Determine current status & active session for each guard
   const result = Object.values(map).map(group => {
-    // Deduplicate sessions by ID or identical timestamps
     const uniqueSessions = [];
     group.sessions.forEach(s => {
       const isDup = uniqueSessions.some(u => 
@@ -573,10 +569,8 @@ const groupedGuards = computed(() => {
     });
     group.sessions = uniqueSessions;
 
-    // Sort sessions chronologically (oldest to newest)
     group.sessions.sort((a, b) => new Date(a.check_in_time || a.date_created) - new Date(b.check_in_time || b.date_created));
 
-    // Find any open session (no check-out time)
     const openSession = group.sessions.find(s => !s.check_out_time && s.check_in_time);
     if (openSession) {
       group.activeSession = openSession;
@@ -590,7 +584,6 @@ const groupedGuards = computed(() => {
     return group;
   });
 
-  // Apply filters to grouped result
   return result.filter(g => {
     if (statusFilter.value !== 'all' && g.currentStatus !== statusFilter.value) return false;
     if (selectedSiteFilter.value && !g.sessions.some(s => String(s.site?.id || s.site) === String(selectedSiteFilter.value))) return false;
@@ -677,9 +670,7 @@ const loadAttendanceData = async (silent = false) => {
     ]);
     attendanceList.value = att || [];
     stats.value = attendanceService.calculateStats(att || []) || stats.value;
-    if (sites && sites.length > 0) {
-      sitesList.value = sites;
-    }
+    sitesList.value = sites || [];
   } catch (error) {
     console.error("Error loading attendance data:", error);
   } finally {
@@ -694,16 +685,20 @@ const openAuditModal = (guardGroup) => {
 };
 
 const exportCSV = () => {
-  const headers = ['Guard Name', 'Phone', 'Site', 'Zone', 'Check-In', 'Check-Out', 'Status'];
-  const rows = filteredList.value.map(r => [
-    r.guard_name,
-    r.guard?.phone || '',
-    r.site_name,
-    r.zone_name || '',
-    r.check_in_time || '',
-    r.check_out_time || '',
-    r.status
-  ]);
+  const headers = ['Guard Name', 'Phone', 'Site', 'First Check-In', 'Last Check-Out', 'Total Sessions', 'Current Status'];
+  const rows = groupedGuards.value.map(g => {
+    const firstSession = g.sessions?.[0];
+    const lastSession = g.sessions?.[g.sessions.length - 1];
+    return [
+      `"${g.guardName || 'Guard'}"`,
+      `"${g.phone || ''}"`,
+      `"${g.siteName || ''}"`,
+      `"${firstSession?.check_in_time ? formatTime(firstSession.check_in_time) : ''}"`,
+      `"${lastSession?.check_out_time ? formatTime(lastSession.check_out_time) : ''}"`,
+      `"${g.sessions?.length || 0}"`,
+      `"${(g.currentStatus || 'off_duty').toUpperCase()}"`
+    ];
+  });
   const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
   const encodedUri = encodeURI(csvContent);
   const link = document.createElement('a');
@@ -751,7 +746,6 @@ onMounted(async () => {
   } catch (_) {}
 
   pollInterval = setInterval(async () => {
-    if (_pollLocked) return;
     try {
       await loadAttendanceData(true);
     } catch (_) {}

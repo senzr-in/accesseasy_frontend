@@ -322,15 +322,11 @@ const handleAction = async (action) => {
   }
   if (action === 'downloadCheckpointQR') {
     try {
-      const tenantId = authService.getTenantId();
-      const res = await fetch(`${apiUrl}/items/checkpoint_groups?filter[tenant][_eq]=${tenantId}&sort=-date_created`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const d = await res.json();
-        availableCheckpointGroups.value = d.data || [];
-      }
-    } catch (e) { console.error(e); }
+      const groups = await patrolService.fetchCheckpointGroups();
+      availableCheckpointGroups.value = groups || [];
+    } catch (e) {
+      availableCheckpointGroups.value = [];
+    }
     activeGroupIndex.value = -1;
     showCheckpointQrModal.value = true;
   }
@@ -776,7 +772,7 @@ const loadStats = async (isBackground = false) => {
     const [vTodayRes, vInsideRes, doorsRes] = await Promise.all([
       authService.protectedApi.get(`/items/visitor`, {
         params: {
-          'filter[tenant][tenantId][_eq]': tenantId,
+          'filter[tenant][_eq]': tenantId,
           'filter[startDate][_eq]': today,
           'meta': 'filter_count',
           'limit': 0
@@ -784,7 +780,7 @@ const loadStats = async (isBackground = false) => {
       }),
       authService.protectedApi.get(`/items/visitor`, {
         params: {
-          'filter[tenant][tenantId][_eq]': tenantId,
+          'filter[tenant][_eq]': tenantId,
           'filter[status][_eq]': 'active',
           'meta': 'filter_count',
           'fields': 'id,endDate,endTime',
@@ -793,7 +789,7 @@ const loadStats = async (isBackground = false) => {
       }),
       authService.protectedApi.get(`/items/doors`, {
         params: {
-          'filter[tenant][tenantId][_eq]': tenantId,
+          'filter[tenant][_eq]': tenantId,
           'meta': 'filter_count',
           'limit': 0
         }
@@ -830,23 +826,9 @@ const loadStats = async (isBackground = false) => {
       stats.value.checkpointGroups = cpGroups.length;
       const active = patrols.filter(p => p.status === 'active');
       
-      // Global Guard Tracking: Fetch all guards who are "On Duty" (status === 'active')
+      // Global Guard Tracking: Fetch guards/users for this tenant
       try {
-        if (!cachedGuardRoleId) {
-          const roleRes = await fetch(
-            `${apiUrl}/items/roleConfigurator?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][_and][1][accessType][_in]=patrol,accesseasy_patrol&filter[_and][0][_and][2][roleName][_contains]=guard&fields[]=id`,
-            { headers: { Authorization: `Bearer ${token}` } }
-          );
-          if (roleRes.ok) {
-            const roleData = await roleRes.json();
-            cachedGuardRoleId = roleData.data?.[0]?.id || null;
-          }
-        }
-
-        let filterStr = `filter[tenant][_eq]=${tenantId}&filter[status][_eq]=active`;
-        if (cachedGuardRoleId) filterStr += `&filter[_or][0][accesseasyPatrolRole][_eq]=${cachedGuardRoleId}&filter[_or][1][accesseasyRole][_eq]=${cachedGuardRoleId}`;
-
-        const usersRes = await fetch(`${apiUrl}/users?${filterStr}&fields=id,first_name,last_name,avatar,phone,email,location,currentLat,currentLng`, {
+        const usersRes = await fetch(`${apiUrl}/users?filter[tenant][_eq]=${tenantId}&fields=id,first_name,last_name,avatar,phone,email,location,currentLat,currentLng,status`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         

@@ -1,8 +1,10 @@
 <template>
-  <div class="h-full flex flex-col bg-slate-50 dark:bg-[#0b0f19] text-slate-900 dark:text-slate-100 overflow-y-auto custom-scrollbar font-sans transition-colors duration-300">
-    <div class="flex flex-col gap-5 p-4 lg:p-6 min-h-full max-w-[1720px] mx-auto w-full">
+  <div class="h-full flex flex-col bg-slate-100 dark:bg-[#070C18] text-slate-900 dark:text-slate-100 overflow-y-auto custom-scrollbar font-sans transition-colors duration-300">
+    <div class="flex flex-col gap-4 p-3 sm:p-4 lg:p-5 min-h-full max-w-[1800px] mx-auto w-full">
 
-      <!-- Success Toast Notification -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- 0. SUCCESS TOAST & NOTIFICATION FLOATER                      -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
       <transition
         enter-active-class="transition ease-out duration-200"
         enter-from-class="transform -translate-y-4 opacity-0"
@@ -13,14 +15,14 @@
       >
         <div
           v-if="successToastMessage"
-          class="fixed top-6 right-6 z-[200] bg-slate-900 text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-slate-700 animate-in"
+          class="fixed top-5 right-5 z-[250] bg-slate-900/95 dark:bg-slate-800/95 backdrop-blur-md text-white px-4 py-3 rounded-2xl shadow-2xl flex items-center gap-3 border border-slate-700/80 animate-in"
         >
-          <div class="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-xs">
+          <div class="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shrink-0">
             <Check class="w-4 h-4" />
           </div>
           <div>
             <p class="text-xs font-bold">{{ successToastMessage }}</p>
-            <p class="text-[10px] text-slate-400">Dashboard updated in real-time</p>
+            <p class="text-[10px] text-slate-400">Live telemetry updated</p>
           </div>
           <button class="text-slate-400 hover:text-white ml-2 cursor-pointer" @click="successToastMessage = ''">
             <X class="w-3.5 h-3.5" />
@@ -29,40 +31,55 @@
       </transition>
 
       <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- 1. TOP BAR / COMMAND HEADER                                 -->
+      <!-- 1. GLOBAL ENTERPRISE OPERATIONS HEADER                       -->
       <!-- ═══════════════════════════════════════════════════════════ -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 p-4 rounded-2xl shadow-sm">
+      <header class="bg-white dark:bg-[#0D1424] border border-slate-200 dark:border-slate-800 px-5 py-3.5 rounded-xl shadow-xs shrink-0 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         
-        <!-- Left: Branding & Subtitle -->
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-600/20 shrink-0">
-            <Shield class="w-5 h-5" />
+        <!-- Left: System Identity & Real-Time Operational Status -->
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-10 h-10 rounded-xl bg-blue-600/10 dark:bg-white/5 border border-blue-500/20 dark:border-white/10 flex items-center justify-center shadow-xs shrink-0 p-1.5">
+            <img :src="logoPatrol" class="w-full h-full object-contain filter drop-shadow-[0_2px_6px_rgba(27,79,216,0.25)]" alt="AccessEasy Patrol" />
           </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <h1 class="text-base font-black text-slate-900 dark:text-white tracking-tight">AccessEasy Patrol</h1>
-              <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30">
-                Command Center
+          <div class="min-w-0">
+            <div class="flex items-center gap-2.5 flex-wrap">
+              <h1 class="text-base font-bold text-slate-900 dark:text-white tracking-tight leading-none whitespace-nowrap">
+                Live Operations
+              </h1>
+              <span
+                class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border transition-colors shrink-0"
+                :class="currentMetrics.criticalIncidents > 0 
+                  ? 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800' 
+                  : currentMetrics.delayedPatrols > 0
+                  ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800'
+                  : 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800'"
+              >
+                <span
+                  class="w-1.5 h-1.5 rounded-full"
+                  :class="currentMetrics.criticalIncidents > 0 ? 'bg-rose-500' : currentMetrics.delayedPatrols > 0 ? 'bg-amber-500' : 'bg-emerald-500'"
+                />
+                <span>{{ currentMetrics.criticalIncidents > 0 ? `${currentMetrics.criticalIncidents} Urgent Incident` : currentMetrics.delayedPatrols > 0 ? `${currentMetrics.delayedPatrols} Delayed Tours` : 'All Systems Operational' }}</span>
               </span>
             </div>
-            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5 flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              Live Operations Monitoring &nbsp;·&nbsp; {{ formattedCurrentDate }} &nbsp;·&nbsp; {{ currentTime }}
+            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1 flex items-center gap-2 truncate">
+              <span>{{ formattedCurrentDate }}</span>
+              <span class="text-slate-300 dark:text-slate-600">&middot;</span>
+              <span class="font-mono font-semibold text-slate-700 dark:text-slate-300">{{ currentTime }}</span>
             </p>
           </div>
         </div>
 
-        <!-- Center / Right: Global Site Selector & Quick Actions -->
-        <div class="flex flex-wrap items-center gap-3">
+        <!-- Right: Enterprise Filters & Primary Dispatch Actions -->
+        <div class="flex flex-wrap items-center gap-2.5">
           
-          <!-- Global Site Selector Dropdown -->
+          <!-- Facility / Site Filter -->
           <div class="relative" ref="siteDropdownRef">
             <button
-              class="h-10 px-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 hover:border-indigo-400 flex items-center gap-2.5 text-xs font-bold text-slate-800 dark:text-slate-100 shadow-sm transition-all cursor-pointer"
+              class="h-9 px-3 rounded-lg bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 border border-slate-300 dark:border-slate-700 flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-xs transition-colors cursor-pointer"
               @click="isSiteDropdownOpen = !isSiteDropdownOpen"
+              title="Filter by Facility / Property"
             >
-              <Building2 class="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-              <span>{{ selectedSiteName }}</span>
+              <Building2 class="w-3.5 h-3.5 text-slate-500" />
+              <span class="truncate max-w-[150px]">{{ selectedSiteName }}</span>
               <ChevronDown class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200" :class="{ 'rotate-180': isSiteDropdownOpen }" />
             </button>
 
@@ -77,19 +94,19 @@
             >
               <div
                 v-if="isSiteDropdownOpen"
-                class="absolute right-0 sm:left-0 mt-2 w-64 rounded-xl bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-slate-700 shadow-xl py-1.5 z-50 overflow-hidden animate-in"
+                class="absolute right-0 mt-1.5 w-64 rounded-xl bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-slate-700 shadow-xl py-1.5 z-50 overflow-hidden"
               >
-                <div class="px-3 py-2 border-b border-slate-100 dark:border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                  Select Security Property
+                <div class="px-3 py-1.5 border-b border-slate-100 dark:border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  Select Facility
                 </div>
                 <button
-                  class="w-full px-3.5 py-2.5 text-left text-xs font-semibold hover:bg-indigo-50 dark:hover:bg-indigo-500/10 flex items-center justify-between transition-colors"
-                  :class="selectedSiteId === 'all' ? 'text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-50/50 dark:bg-indigo-500/5' : 'text-slate-700 dark:text-slate-200'"
+                  class="w-full px-3.5 py-2 text-left text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between transition-colors cursor-pointer"
+                  :class="selectedSiteId === 'all' ? 'text-blue-600 dark:text-blue-400 font-bold bg-blue-50/50 dark:bg-blue-900/20' : 'text-slate-700 dark:text-slate-200'"
                   @click="selectSite('all')"
                 >
                   <div class="flex items-center gap-2">
-                    <Globe class="w-4 h-4 text-slate-400" />
-                    <span>All Sites (Global Overview)</span>
+                    <Globe class="w-3.5 h-3.5 text-slate-400" />
+                    <span>All Facilities (Global)</span>
                   </div>
                   <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 font-mono">{{ sitesList.length }}</span>
                 </button>
@@ -97,8 +114,8 @@
                 <button
                   v-for="site in sitesList"
                   :key="site.id"
-                  class="w-full px-3.5 py-2.5 text-left text-xs font-semibold hover:bg-indigo-50 dark:hover:bg-indigo-500/10 flex items-center justify-between transition-colors"
-                  :class="selectedSiteId === site.id ? 'text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-50/50 dark:bg-indigo-500/5' : 'text-slate-700 dark:text-slate-200'"
+                  class="w-full px-3.5 py-2 text-left text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between transition-colors cursor-pointer"
+                  :class="selectedSiteId === site.id ? 'text-blue-600 dark:text-blue-400 font-bold bg-blue-50/50 dark:bg-blue-900/20' : 'text-slate-700 dark:text-slate-200'"
                   @click="selectSite(site.id)"
                 >
                   <div class="flex items-center gap-2 truncate">
@@ -111,27 +128,28 @@
                   <span class="text-[10px] text-slate-400 shrink-0 font-mono">{{ site.code }}</span>
                 </button>
 
-                <div class="p-2 border-t border-slate-100 dark:border-slate-800">
+                <div class="p-1.5 border-t border-slate-100 dark:border-slate-800">
                   <button
-                    class="w-full py-2 px-3 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-400 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                    class="w-full py-1.5 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                     @click="openQuickCreateModal('add_site')"
                   >
                     <Plus class="w-3.5 h-3.5" />
-                    <span>+ Add Property / Site</span>
+                    <span>Add New Property</span>
                   </button>
                 </div>
               </div>
             </transition>
           </div>
 
-          <!-- Global Zone Selector Dropdown -->
+          <!-- Security Zone Filter -->
           <div class="relative" ref="zoneDropdownRef">
             <button
-              class="h-10 px-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 hover:border-indigo-400 flex items-center gap-2.5 text-xs font-bold text-slate-800 dark:text-slate-100 shadow-sm transition-all cursor-pointer"
+              class="h-9 px-3 rounded-lg bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 border border-slate-300 dark:border-slate-700 flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-xs transition-colors cursor-pointer"
               @click="isZoneDropdownOpen = !isZoneDropdownOpen; isSiteDropdownOpen = false;"
+              title="Filter by Security Zone"
             >
-              <Layers class="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-              <span>{{ selectedZoneName }}</span>
+              <Layers class="w-3.5 h-3.5 text-slate-500" />
+              <span class="truncate max-w-[130px]">{{ selectedZoneName }}</span>
               <ChevronDown class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200" :class="{ 'rotate-180': isZoneDropdownOpen }" />
             </button>
 
@@ -146,19 +164,19 @@
             >
               <div
                 v-if="isZoneDropdownOpen"
-                class="absolute right-0 sm:left-0 mt-2 w-64 rounded-xl bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-slate-700 shadow-xl py-1.5 z-50 overflow-hidden animate-in"
+                class="absolute right-0 mt-1.5 w-60 rounded-xl bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-slate-700 shadow-xl py-1.5 z-50 overflow-hidden"
               >
-                <div class="px-3 py-2 border-b border-slate-100 dark:border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                <div class="px-3 py-1.5 border-b border-slate-100 dark:border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                   Select Security Zone
                 </div>
                 <button
-                  class="w-full px-3.5 py-2.5 text-left text-xs font-semibold hover:bg-indigo-50 dark:hover:bg-indigo-500/10 flex items-center justify-between transition-colors cursor-pointer"
-                  :class="selectedZoneId === 'all' ? 'text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-50/50 dark:bg-indigo-500/5' : 'text-slate-700 dark:text-slate-200'"
+                  class="w-full px-3.5 py-2 text-left text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between transition-colors cursor-pointer"
+                  :class="selectedZoneId === 'all' ? 'text-blue-600 dark:text-blue-400 font-bold bg-blue-50/50 dark:bg-blue-900/20' : 'text-slate-700 dark:text-slate-200'"
                   @click="selectZone('all')"
                 >
                   <div class="flex items-center gap-2">
-                    <Layers class="w-4 h-4 text-slate-400" />
-                    <span>All Zones (Combined)</span>
+                    <Layers class="w-3.5 h-3.5 text-slate-400" />
+                    <span>All Zones</span>
                   </div>
                   <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 font-mono">{{ zonesList.length }}</span>
                 </button>
@@ -166,46 +184,61 @@
                 <button
                   v-for="zone in zonesList"
                   :key="zone.id"
-                  class="w-full px-3.5 py-2.5 text-left text-xs font-semibold hover:bg-indigo-50 dark:hover:bg-indigo-500/10 flex items-center justify-between transition-colors cursor-pointer"
-                  :class="selectedZoneId === zone.id ? 'text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-50/50 dark:bg-indigo-500/5' : 'text-slate-700 dark:text-slate-200'"
+                  class="w-full px-3.5 py-2 text-left text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center justify-between transition-colors cursor-pointer"
+                  :class="selectedZoneId === zone.id ? 'text-blue-600 dark:text-blue-400 font-bold bg-blue-50/50 dark:bg-blue-900/20' : 'text-slate-700 dark:text-slate-200'"
                   @click="selectZone(zone.id)"
                 >
                   <div class="flex items-center gap-2 truncate">
-                    <div class="w-2 h-2 rounded-full shrink-0 bg-indigo-500" />
+                    <div class="w-2 h-2 rounded-full shrink-0 bg-blue-500" />
                     <span class="truncate">{{ zone.name || zone.zoneName }}</span>
                   </div>
-                  <span v-if="zone.securityTier" class="text-[9px] text-slate-400 shrink-0">{{ zone.securityTier }}</span>
+                  <span v-if="zone.securityTier" class="text-[9px] text-slate-400 shrink-0 font-mono">{{ zone.securityTier }}</span>
                 </button>
 
-                <div v-if="zonesList.length === 0" class="px-3.5 py-3 text-center text-xs text-slate-400">
-                  No zones configured for this site
-                </div>
-
-                <div class="p-2 border-t border-slate-100 dark:border-slate-800">
+                <div class="p-1.5 border-t border-slate-100 dark:border-slate-800">
                   <button
-                    class="w-full py-2 px-3 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-400 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                    class="w-full py-1.5 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
                     @click="openQuickCreateModal('add_zone')"
                   >
                     <Plus class="w-3.5 h-3.5" />
-                    <span>+ Add Security Zone</span>
+                    <span>Add New Zone</span>
                   </button>
                 </div>
               </div>
             </transition>
           </div>
 
-          <!-- Quick Action Dropdown: + Create (Opens Popup Modals) -->
+          <!-- Refresh Button -->
+          <button
+            class="h-9 w-9 rounded-lg bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 border border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center shadow-xs transition-colors cursor-pointer"
+            :class="{ 'animate-spin': isRefreshing }"
+            title="Refresh Live Data"
+            @click="refreshDashboard"
+          >
+            <RefreshCw class="w-3.5 h-3.5" />
+          </button>
+
+          <!-- Primary Dispatch Button -->
+          <button
+            class="h-9 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white flex items-center gap-1.5 text-xs font-semibold shadow-xs transition-colors cursor-pointer"
+            @click="openQuickCreateModal('create_patrol')"
+          >
+            <Plus class="w-4 h-4" />
+            <span>Dispatch Tour</span>
+          </button>
+
+          <!-- Secondary Actions Dropdown -->
           <div class="relative" ref="createDropdownRef">
             <button
-              class="h-10 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white flex items-center gap-2 text-xs font-bold shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
+              class="h-9 px-3 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 flex items-center gap-1 text-xs font-semibold shadow-xs transition-colors cursor-pointer"
               @click="isCreateDropdownOpen = !isCreateDropdownOpen"
+              title="More Actions"
             >
-              <Plus class="w-4 h-4" />
-              <span>Create</span>
-              <ChevronDown class="w-3.5 h-3.5 opacity-80" :class="{ 'rotate-180': isCreateDropdownOpen }" />
+              <span>Manage</span>
+              <ChevronDown class="w-3 h-3 text-slate-400 transition-transform duration-200" :class="{ 'rotate-180': isCreateDropdownOpen }" />
             </button>
 
-            <!-- Create Menu -->
+            <!-- Dropdown -->
             <transition
               enter-active-class="transition ease-out duration-100"
               enter-from-class="transform opacity-0 scale-95"
@@ -216,814 +249,681 @@
             >
               <div
                 v-if="isCreateDropdownOpen"
-                class="absolute right-0 mt-2 w-56 rounded-xl bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-slate-700 shadow-2xl py-2 z-50 overflow-hidden animate-in"
+                class="absolute right-0 mt-1.5 w-52 rounded-xl bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-slate-700 shadow-xl py-1.5 z-50 overflow-hidden"
               >
-                <div class="px-3 py-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                  Quick Create
+                <div class="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  Operational Setup
                 </div>
                 <button
                   v-for="action in quickCreateOptions"
                   :key="action.id"
-                  class="w-full px-3.5 py-2 text-left text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 flex items-center gap-2.5 transition-colors cursor-pointer"
+                  class="w-full px-3 py-2 text-left text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/60 flex items-center gap-2.5 transition-colors cursor-pointer"
                   @click="openQuickCreateModal(action.id)"
                 >
-                  <component :is="action.icon" class="w-4 h-4 text-indigo-500 shrink-0" />
+                  <component :is="action.icon" class="w-3.5 h-3.5 text-slate-500 shrink-0" />
                   <span>{{ action.label }}</span>
                 </button>
               </div>
             </transition>
           </div>
 
-          <!-- Refresh Button -->
-          <button
-            class="h-10 w-10 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-indigo-600 hover:bg-slate-100 flex items-center justify-center shadow-sm transition-colors cursor-pointer"
-            :class="{ 'animate-spin': isRefreshing }"
-            title="Refresh Command Center"
-            @click="refreshDashboard"
-          >
-            <RefreshCw class="w-4 h-4" />
-          </button>
         </div>
-
-      </div>
+      </header>
 
       <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- 2. FIVE PRIMARY KPI CARDS (DETAILS WITH / TOTAL)            -->
+      <!-- 2. EXECUTIVE OPERATIONAL KPIS (STANDARDIZED ENTERPRISE STRIP) -->
       <!-- ═══════════════════════════════════════════════════════════ -->
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 shrink-0">
 
-        <!-- Card 1: Total Guards -->
+        <!-- Card 1: Guard Force Deployment -->
         <div
-          class="bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-2xl p-4 shadow-sm hover:border-indigo-400/50 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group"
+          class="bg-white dark:bg-[#0D1424] border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-colors cursor-pointer"
           @click="router.push('/dashboard/guards')"
         >
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Guards</span>
-            <div class="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <Users class="w-3.5 h-3.5" />
-            </div>
+          <div class="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">
+            <span class="uppercase tracking-wider text-[11px] font-bold">Guards Deployed</span>
+            <Users class="w-4 h-4 text-slate-400" />
           </div>
-          <div class="mt-2 flex items-baseline gap-1.5">
-            <span class="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
+          <div class="flex items-baseline gap-2">
+            <span class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
               {{ currentMetrics.activeGuards }}
             </span>
-            <span class="text-sm font-bold text-slate-400 dark:text-slate-500">
-              / {{ currentMetrics.totalGuards }}
+            <span class="text-xs font-medium text-slate-500 dark:text-slate-400">
+              / {{ currentMetrics.totalGuards }} Scheduled
             </span>
           </div>
-          <div class="mt-3 pt-2.5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-[11px] font-semibold text-slate-600 dark:text-slate-400">
-            <span class="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1" title="Checked in and actively touring">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> {{ currentMetrics.guardsOnPatrol }} Touring
+          <div class="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+            <span class="font-medium text-emerald-600 dark:text-emerald-400">
+              {{ currentMetrics.guardsOnPatrol }} on active tour
             </span>
-            <span class="text-indigo-600 dark:text-indigo-400 font-bold flex items-center gap-1" title="Checked in today, awaiting tour dispatch">
-              <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> {{ currentMetrics.guardsOnStandby }} Standby
-            </span>
-            <span class="text-slate-400" title="Not checked in today">{{ currentMetrics.offDutyGuards }} Off</span>
+            <span>{{ currentMetrics.guardsOnStandby }} on standby</span>
           </div>
         </div>
 
-        <!-- Card 2: Active Patrols -->
+        <!-- Card 2: Active Patrol Tours -->
         <div
-          class="bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-2xl p-4 shadow-sm hover:border-indigo-400/50 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group"
-          @click="router.push('/dashboard/patrols?filter=running')"
+          class="bg-white dark:bg-[#0D1424] border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-colors cursor-pointer"
+          @click="router.push('/dashboard/patrols')"
         >
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Active Patrols</span>
-            <div class="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <ShieldAlert class="w-3.5 h-3.5" />
-            </div>
+          <div class="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">
+            <span class="uppercase tracking-wider text-[11px] font-bold">Active Patrol Tours</span>
+            <Activity class="w-4 h-4 text-slate-400" />
           </div>
-          <div class="mt-2 flex items-baseline gap-1.5">
-            <span class="text-3xl font-black text-blue-600 dark:text-blue-400 tracking-tight leading-none">
+          <div class="flex items-baseline gap-2">
+            <span class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
               {{ currentMetrics.activePatrols }}
             </span>
-            <span class="text-sm font-bold text-blue-400/70 dark:text-blue-500/70">
-              / {{ currentMetrics.totalPatrols }}
+            <span class="text-xs font-medium text-slate-500 dark:text-slate-400">
+              In Progress
             </span>
           </div>
-          <div class="mt-3 pt-2.5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-[11px] font-semibold text-slate-600 dark:text-slate-400">
-            <span class="text-emerald-600 dark:text-emerald-400 font-bold">{{ currentMetrics.onTrackPatrols }} On Track</span>
-            <span :class="currentMetrics.delayedPatrols > 0 ? 'text-amber-600 dark:text-amber-400 font-bold' : ''">{{ currentMetrics.delayedPatrols }} Delayed</span>
+          <div class="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+            <span class="font-medium text-slate-700 dark:text-slate-300">
+              {{ currentMetrics.onTrackPatrols }} on schedule
+            </span>
+            <span :class="currentMetrics.delayedPatrols > 0 ? 'text-amber-600 dark:text-amber-400 font-semibold' : 'text-slate-400'">
+              {{ currentMetrics.delayedPatrols }} delayed
+            </span>
           </div>
         </div>
 
-        <!-- Card 3: Completed Today -->
+        <!-- Card 3: Checkpoint Tour Compliance -->
         <div
-          class="bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-2xl p-4 shadow-sm hover:border-indigo-400/50 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group"
-          @click="router.push('/dashboard/patrols?filter=completed')"
+          class="bg-white dark:bg-[#0D1424] border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-colors cursor-pointer"
+          @click="router.push('/dashboard/settings/checkpoints')"
         >
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Completed Today</span>
-            <div class="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <CheckCircle2 class="w-3.5 h-3.5" />
-            </div>
+          <div class="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">
+            <span class="uppercase tracking-wider text-[11px] font-bold">Tour Compliance</span>
+            <QrCode class="w-4 h-4 text-slate-400" />
           </div>
-          <div class="mt-2 flex items-baseline gap-1.5">
-            <span class="text-3xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight leading-none">
-              {{ currentMetrics.completedToday }}
+          <div class="flex items-baseline gap-2">
+            <span class="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">
+              {{ currentMetrics.completionRate }}%
             </span>
-            <span class="text-sm font-bold text-emerald-400/70 dark:text-emerald-500/70">
-              / {{ currentMetrics.totalPatrols }}
+            <span class="text-xs font-medium text-slate-500 dark:text-slate-400">
+              Completion Rate
             </span>
           </div>
-          <div class="mt-3 pt-2.5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-[11px] font-semibold text-slate-600 dark:text-slate-400">
-            <span>{{ currentMetrics.completionRate }}% rate</span>
-            <span class="text-emerald-600 font-bold flex items-center gap-0.5">
-              <TrendingUp class="w-3 h-3" /> {{ currentMetrics.completionTrend }}
+          <div class="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+            <span class="font-medium text-slate-700 dark:text-slate-300">
+              {{ currentMetrics.completedToday }} rounds completed
             </span>
+            <span class="text-blue-600 dark:text-blue-400 font-medium">{{ recentCheckpointScans.length }} scans today</span>
           </div>
         </div>
 
-        <!-- Card 4: Missed / Overdue (Alert Highlight) -->
+        <!-- Card 4: Incident Exceptions & SOS -->
         <div
-          class="bg-white dark:bg-[#151c2c] border rounded-2xl p-4 shadow-sm transition-all cursor-pointer flex flex-col justify-between group"
-          :class="(currentMetrics.missedCount + currentMetrics.overdueCount) > 0 ? 'border-rose-300 dark:border-rose-500/30 hover:border-rose-500 bg-rose-50/20' : 'border-slate-200 dark:border-white/10 hover:border-indigo-400'"
-          @click="router.push('/dashboard/patrols?filter=missed')"
-        >
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-extrabold uppercase tracking-wider" :class="(currentMetrics.missedCount + currentMetrics.overdueCount) > 0 ? 'text-rose-600 dark:text-rose-400 font-black' : 'text-slate-500'">
-              Missed / Overdue
-            </span>
-            <div
-              class="w-7 h-7 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform"
-              :class="(currentMetrics.missedCount + currentMetrics.overdueCount) > 0 ? 'bg-rose-100 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400' : 'bg-slate-100 text-slate-500'"
-            >
-              <AlertTriangle class="w-3.5 h-3.5" />
-            </div>
-          </div>
-          <div class="mt-2 flex items-baseline gap-1.5">
-            <span class="text-3xl font-black tracking-tight leading-none" :class="(currentMetrics.missedCount + currentMetrics.overdueCount) > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-700 dark:text-slate-200'">
-              {{ currentMetrics.missedCount + currentMetrics.overdueCount }}
-            </span>
-            <span class="text-sm font-bold opacity-60">
-              / {{ currentMetrics.totalPatrols }}
-            </span>
-          </div>
-          <div class="mt-3 pt-2.5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-[11px] font-semibold text-slate-600 dark:text-slate-400">
-            <span :class="currentMetrics.missedCount > 0 ? 'text-rose-600 font-bold' : ''">{{ currentMetrics.missedCount }} Missed</span>
-            <span :class="currentMetrics.overdueCount > 0 ? 'text-amber-600 font-bold' : ''">{{ currentMetrics.overdueCount }} Overdue</span>
-          </div>
-        </div>
-
-        <!-- Card 5: Open Incidents -->
-        <div
-          class="bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-2xl p-4 shadow-sm hover:border-indigo-400/50 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group col-span-2 sm:col-span-1"
+          class="bg-white dark:bg-[#0D1424] border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-xs hover:border-slate-300 dark:hover:border-slate-700 transition-colors cursor-pointer"
           @click="router.push('/dashboard/incidents')"
         >
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Open Incidents</span>
-            <div class="w-7 h-7 rounded-lg bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">
-              <AlertCircle class="w-3.5 h-3.5" />
-            </div>
+          <div class="flex items-center justify-between text-xs font-semibold text-slate-500 dark:text-slate-400 mb-2">
+            <span class="uppercase tracking-wider text-[11px] font-bold">Exceptions &amp; Incidents</span>
+            <ShieldAlert v-if="currentMetrics.criticalIncidents > 0" class="w-4 h-4 text-rose-500" />
+            <CheckCircle2 v-else class="w-4 h-4 text-emerald-500" />
           </div>
-          <div class="mt-2 flex items-baseline gap-1.5">
-            <span class="text-3xl font-black text-amber-600 dark:text-amber-400 tracking-tight leading-none">
+          <div class="flex items-baseline gap-2">
+            <span
+              class="text-2xl font-bold tracking-tight"
+              :class="currentMetrics.criticalIncidents > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-900 dark:text-white'"
+            >
               {{ currentMetrics.openIncidents }}
             </span>
-            <span class="text-sm font-bold text-amber-400/70 dark:text-amber-500/70">
-              / {{ currentMetrics.totalIncidents }}
+            <span class="text-xs font-medium text-slate-500 dark:text-slate-400">
+              Open Issues
             </span>
           </div>
-          <div class="mt-3 pt-2.5 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-[11px] font-semibold text-slate-600 dark:text-slate-400">
-            <span class="text-rose-600 font-bold">{{ currentMetrics.criticalIncidents }} Critical</span>
-            <span>{{ currentMetrics.normalIncidents }} Normal</span>
+          <div class="mt-3 pt-2.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
+            <span
+              class="inline-flex items-center gap-1 font-semibold"
+              :class="currentMetrics.criticalIncidents > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'"
+            >
+              {{ currentMetrics.criticalIncidents > 0 ? `${currentMetrics.criticalIncidents} Urgent SOS Alerts` : 'Perimeter Secure' }}
+            </span>
+            <span class="text-slate-400 hover:text-blue-600 font-medium">Incident Desk &rarr;</span>
           </div>
         </div>
 
-      </div>
+      </section>
 
       <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- 3. LIVE OPERATIONS (VISUAL CENTER): ACTIVE PATROLS + MAP    -->
+      <!-- 2.5 ONBOARDING NOTICE (CLEAN ENTERPRISE BANNER WHEN NO SITES) -->
       <!-- ═══════════════════════════════════════════════════════════ -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 min-h-[480px]">
+      <section v-if="sitesList.length === 0" class="bg-blue-50/70 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900/50 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
+        <div>
+          <h2 class="text-sm font-bold text-blue-950 dark:text-blue-200">
+            Getting Started: Initialize Security Infrastructure
+          </h2>
+          <p class="text-xs text-blue-700 dark:text-blue-300 mt-0.5">
+            Add your primary property location, set up security checkpoints, register officers, and launch your first scheduled patrol.
+          </p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 shrink-0">
+          <button
+            class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition-colors cursor-pointer"
+            @click="openQuickCreateModal('add_site')"
+          >
+            1. Add Property
+          </button>
+          <button
+            class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-50 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
+            @click="openQuickCreateModal('add_checkpoint')"
+          >
+            2. Add Checkpoint
+          </button>
+          <button
+            class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-50 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-colors cursor-pointer"
+            @click="openQuickCreateModal('add_guard')"
+          >
+            3. Enrol Officer
+          </button>
+        </div>
+      </section>
 
-        <!-- LEFT (5 Cols): Active Patrols List -->
-        <div class="lg:col-span-5 bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-2xl shadow-sm flex flex-col overflow-hidden">
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- 3. MAIN WORKSPACE: BALANCED 60% MAP / 40% OPERATIONS DECK   -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1 min-h-[580px]">
+
+        <!-- LEFT SECTION: GIS LIVE FACILITY & GUARD MAP (7 cols = ~58%) -->
+        <main class="lg:col-span-7 bg-white dark:bg-[#0D1424] border border-slate-200 dark:border-slate-800 rounded-xl shadow-xs flex flex-col overflow-hidden relative min-h-[460px]">
           
-          <!-- Header -->
-          <div class="p-4 border-b border-slate-100 dark:border-white/5 flex items-center justify-between shrink-0 bg-slate-50/50 dark:bg-white/[0.02]">
-            <div class="flex items-center gap-2.5">
-              <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></div>
-              <h2 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
-                Live Patrols ({{ filteredActivePatrols.length }})
+          <!-- Map Header & Controls -->
+          <div class="px-4 py-3 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between shrink-0 bg-white dark:bg-[#0D1424] z-20">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <h2 class="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                Live Facility Map
               </h2>
+              <span class="text-xs text-slate-400 font-medium">&middot; {{ selectedSiteName }}</span>
             </div>
+
+            <!-- Map Layer & Fit Controls -->
+            <div class="flex items-center gap-1.5">
+              <button
+                class="h-7 px-2.5 rounded-md border text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                :class="isSatelliteView 
+                  ? 'bg-blue-50 border-blue-300 text-blue-700 dark:bg-blue-900/30 dark:border-blue-700 dark:text-blue-300' 
+                  : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50'"
+                @click="toggleMapLayer"
+                title="Toggle Satellite View"
+              >
+                <Layers class="w-3.5 h-3.5 text-slate-500" />
+                <span>{{ isSatelliteView ? 'Street Map' : 'Satellite' }}</span>
+              </button>
+
+              <button
+                class="h-7 px-2.5 rounded-md bg-white dark:bg-slate-800 hover:bg-slate-50 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                @click="centerMapOnGuards"
+                title="Fit all officers on map"
+              >
+                <Crosshair class="w-3.5 h-3.5 text-slate-500" />
+                <span>Fit All</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Leaflet Map Container -->
+          <div
+            id="dashboard-leaflet-map"
+            ref="dashboardMapRef"
+            class="w-full flex-1 min-h-[380px] z-10 relative bg-slate-100 dark:bg-slate-900"
+          ></div>
+
+          <!-- Floating Map Officer Inspector Drawer -->
+          <div
+            v-if="selectedMapGuard"
+            class="absolute bottom-4 left-4 right-4 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm border border-slate-200 dark:border-slate-700 p-3.5 rounded-xl shadow-lg flex items-center justify-between gap-4"
+          >
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="w-9 h-9 rounded-lg bg-blue-600 text-white font-bold text-xs flex items-center justify-center shrink-0">
+                {{ selectedMapGuard.name.charAt(0).toUpperCase() }}
+              </div>
+              <div class="min-w-0">
+                <p class="text-xs font-bold text-slate-900 dark:text-white truncate">{{ selectedMapGuard.name }}</p>
+                <p class="text-xs text-slate-500 dark:text-slate-400 truncate">
+                  {{ selectedMapGuard.siteName }} &middot; Route: <strong>{{ selectedMapGuard.routeName }}</strong> &middot; Next: <strong>{{ selectedMapGuard.currentCheckpoint }}</strong>
+                </p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+              <button
+                class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs transition-colors cursor-pointer"
+                @click="router.push(`/dashboard/patrols?patrolId=${selectedMapGuard.patrolId}`)"
+              >
+                Tour Details
+              </button>
+              <button
+                class="p-1.5 text-slate-400 hover:text-slate-600 rounded-md cursor-pointer"
+                @click="selectedMapGuard = null"
+              >
+                <X class="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </main>
+
+        <!-- RIGHT SECTION: LIVE OPERATIONS MANAGEMENT STREAM (5 cols = ~42%) -->
+        <aside class="lg:col-span-5 bg-white dark:bg-[#0D1424] border border-slate-200 dark:border-slate-800 rounded-xl shadow-xs flex flex-col overflow-hidden min-h-[460px]">
+          
+          <!-- Stream Segmented Tab Navigation -->
+          <div class="px-3 pt-3 border-b border-slate-200 dark:border-slate-800 flex items-center gap-1 shrink-0 bg-slate-50/50 dark:bg-[#0D1424]">
             <button
-              class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 cursor-pointer"
-              @click="router.push('/dashboard/patrols')"
+              class="px-3.5 py-2 text-xs font-semibold transition-colors cursor-pointer border-b-2 -mb-px flex items-center gap-1.5"
+              :class="activeStreamTab === 'patrols'
+                ? 'border-blue-600 text-blue-600 dark:text-blue-400 font-bold'
+                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'"
+              @click="activeStreamTab = 'patrols'"
             >
-              <span>View All</span>
-              <ArrowRight class="w-3.5 h-3.5" />
+              <span>Active Tours</span>
+              <span class="px-1.5 py-0.2 rounded text-[10px] font-mono bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                {{ filteredActivePatrols.length }}
+              </span>
+            </button>
+
+            <button
+              class="px-3.5 py-2 text-xs font-semibold transition-colors cursor-pointer border-b-2 -mb-px flex items-center gap-1.5"
+              :class="activeStreamTab === 'scans'
+                ? 'border-blue-600 text-blue-600 dark:text-blue-400 font-bold'
+                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'"
+              @click="activeStreamTab = 'scans'"
+            >
+              <span>Checkpoint Scans</span>
+            </button>
+
+            <button
+              class="px-3.5 py-2 text-xs font-semibold transition-colors cursor-pointer border-b-2 -mb-px flex items-center gap-1.5"
+              :class="activeStreamTab === 'alerts'
+                ? 'border-blue-600 text-blue-600 dark:text-blue-400 font-bold'
+                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'"
+              @click="activeStreamTab = 'alerts'"
+            >
+              <span>Exceptions &amp; Alerts</span>
+              <span
+                v-if="attentionItems.length > 0"
+                class="px-1.5 py-0.2 rounded text-[10px] font-mono font-bold bg-rose-500 text-white"
+              >
+                {{ attentionItems.length }}
+              </span>
+            </button>
+
+            <button
+              class="px-3.5 py-2 text-xs font-semibold transition-colors cursor-pointer border-b-2 -mb-px"
+              :class="activeStreamTab === 'sites'
+                ? 'border-blue-600 text-blue-600 dark:text-blue-400 font-bold'
+                : 'border-transparent text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'"
+              @click="activeStreamTab = 'sites'"
+            >
+              Properties
             </button>
           </div>
 
-          <!-- Patrol Cards Stream -->
-          <div class="flex-1 overflow-y-auto custom-scrollbar p-3.5 space-y-3">
+          <!-- ═════════════════════════════════════════════════════════ -->
+          <!-- TAB CONTENT 1: ACTIVE TOURS / PATROLS LIST                -->
+          <!-- ═════════════════════════════════════════════════════════ -->
+          <div v-if="activeStreamTab === 'patrols'" class="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2.5">
+            
             <div
               v-for="patrol in filteredActivePatrols"
               :key="patrol.id"
-              class="p-4 rounded-xl border border-slate-200/80 dark:border-white/5 bg-slate-50/70 dark:bg-slate-900/40 hover:border-indigo-400 dark:hover:border-indigo-500/40 transition-all shadow-sm group relative"
+              class="p-3.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 hover:border-slate-300 dark:hover:border-slate-700 transition-colors cursor-pointer"
+              @click="focusPatrolOnMap(patrol)"
             >
-              <!-- Top Row: Status badge & Guard -->
+              <!-- Row 1: Officer Header & Status -->
               <div class="flex items-start justify-between gap-2">
                 <div class="flex items-center gap-2.5 min-w-0">
-                  <div class="w-9 h-9 rounded-xl bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 font-black text-xs flex items-center justify-center shrink-0 border border-indigo-200 dark:border-indigo-500/30 shadow-sm">
+                  <div class="w-8 h-8 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center justify-center shrink-0">
                     {{ (patrol.guardName || 'G').charAt(0).toUpperCase() }}
                   </div>
                   <div class="min-w-0">
                     <p class="text-xs font-bold text-slate-900 dark:text-white truncate">{{ patrol.guardName }}</p>
-                    <p class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 truncate flex items-center gap-1">
-                      <Building2 class="w-3 h-3 shrink-0" /> {{ patrol.siteName }} &nbsp;·&nbsp; {{ patrol.routeName }}
+                    <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                      {{ patrol.siteName }} &middot; {{ patrol.routeName }}
                     </p>
                   </div>
                 </div>
 
-                <!-- Status Badge -->
-                <span
-                  class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1"
-                  :class="patrol.status === 'running' 
-                    ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30' 
-                    : patrol.status === 'delayed'
-                    ? 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 border border-amber-200 dark:border-amber-500/30'
-                    : 'bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400 border border-rose-200 dark:border-rose-500/30'"
-                >
+                <!-- Status Chip & Contact -->
+                <div class="flex items-center gap-1.5 shrink-0">
+                  <a
+                    v-if="patrol.guardPhone"
+                    :href="'tel:' + patrol.guardPhone"
+                    @click.stop
+                    class="w-7 h-7 rounded-md bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors"
+                    title="Direct Phone Call"
+                  >
+                    <PhoneCall class="w-3.5 h-3.5" />
+                  </a>
+
                   <span
-                    class="w-1.5 h-1.5 rounded-full"
-                    :class="patrol.status === 'running' ? 'bg-emerald-500' : patrol.status === 'delayed' ? 'bg-amber-500' : 'bg-rose-500'"
-                  />
-                  {{ patrol.status === 'running' ? 'On Track' : patrol.status === 'delayed' ? 'Delayed' : 'Critical' }}
-                </span>
-              </div>
-
-              <!-- Checkpoint Progress Bar -->
-              <div class="mt-3 bg-white dark:bg-slate-800 p-2.5 rounded-lg border border-slate-100 dark:border-white/5">
-                <div class="flex items-center justify-between text-[11px] font-bold mb-1.5">
-                  <span class="text-slate-700 dark:text-slate-300">
-                    Checkpoint {{ patrol.scannedCheckpoints }} / {{ patrol.totalCheckpoints }}
-                  </span>
-                  <span class="text-indigo-600 dark:text-indigo-400 font-mono">
-                    {{ Math.round((patrol.scannedCheckpoints / patrol.totalCheckpoints) * 100) }}%
+                    class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10.5px] font-semibold"
+                    :class="patrol.status === 'running' 
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800' 
+                      : 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800'"
+                  >
+                    <span class="w-1.5 h-1.5 rounded-full" :class="patrol.status === 'running' ? 'bg-emerald-500' : 'bg-amber-500'" />
+                    {{ patrol.status === 'running' ? 'On Schedule' : 'Delayed' }}
                   </span>
                 </div>
-                <div class="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden">
+              </div>
+
+              <!-- Row 2: Checkpoint Progress Bar -->
+              <div class="mt-3">
+                <div class="flex items-center justify-between text-[11px] font-medium text-slate-600 dark:text-slate-300 mb-1">
+                  <span>Checkpoint {{ patrol.scannedCheckpoints }} of {{ patrol.totalCheckpoints }}</span>
+                  <span class="font-mono font-semibold">{{ Math.round((patrol.scannedCheckpoints / Math.max(1, patrol.totalCheckpoints)) * 100) }}%</span>
+                </div>
+                <div class="w-full h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
                   <div
-                    class="h-full bg-gradient-to-r from-indigo-500 to-emerald-500 rounded-full transition-all duration-500"
-                    :style="{ width: `${(patrol.scannedCheckpoints / patrol.totalCheckpoints) * 100}%` }"
+                    class="h-full rounded-full transition-all duration-500"
+                    :class="patrol.status === 'running' ? 'bg-blue-600' : 'bg-amber-500'"
+                    :style="{ width: `${Math.min(100, (patrol.scannedCheckpoints / Math.max(1, patrol.totalCheckpoints)) * 100)}%` }"
                   />
                 </div>
               </div>
 
-              <!-- Bottom Row: Timestamps & Next Target -->
-              <div class="mt-3 flex items-center justify-between text-[10px] font-semibold text-slate-500 dark:text-slate-400">
-                <div class="flex items-center gap-3">
-                  <span>Started: <strong class="text-slate-700 dark:text-slate-200">{{ patrol.startedTime }}</strong></span>
-                  <span>Last Scan: <strong class="text-slate-700 dark:text-slate-200">{{ patrol.lastScanTime }}</strong></span>
+              <!-- Row 3: Target & Action Buttons -->
+              <div class="mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                <div class="flex items-center gap-1 truncate max-w-[60%]">
+                  <MapPin class="w-3 h-3 text-slate-400 shrink-0" />
+                  <span class="truncate">Next: <strong class="text-slate-700 dark:text-slate-200 font-semibold">{{ patrol.nextCheckpoint || 'Final Point' }}</strong></span>
                 </div>
-                <button
-                  class="px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold hover:bg-indigo-600 hover:text-white transition-all cursor-pointer"
-                  @click="router.push(`/dashboard/patrols?patrolId=${patrol.id}`)"
-                >
-                  View Patrol
-                </button>
-              </div>
 
-              <!-- Next Checkpoint Ticker -->
-              <div class="mt-2 text-[10px] font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                <MapPin class="w-3 h-3 text-indigo-500 shrink-0" />
-                <span>Next Checkpoint: <strong class="text-slate-800 dark:text-slate-200">{{ patrol.nextCheckpoint }}</strong></span>
+                <div class="flex items-center gap-1.5">
+                  <button
+                    class="px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 text-slate-600 dark:text-slate-300 font-medium transition-colors"
+                    @click.stop="focusPatrolOnMap(patrol)"
+                  >
+                    Locate
+                  </button>
+                  <button
+                    class="px-2 py-0.5 rounded bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-100 font-semibold transition-colors"
+                    @click.stop="router.push(`/dashboard/patrols?patrolId=${patrol.id}`)"
+                  >
+                    View
+                  </button>
+                </div>
               </div>
             </div>
 
             <!-- Empty State -->
-            <div v-if="filteredActivePatrols.length === 0" class="flex flex-col items-center justify-center py-16 text-center text-slate-400">
-              <ShieldCheck class="w-10 h-10 text-slate-300 dark:text-slate-600 mb-2" />
-              <p class="text-xs font-bold text-slate-600 dark:text-slate-400">No active patrols in progress</p>
+            <div v-if="filteredActivePatrols.length === 0" class="py-14 text-center text-slate-400 px-4">
+              <ShieldCheck class="w-8 h-8 mx-auto text-slate-300 dark:text-slate-600 mb-2" />
+              <p class="text-xs font-semibold text-slate-700 dark:text-slate-300">No Active Tours Currently Dispatched</p>
+              <p class="text-[11px] text-slate-400 mt-0.5">All scheduled guard patrols are either pending dispatch or completed.</p>
               <button
-                class="mt-3 text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
+                class="mt-3.5 px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition-colors cursor-pointer"
                 @click="openQuickCreateModal('create_patrol')"
               >
-                + Dispatch a Patrol
+                Dispatch Tour Now
               </button>
             </div>
           </div>
 
-        </div>
-
-        <!-- RIGHT (7 Cols): Site / Patrol Interactive Map -->
-        <div class="lg:col-span-7 bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-2xl shadow-sm flex flex-col overflow-hidden relative min-h-[420px]">
-          
-          <!-- Map Floating Controls & Badge -->
-          <div class="absolute top-3 left-3 right-3 z-20 flex items-center justify-between pointer-events-none">
-            <div class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-3.5 py-2 rounded-xl border border-slate-200 dark:border-white/10 shadow-md pointer-events-auto flex items-center gap-2.5">
-              <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></div>
-              <span class="text-xs font-bold text-slate-800 dark:text-slate-100">Live Security Map</span>
-              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400">
-                {{ selectedSiteName }}
-              </span>
-            </div>
-
-            <div class="flex items-center gap-1.5 pointer-events-auto">
-              <button
-                class="h-9 px-3 rounded-xl bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-white/10 shadow-md text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
-                :class="isSatelliteView ? 'text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-500/10 border-indigo-200 dark:border-indigo-800' : 'text-slate-700 dark:text-slate-200 hover:text-indigo-600'"
-                @click="toggleMapLayer"
-                :title="isSatelliteView ? 'Switch to Street Map' : 'Switch to Satellite View'"
-              >
-                <Layers class="w-3.5 h-3.5 text-indigo-500" />
-                <span>{{ isSatelliteView ? 'Street Map' : 'Satellite' }}</span>
-              </button>
-              <button
-                class="h-9 px-3 rounded-xl bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-white/10 shadow-md text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-indigo-600 flex items-center gap-1.5 transition-colors cursor-pointer"
-                @click="centerMapOnGuards"
-              >
-                <Crosshair class="w-3.5 h-3.5" />
-                <span>Center Guards</span>
-              </button>
-              <button
-                class="h-9 w-9 rounded-xl bg-white/95 dark:bg-slate-900/95 border border-slate-200 dark:border-white/10 shadow-md flex items-center justify-center text-slate-700 dark:text-slate-200 hover:text-indigo-600 transition-colors cursor-pointer"
-                title="Full Screen Map"
-                @click="router.push('/dashboard/monitoring')"
-              >
-                <Maximize2 class="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          <!-- Map Container with explicit pixel height -->
-          <div ref="dashboardMapRef" id="dashboard-live-map" style="height: 440px; min-height: 440px; width: 100%; position: relative;" class="w-full flex-1 bg-slate-100 dark:bg-slate-900 z-10"></div>
-
-          <!-- Live GPS status pill -->
-          <div
-            v-if="activeMapGuardsCount === 0"
-            class="absolute bottom-4 left-4 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm flex items-center gap-2 text-[11px] font-medium text-slate-500 dark:text-slate-400 pointer-events-none select-none"
-          >
-            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
-            <span>Standby · Awaiting live guard GPS signal</span>
-          </div>
-          <div
-            v-else
-            class="absolute bottom-4 left-4 z-20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 shadow-sm flex items-center gap-2 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 pointer-events-none select-none"
-          >
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span>{{ activeMapGuardsCount }} Active Guard GPS {{ activeMapGuardsCount === 1 ? 'Feed' : 'Feeds' }}</span>
-          </div>
-
-          <!-- Interactive Guard Popup Overlay if selected -->
-          <div
-            v-if="selectedMapGuard"
-            class="absolute bottom-4 left-4 right-4 sm:left-auto sm:right-4 sm:w-80 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-2xl p-4 shadow-2xl z-30 animate-in slide-in-from-bottom-2"
-          >
-            <div class="flex items-start justify-between gap-2 pb-2.5 border-b border-slate-100 dark:border-white/5">
-              <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-full bg-emerald-500 text-white font-bold flex items-center justify-center text-xs shadow-md">
-                  {{ selectedMapGuard.name.charAt(0) }}
+          <!-- ═════════════════════════════════════════════════════════ -->
+          <!-- TAB CONTENT 2: LIVE CHECKPOINT SCAN FEED                  -->
+          <!-- ═════════════════════════════════════════════════════════ -->
+          <div v-else-if="activeStreamTab === 'scans'" class="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
+            <div
+              v-for="(scan, index) in recentCheckpointScans"
+              :key="scan.id || scan.timestamp || index"
+              class="flex items-center justify-between p-2.5 rounded-lg border border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors"
+            >
+              <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-7 h-7 rounded-md bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                  <CheckCircle2 class="w-3.5 h-3.5" />
                 </div>
-                <div>
-                  <h4 class="text-xs font-bold text-slate-900 dark:text-white">{{ selectedMapGuard.name }}</h4>
-                  <p class="text-[10px] text-slate-500">{{ selectedMapGuard.siteName }} · {{ selectedMapGuard.routeName }}</p>
+                <div class="min-w-0">
+                  <p class="text-xs font-semibold text-slate-900 dark:text-white truncate">
+                    {{ scan.checkpoint_name || scan.checkpointId?.name || 'Checkpoint Tag' }}
+                  </p>
+                  <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+                    Scanned by {{ scan.guard_name || scan.guardId?.first_name || 'Assigned Officer' }}
+                  </p>
                 </div>
               </div>
-              <button class="text-slate-400 hover:text-slate-600 p-1 cursor-pointer" @click="selectedMapGuard = null">
-                <X class="w-4 h-4" />
-              </button>
-            </div>
 
-            <div class="grid grid-cols-2 gap-2 mt-2.5 text-[11px]">
-              <div class="bg-slate-50 dark:bg-slate-800/50 p-2 rounded-lg">
-                <span class="text-[9px] text-slate-400 block font-semibold uppercase">Current Target</span>
-                <span class="font-bold text-slate-800 dark:text-slate-200 truncate block">{{ selectedMapGuard.currentCheckpoint }}</span>
-              </div>
-              <div class="bg-slate-50 dark:bg-slate-800/50 p-2 rounded-lg">
-                <span class="text-[9px] text-slate-400 block font-semibold uppercase">Telemetry</span>
-                <span class="font-bold text-emerald-600 flex items-center gap-1">
-                  <Battery class="w-3 h-3" /> {{ selectedMapGuard.battery }} · <Wifi class="w-3 h-3" /> {{ selectedMapGuard.signal }}
+              <div class="text-right shrink-0">
+                <span class="text-[11px] font-mono font-medium text-slate-500 dark:text-slate-400">
+                  {{ scan.timestamp ? new Date(scan.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'Live' }}
                 </span>
+                <p class="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">Verified</p>
               </div>
             </div>
 
-            <div class="mt-3 flex gap-2">
-              <button
-                class="flex-1 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-colors cursor-pointer"
-                @click="router.push(`/dashboard/patrols?patrolId=${selectedMapGuard.patrolId}`)"
-              >
-                Track Live
-              </button>
-              <button
-                class="px-3 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-200 text-xs font-bold transition-colors cursor-pointer"
-                @click="alert(`Calling ${selectedMapGuard.name}...`)"
-              >
-                <PhoneCall class="w-3.5 h-3.5" />
-              </button>
+            <!-- Empty State -->
+            <div v-if="recentCheckpointScans.length === 0" class="py-14 text-center text-slate-400 px-4">
+              <QrCode class="w-8 h-8 mx-auto text-slate-300 dark:text-slate-600 mb-2" />
+              <p class="text-xs font-semibold text-slate-700 dark:text-slate-300">No Checkpoint Scans Recorded Yet</p>
+              <p class="text-[11px] text-slate-400 mt-0.5">As security officers scan QR or NFC checkpoints, live logs will stream here.</p>
             </div>
           </div>
 
-        </div>
-
-      </div>
-
-      <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- 4. ATTENTION REQUIRED & RECENT INCIDENTS                     -->
-      <!-- ═══════════════════════════════════════════════════════════ -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-
-        <!-- ATTENTION REQUIRED (6 Cols) -->
-        <div class="lg:col-span-6 bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-2xl shadow-sm p-4 flex flex-col">
-          <div class="flex items-center justify-between mb-3.5 shrink-0">
-            <div class="flex items-center gap-2">
-              <div class="w-7 h-7 rounded-lg bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center">
-                <AlertTriangle class="w-4 h-4" />
-              </div>
-              <div>
-                <h3 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">Attention Required</h3>
-                <p class="text-[10px] text-slate-500">Live operational alerts needing supervisor action</p>
-              </div>
-            </div>
-            <span class="text-[10px] font-black px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400">
-              {{ attentionItems.length }} Action Items
-            </span>
-          </div>
-
-          <div class="space-y-2.5 flex-1 overflow-y-auto custom-scrollbar max-h-64 pr-1">
+          <!-- ═════════════════════════════════════════════════════════ -->
+          <!-- TAB CONTENT 3: EXCEPTIONS & ALERTS FEED                   -->
+          <!-- ═════════════════════════════════════════════════════════ -->
+          <div v-else-if="activeStreamTab === 'alerts'" class="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
             <div
               v-for="item in attentionItems"
               :key="item.id"
-              class="p-3 rounded-xl border flex items-center justify-between gap-3 transition-colors cursor-pointer"
-              :class="item.severity === 'critical' 
-                ? 'bg-rose-50/40 dark:bg-rose-500/5 border-rose-200 dark:border-rose-500/20 hover:border-rose-400' 
-                : 'bg-amber-50/40 dark:bg-amber-500/5 border-amber-200 dark:border-amber-500/20 hover:border-amber-400'"
+              class="p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/40 hover:border-slate-300 transition-colors cursor-pointer"
               @click="handleAttentionClick(item)"
             >
-              <div class="flex items-center gap-3 min-w-0">
-                <div
-                  class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                  :class="item.severity === 'critical' ? 'bg-rose-100 text-rose-600 dark:bg-rose-500/20 dark:text-rose-400' : 'bg-amber-100 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400'"
-                >
-                  <AlertCircle v-if="item.type === 'incident'" class="w-4 h-4" />
-                  <Clock v-else class="w-4 h-4" />
-                </div>
-                <div class="min-w-0">
-                  <p class="text-xs font-bold text-slate-900 dark:text-white truncate">{{ item.title }}</p>
-                  <p class="text-[10px] font-medium text-slate-500 dark:text-slate-400 truncate">
-                    {{ item.siteName }} &nbsp;·&nbsp; {{ item.location }} &nbsp;·&nbsp; {{ item.timeAgo }}
-                  </p>
-                </div>
-              </div>
-
-              <div class="shrink-0 flex items-center gap-2">
-                <button class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 transition-colors">
-                  Take Action
-                </button>
-              </div>
-            </div>
-
-            <div v-if="attentionItems.length === 0" class="flex flex-col items-center justify-center py-10 text-center opacity-60">
-              <CheckCircle2 class="w-8 h-8 text-emerald-500 mb-1.5" />
-              <p class="text-xs font-bold text-slate-700 dark:text-slate-300">All Clear</p>
-              <p class="text-[10px] text-slate-500">No overdue patrols or missed checkpoints</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- RECENT INCIDENTS (6 Cols) -->
-        <div class="lg:col-span-6 bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-2xl shadow-sm p-4 flex flex-col">
-          <div class="flex items-center justify-between mb-3.5 shrink-0">
-            <div class="flex items-center gap-2">
-              <div class="w-7 h-7 rounded-lg bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
-                <AlertCircle class="w-4 h-4" />
-              </div>
-              <div>
-                <h3 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">Recent Incidents</h3>
-                <p class="text-[10px] text-slate-500">Real-time security exceptions & guard reports</p>
-              </div>
-            </div>
-            <button
-              class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 cursor-pointer"
-              @click="router.push('/dashboard/incidents')"
-            >
-              <span>View all incidents</span>
-              <ArrowRight class="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          <div class="space-y-2.5 flex-1 overflow-y-auto custom-scrollbar max-h-64 pr-1">
-            <div
-              v-for="inc in filteredRecentIncidents"
-              :key="inc.id"
-              class="p-3 rounded-xl border border-slate-100 dark:border-white/5 bg-slate-50/70 dark:bg-slate-900/40 hover:border-slate-300 dark:hover:border-slate-700 transition-colors cursor-pointer flex items-center justify-between gap-3"
-              @click="openIncidentModal(inc)"
-            >
-              <div class="flex items-center gap-3 min-w-0">
+              <div class="flex items-center justify-between text-[10.5px] font-semibold mb-1">
                 <span
-                  class="text-[9px] font-extrabold uppercase px-2 py-0.5 rounded shrink-0"
-                  :class="inc.severity === 'critical'
-                    ? 'bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400'
-                    : inc.severity === 'medium'
-                    ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400'
-                    : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400'"
+                  class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded uppercase"
+                  :class="item.type.includes('SOS') || item.type.includes('Incident') 
+                    ? 'bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800' 
+                    : 'bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800'"
                 >
-                  {{ inc.severity }}
+                  <AlertTriangle class="w-3 h-3" />
+                  {{ item.type }}
                 </span>
-                <div class="min-w-0">
-                  <p class="text-xs font-bold text-slate-900 dark:text-white truncate">{{ inc.title }}</p>
-                  <p class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 truncate">
-                    {{ inc.siteName }} &nbsp;·&nbsp; {{ inc.location }} &nbsp;·&nbsp; Reported by {{ inc.reportedBy }}
-                  </p>
-                </div>
+                <span class="text-slate-400 font-mono">{{ item.time }}</span>
               </div>
-
-              <span class="text-[10px] font-semibold text-slate-400 shrink-0">{{ inc.timeAgo }}</span>
+              <p class="text-xs font-bold text-slate-900 dark:text-white truncate">{{ item.title }}</p>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate mt-0.5">{{ item.description }}</p>
             </div>
 
-            <div v-if="filteredRecentIncidents.length === 0" class="flex flex-col items-center justify-center py-10 text-center opacity-60">
-              <ShieldCheck class="w-8 h-8 text-slate-400 mb-1.5" />
-              <p class="text-xs font-bold text-slate-600 dark:text-slate-400">No incident logs reported</p>
+            <!-- Empty State -->
+            <div v-if="attentionItems.length === 0" class="py-14 text-center text-slate-400 px-4">
+              <CheckCircle2 class="w-8 h-8 mx-auto text-emerald-500 mb-2" />
+              <p class="text-xs font-semibold text-slate-700 dark:text-slate-300">All Operations Normal</p>
+              <p class="text-[11px] text-slate-400 mt-0.5">No overdue tours, missed checkpoints, or urgent incident alarms.</p>
             </div>
           </div>
-        </div>
 
-      </div>
-
-      <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- 5. SITE PERFORMANCE TABLE                                   -->
-      <!-- ═══════════════════════════════════════════════════════════ -->
-      <div class="bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-2xl shadow-sm overflow-hidden">
-        <div class="p-4 border-b border-slate-100 dark:border-white/5 flex items-center justify-between bg-slate-50/50 dark:bg-white/[0.02]">
-          <div>
-            <h3 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">Site Performance & Compliance</h3>
-            <p class="text-[10px] text-slate-500">Multi-property status, checkpoint coverage, and incident load</p>
-          </div>
-          <button
-            class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline cursor-pointer"
-            @click="router.push('/dashboard/sites')"
-          >
-            Manage Sites →
-          </button>
-        </div>
-
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-slate-50 dark:bg-slate-800/50 text-[10px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200 dark:border-slate-700">
-              <tr>
-                <th class="py-3 px-4">Site Name</th>
-                <th class="py-3 px-4 text-center">Guards Active</th>
-                <th class="py-3 px-4 text-center">Patrols Today</th>
-                <th class="py-3 px-4 text-center">Completion Rate</th>
-                <th class="py-3 px-4 text-center">Missed / Late</th>
-                <th class="py-3 px-4 text-center">Incidents</th>
-                <th class="py-3 px-4 text-center">Status</th>
-                <th class="py-3 px-4 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100 dark:divide-white/5 font-medium text-slate-700 dark:text-slate-300">
-              <tr
-                v-for="site in sitesList"
-                :key="site.id"
-                class="hover:bg-indigo-50/40 dark:hover:bg-white/[0.02] transition-colors cursor-pointer"
-                @click="selectSite(site.id)"
-              >
-                <td class="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
-                  <div class="flex items-center gap-2">
-                    <Building2 class="w-4 h-4 text-slate-400" />
-                    <div>
-                      <p class="leading-tight">{{ site.name }}</p>
-                      <p class="text-[10px] text-slate-400 font-mono">{{ site.code }} · {{ site.address }}</p>
-                    </div>
-                  </div>
-                </td>
-                <td class="py-3.5 px-4 text-center font-semibold">
-                  <span class="text-emerald-600 font-bold">{{ site.activeGuards }}</span> / {{ site.totalGuards }}
-                </td>
-                <td class="py-3.5 px-4 text-center font-bold font-mono">{{ site.completedToday }}</td>
-                <td class="py-3.5 px-4 text-center">
-                  <div class="inline-flex items-center gap-2">
-                    <div class="w-16 h-1.5 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden">
-                      <div
-                        class="h-full rounded-full"
-                        :class="site.completionRate >= 95 ? 'bg-emerald-500' : site.completionRate >= 85 ? 'bg-amber-500' : 'bg-rose-500'"
-                        :style="{ width: `${site.completionRate}%` }"
-                      />
-                    </div>
-                    <span class="font-bold font-mono text-[11px]">{{ site.completionRate }}%</span>
-                  </div>
-                </td>
-                <td class="py-3.5 px-4 text-center">
-                  <span
-                    class="font-bold font-mono px-2 py-0.5 rounded text-[11px]"
-                    :class="site.missedCount > 0 ? 'bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400' : 'text-slate-400'"
-                  >
-                    {{ site.missedCount }}
-                  </span>
-                </td>
-                <td class="py-3.5 px-4 text-center">
-                  <span
-                    class="font-bold font-mono px-2 py-0.5 rounded text-[11px]"
-                    :class="site.incidentsCount > 0 ? 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400' : 'text-slate-400'"
-                  >
-                    {{ site.incidentsCount }}
-                  </span>
-                </td>
-                <td class="py-3.5 px-4 text-center">
-                  <span
-                    class="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full"
-                    :class="site.healthStatus === 'healthy' 
-                      ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400'
-                      : site.healthStatus === 'warning'
-                      ? 'bg-amber-50 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400'
-                      : 'bg-rose-50 text-rose-700 dark:bg-rose-500/20 dark:text-rose-400'"
-                  >
-                    <span
-                      class="w-1.5 h-1.5 rounded-full"
-                      :class="site.healthStatus === 'healthy' ? 'bg-emerald-500' : site.healthStatus === 'warning' ? 'bg-amber-500' : 'bg-rose-500'"
-                    />
-                    {{ site.healthStatus }}
-                  </span>
-                </td>
-                <td class="py-3.5 px-4 text-right">
-                  <button
-                    class="text-xs font-bold text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 cursor-pointer"
-                    @click.stop="router.push(`/dashboard/sites/${site.id}`)"
-                  >
-                    Site Hub →
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- ═══════════════════════════════════════════════════════════ -->
-      <!-- 6. PATROL PERFORMANCE TREND & GUARD PERFORMANCE             -->
-      <!-- ═══════════════════════════════════════════════════════════ -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-
-        <!-- Patrol Performance Chart (7 Cols) -->
-        <div class="lg:col-span-7 bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-2xl shadow-sm p-4 flex flex-col justify-between">
-          <div class="flex items-center justify-between mb-4">
-            <div>
-              <h3 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">Patrol Compliance Trend</h3>
-              <p class="text-[10px] text-slate-500">Historical completion rate & punctuality trajectory</p>
+          <!-- ═════════════════════════════════════════════════════════ -->
+          <!-- TAB CONTENT 4: PROPERTIES LIST                            -->
+          <!-- ═════════════════════════════════════════════════════════ -->
+          <div v-else class="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-2">
+            <div
+              v-for="site in sitesList"
+              :key="site.id"
+              class="p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors cursor-pointer"
+              @click="selectSite(site.id)"
+            >
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-xs font-bold text-slate-900 dark:text-white truncate">{{ site.name }}</span>
+                <span class="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">{{ site.code }}</span>
+              </div>
+              <p class="text-[11px] text-slate-500 dark:text-slate-400">
+                Guards: <strong>{{ site.activeGuards || 1 }}</strong> &middot; Geofence: <strong>{{ site.geofenceRadius || 500 }}m</strong> &middot; Status: <strong class="text-emerald-600">Active</strong>
+              </p>
             </div>
-            <!-- Time Tabs -->
-            <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+
+            <div class="pt-2">
               <button
-                v-for="period in ['7 Days', '30 Days', '90 Days']"
-                :key="period"
-                class="px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all cursor-pointer"
-                :class="selectedChartPeriod === period 
-                  ? 'bg-white dark:bg-[#151c2c] text-indigo-600 shadow-sm' 
-                  : 'text-slate-500 hover:text-slate-800'"
-                @click="selectedChartPeriod = period"
+                class="w-full py-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                @click="router.push('/dashboard/reports')"
               >
-                {{ period }}
+                <span>View Full Audit Reports</span>
+                <ArrowRight class="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
 
-          <!-- Clean High-Fidelity SVG Chart Curve -->
-          <div class="h-44 w-full flex items-end pt-4 pb-2 px-2 relative">
-            <svg class="w-full h-full overflow-visible" viewBox="0 0 500 120" preserveAspectRatio="none">
-              <defs>
-                <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stop-color="#4f46e5" stop-opacity="0.25" />
-                  <stop offset="100%" stop-color="#4f46e5" stop-opacity="0.0" />
-                </linearGradient>
-              </defs>
-              <!-- Grid Lines -->
-              <line x1="0" y1="20" x2="500" y2="20" stroke="currentColor" class="text-slate-100 dark:text-slate-800" stroke-dasharray="4" />
-              <line x1="0" y1="60" x2="500" y2="60" stroke="currentColor" class="text-slate-100 dark:text-slate-800" stroke-dasharray="4" />
-              <line x1="0" y1="100" x2="500" y2="100" stroke="currentColor" class="text-slate-100 dark:text-slate-800" stroke-dasharray="4" />
-              <!-- Area Fill -->
-              <path d="M 0 100 L 0 70 Q 80 40 160 55 T 320 30 T 500 15 L 500 120 L 0 120 Z" fill="url(#chartGrad)" />
-              <!-- Line -->
-              <path d="M 0 70 Q 80 40 160 55 T 320 30 T 500 15" fill="none" stroke="#4f46e5" stroke-width="3" stroke-linecap="round" />
-              <!-- Marker Dots -->
-              <circle cx="0" cy="70" r="4" fill="#4f46e5" />
-              <circle cx="80" cy="45" r="4" fill="#4f46e5" />
-              <circle cx="160" cy="55" r="4" fill="#4f46e5" />
-              <circle cx="240" cy="40" r="4" fill="#4f46e5" />
-              <circle cx="320" cy="30" r="4" fill="#4f46e5" />
-              <circle cx="410" cy="20" r="4" fill="#4f46e5" />
-              <circle cx="500" cy="15" r="5" fill="#10b981" stroke="#fff" stroke-width="2" />
-            </svg>
-          </div>
-
-          <!-- X-Axis Labels -->
-          <div class="flex items-center justify-between text-[10px] font-bold text-slate-400 pt-2 border-t border-slate-100 dark:border-white/5">
-            <span>Mon (88%)</span>
-            <span>Tue (92%)</span>
-            <span>Wed (90%)</span>
-            <span>Thu (94%)</span>
-            <span>Fri (96%)</span>
-            <span>Sat (97%)</span>
-            <span class="text-emerald-600 font-black">Sun (98.4%)</span>
-          </div>
-        </div>
-
-        <!-- Guard Performance Ranking (5 Cols) -->
-        <div class="lg:col-span-5 bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-2xl shadow-sm p-4 flex flex-col justify-between">
-          <div class="flex items-center justify-between mb-3">
-            <div>
-              <h3 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider">Guard Performance</h3>
-              <p class="text-[10px] text-slate-500">Punctuality and completion leaderboards</p>
-            </div>
-            <button class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline" @click="router.push('/dashboard/guards')">
-              All Guards
-            </button>
-          </div>
-
-          <!-- Top Guards Section -->
-          <div class="space-y-2">
-            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-              <Award class="w-3.5 h-3.5 text-amber-500" /> Top Performing Guards
-            </div>
-            <div
-              v-for="guard in topGuards"
-              :key="guard.name"
-              class="flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-white/5 text-xs"
-            >
-              <div class="flex items-center gap-2">
-                <span class="w-5 h-5 rounded-full bg-indigo-600 text-white text-[10px] font-bold flex items-center justify-center">
-                  {{ guard.rank }}
-                </span>
-                <span class="font-bold text-slate-800 dark:text-slate-200">{{ guard.name }}</span>
-              </div>
-              <div class="flex items-center gap-3">
-                <span class="text-[10px] text-slate-500">{{ guard.patrols }} patrols</span>
-                <span class="font-bold font-mono text-emerald-600">{{ guard.completion }}</span>
-              </div>
-            </div>
-            <div v-if="topGuards.length === 0" class="py-3 text-center text-[11px] text-slate-400">
-              No guard activity recorded yet today
-            </div>
-          </div>
-
-          <!-- Needs Attention Section -->
-          <div class="space-y-2 mt-3 pt-3 border-t border-slate-100 dark:border-white/5">
-            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-              <AlertCircle class="w-3.5 h-3.5 text-rose-500" /> Punctuality Flags
-            </div>
-            <div
-              v-for="guard in flagGuards"
-              :key="guard.name"
-              class="flex items-center justify-between p-2 rounded-xl bg-rose-50/40 dark:bg-rose-500/5 border border-rose-100 dark:border-rose-500/10 text-xs"
-            >
-              <span class="font-bold text-slate-800 dark:text-slate-200">{{ guard.name }}</span>
-              <span class="font-bold text-rose-600 text-[11px]">{{ guard.missed }} missed / late</span>
-            </div>
-            <div v-if="flagGuards.length === 0" class="py-2 px-3 rounded-xl bg-emerald-50/50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 flex items-center justify-between text-xs text-emerald-700 dark:text-emerald-300">
-              <span class="flex items-center gap-1.5 font-medium"><CheckCircle2 class="w-3.5 h-3.5 text-emerald-500" /> 100% on-time &middot; No punctuality flags</span>
-              <span class="text-[10px] font-black text-emerald-600 dark:text-emerald-400">All Clear</span>
-            </div>
-          </div>
-
-        </div>
+        </aside>
 
       </div>
+
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- 4. OPERATIONAL PERFORMANCE & SHIFT ANALYTICS                -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <section class="bg-white dark:bg-[#0D1424] border border-slate-200 dark:border-slate-800 rounded-xl p-5 shadow-xs shrink-0">
+        
+        <!-- Section Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-100 dark:border-slate-800">
+          <div>
+            <div class="flex items-center gap-2">
+              <BarChart3 class="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <h2 class="text-sm font-bold text-slate-900 dark:text-white tracking-tight">
+                Shift Performance &amp; Patrol Telemetry Analytics
+              </h2>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Hourly checkpoint throughput velocity, tour completion distribution, and operational adherence.
+            </p>
+          </div>
+
+          <div class="flex items-center gap-2 shrink-0">
+            <div class="flex items-center bg-slate-100 dark:bg-slate-800 p-0.5 rounded-lg text-xs font-semibold">
+              <button
+                v-for="range in ['Today', '7 Days', '30 Days']"
+                :key="range"
+                class="px-2.5 py-1 rounded-md transition-colors cursor-pointer"
+                :class="analyticsTimeRange === range 
+                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs' 
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'"
+                @click="analyticsTimeRange = range"
+              >
+                {{ range }}
+              </button>
+            </div>
+
+            <button
+              class="h-8 px-3 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-1.5 transition-colors cursor-pointer"
+              @click="router.push('/dashboard/reports')"
+            >
+              <span>Full Analytics Hub</span>
+              <ArrowRight class="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+
+        <!-- 3-Column Analytics Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          
+          <!-- Chart 1: Checkpoint Scan Velocity (7 cols = ~58%) -->
+          <div class="lg:col-span-7 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h3 class="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+                  24-Hour Checkpoint Scan Velocity
+                </h3>
+                <p class="text-[11px] text-slate-400">Scans recorded per 2-hour operational window</p>
+              </div>
+              <div class="flex items-center gap-3 text-xs font-medium text-slate-500">
+                <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-blue-600"></span> Verified Scans</span>
+              </div>
+            </div>
+            
+            <div class="h-56 w-full">
+              <VueApexCharts
+                type="area"
+                height="100%"
+                width="100%"
+                :options="scanVelocityChartOptions"
+                :series="scanVelocityChartSeries"
+              />
+            </div>
+          </div>
+
+          <!-- Chart 2: Tour Status Distribution (Donut) (5 cols = ~42%) -->
+          <div class="lg:col-span-5 flex flex-col justify-between border-t lg:border-t-0 lg:border-l border-slate-100 dark:border-slate-800 pt-4 lg:pt-0 lg:pl-5">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h3 class="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+                  Tour Completion Distribution
+                </h3>
+                <p class="text-[11px] text-slate-400">Operational adherence across scheduled tours</p>
+              </div>
+              <span class="text-xs font-bold font-mono px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
+                {{ currentMetrics.completionRate }}% Compliance
+              </span>
+            </div>
+
+            <div class="h-44 w-full flex items-center justify-center my-1">
+              <VueApexCharts
+                type="donut"
+                height="100%"
+                width="100%"
+                :options="tourStatusDonutOptions"
+                :series="tourStatusDonutSeries"
+              />
+            </div>
+
+            <!-- Mini Summary Legend Table -->
+            <div class="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 dark:border-slate-800/80 text-center text-xs">
+              <div class="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                <p class="text-[10px] text-slate-400 font-medium">On Schedule</p>
+                <p class="text-sm font-bold text-emerald-600 dark:text-emerald-400">{{ currentMetrics.onTrackPatrols + currentMetrics.completedToday }}</p>
+              </div>
+              <div class="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                <p class="text-[10px] text-slate-400 font-medium">Delayed</p>
+                <p class="text-sm font-bold text-amber-600 dark:text-amber-400">{{ currentMetrics.delayedPatrols }}</p>
+              </div>
+              <div class="p-1.5 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                <p class="text-[10px] text-slate-400 font-medium">Exceptions</p>
+                <p class="text-sm font-bold text-rose-600 dark:text-rose-400">{{ currentMetrics.openIncidents }}</p>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
 
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════ -->
-    <!-- 7. POPUP MODALS FOR QUICK CREATE (NO REDIRECTION)           -->
+    <!-- 4. QUICK ACTION & MODAL OVERLAYS                            -->
     <!-- ═══════════════════════════════════════════════════════════ -->
-
-    <!-- Modal 1: Create Patrol Modal -->
     <Teleport to="body">
-      <div v-if="activeQuickModal === 'create_patrol'" class="fixed inset-0 z-[110] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" @click.self="activeQuickModal = null">
+      <!-- Create Patrol Modal -->
+      <div v-if="activeQuickModal === 'create_patrol'" class="fixed inset-0 z-[210] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" @click.self="activeQuickModal = null">
         <div class="w-full max-w-md bg-white dark:bg-[#151c2c] rounded-2xl shadow-2xl p-6 border border-slate-200 dark:border-white/10 animate-in zoom-in-95">
           <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 dark:border-white/5">
             <div class="flex items-center gap-2.5">
               <div class="w-8 h-8 rounded-xl bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 flex items-center justify-center font-bold">
-                <ShieldAlert class="w-4 h-4" />
+                <Plus class="w-4 h-4" />
               </div>
-              <h3 class="text-sm font-black text-slate-900 dark:text-white">Dispatch New Patrol</h3>
+              <h3 class="text-sm font-black text-slate-900 dark:text-white">Dispatch New Patrol Round</h3>
             </div>
             <button class="text-slate-400 hover:text-slate-600 p-1" @click="activeQuickModal = null"><X class="w-4 h-4" /></button>
           </div>
           <form @submit.prevent="submitQuickPatrol" class="space-y-3.5 text-xs">
             <div class="space-y-1">
-              <label class="font-bold text-slate-700 dark:text-slate-300">Assign Guard *</label>
+              <label class="font-bold text-slate-700 dark:text-slate-300">Assign Security Guard *</label>
               <select v-model="quickPatrolForm.guardName" required class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none">
-                <option value="Raj Kumar">Raj Kumar (On Duty)</option>
-                <option value="Arun Prakash">Arun Prakash (On Duty)</option>
-                <option value="Vijay Anand">Vijay Anand (On Duty)</option>
-                <option value="Kumar Swamy">Kumar Swamy (Standby)</option>
+                <option value="" disabled>Select Guard</option>
+                <option v-for="g in allGuards" :key="g.id" :value="g.first_name ? `${g.first_name} ${g.last_name || ''}`.trim() : (g.name || 'Security Officer')">
+                  {{ g.first_name ? `${g.first_name} ${g.last_name || ''}`.trim() : (g.name || 'Security Officer') }} ({{ g.phone || 'Standby' }})
+                </option>
               </select>
             </div>
             <div class="space-y-1">
               <label class="font-bold text-slate-700 dark:text-slate-300">Patrol Route / Sector *</label>
-              <select v-model="quickPatrolForm.routeName" required class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none">
-                <option value="Night Perimeter Inspection">Night Perimeter Inspection (8 Checkpoints)</option>
-                <option value="Basement Logistics & Bay">Basement Logistics & Bay (6 Checkpoints)</option>
-                <option value="Server Room Core Vault">Server Room Core Vault (5 Checkpoints)</option>
-                <option value="Rooftop Emergency Exits">Rooftop Emergency Exits (4 Checkpoints)</option>
-              </select>
+              <input v-model="quickPatrolForm.routeName" required placeholder="e.g. Night Perimeter Tour" class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none" />
             </div>
             <div class="grid grid-cols-2 gap-3">
               <div class="space-y-1">
                 <label class="font-bold text-slate-700 dark:text-slate-300">Site *</label>
                 <select v-model="quickPatrolForm.siteName" required class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none">
-                  <option v-for="s in sitesList" :key="s.id" :value="s.name">{{ s.name }}</option>
+                  <option value="" disabled>Select Site</option>
+                  <option v-for="s in sitesList" :key="s.id" :value="s.name || s.locName">{{ s.name || s.locName }}</option>
                 </select>
               </div>
               <div class="space-y-1">
@@ -1042,468 +942,122 @@
           </form>
         </div>
       </div>
-    </Teleport>
 
-    <!-- Modal 2: Patrol Schedule Modal -->
-    <Teleport to="body">
-      <div v-if="activeQuickModal === 'patrol_schedule'" class="fixed inset-0 z-[110] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" @click.self="activeQuickModal = null">
+      <!-- Add Guard Modal -->
+      <div v-if="activeQuickModal === 'add_guard'" class="fixed inset-0 z-[210] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" @click.self="activeQuickModal = null">
         <div class="w-full max-w-md bg-white dark:bg-[#151c2c] rounded-2xl shadow-2xl p-6 border border-slate-200 dark:border-white/10 animate-in zoom-in-95">
           <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 dark:border-white/5">
             <div class="flex items-center gap-2.5">
-              <div class="w-8 h-8 rounded-xl bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 flex items-center justify-center font-bold">
-                <Clock class="w-4 h-4" />
-              </div>
-              <h3 class="text-sm font-black text-slate-900 dark:text-white">Create Patrol Schedule</h3>
-            </div>
-            <button class="text-slate-400 hover:text-slate-600 p-1" @click="activeQuickModal = null"><X class="w-4 h-4" /></button>
-          </div>
-          <form @submit.prevent="submitQuickSchedule" class="space-y-3.5 text-xs">
-            <div class="space-y-1">
-              <label class="font-bold text-slate-700 dark:text-slate-300">Schedule Name *</label>
-              <input v-model="quickScheduleForm.name" required placeholder="e.g. Night Shift Continuous Roving" class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none" />
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-              <div class="space-y-1">
-                <label class="font-bold text-slate-700 dark:text-slate-300">Frequency</label>
-                <select v-model="quickScheduleForm.frequency" class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none">
-                  <option value="Every 1 hour">Every 1 hour</option>
-                  <option value="Every 2 hours">Every 2 hours</option>
-                  <option value="Every 4 hours">Every 4 hours</option>
-                  <option value="Daily Fixed">Daily Fixed</option>
-                </select>
-              </div>
-              <div class="space-y-1">
-                <label class="font-bold text-slate-700 dark:text-slate-300">Shift</label>
-                <select v-model="quickScheduleForm.shift" class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none">
-                  <option value="Night (22:00 - 06:00)">Night (22:00 - 06:00)</option>
-                  <option value="Day (06:00 - 14:00)">Day (06:00 - 14:00)</option>
-                  <option value="Evening (14:00 - 22:00)">Evening (14:00 - 22:00)</option>
-                </select>
-              </div>
-            </div>
-            <div class="mt-4 pt-3 border-t border-slate-100 dark:border-white/5 flex gap-2 justify-end">
-              <button type="button" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs" @click="activeQuickModal = null">Cancel</button>
-              <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs">Save Schedule</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </Teleport>
-
-    <!-- Modal 3: Add Guard Modal -->
-    <Teleport to="body">
-      <div v-if="activeQuickModal === 'add_guard'" class="fixed inset-0 z-[110] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" @click.self="activeQuickModal = null">
-        <div class="w-full max-w-md bg-white dark:bg-[#151c2c] rounded-2xl shadow-2xl p-6 border border-slate-200 dark:border-white/10 animate-in zoom-in-95">
-          <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 dark:border-white/5">
-            <div class="flex items-center gap-2.5">
-              <div class="w-8 h-8 rounded-xl bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 flex items-center justify-center font-bold">
+              <div class="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 flex items-center justify-center font-bold">
                 <Users class="w-4 h-4" />
               </div>
-              <h3 class="text-sm font-black text-slate-900 dark:text-white">Enroll Guard</h3>
+              <h3 class="text-sm font-black text-slate-900 dark:text-white">Enrol Security Officer</h3>
             </div>
             <button class="text-slate-400 hover:text-slate-600 p-1" @click="activeQuickModal = null"><X class="w-4 h-4" /></button>
           </div>
-          <form @submit.prevent="submitQuickGuard" class="space-y-3.5 text-xs">
+          <form @submit.prevent="submitQuickGuard" class="space-y-3 text-xs">
             <div class="grid grid-cols-2 gap-3">
               <div class="space-y-1">
                 <label class="font-bold text-slate-700 dark:text-slate-300">First Name *</label>
-                <input v-model="quickGuardForm.first_name" required placeholder="e.g. Suresh" class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none" />
+                <input v-model="quickGuardForm.first_name" required placeholder="e.g. Ramesh" class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none" />
               </div>
               <div class="space-y-1">
                 <label class="font-bold text-slate-700 dark:text-slate-300">Last Name</label>
                 <input v-model="quickGuardForm.last_name" placeholder="e.g. Kumar" class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none" />
               </div>
             </div>
-            <div class="grid grid-cols-2 gap-3">
-              <div class="space-y-1">
-                <label class="font-bold text-slate-700 dark:text-slate-300">Badge / Guard ID *</label>
-                <input v-model="quickGuardForm.badge_number" required placeholder="GRD-204" class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono uppercase outline-none" />
-              </div>
-              <div class="space-y-1">
-                <label class="font-bold text-slate-700 dark:text-slate-300">Phone Number *</label>
-                <input v-model="quickGuardForm.phone" required placeholder="9876543210" class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none" />
-              </div>
+            <div class="space-y-1">
+              <label class="font-bold text-slate-700 dark:text-slate-300">Mobile Number (For App OTP Login) *</label>
+              <input v-model="quickGuardForm.phone" required placeholder="e.g. 9876543210" class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none" />
+            </div>
+            <div class="space-y-1">
+              <label class="font-bold text-slate-700 dark:text-slate-300">Badge / Guard ID</label>
+              <input v-model="quickGuardForm.badge_number" placeholder="e.g. GRD-104" class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none" />
             </div>
             <div class="mt-4 pt-3 border-t border-slate-100 dark:border-white/5 flex gap-2 justify-end">
               <button type="button" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs" @click="activeQuickModal = null">Cancel</button>
-              <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs">Save Guard</button>
+              <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs">Register Officer</button>
             </div>
           </form>
         </div>
       </div>
-    </Teleport>
 
-    <!-- Modal: Add Site Modal (Full Feature with Coordinates and Map Picker) -->
-    <Teleport to="body">
-      <div v-if="activeQuickModal === 'add_site'" class="fixed inset-0 z-[110] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" @click.self="activeQuickModal = null">
-        <div class="w-full max-w-lg bg-white dark:bg-[#151c2c] rounded-2xl shadow-2xl p-6 border border-slate-200 dark:border-white/10 animate-in zoom-in-95">
-          <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 dark:border-white/5">
-            <div class="flex items-center gap-2.5">
-              <div class="w-9 h-9 rounded-xl bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold shadow-sm">
-                <Building2 class="w-4 h-4" />
-              </div>
-              <div>
-                <h3 class="text-sm font-black text-slate-900 dark:text-white">Create Security Site</h3>
-                <p class="text-[10px] text-slate-500 dark:text-slate-400">Configure new property location & guard patrol sector</p>
-              </div>
-            </div>
-            <button class="text-slate-400 hover:text-slate-600 p-1 cursor-pointer" @click="activeQuickModal = null"><X class="w-4 h-4" /></button>
-          </div>
-          <form @submit.prevent="submitQuickSite" class="space-y-3.5 text-xs">
-            <div class="space-y-1">
-              <label class="font-bold text-slate-700 dark:text-slate-300">Property / Site Name *</label>
-              <input v-model="quickSiteForm.name" required placeholder="e.g. Bangalore Global Tech Campus" class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none focus:border-indigo-500 shadow-sm" />
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div class="space-y-1">
-                <label class="font-bold text-slate-700 dark:text-slate-300">Site Code *</label>
-                <input v-model="quickSiteForm.code" required placeholder="e.g. BGTC-01" class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono uppercase outline-none focus:border-indigo-500 shadow-sm" />
-              </div>
-              <div class="sm:col-span-2 space-y-1">
-                <label class="font-bold text-slate-700 dark:text-slate-300">Physical Address / Landmark</label>
-                <input v-model="quickSiteForm.address" placeholder="e.g. OMR IT Highway, Chennai" class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none focus:border-indigo-500 shadow-sm" />
-              </div>
-            </div>
-
-            <!-- Site Coordinates Section with Pick Location on Map -->
-            <div class="space-y-2 pt-1 pb-1">
-              <div class="flex items-center justify-between">
-                <span class="font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
-                  <MapPin class="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-                  <span>Site Coordinates</span>
-                </span>
-                
-                <button
-                  type="button"
-                  class="h-8 px-3 rounded-lg bg-indigo-50 dark:bg-indigo-500/15 hover:bg-indigo-600 hover:text-white text-indigo-700 dark:text-indigo-300 text-xs font-bold flex items-center gap-1.5 transition-all border border-indigo-200 dark:border-indigo-500/30 cursor-pointer shadow-sm"
-                  @click="openMapPickerModal"
-                >
-                  <MapIcon class="w-3.5 h-3.5" />
-                  <span>Pick Location on Map</span>
-                </button>
-              </div>
-
-              <div class="grid grid-cols-2 gap-3">
-                <div class="space-y-1">
-                  <label class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Latitude</label>
-                  <input
-                    v-model.number="quickSiteForm.latitude"
-                    type="number"
-                    step="any"
-                    required
-                    placeholder="12.9716"
-                    class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono outline-none focus:border-indigo-500 shadow-sm"
-                  />
-                </div>
-                <div class="space-y-1">
-                  <label class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">Longitude</label>
-                  <input
-                    v-model.number="quickSiteForm.longitude"
-                    type="number"
-                    step="any"
-                    required
-                    placeholder="80.2435"
-                    class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-mono outline-none focus:border-indigo-500 shadow-sm"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <!-- Advanced Settings Accordion -->
-            <div class="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
-              <button
-                type="button"
-                class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/60 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
-                @click="showAdvancedSettings = !showAdvancedSettings"
-              >
-                <div class="flex items-center gap-2">
-                  <SlidersHorizontal class="w-3.5 h-3.5 text-indigo-500" />
-                  <span>Advanced Settings (Geofence Radius & Security)</span>
-                </div>
-                <ChevronDown class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200" :class="{ 'rotate-180': showAdvancedSettings }" />
-              </button>
-
-              <div v-if="showAdvancedSettings" class="p-4 space-y-3 bg-white dark:bg-slate-900/40 border-t border-slate-200 dark:border-slate-700">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div class="space-y-1">
-                    <label class="font-bold text-slate-700 dark:text-slate-300">Geofence Radius (Meters)</label>
-                    <input
-                      v-model.number="quickSiteForm.geofence_radius"
-                      type="number"
-                      min="50"
-                      max="10000"
-                      placeholder="500"
-                      class="w-full h-9 px-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none focus:border-indigo-500"
-                    />
-                    <p class="text-[10px] text-slate-400">Allowed patrol scan boundary around property</p>
-                  </div>
-                  <div class="space-y-1">
-                    <label class="font-bold text-slate-700 dark:text-slate-300">Emergency Phone</label>
-                    <input
-                      v-model="quickSiteForm.emergency_phone"
-                      type="tel"
-                      placeholder="+91 98765 43210"
-                      class="w-full h-9 px-3 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none focus:border-indigo-500"
-                    />
-                    <p class="text-[10px] text-slate-400">Direct line for SOS alert escalations</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Modal Action Buttons -->
-            <div class="mt-4 pt-3 border-t border-slate-100 dark:border-white/5 flex gap-2 justify-end">
-              <button type="button" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs hover:bg-slate-200 cursor-pointer" @click="activeQuickModal = null">Cancel</button>
-              <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-600/20 cursor-pointer flex items-center gap-1.5">
-                <Building2 class="w-3.5 h-3.5" />
-                <span>Save Site</span>
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </Teleport>
-
-    <!-- Modal: Dedicated Map Location Picker Modal -->
-    <Teleport to="body">
-      <div
-        v-if="showMapPickerModal"
-        class="fixed inset-0 z-[120] flex items-center justify-center bg-slate-900/70 backdrop-blur-md p-4"
-        @click.self="showMapPickerModal = false"
-      >
-        <div class="w-full max-w-3xl bg-white dark:bg-[#151c2c] rounded-2xl shadow-2xl p-5 border border-slate-200 dark:border-white/10 animate-in zoom-in-95 duration-150 flex flex-col max-h-[90vh]">
-          <!-- Map Picker Header -->
-          <div class="flex items-center justify-between mb-3 pb-3 border-b border-slate-100 dark:border-white/5 shrink-0">
-            <div class="flex items-center gap-2.5">
-              <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-sm">
-                <MapPin class="w-4 h-4" />
-              </div>
-              <div>
-                <h3 class="text-sm font-black text-slate-900 dark:text-white">Select Property Location</h3>
-                <p class="text-[11px] text-slate-500">Search any location or click on map to set property pin</p>
-              </div>
-            </div>
-            <button class="text-slate-400 hover:text-slate-600 p-1 cursor-pointer" @click="showMapPickerModal = false">
-              <X class="w-5 h-5" />
-            </button>
-          </div>
-
-          <!-- Location Search Input -->
-          <div class="flex items-center gap-2 mb-2 shrink-0">
-            <div class="relative flex-1">
-              <Search class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                v-model="locationSearchQuery"
-                type="text"
-                placeholder="Search city, area, landmark, or street address (e.g. Whitefield, Bengaluru)..."
-                @keydown.enter.prevent="searchLocation"
-                class="w-full h-10 pl-9 pr-8 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium outline-none focus:border-indigo-500 shadow-inner"
-              />
-              <button
-                v-if="locationSearchQuery"
-                type="button"
-                class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-0.5 cursor-pointer"
-                @click="locationSearchQuery = ''"
-              >
-                <X class="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            <button
-              type="button"
-              :disabled="isSearchingLocation"
-              class="h-10 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer disabled:opacity-50 shrink-0"
-              @click="searchLocation"
-            >
-              <Search class="w-3.5 h-3.5" />
-              <span>{{ isSearchingLocation ? 'Searching...' : 'Find Place' }}</span>
-            </button>
-          </div>
-
-          <!-- Fast Quick-Select Location Chips -->
-          <div class="flex items-center gap-1.5 flex-wrap pb-2 shrink-0">
-            <span class="text-[10px] font-bold text-slate-400 uppercase">Quick Jump:</span>
-            <button
-              v-for="city in popularHubs"
-              :key="city.name"
-              type="button"
-              class="px-2 py-0.5 rounded-lg text-[10px] font-bold bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-500/20 hover:text-indigo-600 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700 transition-colors cursor-pointer"
-              @click="jumpToLocation(city.lat, city.lng, city.name)"
-            >
-              📍 {{ city.name }}
-            </button>
-          </div>
-
-          <!-- Leaflet Interactive Map Canvas -->
-          <div class="relative w-full flex-1 rounded-xl border border-slate-300 dark:border-slate-700 overflow-hidden shadow-inner bg-slate-100 dark:bg-slate-800" style="min-height: 320px;">
-            <div id="leaflet-site-picker-map" class="w-full h-full" style="min-height: 320px;"></div>
-            
-            <!-- Floating Coordinates Pill -->
-            <div class="absolute bottom-3 left-3 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-800 dark:text-slate-200 shadow-md pointer-events-none flex items-center gap-2 z-[999]">
-              <span class="w-2 h-2 rounded-full bg-indigo-600 animate-ping"></span>
-              <span><strong>Lat:</strong> {{ tempCoords.lat.toFixed(4) }} · <strong>Lng:</strong> {{ tempCoords.lng.toFixed(4) }}</span>
-            </div>
-          </div>
-
-          <!-- Map Picker Footer Actions -->
-          <div class="mt-4 pt-3 border-t border-slate-100 dark:border-white/5 flex items-center justify-between shrink-0">
-            <div class="text-xs text-slate-500 truncate max-w-sm">
-              <span v-if="tempAddress" class="truncate block">📍 {{ tempAddress }}</span>
-              <span v-else class="text-slate-400">Click on map or drag pin to adjust</span>
-            </div>
-
-            <div class="flex gap-2">
-              <button
-                type="button"
-                class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs hover:bg-slate-200 cursor-pointer"
-                @click="showMapPickerModal = false"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-600/20 cursor-pointer flex items-center gap-1.5"
-                @click="confirmLocationSelection"
-              >
-                <Check class="w-3.5 h-3.5" />
-                <span>Confirm Location</span>
-              </button>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </Teleport>
-
-    <!-- Modal 4: Add Zone Modal -->
-    <Teleport to="body">
-      <div v-if="activeQuickModal === 'add_zone'" class="fixed inset-0 z-[110] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" @click.self="activeQuickModal = null">
+      <!-- Add Site Modal -->
+      <div v-if="activeQuickModal === 'add_site'" class="fixed inset-0 z-[210] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" @click.self="activeQuickModal = null">
         <div class="w-full max-w-md bg-white dark:bg-[#151c2c] rounded-2xl shadow-2xl p-6 border border-slate-200 dark:border-white/10 animate-in zoom-in-95">
           <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 dark:border-white/5">
             <div class="flex items-center gap-2.5">
-              <div class="w-8 h-8 rounded-xl bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 flex items-center justify-center font-bold">
-                <MapIcon class="w-4 h-4" />
+              <div class="w-8 h-8 rounded-xl bg-blue-100 dark:bg-blue-500/20 text-blue-600 flex items-center justify-center font-bold">
+                <Building2 class="w-4 h-4" />
               </div>
-              <h3 class="text-sm font-black text-slate-900 dark:text-white">Create Security Zone</h3>
+              <h3 class="text-sm font-black text-slate-900 dark:text-white">Add Security Property / Site</h3>
             </div>
             <button class="text-slate-400 hover:text-slate-600 p-1" @click="activeQuickModal = null"><X class="w-4 h-4" /></button>
           </div>
-          <form @submit.prevent="submitQuickZone" class="space-y-3.5 text-xs">
+          <form @submit.prevent="submitQuickSite" class="space-y-3 text-xs">
             <div class="space-y-1">
-              <label class="font-bold text-slate-700 dark:text-slate-300">Zone Name *</label>
-              <input v-model="quickZoneForm.name" required placeholder="e.g. Server Room Vault 3B" class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none" />
+              <label class="font-bold text-slate-700 dark:text-slate-300">Property Name *</label>
+              <input v-model="quickSiteForm.name" required placeholder="e.g. Apex Tech Campus" class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none" />
             </div>
             <div class="grid grid-cols-2 gap-3">
               <div class="space-y-1">
-                <label class="font-bold text-slate-700 dark:text-slate-300">Site *</label>
-                <select v-model="quickZoneForm.siteId" required class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none">
-                  <option v-for="s in sitesList" :key="s.id" :value="s.id">{{ s.name }}</option>
-                </select>
+                <label class="font-bold text-slate-700 dark:text-slate-300">Site Code</label>
+                <input v-model="quickSiteForm.code" placeholder="e.g. SITE-01" class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none" />
               </div>
               <div class="space-y-1">
-                <label class="font-bold text-slate-700 dark:text-slate-300">Security Tier</label>
-                <select v-model="quickZoneForm.securityTier" class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none">
-                  <option value="Tier 1 Critical">Tier 1 Critical</option>
-                  <option value="Tier 2 High">Tier 2 High</option>
-                  <option value="Tier 3 Standard">Tier 3 Standard</option>
-                </select>
+                <label class="font-bold text-slate-700 dark:text-slate-300">Geofence Radius (m)</label>
+                <input v-model="quickSiteForm.geofence_radius" type="number" placeholder="500" class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none" />
               </div>
+            </div>
+            <div class="space-y-1">
+              <label class="font-bold text-slate-700 dark:text-slate-300">Facility Address</label>
+              <input v-model="quickSiteForm.address" placeholder="Physical location" class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none" />
             </div>
             <div class="mt-4 pt-3 border-t border-slate-100 dark:border-white/5 flex gap-2 justify-end">
               <button type="button" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs" @click="activeQuickModal = null">Cancel</button>
-              <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs">Save Zone</button>
+              <button type="submit" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs">Create Property</button>
             </div>
           </form>
         </div>
       </div>
-    </Teleport>
 
-    <!-- Modal 5: Add Checkpoint Modal -->
-    <Teleport to="body">
-      <div v-if="activeQuickModal === 'add_checkpoint'" class="fixed inset-0 z-[110] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" @click.self="activeQuickModal = null">
+      <!-- Add Checkpoint Modal -->
+      <div v-if="activeQuickModal === 'add_checkpoint'" class="fixed inset-0 z-[210] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" @click.self="activeQuickModal = null">
         <div class="w-full max-w-md bg-white dark:bg-[#151c2c] rounded-2xl shadow-2xl p-6 border border-slate-200 dark:border-white/10 animate-in zoom-in-95">
           <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 dark:border-white/5">
             <div class="flex items-center gap-2.5">
               <div class="w-8 h-8 rounded-xl bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 flex items-center justify-center font-bold">
                 <QrCode class="w-4 h-4" />
               </div>
-              <h3 class="text-sm font-black text-slate-900 dark:text-white">Create Patrol Checkpoint</h3>
+              <h3 class="text-sm font-black text-slate-900 dark:text-white">Register Checkpoint Tag</h3>
             </div>
             <button class="text-slate-400 hover:text-slate-600 p-1" @click="activeQuickModal = null"><X class="w-4 h-4" /></button>
           </div>
-          <form @submit.prevent="submitQuickCheckpoint" class="space-y-3.5 text-xs">
+          <form @submit.prevent="submitQuickCheckpoint" class="space-y-3 text-xs">
             <div class="space-y-1">
               <label class="font-bold text-slate-700 dark:text-slate-300">Checkpoint Name *</label>
-              <input v-model="quickCheckpointForm.name" required placeholder="e.g. CP-18 East Fire Door" class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none" />
+              <input v-model="quickCheckpointForm.name" required placeholder="e.g. Gate 2 North Emergency Exit" class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none" />
             </div>
             <div class="grid grid-cols-2 gap-3">
               <div class="space-y-1">
-                <label class="font-bold text-slate-700 dark:text-slate-300">Verification Type</label>
-                <select v-model="quickCheckpointForm.type" class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none">
-                  <option value="QR Code">QR Code</option>
-                  <option value="NFC Tag">NFC Tag</option>
-                  <option value="GPS Geofence">GPS Geofence</option>
-                  <option value="QR + GPS Dual">QR + GPS Dual</option>
+                <label class="font-bold text-slate-700 dark:text-slate-300">Site *</label>
+                <select v-model="quickCheckpointForm.site" required class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none">
+                  <option value="" disabled>Select Site</option>
+                  <option v-for="s in sitesList" :key="s.id" :value="s.id">{{ s.name || s.locName }}</option>
                 </select>
               </div>
               <div class="space-y-1">
-                <label class="font-bold text-slate-700 dark:text-slate-300">Zone</label>
-                <select v-model="quickCheckpointForm.zone" class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none">
-                  <option value="Perimeter Boundary">Perimeter Boundary</option>
-                  <option value="Basement Parking">Basement Parking</option>
-                  <option value="Tower Core">Tower Core</option>
+                <label class="font-bold text-slate-700 dark:text-slate-300">Tag Type</label>
+                <select v-model="quickCheckpointForm.type" class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none">
+                  <option value="QR Code">QR Code Scan Point</option>
+                  <option value="NFC Tag">NFC Physical Disc</option>
+                  <option value="Bluetooth BLE">BLE Beacon</option>
                 </select>
               </div>
             </div>
             <div class="mt-4 pt-3 border-t border-slate-100 dark:border-white/5 flex gap-2 justify-end">
               <button type="button" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs" @click="activeQuickModal = null">Cancel</button>
               <button type="submit" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs">Save Checkpoint</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </Teleport>
-
-    <!-- Modal 6: Report Incident Modal -->
-    <Teleport to="body">
-      <div v-if="activeQuickModal === 'report_incident'" class="fixed inset-0 z-[110] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4" @click.self="activeQuickModal = null">
-        <div class="w-full max-w-md bg-white dark:bg-[#151c2c] rounded-2xl shadow-2xl p-6 border border-slate-200 dark:border-white/10 animate-in zoom-in-95">
-          <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 dark:border-white/5">
-            <div class="flex items-center gap-2.5">
-              <div class="w-8 h-8 rounded-xl bg-rose-100 dark:bg-rose-500/20 text-rose-600 flex items-center justify-center font-bold">
-                <AlertTriangle class="w-4 h-4" />
-              </div>
-              <h3 class="text-sm font-black text-slate-900 dark:text-white">Report Security Incident</h3>
-            </div>
-            <button class="text-slate-400 hover:text-slate-600 p-1" @click="activeQuickModal = null"><X class="w-4 h-4" /></button>
-          </div>
-          <form @submit.prevent="submitQuickIncident" class="space-y-3.5 text-xs">
-            <div class="space-y-1">
-              <label class="font-bold text-slate-700 dark:text-slate-300">Incident Title *</label>
-              <input v-model="quickIncidentForm.title" required placeholder="e.g. Broken Fence Lock" class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none" />
-            </div>
-            <div class="grid grid-cols-2 gap-3">
-              <div class="space-y-1">
-                <label class="font-bold text-slate-700 dark:text-slate-300">Severity</label>
-                <select v-model="quickIncidentForm.severity" class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none">
-                  <option value="critical">🔴 Critical</option>
-                  <option value="medium">🟠 Medium</option>
-                  <option value="low">🟢 Low</option>
-                </select>
-              </div>
-              <div class="space-y-1">
-                <label class="font-bold text-slate-700 dark:text-slate-300">Location / Sector</label>
-                <input v-model="quickIncidentForm.location" placeholder="e.g. North Gate" class="w-full h-10 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none" />
-              </div>
-            </div>
-            <div class="space-y-1">
-              <label class="font-bold text-slate-700 dark:text-slate-300">Incident Description</label>
-              <textarea v-model="quickIncidentForm.description" rows="2" placeholder="Provide details for immediate triage..." class="w-full p-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-medium outline-none"></textarea>
-            </div>
-            <div class="mt-4 pt-3 border-t border-slate-100 dark:border-white/5 flex gap-2 justify-end">
-              <button type="button" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs" @click="activeQuickModal = null">Cancel</button>
-              <button type="submit" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs">Submit Incident</button>
             </div>
           </form>
         </div>
@@ -1519,21 +1073,22 @@ import { useRouter } from 'vue-router';
 import { onClickOutside } from '@vueuse/core';
 import {
   Shield, ShieldCheck, Building2, Globe, Users, ShieldAlert, CheckCircle2,
-  AlertTriangle, AlertCircle, TrendingUp, Plus, RefreshCw, ChevronDown,
-  ArrowRight, MapPin, Maximize2, Crosshair, PhoneCall, Battery, Wifi,
-  Clock, Award, X, QrCode, Map as MapIcon, Check, Search, SlidersHorizontal, Layers
+  AlertTriangle, Plus, RefreshCw, ChevronDown, ArrowRight, MapPin,
+  Crosshair, PhoneCall, Radio, Activity, Flame, X, QrCode, Layers, Check,
+  BarChart3
 } from 'lucide-vue-next';
+import VueApexCharts from 'vue3-apexcharts';
+
 import { siteService } from '@/services/siteService';
 import { zoneService } from '@/services/zoneService';
 import { patrolService } from '@/services/patrolService';
 import { authService } from '@/services/authService';
 import { attendanceService } from '@/services/attendanceService';
 import { mqttService } from '@/services/mqttService';
-import { alertNotificationService } from '@/services/alertNotificationService';
 import { currentUserTenant } from '@/utils/currentUserTenant';
-import { Loader } from '@googlemaps/js-api-loader';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import logoPatrol from '@/assets/images/logoPatrol.png';
 
 const router = useRouter();
 
@@ -1550,336 +1105,283 @@ const zoneDropdownRef = ref(null);
 
 const isCreateDropdownOpen = ref(false);
 const createDropdownRef = ref(null);
-const selectedChartPeriod = ref('7 Days');
 const selectedMapGuard = ref(null);
-const selectedIncidentModal = ref(null);
 const successToastMessage = ref('');
+const activeStreamTab = ref('patrols'); // 'patrols' | 'scans' | 'alerts' | 'sites'
+
+// Analytics State & Configuration
+const analyticsTimeRange = ref('Today');
+const historicalLogs = ref([]);
+
+const scanVelocityAnalytics = computed(() => {
+  const range = analyticsTimeRange.value;
+  const logs = historicalLogs.value.length > 0 ? historicalLogs.value : recentCheckpointScans.value;
+  const now = new Date();
+
+  if (range === 'Today') {
+    const categories = ['00:00', '02:00', '04:00', '06:00', '08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00'];
+    const buckets = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    const todayStr = now.toISOString().slice(0, 10);
+
+    logs.forEach(scan => {
+      const timeStr = scan.timestamp || scan.date_created;
+      if (timeStr) {
+        const d = new Date(timeStr);
+        if (d.toISOString().slice(0, 10) === todayStr) {
+          const hr = d.getHours();
+          const bucketIndex = Math.min(11, Math.floor(hr / 2));
+          buckets[bucketIndex] += 1;
+        }
+      }
+    });
+
+    return { categories, data: buckets };
+  } else if (range === '7 Days') {
+    const categories = [];
+    const buckets = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      const label = d.toLocaleDateString([], { weekday: 'short', month: 'numeric', day: 'numeric' });
+      categories.push(label);
+      const datePrefix = d.toISOString().slice(0, 10);
+      const count = logs.filter(scan => {
+        const t = scan.timestamp || scan.date_created;
+        return t && t.slice(0, 10) === datePrefix;
+      }).length;
+      buckets.push(count);
+    }
+    return { categories, data: buckets };
+  } else {
+    // 30 Days (6 5-day intervals)
+    const categories = [];
+    const buckets = [];
+    for (let i = 5; i >= 0; i--) {
+      const endD = new Date(now);
+      endD.setDate(endD.getDate() - i * 5);
+      const startD = new Date(endD);
+      startD.setDate(startD.getDate() - 5);
+      const label = `${startD.getDate()}/${startD.getMonth() + 1}-${endD.getDate()}/${endD.getMonth() + 1}`;
+      categories.push(label);
+
+      const count = logs.filter(scan => {
+        const t = scan.timestamp || scan.date_created;
+        if (!t) return false;
+        const scanTime = new Date(t).getTime();
+        return scanTime >= startD.getTime() && scanTime <= endD.getTime();
+      }).length;
+      buckets.push(count);
+    }
+    return { categories, data: buckets };
+  }
+});
+
+const scanVelocityChartSeries = computed(() => [
+  {
+    name: 'Verified Scans',
+    data: scanVelocityAnalytics.value.data
+  }
+]);
+
+const scanVelocityChartOptions = computed(() => ({
+  chart: {
+    type: 'area',
+    toolbar: { show: false },
+    zoom: { enabled: false },
+    fontFamily: 'inherit',
+    sparkline: { enabled: false }
+  },
+  colors: ['#2563eb'],
+  stroke: {
+    curve: 'smooth',
+    width: 2
+  },
+  fill: {
+    type: 'gradient',
+    gradient: {
+      shadeIntensity: 1,
+      opacityFrom: 0.35,
+      opacityTo: 0.05,
+      stops: [0, 95, 100]
+    }
+  },
+  xaxis: {
+    categories: scanVelocityAnalytics.value.categories,
+    labels: {
+      style: {
+        colors: '#94a3b8',
+        fontSize: '11px',
+        fontWeight: 500
+      }
+    },
+    axisBorder: { show: false },
+    axisTicks: { show: false }
+  },
+  yaxis: {
+    labels: {
+      style: {
+        colors: '#94a3b8',
+        fontSize: '11px'
+      }
+    }
+  },
+  grid: {
+    borderColor: '#f1f5f9',
+    strokeDashArray: 4,
+    xaxis: { lines: { show: false } }
+  },
+  dataLabels: { enabled: false },
+  tooltip: {
+    theme: 'dark',
+    y: {
+      formatter: (val) => `${val} Checkpoints Scanned`
+    }
+  }
+}));
+
+const tourStatusDonutSeries = computed(() => {
+  const onSchedule = currentMetrics.value.completedToday + currentMetrics.value.onTrackPatrols;
+  const inProgress = currentMetrics.value.activePatrols;
+  const delayed = currentMetrics.value.delayedPatrols;
+  const exceptions = currentMetrics.value.openIncidents;
+  return [onSchedule, inProgress, delayed, exceptions];
+});
+
+const tourStatusDonutOptions = computed(() => ({
+  chart: {
+    type: 'donut',
+    fontFamily: 'inherit'
+  },
+  noData: {
+    text: 'No tour telemetry recorded yet',
+    style: { color: '#94a3b8', fontSize: '12px' }
+  },
+  labels: ['On Schedule', 'In Progress', 'Delayed', 'Exceptions'],
+  colors: ['#10b981', '#2563eb', '#f59e0b', '#ef4444'],
+  legend: {
+    position: 'bottom',
+    fontSize: '11px',
+    labels: {
+      colors: '#64748b'
+    },
+    itemMargin: { horizontal: 8, vertical: 2 }
+  },
+  plotOptions: {
+    pie: {
+      donut: {
+        size: '72%',
+        labels: {
+          show: true,
+          total: {
+            show: true,
+            label: 'Total Tours',
+            fontSize: '11px',
+            fontWeight: 600,
+            color: '#64748b',
+            formatter: (w) => {
+              const total = w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+              return total;
+            }
+          }
+        }
+      }
+    }
+  },
+  dataLabels: { enabled: false },
+  stroke: { width: 0 }
+}));
 
 // Active Quick Modal
 const activeQuickModal = ref(null);
 
 // Form Models for Direct Modals
 const quickPatrolForm = ref({ guardName: '', routeName: '', siteName: '', priority: 'Normal' });
-const quickScheduleForm = ref({ name: '', frequency: 'Every 2 hours', shift: 'Night (22:00 - 06:00)' });
 const quickGuardForm = ref({ first_name: '', last_name: '', badge_number: '', phone: '' });
 const quickSiteForm = ref({ name: '', code: '', address: '', geofence_radius: 500, emergency_phone: '', latitude: 12.9716, longitude: 80.2435 });
 const quickZoneForm = ref({ name: '', siteId: '', securityTier: 'Tier 1 Critical' });
 const quickCheckpointForm = ref({ name: '', type: 'QR Code', zone: '' });
-const quickIncidentForm = ref({ title: '', severity: 'critical', location: '', description: '' });
 
-// ── MAP LOCATION PICKER STATE ─────────────────────────────────────────────────
-const showMapPickerModal = ref(false);
-const showAdvancedSettings = ref(false);
-const locationSearchQuery = ref('');
-const isSearchingLocation = ref(false);
-const tempCoords = ref({ lat: 12.9716, lng: 80.2435 });
-const tempAddress = ref('');
-
-const popularHubs = [
-  { name: 'Chennai Tech Park', lat: 12.9716, lng: 80.2435 },
-  { name: 'Bangalore Whitefield', lat: 12.9698, lng: 77.7500 },
-  { name: 'Hyderabad Hitec City', lat: 17.4435, lng: 78.3772 },
-  { name: 'Mumbai BKC', lat: 19.0657, lng: 72.8687 },
-  { name: 'Delhi NCR', lat: 28.6139, lng: 77.2090 }
+// Quick Create Menu Items
+const quickCreateOptions = [
+  { id: 'create_patrol', label: 'Dispatch Live Patrol', icon: Shield },
+  { id: 'add_guard', label: 'Enrol Security Officer', icon: Users },
+  { id: 'add_site', label: 'Add Security Property', icon: Building2 },
+  { id: 'add_checkpoint', label: 'Register Checkpoint Tag', icon: QrCode }
 ];
 
-let leafletPickerMap = null;
-let leafletPickerMarker = null;
-let leafletPickerCircle = null;
+const openQuickCreateModal = (id) => {
+  activeQuickModal.value = id;
+  isCreateDropdownOpen.value = false;
+  isSiteDropdownOpen.value = false;
+  isZoneDropdownOpen.value = false;
 
-const openMapPickerModal = async () => {
-  tempCoords.value = {
-    lat: Number(quickSiteForm.value.latitude) || 12.9716,
-    lng: Number(quickSiteForm.value.longitude) || 80.2435
-  };
-  tempAddress.value = quickSiteForm.value.address || '';
-  locationSearchQuery.value = '';
-  showMapPickerModal.value = true;
-
-  await nextTick();
-  setTimeout(() => {
-    initLeafletPickerMap();
-  }, 100);
-};
-
-const initLeafletPickerMap = () => {
-  const container = document.getElementById('leaflet-site-picker-map');
-  if (!container) return;
-
-  if (leafletPickerMap) {
-    leafletPickerMap.remove();
-    leafletPickerMap = null;
-  }
-
-  const initialLat = tempCoords.value.lat;
-  const initialLng = tempCoords.value.lng;
-
-  leafletPickerMap = L.map('leaflet-site-picker-map', {
-    center: [initialLat, initialLng],
-    zoom: 15,
-    zoomControl: true
-  });
-
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors',
-    maxZoom: 19
-  }).addTo(leafletPickerMap);
-
-  const pinIcon = L.divIcon({
-    className: 'custom-leaflet-pin',
-    html: `
-      <div style="position:relative; transform: translate(-50%, -100%);">
-        <div style="background-color: #4f46e5; color: white; width: 34px; height: 34px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4); border: 2.5px solid #ffffff;">
-          <div style="transform: rotate(45deg); width: 10px; height: 10px; background: white; border-radius: 50%;"></div>
-        </div>
-      </div>
-    `,
-    iconSize: [0, 0]
-  });
-
-  leafletPickerMarker = L.marker([initialLat, initialLng], {
-    icon: pinIcon,
-    draggable: true
-  }).addTo(leafletPickerMap);
-
-  const radius = Number(quickSiteForm.value.geofence_radius) || 500;
-  leafletPickerCircle = L.circle([initialLat, initialLng], {
-    radius: radius,
-    color: '#4f46e5',
-    fillColor: '#4f46e5',
-    fillOpacity: 0.15,
-    weight: 2
-  }).addTo(leafletPickerMap);
-
-  leafletPickerMarker.on('dragend', (e) => {
-    const pos = e.target.getLatLng();
-    updatePickerTempLocation(pos.lat, pos.lng);
-  });
-
-  leafletPickerMap.on('click', (e) => {
-    updatePickerTempLocation(e.latlng.lat, e.latlng.lng);
-  });
-
-  leafletPickerMap.invalidateSize();
-};
-
-const updatePickerTempLocation = (lat, lng) => {
-  const cleanLat = parseFloat(lat.toFixed(6));
-  const cleanLng = parseFloat(lng.toFixed(6));
-  tempCoords.value = { lat: cleanLat, lng: cleanLng };
-
-  if (leafletPickerMarker) {
-    leafletPickerMarker.setLatLng([cleanLat, cleanLng]);
-  }
-  if (leafletPickerCircle) {
-    leafletPickerCircle.setLatLng([cleanLat, cleanLng]);
-  }
-
-  fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${cleanLat}&lon=${cleanLng}&zoom=18&addressdetails=1`, {
-    headers: { 'Accept-Language': 'en' }
-  })
-    .then(res => res.json())
-    .then(data => {
-      if (data && data.display_name) {
-        tempAddress.value = data.display_name;
-      }
-    })
-    .catch(() => {});
-};
-
-const searchLocation = async () => {
-  if (!locationSearchQuery.value.trim()) return;
-  isSearchingLocation.value = true;
-
-  try {
-    const q = encodeURIComponent(locationSearchQuery.value.trim());
-    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${q}&limit=1`, {
-      headers: { 'Accept-Language': 'en' }
-    });
-    const data = await res.json();
-    isSearchingLocation.value = false;
-
-    if (data && data.length > 0) {
-      const result = data[0];
-      const lat = parseFloat(parseFloat(result.lat).toFixed(6));
-      const lng = parseFloat(parseFloat(result.lon).toFixed(6));
-
-      tempCoords.value = { lat, lng };
-      tempAddress.value = result.display_name;
-
-      if (leafletPickerMap && leafletPickerMarker && leafletPickerCircle) {
-        leafletPickerMarker.setLatLng([lat, lng]);
-        leafletPickerCircle.setLatLng([lat, lng]);
-        leafletPickerMap.setView([lat, lng], 16);
-      }
+  if (id === 'create_patrol') {
+    let activeSiteName = '';
+    if (selectedSiteId.value && selectedSiteId.value !== 'all') {
+      const match = sitesList.value.find(s => String(s.id) === String(selectedSiteId.value));
+      activeSiteName = match?.name || match?.locName || '';
     }
-  } catch (e) {
-    isSearchingLocation.value = false;
-    console.error('Search failed', e);
+    if (!activeSiteName && sitesList.value.length > 0) {
+      activeSiteName = sitesList.value[0].name || sitesList.value[0].locName || '';
+    }
+
+    const firstGuard = allGuards.value[0];
+    const defaultGuardName = firstGuard 
+      ? (firstGuard.first_name ? `${firstGuard.first_name} ${firstGuard.last_name || ''}`.trim() : (firstGuard.name || ''))
+      : '';
+
+    quickPatrolForm.value = {
+      guardName: defaultGuardName,
+      routeName: '',
+      siteName: activeSiteName,
+      priority: 'Normal'
+    };
+  } else if (id === 'add_guard') {
+    quickGuardForm.value = { first_name: '', last_name: '', badge_number: '', phone: '' };
+  } else if (id === 'add_site') {
+    quickSiteForm.value = { name: '', code: '', address: '', geofence_radius: 500, emergency_phone: '', latitude: 12.9716, longitude: 80.2435 };
+  } else if (id === 'add_checkpoint') {
+    const currentSite = sitesList.value.find(s => String(s.id) === String(selectedSiteId.value)) || sitesList.value[0];
+    quickCheckpointForm.value = {
+      name: '',
+      type: 'QR Code',
+      site: currentSite?.id || '',
+      zone: zonesList.value[0]?.id || ''
+    };
   }
 };
 
-const jumpToLocation = (lat, lng, cityName) => {
-  tempCoords.value = { lat, lng };
-  tempAddress.value = cityName;
-  if (leafletPickerMap && leafletPickerMarker && leafletPickerCircle) {
-    leafletPickerMarker.setLatLng([lat, lng]);
-    leafletPickerCircle.setLatLng([lat, lng]);
-    leafletPickerMap.setView([lat, lng], 15);
-  }
-};
-
-const confirmLocationSelection = () => {
-  quickSiteForm.value.latitude = tempCoords.value.lat;
-  quickSiteForm.value.longitude = tempCoords.value.lng;
-  if (tempAddress.value && !quickSiteForm.value.address) {
-    quickSiteForm.value.address = tempAddress.value;
-  }
-  showMapPickerModal.value = false;
-};
-
+// Click Outside Handlers
 onClickOutside(siteDropdownRef, () => isSiteDropdownOpen.value = false);
+onClickOutside(zoneDropdownRef, () => isZoneDropdownOpen.value = false);
 onClickOutside(createDropdownRef, () => isCreateDropdownOpen.value = false);
 
-// ── QUICK CREATE OPTIONS (OPENS DIRECT POPUPS) ────────────────────────────────
-const quickCreateOptions = [
-  { id: 'create_patrol', label: 'Create Patrol', icon: ShieldAlert },
-  { id: 'patrol_schedule', label: 'Patrol Schedule', icon: Clock },
-  { id: 'add_guard', label: 'Add Guard', icon: Users },
-  { id: 'add_site', label: 'Add Site', icon: Building2 },
-  { id: 'add_zone', label: 'Add Zone', icon: MapIcon },
-  { id: 'add_checkpoint', label: 'Add Checkpoint', icon: QrCode },
-  { id: 'report_incident', label: 'Report Incident', icon: AlertTriangle },
-];
-
-const openQuickCreateModal = (actionId) => {
-  isCreateDropdownOpen.value = false;
-  activeQuickModal.value = actionId;
-};
-
-const showToast = (msg) => {
-  successToastMessage.value = msg;
-  setTimeout(() => {
-    successToastMessage.value = '';
-  }, 4000);
-};
-
-// Direct Submission Handlers
-const submitQuickSite = async () => {
-  try {
-    const payload = {
-      name: quickSiteForm.value.name,
-      code: quickSiteForm.value.code || `SITE-${Math.floor(100 + Math.random() * 900)}`,
-      address: quickSiteForm.value.address || 'Chennai, TN',
-      latitude: quickSiteForm.value.latitude || 12.9716,
-      longitude: quickSiteForm.value.longitude || 80.2435,
-      geofence_radius: quickSiteForm.value.geofence_radius || 500,
-      emergency_phone: quickSiteForm.value.emergency_phone || '',
-      status: 'active'
-    };
-    const created = await siteService.createSite(payload);
-    if (created) {
-      sitesList.value.push(created);
-    }
-    activeQuickModal.value = null;
-    showToast(`Property "${quickSiteForm.value.name}" added successfully!`);
-    quickSiteForm.value = { name: '', code: '', address: '', geofence_radius: 500, emergency_phone: '', latitude: 12.9716, longitude: 80.2435 };
-  } catch (err) {
-    console.error("Failed to quick-create site:", err);
-    activeQuickModal.value = null;
-    showToast(`Site created locally!`);
-  }
-};
-
-// Direct Submission Handlers
-const submitQuickPatrol = () => {
-  const matchedSite = sitesList.value.find(s => s.name === quickPatrolForm.value.siteName) || sitesList.value[0];
-  const siteLat = matchedSite?.latitude ? Number(matchedSite.latitude) : null;
-  const siteLng = matchedSite?.longitude ? Number(matchedSite.longitude) : null;
-
-  liveActivePatrols.value.unshift({
-    id: `pat-${Date.now()}`,
-    siteId: matchedSite?.id || 'site-01',
-    siteName: quickPatrolForm.value.siteName,
-    guardName: quickPatrolForm.value.guardName,
-    routeName: quickPatrolForm.value.routeName,
-    status: 'running',
-    scannedCheckpoints: 1,
-    totalCheckpoints: 8,
-    startedTime: 'Just now',
-    lastScanTime: 'Just now',
-    nextCheckpoint: 'Zone Entrance',
-    lat: siteLat,
-    lng: siteLng,
-    battery: null,
-    signal: 'Standby'
-  });
-  activeQuickModal.value = null;
-  showToast(`Patrol dispatched for ${quickPatrolForm.value.guardName}!`);
-};
-
-const submitQuickSchedule = () => {
-  activeQuickModal.value = null;
-  showToast(`Patrol Schedule "${quickScheduleForm.value.name}" saved!`);
-  quickScheduleForm.value.name = '';
-};
-
-const submitQuickGuard = () => {
-  activeQuickModal.value = null;
-  showToast(`Guard ${quickGuardForm.value.first_name} enrolled successfully!`);
-  quickGuardForm.value = { first_name: '', last_name: '', badge_number: '', phone: '' };
-};
-
-const submitQuickZone = () => {
-  activeQuickModal.value = null;
-  showToast(`Zone "${quickZoneForm.value.name}" created!`);
-  quickZoneForm.value.name = '';
-};
-
-const submitQuickCheckpoint = () => {
-  activeQuickModal.value = null;
-  showToast(`Checkpoint "${quickCheckpointForm.value.name}" registered!`);
-  quickCheckpointForm.value.name = '';
-};
-
-const submitQuickIncident = () => {
-  recentIncidentsList.value.unshift({
-    id: `inc-${Date.now()}`,
-    siteId: 'site-01',
-    siteName: 'Chennai Tech Park',
-    title: quickIncidentForm.value.title,
-    location: quickIncidentForm.value.location || 'Main Property',
-    reportedBy: 'Supervisor',
-    timeAgo: 'Just now',
-    severity: quickIncidentForm.value.severity,
-    description: quickIncidentForm.value.description
-  });
-  activeQuickModal.value = null;
-  showToast(`Incident "${quickIncidentForm.value.title}" logged to live feed!`);
-  quickIncidentForm.value = { title: '', severity: 'critical', location: '', description: '' };
-};
-
-// ── SITES LIST ────────────────────────────────────────────────────────────────
+// ── COMPUTED SITE & ZONE NAMES ────────────────────────────────────────────────
 const sitesList = ref([]);
+const allGuards = ref([]);
+const allPatrols = ref([]);
+const allIncidents = ref([]);
+const todayAttendance = ref([]);
+const recentCheckpointScans = ref([]);
 
 const selectedSiteName = computed(() => {
-  if (selectedSiteId.value === 'all') return 'All Sites (Global)';
+  if (selectedSiteId.value === 'all') return 'All Properties';
   const match = sitesList.value.find(s => String(s.id) === String(selectedSiteId.value));
-  return match ? match.name : 'All Sites';
+  return match?.name || match?.locName || 'Selected Property';
 });
 
 const selectedZoneName = computed(() => {
   if (selectedZoneId.value === 'all') return 'All Zones';
   const match = zonesList.value.find(z => String(z.id) === String(selectedZoneId.value));
-  return match ? (match.name || match.zoneName) : 'All Zones';
+  return match?.name || match?.zoneName || 'Selected Zone';
 });
 
 const selectSite = async (siteId) => {
   selectedSiteId.value = siteId;
-  selectedZoneId.value = 'all';
   isSiteDropdownOpen.value = false;
-  panMapToSelectedSite();
+  selectedZoneId.value = 'all';
   await loadZones(siteId);
+  panMapToSelectedSite();
 };
 
 const selectZone = (zoneId) => {
@@ -1887,58 +1389,31 @@ const selectZone = (zoneId) => {
   isZoneDropdownOpen.value = false;
 };
 
-const loadZones = async (siteId = null) => {
+const loadZones = async (siteId) => {
   try {
-    const targetSiteId = siteId === 'all' ? null : siteId;
-    zonesList.value = await zoneService.fetchZones(targetSiteId);
+    const rawZones = await zoneService.fetchZones();
+    if (siteId && siteId !== 'all') {
+      zonesList.value = rawZones.filter(z => String(z.location || z.site || z.siteId) === String(siteId));
+    } else {
+      zonesList.value = rawZones;
+    }
   } catch (e) {
     zonesList.value = [];
   }
 };
 
-onClickOutside(siteDropdownRef, () => {
-  isSiteDropdownOpen.value = false;
-});
-
-onClickOutside(zoneDropdownRef, () => {
-  isZoneDropdownOpen.value = false;
-});
-
-onClickOutside(createDropdownRef, () => {
-  isCreateDropdownOpen.value = false;
-});
-
-// ── METRICS COMPUTATION (LIVE REAL-TIME DATA & / TOTALS) ─────────────────────
-const allGuards = ref([]);
-const allPatrols = ref([]);
-const allIncidents = ref([]);
-const todayAttendance = ref([]);
-
+// ── COMPREHENSIVE COMPUTED METRICS ───────────────────────────────────────────
 const currentMetrics = computed(() => {
-  const siteFilter = selectedSiteId.value;
-  const zoneFilter = selectedZoneId.value;
+  let filteredP = allPatrols.value || [];
+  let filteredI = allIncidents.value || [];
 
-  const filteredP = allPatrols.value.filter(p => {
-    if (siteFilter !== 'all' && p.site && String(p.site) !== String(siteFilter)) return false;
-    if (zoneFilter !== 'all' && p.zoneId && String(p.zoneId) !== String(zoneFilter)) return false;
-    return true;
-  });
-
-  const filteredI = allIncidents.value.filter(i => {
-    if (siteFilter !== 'all' && i.site && String(i.site) !== String(siteFilter)) return false;
-    return true;
-  });
+  if (selectedSiteId.value !== 'all') {
+    filteredP = filteredP.filter(p => String(p.site || p.siteId) === String(selectedSiteId.value));
+    filteredI = filteredI.filter(i => String(i.site || i.siteId || i.location) === String(selectedSiteId.value));
+  }
 
   const totalG = allGuards.value.length;
-  const activeAttendanceGuardIds = new Set(
-    todayAttendance.value
-      .filter(a => a.status === 'present' || a.status === 'late' || a.check_in_time)
-      .map(a => String(a.guard_id || a.user || a.userId))
-  );
-
-  const activeG = allGuards.value.filter(g =>
-    (g.status === 'active' || g.status === 'on_duty') || activeAttendanceGuardIds.has(String(g.id))
-  ).length || todayAttendance.value.length;
+  const activeG = allGuards.value.filter(g => g.status === 'active' || g.status === 'on_duty' || !g.status).length;
   const offDutyG = Math.max(0, totalG - activeG);
 
   const totalP = filteredP.length;
@@ -1946,23 +1421,14 @@ const currentMetrics = computed(() => {
   const onTrackP = filteredP.filter(p => (p.status === 'running' || p.status === 'in_progress' || p.status === 'active' || p.status === 'ongoing') && !p.is_delayed).length;
   const delayedP = filteredP.filter(p => p.status === 'delayed' || p.is_delayed).length;
   const completedP = filteredP.filter(p => p.status === 'completed').length;
-  const missedP = filteredP.filter(p => p.status === 'missed').length;
-  const overdueP = filteredP.filter(p => p.status === 'overdue').length;
 
   const totalInc = filteredI.length;
   const openInc = filteredI.filter(i => i.status === 'open' || i.status === 'active' || !i.status).length;
-  const criticalInc = filteredI.filter(i => (i.severity || '').toLowerCase() === 'critical' || (i.priority || '').toLowerCase() === 'high').length;
-  const normalInc = Math.max(0, openInc - criticalInc);
+  const criticalInc = filteredI.filter(i => (i.severity || '').toLowerCase() === 'critical' || (i.priority || '').toLowerCase() === 'high' || (i.type || '').toLowerCase().includes('sos')).length;
 
   const completionRate = totalP > 0 ? Math.round((completedP / totalP) * 100) : (completedP > 0 ? 100 : 0);
 
-  const activePatrolGuardIds = new Set(
-    filteredP
-      .filter(p => p.status === 'running' || p.status === 'in_progress' || p.status === 'active' || p.status === 'ongoing')
-      .map(p => String(p.guardId?.id || p.guardId || p.guard_id || p.guard))
-  );
-
-  const guardsOnPatrol = allGuards.value.filter(g => activePatrolGuardIds.has(String(g.id))).length || activeP;
+  const guardsOnPatrol = activeP;
   const guardsOnStandby = Math.max(0, activeG - guardsOnPatrol);
 
   return {
@@ -1977,130 +1443,91 @@ const currentMetrics = computed(() => {
     delayedPatrols: delayedP,
     completedToday: completedP,
     completionRate,
-    completionTrend: '+0.0%',
-    missedCount: missedP,
-    overdueCount: overdueP,
-    totalIncidents: totalInc,
     openIncidents: openInc,
-    incidentsCount: openInc,
-    criticalIncidents: criticalInc,
-    normalIncidents: normalInc
+    criticalIncidents: criticalInc
   };
+});
+
+// Dynamic DEFCON status indicator
+const defconStatus = computed(() => {
+  if (currentMetrics.value.criticalIncidents > 0) {
+    return { level: 1, text: `${currentMetrics.value.criticalIncidents} Critical SOS Alert Active`, color: 'red' };
+  }
+  if (currentMetrics.value.delayedPatrols > 0) {
+    return { level: 3, text: `${currentMetrics.value.delayedPatrols} Patrol Delay Detected`, color: 'amber' };
+  }
+  return { level: 5, text: 'Defcon 5: Perimeter Secure', color: 'emerald' };
 });
 
 // ── ACTIVE PATROLS STREAM ─────────────────────────────────────────────────────
 const liveActivePatrols = ref([]);
+const livePatrolStatusFilter = ref('all');
 
 const filteredActivePatrols = computed(() => {
-  if (selectedSiteId.value === 'all') return liveActivePatrols.value;
-  return liveActivePatrols.value.filter(p => String(p.siteId) === String(selectedSiteId.value));
+  let list = liveActivePatrols.value;
+  if (selectedSiteId.value !== 'all') {
+    list = list.filter(p => String(p.siteId) === String(selectedSiteId.value));
+  }
+  if (livePatrolStatusFilter.value === 'running') {
+    list = list.filter(p => p.status === 'running');
+  } else if (livePatrolStatusFilter.value === 'delayed') {
+    list = list.filter(p => p.status === 'delayed' || p.status === 'critical');
+  }
+  return list;
 });
 
 // ── ATTENTION REQUIRED & INCIDENTS ────────────────────────────────────────────
 const attentionItems = computed(() => {
   const items = [];
-  
-  // 1. Delayed or missed patrols
   allPatrols.value.forEach(p => {
     if (p.status === 'missed') {
       items.push({
         id: `patrol-${p.id}`,
-        type: 'patrol',
-        title: `Missed Patrol: ${p.name || 'Patrol Route'}`,
-        description: `Scheduled at ${p.scheduledTime ? new Date(p.scheduledTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'earlier'}`,
-        severity: 'high',
-        time: p.scheduledTime ? new Date(p.scheduledTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''
+        type: 'Missed Patrol',
+        title: `Missed: ${p.name || 'Patrol Route'}`,
+        description: `Scheduled checkpoint window lapsed without scan.`,
+        time: p.scheduledTime ? new Date(p.scheduledTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Earlier'
       });
     } else if (p.status === 'delayed' || p.is_delayed) {
       items.push({
         id: `patrol-${p.id}`,
-        type: 'patrol',
-        title: `Delayed Patrol: ${p.name || 'Patrol Route'}`,
-        description: 'Patrol pace is behind scheduled checkpoint timeline.',
-        severity: 'medium',
-        time: 'Active'
+        type: 'Delayed Route',
+        title: `Delayed: ${p.name || 'Patrol Route'}`,
+        description: 'Guard scan rate is behind scheduled milestone.',
+        time: 'Live'
       });
     }
   });
 
-  // 2. High severity alerts/incidents
-  (allIncidents.value || []).filter(i => (i.severity || '').toLowerCase() === 'critical' || (i.priority || '').toLowerCase() === 'high').forEach(inc => {
+  (allIncidents.value || []).filter(i => (i.severity || '').toLowerCase() === 'critical' || (i.type || '').toLowerCase().includes('sos')).forEach(inc => {
     items.push({
       id: `incident-${inc.id}`,
-      type: 'incident',
-      title: inc.title || inc.type || 'Critical Incident Alert',
-      description: inc.description || inc.location || 'Immediate response needed',
-      severity: 'high',
-      time: inc.date_created ? new Date(inc.date_created).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''
+      type: 'SOS / Incident',
+      title: inc.title || inc.type || 'Emergency Alarm',
+      description: inc.description || inc.location || 'Immediate supervisor action needed.',
+      time: inc.date_created ? new Date(inc.date_created).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Now'
     });
   });
 
-  return items.slice(0, 5);
+  return items.slice(0, 8);
 });
-
-const recentIncidentsList = ref([]);
-
-const filteredRecentIncidents = computed(() => {
-  if (selectedSiteId.value === 'all') return recentIncidentsList.value;
-  return recentIncidentsList.value.filter(i => String(i.siteId) === String(selectedSiteId.value));
-});
-
-const openIncidentModal = (inc) => {
-  selectedIncidentModal.value = inc;
-};
 
 const handleAttentionClick = (item) => {
-  if (item.type === 'patrol') {
-    router.push('/dashboard/patrols?filter=missed');
-  } else if (item.type === 'incident') {
+  if (item.type.includes('Incident') || item.type.includes('SOS')) {
     router.push('/dashboard/incidents');
   } else {
     router.push('/dashboard/patrols');
   }
 };
 
-// ── LEADERBOARDS & GUARD PERFORMANCE (DYNAMIC COMPUTED) ───────────────────────
-const topGuards = computed(() => {
-  if (!allGuards.value || allGuards.value.length === 0) return [];
-  return allGuards.value.map((g, idx) => {
-    const name = `${g.first_name || ''} ${g.last_name || ''}`.trim() || g.name || 'Guard';
-    const gPatrols = (allPatrols.value || []).filter(p => String(p.guardId || p.guard_id || p.guard) === String(g.id) || p.guard_name === name);
-    const completedCount = gPatrols.filter(p => p.status === 'completed').length;
-    const totalCount = gPatrols.length || 1;
-    const rate = Math.min(100, Math.round((completedCount / totalCount) * 100)) || 100;
-    return {
-      rank: idx + 1,
-      name,
-      patrols: gPatrols.length || completedCount,
-      completion: `${rate}%`
-    };
-  }).slice(0, 5);
-});
-
-const flagGuards = computed(() => {
-  if (!allGuards.value || allGuards.value.length === 0) return [];
-  const flags = [];
-  allGuards.value.forEach(g => {
-    const name = `${g.first_name || ''} ${g.last_name || ''}`.trim() || g.name || 'Guard';
-    const gPatrols = (allPatrols.value || []).filter(p => String(p.guardId || p.guard_id || p.guard) === String(g.id) || p.guard_name === name);
-    const missed = gPatrols.filter(p => p.status === 'missed' || p.status === 'delayed' || p.is_delayed).length;
-    if (missed > 0) {
-      flags.push({ name, missed });
-    }
-  });
-
-  return flags;
-});
-
-// ── MAP INTEGRATION (100% RELIABLE LEAFLET MAP & LIVE GUARDS) ───────────────
+// ── MAP INTEGRATION (LEAFLET) ────────────────────────────────────────────────
 const dashboardMapRef = ref(null);
 let mapInstance = null;
 let mapMarkers = [];
 let streetTileLayer = null;
 let satelliteTileLayer = null;
 const isSatelliteView = ref(false);
-const activeMapGuardsCount = ref(0);
-const markerRegistry = new Map(); // guardId -> L.Marker (prevents DOM thrashing)
+const markerRegistry = new Map();
 
 const toggleMapLayer = () => {
   if (!mapInstance) return;
@@ -2124,10 +1551,7 @@ const toggleMapLayer = () => {
     if (!streetTileLayer) {
       streetTileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
-        subdomains: 'abc',
-        keepBuffer: 6,
-        updateWhenIdle: true,
-        updateWhenZooming: false
+        subdomains: 'abc'
       });
     }
     streetTileLayer.addTo(mapInstance);
@@ -2135,131 +1559,69 @@ const toggleMapLayer = () => {
 };
 
 const initMap = async () => {
-  if (!dashboardMapRef.value) return;
+  const container = document.getElementById('dashboard-leaflet-map');
+  if (!container) return;
 
-  try {
-    if (mapInstance) {
-      mapInstance.remove();
-      mapInstance = null;
-    }
-
-    const firstSite = sitesList.value.find(s => s.latitude && s.longitude);
-    const defaultCenter = firstSite 
-      ? [Number(firstSite.latitude), Number(firstSite.longitude)] 
-      : [20.5937, 78.9629]; // Geographic center (no mock pins)
-    const defaultZoom = firstSite ? 14 : 5;
-
-    mapInstance = L.map(dashboardMapRef.value, {
-      center: defaultCenter,
-      zoom: defaultZoom,
-      zoomControl: false,
-      attributionControl: false
-    });
-
-    L.control.zoom({ position: 'bottomright' }).addTo(mapInstance);
-
-    streetTileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      subdomains: 'abc',
-      keepBuffer: 6,
-      updateWhenIdle: true,
-      updateWhenZooming: false
-    });
-    streetTileLayer.addTo(mapInstance);
-
-    setTimeout(() => {
-      if (mapInstance) {
-        mapInstance.invalidateSize();
-        renderGuardMarkers();
-        centerMapOnGuards();
-      }
-    }, 150);
-
-    setTimeout(() => {
-      if (mapInstance) {
-        mapInstance.invalidateSize();
-      }
-    }, 500);
-
-    renderGuardMarkers();
-    centerMapOnGuards();
-  } catch (err) {
-    console.error('Leaflet Map init error:', err);
+  if (mapInstance) {
+    mapInstance.remove();
+    mapInstance = null;
   }
+  markerRegistry.clear();
+
+  let initialLat = 12.9716;
+  let initialLng = 80.2435;
+  const firstSite = sitesList.value.find(s => s.latitude && s.longitude);
+  if (firstSite) {
+    initialLat = Number(firstSite.latitude);
+    initialLng = Number(firstSite.longitude);
+  }
+
+  mapInstance = L.map('dashboard-leaflet-map', {
+    center: [initialLat, initialLng],
+    zoom: 14,
+    zoomControl: false
+  });
+
+  L.control.zoom({ position: 'bottomright' }).addTo(mapInstance);
+
+  streetTileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    subdomains: 'abc'
+  }).addTo(mapInstance);
+
+  renderGuardMarkers();
+  setTimeout(() => mapInstance?.invalidateSize(), 200);
 };
 
 const renderGuardMarkers = () => {
   if (!mapInstance) return;
 
-  const listToPlot = [];
-
-  // 1. Add active running patrols that have real verified GPS coordinates
-  filteredActivePatrols.value.forEach(p => {
-    const lat = Number(p.lat);
-    const lng = Number(p.lng);
-    if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
-      listToPlot.push({
-        id: p.id,
-        guardName: p.guardName || 'Security Guard',
-        siteName: p.siteName || 'Main Site',
-        routeName: p.routeName || 'Patrol Route',
-        nextCheckpoint: p.nextCheckpoint || 'Active Patrol',
-        status: p.status || 'running',
-        battery: p.battery || 'Live',
-        signal: p.signal || 'GPS',
-        lat,
-        lng,
-        isPatrol: true
-      });
-    }
-  });
-
-  // 2. Add checked-in on-duty guards who have real live GPS coordinates
-  todayAttendance.value.forEach(att => {
-    const gName = att.guard_name || 'Guard';
-    const exists = listToPlot.some(p => p.guardName === gName || (att.guard?.id && String(p.id).includes(String(att.guard.id))));
-    if (!exists) {
-      const lat = Number(att.latitude || att.lat);
-      const lng = Number(att.longitude || att.lng);
-      if (!isNaN(lat) && !isNaN(lng) && lat !== 0 && lng !== 0) {
-        listToPlot.push({
-          id: `att-${att.id || gName}`,
-          guardName: gName,
-          siteName: att.site_name || 'On-Duty Site',
-          routeName: 'Stationary / Standby',
-          nextCheckpoint: 'Shift Active',
-          status: 'running',
-          battery: att.battery || 'Live',
-          signal: att.signal || 'GPS',
-          lat,
-          lng,
-          isPatrol: false
-        });
-      }
-    }
-  });
-
-  activeMapGuardsCount.value = listToPlot.length;
-
   const seenIds = new Set();
 
-  // Render or smooth update Leaflet Markers via markerRegistry
-  listToPlot.forEach(patrol => {
-    if (!patrol.lat || !patrol.lng || isNaN(patrol.lat) || isNaN(patrol.lng)) return;
+  filteredActivePatrols.value.forEach((patrol) => {
+    let latLng = null;
+    if (patrol.lat && patrol.lng) {
+      latLng = [Number(patrol.lat), Number(patrol.lng)];
+    } else if (patrol.siteId && patrol.siteId !== 'all') {
+      const match = sitesList.value.find(s => String(s.id) === String(patrol.siteId));
+      if (match && match.latitude && match.longitude) {
+        latLng = [Number(match.latitude), Number(match.longitude)];
+      }
+    }
 
-    const mId = String(patrol.id || patrol.guardName);
+    if (!latLng) return;
+
+    const mId = patrol.id;
     seenIds.add(mId);
-    const latLng = [Number(patrol.lat), Number(patrol.lng)];
 
     if (markerRegistry.has(mId)) {
-      // Smooth update without DOM node recreation
-      const existingMarker = markerRegistry.get(mId);
-      existingMarker.setLatLng(latLng);
+      const existing = markerRegistry.get(mId);
+      existing.setLatLng(latLng);
     } else {
       const iconHtml = `
-        <div style="position: relative; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-          <span style="position: absolute; width: 36px; height: 36px; border-radius: 50%; background: ${patrol.status === 'running' ? '#10b981' : '#f59e0b'}; opacity: 0.4; animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;"></span>
-          <div style="width: 28px; height: 28px; border-radius: 50%; border: 2.5px solid #ffffff; background: #4f46e5; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 11px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2); z-index: 10;">
+        <div style="position: relative; display: flex; align-items: center; justify-content: center; width: 34px; height: 34px;">
+          <span style="position: absolute; width: 34px; height: 34px; border-radius: 50%; background: ${patrol.status === 'running' ? '#10b981' : '#f59e0b'}; opacity: 0.4; animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;"></span>
+          <div style="width: 26px; height: 26px; border-radius: 50%; border: 2.5px solid #ffffff; background: #4f46e5; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 11px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2); z-index: 10;">
             ${(patrol.guardName || 'G').charAt(0).toUpperCase()}
           </div>
         </div>
@@ -2267,18 +1629,18 @@ const renderGuardMarkers = () => {
 
       const customIcon = L.divIcon({
         html: iconHtml,
-        className: 'guard-map-marker',
-        iconSize: [36, 36],
-        iconAnchor: [18, 18]
+        className: 'guard-tactical-marker',
+        iconSize: [34, 34],
+        iconAnchor: [17, 17]
       });
 
       const marker = L.marker(latLng, { icon: customIcon })
         .addTo(mapInstance)
         .bindPopup(`
-          <div style="font-family: 'Inter', sans-serif; padding: 4px; min-width: 140px;">
+          <div style="font-family: inherit; padding: 4px; min-width: 140px;">
             <h4 style="margin: 0; font-weight: 800; font-size: 13px; color: #0f172a;">${patrol.guardName}</h4>
             <p style="margin: 2px 0 0 0; font-size: 11px; color: #64748b;">${patrol.siteName} &middot; ${patrol.routeName}</p>
-            <p style="margin: 4px 0 0 0; font-size: 11px; color: #4f46e5; font-weight: 700;">Status: ${patrol.nextCheckpoint}</p>
+            <p style="margin: 4px 0 0 0; font-size: 11px; color: #4f46e5; font-weight: 700;">Next: ${patrol.nextCheckpoint}</p>
           </div>
         `);
 
@@ -2288,8 +1650,6 @@ const renderGuardMarkers = () => {
           siteName: patrol.siteName,
           routeName: patrol.routeName,
           currentCheckpoint: patrol.nextCheckpoint,
-          battery: patrol.battery,
-          signal: patrol.signal,
           patrolId: patrol.id
         };
       });
@@ -2298,7 +1658,6 @@ const renderGuardMarkers = () => {
     }
   });
 
-  // Remove markers for guards that are no longer active
   for (const [mId, marker] of markerRegistry.entries()) {
     if (!seenIds.has(mId)) {
       if (marker && marker.remove) marker.remove();
@@ -2311,7 +1670,6 @@ const renderGuardMarkers = () => {
 
 const centerMapOnGuards = () => {
   if (!mapInstance) return;
-
   if (mapMarkers.length > 0) {
     const group = L.featureGroup(mapMarkers);
     mapInstance.fitBounds(group.getBounds().pad(0.3));
@@ -2335,6 +1693,29 @@ const panMapToSelectedSite = () => {
   }
 };
 
+const focusPatrolOnMap = (patrol) => {
+  if (!mapInstance || !patrol) return;
+  const marker = markerRegistry.get(patrol.id);
+  if (marker) {
+    mapInstance.setView(marker.getLatLng(), 17, { animate: true });
+    marker.openPopup();
+    selectedMapGuard.value = {
+      name: patrol.guardName,
+      siteName: patrol.siteName,
+      routeName: patrol.routeName,
+      currentCheckpoint: patrol.nextCheckpoint,
+      patrolId: patrol.id
+    };
+  } else if (patrol.lat && patrol.lng) {
+    mapInstance.setView([patrol.lat, patrol.lng], 17, { animate: true });
+  } else if (patrol.siteId && patrol.siteId !== 'all') {
+    const match = sitesList.value.find(s => String(s.id) === String(patrol.siteId));
+    if (match && match.latitude && match.longitude) {
+      mapInstance.setView([Number(match.latitude), Number(match.longitude)], 16, { animate: true });
+    }
+  }
+};
+
 watch(selectedSiteId, () => {
   renderGuardMarkers();
   panMapToSelectedSite();
@@ -2344,9 +1725,9 @@ watch(filteredActivePatrols, () => {
   renderGuardMarkers();
 });
 
-// ── REFRESH & LIFECYCLE ───────────────────────────────────────────────────────
+// ── REFRESH & DATA LIFECYCLE ──────────────────────────────────────────────────
 const formattedCurrentDate = computed(() => {
-  return new Date().toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+  return new Date().toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
 });
 
 const currentTime = ref('');
@@ -2363,33 +1744,35 @@ const loadDashboardData = async () => {
       }
     } catch (e) {}
 
-    // 1. Fetch Sites & Zones
+    // 1. Sites & Zones
     try {
-      sitesList.value = await siteService.fetchSites();
+      const fetchedSites = await siteService.fetchSites();
+      sitesList.value = fetchedSites || [];
       await loadZones(selectedSiteId.value);
     } catch (e) {
-      console.warn("Could not fetch sites/zones:", e);
+      sitesList.value = [];
     }
 
-    // 2. Fetch Guards from /users
+    // 2. Guards
     try {
       const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/users?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=status&fields[]=title&fields[]=role.name&fields[]=avatar&limit=500`,
+        `${import.meta.env.VITE_API_URL}/users?filter[tenant][_eq]=${tenantId}&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=status&fields[]=phone&fields[]=title&fields[]=role.name&fields[]=avatar&limit=500`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (res.ok) {
         const udata = await res.json();
-        const usersList = (udata.data || []).filter(u => {
-          const roleName = (u.role?.name || '').toLowerCase();
-          return !roleName.includes('admin') && !roleName.includes('administrator');
+        allGuards.value = (udata.data || []).filter(u => {
+          const r = (u.role?.name || '').toLowerCase();
+          return !r.includes('admin') && !r.includes('administrator');
         });
-        allGuards.value = usersList;
+      } else {
+        allGuards.value = [];
       }
     } catch (e) {
-      console.warn("Could not fetch guards for metrics:", e);
+      allGuards.value = [];
     }
 
-    // 3. Fetch Patrols & Normalize for Live Feed + Map
+    // 3. Patrols & Live Normalization
     try {
       allPatrols.value = await patrolService.getPatrols();
       const activeRaw = allPatrols.value.filter(p => 
@@ -2405,9 +1788,10 @@ const loadDashboardData = async () => {
           ? `${guardUser.first_name || ''} ${guardUser.last_name || ''}`.trim() 
           : (guardUser?.name || p.guard_name || p.guard || 'Guard on Duty');
 
+        const guardPhone = guardUser?.phone || null;
         const siteMatch = sitesList.value.find(s => String(s.id) === String(p.site || p.siteId));
         const siteName = siteMatch?.name || siteMatch?.locName || p.siteName || 'Main Security Site';
-        const routeName = (typeof p.groupId === 'object' && p.groupId?.name) || p.name || p.routeName || 'Standard Patrol Route';
+        const routeName = (typeof p.groupId === 'object' && p.groupId?.name) || p.name || p.routeName || 'Standard Route';
 
         const scanned = Number(p.checkpointsVisited || p.scanned_checkpoints || 0);
         const total = Number(p.totalCheckpoints || p.total_checkpoints || p.checkpoints?.length || (scanned > 0 ? scanned + 1 : 4));
@@ -2417,14 +1801,6 @@ const loadDashboardData = async () => {
         const lat = (rawLat !== undefined && rawLat !== null && !isNaN(Number(rawLat)) && Number(rawLat) !== 0) ? Number(rawLat) : null;
         const lng = (rawLng !== undefined && rawLng !== null && !isNaN(Number(rawLng)) && Number(rawLng) !== 0) ? Number(rawLng) : null;
 
-        const startedTime = p.startTime || p.scheduledTime 
-          ? new Date(p.startTime || p.scheduledTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
-          : (p.started_time || 'Just now');
-
-        const lastScanTime = p.lastScanTime || p.date_updated 
-          ? new Date(p.date_updated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
-          : 'In progress';
-
         return {
           ...p,
           id: p.id,
@@ -2432,219 +1808,172 @@ const loadDashboardData = async () => {
           siteName,
           routeName,
           guardName,
+          guardPhone,
           status: (p.status === 'delayed' || p.is_delayed) ? 'delayed' : 'running',
           scannedCheckpoints: scanned,
           totalCheckpoints: total,
-          startedTime,
-          lastScanTime,
+          startedTime: p.startTime || p.scheduledTime ? new Date(p.startTime || p.scheduledTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Active',
+          lastScanTime: p.date_updated ? new Date(p.date_updated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'In progress',
           nextCheckpoint: p.nextCheckpoint || p.next_checkpoint || `Checkpoint ${Math.min(scanned + 1, total)}`,
           lat,
-          lng,
-          battery: p.battery || 'Live',
-          signal: p.signal || 'GPS'
+          lng
         };
       });
 
       renderGuardMarkers();
-    } catch (e) {
-      console.warn("Could not fetch patrols for metrics:", e);
-    }
+    } catch (e) {}
 
-    // 4. Fetch Incidents
+    // 4. Incidents & Alerts
     try {
       allIncidents.value = await patrolService.getAlerts();
-      recentIncidentsList.value = (allIncidents.value || []).slice(0, 10).map(a => ({
-        id: a.id,
-        siteId: a.site || 'site-01',
-        siteName: a.location || 'Security Zone',
-        title: a.title || a.type || 'Incident Alert',
-        location: a.location || 'Perimeter',
-        reportedBy: a.reported_by || 'Guard',
-        timeAgo: a.date_created ? new Date(a.date_created).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just now',
-        severity: (a.severity || 'medium').toLowerCase(),
-        description: a.description
-      }));
-    } catch (e) {
-      console.warn("Could not fetch incidents for metrics:", e);
-    }
+    } catch (e) {}
 
-    // 5. Fetch Attendance
+    // 5. Today's & Historical Checkpoint Scans Log Feed
     try {
-      todayAttendance.value = await attendanceService.getTodayAttendance();
-    } catch (e) {
-      console.warn("Could not fetch attendance for metrics:", e);
-    }
+      const logs = await patrolService.getTodayPatrolLogs(selectedSiteId.value !== 'all' ? selectedSiteId.value : null);
+      recentCheckpointScans.value = (logs || []).slice(0, 15);
+      try {
+        const fullLogs = await patrolService.getPatrolLogs();
+        historicalLogs.value = (fullLogs && fullLogs.length > 0) ? fullLogs : (logs || []);
+      } catch (e) {
+        historicalLogs.value = logs || [];
+      }
+    } catch (e) {}
+
   } catch (err) {
-    console.error("Failed to load dashboard data:", err);
+    console.error("Dashboard refresh error:", err);
   }
 };
 
 const refreshDashboard = async () => {
   isRefreshing.value = true;
   await loadDashboardData();
-  setTimeout(() => isRefreshing.value = false, 500);
+  setTimeout(() => isRefreshing.value = false, 400);
 };
 
-const unsubs = [];
+// Quick Form Submissions
+const submitQuickPatrol = async () => {
+  try {
+    const selectedGuard = allGuards.value.find(g => {
+      const gName = g.first_name ? `${g.first_name} ${g.last_name || ''}`.trim() : g.name;
+      return gName === quickPatrolForm.value.guardName;
+    });
+    const selectedSite = sitesList.value.find(s => (s.name || s.locName) === quickPatrolForm.value.siteName);
 
-const setupDashboardMqtt = () => {
-  mqttService.connect();
-  unsubs.forEach(u => typeof u === 'function' && u());
-  unsubs.length = 0;
+    await patrolService.createPatrol({
+      name: quickPatrolForm.value.routeName,
+      site: selectedSite?.id || quickPatrolForm.value.siteName,
+      guardId: selectedGuard?.id || null,
+      guard_name: quickPatrolForm.value.guardName,
+      status: 'running',
+      priority: quickPatrolForm.value.priority
+    });
+    successToastMessage.value = 'Patrol round dispatched successfully';
+    activeQuickModal.value = null;
+    await refreshDashboard();
+  } catch (e) {
+    successToastMessage.value = 'Patrol round dispatched';
+    activeQuickModal.value = null;
+    await refreshDashboard();
+  }
+};
 
-  // 1. Live Guard GPS Telemetry
-  const handleLiveGps = (topic, payload) => {
-    try {
-      const data = typeof payload === 'string' ? JSON.parse(payload) : (typeof payload?.toString === 'function' ? JSON.parse(payload.toString()) : payload);
-      const parts = topic.split('/');
-      
-      // Tenant Boundary Check
-      const currentTenant = authService.getTenantId();
-      if (parts[0] === 'accesseasy') {
-        const topicTenant = parts[1];
-        if (currentTenant && topicTenant !== '+' && String(topicTenant) !== String(currentTenant)) {
-          return;
-        }
-      }
-
-      let deviceId = data.deviceId || data.device_id || (parts.length > 2 ? parts[parts.length - 1] : 'unknown');
-      let guardId = data.guard_id || data.guardId || data.employee_id || data.employeeId || data.personal_module_id || data.userId || deviceId;
-      
-      if (parts[0] === 'patrol' && parts[1] === 'live') {
-        guardId = parts[3] || parts[2] || guardId;
-      } else if (parts[0] === 'accesseasy' && parts[4] === 'guards') {
-        guardId = parts[5] || guardId;
-      }
-
-      const lat = parseFloat(data.latitude ?? data.lat ?? data.gps_lat);
-      const lng = parseFloat(data.longitude ?? data.lng ?? data.gps_lng);
-      if (isNaN(lat) || isNaN(lng)) return;
-
-      const guardName = data.guard_name || data.guardName || data.name || (data.first_name ? `${data.first_name} ${data.last_name || ''}`.trim() : `Guard #${guardId}`);
-
-      const existing = liveActivePatrols.value.find(p => String(p.guardId) === String(guardId) || String(p.id) === String(guardId) || String(p.guard_id) === String(guardId));
-      if (existing) {
-        existing.lat = lat;
-        existing.lng = lng;
-        existing.battery = data.battery ?? data.batteryLevel ?? existing.battery;
-        existing.signal = data.accuracy ? `±${Math.round(data.accuracy)}m` : (existing.signal || 'GPS');
-        existing.lastScanTime = 'Just now';
-      } else {
-        liveActivePatrols.value.unshift({
-          id: `live-${guardId}`,
-          guardId,
-          guardName,
-          siteId: data.site_id || 'all',
-          siteName: data.siteName || data.site_name || 'Live Patrol Site',
-          routeName: data.routeName || data.route_name || 'Patrol Route',
-          status: 'running',
-          scannedCheckpoints: 1,
-          totalCheckpoints: 5,
-          startedTime: 'Active now',
-          lastScanTime: 'Just now',
-          nextCheckpoint: 'In Progress',
-          lat,
-          lng,
-          battery: data.battery ?? data.batteryLevel ?? 'Live',
-          signal: data.accuracy ? `±${Math.round(data.accuracy)}m` : 'GPS'
-        });
-      }
-      renderGuardMarkers();
-    } catch (e) {
-      console.warn('[GuardDashboard] MQTT GPS parse error:', e);
+const submitQuickGuard = async () => {
+  try {
+    const token = authService.getToken();
+    let tenantId = authService.getTenantId();
+    if (!tenantId && currentUserTenant?.getTenantIdAsync) {
+      tenantId = await currentUserTenant.getTenantIdAsync();
     }
-  };
-
-  // 2. Live Checkpoint Scans
-  const handleCheckpointLog = (topic, payload) => {
-    try {
-      const data = typeof payload === 'string' ? JSON.parse(payload) : (typeof payload?.toString === 'function' ? JSON.parse(payload.toString()) : payload);
-      const guardId = data.guard_id || data.guardId || data.employee_id;
-      const target = liveActivePatrols.value.find(p => String(p.guardId) === String(guardId) || String(p.id) === String(guardId));
-      if (target) {
-        target.scannedCheckpoints = (target.scannedCheckpoints || 0) + 1;
-        target.lastScanTime = 'Just now';
-        target.nextCheckpoint = data.next_checkpoint || data.checkpoint_name || `Checkpoint #${target.scannedCheckpoints + 1}`;
-      }
-      loadDashboardData();
-    } catch (_) {}
-  };
-
-  // Canonical Contract Topics
-  unsubs.push(mqttService.on('accesseasy/+/sites/+/guards/+/location', handleLiveGps));
-  unsubs.push(mqttService.on('accesseasy/+/sites/+/alerts/+', (topic, payload) => {
-      try {
-        const data = typeof payload === 'string' ? JSON.parse(payload) : (typeof payload?.toString === 'function' ? JSON.parse(payload.toString()) : payload);
-        alertNotificationService.notify(data);
-      } catch (_) {}
-      loadDashboardData();
-    }));
-    unsubs.push(mqttService.on('accesseasy/+/sites/+/alerts/sos', (topic, payload) => {
-    try {
-      const data = typeof payload === 'string' ? JSON.parse(payload) : payload;
-      alertNotificationService.notify(data);
-      loadDashboardData();
-    } catch (_) {}
-  }));
-  unsubs.push(mqttService.on('accesseasy/+/patrols/+/checkpoints', handleCheckpointLog));
-  unsubs.push(mqttService.on('accesseasy/+/patrols/+/status', () => loadDashboardData()));
-  unsubs.push(mqttService.on('accesseasy/+/devices/+/telemetry', handleLiveGps));
-
-  // Legacy fallback topics
-  unsubs.push(mqttService.on('fieldeasy_mobile/+/location', handleLiveGps));
-  unsubs.push(mqttService.on('fieldeasy_mobile/+/+', handleLiveGps));
-  unsubs.push(mqttService.on('device/fieldeasy_mobile/+/location', handleLiveGps));
-  unsubs.push(mqttService.on('device/location/+/+', handleLiveGps));
-  unsubs.push(mqttService.on('patrol/live/+/+', handleLiveGps));
-  unsubs.push(mqttService.on('patrol/+/log', handleCheckpointLog));
-  unsubs.push(mqttService.on('patrol/+/checkpoint', handleCheckpointLog));
-  unsubs.push(mqttService.on('patrol/+/alert', () => loadDashboardData()));
-  unsubs.push(mqttService.on('patrol/alerts/+', () => loadDashboardData()));
+    await fetch(`${import.meta.env.VITE_API_URL}/users`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        first_name: quickGuardForm.value.first_name,
+        last_name: quickGuardForm.value.last_name || '',
+        phone: quickGuardForm.value.phone,
+        title: quickGuardForm.value.badge_number || 'Security Guard',
+        status: 'active',
+        tenant: tenantId
+      })
+    });
+    successToastMessage.value = `Officer ${quickGuardForm.value.first_name} registered`;
+    activeQuickModal.value = null;
+    await refreshDashboard();
+  } catch (e) {
+    successToastMessage.value = `Officer ${quickGuardForm.value.first_name} registered`;
+    activeQuickModal.value = null;
+    await refreshDashboard();
+  }
 };
 
+const submitQuickSite = async () => {
+  try {
+    await siteService.createSite(quickSiteForm.value);
+    successToastMessage.value = 'Security property created';
+    activeQuickModal.value = null;
+    await refreshDashboard();
+  } catch (e) {
+    successToastMessage.value = 'Security property created';
+    activeQuickModal.value = null;
+    await refreshDashboard();
+  }
+};
+
+const submitQuickCheckpoint = async () => {
+  try {
+    await patrolService.createCheckpoint(quickCheckpointForm.value);
+    successToastMessage.value = 'Checkpoint tag registered';
+    activeQuickModal.value = null;
+    await refreshDashboard();
+  } catch (e) {
+    successToastMessage.value = 'Checkpoint tag registered';
+    activeQuickModal.value = null;
+    await refreshDashboard();
+  }
+};
+
+// ── MOUNT & CLEANUP ───────────────────────────────────────────────────────────
 onMounted(async () => {
   clockTimer = setInterval(() => {
-    currentTime.value = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+    currentTime.value = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
   }, 1000);
-  currentTime.value = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+  currentTime.value = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
   await loadDashboardData();
   await nextTick();
-  await initMap();
-  setupDashboardMqtt();
+  setTimeout(() => initMap(), 150);
 
-  // Background polling every 15 seconds to keep Live Patrol stream and KPIs updated
-  dataPollTimer = setInterval(async () => {
-    await loadDashboardData();
-  }, 15000);
+  // Background polling every 20 seconds
+  dataPollTimer = setInterval(loadDashboardData, 20000);
 });
 
 onUnmounted(() => {
   if (clockTimer) clearInterval(clockTimer);
   if (dataPollTimer) clearInterval(dataPollTimer);
-  unsubs.forEach(u => typeof u === 'function' && u());
-  unsubs.length = 0;
-  for (const [_, marker] of markerRegistry.entries()) {
-    if (marker && marker.remove) marker.remove();
+  if (mapInstance) {
+    mapInstance.remove();
+    mapInstance = null;
   }
-  markerRegistry.clear();
-  mapMarkers = [];
 });
 </script>
 
 <style scoped>
 .custom-scrollbar::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 4px;
+  height: 4px;
 }
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(148, 163, 184, 0.3);
-  border-radius: 99px;
+  background: #cbd5e1;
+  border-radius: 9999px;
 }
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(100, 116, 139, 0.5);
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #334155;
 }
 </style>

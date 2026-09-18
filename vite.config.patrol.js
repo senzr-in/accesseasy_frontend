@@ -39,12 +39,24 @@ export default defineConfig(({ mode }) => {
       }
     },
     optimizeDeps: {
-      include: ['@tensorflow/tfjs-tflite']
+      include: [
+        '@tensorflow/tfjs-tflite',
+        'lucide-vue-next',
+        'qrcode',
+        'leaflet',
+        'axios',
+        'date-fns',
+        'lodash'
+      ]
     },
     server: { 
       port: 5176, 
       host: "0.0.0.0", 
-      watch: { usePolling: true },
+      watch: { 
+        usePolling: true,
+        interval: 1000,
+        ignored: ['**/node_modules/**', '**/.git/**', '**/dist/**']
+      },
       hmr: { overlay: false }
     }
   };

@@ -6,15 +6,22 @@
       <!-- Top Banner -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 p-5 rounded-2xl shadow-sm">
         <div class="flex items-center gap-3.5">
+          <button
+            @click="router.push('/dashboard/settings')"
+            class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer shrink-0"
+            title="Back to Settings"
+          >
+            <ArrowLeft class="w-4 h-4" />
+          </button>
           <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-600/20 shrink-0">
             <Smartphone class="w-5 h-5" />
           </div>
           <div>
             <h1 class="text-base font-black text-slate-900 dark:text-white tracking-tight">
-              Shared Patrol Terminals &amp; Device Management
+              Guard Devices
             </h1>
             <p class="text-xs text-slate-500 font-medium mt-0.5">
-              Manage site-bound terminals, QR code pairing, active guard shift monitoring, and hardware replacements
+              Monitor mobile devices, battery levels, and app versions
             </p>
           </div>
         </div>
@@ -410,12 +417,15 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { Smartphone, Plus, RefreshCw, X, QrCode, Copy, Check, Lock, Unlock } from 'lucide-vue-next';
+import { useRouter } from 'vue-router';
+import { Smartphone, Plus, RefreshCw, X, QrCode, Copy, Check, Lock, Unlock, ArrowLeft } from 'lucide-vue-next';
 import QrcodeVue from 'qrcode.vue';
 import { deviceService } from '@/services/deviceService';
 import { siteService } from '@/services/siteService';
 import { authService } from '@/services/authService';
 import FeatureGate from '@/components/common/FeatureGate.vue';
+
+const router = useRouter();
 
 const devices = ref([]);
 const availableSites = ref([]);

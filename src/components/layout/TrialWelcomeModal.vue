@@ -50,7 +50,7 @@
           <div class="pill-item">✓ Incident Escalation</div>
           <div class="pill-item">✓ 24/7 Shift Scheduler</div>
           <div class="pill-item">✓ Handheld Fleet</div>
-          <div class="pill-item">✓ Audit Trail</div>
+          <div class="pill-item">✓ Reports & Analytics</div>
         </div>
 
         <!-- Action Buttons -->

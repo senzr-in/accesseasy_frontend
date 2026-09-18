@@ -211,6 +211,7 @@ import { ArrowLeft, Save, Activity, MapPin, Layers } from 'lucide-vue-next';
 import { siteService } from '@/services/siteService';
 import { geofenceService } from '@/services/geofenceService';
 import FeatureGate from '@/components/common/FeatureGate.vue';
+import { toast } from '@/stores/useToastStore';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -310,11 +311,21 @@ const updateMapCircle = () => {
   }
 };
 
+const isSaving = ref(false);
+
 const saveGeofenceSettings = async () => {
-  await siteService.updateSite(siteId, {
-    geofence_radius: currentRadius.value
-  });
-  alert("Geofence radius saved successfully!");
+  isSaving.value = true;
+  try {
+    await siteService.updateSite(siteId, {
+      geofence_radius: currentRadius.value
+    });
+    toast.success("Geofence radius saved successfully!");
+  } catch (err) {
+    console.error("Failed to save geofence:", err);
+    toast.error(err.message || "Failed to save geofence radius");
+  } finally {
+    isSaving.value = false;
+  }
 };
 
 const initMap = () => {

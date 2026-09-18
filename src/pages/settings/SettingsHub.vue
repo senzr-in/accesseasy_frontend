@@ -9,10 +9,10 @@
         </div>
         <div>
           <h1 class="text-xl font-black text-slate-900 dark:text-white tracking-tight">
-            Security & System Settings Hub
+            Settings
           </h1>
-          <p class="text-xs text-slate-500 font-medium mt-1">
-            Configure subscription tiers, escalation policies, device fleets, shift rosters, and audit trails
+          <p class="text-xs text-slate-500 font-medium mt-0.5">
+            Configure system preferences, devices, and operational rules
           </p>
         </div>
       </div>
@@ -24,32 +24,27 @@
       <div
         v-for="card in settingsCards"
         :key="card.title"
-        class="bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-2xl p-5 shadow-sm hover:shadow-md hover:border-indigo-300 dark:hover:border-indigo-500/50 transition-all cursor-pointer flex flex-col justify-between group"
+        class="bg-white dark:bg-[#151c2c] border border-slate-200/80 dark:border-white/10 rounded-2xl p-5 shadow-xs hover:shadow-md hover:border-indigo-400/80 dark:hover:border-indigo-500/50 transition-all cursor-pointer flex flex-col justify-between group"
         @click="router.push(card.route)"
       >
         <div class="space-y-3">
           <div class="flex items-center justify-between">
-            <div class="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm" :class="card.iconBg">
+            <div class="w-11 h-11 rounded-xl flex items-center justify-center shadow-xs" :class="card.iconBg">
               <component :is="card.icon" class="w-5 h-5" :class="card.iconColor" />
             </div>
-            <span v-if="card.tag" class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full" :class="card.tagClass">
-              {{ card.tag }}
-            </span>
+            <div class="w-8 h-8 rounded-lg bg-slate-50 dark:bg-white/5 flex items-center justify-center text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-500/10 group-hover:translate-x-0.5 transition-all">
+              <ChevronRight class="w-4 h-4" />
+            </div>
           </div>
 
           <div>
             <h3 class="text-sm font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
               {{ card.title }}
             </h3>
-            <p class="text-xs text-slate-500 leading-relaxed mt-1">
+            <p class="text-xs text-slate-500 font-medium leading-relaxed mt-1">
               {{ card.description }}
             </p>
           </div>
-        </div>
-
-        <div class="mt-4 pt-3 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-xs font-bold text-indigo-600 dark:text-indigo-400 group-hover:translate-x-1 transition-transform">
-          <span>Configure Settings</span>
-          <ArrowRight class="w-4 h-4" />
         </div>
       </div>
 
@@ -62,7 +57,7 @@
 import { useRouter } from 'vue-router';
 import { 
   Settings, CreditCard, Volume2, Smartphone, Calendar, 
-  MapPin, ScrollText, QrCode, ArrowRight 
+  MapPin, QrCode, ChevronRight 
 } from 'lucide-vue-next';
 
 const router = useRouter();
@@ -70,73 +65,51 @@ const router = useRouter();
 const settingsCards = [
   {
     title: 'Subscription & Billing',
-    description: 'Manage tier capacity limits, view live resource usage meters, and upgrade between Normal, Pro & Custom.',
+    description: 'Plan details, usage limits, and renewal',
     route: '/dashboard/settings/subscription',
     icon: CreditCard,
     iconBg: 'bg-indigo-50 dark:bg-indigo-500/10',
-    iconColor: 'text-indigo-600',
-    tag: 'Tiers & Quota',
-    tagClass: 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-300'
+    iconColor: 'text-indigo-600 dark:text-indigo-400'
   },
   {
-    title: 'Emergency Escalation Policies',
-    description: 'Configure automated multi-tier alert fallback chains for SOS panic alerts, missed patrols, and geofence breaches.',
+    title: 'Emergency Alert Rules',
+    description: 'Automated alerts for SOS alarms and missed patrols',
     route: '/dashboard/settings/escalation',
     icon: Volume2,
     iconBg: 'bg-rose-50 dark:bg-rose-500/10',
-    iconColor: 'text-rose-600',
-    tag: 'Escalation Engine',
-    tagClass: 'bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300'
+    iconColor: 'text-rose-600 dark:text-rose-400'
   },
   {
-    title: 'Guard Handhelds & Device Fleet',
-    description: 'Live battery %, charging state, OS/App versions, heartbeat freshness, registration, and remote device wiping.',
+    title: 'Guard Devices',
+    description: 'Battery levels, app versions, and online status',
     route: '/dashboard/settings/devices',
     icon: Smartphone,
     iconBg: 'bg-blue-50 dark:bg-blue-500/10',
-    iconColor: 'text-blue-600',
-    tag: 'Fleet Ops',
-    tagClass: 'bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300'
+    iconColor: 'text-blue-600 dark:text-blue-400'
   },
   {
-    title: 'Shift Scheduler & Rotation Matrix',
-    description: 'Plan weekly 24/7 rotations, assign guard shift slots, detect turnaround fatigue conflicts, and export rosters.',
+    title: 'Shift Schedules',
+    description: 'Duty shift timings, hours, and weekly rosters',
     route: '/dashboard/settings/patrol-shifts',
     icon: Calendar,
     iconBg: 'bg-emerald-50 dark:bg-emerald-500/10',
-    iconColor: 'text-emerald-600',
-    tag: 'Shift Matrix',
-    tagClass: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300'
+    iconColor: 'text-emerald-600 dark:text-emerald-400'
   },
   {
-    title: 'Sites & Geofence Calibration',
-    description: 'Property boundaries, zone perimeters, 4-tier GPS accuracy calibration, and live violation logs.',
+    title: 'Sites & Zones',
+    description: 'Client locations, boundary areas, and geofences',
     route: '/dashboard/sites',
     icon: MapPin,
     iconBg: 'bg-amber-50 dark:bg-amber-500/10',
-    iconColor: 'text-amber-600',
-    tag: 'Perimeter Engine',
-    tagClass: 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300'
+    iconColor: 'text-amber-600 dark:text-amber-400'
   },
   {
-    title: 'Security Operations Audit Trail',
-    description: 'Immutable historical logs of all supervisor actions, incident transitions, geofence edits, and IP tracking.',
-    route: '/dashboard/settings/audit-log',
-    icon: ScrollText,
-    iconBg: 'bg-slate-100 dark:bg-slate-800',
-    iconColor: 'text-slate-700 dark:text-slate-300',
-    tag: 'Audit & Compliance',
-    tagClass: 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
-  },
-  {
-    title: 'Checkpoints Configuration',
-    description: 'Manage QR code tokens, NFC tags, scanning radius margins, and checkpoint library.',
+    title: 'Patrol Checkpoints',
+    description: 'QR codes, NFC tags, and scan points',
     route: '/dashboard/settings/checkpoints',
     icon: QrCode,
     iconBg: 'bg-cyan-50 dark:bg-cyan-500/10',
-    iconColor: 'text-cyan-600',
-    tag: 'Core Patrol',
-    tagClass: 'bg-cyan-50 text-cyan-700 dark:bg-cyan-500/10 dark:text-cyan-300'
+    iconColor: 'text-cyan-600 dark:text-cyan-400'
   }
 ];
 </script>

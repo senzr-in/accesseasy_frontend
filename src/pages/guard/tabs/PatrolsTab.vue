@@ -22,61 +22,43 @@
         </div>
       </div>
 
-      <div class="flex items-center gap-2">
+      <div class="flex items-center gap-2.5">
+        <!-- Live Manual Sync -->
         <button
-          class="btn-primary text-xs flex items-center gap-1.5 h-10 px-4 whitespace-nowrap shadow-sm shadow-indigo-200 dark:shadow-none cursor-pointer"
-          @click="$router.push('/dashboard/patrols/create')"
+          class="h-9 px-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap shadow-xs cursor-pointer"
+          :class="{ 'opacity-60 pointer-events-none': isPolling }"
+          @click="manualRefresh"
+          title="Refresh live patrol state and alerts"
         >
-          <PlusCircle class="w-4 h-4" />
-          <span>Patrol Creator</span>
+          <RefreshCw class="w-3.5 h-3.5 text-indigo-500" :class="{ 'animate-spin': isPolling }" />
+          <span class="hidden sm:inline">Sync Live</span>
         </button>
+
         <button
-          class="h-10 px-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap shadow-sm cursor-pointer"
+          class="h-9 px-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap shadow-xs cursor-pointer"
           @click="$router.push('/dashboard/patrols/history')"
         >
-          <HistoryIcon class="w-4 h-4 text-slate-400" />
+          <HistoryIcon class="w-3.5 h-3.5 text-slate-400" />
           <span>History</span>
         </button>
 
-        <!-- Pair Tablet QR Button -->
         <button
-          class="h-10 px-3.5 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap shadow-sm cursor-pointer"
-          @click="openDevicePairingModal"
-          title="Pair Guard Mobile / Tablet Device"
+          class="btn-primary text-xs flex items-center gap-1.5 h-9 px-4 whitespace-nowrap shadow-sm shadow-indigo-600/20 cursor-pointer"
+          @click="$router.push('/dashboard/patrols/create')"
         >
-          <QrCode class="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-          <span>Pair Tablet QR</span>
+          <PlusCircle class="w-3.5 h-3.5" />
+          <span>Create Patrol</span>
         </button>
 
-        <!-- Get Patrol App (Play Store) -->
-        <button
-          class="h-10 px-3.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:bg-black dark:hover:bg-slate-100 text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap shadow-sm cursor-pointer"
-          @click="showAppDownloadModal = true"
-          title="Download Patrol Mobile App on Google Play Store"
-        >
-          <Smartphone class="w-4 h-4 text-indigo-400 dark:text-indigo-600" />
-          <span>Get Patrol App</span>
-        </button>
-
-        <!-- WhatsApp Support Button -->
-        <button
-          class="h-10 px-3.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/50 text-xs font-bold transition-all flex items-center gap-1.5 whitespace-nowrap shadow-sm cursor-pointer"
-          @click="openWhatsAppSupport"
-          title="Chat with AccessEasy 24/7 WhatsApp Support"
-        >
-          <MessageCircle class="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-          <span>WhatsApp Support</span>
-        </button>
-
-        <!-- Overflow Dropdown Menu -->
+        <!-- More Options Menu -->
         <div class="relative">
           <button
             ref="overflowButtonRef"
-            class="w-10 h-10 flex items-center justify-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors shadow-sm cursor-pointer"
+            class="h-9 w-9 flex items-center justify-center bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 transition-colors shadow-xs cursor-pointer"
             @click="toggleOverflowMenu"
             title="More Options"
           >
-            <MoreVertical class="w-4 h-4 text-slate-500 dark:text-slate-400 shrink-0" />
+            <MoreVertical class="w-4 h-4 shrink-0" />
           </button>
           
           <Teleport to="body">
@@ -178,6 +160,15 @@
         Dismiss
       </button>
     </div>
+
+    <!-- Setup & Onboarding Wizard -->
+    <SetupOnboardingBanner
+      :sites-count="pairingSitesList.length"
+      :zones-count="zones.length"
+      :patrols-count="allPatrols.length"
+      @open-pairing="openDevicePairingModal"
+      @refresh-data="handleOnboardingRefresh"
+    />
 
     <!-- KPI Metric Cards Strip -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4 shrink-0">
@@ -431,7 +422,7 @@
           </div>
 
           <!-- Code Summary Box -->
-          <div class="bg-slate-50 dark:bg-slate-800/60 rounded-xl p-3 mb-4 text-left border border-slate-200 dark:border-white/5">
+          <div class="bg-slate-50 dark:bg-slate-800/60 rounded-xl p-3 mb-3 text-left border border-slate-200 dark:border-white/5">
             <div class="flex justify-between items-center mb-1">
               <span class="text-[10px] font-bold text-slate-400 uppercase">Site:</span>
               <span class="font-bold text-emerald-600 dark:text-emerald-400 text-xs">{{ selectedPairingSiteName }}</span>
@@ -442,8 +433,28 @@
             </div>
           </div>
 
+          <!-- Quick Action Buttons: Copy Code & WhatsApp Share -->
+          <div class="grid grid-cols-2 gap-2 mb-4">
+            <button
+              type="button"
+              class="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+              @click="copyPairingCode"
+            >
+              <Copy class="w-3.5 h-3.5 text-slate-500" />
+              <span>Copy Code</span>
+            </button>
+            <button
+              type="button"
+              class="py-2 px-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 dark:bg-emerald-500/10 dark:hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer border border-emerald-200 dark:border-emerald-500/20"
+              @click="sharePairingWhatsApp"
+            >
+              <MessageCircle class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              <span>WhatsApp</span>
+            </button>
+          </div>
+
           <p class="text-[11px] text-slate-500 mb-4 leading-relaxed">
-            Open the <strong>AccessEasy Patrol</strong> app on the tablet, tap <strong>Scan QR Code</strong>, and scan this QR code to bind the device.
+            Open the <strong>AccessEasy Patrol</strong> app on the tablet, tap <strong>Scan QR Code</strong>, or enter the pairing code manually to bind the device.
           </p>
 
           <button
@@ -561,7 +572,7 @@ import {
   MapPin, Clock, CheckCircle, XCircle, Search, Calendar,
   MoreVertical, ShieldCheck, ChevronRight, Play, CheckCircle2, Loader2, PlayCircle, Filter, 
   Map as MapIcon, X, Maximize2, Minimize2, Eye, ExternalLink, Activity, ScanLine, QrCode, Settings, BarChart3, History as HistoryIcon, CheckCheck, PlusCircle, Download,
-  MessageCircle, Smartphone
+  MessageCircle, Smartphone, RefreshCw, Copy
 } from "lucide-vue-next";
 import { useRoute, useRouter } from 'vue-router';
 import { patrolService } from '@/services/patrolService';
@@ -569,10 +580,12 @@ import { zoneService } from '@/services/zoneService';
 import { authService } from '@/services/authService';
 import { mqttService } from '@/services/mqttService';
 import { currentUserTenant } from '@/utils/currentUserTenant';
+import { toast } from '@/stores/useToastStore';
 import ZoneScoreboard from './components/ZoneScoreboard.vue';
 import PatrolLiveFeed from './components/PatrolLiveFeed.vue';
 import PatrolMapReplay from './components/PatrolMapReplay.vue';
 import PatrolReports from './components/PatrolReports.vue';
+import SetupOnboardingBanner from './components/SetupOnboardingBanner.vue';
 
 import PatrolCreator from './components/PatrolCreator.vue';
 import EditPatrolModal from './components/EditPatrolModal.vue';
@@ -612,6 +625,15 @@ const openDevicePairingModal = async () => {
   await generateDeviceQR();
 };
 
+const handleOnboardingRefresh = async () => {
+  try {
+    const sites = await zoneService.getSites();
+    pairingSitesList.value = sites || [];
+  } catch (_) {}
+  await fetchStaticMetadata();
+  await load();
+};
+
 const generateDeviceQR = async () => {
   try {
     const tenantId = authService.getTenantId();
@@ -636,6 +658,33 @@ const generateDeviceQR = async () => {
     console.error('Failed to generate device QR code:', e);
   }
 };
+
+const copyPairingCode = async () => {
+  try {
+    await navigator.clipboard.writeText(devicePairingCode.value);
+    toast.success('Pairing code copied to clipboard!');
+  } catch {
+    toast.info(`Pairing Code: ${devicePairingCode.value}`);
+  }
+};
+
+const sharePairingWhatsApp = () => {
+  const text = `*AccessEasy Patrol App Setup*\nSite: ${selectedPairingSiteName.value}\nDevice ID: ${pairingDeviceId.value}\nPairing Code: *${devicePairingCode.value}*\n\nEnter this code or scan the pairing QR code in the AccessEasy Patrol mobile app.`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+};
+
+const manualRefresh = async () => {
+  if (isPolling) return;
+  isPolling = true;
+  try {
+    await load();
+    toast.info('Patrol operations synced');
+  } catch (e) {
+    toast.error('Sync failed: ' + (e?.message || 'Network error'));
+  } finally {
+    isPolling = false;
+  }
+};
 const loadingHandovers = ref(false);
 const handoversList = ref([]);
 
@@ -657,7 +706,7 @@ const downloadCheckpointQRs = async () => {
   try {
     const list = await patrolService.getMasterCheckpoints();
     if (!list || list.length === 0) {
-      toastMsg.value = 'No checkpoints found to download.';
+      toast.warning('No checkpoints found to download.');
       return;
     }
     
@@ -699,8 +748,8 @@ const downloadCheckpointQRs = async () => {
           .card { width: 58mm; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 10px; border: 1px dashed #ccc; page-break-inside: avoid; margin-bottom: 20px; }
           .brand { font-size: 14px; font-weight: 800; text-transform: uppercase; border-bottom: 1px dashed #000; width: 100%; padding-bottom: 4px; margin-bottom: 8px; }
           .qr { width: 45mm; height: 45mm; margin-bottom: 8px; }
-          .name { font-size: 16px; font-weight: bold; margin-bottom: 4px; }
-          .id { font-size: 11px; margin-bottom: 8px; }
+          .name { font-size: 14px; font-weight: bold; margin-bottom: 4px; word-break: break-word; max-width: 100%; }
+          .id { font-size: 11px; margin-bottom: 8px; word-break: break-all; }
           .meta { width: 100%; display: flex; justify-content: space-between; border-top: 1px dashed #000; padding-top: 8px; margin-bottom: 8px; }
           .meta-item { display: flex; flex-direction: column; text-align: center; width: 50%; }
           .meta-item label { font-size: 10px; text-transform: uppercase; }
@@ -718,13 +767,16 @@ const downloadCheckpointQRs = async () => {
     </html>`;
     
     const win = window.open('', '_blank');
+    if (!win) {
+      toast.warning('Pop-up was blocked. Please allow pop-ups for this site to print badges.');
+      return;
+    }
     win.document.write(html);
     win.document.close();
 
   } catch (err) {
     console.error('Failed to download checkpoints:', err);
-    toastMsg.value = 'Failed to generate QR list.';
-    setTimeout(() => { toastMsg.value = ''; }, 6000);
+    toast.error('Failed to generate QR list.');
   } finally {
     downloadingQRs.value = false;
   }
@@ -737,7 +789,7 @@ onMounted(() => {
   load();
 });
 
-const editingPatrol   = ref(null);
+const editingPatrol = ref(null);
 
 const showReports = ref(false);
 const showWizard = ref(false);
@@ -872,14 +924,18 @@ async function checkMissedPatrols() {
 
     if (!notifiedPatrols.has(p.id)) {
       notifiedPatrols.add(p.id);
-      // Native Browser Notification
-      if (notificationPermission.value === 'granted') {
-        new Notification(`⚠️ Patrol ${p.status.toUpperCase()}: ${p.zoneName || 'Unknown Zone'}`, {
-          body: p.status === 'missed'
-            ? `Guard ${p.guardName || 'Unassigned'} did not start the ${p.zoneName} patrol on time.`
-            : `Route ${p.zoneName || 'Unknown'} is currently delayed.`,
-          icon: '/favicon.ico'
-        });
+      // Native Browser Notification safely wrapped
+      if (notificationPermission.value === 'granted' && typeof Notification !== 'undefined') {
+        try {
+          new Notification(`⚠️ Patrol ${p.status.toUpperCase()}: ${p.zoneName || 'Unknown Zone'}`, {
+            body: p.status === 'missed'
+              ? `Guard ${p.guardName || 'Unassigned'} did not start the ${p.zoneName} patrol on time.`
+              : `Route ${p.zoneName || 'Unknown'} is currently delayed.`,
+            icon: '/favicon.ico'
+          });
+        } catch (notifErr) {
+          console.warn('Native notification failed:', notifErr);
+        }
       }
       // Toast fallback
       toastMsg.value = `⚠️ ALERT: ${p.zoneName || 'Zone'} patrol was ${p.status}!`;
@@ -1038,33 +1094,25 @@ const statistics = computed(() => {
   };
 });
 
-function onZoneSelect(zone) {
-  // Toggle: clicking same zone deselects (shows all)
-  if (selectedZoneId.value === zone.id) {
-    selectedZoneId.value = null;
-  } else {
-    selectedZoneId.value = zone.id;
-  }
-}
+const selectedPairingSiteName = computed(() => {
+  const s = pairingSitesList.value.find(s => String(s.id) === String(selectedPairingSiteId.value));
+  return s ? (s.name || s.locName || 'Property Site') : 'Select Site';
+});
+
+const devicePairingCode = computed(() => {
+  const siteId = String(selectedPairingSiteId.value || '1').padStart(3, '0');
+  const dev = (pairingDeviceId.value || 'TAB01').replace(/[^a-zA-Z0-9]/g, '').slice(-4).toUpperCase();
+  return `AE-${siteId}-${dev}`;
+});
 
 const editPatrol = (patrol) => {
   editingPatrol.value = patrol;
 };
 
-const onEditSave = async ({ id, payload }) => {
-  try {
-    const updated = await patrolService.updatePatrol(id, payload);
-    // Merge back into local array
-    const idx = allPatrols.value.findIndex(p => p.id === id);
-    if (idx !== -1) {
-      allPatrols.value[idx] = { ...allPatrols.value[idx], ...payload, ...(updated || {}) };
-    }
-    editingPatrol.value = null;
-    toastMsg.value = 'Patrol updated successfully.';
-    setTimeout(() => { toastMsg.value = ''; }, 3000);
-  } catch (err) {
-    alert(`Failed to update patrol: ${err.message}`);
-  }
+const onEditSave = async () => {
+  editingPatrol.value = null;
+  toast.success('Patrol updated successfully');
+  await load();
 };
 
 const deletePatrol = (patrol) => {
@@ -1076,51 +1124,46 @@ const confirmDelete = async () => {
   if (!patrolToDelete.value) return;
   isDeleting.value = true;
   try {
-    const patrol = patrolToDelete.value;
-    // Delete associated tracking points, logs, and alerts first to avoid foreign key violations
-    try {
-      await authService.protectedApi.delete(`/items/tracking_points?filter[patrol_id][_eq]=${patrol.id}`);
-    } catch (e) { /* best-effort cleanup */ }
-    try {
-      await authService.protectedApi.delete(`/items/patrol_logs?filter[patrol_id][_eq]=${patrol.id}`);
-    } catch (e) { /* best-effort cleanup */ }
-    try {
-      await authService.protectedApi.delete(`/items/patrol_alerts?filter[patrol_id][_eq]=${patrol.id}`);
-    } catch (e) { /* best-effort cleanup */ }
-    
-    await patrolService.deletePatrol(patrol.id);
-    allPatrols.value = allPatrols.value.filter(p => p.id !== patrol.id);
-    toastMsg.value = `Patrol deleted successfully.`;
-    setTimeout(() => { toastMsg.value = ''; }, 3000);
-  } catch (err) {
-    alert(`Failed to delete patrol: ${err.message}`);
-  } finally {
-    isDeleting.value = false;
+    await patrolService.deletePatrol(patrolToDelete.value.id);
+    toast.success('Patrol deleted successfully');
     showDeleteModal.value = false;
     patrolToDelete.value = null;
+    await load();
+  } catch (err) {
+    console.error('Failed to delete patrol:', err);
+    toast.error(err?.message || 'Failed to delete patrol');
+  } finally {
+    isDeleting.value = false;
   }
 };
 
-async function load() {
+const load = async () => {
   try {
-    const [patrols, groups, alerts, todayLogs] = await Promise.all([
-      patrolService.getPatrols(),
-      patrolService.fetchCheckpointGroups(),
-      patrolService.getAlerts(),
-      patrolService.getTodayPatrolLogs()
+    const [patrolsData, logsList, alerts] = await Promise.all([
+      patrolService.getTodayPatrols(),
+      patrolService.getPatrolLogs(),
+      patrolService.getActiveAlerts()
     ]);
+    const todayPatrols = patrolsData || [];
     
-    const todayPatrols = patrols;
-    const logsList = Array.isArray(todayLogs) ? todayLogs : [];
-    
-    // Load checkpoints for today's patrols
+    // Group routes by zoneId and route/groupId
+    const groups = new Map();
+    const groupIds = [];
+    todayPatrols.forEach(p => {
+      const gId = typeof p.groupId === 'object' && p.groupId ? p.groupId.id : (p.groupId || 'nogroup');
+      if (gId && gId !== 'nogroup') groupIds.push(gId);
+      const groupKey = `${p.zoneId}-${gId}-${p.date || ''}`;
+      if (!groups.has(groupKey)) groups.set(groupKey, []);
+      groups.get(groupKey).push(p);
+    });
+
+    // Single batch query for all active route checkpoints (resolves N+1 query storm)
+    const allRouteCps = await patrolService.getCheckpointsForMultipleRoutes(groupIds);
+
     const cpMap = {};
-
-    await Promise.all(todayPatrols.map(async p => {
-      const gId = typeof p.groupId === 'object' && p.groupId ? p.groupId.id : p.groupId;
-      if (!gId) return;
-
-      const staticCps = await patrolService.getCheckpointsForRoute(gId);
+    todayPatrols.forEach((p) => {
+      const gId = typeof p.groupId === 'object' && p.groupId ? p.groupId.id : (p.groupId || null);
+      const staticCps = allRouteCps[gId] || [];
       
       // Checkpoint logs matching this patrol ID
       const patrolLogs = logsList.filter(l => String(l.patrol_id) === String(p.id));
@@ -1170,7 +1213,7 @@ async function load() {
       if (allScanned && p.status === 'active') {
         p.status = 'completed';
       }
-    }));
+    });
     
     // Batch reactive assignments synchronously at the end
     checkpointMap.value = cpMap;
@@ -1180,8 +1223,9 @@ async function load() {
     const dismissedIds = new Set(getDismissedAlertIds());
     activeAlerts.value = (alerts || []).filter(a => a && a.status !== 'resolved' && !dismissedIds.has(a.id));
   } catch (e) { console.error(e); }
-}
+};
 
+// Static metadata caches
 const fetchStaticMetadata = async () => {
   try {
     zones.value = await zoneService.fetchZones();
@@ -1192,20 +1236,11 @@ const fetchStaticMetadata = async () => {
     const token = authService.getToken();
     const tenantId = authService.getTenantId();
     const apiUrl = import.meta.env.VITE_API_URL;
-    
-    const roleRes = await fetch(`${apiUrl}/items/roleConfigurator?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][_and][1][accessType][_in]=patrol,accesseasy_patrol&filter[_and][0][_and][2][roleName][_contains]=guard&fields[]=id`, { headers: { Authorization: `Bearer ${token}` } });
-    let guardRoleId = null;
-    if (roleRes.ok) {
-      const roleData = await roleRes.json();
-      guardRoleId = roleData.data?.[0]?.id || null;
-    }
+    if (!token || !tenantId) return;
 
-    // Fetch users with that role
-    let filterStr = `filter[tenant][_eq]=${tenantId}`;
-    if (guardRoleId) filterStr += `&filter[_or][0][accesseasyPatrolRole][_eq]=${guardRoleId}&filter[_or][1][accesseasyRole][_eq]=${guardRoleId}`;
-
+    // Fetch tenant users directly without restricted roleConfigurator endpoint
     const res = await fetch(
-      `${apiUrl}/users?${filterStr}&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=phone&fields[]=status`,
+      `${apiUrl}/users?filter[tenant][_eq]=${tenantId}&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=phone&fields[]=status`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
     if (res.ok) {
@@ -1217,7 +1252,7 @@ const fetchStaticMetadata = async () => {
         status: u.status
       }));
     }
-  } catch (e) { console.error('Failed to fetch guards:', e); }
+  } catch (e) { /* graceful fallback */ }
 };
 
 const globalRouteCache = {};
@@ -1244,7 +1279,27 @@ onMounted(async () => {
   try {
     mqttService.connect();
     
-    // Handler for mobile GPS location updates
+    // Buffer for throttling high-frequency mobile GPS location updates (prevents UI thread thrashing)
+    const locBuffer = new Map();
+    let locFlushTimer = null;
+
+    const flushLocationBuffer = () => {
+      if (locBuffer.size === 0) return;
+      const updates = Array.from(locBuffer.values());
+      locBuffer.clear();
+
+      allPatrols.value.forEach(p => {
+        const pGuardId = String(p.guardId || p.guard || (typeof p.guard === 'object' ? p.guard.id : '') || '');
+        const pPatrolId = String(p.id || '');
+        const match = updates.find(u => (u.empId && pGuardId === u.empId) || (u.patrol_id && String(u.patrol_id) === pPatrolId));
+        if (match) {
+          p.currentLat = match.lat;
+          p.currentLng = match.lng;
+          p.last_seen = match.time;
+        }
+      });
+    };
+
     const handleLocationUpdate = (topic, payload) => {
       try {
         const rawStr = payload.toString();
@@ -1254,16 +1309,14 @@ onMounted(async () => {
         const lng = parseFloat(data.lng || data.longitude);
 
         if (!isNaN(lat) && !isNaN(lng)) {
-          // Update matching active patrol records in memory immediately
-          allPatrols.value.forEach(p => {
-            const pGuardId = String(p.guardId || p.guard || (typeof p.guard === 'object' ? p.guard.id : '') || '');
-            const pPatrolId = String(p.id || '');
-            if ((empId && pGuardId === empId) || (data.patrol_id && String(data.patrol_id) === pPatrolId)) {
-              p.currentLat = lat;
-              p.currentLng = lng;
-              p.last_seen = new Date().toISOString();
-            }
-          });
+          const key = empId || data.patrol_id || topic;
+          locBuffer.set(key, { empId, patrol_id: data.patrol_id, lat, lng, time: new Date().toISOString() });
+          if (!locFlushTimer) {
+            locFlushTimer = setTimeout(() => {
+              flushLocationBuffer();
+              locFlushTimer = null;
+            }, 500);
+          }
         }
       } catch (err) {
         // silent parse failure
@@ -1303,7 +1356,7 @@ onMounted(async () => {
     } finally {
       isPolling = false;
     }
-  }, 25000);
+  }, 15000);
 });
 
 onUnmounted(() => {

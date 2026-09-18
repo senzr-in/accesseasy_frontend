@@ -438,6 +438,7 @@ import { subscriptionService } from '@/services/subscriptionService';
 import { usePlanGuard } from '@/composables/usePlanGuard';
 import PlanLimitBanner from '@/components/common/PlanLimitBanner.vue';
 import UpgradeModal from '@/components/common/UpgradeModal.vue';
+import { toast } from '@/stores/useToastStore';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -636,7 +637,7 @@ const searchLocation = async () => {
         leafletMap.setView([lat, lng], 16);
       }
     } else {
-      alert(`Location "${locationSearchQuery.value}" not found. Try searching with city name.`);
+      toast.warning(`Location "${locationSearchQuery.value}" not found. Try searching with city name.`);
     }
   } catch (e) {
     isSearchingLocation.value = false;
@@ -838,18 +839,24 @@ const loadSites = async () => {
   }
 };
 
+const isCreatingSite = ref(false);
+
 const submitCreateSite = async () => {
+  isCreatingSite.value = true;
   try {
-    await siteService.createSite(newSiteForm.value);
+    const created = await siteService.createSite(newSiteForm.value);
     showCreateSiteModal.value = false;
+    toast.success(`Site "${created?.name || newSiteForm.value.name}" created successfully!`);
     await loadSites();
   } catch (error) {
     if (error.code === 'PLAN_LIMIT_EXCEEDED') {
       showCreateSiteModal.value = false;
       showUpgradeModal.value = true;
     } else {
-      alert(error.message || "Failed to create site.");
+      toast.error(error.message || "Failed to create site.");
     }
+  } finally {
+    isCreatingSite.value = false;
   }
 };
 

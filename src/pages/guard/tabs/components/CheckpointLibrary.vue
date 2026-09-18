@@ -18,6 +18,7 @@
               class="ae-input py-1 h-8 text-xs min-w-[110px] pr-8"
             >
               <option value="all">All Zones</option>
+              <option value="unassigned">⚠️ Unassigned Checkpoints ({{ unassignedCheckpointsCount }})</option>
               <option
                 v-for="zone in zones"
                 :key="zone.id"
@@ -50,6 +51,14 @@
             />
           </div>
           <button
+            class="h-8 px-3 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer shrink-0"
+            title="Print Badges for displayed checkpoints"
+            @click="printFilteredBadges"
+          >
+            <QrCode class="w-3.5 h-3.5 text-indigo-500" />
+            <span>Print ({{ filteredCheckpoints.length }})</span>
+          </button>
+          <button
             class="btn-primary text-xs flex items-center gap-1.5 h-8 px-3 shrink-0 whitespace-nowrap"
             @click="openCreateModal"
           >
@@ -62,11 +71,40 @@
 
     <!-- Main Table View -->
     <div class="flex-1 overflow-hidden flex flex-col min-h-0 relative">
-      <div
-        v-if="loading"
-        class="flex justify-center items-center h-full flex-1"
-      >
-        <Loader2 class="w-8 h-8 animate-spin text-indigo-650" />
+      <!-- Skeleton Table Shimmer (Instant perceived speed) -->
+      <div v-if="loading" class="flex-1 overflow-hidden p-6 animate-pulse">
+        <div class="space-y-4">
+          <div class="grid grid-cols-6 gap-4 pb-3 border-b border-slate-100 dark:border-slate-800">
+            <div class="h-3 bg-slate-200 dark:bg-slate-800 rounded col-span-2"></div>
+            <div class="h-3 bg-slate-200 dark:bg-slate-800 rounded"></div>
+            <div class="h-3 bg-slate-200 dark:bg-slate-800 rounded"></div>
+            <div class="h-3 bg-slate-200 dark:bg-slate-800 rounded"></div>
+            <div class="h-3 bg-slate-200 dark:bg-slate-800 rounded"></div>
+          </div>
+          <div v-for="i in 5" :key="i" class="grid grid-cols-6 gap-4 py-3.5 border-b border-slate-50 dark:border-slate-800/40 items-center">
+            <div class="col-span-2 space-y-2">
+              <div class="h-4 bg-slate-200 dark:bg-slate-800 rounded w-3/4"></div>
+              <div class="h-2.5 bg-slate-150 dark:bg-slate-850 rounded w-1/2"></div>
+            </div>
+            <div>
+              <div class="h-6 bg-slate-200 dark:bg-slate-800 rounded-xl w-24"></div>
+            </div>
+            <div class="space-y-1.5">
+              <div class="h-3 bg-slate-200 dark:bg-slate-800 rounded w-20"></div>
+              <div class="h-2.5 bg-slate-150 dark:bg-slate-850 rounded w-14"></div>
+            </div>
+            <div class="flex justify-center">
+              <div class="h-3 bg-slate-200 dark:bg-slate-800 rounded w-12"></div>
+            </div>
+            <div class="flex justify-center">
+              <div class="h-5 bg-slate-200 dark:bg-slate-800 rounded-full w-16"></div>
+            </div>
+            <div class="flex justify-end gap-2">
+              <div class="h-7 w-7 bg-slate-200 dark:bg-slate-800 rounded-lg"></div>
+              <div class="h-7 w-7 bg-slate-200 dark:bg-slate-800 rounded-lg"></div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div
@@ -138,6 +176,14 @@
               <!-- Actions (with QR, Edit, Delete) -->
               <td class="py-3.5 px-4 text-right">
                 <div class="flex items-center justify-end gap-2">
+                  <!-- Print Badge -->
+                  <button
+                    class="w-8 h-8 rounded-full border border-slate-200 dark:border-white/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-colors shadow-sm cursor-pointer"
+                    title="Print Checkpoint Badge"
+                    @click.stop="printSingleCheckpointBadge(cp)"
+                  >
+                    <QrCode class="w-3.5 h-3.5" />
+                  </button>
                   <!-- QR Download -->
                   <div class="flex items-center gap-1 group/qr cursor-pointer" @click.stop="downloadCheckpointQr(cp)" title="Download QR">
                     <img v-if="qrDataUrls[cp.id]" :src="qrDataUrls[cp.id]" class="w-6 h-6 bg-white p-0.5 rounded border" />
@@ -460,7 +506,7 @@ import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 import {
   Search, Plus, MapPin, Loader2, X, Trash2, Wifi, Clock,
-  ArrowRight, Download, Check, AlertCircle, Settings, Layers, Building2, Pencil, AlertTriangle
+  ArrowRight, Download, Check, AlertCircle, Settings, Layers, Building2, Pencil, AlertTriangle, QrCode
 } from 'lucide-vue-next';
 import QRCode from 'qrcode';
 import { patrolService } from '@/services/patrolService';
@@ -477,6 +523,13 @@ const selectedZoneFilter = ref('all');
 const kpiFilter = ref('all');
 const qrDataUrls = ref({});
 const clonedCheckpoints = ref([]);
+
+const unassignedCheckpointsCount = computed(() => {
+  return checkpoints.value.filter(c => {
+    const zId = typeof c.zone === 'object' && c.zone ? c.zone.id : c.zone;
+    return !zId;
+  }).length;
+});
 
 const getAssignedPatrolCount = (cp) => {
   return getLinkedPatrolNamesList(cp).length;
@@ -548,7 +601,16 @@ const filteredCheckpoints = computed(() => {
 const loadCheckpoints = async () => {
   loading.value = true;
   try {
-    const list = await patrolService.getMasterCheckpoints();
+    const tenantId = authService.getTenantId();
+    const [list, fetchedZones, fetchedGroups, clonedRes] = await Promise.all([
+      patrolService.getMasterCheckpoints(),
+      zoneService.fetchZones(),
+      patrolService.fetchCheckpointGroups(),
+      authService.protectedApi.get(
+        `/items/checkpoints?filter[tenant][_eq]=${tenantId}&filter[group_id][_nnull]=true&limit=500`
+      ).catch(() => ({ data: { data: [] } }))
+    ]);
+
     if (list) {
       list.forEach(cp => {
         const match = cp.instructions?.match(/__ZONE_ASSIGNMENT__:(\d+)/);
@@ -559,15 +621,8 @@ const loadCheckpoints = async () => {
       });
     }
     checkpoints.value = list || [];
-    
-    zones.value = await zoneService.fetchZones();
-    checkpointGroups.value = await patrolService.fetchCheckpointGroups();
-
-    // Fetch cloned checkpoints
-    const tenantId = authService.getTenantId();
-    const clonedRes = await authService.protectedApi.get(
-      `/items/checkpoints?filter[tenant][_eq]=${tenantId}&filter[group_id][_nnull]=true&limit=500`
-    );
+    zones.value = fetchedZones || [];
+    checkpointGroups.value = fetchedGroups || [];
     clonedCheckpoints.value = clonedRes.data?.data || [];
   } catch (err) {
     console.error('Failed to load checkpoints:', err);
@@ -750,6 +805,121 @@ const downloadCheckpointQr = async (cp) => {
   } catch (err) {
     console.error('QR download failed:', err);
   }
+};
+
+const printSingleCheckpointBadge = async (cp) => {
+  const tenantId = authService.getTenantId();
+  const rawString = `${cp.checkpoint_id}-${tenantId}-AccessEasy2026`;
+  const signature = btoa(unescape(encodeURIComponent(rawString))).replace(/=/g, '');
+  const qrData = `ACPT::${cp.checkpoint_id}::${signature}`;
+  try {
+    const qrDataUrl = await QRCode.toDataURL(qrData, {
+      width: 240, margin: 1, color: { dark: '#0F172A', light: '#FFFFFF' }
+    });
+
+    const html = `
+    <html>
+      <head>
+        <title>Badge - ${cp.name}</title>
+        <style>
+          * { box-sizing: border-box; margin: 0; padding: 0; }
+          body { font-family: monospace, system-ui, sans-serif; background: #fff; color: #000; padding: 40px; display: flex; justify-content: center; }
+          .card { width: 68mm; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 14px; border: 2px dashed #0F172A; border-radius: 12px; }
+          .brand { font-size: 15px; font-weight: 900; text-transform: uppercase; border-bottom: 1px dashed #000; width: 100%; padding-bottom: 6px; margin-bottom: 12px; }
+          .qr { width: 50mm; height: 50mm; margin-bottom: 10px; }
+          .name { font-size: 16px; font-weight: bold; margin-bottom: 4px; }
+          .id { font-size: 12px; font-family: monospace; margin-bottom: 10px; color: #334155; }
+          .meta { width: 100%; display: flex; justify-content: space-between; border-top: 1px dashed #000; padding-top: 8px; margin-top: 4px; }
+          .meta-item { display: flex; flex-direction: column; text-align: center; width: 50%; }
+          .meta-item label { font-size: 9px; text-transform: uppercase; color: #64748B; }
+          .meta-item span { font-weight: bold; font-size: 12px; }
+          @media print { body { padding: 0; } .card { border: 1px solid #000; } }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <div class="brand">AccessEasy<div style="font-size:10px;font-weight:normal;margin-top:2px;">Checkpoint Badge</div></div>
+          <img src="${qrDataUrl}" class="qr" />
+          <div class="name">${cp.name}</div>
+          <div class="id">${cp.checkpoint_id}</div>
+          <div class="meta">
+            <div class="meta-item"><label>Zone</label><span>${getZoneName(cp.zone)}</span></div>
+            <div class="meta-item"><label>Floor</label><span>${cp.floor || 'Ground'}</span></div>
+          </div>
+        </div>
+        <script>window.onload = () => { setTimeout(() => { window.print(); window.close(); }, 500); };<\/script>
+      </body>
+    </html>`;
+
+    const win = window.open('', '_blank');
+    win.document.write(html);
+    win.document.close();
+  } catch (err) {
+    console.error('Failed to print badge:', err);
+  }
+};
+
+const printFilteredBadges = async () => {
+  const list = filteredCheckpoints.value || [];
+  if (list.length === 0) return;
+  const tenantId = authService.getTenantId();
+  let htmlContent = '';
+
+  for (const cp of list) {
+    const rawString = `${cp.checkpoint_id}-${tenantId}-AccessEasy2026`;
+    const signature = btoa(unescape(encodeURIComponent(rawString))).replace(/=/g, '');
+    const qrData = `ACPT::${cp.checkpoint_id}::${signature}`;
+    let qrDataUrl = '';
+    try {
+      qrDataUrl = await QRCode.toDataURL(qrData, {
+        width: 200, margin: 1, color: { dark: '#0F172A', light: '#FFFFFF' }
+      });
+    } catch {}
+
+    htmlContent += `
+    <div class="card">
+      <div class="brand">AccessEasy<div style="font-size:10px;font-weight:normal;margin-top:2px;">Checkpoint Badge</div></div>
+      ${qrDataUrl ? `<img src="${qrDataUrl}" class="qr" />` : ''}
+      <div class="name">${cp.name}</div>
+      <div class="id">${cp.checkpoint_id}</div>
+      <div class="meta">
+        <div class="meta-item"><label>Zone</label><span>${getZoneName(cp.zone)}</span></div>
+        <div class="meta-item"><label>Floor</label><span>${cp.floor || '—'}</span></div>
+      </div>
+    </div>`;
+  }
+
+  const html = `
+  <html>
+    <head>
+      <title>Checkpoints Batch Print (${list.length})</title>
+      <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: monospace, system-ui, sans-serif; background: #fff; color: #000; padding: 20px; display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
+        .card { width: 58mm; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 10px; border: 1px dashed #ccc; page-break-inside: avoid; margin-bottom: 20px; }
+        .brand { font-size: 14px; font-weight: 800; text-transform: uppercase; border-bottom: 1px dashed #000; width: 100%; padding-bottom: 4px; margin-bottom: 8px; }
+        .qr { width: 45mm; height: 45mm; margin-bottom: 8px; }
+        .name { font-size: 16px; font-weight: bold; margin-bottom: 4px; }
+        .id { font-size: 11px; margin-bottom: 8px; }
+        .meta { width: 100%; display: flex; justify-content: space-between; border-top: 1px dashed #000; padding-top: 8px; margin-bottom: 8px; }
+        .meta-item { display: flex; flex-direction: column; text-align: center; width: 50%; }
+        .meta-item label { font-size: 10px; text-transform: uppercase; }
+        .meta-item span { font-weight: bold; font-size: 12px; }
+        @media print { 
+          body { padding: 0; display: block; }
+          .card { float: left; margin: 10px; border: 1px solid #eee; }
+        }
+      </style>
+    </head>
+    <body>
+      ${htmlContent}
+      <script>window.onload = () => { setTimeout(() => { window.print(); window.close(); }, 500); };<\/script>
+    </body>
+  </html>`;
+
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
 };
 
 // Generate QR Code Preview on canvas

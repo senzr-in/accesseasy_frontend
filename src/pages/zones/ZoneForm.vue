@@ -98,6 +98,7 @@ import { ref, computed, onMounted, watch } from "vue";
 import { zoneService } from "@/services/zoneService";
 import { siteService } from "@/services/siteService";
 import UpgradeModal from "@/components/common/UpgradeModal.vue";
+import { toast } from "@/stores/useToastStore";
 
 const props = defineProps({
   isEditing: {
@@ -185,8 +186,10 @@ const handleSubmit = async () => {
 
     if (props.isEditing) {
       await zoneService.updateZone(props.zoneData.id, payload);
+      toast.success(`Zone "${formData.value.zoneName}" updated successfully`);
     } else {
       await zoneService.createZone(payload);
+      toast.success(`Zone "${formData.value.zoneName}" created successfully`);
     }
 
     emit("save-success");
@@ -196,7 +199,7 @@ const handleSubmit = async () => {
       upgradeMsg.value = error.message;
       showUpgradeModal.value = true;
     } else {
-      alert(error.message || `Error ${props.isEditing ? "updating" : "creating"} zone`);
+      toast.error(error.message || `Error ${props.isEditing ? "updating" : "creating"} zone`);
     }
   } finally {
     loading.value = false;

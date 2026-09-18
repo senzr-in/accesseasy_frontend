@@ -113,7 +113,7 @@ class AttendanceService {
       } else {
         try {
           const usersUrl = tenantId 
-            ? `/users?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][id][_eq]=${tenantId}&limit=500&fields=id,first_name,last_name,email,phone,avatar`
+            ? `/users?filter[tenant][_eq]=${tenantId}&limit=500&fields=id,first_name,last_name,email,phone,avatar`
             : `/users?limit=500&fields=id,first_name,last_name,email,phone,avatar`;
           const usersRes = await authService.protectedApi.get(usersUrl);
           if (usersRes.data?.data) {
@@ -154,7 +154,7 @@ class AttendanceService {
       } else {
         try {
           const pmUrl = tenantId
-            ? `/items/personalModule?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][id][_eq]=${tenantId}&limit=500&fields=id,employeeId,assignedUser.id,assignedUser.first_name,assignedUser.last_name,assignedUser.phone,assignedUser.email`
+            ? `/items/personalModule?filter[tenant][_eq]=${tenantId}&limit=500&fields=id,employeeId,assignedUser.id,assignedUser.first_name,assignedUser.last_name,assignedUser.phone,assignedUser.email`
             : `/items/personalModule?limit=500&fields=id,employeeId,assignedUser.id,assignedUser.first_name,assignedUser.last_name,assignedUser.phone,assignedUser.email`;
           const pmRes = await authService.protectedApi.get(pmUrl);
           if (pmRes.data?.data) {
@@ -177,7 +177,7 @@ class AttendanceService {
       try {
         let url = `/items/guard_attendance?sort=-check_in_time&limit=100&fields=*`;
         if (tenantId) {
-          url = `/items/guard_attendance?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][id][_eq]=${tenantId}&sort=-check_in_time&limit=100&fields=*`;
+          url = `/items/guard_attendance?filter[tenant][_eq]=${tenantId}&sort=-check_in_time&limit=100&fields=*`;
         }
         if (siteId && siteId !== 'all') {
           url += `&filter[site][_eq]=${siteId}`;
@@ -299,7 +299,7 @@ class AttendanceService {
       try {
         let url = `/items/logs?sort=-date_created&limit=200&fields=*`;
         if (tenantId) {
-          url = `/items/logs?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][id][_eq]=${tenantId}&sort=-date_created&limit=200&fields=*`;
+          url = `/items/logs?filter[tenant][_eq]=${tenantId}&sort=-date_created&limit=200&fields=*`;
         }
         const res = await authService.protectedApi.get(url, { timeout: 15000 });
         if (res.data?.data && Array.isArray(res.data.data)) {

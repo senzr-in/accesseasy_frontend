@@ -3,13 +3,21 @@
     <div class="max-w-[1400px] mx-auto w-full p-6 flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500 min-h-[calc(100vh-80px)]">
       
       <!-- Header -->
-      <div class="flex items-start gap-4 shrink-0">
-        <div class="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center shrink-0 border border-indigo-100 dark:border-indigo-500/20 shadow-inner">
-          <HistoryIcon class="w-7 h-7 text-indigo-600 dark:text-indigo-400" />
+      <div class="flex items-center gap-4 shrink-0">
+        <button
+          type="button"
+          class="flex items-center justify-center w-10 h-10 rounded-xl border border-slate-200 dark:border-white/10 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:text-slate-200 bg-white dark:bg-white/5 hover:bg-slate-50 dark:hover:bg-white/10 transition-colors shrink-0 cursor-pointer shadow-xs"
+          @click="$router.push('/dashboard/patrols')"
+          title="Back to Patrols"
+        >
+          <ArrowLeft class="w-4 h-4" />
+        </button>
+        <div class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center shrink-0 border border-indigo-100 dark:border-indigo-500/20 shadow-inner">
+          <HistoryIcon class="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
         </div>
-        <div class="pt-1">
+        <div>
           <h1 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Patrol History</h1>
-          <p class="text-sm font-semibold text-slate-500 dark:text-slate-400 mt-1">Review all completed and missed patrol rounds across your zones.</p>
+          <p class="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400 mt-0.5">Review all completed and missed patrol rounds across your zones.</p>
         </div>
       </div>
 
@@ -145,7 +153,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
-import { ChevronRight, History as HistoryIcon, AlertTriangle, CheckCheck, Clock, MapPin, Loader2 } from 'lucide-vue-next';
+import { ChevronRight, History as HistoryIcon, AlertTriangle, CheckCheck, Clock, MapPin, Loader2, ArrowLeft } from 'lucide-vue-next';
 import { patrolService } from '@/services/patrolService';
 
 const isMounted = ref(false);

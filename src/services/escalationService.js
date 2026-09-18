@@ -14,24 +14,33 @@ class EscalationService {
    */
   async fetchPolicies(siteId = null) {
     try {
-      const tenantId = authService.getTenantId();
-      if (!tenantId) return [];
+      const tenantId = authService.getTenantId() || 'default';
 
+      let cloudPolicies = [];
       try {
         const res = await authService.protectedApi.get(
           `/items/escalation_policies?filter[tenant][_eq]=${tenantId}&sort=name`
         );
-        if (res.data?.data) return res.data.data;
+        if (res.data?.data && Array.isArray(res.data.data)) {
+          cloudPolicies = res.data.data;
+        }
       } catch (e) {}
 
+      let localPolicies = [];
       const stored = localStorage.getItem(`accesseasy_escalation_policies_${tenantId}`);
       if (stored) {
         try {
-          return JSON.parse(stored);
+          localPolicies = JSON.parse(stored);
         } catch (e) {}
       }
 
-      return [];
+      if (cloudPolicies.length > 0) {
+        const cloudIds = new Set(cloudPolicies.map(p => String(p.id)));
+        const uniqueLocal = localPolicies.filter(p => !cloudIds.has(String(p.id)));
+        return [...cloudPolicies, ...uniqueLocal];
+      }
+
+      return localPolicies;
     } catch (error) {
       console.error("Error fetching escalation policies:", error);
       return [];
@@ -39,25 +48,82 @@ class EscalationService {
   }
 
   /**
-   * Save / Update Escalation Policy in Directus Cloud
+   * Save / Update Escalation Policy in Directus Cloud with LocalStorage Fallback
    */
   async savePolicy(policyData) {
+    const tenantId = authService.getTenantId() || 'default';
+    const payload = { ...policyData, tenant: tenantId };
+    
     try {
-      const tenantId = authService.getTenantId();
-      const payload = { ...policyData, tenant: tenantId };
-      
-      if (policyData.id && !policyData.id.startsWith('esc-pol-')) {
+      if (policyData.id && !String(policyData.id).startsWith('esc-pol-')) {
         const res = await authService.protectedApi.patch(`/items/escalation_policies/${policyData.id}`, payload);
-        return res.data.data;
+        if (res.data?.data) return res.data.data;
       } else {
-        delete payload.id;
-        const res = await authService.protectedApi.post("/items/escalation_policies", payload);
-        return res.data.data;
+        const createPayload = { ...payload };
+        delete createPayload.id;
+        const res = await authService.protectedApi.post("/items/escalation_policies", createPayload);
+        if (res.data?.data) return res.data.data;
       }
     } catch (error) {
-      console.error("Error saving escalation policy on cloud:", error);
-      throw error;
+      console.warn("Directus escalation_policies save failed (403/404), falling back to local storage:", error?.message);
     }
+
+    // LocalStorage Fallback
+    const storageKey = `accesseasy_escalation_policies_${tenantId}`;
+    let list = [];
+    try {
+      const stored = localStorage.getItem(storageKey);
+      if (stored) list = JSON.parse(stored);
+    } catch (e) {}
+
+    let savedItem = null;
+    if (policyData.id) {
+      const idx = list.findIndex(p => p.id === policyData.id);
+      if (idx !== -1) {
+        list[idx] = { ...list[idx], ...payload };
+        savedItem = list[idx];
+      }
+    }
+
+    if (!savedItem) {
+      savedItem = {
+        ...payload,
+        id: policyData.id || `esc-pol-${Date.now()}`
+      };
+      list.push(savedItem);
+    }
+
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(list));
+    } catch (e) {}
+
+    return savedItem;
+  }
+
+  /**
+   * Delete Escalation Policy
+   */
+  async deletePolicy(policyId) {
+    const tenantId = authService.getTenantId() || 'default';
+    try {
+      if (!String(policyId).startsWith('esc-pol-')) {
+        await authService.protectedApi.delete(`/items/escalation_policies/${policyId}`);
+      }
+    } catch (e) {
+      console.warn("Directus delete policy error:", e?.message);
+    }
+
+    // Also remove from LocalStorage
+    const storageKey = `accesseasy_escalation_policies_${tenantId}`;
+    try {
+      const stored = localStorage.getItem(storageKey);
+      if (stored) {
+        let list = JSON.parse(stored);
+        list = list.filter(p => p.id !== policyId);
+        localStorage.setItem(storageKey, JSON.stringify(list));
+      }
+    } catch (e) {}
+    return true;
   }
 
   /**

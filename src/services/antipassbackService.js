@@ -9,7 +9,7 @@ class AntipassbackService {
     try {
       const tenantId = authService.getTenantId();
       const response = await authService.protectedApi.get(
-        `/items/doors?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}`
+        `/items/doors?filter[tenant][_eq]=${tenantId}`
       );
       return response.data.data;
     } catch (error) {

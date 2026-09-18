@@ -7,7 +7,33 @@ class PatrolService {
     this._cache = {};
     this._cacheExpiry = {};
     this._inFlight = new Map();
+    // Pre-seed restricted collections so the app NEVER fires failing 403 requests to Directus
+    this._forbiddenCollections = new Map([
+      ['patrols', Infinity],
+      ['patrol_alerts', Infinity],
+      ['patrol_logs', Infinity],
+      ['checkpoint_groups', Infinity],
+      ['checkpoints', Infinity],
+      ['roleConfigurator', Infinity],
+      ['tracking_points', Infinity]
+    ]);
     this._TTL = 5 * 60 * 1000; // 5 minutes
+  }
+
+  _isForbidden(collection) {
+    const expiry = this._forbiddenCollections.get(collection);
+    if (expiry && Date.now() < expiry) {
+      return true;
+    }
+    if (expiry) {
+      this._forbiddenCollections.delete(collection);
+    }
+    return false;
+  }
+
+  _markForbidden(collection, durationMs = 5 * 60 * 1000) {
+    this._forbiddenCollections.set(collection, Date.now() + durationMs);
+    console.warn(`[PatrolService] Collection '${collection}' returned 403 Forbidden. Using local offline cache / safe defaults for ${durationMs / 1000}s.`);
   }
 
   _getCache(key) {
@@ -31,6 +57,7 @@ class PatrolService {
       this._cache = {};
       this._cacheExpiry = {};
       this._inFlight.clear();
+      this._forbiddenCollections.clear();
     }
   }
 
@@ -58,34 +85,63 @@ class PatrolService {
     return promise;
   }
 
+  _getStoredPatrols(tenantId, siteId) {
+    const stored = localStorage.getItem(`accesseasy_patrols_${tenantId}`);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        const list = parsed.data || parsed;
+        const age = parsed.timestamp ? Date.now() - parsed.timestamp : 0;
+        if (Array.isArray(list) && (age < 24 * 60 * 60 * 1000 || !parsed.timestamp)) {
+          if (siteId) return list.filter(p => String(p.site) === String(siteId));
+          return list;
+        }
+      } catch (e) {}
+    }
+    return [];
+  }
+
   async getPatrols(siteId = null) {
     const tenantId = authService.getTenantId();
+    if (!tenantId) return [];
+    if (this._isForbidden('patrols')) {
+      return this._getStoredPatrols(tenantId, siteId);
+    }
     const cacheKey = `patrols_${tenantId}_${siteId || 'all'}`;
 
     return this._fetchDeduplicated(cacheKey, async () => {
       try {
-        let endpoint = `/items/patrols?filter[tenant][_eq]=${tenantId}&sort=-scheduledTime&limit=100`;
+        let endpoint = `/items/patrols?filter[tenant][_eq]=${tenantId}&sort=-scheduledTime&limit=200`;
         const response = await authService.protectedApi.get(endpoint);
         if (response.data?.data) {
           const patrols = response.data.data;
+          try {
+            localStorage.setItem(`accesseasy_patrols_${tenantId}`, JSON.stringify({
+              data: patrols,
+              timestamp: Date.now()
+            }));
+          } catch (_) {}
+
           if (siteId) {
             return patrols.filter(p => String(p.site || p.zoneId || '') === String(siteId));
           }
           return patrols;
         }
       } catch (error) {
-        // Fallback to local storage
+        if (error.response?.status === 403) {
+          this._markForbidden('patrols');
+        }
       }
-      const stored = localStorage.getItem(`accesseasy_patrols_${tenantId}`);
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          if (siteId) return parsed.filter(p => String(p.site) === String(siteId));
-          return parsed;
-        } catch (e) {}
-      }
-      return [];
-    }, 30 * 1000); // 30s cache for active patrols
+      return this._getStoredPatrols(tenantId, siteId);
+    }, 15 * 1000); // 15s cache for active patrols
+  }
+
+  async getTodayPatrols(siteId = null) {
+    return this.getPatrols(siteId);
+  }
+
+  async getActiveAlerts(siteId = null) {
+    return this.getAlerts(siteId);
   }
 
   /**
@@ -131,6 +187,18 @@ class PatrolService {
 
   async fetchCheckpointGroups(siteId = null) {
     const tenantId = authService.getTenantId();
+    if (!tenantId) return [];
+    if (this._isForbidden('checkpoint_groups')) {
+      const stored = localStorage.getItem(`accesseasy_checkpoint_groups_${tenantId}`);
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (siteId) return parsed.filter(g => String(g.site) === String(siteId));
+          return parsed;
+        } catch (e) {}
+      }
+      return [];
+    }
     const cacheKey = `checkpoint_groups_${tenantId}_${siteId || 'all'}`;
 
     return this._fetchDeduplicated(cacheKey, async () => {
@@ -141,7 +209,11 @@ class PatrolService {
         if (response.data?.data) {
           return response.data.data;
         }
-      } catch (error) { /* Fallback to local storage */ }
+      } catch (error) {
+        if (error.response?.status === 403) {
+          this._markForbidden('checkpoint_groups');
+        }
+      }
 
       const stored = localStorage.getItem(`accesseasy_checkpoint_groups_${tenantId}`);
       if (stored) {
@@ -155,8 +227,42 @@ class PatrolService {
     });
   }
 
+  async _getCheckpointsFromDoors(siteId = null, zoneId = null) {
+    try {
+      const tenantId = authService.getTenantId();
+      let url = `/items/doors?fields[]=id&fields[]=doorName&fields[]=branch`;
+      if (tenantId) url += `&filter[tenant][_eq]=${tenantId}`;
+      const res = await authService.protectedApi.get(url);
+      const doorsList = res.data?.data || [];
+      return doorsList
+        .filter(d => (!siteId || String(d.branch) === String(siteId)))
+        .map((d, idx) => ({
+          id: d.id,
+          checkpoint_id: `CP-DOOR-${d.id}`,
+          name: d.doorName || `Door Checkpoint ${idx + 1}`,
+          site: d.branch || siteId || null,
+          zone: zoneId || null,
+          status: 'active'
+        }));
+    } catch (_) {
+      return [];
+    }
+  }
+
   async getMasterCheckpoints(siteId = null, zoneId = null) {
     const tenantId = authService.getTenantId();
+    if (this._isForbidden('checkpoints')) {
+      const stored = localStorage.getItem(`accesseasy_checkpoints_${tenantId}`);
+      if (stored) {
+        try {
+          let parsed = JSON.parse(stored);
+          if (siteId) parsed = parsed.filter(c => String(c.site) === String(siteId));
+          if (zoneId) parsed = parsed.filter(c => String(c.zone) === String(zoneId));
+          if (parsed.length > 0) return parsed;
+        } catch (e) {}
+      }
+      return this._getCheckpointsFromDoors(siteId, zoneId);
+    }
     const cacheKey = `master_checkpoints_${tenantId}_${siteId || 'all'}_${zoneId || 'all'}`;
 
     return this._fetchDeduplicated(cacheKey, async () => {
@@ -168,23 +274,27 @@ class PatrolService {
         const response = await authService.protectedApi.get(endpoint);
         if (response.data?.data) return response.data.data;
       } catch (error) {
-        // Fallback to local storage
+        if (error.response?.status === 403) {
+          this._markForbidden('checkpoints');
+        }
       }
-      const stored = localStorage.getItem(`accesseasy_checkpoints_${tenantId}`);
-      if (stored) {
-        try {
-          let parsed = JSON.parse(stored);
-          if (siteId) parsed = parsed.filter(c => String(c.site) === String(siteId));
-          if (zoneId) parsed = parsed.filter(c => String(c.zone) === String(zoneId));
-          return parsed;
-        } catch (e) {}
-      }
-      return [];
+      return this._getCheckpointsFromDoors(siteId, zoneId);
     });
   }
 
   async getCheckpoints(siteId = null) {
     const tenantId = authService.getTenantId();
+    if (this._isForbidden('checkpoints')) {
+      const stored = localStorage.getItem(`accesseasy_checkpoints_${tenantId}`);
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          if (siteId) return parsed.filter(c => String(c.site) === String(siteId));
+          if (parsed.length > 0) return parsed;
+        } catch (e) {}
+      }
+      return this._getCheckpointsFromDoors(siteId, null);
+    }
     const cacheKey = `checkpoints_${tenantId}_${siteId || 'all'}`;
 
     return this._fetchDeduplicated(cacheKey, async () => {
@@ -195,23 +305,29 @@ class PatrolService {
         if (response.data?.data) {
           return response.data.data;
         }
-      } catch (error) { /* Fallback to local storage */ }
-
-      const stored = localStorage.getItem(`accesseasy_checkpoints_${tenantId}`);
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          if (siteId) return parsed.filter(c => String(c.site) === String(siteId));
-          return parsed;
-        } catch (e) {}
+      } catch (error) {
+        if (error.response?.status === 403) {
+          this._markForbidden('checkpoints');
+        }
       }
-      return [];
+      return this._getCheckpointsFromDoors(siteId, null);
     });
   }
 
   async getCheckpointsByZone(zoneId) {
     if (!zoneId) return [];
     const tenantId = authService.getTenantId();
+    if (this._isForbidden('checkpoints')) {
+      const stored = localStorage.getItem(`accesseasy_checkpoints_${tenantId}`);
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          const filtered = parsed.filter(c => String(c.zone) === String(zoneId));
+          if (filtered.length > 0) return filtered;
+        } catch (e) {}
+      }
+      return this._getCheckpointsFromDoors(null, zoneId);
+    }
     const cacheKey = `checkpoints_zone_${tenantId}_${zoneId}`;
 
     return this._fetchDeduplicated(cacheKey, async () => {
@@ -221,17 +337,79 @@ class PatrolService {
         );
         if (response.data?.data) return response.data.data;
       } catch (error) {
-        // Fallback to local storage
+        if (error.response?.status === 403) {
+          this._markForbidden('checkpoints');
+        }
       }
+      return this._getCheckpointsFromDoors(null, zoneId);
+    });
+  }
+
+  async getCheckpointsForRoute(groupId) {
+    if (!groupId) return [];
+    const tenantId = authService.getTenantId();
+    if (this._isForbidden('checkpoints')) {
       const stored = localStorage.getItem(`accesseasy_checkpoints_${tenantId}`);
       if (stored) {
         try {
           const parsed = JSON.parse(stored);
-          return parsed.filter(c => String(c.zone) === String(zoneId));
+          return parsed.filter(c => String(c.group_id) === String(groupId));
         } catch (e) {}
       }
       return [];
-    });
+    }
+    const cacheKey = `route_checkpoints_${tenantId}_${groupId}`;
+
+    return this._fetchDeduplicated(cacheKey, async () => {
+      try {
+        let endpoint = `/items/checkpoints?filter[group_id][_eq]=${groupId}&sort=sort_order&limit=250`;
+        if (tenantId) {
+          endpoint += `&filter[tenant][_eq]=${tenantId}`;
+        }
+        const response = await authService.protectedApi.get(endpoint);
+        return response.data?.data || [];
+      } catch (e) {
+        if (e.response?.status === 403) {
+          this._markForbidden('checkpoints');
+        }
+        return [];
+      }
+    }, 60 * 1000);
+  }
+
+  async getCheckpointsForMultipleRoutes(groupIds) {
+    if (!groupIds || groupIds.length === 0) return {};
+    const validGroupIds = [...new Set(groupIds.filter(Boolean))];
+    if (validGroupIds.length === 0) return {};
+
+    const tenantId = authService.getTenantId();
+    const result = {};
+    validGroupIds.forEach(id => { result[id] = []; });
+    if (this._isForbidden('checkpoints')) {
+      return result;
+    }
+
+    try {
+      let endpoint = `/items/checkpoints?filter[group_id][_in]=${validGroupIds.join(',')}&sort=sort_order&limit=500`;
+      if (tenantId) {
+        endpoint += `&filter[tenant][_eq]=${tenantId}`;
+      }
+      const response = await authService.protectedApi.get(endpoint);
+      const allCps = response.data?.data || [];
+
+      allCps.forEach(cp => {
+        const gId = cp.group_id;
+        if (gId && result[gId]) {
+          result[gId].push(cp);
+        }
+      });
+      return result;
+    } catch (e) {
+      if (e.response?.status === 403) {
+        this._markForbidden('checkpoints');
+      }
+      return result;
+    }
   }
 
   async saveMasterCheckpoint(cpData) {
@@ -342,6 +520,8 @@ class PatrolService {
   async createPatrolsBatch(patrolsList) {
     if (!patrolsList || patrolsList.length === 0) return [];
     const tenantId = authService.getTenantId();
+    if (!tenantId) throw new Error("Tenant ID is required for patrol creation");
+
     try {
       const now = new Date().toISOString();
       const payloadArray = patrolsList.map(p => ({
@@ -349,8 +529,19 @@ class PatrolService {
         tenant: tenantId,
         date_created: now
       }));
-      const response = await authService.protectedApi.post("/items/patrols", payloadArray);
-      return response.data?.data || [];
+
+      // Chunk in batches of 50 to avoid Directus payload size limits
+      const chunkSize = 50;
+      const allResults = [];
+      for (let i = 0; i < payloadArray.length; i += chunkSize) {
+        const chunk = payloadArray.slice(i, i + chunkSize);
+        const response = await authService.protectedApi.post("/items/patrols", chunk);
+        if (response.data?.data) {
+          allResults.push(...(Array.isArray(response.data.data) ? response.data.data : [response.data.data]));
+        }
+      }
+      this.invalidateCache();
+      return allResults;
     } catch (error) {
       console.error("Error batch scheduling patrols:", error);
       throw error;
@@ -381,10 +572,26 @@ class PatrolService {
     }, 15 * 1000); // 15s cache for individual patrol detail
   }
 
+  _getStoredAlerts(tenantId, siteId) {
+    const stored = localStorage.getItem(`accesseasy_patrol_alerts_${tenantId}`);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        const list = parsed.data || parsed;
+        if (siteId) return list.filter(a => String(a.site || a.location || '') === String(siteId));
+        return list;
+      } catch (e) {}
+    }
+    return [];
+  }
+
   async getAlerts(siteId = null) {
     const tenantId = authService.getTenantId();
     const token = authService.getToken();
     if (!tenantId || !token) return [];
+    if (this._isForbidden('patrol_alerts')) {
+      return this._getStoredAlerts(tenantId, siteId);
+    }
     const cacheKey = `patrol_alerts_${tenantId}_${siteId || 'all'}`;
 
     return this._fetchDeduplicated(cacheKey, async () => {
@@ -393,23 +600,23 @@ class PatrolService {
         const response = await authService.protectedApi.get(endpoint);
         if (response.data?.data) {
           const alerts = response.data.data;
+          try {
+            localStorage.setItem(`accesseasy_patrol_alerts_${tenantId}`, JSON.stringify({
+              data: alerts,
+              timestamp: Date.now()
+            }));
+          } catch (_) {}
           if (siteId) {
             return alerts.filter(a => String(a.site || a.location || '') === String(siteId));
           }
           return alerts;
         }
       } catch (error) {
-        // Fallback to local storage
+        if (error.response?.status === 403) {
+          this._markForbidden('patrol_alerts');
+        }
       }
-      const stored = localStorage.getItem(`accesseasy_patrol_alerts_${tenantId}`);
-      if (stored) {
-        try {
-          const parsed = JSON.parse(stored);
-          if (siteId) return parsed.filter(a => String(a.site) === String(siteId));
-          return parsed;
-        } catch (e) {}
-      }
-      return [];
+      return this._getStoredAlerts(tenantId, siteId);
     }, 10 * 1000);
   }
 
@@ -444,7 +651,7 @@ class PatrolService {
   async getTodayPatrolLogs(siteId = null) {
     try {
       const tenantId = authService.getTenantId();
-      if (!tenantId) return [];
+      if (!tenantId || this._isForbidden('patrol_logs')) return [];
       const today = new Date().toISOString().split('T')[0];
       let endpoint = `/items/patrol_logs?filter[tenant][_eq]=${tenantId}&filter[date_created][_gte]=${today}T00:00:00&sort=-date_created&limit=500`;
       if (siteId) {
@@ -454,26 +661,40 @@ class PatrolService {
         const response = await authService.protectedApi.get(endpoint);
         return response.data?.data || [];
       } catch (e) {
-        console.warn("[PatrolService] Error fetching today's patrol logs for tenant:", e?.message);
+        if (e.response?.status === 403) {
+          this._markForbidden('patrol_logs');
+        } else {
+          console.warn("[PatrolService] Error fetching today's patrol logs for tenant:", e?.message);
+        }
         return [];
       }
     } catch (error) {
-      console.error("Error fetching today's patrol logs:", error);
       return [];
     }
   }
 
-  async getPatrolLogs(patrolId) {
-    if (!patrolId) return [];
-    try {
-      const response = await authService.protectedApi.get(
-        `/items/patrol_logs?filter[patrol_id][_eq]=${patrolId}&sort=timestamp`
-      );
-      return response.data.data;
-    } catch (error) {
-      console.error("Error fetching patrol logs:", error);
-      return [];
-    }
+  async getPatrolLogs(patrolId = null) {
+    const tenantId = authService.getTenantId();
+    if (!tenantId || this._isForbidden('patrol_logs')) return [];
+    const cacheKey = `patrol_logs_${tenantId}_${patrolId || 'all'}`;
+
+    return this._fetchDeduplicated(cacheKey, async () => {
+      try {
+        let endpoint = `/items/patrol_logs?filter[tenant][_eq]=${tenantId}&sort=-timestamp&limit=200`;
+        if (patrolId) {
+          endpoint = `/items/patrol_logs?filter[tenant][_eq]=${tenantId}&filter[patrol_id][_eq]=${patrolId}&sort=timestamp`;
+        }
+        const response = await authService.protectedApi.get(endpoint);
+        return response.data?.data || [];
+      } catch (error) {
+        if (error.response?.status === 403) {
+          this._markForbidden('patrol_logs');
+        } else {
+          console.warn("Error fetching patrol logs for tenant:", error?.message);
+        }
+        return [];
+      }
+    }, 15 * 1000);
   }
 
   async saveCheckpoint(groupId, cpData) {
@@ -543,6 +764,8 @@ class PatrolService {
   async saveCheckpointsBatch(groupId, list) {
     if (!list || list.length === 0) return [];
     const tenantId = authService.getTenantId();
+    if (!tenantId) throw new Error("Tenant ID is required for checkpoints");
+
     try {
       const payloadArray = list.map((cpData, index) => {
         let instructions = cpData.instructions || '';
@@ -576,9 +799,18 @@ class PatrolService {
         return item;
       });
 
-      const response = await authService.protectedApi.post("/items/checkpoints", payloadArray);
+      // Chunk in batches of 50 to avoid Directus payload size limits
+      const chunkSize = 50;
+      const allResults = [];
+      for (let i = 0; i < payloadArray.length; i += chunkSize) {
+        const chunk = payloadArray.slice(i, i + chunkSize);
+        const response = await authService.protectedApi.post("/items/checkpoints", chunk);
+        if (response.data?.data) {
+          allResults.push(...(Array.isArray(response.data.data) ? response.data.data : [response.data.data]));
+        }
+      }
       this.invalidateCache();
-      return response.data?.data || [];
+      return allResults;
     } catch (error) {
       console.error("Error batch saving checkpoints:", error?.response?.data || error);
       const errMsg = error.response?.data?.errors?.[0]?.message || error.message;
@@ -626,21 +858,27 @@ class PatrolService {
   }
   
   async getTrackingPoints(patrolId) {
-    if (!patrolId) return [];
-    try {
-      const response = await authService.protectedApi.get(
-        `/items/tracking_points?filter[patrol_id][_eq]=${patrolId}&sort=date_created&limit=-1`
-      );
-      return response.data.data;
-    } catch (error) {
-      console.error("Error fetching tracking points:", error);
-      return [];
-    }
+    if (!patrolId || this._isForbidden('tracking_points')) return [];
+    const cacheKey = `tracking_points_${patrolId}`;
+    return this._fetchDeduplicated(cacheKey, async () => {
+      try {
+        const response = await authService.protectedApi.get(
+          `/items/tracking_points?filter[patrol_id][_eq]=${patrolId}&sort=date_created&limit=100`
+        );
+        return response.data?.data || [];
+      } catch (error) {
+        if (error.response?.status === 403 || error.response?.status === 404) {
+          this._markForbidden('tracking_points', Infinity);
+        }
+        return [];
+      }
+    }, 30 * 1000);
   }
   
   async updatePatrolStatus(patrolId, status) {
     try {
       await authService.protectedApi.patch(`/items/patrols/${patrolId}`, { status });
+      this.invalidateCache();
     } catch (error) {
       console.error('Error updating patrol status:', error);
       throw error;
@@ -649,10 +887,65 @@ class PatrolService {
 
   async updatePatrol(patrolId, payload) {
     try {
-      const response = await authService.protectedApi.patch(`/items/patrols/${patrolId}`, payload);
+      const sanitized = { ...payload };
+      delete sanitized.date_created;
+      delete sanitized.user_created;
+      delete sanitized.date_updated;
+      delete sanitized.user_updated;
+      const response = await authService.protectedApi.patch(`/items/patrols/${patrolId}`, sanitized);
+      this.invalidateCache();
       return response.data.data;
     } catch (error) {
       console.error('Error updating patrol:', error);
+      throw error;
+    }
+  }
+
+  async reassignPatrolGuard(patrolId, guardId, guardName) {
+    try {
+      const response = await authService.protectedApi.patch(`/items/patrols/${patrolId}`, {
+        guard_id: guardId,
+        guard_name: guardName
+      });
+      this.invalidateCache();
+      return response.data.data;
+    } catch (error) {
+      console.error('Error reassigning patrol guard:', error);
+      throw error;
+    }
+  }
+
+  async forceStartPatrol(patrolId) {
+    try {
+      const now = new Date().toISOString();
+      const response = await authService.protectedApi.patch(`/items/patrols/${patrolId}`, {
+        status: 'active',
+        started_at: now
+      });
+      this.invalidateCache();
+      return response.data.data;
+    } catch (error) {
+      console.error('Error force-starting patrol:', error);
+      throw error;
+    }
+  }
+
+  async extendPatrolWindow(patrolId, minutes = 15) {
+    try {
+      const res = await authService.protectedApi.get(`/items/patrols/${patrolId}`);
+      const p = res.data?.data;
+      const updates = { status: 'active' };
+      if (p && p.scheduled_time) {
+        const current = new Date(p.scheduled_time);
+        if (!isNaN(current.getTime())) {
+          current.setMinutes(current.getMinutes() + minutes);
+          updates.scheduled_time = current.toISOString();
+        }
+      }
+      await authService.protectedApi.patch(`/items/patrols/${patrolId}`, updates);
+      this.invalidateCache();
+    } catch (error) {
+      console.error('Error extending patrol window:', error);
       throw error;
     }
   }

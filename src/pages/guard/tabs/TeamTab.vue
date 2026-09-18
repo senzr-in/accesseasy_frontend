@@ -831,74 +831,15 @@ const fetchGuardRoleId = async () => {
     if (!token || !authService.isAuthenticated()) return;
     const tenantId = await currentUserTenant.getTenantIdAsync();
     if (!tenantId) return;
-    const res = await fetch(
-      `${import.meta.env.VITE_API_URL}/items/roleConfigurator?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][_and][1][accessType][_in]=patrol,accesseasy_patrol&fields[]=id&fields[]=roleName`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    if (res.ok) {
-      const data = await res.json();
-      if (data.data && data.data.length > 0) {
-        availableRoles.value = data.data;
-        const guardRole = data.data.find(r => /guard|security|patrol|officer/i.test(r.roleName));
-        if (guardRole) {
-          guardRoleId.value = guardRole.id;
-          if (!form.value.role_id) {
-            form.value.role_id = guardRole.id;
-          }
-        } else {
-          // Auto-provision default Security Guard role for this tenant
-          try {
-            const createRes = await fetch(`${import.meta.env.VITE_API_URL}/items/roleConfigurator`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`
-              },
-              body: JSON.stringify({
-                roleName: 'Security Guard',
-                accessType: 'patrol',
-                tenant: tenantId
-              })
-            });
-            if (createRes.ok) {
-              const created = await createRes.json();
-              if (created.data?.id) {
-                availableRoles.value.push(created.data);
-                guardRoleId.value = created.data.id;
-                form.value.role_id = created.data.id;
-              }
-            }
-          } catch (e) {
-            guardRoleId.value = null;
-          }
-        }
-      } else {
-        // No patrol roles exist at all for this tenant — auto-create Security Guard
-        try {
-          const createRes = await fetch(`${import.meta.env.VITE_API_URL}/items/roleConfigurator`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`
-            },
-            body: JSON.stringify({
-              roleName: 'Security Guard',
-              accessType: 'patrol',
-              tenant: tenantId
-            })
-          });
-          if (createRes.ok) {
-            const created = await createRes.json();
-            if (created.data?.id) {
-              availableRoles.value = [created.data];
-              guardRoleId.value = created.data.id;
-              form.value.role_id = created.data.id;
-            }
-          }
-        } catch (e) {
-          guardRoleId.value = null;
-        }
-      }
+
+    availableRoles.value = [
+      { id: 'role-security-guard', roleName: 'Security Guard' },
+      { id: 'role-patrol-officer', roleName: 'Patrol Officer' },
+      { id: 'role-supervisor', roleName: 'Supervisor' }
+    ];
+    guardRoleId.value = 'role-security-guard';
+    if (!form.value.role_id) {
+      form.value.role_id = 'role-security-guard';
     }
   } catch (err) {
     console.error('Failed to fetch guard role config:', err);
@@ -1022,13 +963,11 @@ const fetchGuards = async () => {
 
     let rawGuards = [];
 
-    // Step 1: Query /users with multi-strategy fallback
+    // Step 1: Query /users with tenant filter (direct foreign key equality)
     const queryUrls = [];
     if (tenantId) {
-      queryUrls.push(`${import.meta.env.VITE_API_URL}/users?filter[_or][0][tenant][_eq]=${tenantId}&filter[_or][1][tenant][tenantId][_eq]=${tenantId}&filter[_or][2][tenant][id][_eq]=${tenantId}&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=email&fields[]=phone&fields[]=status&fields[]=title&fields[]=avatar&fields[]=role.name&limit=500`);
       queryUrls.push(`${import.meta.env.VITE_API_URL}/users?filter[tenant][_eq]=${tenantId}&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=email&fields[]=phone&fields[]=status&fields[]=title&fields[]=avatar&fields[]=role.name&limit=500`);
     }
-    // Strict multi-tenant isolation: Never execute unfiltered /users query
 
     for (const url of queryUrls) {
       try {

@@ -8,6 +8,16 @@
     </div>
 
     <template v-else>
+      <!-- Back Navigation Button -->
+      <button
+        @click="router.push('/dashboard/settings')"
+        class="flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-white transition-colors w-fit group cursor-pointer"
+      >
+        <div class="w-7 h-7 rounded-lg bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 flex items-center justify-center group-hover:border-indigo-400 dark:group-hover:border-indigo-500 shadow-xs">
+          <ArrowLeft class="w-3.5 h-3.5" />
+        </div>
+        <span>Back to Settings</span>
+      </button>
 
       <!-- Expired Critical Warning Banner -->
       <div
@@ -200,8 +210,8 @@ import { usePlanStore } from '@/stores/usePlanStore';
 import { currentUserTenant } from '@/utils/currentUserTenant';
 import { 
   ShieldCheck, CreditCard, AlertTriangle, Building2, Clock, 
-  RefreshCw, ArrowRight, ArrowUpRight, Navigation, AlertCircle, 
-  Smartphone, ScrollText, Calendar, QrCode
+  RefreshCw, ArrowRight, ArrowLeft, ArrowUpRight, Navigation, AlertCircle, 
+  Smartphone, Calendar, QrCode
 } from 'lucide-vue-next';
 
 const router = useRouter();
