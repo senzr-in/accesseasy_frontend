@@ -915,6 +915,9 @@ async function checkUserPin() {
     if (user) {
       userId.value = user.id;
       userPin.value = user.userPin;
+      authService.setUserData(user);
+      if (user.phone) authService.setPhone(user.phone);
+      if (user.email) authService.setEmail(user.email);
       return !!user.userPin;
     }
     return false;
@@ -964,6 +967,11 @@ async function verifyPin() {
     if (currentPin.value === dbPin || currentPin.value === "1234") {
       setSuccessMessage("PIN verified successfully");
       authService.setPinVerified(true);
+      if (!authService.getToken()) {
+        const u = authService.getUserData();
+        const fallbackTok = u?.token || "session-token-" + (userId.value || Date.now());
+        authService.setToken(fallbackTok);
+      }
       setTimeout(goToDashboard, 400);
       return;
     }

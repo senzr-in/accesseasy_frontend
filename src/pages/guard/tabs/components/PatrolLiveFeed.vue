@@ -476,6 +476,7 @@
 import { computed, ref, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import QRCode from 'qrcode';
+import { getCheckpointQrDataUrl } from '@/utils/checkpointQrHelper';
 import { 
   Shield, MapPin, Navigation, CheckCheck, X, AlertTriangle, 
   Pencil, Trash2, Activity, Loader2, Search, Clock, Plus,
@@ -892,20 +893,15 @@ const printRouteBadges = async () => {
 
     for (const cp of cps) {
       const cpId = cp.checkpoint_id || cp.id;
-      const rawString = `${cpId}-${tenantId}-AccessEasy2026`;
-      const signature = btoa(unescape(encodeURIComponent(rawString))).replace(/=/g, '');
-      const qrData = `ACPT::${cpId}::${signature}`;
       let qrDataUrl = '';
       try {
-        qrDataUrl = await QRCode.toDataURL(qrData, {
-          width: 200, margin: 1, color: { dark: '#0F172A', light: '#FFFFFF' }
-        });
+        qrDataUrl = await getCheckpointQrDataUrl(cpId, tenantId, { size: 240 });
       } catch {}
 
       htmlContent += `
       <div class="card">
         <div class="brand">AccessEasy<div style="font-size:10px;font-weight:normal;margin-top:2px;">Route Checkpoint Badge</div></div>
-        ${qrDataUrl ? `<img src="${qrDataUrl}" class="qr" />` : ''}
+        ${qrDataUrl ? `<img src="${qrDataUrl}" class="qr" style="object-fit:contain;" />` : ''}
         <div class="name">${cp.name}</div>
         <div class="id">${cpId}</div>
         <div class="meta">

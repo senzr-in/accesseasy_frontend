@@ -534,9 +534,20 @@ async function onPhoneSubmit() {
       return;
     }
 
-    await authService.getUserByPhone(fullPhoneNumber);
+    const user = await authService.getUserByPhone(fullPhoneNumber);
+    const hasPin = user && (user.userPin || user.pin);
+
     localStorage.setItem("userPhone", digits);
-    await proceedToOtpVerification(fullPhoneNumber);
+
+    // If user has a PIN, go directly to PIN verification (NO OTP)
+    if (hasPin) {
+      router.push({
+        name: "PinVerification",
+        params: { contactType: "phone", contactValue: digits },
+      });
+    } else {
+      await proceedToOtpVerification(fullPhoneNumber);
+    }
   } catch (error) {
     console.error("Error during login:", error);
     let errorMessage = "An error occurred. Please try again or check the internet connection";
@@ -626,18 +637,29 @@ async function onEmailSubmit() {
       return;
     }
 
+    const user = await authService.getUserByEmail(email.value);
+    const hasPin = user && (user.userPin || user.pin);
+
     localStorage.setItem("email", email.value);
 
-    const data = await authService.generateEmailOtp(email.value);
+    // If user has a PIN, go directly to PIN verification (NO OTP)
+    if (hasPin) {
+      router.push({
+        name: "PinVerification",
+        params: { contactType: "email", contactValue: email.value },
+      });
+    } else {
+      const data = await authService.generateEmailOtp(email.value);
 
-    if (!data?.success && !data?.otp_session_uuid) {
-      throw new Error(data?.message || "Could not start email session. Try again.");
-    }
+      if (!data?.success && !data?.otp_session_uuid) {
+        throw new Error(data?.message || "Could not start email session. Try again.");
+      }
 
-    if (data?.otp_session_uuid) {
-      localStorage.setItem("emailSessionUuid", data.otp_session_uuid);
+      if (data?.otp_session_uuid) {
+        localStorage.setItem("emailSessionUuid", data.otp_session_uuid);
+      }
+      router.push({ name: "EmailVerification", params: { email: email.value } });
     }
-    router.push({ name: "EmailVerification", params: { email: email.value } });
   } catch (err) {
     emailError.value = err?.response?.data?.message || err?.message || "Something went wrong. Please try again.";
   } finally {

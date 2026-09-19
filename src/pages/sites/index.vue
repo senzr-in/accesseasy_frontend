@@ -2,40 +2,81 @@
   <div class="h-full flex flex-col bg-slate-50 dark:bg-[#0b0f19] text-slate-900 dark:text-slate-100 overflow-y-auto custom-scrollbar font-sans transition-colors duration-300">
     <div class="flex flex-col gap-5 p-4 lg:p-6 min-h-full max-w-[1720px] mx-auto w-full">
       
-      <!-- Top Header -->
+      <!-- Top Header & Hub Switcher -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 p-5 rounded-2xl shadow-sm">
         <div class="flex items-center gap-3.5">
           <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-600/20 shrink-0">
-            <Building2 class="w-5 h-5" />
+            <Building2 v-if="activeTab === 'sites'" class="w-5 h-5" />
+            <Layers v-else class="w-5 h-5" />
           </div>
           <div>
-            <h1 class="text-base font-black text-slate-900 dark:text-white tracking-tight">Sites & Properties Hub</h1>
+            <h1 class="text-base font-black text-slate-900 dark:text-white tracking-tight">Sites & Zones Hub</h1>
             <p class="text-xs text-slate-500 font-medium mt-0.5">
-              Manage multi-site security estates, geographical boundaries, and property checkpoints
+              Manage multi-site properties, perimeter sectors, security zones, and checkpoints
             </p>
           </div>
         </div>
 
-        <div class="flex items-center gap-3">
-          <!-- Plan Capacity Indicator -->
-          <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300">
+        <div class="flex flex-wrap items-center gap-3">
+          <!-- Hub Tab Switcher -->
+          <div class="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-800/80 rounded-xl border border-slate-200/70 dark:border-white/5">
+            <button
+              type="button"
+              class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-2 cursor-pointer"
+              :class="activeTab === 'sites' 
+                ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs border border-slate-200/80 dark:border-white/10' 
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+              @click="setTab('sites')"
+            >
+              <Building2 class="w-3.5 h-3.5" />
+              <span>Sites ({{ sites.length }})</span>
+            </button>
+            <button
+              type="button"
+              class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-2 cursor-pointer"
+              :class="activeTab === 'zones' 
+                ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 shadow-xs border border-slate-200/80 dark:border-white/10' 
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+              @click="setTab('zones')"
+            >
+              <Layers class="w-3.5 h-3.5" />
+              <span>Zones ({{ zones.length }})</span>
+            </button>
+          </div>
+
+          <!-- Capacity Indicator -->
+          <div v-if="activeTab === 'sites'" class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300">
             <span class="w-2 h-2 rounded-full" :class="siteLimitInfo.allowed ? 'bg-emerald-500' : 'bg-rose-500'" />
             <span>Sites: <strong>{{ sites.length }}</strong> / {{ siteLimitInfo.max === Infinity ? '∞' : siteLimitInfo.max }}</span>
           </div>
+          <div v-else class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-semibold text-slate-600 dark:text-slate-300">
+            <span class="w-2 h-2 rounded-full" :class="zoneLimitInfo.allowed ? 'bg-emerald-500' : 'bg-rose-500'" />
+            <span>Zones: <strong>{{ zones.length }}</strong> / {{ zoneLimitInfo.max === Infinity ? '∞' : zoneLimitInfo.max }}</span>
+          </div>
 
+          <!-- Contextual Action Button -->
           <button
+            v-if="activeTab === 'sites'"
             class="h-10 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white flex items-center gap-2 text-xs font-bold shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
             @click="openCreateModal"
           >
             <Plus class="w-4 h-4" />
             <span>Add New Site</span>
           </button>
+          <button
+            v-else
+            class="h-10 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white flex items-center gap-2 text-xs font-bold shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
+            @click="handleCreateZone"
+          >
+            <Plus class="w-4 h-4" />
+            <span>Add New Zone</span>
+          </button>
         </div>
       </div>
 
-      <!-- Plan Limit Warning Banner (if limit reached or approaching) -->
+      <!-- Plan Limit Warning Banner -->
       <PlanLimitBanner
-        v-if="!siteLimitInfo.allowed"
+        v-if="activeTab === 'sites' && !siteLimitInfo.allowed"
         :message="siteLimitInfo.upgradeMessage"
         :current-count="sites.length"
         :max-count="siteLimitInfo.max"
@@ -43,86 +84,342 @@
         upgrade-label="Upgrade to Pro"
         @upgrade="showUpgradeModal = true"
       />
+      <PlanLimitBanner
+        v-if="activeTab === 'zones' && !zoneLimitInfo.allowed"
+        :message="zoneLimitInfo.upgradeMessage"
+        :current-count="zones.length"
+        :max-count="zoneLimitInfo.max"
+        severity="error"
+        upgrade-label="Upgrade to Pro"
+        @upgrade="showUpgradeModal = true"
+      />
 
-      <!-- Sites Grid View -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        <div
-          v-for="site in sites"
-          :key="site.id"
-          class="bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-2xl p-5 shadow-sm hover:border-indigo-400 dark:hover:border-indigo-500/40 hover:shadow-md transition-all flex flex-col justify-between group cursor-pointer"
-          @click="router.push(`/dashboard/sites/${site.id}`)"
-        >
-          <!-- Top Site Badge & Status -->
-          <div>
-            <div class="flex items-start justify-between gap-2 mb-3">
-              <div class="flex items-center gap-2.5">
-                <div class="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-black text-xs border border-indigo-100 dark:border-indigo-500/20">
-                  <Building2 class="w-4 h-4" />
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- TAB 1: SITES GRID VIEW                                      -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <div v-if="activeTab === 'sites'" class="space-y-4">
+        <div v-if="isLoadingSites" class="p-20 flex justify-center">
+          <Loader2 class="w-8 h-8 animate-spin text-indigo-500" />
+        </div>
+
+        <div v-else-if="sites.length === 0" class="p-16 bg-white dark:bg-[#151c2c] rounded-2xl border border-slate-200 dark:border-white/10 flex flex-col items-center justify-center text-center">
+          <Building2 class="w-12 h-12 text-slate-300 dark:text-slate-600 mb-3" />
+          <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200">No Sites Configured</h3>
+          <p class="text-xs text-slate-500 mt-1 max-w-sm">Create your first physical property location to start organizing zones, checkpoints, and guard patrols.</p>
+          <button
+            class="mt-4 h-9 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+            @click="openCreateModal"
+          >
+            <Plus class="w-4 h-4" />
+            <span>Create First Site</span>
+          </button>
+        </div>
+
+        <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <div
+            v-for="site in sites"
+            :key="site.id"
+            class="bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-2xl p-5 shadow-sm hover:border-indigo-400 dark:hover:border-indigo-500/40 hover:shadow-md transition-all flex flex-col justify-between group cursor-pointer"
+            @click="router.push(`/dashboard/sites/${site.id}`)"
+          >
+            <!-- Top Site Badge & Status -->
+            <div>
+              <div class="flex items-start justify-between gap-2 mb-3">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-black text-xs border border-indigo-100 dark:border-indigo-500/20">
+                    <Building2 class="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 class="text-sm font-black text-slate-900 dark:text-white group-hover:text-indigo-600 transition-colors">{{ site.name }}</h3>
+                    <span class="text-[10px] font-mono font-semibold text-slate-400">{{ site.code || ('SITE-' + (site.id || '01')) }}</span>
+                  </div>
+                </div>
+
+                <span
+                  class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full flex items-center gap-1"
+                  :class="(site.healthStatus || 'healthy') === 'healthy' 
+                    ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200' 
+                    : site.healthStatus === 'warning'
+                    ? 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 border border-amber-200'
+                    : 'bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400 border border-rose-200'"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full" :class="(site.healthStatus || 'healthy') === 'healthy' ? 'bg-emerald-500' : site.healthStatus === 'warning' ? 'bg-amber-500' : 'bg-rose-500'" />
+                  {{ site.healthStatus || 'healthy' }}
+                </span>
+              </div>
+
+              <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mb-4">
+                <MapPin class="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <span class="truncate">{{ site.address || 'No address specified' }}</span>
+              </p>
+
+              <!-- Metrics Strip -->
+              <div class="grid grid-cols-3 gap-2 bg-slate-50 dark:bg-slate-800/40 p-3 rounded-xl border border-slate-100 dark:border-white/5 text-center mb-4">
+                <div>
+                  <span class="text-[10px] font-semibold text-slate-400 block uppercase">Guards</span>
+                  <span class="text-xs font-black text-slate-800 dark:text-slate-200">{{ site.activeGuards ?? 0 }} / {{ site.totalGuards ?? 0 }}</span>
                 </div>
                 <div>
-                  <h3 class="text-sm font-black text-slate-900 dark:text-white group-hover:text-indigo-600 transition-colors">{{ site.name }}</h3>
-                  <span class="text-[10px] font-mono font-semibold text-slate-400">{{ site.code || ('SITE-' + (site.id || '01')) }}</span>
+                  <span class="text-[10px] font-semibold text-slate-400 block uppercase">Zones</span>
+                  <span class="text-xs font-black text-slate-800 dark:text-slate-200">{{ site.zonesCount ?? 0 }}</span>
+                </div>
+                <div>
+                  <span class="text-[10px] font-semibold text-slate-400 block uppercase">Checkpoints</span>
+                  <span class="text-xs font-black text-slate-800 dark:text-slate-200">{{ site.checkpointsCount ?? 0 }}</span>
                 </div>
               </div>
 
-              <span
-                class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full flex items-center gap-1"
-                :class="(site.healthStatus || 'healthy') === 'healthy' 
-                  ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200' 
-                  : site.healthStatus === 'warning'
-                  ? 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400 border border-amber-200'
-                  : 'bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400 border border-rose-200'"
-              >
-                <span class="w-1.5 h-1.5 rounded-full" :class="(site.healthStatus || 'healthy') === 'healthy' ? 'bg-emerald-500' : site.healthStatus === 'warning' ? 'bg-amber-500' : 'bg-rose-500'" />
-                {{ site.healthStatus || 'healthy' }}
+              <!-- Compliance Progress -->
+              <div class="space-y-1.5 mb-2">
+                <div class="flex items-center justify-between text-[11px] font-bold">
+                  <span class="text-slate-600 dark:text-slate-400">Patrol Compliance</span>
+                  <span class="text-indigo-600 dark:text-indigo-400 font-mono">{{ site.completionRate ?? 100 }}%</span>
+                </div>
+                <div class="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden">
+                  <div
+                    class="h-full rounded-full transition-all duration-500"
+                    :class="(site.completionRate ?? 100) >= 95 ? 'bg-emerald-500' : (site.completionRate ?? 100) >= 85 ? 'bg-amber-500' : 'bg-rose-500'"
+                    :style="{ width: `${site.completionRate ?? 100}%` }"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Bottom Action Row -->
+            <div class="mt-4 pt-3 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-xs">
+              <span class="text-[11px] font-semibold text-slate-400">
+                Radius: {{ site.geofence_radius || 500 }}m
+              </span>
+              <span class="font-bold text-indigo-600 group-hover:translate-x-1 transition-transform flex items-center gap-1">
+                Open Site Command →
               </span>
             </div>
+          </div>
+        </div>
+      </div>
 
-            <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mb-4">
-              <MapPin class="w-3.5 h-3.5 text-slate-400 shrink-0" />
-              <span class="truncate">{{ site.address || 'No address specified' }}</span>
-            </p>
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <!-- TAB 2: ZONES HUB VIEW                                       -->
+      <!-- ═══════════════════════════════════════════════════════════ -->
+      <div v-else class="flex flex-col lg:flex-row gap-5 flex-1 min-h-0">
+        <!-- Main Zones Table & Controls Area -->
+        <div class="flex-1 bg-white dark:bg-[#151c2c] rounded-2xl border border-slate-200 dark:border-white/10 shadow-sm flex flex-col overflow-hidden min-h-[500px]">
+          
+          <!-- Filter Toolbar -->
+          <div class="flex flex-wrap items-center justify-between gap-3 px-4 py-3.5 bg-slate-50/70 dark:bg-slate-800/30 border-b border-slate-200 dark:border-white/5">
+            <div class="flex flex-wrap items-center gap-2.5">
+              <!-- Site Filter -->
+              <div class="flex items-center gap-1.5">
+                <Building2 class="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <select
+                  v-model="zoneSiteFilter"
+                  class="h-8.5 px-3 text-xs font-semibold rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 cursor-pointer outline-none focus:border-indigo-500"
+                >
+                  <option value="ALL">All Sites ({{ sites.length }})</option>
+                  <option v-for="site in sites" :key="site.id" :value="String(site.id)">
+                    {{ site.name }}
+                  </option>
+                </select>
+              </div>
 
-            <!-- Metrics Strip -->
-            <div class="grid grid-cols-3 gap-2 bg-slate-50 dark:bg-slate-800/40 p-3 rounded-xl border border-slate-100 dark:border-white/5 text-center mb-4">
-              <div>
-                <span class="text-[10px] font-semibold text-slate-400 block uppercase">Guards</span>
-                <span class="text-xs font-black text-slate-800 dark:text-slate-200">{{ site.activeGuards ?? 0 }} / {{ site.totalGuards ?? 0 }}</span>
-              </div>
-              <div>
-                <span class="text-[10px] font-semibold text-slate-400 block uppercase">Zones</span>
-                <span class="text-xs font-black text-slate-800 dark:text-slate-200">{{ site.zonesCount ?? 0 }}</span>
-              </div>
-              <div>
-                <span class="text-[10px] font-semibold text-slate-400 block uppercase">Checkpoints</span>
-                <span class="text-xs font-black text-slate-800 dark:text-slate-200">{{ site.checkpointsCount ?? 0 }}</span>
-              </div>
+              <!-- Status Filter -->
+              <select
+                v-model="zoneStatusFilter"
+                class="h-8.5 px-3 text-xs font-semibold rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 cursor-pointer outline-none focus:border-indigo-500"
+              >
+                <option value="ALL">All Status</option>
+                <option value="active">Active Only</option>
+                <option value="inactive">Inactive</option>
+              </select>
             </div>
 
-            <!-- Compliance Progress -->
-            <div class="space-y-1.5 mb-2">
-              <div class="flex items-center justify-between text-[11px] font-bold">
-                <span class="text-slate-600 dark:text-slate-400">Patrol Compliance</span>
-                <span class="text-indigo-600 dark:text-indigo-400 font-mono">{{ site.completionRate ?? 100 }}%</span>
+            <!-- Search -->
+            <div class="relative w-full sm:w-64">
+              <Search class="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              <input
+                v-model="zoneSearchQuery"
+                type="text"
+                placeholder="Search zones by name or code..."
+                class="w-full h-8.5 pl-9 pr-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-xs outline-none focus:border-indigo-500"
+              />
+            </div>
+          </div>
+
+          <!-- Loading State -->
+          <div v-if="isLoadingZones" class="p-20 flex justify-center">
+            <Loader2 class="w-8 h-8 animate-spin text-indigo-500" />
+          </div>
+
+          <!-- Empty State -->
+          <div v-else-if="filteredZones.length === 0" class="p-16 flex flex-col items-center justify-center text-center">
+            <Layers class="w-12 h-12 text-slate-300 dark:text-slate-600 mb-3" />
+            <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200">No Zones Found</h3>
+            <p class="text-xs text-slate-500 mt-1 max-w-sm">No security zones match your current filter. Create a new zone to assign patrol routes and checkpoints.</p>
+            <button
+              class="mt-4 h-9 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5"
+              @click="handleCreateZone"
+            >
+              <Plus class="w-4 h-4" />
+              <span>Create New Zone</span>
+            </button>
+          </div>
+
+          <!-- Zones Table -->
+          <div v-else class="flex-1 overflow-x-auto custom-scrollbar">
+            <table class="w-full text-left text-xs whitespace-nowrap">
+              <thead class="sticky top-0 bg-slate-50/95 dark:bg-slate-800/95 backdrop-blur z-10">
+                <tr class="border-b border-slate-200 dark:border-white/5 text-[10px] font-black text-slate-400 uppercase tracking-wider">
+                  <th class="px-5 py-3">Zone Details</th>
+                  <th class="px-5 py-3">Assigned Site</th>
+                  <th class="px-5 py-3">Description</th>
+                  <th class="px-5 py-3 text-center">Checkpoints</th>
+                  <th class="px-5 py-3 text-center">Status</th>
+                  <th class="px-5 py-3 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100 dark:divide-white/5">
+                <tr
+                  v-for="zone in filteredZones"
+                  :key="zone.id"
+                  class="hover:bg-slate-50/80 dark:hover:bg-white/[0.02] transition-colors cursor-pointer group"
+                  @click="handleEditZone(zone)"
+                >
+                  <!-- Zone Name & Code -->
+                  <td class="px-5 py-3.5">
+                    <div class="flex items-center gap-3">
+                      <div class="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 border border-indigo-100 dark:border-indigo-500/20">
+                        <Layers class="w-4 h-4" />
+                      </div>
+                      <div>
+                        <p class="font-bold text-slate-900 dark:text-slate-100 text-xs group-hover:text-indigo-600 transition-colors">{{ zone.zoneName || zone.name }}</p>
+                        <span class="text-[10px] font-mono text-slate-400">{{ zone.code || ('ZN-' + String(zone.id).padStart(2, '0')) }}</span>
+                      </div>
+                    </div>
+                  </td>
+
+                  <!-- Parent Site -->
+                  <td class="px-5 py-3.5">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] font-semibold border border-slate-200/60 dark:border-white/5">
+                      <Building2 class="w-3 h-3 text-slate-400" />
+                      {{ getZoneSiteName(zone) }}
+                    </span>
+                  </td>
+
+                  <!-- Description -->
+                  <td class="px-5 py-3.5 text-slate-600 dark:text-slate-400 font-medium max-w-xs truncate">
+                    {{ zone.description || 'General perimeter & patrol sector' }}
+                  </td>
+
+                  <!-- Checkpoints Count -->
+                  <td class="px-5 py-3.5 text-center font-bold text-slate-900 dark:text-slate-100">
+                    <span class="px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-mono text-xs">
+                      {{ getZoneCheckpointCount(zone) }}
+                    </span>
+                  </td>
+
+                  <!-- Status -->
+                  <td class="px-5 py-3.5 text-center">
+                    <span
+                      v-if="(zone.status || 'active').toLowerCase() !== 'inactive'"
+                      class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 text-[10px] font-bold"
+                    >
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                      Active
+                    </span>
+                    <span
+                      v-else
+                      class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 text-[10px] font-bold"
+                    >
+                      <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                      Inactive
+                    </span>
+                  </td>
+
+                  <!-- Actions -->
+                  <td class="px-5 py-3.5 text-right" @click.stop>
+                    <div class="flex items-center justify-end gap-1.5">
+                      <button
+                        type="button"
+                        class="h-7 px-2.5 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-indigo-600 hover:border-indigo-300 dark:hover:border-indigo-500/40 text-[11px] font-bold transition-all cursor-pointer"
+                        @click="handleEditZone(zone)"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        class="w-7 h-7 rounded-lg border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors cursor-pointer"
+                        title="Delete Zone"
+                        @click="zoneToDelete = zone"
+                      >
+                        <Trash2 class="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Footer Count -->
+          <div class="p-3.5 border-t border-slate-200 dark:border-white/5 flex items-center justify-between text-xs text-slate-500 bg-slate-50/50 dark:bg-slate-900/50 shrink-0">
+            <span>Showing <strong>{{ filteredZones.length }}</strong> zones</span>
+            <button
+              class="text-indigo-600 hover:underline font-bold text-xs cursor-pointer"
+              @click="handleCreateZone"
+            >
+              + Add another zone
+            </button>
+          </div>
+        </div>
+
+        <!-- Right Side Helpful Insights Sidebar -->
+        <div class="w-full lg:w-80 shrink-0 space-y-4">
+          <!-- Zone Guide Card -->
+          <div class="bg-white dark:bg-[#151c2c] rounded-2xl border border-slate-200 dark:border-white/10 p-5 shadow-sm space-y-3">
+            <div class="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+              <div class="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center">
+                <HelpCircle class="w-4 h-4" />
               </div>
-              <div class="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden">
-                <div
-                  class="h-full rounded-full transition-all duration-500"
-                  :class="(site.completionRate ?? 100) >= 95 ? 'bg-emerald-500' : (site.completionRate ?? 100) >= 85 ? 'bg-amber-500' : 'bg-rose-500'"
-                  :style="{ width: `${site.completionRate ?? 100}%` }"
-                />
+              <h3 class="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">What is a Security Zone?</h3>
+            </div>
+            <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+              A <strong>Zone</strong> represents a distinct operational sector (e.g. Warehouse, Main Entrance, Server Room) inside a site where specific checkpoints and guard patrol routines are mapped.
+            </p>
+            <div class="space-y-2 pt-2 border-t border-slate-100 dark:border-white/5">
+              <h4 class="text-[10px] font-black uppercase text-slate-400 tracking-wider">Typical Zone Types</h4>
+              <div class="flex flex-wrap gap-1.5">
+                <span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-[11px] font-semibold text-slate-600 dark:text-slate-300">🏢 Office Complex</span>
+                <span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-[11px] font-semibold text-slate-600 dark:text-slate-300">📦 Warehouse Bay</span>
+                <span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-[11px] font-semibold text-slate-600 dark:text-slate-300">🚗 Perimeter & Parking</span>
+                <span class="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-[11px] font-semibold text-slate-600 dark:text-slate-300">🔐 Data Center</span>
               </div>
             </div>
           </div>
 
-          <!-- Bottom Action Row -->
-          <div class="mt-4 pt-3 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-xs">
-            <span class="text-[11px] font-semibold text-slate-400">
-              Radius: {{ site.geofence_radius || 500 }}m
-            </span>
-            <span class="font-bold text-indigo-600 group-hover:translate-x-1 transition-transform flex items-center gap-1">
-              Open Site Command →
-            </span>
+          <!-- Quick Navigation Card -->
+          <div class="bg-indigo-50/60 dark:bg-indigo-500/5 rounded-2xl border border-indigo-100 dark:border-indigo-500/20 p-5 space-y-3">
+            <h4 class="text-xs font-black text-indigo-950 dark:text-indigo-200">Patrol & Checkpoint Setup</h4>
+            <p class="text-xs text-indigo-800/80 dark:text-indigo-300/80 leading-relaxed">
+              Once you have created your zones, add physical QR checkpoints inside them or launch patrol shifts.
+            </p>
+            <div class="flex flex-col gap-2 pt-1">
+              <button
+                type="button"
+                class="w-full h-8.5 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all cursor-pointer"
+                @click="router.push('/dashboard/patrols/checkpoints')"
+              >
+                <MapPin class="w-3.5 h-3.5" />
+                <span>Manage Checkpoints →</span>
+              </button>
+              <button
+                type="button"
+                class="w-full h-8.5 px-3 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                @click="router.push('/dashboard/patrols/create')"
+              >
+                <Plus class="w-3.5 h-3.5 text-indigo-600" />
+                <span>Create Patrol Route</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -130,7 +427,7 @@
     </div>
 
     <!-- ═══════════════════════════════════════════════════════════ -->
-    <!-- 1. CREATE SITE MODAL (CLEAN & NON-CLUTTERED)                -->
+    <!-- MODAL 1: CREATE SITE MODAL                                  -->
     <!-- ═══════════════════════════════════════════════════════════ -->
     <Teleport to="body">
       <div
@@ -198,7 +495,6 @@
                   <span>Site Coordinates</span>
                 </span>
                 
-                <!-- Action button: Only opens the map when clicked -->
                 <button
                   type="button"
                   class="h-8 px-3 rounded-lg bg-indigo-50 dark:bg-indigo-500/15 hover:bg-indigo-600 hover:text-white text-indigo-700 dark:text-indigo-300 text-xs font-bold flex items-center gap-1.5 transition-all border border-indigo-200 dark:border-indigo-500/30 cursor-pointer shadow-sm"
@@ -235,7 +531,7 @@
               </div>
             </div>
 
-            <!-- Advanced Settings Accordion (Geofence, Security Rules) -->
+            <!-- Advanced Settings Accordion -->
             <div class="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
               <button
                 type="button"
@@ -289,10 +585,11 @@
               </button>
               <button
                 type="submit"
-                class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-600/20 cursor-pointer flex items-center gap-1.5"
+                :disabled="isCreatingSite"
+                class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md shadow-indigo-600/20 cursor-pointer flex items-center gap-1.5 disabled:opacity-50"
               >
                 <Building2 class="w-3.5 h-3.5" />
-                <span>Save Site</span>
+                <span>{{ isCreatingSite ? 'Saving...' : 'Save Site' }}</span>
               </button>
             </div>
           </form>
@@ -301,7 +598,7 @@
     </Teleport>
 
     <!-- ═══════════════════════════════════════════════════════════ -->
-    <!-- 2. DEDICATED MAP LOCATION PICKER MODAL                      -->
+    <!-- MODAL 2: MAP LOCATION PICKER MODAL                          -->
     <!-- ═══════════════════════════════════════════════════════════ -->
     <Teleport to="body">
       <div
@@ -334,7 +631,7 @@
               <input
                 v-model="locationSearchQuery"
                 type="text"
-                placeholder="Search city, area, landmark, or street address (e.g. Whitefield, Bengaluru)..."
+                placeholder="Search city, area, landmark, or street address..."
                 @keydown.enter.prevent="searchLocation"
                 class="w-full h-10 pl-9 pr-8 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-xs font-medium outline-none focus:border-indigo-500 shadow-inner"
               />
@@ -373,11 +670,10 @@
             </button>
           </div>
 
-          <!-- Leaflet Interactive Map Canvas (100% Reliable, Never Blank) -->
+          <!-- Leaflet Interactive Map Canvas -->
           <div class="relative w-full flex-1 rounded-xl border border-slate-300 dark:border-slate-700 overflow-hidden shadow-inner bg-slate-100 dark:bg-slate-800" style="min-height: 320px;">
             <div id="leaflet-site-picker-map" class="w-full h-full" style="min-height: 320px;"></div>
             
-            <!-- Floating Coordinates & Instructions Pill -->
             <div class="absolute bottom-3 left-3 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-800 dark:text-slate-200 shadow-md pointer-events-none flex items-center gap-2 z-[999]">
               <span class="w-2 h-2 rounded-full bg-indigo-600 animate-ping"></span>
               <span><strong>Lat:</strong> {{ tempCoords.lat.toFixed(4) }} · <strong>Lng:</strong> {{ tempCoords.lng.toFixed(4) }}</span>
@@ -414,21 +710,80 @@
       </div>
     </Teleport>
 
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- MODAL 3: ZONE CREATE / EDIT MODAL                           -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <Teleport to="body">
+      <div
+        v-if="showZoneFormModal"
+        class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+        @click.self="showZoneFormModal = false"
+      >
+        <div class="relative w-full max-w-2xl bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden flex flex-col animate-in zoom-in-95 duration-200">
+          <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-slate-900">
+            <h2 class="text-sm font-bold text-slate-900 dark:text-slate-100 uppercase tracking-widest flex items-center gap-2">
+              <Layers class="w-4 h-4 text-indigo-600" />
+              {{ selectedZoneForEdit ? 'Edit Security Zone' : 'Create Security Zone' }}
+            </h2>
+            <button
+              class="w-8 h-8 rounded-full border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-600 transition-colors cursor-pointer"
+              @click="showZoneFormModal = false"
+            >
+              <X class="w-4 h-4" />
+            </button>
+          </div>
+          <div class="p-6 overflow-y-auto max-h-[80vh] custom-scrollbar bg-white dark:bg-slate-900">
+            <ZoneForm
+              :is-editing="!!selectedZoneForEdit"
+              :zone-data="selectedZoneForEdit || {}"
+              @save-success="onZoneSaveSuccess"
+              @cancel="showZoneFormModal = false"
+            />
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- MODAL 4: DELETE ZONE CONFIRMATION MODAL                     -->
+    <!-- ═══════════════════════════════════════════════════════════ -->
+    <Teleport to="body">
+      <div
+        v-if="zoneToDelete"
+        class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+      >
+        <div class="w-full max-w-sm bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden p-6 text-center animate-in zoom-in-95 duration-200">
+          <div class="w-16 h-16 rounded-full bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center mx-auto mb-4 border border-rose-100 dark:border-rose-500/20">
+            <Trash2 class="w-8 h-8 text-rose-500" />
+          </div>
+          <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Delete Security Zone</h3>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">
+            Are you sure you want to delete <span class="font-bold text-slate-900 dark:text-white">{{ zoneToDelete.zoneName || zoneToDelete.name }}</span>? This will unassign its associated checkpoints.
+          </p>
+          <div class="flex items-center gap-3 w-full">
+            <button class="flex-1 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-sm font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer" @click="zoneToDelete = null">Cancel</button>
+            <button class="flex-1 bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 rounded-xl text-sm transition-colors shadow-sm cursor-pointer" @click="executeDeleteZone">Delete</button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
     <!-- Upgrade Modal -->
     <UpgradeModal
       v-model="showUpgradeModal"
-      :trigger-message="siteLimitInfo.upgradeMessage"
+      :trigger-message="activeTab === 'sites' ? siteLimitInfo.upgradeMessage : zoneLimitInfo.upgradeMessage"
     />
 
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, nextTick } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed, onMounted, nextTick, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { 
   Building2, Plus, MapPin, X, Search, Map as MapIcon, 
-  ChevronDown, SlidersHorizontal, Check 
+  ChevronDown, SlidersHorizontal, Check, Layers, Loader2,
+  Trash2, HelpCircle, AlertTriangle
 } from 'lucide-vue-next';
 import { siteService } from '@/services/siteService';
 import { zoneService } from '@/services/zoneService';
@@ -438,18 +793,55 @@ import { subscriptionService } from '@/services/subscriptionService';
 import { usePlanGuard } from '@/composables/usePlanGuard';
 import PlanLimitBanner from '@/components/common/PlanLimitBanner.vue';
 import UpgradeModal from '@/components/common/UpgradeModal.vue';
+import ZoneForm from '@/pages/zones/ZoneForm.vue';
 import { toast } from '@/stores/useToastStore';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
 const router = useRouter();
+const route = useRoute();
 const { isNormal, isPro, currentPlan } = usePlanGuard();
+
+// Active Hub Tab ('sites' | 'zones')
+const activeTab = ref(route.query.tab === 'zones' ? 'zones' : 'sites');
+
+const setTab = (tab) => {
+  activeTab.value = tab;
+  router.replace({ query: { ...route.query, tab } });
+};
+
+watch(() => route.query.tab, (newTab) => {
+  if (newTab === 'zones' || newTab === 'sites') {
+    activeTab.value = newTab;
+  }
+});
+
+// Data State
 const sites = ref([]);
+const zones = ref([]);
+const checkpoints = ref([]);
+const isLoadingSites = ref(false);
+const isLoadingZones = ref(false);
+
+// Zone Filter & Search State
+const zoneSearchQuery = ref('');
+const zoneSiteFilter = ref('ALL');
+const zoneStatusFilter = ref('ALL');
+
+// Modals State
 const showCreateSiteModal = ref(false);
 const showMapPickerModal = ref(false);
 const showAdvancedSettings = ref(false);
+const showZoneFormModal = ref(false);
+const selectedZoneForEdit = ref(null);
+const zoneToDelete = ref(null);
 const showUpgradeModal = ref(false);
+
+// Limit Info
 const siteLimitInfo = ref({ allowed: true, current: 0, max: 1, upgradeMessage: '' });
+const zoneLimitInfo = ref({ allowed: true, current: 0, max: 1, upgradeMessage: '' });
+
+// Location Search State
 const locationSearchQuery = ref('');
 const isSearchingLocation = ref(false);
 
@@ -484,15 +876,110 @@ const resetSiteForm = () => {
   };
 };
 
-// Temporary coordinates for map picker modal
+// Map Picker Temp State
 const tempCoords = ref({ lat: 12.9716, lng: 80.2435 });
 const tempAddress = ref('');
-
-// Leaflet Map Picker Instance
 let leafletMap = null;
 let leafletMarker = null;
 let leafletCircle = null;
 
+// Filtered Zones Computed
+const filteredZones = computed(() => {
+  let result = [...zones.value];
+
+  // 1. Site Filter
+  if (zoneSiteFilter.value !== 'ALL') {
+    result = result.filter(z => {
+      const zSiteId = String(z.site?.id || z.site || z.siteId || z.locationManagement || z.location || '');
+      return zSiteId === zoneSiteFilter.value;
+    });
+  }
+
+  // 2. Status Filter
+  if (zoneStatusFilter.value !== 'ALL') {
+    result = result.filter(z => {
+      const st = (z.status || 'active').toLowerCase();
+      return st === zoneStatusFilter.value.toLowerCase();
+    });
+  }
+
+  // 3. Search Query
+  if (zoneSearchQuery.value.trim()) {
+    const q = zoneSearchQuery.value.toLowerCase().trim();
+    result = result.filter(z => {
+      const name = (z.zoneName || z.name || '').toLowerCase();
+      const code = (z.code || '').toLowerCase();
+      const desc = (z.description || '').toLowerCase();
+      return name.includes(q) || code.includes(q) || desc.includes(q);
+    });
+  }
+
+  return result;
+});
+
+// Helper functions for Zone table
+const getZoneSiteName = (zone) => {
+  if (zone.site && typeof zone.site === 'object' && zone.site.name) {
+    return zone.site.name;
+  }
+  const siteId = String(zone.site?.id || zone.site || zone.siteId || zone.locationManagement || zone.location || '');
+  if (siteId) {
+    const found = sites.value.find(s => String(s.id) === siteId);
+    if (found) return found.name;
+  }
+  return 'All Sites';
+};
+
+const getZoneCheckpointCount = (zone) => {
+  if (zone.checkpoints && Array.isArray(zone.checkpoints)) {
+    return zone.checkpoints.length;
+  }
+  const zoneIdStr = String(zone.id);
+  const matching = checkpoints.value.filter(cp => {
+    const cpZoneId = String(typeof cp.zone === 'object' && cp.zone ? cp.zone.id : cp.zone || '');
+    return cpZoneId === zoneIdStr;
+  });
+  return matching.length;
+};
+
+// Zone Handlers
+const handleCreateZone = async () => {
+  const check = await subscriptionService.checkLimit('zones');
+  zoneLimitInfo.value = check;
+  if (!check.allowed) {
+    showUpgradeModal.value = true;
+    return;
+  }
+  selectedZoneForEdit.value = null;
+  showZoneFormModal.value = true;
+};
+
+const handleEditZone = (zone) => {
+  selectedZoneForEdit.value = { ...zone };
+  showZoneFormModal.value = true;
+};
+
+const onZoneSaveSuccess = async () => {
+  showZoneFormModal.value = false;
+  selectedZoneForEdit.value = null;
+  toast.success('Zone saved successfully!');
+  await loadData();
+};
+
+const executeDeleteZone = async () => {
+  if (!zoneToDelete.value) return;
+  const target = zoneToDelete.value;
+  try {
+    await zoneService.deleteZone(target.id);
+    toast.success(`Zone "${target.zoneName || target.name}" deleted successfully.`);
+    zoneToDelete.value = null;
+    await loadData();
+  } catch (err) {
+    toast.error(err.message || 'Failed to delete zone.');
+  }
+};
+
+// Site Modal Handlers
 const openCreateModal = async () => {
   const check = await subscriptionService.checkLimit('sites');
   siteLimitInfo.value = check;
@@ -537,13 +1024,11 @@ const initLeafletMap = () => {
     zoomControl: true
   });
 
-  // OpenStreetMap standard tile layer (100% reliable, zero blank screens)
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors',
     maxZoom: 19
   }).addTo(leafletMap);
 
-  // Custom Icon for Site Pin
   const pinIcon = L.divIcon({
     className: 'custom-leaflet-pin',
     html: `
@@ -556,13 +1041,11 @@ const initLeafletMap = () => {
     iconSize: [0, 0]
   });
 
-  // Marker
   leafletMarker = L.marker([initialLat, initialLng], {
     icon: pinIcon,
     draggable: true
   }).addTo(leafletMap);
 
-  // Geofence Radius Circle
   const radius = Number(newSiteForm.value.geofence_radius) || 500;
   leafletCircle = L.circle([initialLat, initialLng], {
     radius: radius,
@@ -572,13 +1055,11 @@ const initLeafletMap = () => {
     weight: 2
   }).addTo(leafletMap);
 
-  // Marker Drag Listener
   leafletMarker.on('dragend', (e) => {
     const pos = e.target.getLatLng();
     updateTempLocation(pos.lat, pos.lng);
   });
 
-  // Map Click Listener
   leafletMap.on('click', (e) => {
     updateTempLocation(e.latlng.lat, e.latlng.lng);
   });
@@ -598,7 +1079,6 @@ const updateTempLocation = (lat, lng) => {
     leafletCircle.setLatLng([cleanLat, cleanLng]);
   }
 
-  // Reverse geocode with OpenStreetMap Nominatim
   fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${cleanLat}&lon=${cleanLng}&zoom=18&addressdetails=1`, {
     headers: { 'Accept-Language': 'en' }
   })
@@ -664,27 +1144,57 @@ const confirmLocationSelection = () => {
   showMapPickerModal.value = false;
 };
 
-const loadSites = async () => {
+const isCreatingSite = ref(false);
+
+const submitCreateSite = async () => {
+  isCreatingSite.value = true;
+  try {
+    const created = await siteService.createSite(newSiteForm.value);
+    showCreateSiteModal.value = false;
+    toast.success(`Site "${created?.name || newSiteForm.value.name}" created successfully!`);
+    await loadData();
+  } catch (error) {
+    if (error.code === 'PLAN_LIMIT_EXCEEDED') {
+      showCreateSiteModal.value = false;
+      showUpgradeModal.value = true;
+    } else {
+      toast.error(error.message || "Failed to create site.");
+    }
+  } finally {
+    isCreatingSite.value = false;
+  }
+};
+
+// Load All Unified Data
+const loadData = async () => {
+  isLoadingSites.value = true;
+  isLoadingZones.value = true;
   subscriptionService.clearCache();
-  const rawSites = await siteService.fetchSites();
-  siteLimitInfo.value = await subscriptionService.checkLimit('sites');
 
   try {
-    const [zonesRes, masterCpRes, generalCpRes, patrolsRes, attendanceRes] = await Promise.allSettled([
+    const [rawSites, siteLimit, zoneLimit, zonesRes, masterCpRes, generalCpRes, patrolsRes, attendanceRes] = await Promise.all([
+      siteService.fetchSites(),
+      subscriptionService.checkLimit('sites'),
+      subscriptionService.checkLimit('zones'),
       zoneService.fetchZones(null, null, true),
-      patrolService.getMasterCheckpoints(),
-      patrolService.getCheckpoints(),
-      patrolService.getPatrols(),
-      attendanceService.getTodayAttendance()
+      patrolService.getMasterCheckpoints().catch(() => []),
+      patrolService.getCheckpoints().catch(() => []),
+      patrolService.getPatrols().catch(() => []),
+      attendanceService.getTodayAttendance().catch(() => [])
     ]);
 
-    const allZones = zonesRes.status === 'fulfilled' && Array.isArray(zonesRes.value) ? zonesRes.value : [];
-    const allMasterCp = masterCpRes.status === 'fulfilled' && Array.isArray(masterCpRes.value) ? masterCpRes.value : [];
-    const allGeneralCp = generalCpRes.status === 'fulfilled' && Array.isArray(generalCpRes.value) ? generalCpRes.value : [];
-    const allPatrols = patrolsRes.status === 'fulfilled' && Array.isArray(patrolsRes.value) ? patrolsRes.value : [];
-    const allAttendance = attendanceRes.status === 'fulfilled' && Array.isArray(attendanceRes.value) ? attendanceRes.value : [];
+    siteLimitInfo.value = siteLimit;
+    zoneLimitInfo.value = zoneLimit;
 
-    // Distinct master checkpoints (deduplicate by checkpoint_id or name to avoid counting route duplicate copies)
+    const allZones = Array.isArray(zonesRes) ? zonesRes : [];
+    zones.value = allZones;
+
+    const allMasterCp = Array.isArray(masterCpRes) ? masterCpRes : [];
+    const allGeneralCp = Array.isArray(generalCpRes) ? generalCpRes : [];
+    const allPatrols = Array.isArray(patrolsRes) ? patrolsRes : [];
+    const allAttendance = Array.isArray(attendanceRes) ? attendanceRes : [];
+
+    // Checkpoints deduplication
     const masterCpMap = new Map();
     const sourceCpList = allMasterCp.length > 0 ? allMasterCp : allGeneralCp.filter(c => !c.group_id);
     const fallbackList = sourceCpList.length > 0 ? sourceCpList : allGeneralCp;
@@ -703,13 +1213,13 @@ const loadSites = async () => {
       }
     });
     const uniqueMasterCheckpoints = Array.from(masterCpMap.values());
+    checkpoints.value = uniqueMasterCheckpoints;
 
     const isSingleSite = rawSites.length === 1;
 
     sites.value = rawSites.map(site => {
       const siteIdStr = String(site.id || '');
 
-      // 1. Match zones for this site (or all tenant zones if single site)
       const siteZones = allZones.filter(z => {
         const zSiteId = String(z.site?.id || z.site || z.siteId || z.locationManagement || z.location || '');
         if (zSiteId && zSiteId === siteIdStr) return true;
@@ -722,7 +1232,6 @@ const loadSites = async () => {
 
       const zoneIdsForSite = new Set(siteZones.map(z => String(z.id)));
 
-      // 2. Match unique checkpoints for this site
       const siteCheckpoints = uniqueMasterCheckpoints.filter(cp => {
         const cpSiteId = String(cp.site?.id || cp.site || cp.siteId || cp.location || '');
         if (cpSiteId && cpSiteId === siteIdStr) return true;
@@ -733,7 +1242,6 @@ const loadSites = async () => {
         return false;
       });
 
-      // 3. Match patrols for this site
       const sitePatrols = allPatrols.filter(p => {
         const pSiteId = String(p.site?.id || p.site || p.zoneId || p.siteId || '');
         if (pSiteId && (pSiteId === siteIdStr || zoneIdsForSite.has(pSiteId))) return true;
@@ -741,11 +1249,9 @@ const loadSites = async () => {
         return false;
       });
 
-      // 4. Extract DISTINCT Guards (both total roster and currently on-duty)
       const totalGuardsSet = new Set();
       const activeGuardsSet = new Set();
 
-      // From Attendance logs:
       const siteAttendance = allAttendance.filter(r => {
         const rSiteId = String(r.site?.id || r.site || r.siteId || '');
         if (rSiteId && rSiteId === siteIdStr) return true;
@@ -774,7 +1280,6 @@ const loadSites = async () => {
         }
       });
 
-      // From Patrol assignments:
       sitePatrols.forEach(p => {
         const gName = String(
           p.guard_name || 
@@ -794,7 +1299,6 @@ const loadSites = async () => {
         }
       });
 
-      // If site has registered user IDs in empIds:
       if (Array.isArray(site.empIds)) {
         site.empIds.forEach(id => {
           if (id) totalGuardsSet.add(String(id).toLowerCase());
@@ -804,7 +1308,6 @@ const loadSites = async () => {
       const activeGuards = activeGuardsSet.size;
       const totalGuards = Math.max(totalGuardsSet.size, activeGuards);
 
-      // 5. Patrol Compliance calculation
       const completedPatrols = sitePatrols.filter(p => String(p.status || '').toLowerCase() === 'completed');
       const completionRate = sitePatrols.length > 0 
         ? Math.round((completedPatrols.length / sitePatrols.length) * 100) 
@@ -825,42 +1328,14 @@ const loadSites = async () => {
       };
     });
   } catch (err) {
-    console.error('Error enriching sites data:', err);
-    sites.value = rawSites.map(site => ({
-      ...site,
-      code: site.code || site.locCode || `STE-${site.id}`,
-      healthStatus: site.healthStatus || 'healthy',
-      activeGuards: site.activeGuards || 0,
-      totalGuards: site.totalGuards || 0,
-      zonesCount: site.zonesCount || 0,
-      checkpointsCount: site.checkpointsCount || 0,
-      completionRate: site.completionRate ?? 100
-    }));
-  }
-};
-
-const isCreatingSite = ref(false);
-
-const submitCreateSite = async () => {
-  isCreatingSite.value = true;
-  try {
-    const created = await siteService.createSite(newSiteForm.value);
-    showCreateSiteModal.value = false;
-    toast.success(`Site "${created?.name || newSiteForm.value.name}" created successfully!`);
-    await loadSites();
-  } catch (error) {
-    if (error.code === 'PLAN_LIMIT_EXCEEDED') {
-      showCreateSiteModal.value = false;
-      showUpgradeModal.value = true;
-    } else {
-      toast.error(error.message || "Failed to create site.");
-    }
+    console.error('Error loading Sites & Zones data:', err);
   } finally {
-    isCreatingSite.value = false;
+    isLoadingSites.value = false;
+    isLoadingZones.value = false;
   }
 };
 
 onMounted(async () => {
-  await loadSites();
+  await loadData();
 });
 </script>

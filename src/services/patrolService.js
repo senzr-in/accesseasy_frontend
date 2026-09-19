@@ -380,10 +380,20 @@ class PatrolService {
         throw error;
       }
 
+      const siteId = payload.site || payload.siteId || null;
       const data = { ...payload, tenant: tenantId, date_created: new Date().toISOString() };
+      delete data.site;
+      delete data.siteId;
+
       const response = await authService.protectedApi.post("/items/checkpoint_groups", data);
+      const created = response.data?.data;
+      if (created && siteId) {
+        created.site = siteId;
+        created.siteId = siteId;
+      }
+
       subscriptionService.clearCache();
-      return response.data.data;
+      return created;
     } catch (error) {
       console.error("Error creating checkpoint group:", error);
       throw error;
@@ -393,9 +403,40 @@ class PatrolService {
   async createPatrol(payload) {
     const tenantId = authService.getTenantId();
     try {
+      const siteId = payload.site || payload.siteId || null;
       const data = { ...payload, tenant: tenantId, date_created: new Date().toISOString() };
-      const response = await authService.protectedApi.post("/items/patrols", data);
-      return response.data.data;
+      delete data.site;
+      if (siteId) {
+        data.siteId = siteId;
+      }
+      
+      let response;
+      try {
+        response = await authService.protectedApi.post("/items/patrols", data);
+      } catch (postErr) {
+        const errData = postErr.response?.data;
+        const hasFkError = errData?.errors?.some(e =>
+          e.code === 'INVALID_FOREIGN_KEY' ||
+          (e.message && (e.message.includes('foreign key') || e.message.includes('site') || e.message.includes('zone')))
+        );
+        if (hasFkError) {
+          console.warn('[createPatrol] Directus foreign key constraint detected, retrying with sanitized payload');
+          delete data.site;
+          delete data.siteId;
+          delete data.zone;
+          response = await authService.protectedApi.post("/items/patrols", data);
+        } else {
+          throw postErr;
+        }
+      }
+
+      const created = response.data?.data;
+      if (created && siteId) {
+        created.site = siteId;
+        created.siteId = siteId;
+      }
+      this.invalidateCache();
+      return created;
     } catch (error) {
       console.error("Error scheduling patrol:", error);
       throw error;
@@ -409,18 +450,48 @@ class PatrolService {
 
     try {
       const now = new Date().toISOString();
-      const payloadArray = patrolsList.map(p => ({
-        ...p,
-        tenant: tenantId,
-        date_created: now
-      }));
+      const payloadArray = patrolsList.map(p => {
+        const siteId = p.site || p.siteId || null;
+        const cleanP = {
+          ...p,
+          tenant: tenantId,
+          date_created: now
+        };
+        delete cleanP.site;
+        if (siteId) {
+          cleanP.siteId = siteId;
+        }
+        return cleanP;
+      });
 
       // Chunk in batches of 50 to avoid Directus payload size limits
       const chunkSize = 50;
       const allResults = [];
       for (let i = 0; i < payloadArray.length; i += chunkSize) {
         const chunk = payloadArray.slice(i, i + chunkSize);
-        const response = await authService.protectedApi.post("/items/patrols", chunk);
+        let response;
+        try {
+          response = await authService.protectedApi.post("/items/patrols", chunk);
+        } catch (postErr) {
+          const errData = postErr.response?.data;
+          const hasFkError = errData?.errors?.some(e =>
+            e.code === 'INVALID_FOREIGN_KEY' ||
+            (e.message && (e.message.includes('foreign key') || e.message.includes('site') || e.message.includes('zone')))
+          );
+          if (hasFkError) {
+            console.warn('[createPatrolsBatch] Directus foreign key constraint detected on chunk, retrying with sanitized payload');
+            const sanitizedChunk = chunk.map(c => {
+              const clean = { ...c };
+              delete clean.site;
+              delete clean.siteId;
+              delete clean.zone;
+              return clean;
+            });
+            response = await authService.protectedApi.post("/items/patrols", sanitizedChunk);
+          } else {
+            throw postErr;
+          }
+        }
         if (response.data?.data) {
           allResults.push(...(Array.isArray(response.data.data) ? response.data.data : [response.data.data]));
         }
@@ -814,9 +885,72 @@ class PatrolService {
     }
   }
 
-  async deletePatrol(patrolId) {
+  async deletePatrol(patrolOrId, deleteAllRounds = true) {
+    const tenantId = authService.getTenantId();
     try {
-      await authService.protectedApi.delete(`/items/patrols/${patrolId}`);
+      const patrolId = typeof patrolOrId === 'object' && patrolOrId !== null ? patrolOrId.id : patrolOrId;
+      const patrolObj = typeof patrolOrId === 'object' && patrolOrId !== null ? patrolOrId : null;
+      const groupId = patrolObj?.groupId?.id || patrolObj?.groupId || null;
+      const routeName = patrolObj?.name || patrolObj?.routeName || null;
+
+      // 1. Delete the primary patrol by ID
+      if (patrolId) {
+        try {
+          await authService.protectedApi.delete(`/items/patrols/${patrolId}`);
+        } catch (e) {
+          console.warn(`[deletePatrol] Individual delete for ${patrolId} error:`, e?.message);
+        }
+      }
+
+      // 2. If deleteAllRounds is true, delete all sibling rounds for this route/group
+      if (deleteAllRounds && (groupId || (routeName && tenantId))) {
+        try {
+          let filterQuery = groupId && groupId !== 'nogroup'
+            ? `filter[groupId][_eq]=${groupId}`
+            : `filter[name][_eq]=${encodeURIComponent(routeName)}`;
+
+          if (tenantId) filterQuery += `&filter[tenant][_eq]=${tenantId}`;
+
+          const siblingRes = await authService.protectedApi.get(`/items/patrols?${filterQuery}&fields=id&limit=200`);
+          const siblingIds = (siblingRes.data?.data || []).map(p => p.id).filter(id => id && id !== patrolId);
+
+          for (const sId of siblingIds) {
+            await authService.protectedApi.delete(`/items/patrols/${sId}`).catch(() => {});
+          }
+        } catch (siblingErr) {
+          console.warn('[deletePatrol] Sibling rounds cleanup notice:', siblingErr?.message);
+        }
+
+        // Clean up the associated checkpoint group if applicable
+        if (groupId && groupId !== 'nogroup') {
+          try {
+            await authService.protectedApi.delete(`/items/checkpoint_groups/${groupId}`).catch(() => {});
+          } catch (_) {}
+        }
+      }
+
+      // 3. Purge from localStorage
+      if (tenantId) {
+        try {
+          const storedKey = `accesseasy_patrols_${tenantId}`;
+          const stored = localStorage.getItem(storedKey);
+          if (stored) {
+            const parsed = JSON.parse(stored);
+            const list = parsed.data || parsed;
+            if (Array.isArray(list)) {
+              const updated = list.filter(p => {
+                if (patrolId && String(p.id) === String(patrolId)) return false;
+                if (groupId && groupId !== 'nogroup' && String(p.groupId?.id || p.groupId) === String(groupId)) return false;
+                if (routeName && (p.name === routeName || p.routeName === routeName)) return false;
+                return true;
+              });
+              localStorage.setItem(storedKey, JSON.stringify({ data: updated, timestamp: Date.now() }));
+            }
+          }
+        } catch (_) {}
+      }
+
+      this.invalidateCache();
       subscriptionService.clearCache();
     } catch (error) {
       console.error('Error deleting patrol:', error);

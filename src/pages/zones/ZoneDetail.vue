@@ -226,6 +226,7 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import QRCode from 'qrcode';
+import { getCheckpointQrDataUrl } from '@/utils/checkpointQrHelper';
 import { ArrowLeft, Building2, MapPin, X, QrCode } from 'lucide-vue-next';
 import { zoneService } from '@/services/zoneService';
 import { siteService } from '@/services/siteService';
@@ -327,12 +328,7 @@ const printSingleCheckpointBadge = async (cp) => {
   try {
     const tenantId = authService.getTenantId();
     const cpId = cp.checkpoint_id || cp.id;
-    const rawString = `${cpId}-${tenantId}-AccessEasy2026`;
-    const signature = btoa(unescape(encodeURIComponent(rawString))).replace(/=/g, '');
-    const qrData = `ACPT::${cpId}::${signature}`;
-    const qrDataUrl = await QRCode.toDataURL(qrData, {
-      width: 240, margin: 1, color: { dark: '#0F172A', light: '#FFFFFF' }
-    });
+    const qrDataUrl = await getCheckpointQrDataUrl(cpId, tenantId, { size: 280 });
 
     const html = `
     <html>
@@ -343,7 +339,7 @@ const printSingleCheckpointBadge = async (cp) => {
           body { font-family: monospace, system-ui, sans-serif; background: #fff; color: #000; padding: 40px; display: flex; justify-content: center; }
           .card { width: 68mm; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 14px; border: 2px dashed #0F172A; border-radius: 12px; }
           .brand { font-size: 15px; font-weight: 900; text-transform: uppercase; border-bottom: 1px dashed #000; width: 100%; padding-bottom: 6px; margin-bottom: 12px; }
-          .qr { width: 50mm; height: 50mm; margin-bottom: 10px; }
+          .qr { width: 50mm; height: 50mm; margin-bottom: 10px; object-fit: contain; }
           .name { font-size: 15px; font-weight: bold; margin-bottom: 4px; word-break: break-word; max-width: 100%; }
           .id { font-size: 12px; font-family: monospace; margin-bottom: 10px; color: #334155; word-break: break-all; }
           .meta { width: 100%; display: flex; justify-content: space-between; border-top: 1px dashed #000; padding-top: 8px; margin-top: 4px; }

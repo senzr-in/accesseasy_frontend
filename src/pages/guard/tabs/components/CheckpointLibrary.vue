@@ -509,6 +509,7 @@ import {
   ArrowRight, Download, Check, AlertCircle, Settings, Layers, Building2, Pencil, AlertTriangle, QrCode
 } from 'lucide-vue-next';
 import QRCode from 'qrcode';
+import { getCheckpointQrDataUrl, downloadCheckpointQrPng, generateCheckpointQrData } from '@/utils/checkpointQrHelper';
 import { patrolService } from '@/services/patrolService';
 import { zoneService } from '@/services/zoneService';
 import { authService } from '@/services/authService';
@@ -795,17 +796,8 @@ const createNewZone = async () => {
 
 const downloadCheckpointQr = async (cp) => {
   const tenantId = authService.getTenantId();
-  const rawString = `${cp.checkpoint_id}-${tenantId}-AccessEasy2026`;
-  const signature = btoa(unescape(encodeURIComponent(rawString))).replace(/=/g, '');
-  const qrData = `ACPT::${cp.checkpoint_id}::${signature}`;
   try {
-    const dataUrl = await QRCode.toDataURL(qrData, {
-      width: 400, margin: 2, color: { dark: '#0F172A', light: '#FFFFFF' }
-    });
-    const link = document.createElement('a');
-    link.download = `${cp.name.replace(/\s+/g, '-')}-QR.png`;
-    link.href = dataUrl;
-    link.click();
+    await downloadCheckpointQrPng(cp, tenantId);
   } catch (err) {
     console.error('QR download failed:', err);
   }
@@ -813,13 +805,8 @@ const downloadCheckpointQr = async (cp) => {
 
 const printSingleCheckpointBadge = async (cp) => {
   const tenantId = authService.getTenantId();
-  const rawString = `${cp.checkpoint_id}-${tenantId}-AccessEasy2026`;
-  const signature = btoa(unescape(encodeURIComponent(rawString))).replace(/=/g, '');
-  const qrData = `ACPT::${cp.checkpoint_id}::${signature}`;
   try {
-    const qrDataUrl = await QRCode.toDataURL(qrData, {
-      width: 240, margin: 1, color: { dark: '#0F172A', light: '#FFFFFF' }
-    });
+    const qrDataUrl = await getCheckpointQrDataUrl(cp.checkpoint_id, tenantId, { size: 320 });
 
     const html = `
     <html>
@@ -830,7 +817,7 @@ const printSingleCheckpointBadge = async (cp) => {
           body { font-family: monospace, system-ui, sans-serif; background: #fff; color: #000; padding: 40px; display: flex; justify-content: center; }
           .card { width: 68mm; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 14px; border: 2px dashed #0F172A; border-radius: 12px; }
           .brand { font-size: 15px; font-weight: 900; text-transform: uppercase; border-bottom: 1px dashed #000; width: 100%; padding-bottom: 6px; margin-bottom: 12px; }
-          .qr { width: 50mm; height: 50mm; margin-bottom: 10px; }
+          .qr { width: 50mm; height: 50mm; margin-bottom: 10px; object-fit: contain; }
           .name { font-size: 16px; font-weight: bold; margin-bottom: 4px; }
           .id { font-size: 12px; font-family: monospace; margin-bottom: 10px; color: #334155; }
           .meta { width: 100%; display: flex; justify-content: space-between; border-top: 1px dashed #000; padding-top: 8px; margin-top: 4px; }
@@ -870,14 +857,9 @@ const printFilteredBadges = async () => {
   let htmlContent = '';
 
   for (const cp of list) {
-    const rawString = `${cp.checkpoint_id}-${tenantId}-AccessEasy2026`;
-    const signature = btoa(unescape(encodeURIComponent(rawString))).replace(/=/g, '');
-    const qrData = `ACPT::${cp.checkpoint_id}::${signature}`;
     let qrDataUrl = '';
     try {
-      qrDataUrl = await QRCode.toDataURL(qrData, {
-        width: 200, margin: 1, color: { dark: '#0F172A', light: '#FFFFFF' }
-      });
+      qrDataUrl = await getCheckpointQrDataUrl(cp.checkpoint_id, tenantId, { size: 260 });
     } catch {}
 
     htmlContent += `
@@ -902,7 +884,7 @@ const printFilteredBadges = async () => {
         body { font-family: monospace, system-ui, sans-serif; background: #fff; color: #000; padding: 20px; display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
         .card { width: 58mm; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 10px; border: 1px dashed #ccc; page-break-inside: avoid; margin-bottom: 20px; }
         .brand { font-size: 14px; font-weight: 800; text-transform: uppercase; border-bottom: 1px dashed #000; width: 100%; padding-bottom: 4px; margin-bottom: 8px; }
-        .qr { width: 45mm; height: 45mm; margin-bottom: 8px; }
+        .qr { width: 45mm; height: 45mm; margin-bottom: 8px; object-fit: contain; }
         .name { font-size: 16px; font-weight: bold; margin-bottom: 4px; }
         .id { font-size: 11px; margin-bottom: 8px; }
         .meta { width: 100%; display: flex; justify-content: space-between; border-top: 1px dashed #000; padding-top: 8px; margin-bottom: 8px; }
@@ -931,13 +913,12 @@ watch([editingCp, qrCanvas], async ([cp, canvas]) => {
   if (!cp || !canvas || isNew.value) return;
   await nextTick();
   const tenantId = authService.getTenantId();
-  const rawString = `${cp.checkpoint_id}-${tenantId}-AccessEasy2026`;
-  const signature = btoa(unescape(encodeURIComponent(rawString))).replace(/=/g, '');
-  const qrData = `ACPT::${cp.checkpoint_id}::${signature}`;
+  const qrData = generateCheckpointQrData(cp.checkpoint_id, tenantId);
   try {
     await QRCode.toCanvas(canvas, qrData, {
       width: 48,
       margin: 1,
+      errorCorrectionLevel: 'H',
       color: { dark: '#0F172A', light: '#FFFFFF' }
     });
   } catch (e) { console.error('QR generation failed', e); }
@@ -947,14 +928,9 @@ const printBadge = async () => {
   if (!editingCp.value) return;
   
   const tenantId = authService.getTenantId();
-  const rawString = `${editingCp.value.checkpoint_id}-${tenantId}-AccessEasy2026`;
-  const signature = btoa(unescape(encodeURIComponent(rawString))).replace(/=/g, '');
-  const qrData = `ACPT::${editingCp.value.checkpoint_id}::${signature}`;
   let qrDataUrl = '';
   try {
-    qrDataUrl = await QRCode.toDataURL(qrData, {
-      width: 200, margin: 1, color: { dark: '#0F172A', light: '#FFFFFF' }
-    });
+    qrDataUrl = await getCheckpointQrDataUrl(editingCp.value.checkpoint_id, tenantId, { size: 280 });
   } catch {}
 
   const html = `
@@ -966,7 +942,7 @@ const printBadge = async () => {
         body { font-family: monospace, system-ui, sans-serif; background: #fff; width: 58mm; margin: 0 auto; color: #000; }
         .card { width: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; padding: 10px 0; }
         .brand { font-size: 14px; font-weight: 800; text-transform: uppercase; border-bottom: 1px dashed #000; width: 100%; padding-bottom: 4px; margin-bottom: 8px; }
-        .qr { width: 45mm; height: 45mm; margin-bottom: 8px; }
+        .qr { width: 45mm; height: 45mm; margin-bottom: 8px; object-fit: contain; }
         .name { font-size: 16px; font-weight: bold; margin-bottom: 4px; }
         .id { font-size: 11px; margin-bottom: 8px; }
         .meta { width: 100%; display: flex; justify-content: space-between; border-top: 1px dashed #000; padding-top: 8px; margin-bottom: 8px; }

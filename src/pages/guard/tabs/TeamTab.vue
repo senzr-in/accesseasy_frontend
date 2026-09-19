@@ -405,22 +405,22 @@
                 </select>
               </div>
 
-              <!-- Assigned Door / Zone -->
+              <!-- Assigned Zone -->
               <div class="space-y-1.5">
                 <label class="text-[10px] font-black text-slate-500 dark:text-zinc-400 uppercase tracking-widest">Assigned Zone</label>
                 <select
-                  v-model="form.assigned_door"
+                  v-model="form.zone_id"
                   class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all text-foreground shadow-sm focus:border-indigo-500"
                 >
                   <option :value="null">
                     Unassigned
                   </option>
                   <option
-                    v-for="door in doors"
-                    :key="door.id"
-                    :value="door.id"
+                    v-for="zone in zones"
+                    :key="zone.id"
+                    :value="zone.id"
                   >
-                    {{ door.doorName || 'Unnamed Zone' }}
+                    {{ zone.zoneName || zone.name || `Zone ${zone.id}` }}
                   </option>
                 </select>
               </div>
@@ -719,6 +719,7 @@ import {
 import { authService } from '@/services/authService';
 import { currentUserTenant } from '@/utils/currentUserTenant';
 import { biometricService } from '@/services/biometricService';
+import { zoneService } from '@/services/zoneService';
 import ValueHeader from '@/components/common/ValueHeader.vue';
 import GuardMessageModal from '@/components/guard/GuardMessageModal.vue';
 
@@ -729,7 +730,7 @@ const showDialog = ref(false);
 const editingGuard = ref(null);
 const dialogLoading = ref(false);
 const dialogError = ref('');
-const doors = ref([]);
+const zones = ref([]);
 const guardRoleId = ref(null);
 
 const showBiometricModal = ref(false);
@@ -800,7 +801,7 @@ const form = ref({
   role_id: 4940,
   send_login_link: true,
   password: '',
-  assigned_door: null,
+  zone_id: null,
   enable_incidents: false,
   enable_patrols: false,
 });
@@ -870,7 +871,7 @@ const openAddDialog = () => {
     role_id: availableRoles.value[0]?.id || guardRoleId.value || null,
     send_login_link: true,
     password: '',
-    assigned_door: null,
+    zone_id: null,
     enable_incidents: false,
     enable_patrols: false
   };
@@ -891,6 +892,26 @@ const editGuard = async (guard) => {
     }
   }
 
+  let currentZoneId = guard.zone_id || null;
+  const tenantId = authService.getTenantId();
+  if (tenantId) {
+    try {
+      const key = `accesseasy_guard_assignments_${tenantId}`;
+      const assignments = JSON.parse(localStorage.getItem(key) || '{}');
+      if (assignments[guard.id] || assignments[String(guard.id)]) {
+        const a = assignments[guard.id] || assignments[String(guard.id)];
+        if (a.zone_id !== undefined) currentZoneId = a.zone_id;
+      }
+    } catch (_) {}
+  }
+
+  if (currentZoneId !== null && currentZoneId !== undefined && zones.value.length > 0) {
+    const matchingZone = zones.value.find(z => String(z.id) === String(currentZoneId));
+    if (matchingZone) {
+      currentZoneId = matchingZone.id;
+    }
+  }
+
   form.value = {
     employee_id: guard.employeeId || guard.employee_id || '',
     first_name: guard.first_name || '',
@@ -901,23 +922,22 @@ const editGuard = async (guard) => {
     role_id: guard.accesseasyRole?.id || guard.accesseasyRole || availableRoles.value[0]?.id || guardRoleId.value || null,
     send_login_link: false,
     password: '',
-    assigned_door: null,
+    zone_id: currentZoneId,
     enable_incidents: false,
     enable_patrols: false,
   };
   
-  // Fetch personalModule to get assigned_door, employeeId, and mobilePermissions
+  // Fetch personalModule to get employeeId and mobilePermissions
   try {
     dialogLoading.value = true;
     const token = authService.getToken();
-    const pmRes = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule?filter[assignedUser][_eq]=${guard.id}&fields[]=id&fields[]=employeeId&fields[]=assigned_door&fields[]=mobilePermissions`, {
+    const pmRes = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule?filter[assignedUser][_eq]=${guard.id}&fields[]=id&fields[]=employeeId&fields[]=mobilePermissions`, {
         headers: { Authorization: `Bearer ${token}` }
     });
     if (pmRes.ok) {
         const pmData = await pmRes.json();
         if (pmData.data && pmData.data.length > 0) {
             const pm = pmData.data[0];
-            form.value.assigned_door = typeof pm.assigned_door === 'object' && pm.assigned_door !== null ? pm.assigned_door.id || pm.assigned_door : pm.assigned_door;
             if (pm.employeeId) {
               form.value.employee_id = pm.employeeId;
             }
@@ -995,12 +1015,12 @@ const fetchGuards = async () => {
       }
     }
 
-    // Step 2: Enrich rawGuards with personalModule data (zone, employeeId, mobilePermissions)
+    // Step 2: Enrich rawGuards with personalModule data (employeeId, mobilePermissions)
     if (rawGuards.length > 0) {
       try {
         const userIds = rawGuards.map(g => g.id).filter(Boolean).join(',');
         const pmRes = await fetch(
-          `${import.meta.env.VITE_API_URL}/items/personalModule?filter[assignedUser][_in]=${userIds}&fields[]=assignedUser&fields[]=id&fields[]=employeeId&fields[]=mobilePermissions&fields[]=assigned_door.doorName`,
+          `${import.meta.env.VITE_API_URL}/items/personalModule?filter[assignedUser][_in]=${userIds}&fields[]=assignedUser&fields[]=id&fields[]=employeeId&fields[]=mobilePermissions`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         if (pmRes.ok) {
@@ -1012,7 +1032,6 @@ const fetchGuards = async () => {
                 personalModuleId: pm.id,
                 employeeId: pm.employeeId,
                 mobilePermissions: pm.mobilePermissions,
-                assigned_zone_name: pm.assigned_door?.doorName || null
               };
             }
           });
@@ -1022,7 +1041,6 @@ const fetchGuards = async () => {
               g.personalModuleId = pm.personalModuleId;
               g.employeeId = g.employeeId || pm.employeeId;
               g.mobilePermissions = pm.mobilePermissions;
-              g.assigned_zone_name = pm.assigned_zone_name;
             }
           });
         }
@@ -1042,6 +1060,16 @@ const fetchGuards = async () => {
       return true;
     });
 
+    // Step 4: Enrich with stored zone assignments
+    let storedAssignments = {};
+    if (tenantId) {
+      try {
+        const key = `accesseasy_guard_assignments_${tenantId}`;
+        storedAssignments = JSON.parse(localStorage.getItem(key) || '{}');
+      } catch (_) {}
+    }
+    const zoneMap = new Map((zones.value || []).map(z => [String(z.id), z.zoneName || z.name || `Zone ${z.id}`]));
+
     // 5. Fetch biometric face ID records for current tenant
     let faceProfiles = [];
     try {
@@ -1051,6 +1079,19 @@ const fetchGuards = async () => {
     }
 
     const enhanced = filtered.map(u => {
+      const gId = String(u.id);
+      const assignment = storedAssignments[gId];
+      let assignedZoneId = u.zone_id || null;
+      let assignedZoneName = u.assigned_zone_name || null;
+      if (assignment && assignment.zone_id !== undefined) {
+        assignedZoneId = assignment.zone_id;
+      }
+      if (assignedZoneId && zoneMap.has(String(assignedZoneId))) {
+        assignedZoneName = zoneMap.get(String(assignedZoneId));
+      } else if (!assignedZoneName && assignedZoneId) {
+        assignedZoneName = `Zone ${assignedZoneId}`;
+      }
+
       const matchingProfile = faceProfiles.find(fp => 
         fp.assignedTo?.assignedUser?.id === u.id || 
         fp.assignedTo?.assignedUser === u.id || 
@@ -1087,6 +1128,8 @@ const fetchGuards = async () => {
 
       return {
         ...u,
+        zone_id: assignedZoneId,
+        assigned_zone_name: assignedZoneName,
         avatar: photoUrl,
         faceProfile: matchingProfile || null,
         faceStatus: matchingProfile?.status || 'not_enrolled',
@@ -1105,19 +1148,12 @@ const fetchGuards = async () => {
   }
 };
 
-const fetchDoors = async () => {
+const fetchZones = async () => {
   try {
-    const token = authService.getToken();
-    const tenantId = await currentUserTenant.getTenantIdAsync();
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/doors?filter[tenant][_eq]=${tenantId}&filter[status][_neq]=archived&fields[]=id&fields[]=doorName`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    if (res.ok) {
-      const data = await res.json();
-      doors.value = data.data || [];
-    }
+    zones.value = await zoneService.getZones();
   } catch (err) {
-    console.error('Failed to fetch doors:', err);
+    console.error('Failed to fetch zones:', err);
+    zones.value = [];
   }
 };
 
@@ -1209,10 +1245,9 @@ const handleSubmit = async () => {
           attendancePolicyHistory: { status: "published" },
           tenant: tenantId,
           assignedUser: newUserId,
-          assigned_door: form.value.assigned_door,
         };
 
-        const personalRes = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule`, {
+        await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
@@ -1220,19 +1255,14 @@ const handleSubmit = async () => {
           },
           body: JSON.stringify(personalPayload),
         });
-
-        if (!personalRes.ok) {
-          console.warn('Backend rejected personalModule assignment for Guard.');
-        }
       } else if (isEdit && editingGuard.value.personalModuleId) {
-        // Update assigned_door, mobile permissions, and employeeId
+        // Update mobile permissions and employeeId
         const personalPayload = {
             employeeId: form.value.employee_id?.trim() || undefined,
             firstName: form.value.first_name,
             lastName: form.value.last_name || '-',
             personalEmail: form.value.email,
             personalPhone: form.value.phone ? `+91${form.value.phone}` : null,
-            assigned_door: form.value.assigned_door,
             mobilePermissions: { 
               enable_incidents: form.value.enable_incidents, 
               enable_patrols: form.value.enable_patrols 
@@ -1246,6 +1276,23 @@ const handleSubmit = async () => {
           },
           body: JSON.stringify(personalPayload),
         });
+      }
+
+      // Persist zone assignment
+      const targetGuardId = isEdit ? editingGuard.value.id : newUserId;
+      if (targetGuardId && tenantId) {
+        try {
+          const key = `accesseasy_guard_assignments_${tenantId}`;
+          const assignments = JSON.parse(localStorage.getItem(key) || '{}');
+          assignments[String(targetGuardId)] = {
+            ...(assignments[String(targetGuardId)] || {}),
+            zone_id: form.value.zone_id || null,
+            updated_at: Date.now()
+          };
+          localStorage.setItem(key, JSON.stringify(assignments));
+        } catch (e) {
+          console.warn('[TeamTab] Assignment storage notice:', e);
+        }
       }
 
       showDialog.value = false;
@@ -1298,6 +1345,6 @@ const deleteGuard = async (guard) => {
 
 onMounted(() => {
   fetchGuards();
-  fetchDoors();
+  fetchZones();
 });
 </script>

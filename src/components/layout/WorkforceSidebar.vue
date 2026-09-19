@@ -238,7 +238,7 @@ const dailyOperationsNav = computed(() => {
 const siteSetupNav = computed(() => {
   if (userRole.value === 'Admin' || userRole.value === 'Manager') {
     return [
-      { name: 'Zones', href: '/dashboard/settings/zones', icon: Building2 },
+      { name: 'Sites & Zones', href: '/dashboard/sites', icon: Building2 },
     ];
   }
   return [];

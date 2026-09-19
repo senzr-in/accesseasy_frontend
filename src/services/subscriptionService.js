@@ -373,10 +373,52 @@ class SubscriptionService {
 
         // Sites (Branch) count
         try {
-          const res = await authService.protectedApi.get(
-            `/items/branch?filter[tenant][_eq]=${tenantId}&fields[]=id&limit=500`
-          );
-          if (res.data?.data) siteCount = res.data.data.length;
+          const tenantData = authService.getTenantData();
+          const tenantCode = tenantData?.tenantId || (typeof tenantData === 'string' ? tenantData : null) || tenantId;
+          const tenantPk = tenantData?.id;
+
+          const queries = [
+            tenantCode ? `/items/branch?filter[tenant][tenantId][_eq]=${encodeURIComponent(tenantCode)}&fields[]=id,tenant&limit=500` : null,
+            tenantPk ? `/items/branch?filter[tenant][_eq]=${encodeURIComponent(tenantPk)}&fields[]=id,tenant&limit=500` : null,
+            tenantId ? `/items/branch?filter[tenant][_eq]=${encodeURIComponent(tenantId)}&fields[]=id,tenant&limit=500` : null,
+            `/items/branch?fields[]=id,tenant&limit=500`
+          ].filter(Boolean);
+
+          let branchList = [];
+          for (const q of queries) {
+            try {
+              const res = await authService.protectedApi.get(q, { timeout: 6000 });
+              if (Array.isArray(res.data?.data) && res.data.data.length > 0) {
+                branchList = res.data.data;
+                break;
+              }
+            } catch (_) {}
+          }
+
+          const userTenantId = String(tenantId || '').trim().toLowerCase();
+          const userTenantCode = String(tenantCode || '').trim().toLowerCase();
+          const userTenantPk = tenantPk != null ? String(tenantPk).trim().toLowerCase() : '';
+
+          const matchingBranches = branchList.filter(loc => {
+            if (!loc || !loc.tenant) return false;
+            if (typeof loc.tenant === 'object') {
+              const tCode = loc.tenant.tenantId ? String(loc.tenant.tenantId).trim().toLowerCase() : '';
+              const tPk = loc.tenant.id != null ? String(loc.tenant.id).trim().toLowerCase() : '';
+              return (
+                (userTenantCode && tCode === userTenantCode) ||
+                (userTenantId && (tCode === userTenantId || tPk === userTenantId)) ||
+                (userTenantPk && tPk === userTenantPk)
+              );
+            }
+            const str = String(loc.tenant).trim().toLowerCase();
+            return (
+              (userTenantCode && str === userTenantCode) ||
+              (userTenantId && str === userTenantId) ||
+              (userTenantPk && str === userTenantPk)
+            );
+          });
+
+          siteCount = matchingBranches.length;
         } catch (_) {
           const stored = localStorage.getItem(`accesseasy_sites_${tenantId}`);
           if (stored) {

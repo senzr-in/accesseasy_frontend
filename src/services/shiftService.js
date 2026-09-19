@@ -3,16 +3,16 @@ import { authService } from "@/services/authService";
 class ShiftService {
   getDefaultShiftTemplates() {
     return [
-      { id: 'tmpl-1', name: 'Morning Shift (06:00 - 14:00)', shift: 'Morning', start_time: '06:00', end_time: '14:00' },
-      { id: 'tmpl-2', name: 'Afternoon Shift (14:00 - 22:00)', shift: 'Afternoon', start_time: '14:00', end_time: '22:00' },
-      { id: 'tmpl-3', name: 'Night Shift (22:00 - 06:00)', shift: 'Night', start_time: '22:00', end_time: '06:00' },
-      { id: 'tmpl-4', name: '12-Hour Duty (08:00 - 20:00)', shift: '12-Hour', start_time: '08:00', end_time: '20:00' },
-      { id: 'off', name: 'Day Off / Rest', shift: 'OFF', start_time: '00:00', end_time: '00:00' }
+      { id: 'tmpl-1', name: 'Morning Shift (06:00 - 14:00)', shift: 'Morning', start_time: '06:00', end_time: '14:00', durationHours: 8 },
+      { id: 'tmpl-2', name: 'Afternoon Shift (14:00 - 22:00)', shift: 'Afternoon', start_time: '14:00', end_time: '22:00', durationHours: 8 },
+      { id: 'tmpl-3', name: 'Night Shift (22:00 - 06:00)', shift: 'Night', start_time: '22:00', end_time: '06:00', durationHours: 8 },
+      { id: 'tmpl-4', name: '12-Hour Duty (08:00 - 20:00)', shift: '12-Hour', start_time: '08:00', end_time: '20:00', durationHours: 12 },
+      { id: 'off', name: 'Day Off / Rest', shift: 'OFF', start_time: '00:00', end_time: '00:00', durationHours: 0 }
     ];
   }
 
   /**
-   * Fetch shift templates (morning, afternoon, night, etc.) from Directus Cloud
+   * Fetch shift templates (morning, afternoon, night, etc.)
    */
   async fetchShiftTemplates() {
     try {
@@ -25,11 +25,12 @@ class ShiftService {
           if (res.data?.data && res.data.data.length > 0) {
             return res.data.data.map(s => ({
               ...s,
-              id: s.id || `shift-${s.shift || 'custom'}`,
+              id: String(s.id || `shift-${s.shift || 'custom'}`),
               name: s.name || s.shift || `Shift ${s.id}`,
               shift: s.shift || s.name || `Shift ${s.id}`,
-              start_time: s.start_time || s.entryTime || '08:00',
-              end_time: s.end_time || s.exitTime || '16:00'
+              startTime: s.start_time || s.startTime || s.entryTime || '08:00',
+              endTime: s.end_time || s.endTime || s.exitTime || '16:00',
+              durationHours: s.durationHours || 8
             }));
           }
         } catch (e) {}
@@ -39,21 +40,11 @@ class ShiftService {
   }
 
   /**
-   * Fetch weekly roster for all guards (or filtered by site) from Directus Cloud
+   * Fetch weekly roster for all guards
    */
   async fetchWeeklyRoster(siteId = null) {
     const tenantId = authService.getTenantId() || 'default';
     const storageKey = `accesseasy_guard_roster_${tenantId}`;
-
-    let cloudRoster = [];
-    try {
-      let endpoint = `/items/guard_roster?filter[tenant][_eq]=${tenantId}&sort=guard_name`;
-      if (siteId) endpoint += `&filter[site][_eq]=${siteId}`;
-      const res = await authService.protectedApi.get(endpoint);
-      if (res.data?.data && Array.isArray(res.data.data)) {
-        cloudRoster = res.data.data;
-      }
-    } catch (e) {}
 
     let localRoster = [];
     try {
@@ -61,111 +52,69 @@ class ShiftService {
       if (stored) localRoster = JSON.parse(stored);
     } catch (e) {}
 
-    // Combine cloud and local roster entries
-    let combinedRoster = [...cloudRoster];
-    if (localRoster.length > 0) {
-      const existingIds = new Set(combinedRoster.map(r => String(r.guardId || r.guard || r.id)));
-      localRoster.forEach(lr => {
-        const idStr = String(lr.guardId || lr.guard || lr.id);
-        if (!existingIds.has(idStr)) {
-          combinedRoster.push(lr);
-        } else {
-          const idx = combinedRoster.findIndex(r => String(r.guardId || r.guard || r.id) === idStr);
-          if (idx !== -1 && lr.schedule) {
-            combinedRoster[idx].schedule = { ...combinedRoster[idx].schedule, ...lr.schedule };
-          }
-        }
-      });
-    }
+    const rosterMap = new Map();
+    localRoster.forEach(lr => {
+      const key = String(lr.guardId || lr.id);
+      rosterMap.set(key, lr);
+    });
 
-    // Also fetch employees / guards to make sure all registered staff appear in the roster
+    // Fetch real registered guards/users for this tenant
     try {
-      const empRes = await authService.protectedApi.get(`/items/employees?filter[tenant][_eq]=${tenantId}&limit=50`);
-      const employees = empRes.data?.data || [];
-      
-      employees.forEach(emp => {
-        const empId = String(emp.id);
-        const empName = emp.name || `${emp.first_name || ''} ${emp.last_name || ''}`.trim() || `Guard ${emp.employee_id || emp.id}`;
-        
-        const found = combinedRoster.find(r => String(r.guardId || r.guard || r.id) === empId || r.guardName === empName);
-        if (!found) {
-          combinedRoster.push({
-            id: `roster-${empId}`,
-            guardId: empId,
-            guardName: empName,
-            schedule: {
-              Mon: { shiftId: 'tmpl-1', shiftName: 'Morning (06-14)' },
-              Tue: { shiftId: 'tmpl-1', shiftName: 'Morning (06-14)' },
-              Wed: { shiftId: 'tmpl-1', shiftName: 'Morning (06-14)' },
-              Thu: { shiftId: 'tmpl-1', shiftName: 'Morning (06-14)' },
-              Fri: { shiftId: 'tmpl-1', shiftName: 'Morning (06-14)' },
-              Sat: { shiftId: 'tmpl-1', shiftName: 'Morning (06-14)' },
-              Sun: { shiftId: 'off', shiftName: 'OFF' }
-            }
-          });
-        }
-      });
-    } catch (e) {}
+      const token = authService.getToken();
+      const apiUrl = import.meta.env.VITE_API_URL;
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-    // If still empty (e.g. brand new tenant), supply standard demo roster entries
-    if (combinedRoster.length === 0) {
-      combinedRoster = [
-        {
-          id: 'roster-g1',
-          guardId: 'g1',
-          guardName: 'Ramesh Kumar (Supervisor)',
-          schedule: {
-            Mon: { shiftId: 'tmpl-1', shiftName: 'Morning (06-14)' },
-            Tue: { shiftId: 'tmpl-1', shiftName: 'Morning (06-14)' },
-            Wed: { shiftId: 'tmpl-1', shiftName: 'Morning (06-14)' },
-            Thu: { shiftId: 'tmpl-1', shiftName: 'Morning (06-14)' },
-            Fri: { shiftId: 'tmpl-1', shiftName: 'Morning (06-14)' },
-            Sat: { shiftId: 'tmpl-1', shiftName: 'Morning (06-14)' },
-            Sun: { shiftId: 'off', shiftName: 'OFF' }
+      const res = await fetch(
+        `${apiUrl}/users?filter[tenant][_eq]=${tenantId}&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=phone&fields[]=role&limit=100`,
+        { headers }
+      );
+
+      if (res.ok) {
+        const json = await res.json();
+        const rawUsers = json?.data || [];
+
+        rawUsers.forEach(u => {
+          if (u && u.id) {
+            const uid = String(u.id);
+            const name = `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.phone || `Guard ${u.id}`;
+
+            if (rosterMap.has(uid)) {
+              const existing = rosterMap.get(uid);
+              existing.guardName = name;
+            } else {
+              rosterMap.set(uid, {
+                id: `roster-${uid}`,
+                guardId: uid,
+                guardName: name,
+                schedule: {
+                  Mon: { shiftId: 'tmpl-1', shiftName: 'Morning (06-14)' },
+                  Tue: { shiftId: 'tmpl-1', shiftName: 'Morning (06-14)' },
+                  Wed: { shiftId: 'tmpl-1', shiftName: 'Morning (06-14)' },
+                  Thu: { shiftId: 'tmpl-1', shiftName: 'Morning (06-14)' },
+                  Fri: { shiftId: 'tmpl-1', shiftName: 'Morning (06-14)' },
+                  Sat: { shiftId: 'tmpl-1', shiftName: 'Morning (06-14)' },
+                  Sun: { shiftId: 'off', shiftName: 'OFF' }
+                }
+              });
+            }
           }
-        },
-        {
-          id: 'roster-g2',
-          guardId: 'g2',
-          guardName: 'Suresh Patel (Patrol Officer)',
-          schedule: {
-            Mon: { shiftId: 'tmpl-2', shiftName: 'Afternoon (14-22)' },
-            Tue: { shiftId: 'tmpl-2', shiftName: 'Afternoon (14-22)' },
-            Wed: { shiftId: 'tmpl-2', shiftName: 'Afternoon (14-22)' },
-            Thu: { shiftId: 'tmpl-2', shiftName: 'Afternoon (14-22)' },
-            Fri: { shiftId: 'tmpl-2', shiftName: 'Afternoon (14-22)' },
-            Sat: { shiftId: 'off', shiftName: 'OFF' },
-            Sun: { shiftId: 'tmpl-2', shiftName: 'Afternoon (14-22)' }
-          }
-        },
-        {
-          id: 'roster-g3',
-          guardId: 'g3',
-          guardName: 'Vijay Singh (Night Guard)',
-          schedule: {
-            Mon: { shiftId: 'tmpl-3', shiftName: 'Night (22-06)' },
-            Tue: { shiftId: 'tmpl-3', shiftName: 'Night (22-06)' },
-            Wed: { shiftId: 'tmpl-3', shiftName: 'Night (22-06)' },
-            Thu: { shiftId: 'tmpl-3', shiftName: 'Night (22-06)' },
-            Fri: { shiftId: 'tmpl-3', shiftName: 'Night (22-06)' },
-            Sat: { shiftId: 'tmpl-3', shiftName: 'Night (22-06)' },
-            Sun: { shiftId: 'off', shiftName: 'OFF' }
-          }
-        }
-      ];
+        });
+      }
+    } catch (e) {
+      console.warn('[shiftService] Error fetching users for roster:', e);
     }
 
-    return combinedRoster;
+    const finalRoster = Array.from(rosterMap.values());
+    return finalRoster;
   }
 
   /**
    * Assign / update a guard's shift for a specific day
    */
-  async assignGuardShift(guardId, dayKey, shiftId, shiftName, siteId = null) {
+  async assignGuardShift(guardId, dayKey, shiftId, shiftName, siteId = null, guardName = null) {
     const tenantId = authService.getTenantId() || 'default';
     const storageKey = `accesseasy_guard_roster_${tenantId}`;
 
-    // Update in LocalStorage fallback first
     try {
       let localList = [];
       const stored = localStorage.getItem(storageKey);
@@ -179,51 +128,28 @@ class ShiftService {
           shiftName,
           status: shiftId === 'off' ? 'off' : 'confirmed'
         };
+        if (guardName) localList[idx].guardName = guardName;
       } else {
         const newEntry = {
           id: `roster-${guardId}`,
           guardId: String(guardId),
-          guardName: `Guard ${guardId}`,
+          guardName: guardName || `Guard ${guardId}`,
           schedule: {
+            Mon: { shiftId: 'tmpl-1', shiftName: 'Morning (06-14)' },
+            Tue: { shiftId: 'tmpl-1', shiftName: 'Morning (06-14)' },
+            Wed: { shiftId: 'tmpl-1', shiftName: 'Morning (06-14)' },
+            Thu: { shiftId: 'tmpl-1', shiftName: 'Morning (06-14)' },
+            Fri: { shiftId: 'tmpl-1', shiftName: 'Morning (06-14)' },
+            Sat: { shiftId: 'tmpl-1', shiftName: 'Morning (06-14)' },
+            Sun: { shiftId: 'off', shiftName: 'OFF' },
             [dayKey]: { shiftId, shiftName, status: shiftId === 'off' ? 'off' : 'confirmed' }
           }
         };
         localList.push(newEntry);
       }
       localStorage.setItem(storageKey, JSON.stringify(localList));
-    } catch (e) {}
-
-    // Attempt Directus Cloud save
-    try {
-      const existing = await authService.protectedApi
-        .get(`/items/guard_roster?filter[tenant][_eq]=${tenantId}&filter[guard][_eq]=${guardId}&limit=1`)
-        .then(r => r.data?.data?.[0])
-        .catch(() => null);
-
-      const schedule = existing?.schedule ? { ...existing.schedule } : {};
-      schedule[dayKey] = {
-        shiftId,
-        shiftName,
-        status: shiftId === "off" ? "off" : "confirmed"
-      };
-
-      if (existing?.id) {
-        const upd = await authService.protectedApi.patch(
-          `/items/guard_roster/${existing.id}`,
-          { schedule }
-        );
-        return upd.data?.data;
-      } else {
-        const created = await authService.protectedApi.post("/items/guard_roster", {
-          tenant: tenantId,
-          guard: guardId,
-          site: siteId,
-          schedule
-        });
-        return created.data?.data;
-      }
-    } catch (error) {
-      console.warn("Directus save guard_roster fallback to local storage:", error?.message);
+    } catch (e) {
+      console.error('[shiftService] Error saving guard shift:', e);
     }
 
     return true;

@@ -441,6 +441,7 @@ import { patrolService } from '@/services/patrolService';
 import { zoneService } from '@/services/zoneService';
 import { authService } from '@/services/authService';
 import QRCode from 'qrcode';
+import { getCheckpointQrDataUrl } from '@/utils/checkpointQrHelper';
 
 const selectedPatrolId = ref(null);
 const checkpoints = ref([]); // Current group's sequence
@@ -625,12 +626,7 @@ const onDragEnd = () => {
 const generateQrDataUrl = async (cp) => {
   try {
     const tenantId = authService.getTenantId();
-    const rawString = `${cp.checkpoint_id}-${tenantId}-AccessEasy2026`;
-    const signature = btoa(unescape(encodeURIComponent(rawString))).replace(/=/g, '');
-    const qrData = `ACPT::${cp.checkpoint_id}::${signature}`;
-    return await QRCode.toDataURL(qrData, {
-      width: 200, margin: 1, color: { dark: '#0F172A', light: '#FFFFFF' }
-    });
+    return await getCheckpointQrDataUrl(cp.checkpoint_id, tenantId, { size: 240 });
   } catch (err) {
     console.error('QR code generation failed:', err);
     return '';

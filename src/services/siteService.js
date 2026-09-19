@@ -40,18 +40,60 @@ class SiteService {
         const tenantId = authService.getTenantId();
         if (!tenantId || !authService.getToken()) return [];
 
+        const tenantData = authService.getTenantData();
+        const tenantCode = tenantData?.tenantId || (typeof tenantData === 'string' ? tenantData : null) || tenantId;
+        const tenantPk = tenantData?.id;
+
         let rawData = [];
-        try {
-          const res = await authService.protectedApi.get(
-            `/items/branch?filter[tenant][_eq]=${tenantId}&limit=200`,
-            { timeout: 6000 }
-          );
-          rawData = res.data?.data || [];
-        } catch (err) {
-          console.warn('[siteService] fetchSites branch query error:', err?.message);
+        
+        // Multi-strategy queries for Directus M2O tenant relation
+        const queries = [
+          tenantCode ? `/items/branch?filter[tenant][tenantId][_eq]=${encodeURIComponent(tenantCode)}&fields=*,tenant.*&limit=200` : null,
+          tenantPk ? `/items/branch?filter[tenant][_eq]=${encodeURIComponent(tenantPk)}&fields=*,tenant.*&limit=200` : null,
+          tenantId ? `/items/branch?filter[tenant][_eq]=${encodeURIComponent(tenantId)}&fields=*,tenant.*&limit=200` : null,
+          `/items/branch?fields=*,tenant.*&limit=200`
+        ].filter(Boolean);
+
+        for (const q of queries) {
+          try {
+            const res = await authService.protectedApi.get(q, { timeout: 6000 });
+            if (Array.isArray(res.data?.data) && res.data.data.length > 0) {
+              rawData = res.data.data;
+              break;
+            }
+          } catch (err) {
+            // continue fallback
+          }
         }
 
-        const mapped = rawData.map(loc => {
+        const userTenantId = String(tenantId || '').trim().toLowerCase();
+        const userTenantCode = String(tenantCode || '').trim().toLowerCase();
+        const userTenantPk = tenantPk != null ? String(tenantPk).trim().toLowerCase() : '';
+
+        // Strict tenant isolation filter
+        const tenantFiltered = rawData.filter(loc => {
+          if (!loc) return false;
+          if (!loc.tenant) return false; // Exclude unassigned/global test sites
+
+          if (typeof loc.tenant === 'object') {
+            const tCode = loc.tenant.tenantId ? String(loc.tenant.tenantId).trim().toLowerCase() : '';
+            const tPk = loc.tenant.id != null ? String(loc.tenant.id).trim().toLowerCase() : '';
+            return (
+              (userTenantCode && tCode === userTenantCode) ||
+              (userTenantId && (tCode === userTenantId || tPk === userTenantId)) ||
+              (userTenantPk && tPk === userTenantPk)
+            );
+          }
+
+          const str = String(loc.tenant).trim().toLowerCase();
+          return (
+            (userTenantCode && str === userTenantCode) ||
+            (userTenantId && str === userTenantId) ||
+            (userTenantPk && str === userTenantPk)
+          );
+        });
+
+        const mapped = tenantFiltered.map(loc => {
           let lat = null;
           let lng = null;
           if (loc.locmark?.coordinates && Array.isArray(loc.locmark.coordinates)) {
@@ -83,8 +125,6 @@ class SiteService {
             geofence_radius: siteRadius
           };
         });
-
-        // Note: localStorage fallback removed — Directus is the single source of truth.
 
         this._sitesCache = mapped;
         this._cacheExpiry = Date.now() + 60000; // 60s TTL

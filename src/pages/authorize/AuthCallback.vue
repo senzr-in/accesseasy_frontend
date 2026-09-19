@@ -141,6 +141,8 @@ onMounted(async () => {
         }
       }
 
+      let authSuccessful = false;
+
       // 1. ALWAYS call Knative auth-service google-login first with userEmail to get the true Directus JWT and Directus refresh token
       if (userEmail) {
         try {

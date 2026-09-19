@@ -52,7 +52,7 @@
         </div>
         <div class="bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-xl p-4 shadow-sm">
           <span class="text-[10px] font-bold text-slate-400 uppercase">24/7 Coverage</span>
-          <p class="text-2xl font-black text-emerald-600 mt-1">100% <span class="text-xs text-emerald-500 font-bold">Optimal</span></p>
+          <p class="text-2xl font-black text-emerald-600 mt-1">{{ rosterList.length > 0 ? '100%' : '0%' }} <span class="text-xs text-emerald-500 font-bold">{{ rosterList.length > 0 ? 'Optimal' : 'Pending' }}</span></p>
         </div>
         <div class="bg-white dark:bg-[#151c2c] border border-slate-200 dark:border-white/10 rounded-xl p-4 shadow-sm">
           <span class="text-[10px] font-bold text-slate-400 uppercase">Shift Templates</span>
@@ -75,7 +75,24 @@
           </div>
         </div>
 
-        <div class="overflow-x-auto custom-scrollbar">
+        <div v-if="isLoading" class="p-16 flex justify-center">
+          <Loader2 class="w-8 h-8 animate-spin text-indigo-500" />
+        </div>
+
+        <div v-else-if="rosterList.length === 0" class="p-16 flex flex-col items-center justify-center text-center">
+          <Calendar class="w-12 h-12 text-slate-300 dark:text-slate-600 mb-3" />
+          <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200">No Guard Shifts Scheduled</h3>
+          <p class="text-xs text-slate-500 mt-1 max-w-sm">No security guards are currently assigned to shift rosters. Add guards to your workforce roster or assign their first weekly shifts.</p>
+          <button
+            class="mt-4 h-9 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 shadow-sm"
+            @click="router.push('/dashboard/guards')"
+          >
+            <Plus class="w-4 h-4" />
+            <span>Manage Guards & Team</span>
+          </button>
+        </div>
+
+        <div v-else class="overflow-x-auto custom-scrollbar">
           <table class="w-full text-left text-xs whitespace-nowrap">
             <thead class="bg-slate-50/90 dark:bg-slate-800/60 border-b border-slate-100 dark:border-white/5 text-[10px] font-black text-slate-400 uppercase tracking-wider">
               <tr>
@@ -135,11 +152,24 @@
         <div class="w-full max-w-md bg-white dark:bg-[#151c2c] rounded-2xl shadow-2xl p-6 border border-slate-200 dark:border-white/10 animate-in zoom-in-95 duration-150 text-xs">
           <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-100 dark:border-white/5">
             <h3 class="text-sm font-black text-slate-900 dark:text-white">
-              Assign Shift: {{ selectedSlotGuard?.guardName }} ({{ selectedSlotDay }})
+              Assign Shift: {{ selectedSlotGuard?.guardName || 'Officer' }} ({{ selectedSlotDay }})
             </h3>
             <button class="text-slate-400 hover:text-slate-600 p-1 cursor-pointer" @click="showSlotModal = false">
               <X class="w-4 h-4" />
             </button>
+          </div>
+
+          <!-- Select Guard if not pre-selected -->
+          <div v-if="!selectedSlotGuard?.guardId && rosterList.length > 0" class="mb-4 space-y-1">
+            <label class="font-bold text-slate-700 dark:text-slate-300 block">Select Guard / Officer</label>
+            <select
+              v-model="selectedSlotGuard"
+              class="w-full h-9 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-semibold"
+            >
+              <option v-for="g in rosterList" :key="g.guardId" :value="g">
+                {{ g.guardName }}
+              </option>
+            </select>
           </div>
 
           <div v-if="conflictWarning" class="p-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 rounded-xl mb-4 text-amber-800 dark:text-amber-300">
@@ -180,7 +210,7 @@
           <div class="mt-6 pt-3 border-t border-slate-100 dark:border-white/5 flex gap-2 justify-end">
             <button
               type="button"
-              class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs"
+              class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs cursor-pointer"
               @click="showSlotModal = false"
             >
               Cancel
@@ -203,7 +233,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { Calendar, Download, Plus, X, ArrowLeft } from 'lucide-vue-next';
+import { Calendar, Download, Plus, X, ArrowLeft, Loader2 } from 'lucide-vue-next';
 import { shiftService } from '@/services/shiftService';
 import FeatureGate from '@/components/common/FeatureGate.vue';
 
@@ -212,6 +242,7 @@ const router = useRouter();
 const daysList = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const rosterList = ref([]);
 const shiftTemplates = ref([]);
+const isLoading = ref(true);
 
 const showSlotModal = ref(false);
 const selectedSlotGuard = ref(null);
@@ -247,7 +278,7 @@ const calculateGuardHours = (guard) => {
 };
 
 const openShiftSlotModal = (guard, day) => {
-  selectedSlotGuard.value = guard || rosterList.value[0];
+  selectedSlotGuard.value = guard || rosterList.value[0] || null;
   selectedSlotDay.value = day;
   const current = selectedSlotGuard.value?.schedule?.[day];
   selectedTemplateId.value = current?.shiftId || 'tmpl-1';
@@ -259,7 +290,9 @@ const openShiftSlotModal = (guard, day) => {
 const onSelectTemplate = (tmpl) => {
   selectedTemplateId.value = tmpl.id;
   selectedTemplateName.value = tmpl.name;
-  conflictWarning.value = shiftService.detectConflict(selectedSlotGuard.value, selectedSlotDay.value, tmpl.id);
+  if (selectedSlotGuard.value) {
+    conflictWarning.value = shiftService.detectConflict(selectedSlotGuard.value, selectedSlotDay.value, tmpl.id);
+  }
 };
 
 const confirmAssignShift = async () => {
@@ -268,13 +301,16 @@ const confirmAssignShift = async () => {
     selectedSlotGuard.value.guardId,
     selectedSlotDay.value,
     selectedTemplateId.value,
-    selectedTemplateName.value
+    selectedTemplateName.value,
+    null,
+    selectedSlotGuard.value.guardName
   );
   showSlotModal.value = false;
   await loadData();
 };
 
 const exportRosterCSV = () => {
+  if (rosterList.value.length === 0) return;
   const headers = ['Guard Name', ...daysList, 'Total Hours'];
   const rows = rosterList.value.map(g => [
     g.guardName,
@@ -291,8 +327,19 @@ const exportRosterCSV = () => {
 };
 
 const loadData = async () => {
-  rosterList.value = await shiftService.fetchWeeklyRoster();
-  shiftTemplates.value = await shiftService.fetchShiftTemplates();
+  isLoading.value = true;
+  try {
+    const [roster, templates] = await Promise.all([
+      shiftService.fetchWeeklyRoster(),
+      shiftService.fetchShiftTemplates()
+    ]);
+    rosterList.value = roster || [];
+    shiftTemplates.value = templates || [];
+  } catch (err) {
+    console.error('Error loading ShiftScheduler data:', err);
+  } finally {
+    isLoading.value = false;
+  }
 };
 
 onMounted(async () => {

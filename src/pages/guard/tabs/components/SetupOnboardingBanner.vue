@@ -676,7 +676,19 @@ const props = defineProps({
 
 const emit = defineEmits(['refreshData']);
 
-const isDismissed = ref(false);
+// Helper to check dismissal/completion keys for current tenant
+const _checkIsCompletedOrDismissed = () => {
+  const tenantId = authService.getTenantId() || 'global';
+  return (
+    localStorage.getItem(`accesseasy_setup_wizard_completed_${tenantId}`) === 'true' ||
+    localStorage.getItem(`accesseasy_setup_wizard_dismissed_${tenantId}`) === 'true' ||
+    localStorage.getItem('accesseasy_setup_wizard_dismissed') === 'true' ||
+    localStorage.getItem('accesseasy_setup_wizard_completed') === 'true'
+  );
+};
+
+const isDismissed = ref(_checkIsCompletedOrDismissed());
+const isLoading = ref(true);
 const totalCheckpoints = ref(0);
 
 // Local override counts so completed status flips instantly on creation
@@ -748,11 +760,16 @@ const guardForm = ref({
 });
 
 const fetchMetadata = async () => {
+  if (isDismissed.value) {
+    isLoading.value = false;
+    return;
+  }
   try {
-    const [sites, zones, cps] = await Promise.all([
+    const [sites, zones, cps, patrols] = await Promise.all([
       siteService.fetchSites().catch(() => []),
       zoneService.fetchZones().catch(() => []),
-      patrolService.getMasterCheckpoints().catch(() => [])
+      patrolService.getMasterCheckpoints().catch(() => []),
+      patrolService.getPatrols().catch(() => [])
     ]);
     availableSites.value = sites || [];
     availableZones.value = zones || [];
@@ -760,25 +777,79 @@ const fetchMetadata = async () => {
 
     // Fetch guards
     const token = authService.getToken();
-    const tenantId = authService.getTenantId();
+    let tenantId = authService.getTenantId();
+    if (!tenantId) {
+      try { tenantId = await currentUserTenant.getTenantIdAsync(); } catch (_) {}
+    }
+    const tenantData = authService.getTenantData();
+    const tenantIdStr = tenantData?.tenantId;
+    const tenantIdPk = tenantData?.id;
     const apiUrl = import.meta.env.VITE_API_URL;
-    if (token && tenantId) {
+
+    const validTenantSet = new Set(
+      [tenantId, tenantIdStr, tenantIdPk].filter(Boolean).map(String)
+    );
+
+    if (token && validTenantSet.size > 0) {
       try {
-        const res = await fetch(
-          `${apiUrl}/users?filter[tenant][_eq]=${tenantId}&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=phone&fields[]=status`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        if (res.ok) {
-          const data = await res.json();
-          availableGuards.value = (data.data || []).map(u => ({
-            id: u.id,
-            name: `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.phone || 'Guard'
-          }));
+        const guardsMap = new Map();
+        const candidateTids = Array.from(validTenantSet);
+        for (const tid of candidateTids) {
+          try {
+            const res = await fetch(
+              `${apiUrl}/users?filter[tenant][_eq]=${tid}&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=phone&fields[]=status&fields[]=role.name&limit=500`,
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            if (res.ok) {
+              const data = await res.json();
+              if (Array.isArray(data.data)) {
+                for (const u of data.data) {
+                  const uid = String(u.id);
+                  if (!guardsMap.has(uid)) {
+                    guardsMap.set(uid, u);
+                  }
+                }
+              }
+            }
+          } catch (_) {}
         }
+
+        const allUsers = Array.from(guardsMap.values());
+        const currentUserId = authService.getUserId?.() || authService.getUserData?.()?.id;
+        const guardsOnly = allUsers.filter(u => {
+          const roleName = (u.role?.name || '').toLowerCase();
+          if (roleName.includes('administrator') || roleName.includes('public')) return false;
+          if (currentUserId && String(u.id) === String(currentUserId)) {
+            const myRole = (authService.getUserRole?.() || '').toLowerCase();
+            if (myRole.includes('admin') || myRole.includes('owner')) return false;
+          }
+          return true;
+        });
+
+        availableGuards.value = guardsOnly.map(u => {
+          const lName = (u.last_name && u.last_name !== '-') ? u.last_name : '';
+          const fName = u.first_name || '';
+          const fullName = `${fName} ${lName}`.trim();
+          return {
+            id: u.id,
+            name: fullName || u.phone || 'Guard'
+          };
+        });
       } catch (_) {}
+    }
+
+    // If all essential setup items already exist, mark completed permanently
+    const hasAll = (availableSites.value.length > 0 || props.sitesCount > 0) &&
+                   (availableZones.value.length > 0 || props.zonesCount > 0) &&
+                   (totalCheckpoints.value > 0) &&
+                   (availableGuards.value.length > 0 || (patrols && patrols.length > 0));
+    if (hasAll) {
+      markCompletedPermanently();
     }
   } catch (e) {
     console.warn('[SetupWizard] Metadata fetch failed:', e);
+  } finally {
+    isLoading.value = false;
   }
 };
 
@@ -797,17 +868,25 @@ const useCurrentLocation = () => {
   }
 };
 
+const markCompletedPermanently = () => {
+  isDismissed.value = true;
+  const tenantId = authService.getTenantId() || 'global';
+  localStorage.setItem(`accesseasy_setup_wizard_completed_${tenantId}`, 'true');
+  localStorage.setItem(`accesseasy_setup_wizard_dismissed_${tenantId}`, 'true');
+  localStorage.setItem('accesseasy_setup_wizard_completed', 'true');
+  localStorage.setItem('accesseasy_setup_wizard_dismissed', 'true');
+};
+
 onMounted(() => {
-  const dismissed = localStorage.getItem('accesseasy_setup_wizard_dismissed');
-  if (dismissed === 'true') {
-    isDismissed.value = true;
+  if (!isDismissed.value) {
+    fetchMetadata();
+  } else {
+    isLoading.value = false;
   }
-  fetchMetadata();
 });
 
 const dismissBanner = () => {
-  isDismissed.value = true;
-  localStorage.setItem('accesseasy_setup_wizard_dismissed', 'true');
+  markCompletedPermanently();
 };
 
 // Form Submissions
@@ -1037,7 +1116,15 @@ const steps = computed(() => [
 const completedCount = computed(() => steps.value.filter(s => s.completed).length);
 
 const isVisible = computed(() => {
+  // Once dismissed or completed, NEVER show again
   if (isDismissed.value) return false;
+  // Do not flash banner while loading initial check
+  if (isLoading.value) return false;
+  // If all steps completed, auto-mark completed and hide permanently
+  if (completedCount.value >= steps.value.length && steps.value.length > 0) {
+    markCompletedPermanently();
+    return false;
+  }
   return completedCount.value < steps.value.length;
 });
 </script>

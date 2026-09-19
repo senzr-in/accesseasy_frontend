@@ -445,7 +445,7 @@ const operationsNav = computed(() => {
 const setupNav = computed(() => {
   if (appMode === 'patrol') {
     return [
-      { name: 'Sites & Locations', href: '/dashboard/sites', icon: Building2 },
+      { name: 'Sites & Zones', href: '/dashboard/sites', icon: Building2 },
       { name: 'Patrol Checkpoints', href: '/dashboard/settings/checkpoints', icon: QrCode },
       { name: 'Guard Devices', href: '/dashboard/settings/devices', icon: Smartphone }
     ];

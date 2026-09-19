@@ -2597,14 +2597,26 @@ const submit = async () => {
   if (!form.value.name.trim()) return toast.warning('Please enter a Patrol Name');
   if (!form.value.zoneId) return toast.warning('Please select a Zone');
   if (selectedCheckpoints.value.length === 0) return toast.warning('Please select at least one Checkpoint');
-  
+
+  // Guard: ensure the selected siteId actually exists in the loaded sites list.
+  // If it doesn't (e.g. site was deleted), clear it so we don't send an invalid FK.
+  const resolvedSiteId = (() => {
+    if (!form.value.siteId) return null;
+    const exists = sites.value?.some(s => String(s.id) === String(form.value.siteId));
+    if (!exists) {
+      form.value.siteId = ''; // reset stale selection
+      return null;
+    }
+    return form.value.siteId;
+  })();
+
   saving.value = true;
   try {
     // 1. Create a Checkpoint Group representing the route configuration (1 API call)
     const group = await patrolService.createCheckpointGroup({
       name: form.value.name.trim(),
-      site_id: form.value.siteId || null,
-      site: form.value.siteId || null,
+      site_id: resolvedSiteId,
+      site: resolvedSiteId,
       zone_id: form.value.zoneId,
       frequency: form.value.repeat === 'none' ? 'custom' : `every_${form.value.repeat}h`,
       grace_period: 15 // static grace period buffer
@@ -2640,8 +2652,8 @@ const submit = async () => {
       const dateStr = `${y}-${m}-${d}`;
 
       return {
-        site: form.value.siteId || null,
-        siteId: form.value.siteId || null,
+        site: resolvedSiteId,
+        siteId: resolvedSiteId,
         zone: form.value.zoneId || null,
         zoneId: form.value.zoneId,
         zoneName: z?.zoneName || z?.name || 'Security Zone',
@@ -2779,35 +2791,66 @@ onMounted(async () => {
 
   // Fetch Guards
   try {
-    let rawUsers = [];
-    try {
-      const res = await fetch(`${apiUrl}/users?filter[tenant][_eq]=${tenantId}&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=phone&fields[]=title&fields[]=accesseasyPatrolRole.roleName&fields[]=accesseasyRole.roleName&fields[]=role.name&limit=200`, { headers: { Authorization: `Bearer ${token}` } });
-      if (res.ok) {
-        const data = await res.json();
-        rawUsers = data.data || [];
+    const tenantData = authService.getTenantData();
+    const tenantIdStr = tenantData?.tenantId;
+    const tenantIdPk = tenantData?.id;
+
+    const validTenantSet = new Set(
+      [tenantId, tenantIdStr, tenantIdPk].filter(Boolean).map(String)
+    );
+
+    const userFieldList = [
+      'id', 'first_name', 'last_name', 'email', 'phone', 'status', 'title', 'role.name', 'tenant'
+    ].map(f => `fields[]=${f}`).join('&');
+
+    const guardsMap = new Map();
+    const candidateTids = Array.from(validTenantSet);
+    for (const tid of candidateTids) {
+      try {
+        const usersUrl = `${apiUrl}/users?filter[tenant][_eq]=${tid}&${userFieldList}&limit=500`;
+        const usersRes = await fetch(usersUrl, { headers: { Authorization: `Bearer ${token}` } });
+        if (usersRes.ok) {
+          const usersData = await usersRes.json();
+          if (Array.isArray(usersData.data)) {
+            for (const u of usersData.data) {
+              const uid = String(u.id);
+              if (!guardsMap.has(uid)) {
+                guardsMap.set(uid, u);
+              }
+            }
+          }
+        }
+      } catch (usersErr) {
+        console.warn('[CreatePatrol] users fetch notice:', usersErr);
       }
-    } catch (_) {}
+    }
 
     const currentUserId = authService.getUserId?.() || authService.getUserData?.()?.id;
-    const guardsOnly = rawUsers.filter(u => {
-      const roleName = (u.accesseasyPatrolRole?.roleName || u.accesseasyRole?.roleName || u.title || u.role?.name || '').toLowerCase();
-      if (roleName.includes('admin') || roleName.includes('owner') || roleName.includes('manager') || roleName.includes('superadmin')) {
-        return false;
-      }
+    const allUsers = Array.from(guardsMap.values());
+    const guardsOnly = allUsers.filter(u => {
+      const roleName = (u.role?.name || '').toLowerCase();
+      if (roleName.includes('administrator') || roleName.includes('public')) return false;
       if (currentUserId && String(u.id) === String(currentUserId)) {
         const myRole = (authService.getUserRole?.() || '').toLowerCase();
-        if (myRole.includes('admin') || myRole.includes('owner')) {
-          return false;
-        }
+        if (myRole.includes('admin') || myRole.includes('owner')) return false;
       }
       return true;
     });
 
-    guards.value = guardsOnly.map(u => ({
-      id: u.id,
-      name: `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.phone || u.email || 'Guard'
-    }));
-  } catch (e) { console.error('Failed to fetch guards:', e); }
+    guards.value = guardsOnly.map(u => {
+      const lName = (u.last_name && u.last_name !== '-') ? u.last_name : '';
+      const fName = u.first_name || '';
+      const fullName = `${fName} ${lName}`.trim();
+      return {
+        id: u.id,
+        name: fullName || u.phone || u.email || 'Guard',
+        first_name: u.first_name,
+        last_name: u.last_name,
+        phone: u.phone,
+        email: u.email
+      };
+    });
+  } catch (e) { console.error('Failed to fetch guards in CreatePatrol:', e); }
 
   // Mount Tactical Patrol Route Map
   nextTick(() => {

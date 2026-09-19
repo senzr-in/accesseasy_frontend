@@ -100,6 +100,15 @@
                 <MapPin class="w-4 h-4 text-indigo-500" />
                 <span>Patrol Checkpoints</span>
               </button>
+
+              <!-- Sites & Zones Hub -->
+              <button
+                class="w-full px-4 py-2.5 text-left text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/50 flex items-center gap-2.5 transition-colors cursor-pointer border-0 bg-transparent"
+                @click="$router.push('/dashboard/sites'); showOverflowMenu = false;"
+              >
+                <Building2 class="w-4 h-4 text-indigo-500" />
+                <span>Sites & Zones Hub</span>
+              </button>
               
               <!-- Pair Patrol Tablet QR -->
               <button
@@ -567,12 +576,13 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import QRCode from 'qrcode';
+import { getCheckpointQrDataUrl } from '@/utils/checkpointQrHelper';
 import {
   ArrowLeft, AlertTriangle, ShieldAlert, Users,
   MapPin, Clock, CheckCircle, XCircle, Search, Calendar,
   MoreVertical, ShieldCheck, ChevronRight, Play, CheckCircle2, Loader2, PlayCircle, Filter, 
   Map as MapIcon, X, Maximize2, Minimize2, Eye, ExternalLink, Activity, ScanLine, QrCode, Settings, BarChart3, History as HistoryIcon, CheckCheck, PlusCircle, Download,
-  MessageCircle, Smartphone, RefreshCw, Copy
+  MessageCircle, Smartphone, RefreshCw, Copy, Building2
 } from "lucide-vue-next";
 import { useRoute, useRouter } from 'vue-router';
 import { patrolService } from '@/services/patrolService';
@@ -714,28 +724,22 @@ const downloadCheckpointQRs = async () => {
     let htmlContent = '';
     
     for (const cp of list) {
-      const rawString = `${cp.checkpoint_id}-${tenantId}-AccessEasy2026`;
-      const signature = btoa(unescape(encodeURIComponent(rawString))).replace(/=/g, '');
-      const qrData = `ACPT::${cp.checkpoint_id}::${signature}`;
       let qrDataUrl = '';
       try {
-        qrDataUrl = await QRCode.toDataURL(qrData, {
-          width: 200, margin: 1, color: { dark: '#0F172A', light: '#FFFFFF' }
-        });
+        qrDataUrl = await getCheckpointQrDataUrl(cp.checkpoint_id, tenantId, { size: 240 });
       } catch {}
 
       htmlContent += `
       <div class="card">
         <div class="brand">AccessEasy<div style="font-size:10px;font-weight:normal;margin-top:2px;">Checkpoint Badge</div></div>
-        ${qrDataUrl ? `<img src="${qrDataUrl}" class="qr" />` : ''}
+        ${qrDataUrl ? `<img src="${qrDataUrl}" class="qr" style="object-fit:contain;" />` : ''}
         <div class="name">${cp.name}</div>
         <div class="id">${cp.checkpoint_id}</div>
         <div class="meta">
           <div class="meta-item"><label>Floor</label><span>${cp.floor || '—'}</span></div>
           <div class="meta-item"><label>Building</label><span>${cp.building_id || '—'}</span></div>
         </div>
-      </div>
-      `;
+      </div>`;
     }
 
     const html = `
@@ -1122,16 +1126,31 @@ const deletePatrol = (patrol) => {
 
 const confirmDelete = async () => {
   if (!patrolToDelete.value) return;
+  const patrol = patrolToDelete.value;
+  const targetId = patrol.id;
+  const groupId = typeof patrol.groupId === 'object' && patrol.groupId ? patrol.groupId.id : patrol.groupId;
+  const routeName = patrol.name || patrol.routeName;
+
   isDeleting.value = true;
   try {
-    await patrolService.deletePatrol(patrolToDelete.value.id);
-    toast.success('Patrol deleted successfully');
+    // Optimistically remove all rounds belonging to this route from the local state
+    allPatrols.value = allPatrols.value.filter(p => {
+      if (targetId && String(p.id) === String(targetId)) return false;
+      const pGroupId = typeof p.groupId === 'object' && p.groupId ? p.groupId.id : p.groupId;
+      if (groupId && groupId !== 'nogroup' && String(pGroupId) === String(groupId)) return false;
+      if (routeName && (p.name === routeName || p.routeName === routeName)) return false;
+      return true;
+    });
+
+    await patrolService.deletePatrol(patrol, true);
+    toast.success('Patrol and scheduled rounds deleted successfully');
     showDeleteModal.value = false;
     patrolToDelete.value = null;
     await load();
   } catch (err) {
     console.error('Failed to delete patrol:', err);
     toast.error(err?.message || 'Failed to delete patrol');
+    await load();
   } finally {
     isDeleting.value = false;
   }
@@ -1234,23 +1253,65 @@ const fetchStaticMetadata = async () => {
   // Fetch guards for pre-assignment dropdown
   try {
     const token = authService.getToken();
-    const tenantId = authService.getTenantId();
+    let tenantId = authService.getTenantId();
+    if (!tenantId) {
+      try { tenantId = await currentUserTenant.getTenantIdAsync(); } catch (_) {}
+    }
+    const tenantData = authService.getTenantData();
+    const tenantIdStr = tenantData?.tenantId;
+    const tenantIdPk = tenantData?.id;
     const apiUrl = import.meta.env.VITE_API_URL;
-    if (!token || !tenantId) return;
 
-    // Fetch tenant users directly without restricted roleConfigurator endpoint
-    const res = await fetch(
-      `${apiUrl}/users?filter[tenant][_eq]=${tenantId}&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=phone&fields[]=status`,
-      { headers: { Authorization: `Bearer ${token}` } }
+    const validTenantSet = new Set(
+      [tenantId, tenantIdStr, tenantIdPk].filter(Boolean).map(String)
     );
-    if (res.ok) {
-      const data = await res.json();
-      guards.value = (data.data || []).map(u => ({
-        id: u.id,
-        name: `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.phone || 'Guard',
-        full_name: `${u.first_name || ''} ${u.last_name || ''}`.trim(),
-        status: u.status
-      }));
+
+    if (token && validTenantSet.size > 0) {
+      const guardsMap = new Map();
+      const candidateTids = Array.from(validTenantSet);
+      for (const tid of candidateTids) {
+        try {
+          const res = await fetch(
+            `${apiUrl}/users?filter[tenant][_eq]=${tid}&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=phone&fields[]=status&fields[]=role.name&limit=500`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data.data)) {
+              for (const u of data.data) {
+                const uid = String(u.id);
+                if (!guardsMap.has(uid)) {
+                  guardsMap.set(uid, u);
+                }
+              }
+            }
+          }
+        } catch (_) {}
+      }
+
+      const allUsers = Array.from(guardsMap.values());
+      const currentUserId = authService.getUserId?.() || authService.getUserData?.()?.id;
+      const guardsOnly = allUsers.filter(u => {
+        const roleName = (u.role?.name || '').toLowerCase();
+        if (roleName.includes('administrator') || roleName.includes('public')) return false;
+        if (currentUserId && String(u.id) === String(currentUserId)) {
+          const myRole = (authService.getUserRole?.() || '').toLowerCase();
+          if (myRole.includes('admin') || myRole.includes('owner')) return false;
+        }
+        return true;
+      });
+
+      guards.value = guardsOnly.map(u => {
+        const lName = (u.last_name && u.last_name !== '-') ? u.last_name : '';
+        const fName = u.first_name || '';
+        const fullName = `${fName} ${lName}`.trim();
+        return {
+          id: u.id,
+          name: fullName || u.phone || 'Guard',
+          full_name: fullName || u.phone || 'Guard',
+          status: u.status
+        };
+      });
     }
   } catch (e) { /* graceful fallback */ }
 };

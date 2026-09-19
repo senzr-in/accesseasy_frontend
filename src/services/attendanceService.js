@@ -15,18 +15,22 @@ class AttendanceService {
     this._CACHE_TTL = 5 * 60 * 1000; // 5 minutes
   }
 
-  async _resolveTenantId() {
+  async _resolveTenantSet() {
     let tid = authService.getTenantId();
     if (!tid) {
       try {
         tid = await currentUserTenant.getTenantIdAsync();
       } catch (_) {}
     }
-    if (!tid) {
-      const u = authService.getUserData();
-      tid = u?.tenant?.tenantId || u?.tenant?.id || (typeof u?.tenant === 'string' ? u.tenant : null);
-    }
-    return tid;
+    const tenantData = authService.getTenantData();
+    const u = authService.getUserData();
+    const userTid = u?.tenant?.tenantId || u?.tenant?.id || (typeof u?.tenant === 'string' ? u.tenant : null);
+    return Array.from(new Set([tid, tenantData?.tenantId, tenantData?.id, userTid].filter(Boolean).map(String)));
+  }
+
+  async _resolveTenantId() {
+    const set = await this._resolveTenantSet();
+    return set[0] || null;
   }
 
   /**
@@ -46,7 +50,8 @@ class AttendanceService {
 
     let guardName = 'Security Guard';
     if (guardUser?.first_name || guardUser?.last_name) {
-      guardName = `${guardUser.first_name || ''} ${guardUser.last_name || ''}`.trim();
+      const lName = (guardUser.last_name && guardUser.last_name !== '-') ? guardUser.last_name : '';
+      guardName = `${guardUser.first_name || ''} ${lName}`.trim();
     } else if (guardUser?.name) {
       guardName = guardUser.name;
     } else if (mappedUser?.name) {
@@ -75,7 +80,14 @@ class AttendanceService {
 
     const phone = guardUser?.phone || guardUser?.phoneNumber || mappedUser?.phone || r.guard?.phone || r.guard_phone || r.phone || 'No phone';
 
-    const verificationMode = r.verification_mode || (r.face_snapshot || r.confidence_score ? 'face_ai' : (r.nfc_uid ? 'nfc' : (r.pin_verified ? 'pin' : 'manual')));
+    let verificationMode = r.verification_mode || (r.face_snapshot || r.confidence_score ? 'face_ai' : (r.nfc_uid ? 'nfc' : (r.pin_verified ? 'pin' : 'manual')));
+    if (r.mode) {
+      const mLower = String(r.mode).toLowerCase();
+      if (mLower.includes('face')) verificationMode = 'face_ai';
+      else if (mLower.includes('nfc') || mLower.includes('card') || mLower.includes('rfid')) verificationMode = 'nfc';
+      else if (mLower.includes('finger') || mLower.includes('bio')) verificationMode = 'biometric_device';
+      else if (mLower.includes('app') || mLower.includes('mobile')) verificationMode = 'mobile_app';
+    }
     const confidenceScore = r.confidence_score != null ? Math.round(r.confidence_score * (r.confidence_score <= 1 ? 100 : 1)) : null;
 
     return {
@@ -92,7 +104,7 @@ class AttendanceService {
       verification_mode: verificationMode,
       confidence_score: confidenceScore,
       face_snapshot: r.face_snapshot?.id || r.face_snapshot || null,
-      device_name: r.device_name || r.device || 'Mobile Patrol App',
+      device_name: r.device_name || r.device || (r.door ? `Device (${r.door})` : 'Access Terminal / App'),
       status: r.status || (r.check_out_time ? 'off_duty' : (r.check_in_time ? 'present' : 'absent'))
     };
   }
@@ -103,7 +115,8 @@ class AttendanceService {
    */
   async getTodayAttendance(siteId = null) {
     try {
-      const tenantId = await this._resolveTenantId();
+      const tenantIds = await this._resolveTenantSet();
+      const primaryTenantId = tenantIds[0] || null;
       const now = Date.now();
       
       // 1. Fetch Users Map — cached for 5 minutes
@@ -112,21 +125,23 @@ class AttendanceService {
         userMap = this._userMapCache;
       } else {
         try {
-          const usersUrl = tenantId 
-            ? `/users?filter[tenant][_eq]=${tenantId}&limit=500&fields=id,first_name,last_name,email,phone,avatar`
-            : `/users?limit=500&fields=id,first_name,last_name,email,phone,avatar`;
-          const usersRes = await authService.protectedApi.get(usersUrl);
-          if (usersRes.data?.data) {
-            usersRes.data.data.forEach(u => {
-              userMap[String(u.id)] = {
-                name: `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email?.split('@')[0] || 'Guard',
-                phone: u.phone || '',
-                avatar: u.avatar || null
-              };
-            });
-            this._userMapCache = userMap;
-            this._userMapExpiry = now + this._CACHE_TTL;
+          for (const tid of tenantIds) {
+            const usersUrl = `/users?filter[tenant][_eq]=${tid}&limit=500&fields=id,first_name,last_name,email,phone,avatar`;
+            const usersRes = await authService.protectedApi.get(usersUrl).catch(() => null);
+            if (usersRes?.data?.data) {
+              usersRes.data.data.forEach(u => {
+                const lName = (u.last_name && u.last_name !== '-') ? u.last_name : '';
+                userMap[String(u.id)] = {
+                  id: u.id,
+                  name: `${u.first_name || ''} ${lName}`.trim() || u.email?.split('@')[0] || 'Guard',
+                  phone: u.phone || '',
+                  avatar: u.avatar || null
+                };
+              });
+            }
           }
+          this._userMapCache = userMap;
+          this._userMapExpiry = now + this._CACHE_TTL;
         } catch (_) {}
       }
 
@@ -147,59 +162,53 @@ class AttendanceService {
         } catch (_) {}
       }
 
-      // 3. Fetch personalModule Map — cached for 5 minutes (resolves mobile personal_module_id)
+      // 3. Fetch personalModule Map — cached for 5 minutes
       let pmMap = {};
       if (this._pmMapCache && now < this._pmMapExpiry) {
         pmMap = this._pmMapCache;
       } else {
         try {
-          const pmUrl = tenantId
-            ? `/items/personalModule?filter[tenant][_eq]=${tenantId}&limit=500&fields=id,employeeId,assignedUser.id,assignedUser.first_name,assignedUser.last_name,assignedUser.phone,assignedUser.email`
-            : `/items/personalModule?limit=500&fields=id,employeeId,assignedUser.id,assignedUser.first_name,assignedUser.last_name,assignedUser.phone,assignedUser.email`;
-          const pmRes = await authService.protectedApi.get(pmUrl);
-          if (pmRes.data?.data) {
-            pmRes.data.data.forEach(pm => {
-              const u = pm.assignedUser || {};
-              const name = `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.email?.split('@')[0] || `Employee #${pm.id}`;
-              const entry = { name, phone: u.phone || '', userObj: u };
-              pmMap[String(pm.id)] = entry;
-              if (pm.employeeId) pmMap[String(pm.employeeId)] = entry;
-            });
-            this._pmMapCache = pmMap;
-            this._pmMapExpiry = now + this._CACHE_TTL;
+          for (const tid of tenantIds) {
+            const pmUrl = `/items/personalModule?filter[tenant][_eq]=${tid}&limit=500&fields=id,employeeId,assignedUser.id,assignedUser.first_name,assignedUser.last_name,assignedUser.phone,assignedUser.email`;
+            const pmRes = await authService.protectedApi.get(pmUrl).catch(() => null);
+            if (pmRes?.data?.data) {
+              pmRes.data.data.forEach(pm => {
+                const u = pm.assignedUser || {};
+                const lName = (u.last_name && u.last_name !== '-') ? u.last_name : '';
+                const name = `${u.first_name || ''} ${lName}`.trim() || u.email?.split('@')[0] || `Employee #${pm.id}`;
+                const entry = { id: pm.id, employeeId: pm.employeeId, name, phone: u.phone || '', userObj: u };
+                pmMap[String(pm.id)] = entry;
+                if (pm.employeeId) pmMap[String(pm.employeeId)] = entry;
+                if (u.id) pmMap[String(u.id)] = entry;
+              });
+            }
           }
+          this._pmMapCache = pmMap;
+          this._pmMapExpiry = now + this._CACHE_TTL;
         } catch (_) {}
       }
 
       let allRecords = [];
 
-      // 4. Query /items/guard_attendance
-      try {
-        let url = `/items/guard_attendance?sort=-check_in_time&limit=100&fields=*`;
-        if (tenantId) {
-          url = `/items/guard_attendance?filter[tenant][_eq]=${tenantId}&sort=-check_in_time&limit=100&fields=*`;
-        }
-        if (siteId && siteId !== 'all') {
-          url += `&filter[site][_eq]=${siteId}`;
-        }
-        const res = await authService.protectedApi.get(url, { timeout: 15000 });
-        if (res.data?.data && Array.isArray(res.data.data) && res.data.data.length > 0) {
-          allRecords = res.data.data;
-        }
-      } catch (err) {
-        // Fallback to simple tenant filter if relational join timed out
-        if (tenantId) {
-          try {
-            const fallbackUrl = `/items/guard_attendance?filter[tenant][_eq]=${tenantId}&sort=-check_in_time&limit=100&fields=*`;
-            const res2 = await authService.protectedApi.get(fallbackUrl, { timeout: 15000 });
-            if (res2.data?.data && Array.isArray(res2.data.data) && res2.data.data.length > 0) {
-              allRecords = res2.data.data;
-            }
-          } catch (_) {}
-        }
+      // 4. Query /items/guard_attendance across valid tenant IDs
+      for (const tid of tenantIds) {
+        try {
+          let url = `/items/guard_attendance?filter[tenant][_eq]=${tid}&sort=-check_in_time&limit=100&fields=*`;
+          if (siteId && siteId !== 'all') {
+            url += `&filter[site][_eq]=${siteId}`;
+          }
+          const res = await authService.protectedApi.get(url, { timeout: 10000 });
+          if (res.data?.data && Array.isArray(res.data.data)) {
+            res.data.data.forEach(r => {
+              if (!allRecords.some(item => String(item.id) === String(r.id))) {
+                allRecords.push(r);
+              }
+            });
+          }
+        } catch (_) {}
       }
 
-      // 5. Fetch live multi-session punch records from mobile-app logs (/items/logs)
+      // 5. Fetch live multi-session punch records from hardware device & mobile-app logs (/items/logs)
       try {
         const liveStates = await this.getLiveGuardStates();
 
@@ -218,7 +227,7 @@ class AttendanceService {
                 guard: { id: ls.userId || ls.employeeId, assignedUser: ls.assignedUser },
                 guard_name: ls.guardName,
                 phone: ls.phone,
-                site_name: ls.siteName || 'App Check-In',
+                site_name: ls.siteName || 'Device Access',
                 zone_name: '',
                 check_in_time: ls.checkInTime,
                 check_out_time: ls.checkOutTime,
@@ -234,46 +243,7 @@ class AttendanceService {
         });
       } catch (_) {}
 
-      // 6. Workforce attendance fallback (only in workforce mode when guard_attendance has no data)
-      const isPatrolMode = import.meta.env.VITE_APP_MODE === 'patrol';
-      if (!isPatrolMode && allRecords.length === 0) {
-        try {
-          let attUrl = `/items/attendance?filter[tenant][_eq]=${tenantId}&sort=-date,-inTime&limit=50&fields=id,employeeId,date,inTime,outTime,status,attendance,location,door,mode`;
-          const res = await authService.protectedApi.get(attUrl, { timeout: 3000 });
-          if (res.data?.data && Array.isArray(res.data.data) && res.data.data.length > 0) {
-            const attMapped = res.data.data
-              .filter(item => (item.inTime && item.inTime !== '00:00:00') || (item.outTime && item.outTime !== '00:00:00'))
-              .map(item => {
-                const empId = typeof item.employeeId === 'object' ? item.employeeId?.id : item.employeeId;
-                const mappedUser = userMap[String(empId)] || pmMap[String(empId)] || {};
-                const dateStr = item.date || new Date().toISOString().split('T')[0];
-                const inTimeStr = item.inTime ? (item.inTime.includes('T') ? item.inTime : `${dateStr}T${item.inTime}`) : null;
-                const outTimeStr = item.outTime ? (item.outTime.includes('T') ? item.outTime : `${dateStr}T${item.outTime}`) : null;
-                const siteName = typeof item.location === 'string' ? item.location : (item.site_name || '');
 
-                return {
-                  id: `att-${item.id}`,
-                  guard: empId,
-                  guard_name: mappedUser.name || 'Security Guard',
-                  phone: mappedUser.phone || 'No phone',
-                  site_name: siteName || 'Main Site',
-                  zone_name: typeof item.door === 'string' ? item.door : '',
-                  check_in_time: inTimeStr,
-                  check_out_time: outTimeStr,
-                  status: item.attendance === 'present' || item.status === 'present' ? 'present' : (item.status || 'present'),
-                  verification_mode: item.mode || 'manual',
-                  date_created: inTimeStr || item.date_created || new Date().toISOString()
-                };
-              });
-
-            attMapped.forEach(am => {
-              if (!allRecords.some(r => String(r.id) === String(am.id))) {
-                allRecords.push(am);
-              }
-            });
-          }
-        } catch (_) {}
-      }
 
       if (allRecords && allRecords.length > 0) {
         return allRecords.map(r => this._mapAttendanceRecord(r, userMap, siteMap, pmMap));
@@ -288,40 +258,88 @@ class AttendanceService {
 
   /**
    * Fetch live guard states from the /items/logs collection.
-   * Returns one entry per guard with their CURRENT state: checked_in | on_break | checked_out
+   * Recognizes all hardware biometric, face terminal, RFID card, turnstile, and mobile punch actions.
    */
   async getLiveGuardStates() {
     try {
-      const tenantId = await this._resolveTenantId();
+      const tenantIds = await this._resolveTenantSet();
       const today = new Date().toISOString().split('T')[0];
 
       let logsData = [];
-      try {
-        let url = `/items/logs?sort=-date_created&limit=200&fields=*`;
-        if (tenantId) {
-          url = `/items/logs?filter[tenant][_eq]=${tenantId}&sort=-date_created&limit=200&fields=*`;
-        }
-        const res = await authService.protectedApi.get(url, { timeout: 15000 });
-        if (res.data?.data && Array.isArray(res.data.data)) {
-          logsData = res.data.data;
-        }
-      } catch (err) {
-        console.warn('[AttendanceService] getLiveGuardStates query error:', err?.message);
-        logsData = [];
+      for (const tid of tenantIds) {
+        try {
+          const url = `/items/logs?filter[tenant][_eq]=${tid}&sort=-date_created&limit=300&fields=*`;
+          const res = await authService.protectedApi.get(url, { timeout: 10000 });
+          if (res.data?.data && Array.isArray(res.data.data)) {
+            res.data.data.forEach(l => {
+              if (!logsData.some(item => String(item.id) === String(l.id))) {
+                logsData.push(l);
+              }
+            });
+          }
+        } catch (_) {}
       }
 
       if (!logsData.length) return [];
 
-      // Group all logs by employeeId (personalModule.id)
+      // Group all logs by employeeId or user
       const byEmployee = {};
       logsData.forEach(log => {
-        const empId = typeof log.employeeId === 'object' ? log.employeeId?.id : (log.employeeId || log.personal_module_id);
+        const empId = typeof log.employeeId === 'object' ? log.employeeId?.id : (log.employeeId || log.personal_module_id || log.user || log.userId);
         if (!empId) return;
-        if (!byEmployee[empId]) byEmployee[empId] = { logs: [], empObj: log.employeeId };
-        byEmployee[empId].logs.push(log);
+        const key = String(empId);
+        if (!byEmployee[key]) byEmployee[key] = { logs: [], empObj: log.employeeId };
+        byEmployee[key].logs.push(log);
       });
 
-      const pmMap = this._pmMapCache || {};
+      // Ensure personalModule map is loaded across tenant IDs
+      let pmMap = this._pmMapCache;
+      if (!pmMap || Object.keys(pmMap).length === 0) {
+        pmMap = {};
+        for (const tid of tenantIds) {
+          try {
+            const pmUrl = `/items/personalModule?filter[tenant][_eq]=${tid}&limit=500&fields=id,employeeId,assignedUser.id,assignedUser.first_name,assignedUser.last_name,assignedUser.phone,assignedUser.email`;
+            const pmRes = await authService.protectedApi.get(pmUrl, { timeout: 8000 }).catch(() => null);
+            if (pmRes?.data?.data) {
+              pmRes.data.data.forEach(pm => {
+                const u = pm.assignedUser || {};
+                const lName = (u.last_name && u.last_name !== '-') ? u.last_name : '';
+                const name = `${u.first_name || ''} ${lName}`.trim() || u.email?.split('@')[0] || `Employee #${pm.id}`;
+                const entry = { id: pm.id, employeeId: pm.employeeId, name, phone: u.phone || '', userObj: u, userId: u.id };
+                pmMap[String(pm.id)] = entry;
+                if (pm.employeeId) pmMap[String(pm.employeeId)] = entry;
+                if (u.id) pmMap[String(u.id)] = entry;
+              });
+            }
+          } catch (_) {}
+        }
+        this._pmMapCache = pmMap;
+        this._pmMapExpiry = Date.now() + this._CACHE_TTL;
+      }
+
+      const userMap = this._userMapCache || {};
+
+      // Device & App action classifications
+      const isCheckInAction = (act) => {
+        const a = (act || '').toLowerCase().trim();
+        return [
+          'in', 'entry', 'granted', 'access granted', 'access_granted', 'door open',
+          'door_unlock', 'pass', 'clock_in', 'check_in', 'resume', 'break_end',
+          'active', 'normal', 'swipe', 'face', 'card', 'finger', 'allow', 'success'
+        ].some(k => a === k || a.includes('grant') || a.includes('entry') || a.includes('clock_in') || a.includes('check_in') || a === 'in');
+      };
+
+      const isCheckOutAction = (act) => {
+        const a = (act || '').toLowerCase().trim();
+        return [
+          'out', 'exit', 'clock_out', 'check_out', 'off_duty', 'deny'
+        ].some(k => a === k || a.includes('exit') || a.includes('clock_out') || a.includes('check_out') || a === 'out');
+      };
+
+      const isBreakAction = (act) => {
+        const a = (act || '').toLowerCase().trim();
+        return ['break', 'break_start', 'on_break', 'pause'].some(k => a.includes(k));
+      };
 
       return Object.entries(byEmployee).map(([empId, { logs, empObj }]) => {
         // Sort chronologically (oldest to newest)
@@ -335,11 +353,11 @@ class AttendanceService {
         const rawAction = (latestLog?.action || '').toLowerCase().trim();
 
         let liveStatus = 'unknown';
-        if (['in', 'clock_in', 'check_in', 'resume', 'break_end', 'active'].includes(rawAction)) {
+        if (isCheckInAction(rawAction)) {
           liveStatus = 'checked_in';
-        } else if (['out', 'clock_out', 'check_out', 'off_duty', 'exit'].includes(rawAction)) {
+        } else if (isCheckOutAction(rawAction)) {
           liveStatus = 'checked_out';
-        } else if (['break', 'break_start', 'on_break', 'pause'].includes(rawAction)) {
+        } else if (isBreakAction(rawAction)) {
           liveStatus = 'on_break';
         }
 
@@ -357,12 +375,15 @@ class AttendanceService {
           return `${d}T${t}`;
         };
 
-        const assignedUser = typeof empObj === 'object' ? empObj?.assignedUser : null;
         const mappedPm = pmMap[String(empId)] || {};
+        const mappedUser = userMap[String(empId)] || {};
+        const assignedUser = typeof empObj === 'object' ? empObj?.assignedUser : (mappedPm.userObj || null);
+        const resolvedUserId = assignedUser?.id || mappedPm.userId || empId;
+        const resolvedEmpId = mappedPm.employeeId || (typeof empObj === 'object' ? empObj?.employeeId : null) || empId;
         const firstName = assignedUser?.first_name || '';
-        const lastName = assignedUser?.last_name || '';
-        const guardName = (firstName || lastName) ? `${firstName} ${lastName}`.trim() : (mappedPm.name || `Guard #${empId}`);
-        const logSite = latestLog?.site_name || latestLog?.location || (typeof latestLog?.site === 'string' ? latestLog.site : null);
+        const lastName = (assignedUser?.last_name && assignedUser?.last_name !== '-') ? assignedUser.last_name : '';
+        const guardName = (firstName || lastName) ? `${firstName} ${lastName}`.trim() : (mappedPm.name || mappedUser.name || `Guard #${empId}`);
+        const logSite = latestLog?.site_name || latestLog?.location || (typeof latestLog?.site === 'string' ? latestLog.site : null) || (latestLog?.door ? `Gate: ${latestLog.door}` : 'Access Terminal');
 
         // Build distinct session pairs
         const sessions = [];
@@ -371,27 +392,30 @@ class AttendanceService {
         for (const l of sortedLogs) {
           const act = (l.action || '').toLowerCase().trim();
           const t = toISO(l);
-          if (['in', 'clock_in', 'check_in'].includes(act)) {
+          if (isCheckInAction(act)) {
             if (cur && !cur.check_out_time) {
               sessions.push(cur);
             }
             cur = {
               id: `log-s-${empId}-${l.id || Math.random()}`,
-              guard: { id: assignedUser?.id || empId, assignedUser },
+              guard: { id: resolvedUserId, assignedUser, employeeId: resolvedEmpId, personalModuleId: mappedPm.id },
               guard_name: guardName,
-              phone: assignedUser?.phone || mappedPm.phone || 'No phone',
-              site_name: logSite || 'App Check-In',
-              zone_name: '',
+              phone: assignedUser?.phone || mappedPm.phone || mappedUser.phone || 'No phone',
+              employee_id: resolvedEmpId,
+              personalModuleId: mappedPm.id,
+              site_name: logSite,
+              zone_name: l.door || '',
               check_in_time: t,
               check_out_time: null,
               status: 'present',
               verification_mode: l.mode || 'face_ai',
+              device_name: l.device_name || l.device || l.door || 'Biometric Device',
               live_status: 'checked_in',
               last_log_time: t,
               last_log_action: act,
               date_created: t
             };
-          } else if (['out', 'clock_out', 'check_out'].includes(act)) {
+          } else if (isCheckOutAction(act)) {
             if (cur) {
               cur.check_out_time = t;
               cur.status = 'off_duty';
@@ -401,15 +425,18 @@ class AttendanceService {
             } else {
               sessions.push({
                 id: `log-s-${empId}-${l.id || Math.random()}`,
-                guard: { id: assignedUser?.id || empId, assignedUser },
+                guard: { id: resolvedUserId, assignedUser, employeeId: resolvedEmpId, personalModuleId: mappedPm.id },
                 guard_name: guardName,
-                phone: assignedUser?.phone || 'No phone',
-                site_name: logSite || 'App Check-In',
-                zone_name: '',
+                phone: assignedUser?.phone || mappedPm.phone || mappedUser.phone || 'No phone',
+                employee_id: resolvedEmpId,
+                personalModuleId: mappedPm.id,
+                site_name: logSite,
+                zone_name: l.door || '',
                 check_in_time: null,
                 check_out_time: t,
                 status: 'off_duty',
                 verification_mode: l.mode || 'face_ai',
+                device_name: l.device_name || l.device || l.door || 'Biometric Device',
                 live_status: 'checked_out',
                 last_log_time: t,
                 last_log_action: act,
@@ -422,22 +449,22 @@ class AttendanceService {
           sessions.push(cur);
         }
 
-        const inLog = sortedLogs.find(l => ['in', 'clock_in', 'check_in'].includes((l.action || '').toLowerCase().trim()));
-        const outLog = [...sortedLogs].reverse().find(l => ['out', 'clock_out', 'check_out'].includes((l.action || '').toLowerCase().trim()));
+        const inLog = sortedLogs.find(l => isCheckInAction(l.action));
+        const outLog = [...sortedLogs].reverse().find(l => isCheckOutAction(l.action));
 
         return {
           employeeId: empId,
-          userId: assignedUser?.id || null,
+          userId: assignedUser?.id || empId,
           assignedUser: assignedUser || null,
           guardName,
-          phone: assignedUser?.phone || 'No phone',
-          siteName: logSite || null,
+          phone: assignedUser?.phone || mappedPm.phone || mappedUser.phone || 'No phone',
+          siteName: logSite,
           liveStatus,
           lastAction: rawAction,
           lastLogTime: toISO(latestLog),
           checkInTime: toISO(inLog),
           checkOutTime: toISO(outLog),
-          mode: latestLog?.mode || 'app',
+          mode: latestLog?.mode || 'face_ai',
           sessions,
           allLogs: sortedLogs.map(l => ({ id: l.id, action: l.action, time: toISO(l) }))
         };

@@ -918,7 +918,7 @@
           <div class="space-y-1.5">
             <label class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Assigned Zone</label>
             <select
-              v-model="form.assigned_door"
+              v-model="form.zone_id"
               class="w-full h-9 px-3 rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-slate-900 dark:text-slate-100 shadow-sm focus:border-emerald-500 transition-all"
             >
               <option :value="null">
@@ -929,7 +929,7 @@
                 :key="zone.id"
                 :value="zone.id"
               >
-                {{ zone.zoneName || zone.name || zone.doorName || `Zone ${zone.id}` }}
+                {{ zone.zoneName || zone.name || `Zone ${zone.id}` }}
               </option>
             </select>
           </div>
@@ -1185,14 +1185,23 @@ const parseDirectusError = (errorData) => {
 };
 
 const availableZones = computed(() => {
-  if (zones.value.length > 0) {
-    if (form.value.site_id) {
-      const filtered = zones.value.filter(z => !z.site || z.site == form.value.site_id || z.siteId == form.value.site_id);
-      return filtered.length > 0 ? filtered : zones.value;
+  const allZ = zones.value.length > 0 ? zones.value : doors.value;
+  if (!allZ || allZ.length === 0) return [];
+  if (form.value.site_id) {
+    const siteIdStr = String(form.value.site_id);
+    const filtered = allZ.filter(z => {
+      if (!z.site && !z.siteId) return true;
+      const zSiteId = String(z.site?.id ?? z.site ?? z.siteId ?? '');
+      return zSiteId === siteIdStr;
+    });
+    const result = filtered.length > 0 ? [...filtered] : [...allZ];
+    if (form.value.zone_id && !result.some(z => String(z.id) === String(form.value.zone_id))) {
+      const selectedZ = allZ.find(z => String(z.id) === String(form.value.zone_id));
+      if (selectedZ) result.push(selectedZ);
     }
-    return zones.value;
+    return result;
   }
-  return doors.value;
+  return allZ;
 });
 
 
@@ -1228,7 +1237,7 @@ const form = ref({
   phone: '',
   role_id: 4940,
   site_id: null,
-  assigned_door: null,
+  zone_id: null,
   send_login_link: true,
   avatarFile: null,
   avatarPreview: null,
@@ -1355,7 +1364,7 @@ const openAddDialog = () => {
   editingGuard.value = null;
   formError.value = null;
   fieldErrors.value = {};
-  form.value = { 
+  form.value = {
     employee_id: `GRD-${Date.now().toString().slice(-5)}`,
     first_name: '', 
     last_name: '', 
@@ -1365,7 +1374,7 @@ const openAddDialog = () => {
     role_id: guardRoleId.value || availableRoles.value[0]?.id || null,
     site_id: sites.value[0]?.id || null,
     send_login_link: true,
-    assigned_door: null,
+    zone_id: null,
     avatarFile: null,
     avatarPreview: null,
     removeAvatar: false
@@ -1390,6 +1399,38 @@ const editGuard = async (guard) => {
     }
   }
 
+  const tenantId = authService.getTenantId();
+  let currentSiteId = guard.site_id || guard.site || null;
+  let currentZoneId = guard.zone_id || guard.zone || null;
+  if (tenantId) {
+    try {
+      const key = `accesseasy_guard_assignments_${tenantId}`;
+      const assignments = JSON.parse(localStorage.getItem(key) || '{}');
+      if (assignments[guard.id] || assignments[String(guard.id)]) {
+        const a = assignments[guard.id] || assignments[String(guard.id)];
+        if (a.site_id !== undefined) currentSiteId = a.site_id;
+        if (a.zone_id !== undefined) currentZoneId = a.zone_id;
+      }
+    } catch (_) {}
+  }
+
+  // Type-safe matching with sites array
+  if (currentSiteId !== null && currentSiteId !== undefined && sites.value.length > 0) {
+    const matchingSite = sites.value.find(s => String(s.id) === String(currentSiteId));
+    if (matchingSite) {
+      currentSiteId = matchingSite.id;
+    }
+  }
+
+  // Type-safe matching with zones/doors array
+  const allZ = zones.value.length > 0 ? zones.value : doors.value;
+  if (currentZoneId !== null && currentZoneId !== undefined && allZ.length > 0) {
+    const matchingZone = allZ.find(z => String(z.id) === String(currentZoneId));
+    if (matchingZone) {
+      currentZoneId = matchingZone.id;
+    }
+  }
+
   form.value = {
     employee_id: guard.employee_id || '',
     first_name: guard.first_name || '',
@@ -1398,9 +1439,9 @@ const editGuard = async (guard) => {
     country_code: matchedCode,
     phone: cleanPhone,
     role_id: guard.accesseasyRole?.id || guard.accesseasyRole || availableRoles.value[0]?.id || guardRoleId.value || null,
-    site_id: null,
+    site_id: currentSiteId,
+    zone_id: currentZoneId,
     send_login_link: false,
-    assigned_door: null,
     avatarFile: null,
     avatarPreview: null,
     removeAvatar: false
@@ -1409,15 +1450,13 @@ const editGuard = async (guard) => {
   
   try {
     const token = authService.getToken();
-    const pmRes = await fetch(`${apiUrl}/items/personalModule?filter[assignedUser][_eq]=${guard.id}&fields[]=id&fields[]=employeeId&fields[]=assigned_door&fields[]=branchLocation`, {
+    const pmRes = await fetch(`${apiUrl}/items/personalModule?filter[assignedUser][_eq]=${guard.id}&fields[]=id&fields[]=employeeId`, {
         headers: { Authorization: `Bearer ${token}` }
     });
     if (pmRes.ok) {
         const pmData = await pmRes.json();
         if (pmData.data && pmData.data.length > 0) {
             const pm = pmData.data[0];
-            form.value.assigned_door = typeof pm.assigned_door === 'object' && pm.assigned_door !== null ? pm.assigned_door.id || pm.assigned_door : pm.assigned_door;
-            form.value.site_id = typeof pm.branchLocation === 'object' && pm.branchLocation !== null ? pm.branchLocation.id || pm.branchLocation : pm.branchLocation;
             if (pm.employeeId) {
               form.value.employee_id = pm.employeeId;
             }
@@ -1773,6 +1812,36 @@ const fetchGuards = async () => {
       return true;
     });
 
+    // Enrich with stored site and zone assignments
+    let storedAssignments = {};
+    if (tenantId) {
+      try {
+        const key = `accesseasy_guard_assignments_${tenantId}`;
+        storedAssignments = JSON.parse(localStorage.getItem(key) || '{}');
+      } catch (_) {}
+    }
+
+    const siteMap = new Map((sites.value || []).map(s => [String(s.id), s.locName || s.name || s.branchName || `Site ${s.id}`]));
+    const allZ = zones.value.length > 0 ? zones.value : doors.value;
+    const zoneMap = new Map((allZ || []).map(z => [String(z.id), z.zoneName || z.name || z.doorName || `Zone ${z.id}`]));
+
+    guardsOnly.forEach(g => {
+      const gId = String(g.id);
+      const assignment = storedAssignments[gId];
+      if (assignment) {
+        if (assignment.site_id !== undefined) g.site_id = assignment.site_id;
+        if (assignment.zone_id !== undefined) g.zone_id = assignment.zone_id;
+      }
+      if (g.zone_id && zoneMap.has(String(g.zone_id))) {
+        g.assigned_zone_name = zoneMap.get(String(g.zone_id));
+      } else if (!g.assigned_zone_name && g.zone_id) {
+        g.assigned_zone_name = `Zone ${g.zone_id}`;
+      }
+      if (g.site_id && siteMap.has(String(g.site_id))) {
+        g.assigned_site_name = siteMap.get(String(g.site_id));
+      }
+    });
+
     items.value = guardsOnly;
 
     // Step 2: Enrich with faceId biometric photos
@@ -1939,36 +2008,6 @@ const saveGuard = async () => {
       // Personal Module for Guard
       const guardEmpId = form.value.employee_id?.trim() || `GRD-${Date.now().toString().slice(-5)}`;
 
-      // Resolve valid branchLocation foreign key (pointing to locationManagement collection)
-      let validBranchLocationId = null;
-      if (form.value.site_id) {
-        try {
-          const directCheck = await fetch(`${apiUrl}/items/locationManagement/${form.value.site_id}?fields[]=id`, {
-            headers: { Authorization: `Bearer ${token}` }
-          }).catch(() => null);
-          if (directCheck && directCheck.ok) {
-            validBranchLocationId = form.value.site_id;
-          } else {
-            const selectedSite = sites.value.find(s => String(s.id) === String(form.value.site_id));
-            const siteName = selectedSite?.locName || selectedSite?.name || selectedSite?.branchName;
-            if (siteName) {
-              const queryCheck = await fetch(
-                `${apiUrl}/items/locationManagement?filter[locdetail][locationName][_icontains]=${encodeURIComponent(siteName)}&fields[]=id&limit=1`,
-                { headers: { Authorization: `Bearer ${token}` } }
-              ).catch(() => null);
-              if (queryCheck && queryCheck.ok) {
-                const qData = await queryCheck.json();
-                if (qData.data && qData.data.length > 0) {
-                  validBranchLocationId = qData.data[0].id;
-                }
-              }
-            }
-          }
-        } catch (_) {
-          validBranchLocationId = null;
-        }
-      }
-
       if (!editingGuard.value && newUserId) {
         const personalPayload = {
           employeeId: guardEmpId,
@@ -1982,13 +2021,10 @@ const saveGuard = async () => {
           uniqueId: `${tenantId}-${guardEmpId}`,
           tenant: tenantId,
           assignedUser: newUserId,
-          branchLocation: validBranchLocationId || null,
-          branch: form.value.site_id || null,
-          assigned_door: form.value.assigned_door || null,
           mobilePermissions: { enable_incidents: true, enable_patrols: true }
         };
 
-        let pmCreateRes = await fetch(`${apiUrl}/items/personalModule`, {
+        const pmCreateRes = await fetch(`${apiUrl}/items/personalModule`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
@@ -1997,52 +2033,21 @@ const saveGuard = async () => {
           body: JSON.stringify(personalPayload),
         });
 
-        // Resilient fallback: if branchLocation or branch caused FK constraint violation, retry without them
-        if (!pmCreateRes.ok) {
-          try {
-            const errData = await pmCreateRes.clone().json();
-            const hasFkError = errData.errors?.some(e => 
-              e.code === 'INVALID_FOREIGN_KEY' || 
-              e.field === 'branchLocation' || 
-              e.field === 'branch' ||
-              (e.message && (e.message.includes('branchLocation') || e.message.includes('branch')))
-            );
-            if (hasFkError) {
-              console.warn('[saveGuard] Foreign key constraint on branchLocation/branch, retrying with null');
-              delete personalPayload.branch;
-              personalPayload.branchLocation = null;
-              pmCreateRes = await fetch(`${apiUrl}/items/personalModule`, {
-                method: 'POST',
-                headers: { 
-                  'Content-Type': 'application/json',
-                  Authorization: `Bearer ${token}`
-                },
-                body: JSON.stringify(personalPayload),
-              });
-            }
-          } catch (_) {}
-        }
-
         if (pmCreateRes.ok) {
           const pmData = await pmCreateRes.json();
           targetPmId = pmData.data?.id;
-        } else {
-          console.warn('[saveGuard] Note: personalModule creation response:', await pmCreateRes.text().catch(() => ''));
         }
       } else if (editingGuard.value && editingGuard.value.personalModuleId) {
         targetPmId = editingGuard.value.personalModuleId;
         const patchPayload = {
            employeeId: form.value.employee_id?.trim() || undefined,
-           branchLocation: validBranchLocationId || null,
-           branch: form.value.site_id || null,
-           assigned_door: form.value.assigned_door || null,
            personalEmail: form.value.email || undefined,
            personalPhone: payload.phone,
            firstName: form.value.first_name,
            lastName: form.value.last_name || '-',
         };
 
-        let pmPatchRes = await fetch(`${apiUrl}/items/personalModule/${editingGuard.value.personalModuleId}`, {
+        await fetch(`${apiUrl}/items/personalModule/${editingGuard.value.personalModuleId}`, {
           method: 'PATCH',
           headers: { 
             'Content-Type': 'application/json',
@@ -2050,31 +2055,6 @@ const saveGuard = async () => {
           },
           body: JSON.stringify(patchPayload),
         });
-
-        if (!pmPatchRes.ok) {
-          try {
-            const errData = await pmPatchRes.clone().json();
-            const hasFkError = errData.errors?.some(e => 
-              e.code === 'INVALID_FOREIGN_KEY' || 
-              e.field === 'branchLocation' || 
-              e.field === 'branch' ||
-              (e.message && (e.message.includes('branchLocation') || e.message.includes('branch')))
-            );
-            if (hasFkError) {
-              console.warn('[saveGuard] Foreign key constraint on branchLocation/branch on patch, retrying with null');
-              delete patchPayload.branch;
-              patchPayload.branchLocation = null;
-              await fetch(`${apiUrl}/items/personalModule/${editingGuard.value.personalModuleId}`, {
-                method: 'PATCH',
-                headers: { 
-                  'Content-Type': 'application/json',
-                  Authorization: `Bearer ${token}`
-                },
-                body: JSON.stringify(patchPayload),
-              });
-            }
-          } catch (_) {}
-        }
       }
 
       // Automatically sync Face ID & Biometrics if avatar picture was updated
@@ -2093,6 +2073,23 @@ const saveGuard = async () => {
           }
         } catch (faceSyncErr) {
           console.warn('[FaceSync] Non-blocking face embedding notice:', faceSyncErr);
+        }
+      }
+
+      // Persist site and zone assignment
+      const targetGuardId = editingGuard.value ? editingGuard.value.id : newUserId;
+      if (targetGuardId && tenantId) {
+        try {
+          const key = `accesseasy_guard_assignments_${tenantId}`;
+          const assignments = JSON.parse(localStorage.getItem(key) || '{}');
+          assignments[String(targetGuardId)] = {
+            site_id: form.value.site_id || null,
+            zone_id: form.value.zone_id || null,
+            updated_at: Date.now()
+          };
+          localStorage.setItem(key, JSON.stringify(assignments));
+        } catch (e) {
+          console.warn('[saveGuard] Assignment storage error:', e);
         }
       }
 

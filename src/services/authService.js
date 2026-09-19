@@ -1133,6 +1133,62 @@ class AuthService {
     }
   }
 
+  async getUserByPhone(phone) {
+    try {
+      const cleanPhone = phone.replace(/\s/g, "");
+      const response = await this.knApi.post("/auth-service", {
+        action: "get-user-profile",
+        phone: cleanPhone,
+      });
+
+      if (response?.data?.success && response.data.userData) {
+        const userData = response.data.userData;
+
+        let userAppsList = userData.userApp;
+        if (typeof userAppsList === "string") {
+          try {
+            userAppsList = JSON.parse(userAppsList);
+          } catch (_) {
+            userAppsList = userAppsList.split(",").map(s => ({ userApp: s.trim() }));
+          }
+        }
+        if (!Array.isArray(userAppsList)) {
+          userAppsList = userAppsList ? [{ userApp: String(userAppsList) }] : [];
+        }
+
+        const hasPatrol = userAppsList.some(a => {
+          const name = String(a.userApp || a || "").toLowerCase();
+          return name === "patrol" || name === "accesseasy_patrol";
+        });
+
+        if (!hasPatrol) {
+          console.log("[getUserByPhone] Appending patrol to userApp array...");
+          const updatedApps = [...userAppsList, { userApp: "patrol", date: new Date().toISOString() }];
+
+          if (this.getToken()) {
+            this.protectedApi.patch(`/users/${userData.id}`, { userApp: updatedApps }).catch(e =>
+              console.warn("[getUserByPhone] User patch (non-fatal):", e.message)
+            );
+          }
+          userData.userApp = updatedApps;
+
+          const tId = userData.tenant?.tenantId || userData.tenant?.id;
+          if (tId) {
+            this.ensureTenantUserApp(tId, userData.id, "patrol").catch(e =>
+              console.warn("[getUserByPhone] Tenant patch failed:", e.message)
+            );
+          }
+        }
+        this.setUserData(userData);
+        return userData;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error fetching user by phone:", error);
+      return null;
+    }
+  }
+
   async loginWithSessionUuid(email, sessionUuid) {
     try {
       if (!email || !sessionUuid) {
