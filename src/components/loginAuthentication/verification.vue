@@ -163,7 +163,7 @@
 
           <div class="space-y-6">
             <div class="space-y-2">
-              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Verification Code</label>
+              <label class="text-[10px] font-black tracking-[0.15em] text-slate-600 ml-1 uppercase">Verification Code</label>
               <div class="flex justify-between gap-2">
                 <input
                   v-for="(digit, index) in 6"
@@ -172,7 +172,7 @@
                   v-model="otpDigits[index]"
                   maxlength="1"
                   type="text"
-                  class="w-12 h-14 text-center rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none text-xl font-black text-slate-900 dark:text-white shadow-sm"
+                  class="w-12 h-14 text-center rounded-2xl bg-white/85 hover:bg-white/95 focus:bg-white border border-[#d8e2ee] focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none text-xl font-black text-slate-800 shadow-sm"
                   @input="handleInput(index)"
                   @keydown="handleKeydown($event, index)"
                   @paste="handlePaste($event, index)"
@@ -180,7 +180,7 @@
               </div>
             
               <div class="flex items-center justify-between px-1 mt-2">
-                <p class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                   Didn't receive code?
                 </p>
                 <button 
@@ -202,23 +202,23 @@
 
             <button
               :disabled="loading || !isValidOtp"
-              class="w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 transition-all disabled:opacity-70 disabled:cursor-not-allowed group"
+              class="w-full h-12 rounded-2xl text-[12px] font-black uppercase tracking-[0.15em] flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-[0_6px_25px_rgba(59,130,246,0.4)] transition-all active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed group"
               @click="verifyCode"
             >
               <span v-if="loading">Verifying...</span>
               <template v-else>
-                Verify & Continue
+                VERIFY & CONTINUE
                 <ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </template>
             </button>
 
-            <div class="flex items-center justify-between gap-4 py-2 opacity-50">
-              <div class="h-[1px] flex-1 bg-slate-300 dark:bg-slate-700" />
-              <span class="text-[9px] font-black tracking-[0.3em] text-slate-500 dark:text-slate-400 uppercase">OR</span>
-              <div class="h-[1px] flex-1 bg-slate-300 dark:bg-slate-700" />
+            <div class="flex items-center justify-between gap-4 py-1.5 opacity-60">
+              <div class="h-[1px] flex-1 bg-slate-300" />
+              <span class="text-[9px] font-black tracking-[0.3em] text-slate-400 uppercase">OR</span>
+              <div class="h-[1px] flex-1 bg-slate-300" />
             </div>
 
-            <p class="text-center text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            <p class="text-center text-[10px] font-bold text-slate-500 uppercase tracking-wider">
               <router-link
                 to="/login"
                 class="text-blue-600 hover:text-blue-700 underline underline-offset-4 cursor-pointer"
@@ -286,7 +286,11 @@ const isValidOtp = computed(() =>
 
 const displayContact = computed(() => {
   if (userEmail.value) return userEmail.value;
-  const phone = userPhone.value || localStorage.getItem("userPhone");
+  let phone = userPhone.value || localStorage.getItem("userPhone") || localStorage.getItem("justRegisteredPhone") || "";
+  if (!phone) return "your number";
+  
+  // Clean double prefixes e.g. "+91+91" or "+91 +91"
+  phone = phone.replace(/^(\+91\s*)+/, '').replace(/^(\+\d{1,4}\s*)+/, '');
   return phone ? `+91 ${phone}` : "your number";
 });
 

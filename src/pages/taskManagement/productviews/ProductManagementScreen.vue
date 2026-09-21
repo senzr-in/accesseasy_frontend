@@ -743,12 +743,11 @@ export default {
       this.isLoading = true;
       try {
         this.products = await this.productService.getProducts(this.tenantId);
-        // Add mock branch, status, and createdAt data to products
         this.products = this.products.map(product => ({
           ...product,
-          branch: this.branches[Math.floor(Math.random() * this.branches.length)].id,
-          status: ['active', 'inactive', 'draft'][Math.floor(Math.random() * 3)],
-          createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(), // Mock createdAt within last 30 days
+          branch: product.branch || (this.branches[0] ? this.branches[0].id : null),
+          status: product.status || 'active',
+          createdAt: product.date_created || product.createdAt || new Date().toISOString(),
         }));
       } catch (error) {
         console.error('Failed to load products:', error);

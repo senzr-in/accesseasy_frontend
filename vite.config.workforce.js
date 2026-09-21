@@ -18,6 +18,6 @@ export default defineConfig(({ mode }) => {
       'import.meta.env.VITE_APP_MODE': JSON.stringify('workforce')
     },
     build: { outDir: path.resolve(__dirname, 'dist/workforce'), emptyOutDir: true },
-    server: { port: 5175, host: "0.0.0.0", watch: { usePolling: true } }
+    server: { port: 5175, host: "0.0.0.0", watch: { usePolling: true }, hmr: { clientPort: 5175 } }
   };
 });

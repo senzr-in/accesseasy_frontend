@@ -499,7 +499,7 @@ const generateNewQr = async () => {
 
     if (!res.ok) console.error("Failed to save QR to backend");
 
-    // 3. Build visual QR payload — includes qr_type for guard app
+    // 3. Build visual QR payload for door reader verification
     const qrPayloadObj = JSON.stringify({
       type: "EMPLOYEE",
       qr_type: qrType,

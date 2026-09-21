@@ -135,7 +135,7 @@ const getCardColor = (type) => {
   const typeMap = {
     Access: "indigo",
     Employee: "teal",
-    Visitor: "amber-darken-2",
+    Contractor: "amber-darken-2",
     Admin: "deep-purple",
     Security: "red-darken-1",
   };
@@ -146,7 +146,7 @@ const getCardIcon = (type) => {
   const iconMap = {
     Access: "mdi-door",
     Employee: "mdi-account-badge",
-    Visitor: "mdi-account-question",
+    Contractor: "mdi-account-hard-hat",
     Admin: "mdi-shield-account",
     Security: "mdi-security",
   };

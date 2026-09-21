@@ -145,97 +145,100 @@
             </p>
           </div>
 
-          <!-- Mode Selector Switcher (3D Metallic Brushed Pill Tabs) -->
-          <div class="p-1.5 bg-slate-300/70 rounded-xl mb-6 border border-slate-400/50 flex relative shadow-inner">
+          <!-- Mode Selector Switcher (Email / Phone Pill Tabs) -->
+          <div class="p-1 bg-[#e2e8f0]/80 rounded-2xl mb-6 border border-slate-300/80 flex items-center shadow-inner">
             <button
               type="button"
               :class="[
-                'flex-1 py-2.5 px-3 flex items-center justify-center gap-2 text-xs font-extrabold rounded-lg transition-all duration-300 z-10',
-                activeTab === 'email_phone' 
-                  ? 'bg-gradient-to-r from-slate-100 via-slate-200 to-slate-300 text-blue-900 border border-blue-500/60 shadow-[inset_0_1px_2px_rgba(255,255,255,0.95),0_4px_12px_rgba(59,130,246,0.3)]' 
+                'flex-1 py-2.5 px-3 flex items-center justify-center gap-2 text-xs font-bold rounded-xl transition-all duration-300 cursor-pointer',
+                authMode === 'email'
+                  ? 'bg-white text-slate-900 shadow-sm border border-slate-200/80'
                   : 'text-slate-600 hover:text-slate-900'
               ]"
-              @click="setTab('email_phone')"
+              @click="setAuthMode('email')"
             >
-              <Mail class="w-3.5 h-3.5 text-blue-600" />
-              Email or Phone
+              <Mail class="w-4 h-4 text-blue-600" />
+              <span>Email</span>
             </button>
             <button
               type="button"
               :class="[
-                'flex-1 py-2.5 px-3 flex items-center justify-center gap-2 text-xs font-extrabold rounded-lg transition-all duration-300 z-10',
-                activeTab === 'employee_id' 
-                  ? 'bg-gradient-to-r from-slate-100 via-slate-200 to-slate-300 text-blue-900 border border-blue-500/60 shadow-[inset_0_1px_2px_rgba(255,255,255,0.95),0_4px_12px_rgba(59,130,246,0.3)]' 
+                'flex-1 py-2.5 px-3 flex items-center justify-center gap-2 text-xs font-bold rounded-xl transition-all duration-300 cursor-pointer',
+                authMode === 'phone'
+                  ? 'bg-white text-slate-900 shadow-sm border border-slate-200/80'
                   : 'text-slate-600 hover:text-slate-900'
               ]"
-              @click="setTab('employee_id')"
+              @click="setAuthMode('phone')"
             >
-              <IdCard class="w-3.5 h-3.5 text-slate-600" />
-              Employee ID
+              <Phone class="w-4 h-4 text-emerald-600" />
+              <span>Phone</span>
             </button>
           </div>
 
           <form
             class="space-y-4"
-            @submit.prevent="handleSubmit"
+            @submit.prevent="handleAuthSubmit"
           >
-            <!-- Email / Phone or Employee ID Input Field -->
-            <div class="space-y-1.5">
+            <!-- Phone Number Input (When Phone Tab Active) -->
+            <div
+              v-if="authMode === 'phone'"
+              class="space-y-1.5"
+            >
               <label class="block text-xs font-bold text-slate-800">
-                {{ activeTab === 'email_phone' ? 'Email or Phone Number' : 'Employee ID' }}
+                Phone number
               </label>
-              <div class="relative group">
-                <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-cyan-600 transition-colors">
-                  <User
-                    v-if="activeTab === 'email_phone'"
-                    class="w-4 h-4"
-                  />
-                  <CreditCard
-                    v-else
-                    class="w-4 h-4"
-                  />
+              <div class="flex items-center rounded-xl bg-slate-50/90 border-2 border-slate-300 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/20 overflow-hidden transition-all shadow-inner">
+                <div class="relative flex items-center border-r-2 border-slate-300 bg-slate-100/80">
+                  <select
+                    v-model="countryCode"
+                    class="appearance-none bg-transparent pl-3 pr-6 py-3 text-xs font-extrabold text-slate-700 outline-none cursor-pointer"
+                  >
+                    <option value="+91">IN +91</option>
+                    <option value="+1">US +1</option>
+                    <option value="+44">UK +44</option>
+                    <option value="+971">AE +971</option>
+                    <option value="+65">SG +65</option>
+                  </select>
+                  <ChevronDown class="w-3.5 h-3.5 text-slate-500 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 </div>
                 <input
-                  v-model="inputIdentifier"
-                  :type="activeTab === 'email_phone' && isPurePhone ? 'tel' : 'text'"
+                  v-model="phoneDigits"
+                  type="tel"
+                  maxlength="10"
                   required
-                  class="w-full h-12 pl-10 pr-4 rounded-xl bg-slate-50/90 border-2 border-cyan-400 focus:border-blue-500 focus:ring-4 focus:ring-cyan-400/30 shadow-[0_0_18px_rgba(6,182,212,0.35)] transition-all outline-none text-sm font-semibold text-slate-900 placeholder:text-slate-400"
-                  :placeholder="activeTab === 'email_phone' ? 'Enter email or phone number' : 'Enter employee ID'"
+                  class="w-full h-12 px-3.5 text-sm font-semibold text-slate-900 placeholder:text-slate-400 bg-transparent outline-none"
+                  placeholder="10-digit number"
+                  @input="phoneDigits = phoneDigits.replace(/\D/g, '')"
                 >
               </div>
             </div>
 
-            <!-- Password Input Field -->
-            <div class="space-y-1.5">
+            <!-- Email Address Input (When Email Tab Active) -->
+            <div
+              v-else
+              class="space-y-1.5"
+            >
               <label class="block text-xs font-bold text-slate-800">
-                Password
+                Email address
               </label>
-              <div class="relative group">
-                <div class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-cyan-600 transition-colors">
-                  <Lock class="w-4 h-4" />
+              <div class="flex items-center rounded-xl bg-slate-50/90 border-2 border-slate-300 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/20 overflow-hidden transition-all shadow-inner">
+                <div class="pl-3.5 text-slate-400 flex items-center">
+                  <Mail class="w-4 h-4 text-blue-500" />
                 </div>
                 <input
-                  v-model="password"
-                  :type="showPassword ? 'text' : 'password'"
-                  class="w-full h-12 pl-10 pr-10 rounded-xl bg-slate-50/90 border-2 border-cyan-400 focus:border-blue-500 focus:ring-4 focus:ring-cyan-400/30 shadow-[0_0_18px_rgba(6,182,212,0.35)] transition-all outline-none text-sm font-semibold text-slate-900 placeholder:text-slate-400"
-                  placeholder="Enter your password"
+                  v-model="emailAddress"
+                  type="email"
+                  required
+                  class="w-full h-12 px-3.5 text-sm font-semibold text-slate-900 placeholder:text-slate-400 bg-transparent outline-none"
+                  placeholder="Enter email address"
                 >
-                <button
-                  type="button"
-                  class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors p-1"
-                  @click="showPassword = !showPassword"
-                >
-                  <Eye
-                    v-if="!showPassword"
-                    class="w-4 h-4"
-                  />
-                  <EyeOff
-                    v-else
-                    class="w-4 h-4"
-                  />
-                </button>
               </div>
             </div>
+
+            <!-- Helper Text -->
+            <p class="text-xs text-slate-500 font-medium">
+              We'll send you a one-time password (OTP) to sign in.
+            </p>
 
             <!-- Error Feedback Banner -->
             <div
@@ -246,45 +249,24 @@
               <span>{{ errorMessage }}</span>
             </div>
 
-            <!-- Remember me & Forgot Password Row -->
-            <div class="flex items-center justify-between pt-1">
-              <label class="flex items-center gap-2 cursor-pointer group select-none">
-                <input
-                  v-model="rememberMe"
-                  type="checkbox"
-                  class="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500/30 transition cursor-pointer"
-                >
-                <span class="text-xs font-semibold text-slate-700 group-hover:text-slate-900 transition-colors">
-                  Remember me
-                </span>
-              </label>
-              <a
-                href="#"
-                class="text-xs font-bold text-blue-600 hover:underline hover:text-blue-700 transition-colors"
-                @click.prevent="handleForgotPassword"
-              >
-                Forgot Password?
-              </a>
-            </div>
-
-            <!-- Primary Dynamic Fluid Liquid Texture Button -->
+            <!-- SEND OTP CTA Button with glowing drop shadow -->
             <button
               type="submit"
               :disabled="loading"
-              class="w-full h-12 mt-2 rounded-xl text-xs font-black tracking-wider uppercase flex items-center justify-center gap-2 bg-gradient-to-r from-[#002884] via-[#0052cc] to-[#0070f3] hover:from-[#001f66] hover:to-[#0052cc] text-white border-t border-white/50 shadow-[0_10px_30px_rgba(0,82,204,0.5),0_0_20px_rgba(0,102,255,0.35)] hover:shadow-[0_12px_35px_rgba(0,82,204,0.65)] hover:scale-[1.01] active:scale-[0.99] transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed group relative overflow-hidden"
+              class="w-full h-12 rounded-xl text-xs font-black tracking-wider uppercase flex items-center justify-center gap-2 bg-gradient-to-r from-[#3b82f6] via-[#2563eb] to-[#1d4ed8] hover:from-[#2563eb] hover:to-[#1e40af] text-white shadow-[0_10px_25px_rgba(37,99,235,0.45)] hover:shadow-[0_12px_30px_rgba(37,99,235,0.6)] active:scale-[0.99] transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed group relative overflow-hidden"
             >
               <!-- Button Gloss Sweep Effect -->
-              <div class="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-12 -translate-x-full group-hover:translate-x-[300%] transition-transform duration-1000" />
+              <div class="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12 -translate-x-full group-hover:translate-x-[300%] transition-transform duration-1000" />
               
               <span v-if="loading">Processing...</span>
               <template v-else>
-                <span>Sign In</span>
+                <span>SEND OTP</span>
                 <ArrowRight class="w-4 h-4 transition-transform group-hover:translate-x-1.5 duration-300" />
               </template>
             </button>
 
             <!-- OR Divider -->
-            <div class="flex items-center justify-center gap-3 py-2">
+            <div class="flex items-center justify-center gap-3 py-1">
               <div class="h-[1px] flex-1 bg-slate-300" />
               <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">OR</span>
               <div class="h-[1px] flex-1 bg-slate-300" />
@@ -340,12 +322,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { authService } from "@/services/authService";
 import { 
-  Shield, ShieldCheck, Lock, Mail, User, CreditCard, Eye, EyeOff, 
-  ArrowRight, IdCard, Zap, BarChart3, AlertCircle, Layers, Globe,
+  Shield, ShieldCheck, Mail, Phone, ChevronDown,
+  ArrowRight, Zap, BarChart3, AlertCircle, Layers,
   ScanFace, Fingerprint, Radio, Nfc, Bluetooth
 } from "lucide-vue-next";
 
@@ -356,11 +338,10 @@ import marbleBg from "@/assets/images/marble_bg.png";
 const router = useRouter();
 const route = useRoute();
 
-const activeTab = ref("email_phone"); // 'email_phone' | 'employee_id'
-const inputIdentifier = ref("");
-const password = ref("");
-const showPassword = ref(false);
-const rememberMe = ref(false);
+const authMode = ref("phone"); // 'phone' | 'email'
+const countryCode = ref("+91");
+const phoneDigits = ref("");
+const emailAddress = ref("");
 const loading = ref(false);
 const errorMessage = ref("");
 
@@ -397,101 +378,35 @@ const authMethods = [
   { name: "Bluetooth", sub: "BLE Touchless", icon: Bluetooth }
 ];
 
-const isPurePhone = computed(() => {
-  const digits = inputIdentifier.value.replace(/\D/g, "");
-  return digits.length >= 10 && !inputIdentifier.value.includes("@");
-});
-
 onMounted(() => {
   if (route.query.autoSubmit === "true" && localStorage.getItem("fromRegistration") === "true") {
     const registeredPhone = localStorage.getItem("justRegisteredPhone");
     if (registeredPhone) {
-      inputIdentifier.value = registeredPhone.replace(/\D/g, "").slice(-10);
-      activeTab.value = "email_phone";
+      phoneDigits.value = registeredPhone.replace(/\D/g, "").slice(-10);
+      authMode.value = "phone";
       setTimeout(() => {
-        handleSubmit();
+        handlePhoneSubmit();
       }, 500);
     }
   }
 });
 
-function setTab(tab) {
-  activeTab.value = tab;
+function setAuthMode(mode) {
+  authMode.value = mode;
   errorMessage.value = "";
 }
 
-function handleForgotPassword() {
-  if (activeTab.value === "email_phone" && isPurePhone.value) {
-    onPhoneSubmit();
+async function handleAuthSubmit() {
+  errorMessage.value = "";
+  if (authMode.value === "phone") {
+    await handlePhoneSubmit();
   } else {
-    alert("Please contact your administrator or use the registered Email OTP to reset your password.");
+    await handleEmailSubmit();
   }
 }
 
-async function handleSubmit() {
-  errorMessage.value = "";
-  if (!inputIdentifier.value.trim()) {
-    errorMessage.value = "Please enter your Email, Phone number, or Employee ID.";
-    return;
-  }
-
-  loading.value = true;
-  try {
-    const rawVal = inputIdentifier.value.trim();
-    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawVal);
-    const isPhone = /^\d{10}$/.test(rawVal.replace(/\D/g, ""));
-    const digits = rawVal.replace(/\D/g, "");
-
-    // Save identifier in storage
-    if (isPhone) {
-      localStorage.setItem("userPhone", digits);
-    } else if (isEmail) {
-      localStorage.setItem("email", rawVal);
-    }
-
-    // Direct password / credential authentication straight to Dashboard (No separate page redirects)
-    if (password.value || activeTab.value === "employee_id") {
-      localStorage.setItem("pinVerifiedInSession", "true");
-      router.push({ name: "DashboardHome" });
-      return;
-    }
-
-    // Direct login verification without separate page redirects
-    if (isPhone) {
-      const fullPhoneNumber = "+91" + digits;
-      const phoneExists = await authService.checkPhoneExists(fullPhoneNumber);
-      if (!phoneExists) {
-        errorMessage.value = "This phone number is not registered. Please sign up first.";
-        return;
-      }
-      const isResigned = await authService.checkUserResigned(fullPhoneNumber);
-      if (isResigned) {
-        errorMessage.value = "Resigned Employee has No access. Please contact your Company Admin.";
-        return;
-      }
-      localStorage.setItem("pinVerifiedInSession", "true");
-      router.push({ name: "DashboardHome" });
-    } else if (isEmail) {
-      const emailExists = await authService.checkEmailExists(rawVal);
-      if (!emailExists) {
-        errorMessage.value = "This email is not registered. Please sign up first.";
-        return;
-      }
-      localStorage.setItem("pinVerifiedInSession", "true");
-      router.push({ name: "DashboardHome" });
-    } else {
-      errorMessage.value = "Please enter a valid 10-digit mobile number or email address.";
-    }
-  } catch (error) {
-    console.error("Error during login:", error);
-    errorMessage.value = error.response?.data?.message || error.message || "An error occurred. Please try again.";
-  } finally {
-    loading.value = false;
-  }
-}
-
-async function onPhoneSubmit() {
-  const digits = inputIdentifier.value.replace(/\D/g, "");
+async function handlePhoneSubmit() {
+  const digits = phoneDigits.value.replace(/\D/g, "");
 
   if (digits.length !== 10) {
     errorMessage.value = "Please enter a valid 10-digit mobile number.";
@@ -504,7 +419,7 @@ async function onPhoneSubmit() {
     localStorage.removeItem("pinVerifiedInSession");
     localStorage.removeItem("fromOtp");
 
-    const fullPhoneNumber = "+91" + digits;
+    const fullPhoneNumber = countryCode.value + digits;
 
     const phoneExists = await authService.checkPhoneExists(fullPhoneNumber);
     if (!phoneExists) {
@@ -571,8 +486,13 @@ async function proceedToOtpVerification(fullPhoneNumber) {
   }
 }
 
-async function onEmailSubmit() {
-  const emailVal = inputIdentifier.value.trim();
+async function handleEmailSubmit() {
+  const emailVal = emailAddress.value.trim();
+
+  if (!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+    errorMessage.value = "Please enter a valid email address.";
+    return;
+  }
 
   loading.value = true;
 
@@ -599,6 +519,7 @@ async function onEmailSubmit() {
     localStorage.setItem("emailSessionUuid", data.otp_session_uuid);
     router.push({ name: "EmailVerification", params: { email: emailVal } });
   } catch (err) {
+    console.error("Error generating email OTP:", err);
     errorMessage.value = err?.response?.data?.message || err?.message || "Something went wrong. Please try again.";
   } finally {
     loading.value = false;

@@ -598,7 +598,7 @@ const loadGoogleMap = () => {
             position: startPoint,
             map: map,
             icon: {
-              url: "http://maps.google.com/mapfiles/ms/icons/green-dot.png",
+              url: "https://maps.google.com/mapfiles/ms/icons/green-dot.png",
               scaledSize: new google.maps.Size(32, 32),
             },
             title: "Start Point",
@@ -610,7 +610,7 @@ const loadGoogleMap = () => {
             position: endPoint,
             map: map,
             icon: {
-              url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
+              url: "https://maps.google.com/mapfiles/ms/icons/red-dot.png",
               scaledSize: new google.maps.Size(32, 32),
             },
             title: "End Point",
@@ -789,7 +789,7 @@ const loadGoogleMap = () => {
               position: fallbackPosition,
               map: map,
               icon: {
-                url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+                url: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png",
               },
               title: "Field Trip Location",
             });

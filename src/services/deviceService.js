@@ -67,8 +67,10 @@ export const deviceService = {
         ...getHeaders()
       },
       body: JSON.stringify({
-        name: payload.name,
-        ip: payload.ip,
+        controllerName: payload.name,
+        deviceName: payload.name,
+        controllerIP: payload.ip,
+        ip_address: payload.ip,
         sn: payload.uuid || `SN-${Date.now()}`,
         tenant: activeTenantId
       })

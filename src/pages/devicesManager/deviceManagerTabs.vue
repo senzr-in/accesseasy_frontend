@@ -11,7 +11,7 @@
           @click="showHardwareConfigModal = true"
         >
           <SlidersHorizontal class="h-3.5 w-3.5 fill-current" />
-          4-Door Hardware Config
+          Hardware Config
         </button>
         <button
           class="flex items-center gap-2 rounded-xl px-4 py-2 shadow-sm border border-slate-200 dark:border-zinc-800 font-black uppercase tracking-widest text-[10px] bg-white dark:bg-zinc-950 text-slate-700 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
@@ -38,60 +38,60 @@
           v-model="search"
           type="search"
           placeholder="Search devices by name or serial..."
-          class="w-full rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 h-10 pl-9 pr-4 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all shadow-sm"
+          class="w-full rounded-xl border border-slate-200 bg-white h-10 pl-9 pr-4 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none transition-all shadow-sm"
           @input="debouncedSearch"
         >
       </div>
       
       <!-- Tab filter -->
-      <div class="flex bg-slate-50 dark:hover:bg-zinc-800 border border-slate-200 dark:border-zinc-800 p-1 rounded-xl shadow-sm shrink-0">
+      <div class="flex bg-slate-100 border border-slate-200 p-1 rounded-xl shadow-sm shrink-0">
         <button 
           v-for="tab in ['all', 'approved', 'unApproved']" 
           :key="tab"
           :class="[
-            'px-4 h-8 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all',
+            'px-4 h-8 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer',
             activeStatusTab === tab 
-              ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-sm border border-slate-200 dark:border-zinc-700' 
-              : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:text-slate-200 dark:hover:text-slate-300'
+              ? 'bg-white text-blue-600 shadow-sm border border-slate-200' 
+              : 'text-slate-600 hover:text-slate-900'
           ]"
           @click="activeStatusTab = tab"
         >
-          {{ tab }}
+          {{ tab === 'unApproved' ? 'Unapproved' : tab }}
         </button>
       </div>
     </div>
 
     <!-- Data Table -->
-    <div class="rounded-xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-sm overflow-hidden flex flex-col h-[700px]">
+    <div class="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden flex flex-col min-h-[500px]">
       <div class="overflow-x-auto flex-1 h-full">
         <table class="w-full text-left border-collapse relative">
-          <thead class="bg-slate-50 dark:hover:bg-zinc-800 border-b border-slate-200 dark:border-zinc-800 sticky top-0 z-10 w-full">
+          <thead class="bg-slate-50 border-b border-slate-200 sticky top-0 z-10 w-full">
             <tr>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
+              <th class="h-10 px-5 font-bold text-[10px] text-slate-500 uppercase tracking-wider whitespace-nowrap">
                 Identity Matrix
               </th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
+              <th class="h-10 px-5 font-bold text-[10px] text-slate-500 uppercase tracking-wider whitespace-nowrap">
                 Protocol Type
               </th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
+              <th class="h-10 px-5 font-bold text-[10px] text-slate-500 uppercase tracking-wider whitespace-nowrap">
                 Link Status
               </th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
+              <th class="h-10 px-5 font-bold text-[10px] text-slate-500 uppercase tracking-wider whitespace-nowrap">
                 Core Engine
               </th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap">
+              <th class="h-10 px-5 font-bold text-[10px] text-slate-500 uppercase tracking-wider whitespace-nowrap">
                 Authorization
               </th>
-              <th class="h-10 px-5 font-black text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-widest whitespace-nowrap text-right">
+              <th class="h-10 px-5 font-bold text-[10px] text-slate-500 uppercase tracking-wider whitespace-nowrap text-right">
                 Operations
               </th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100 dark:divide-zinc-800 bg-white dark:bg-zinc-950">
+          <tbody class="divide-y divide-slate-100 bg-white">
             <tr v-if="loading">
               <td
                 colspan="6"
-                class="px-5 py-24 text-center text-slate-500 dark:text-slate-400"
+                class="px-5 py-24 text-center text-slate-500"
               >
                 <Loader2 class="w-8 h-8 animate-spin text-blue-500 mx-auto" />
               </td>
@@ -99,17 +99,17 @@
             <tr v-else-if="items.length === 0">
               <td
                 colspan="6"
-                class="px-5 py-24 text-center"
+                class="px-5 py-24 text-center bg-white"
               >
                 <div class="flex flex-col items-center gap-4 max-w-xs mx-auto">
-                  <div class="h-16 w-16 bg-slate-50 dark:hover:bg-zinc-800 rounded-xl flex items-center justify-center border border-slate-200 dark:border-zinc-800">
+                  <div class="h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center border border-slate-200 shadow-sm">
                     <Zap class="h-8 w-8 text-slate-400" />
                   </div>
                   <div class="space-y-1">
-                    <p class="text-[10px] font-black uppercase tracking-widest text-slate-900 dark:text-white">
+                    <p class="text-[11px] font-black uppercase tracking-widest text-slate-900">
                       Empty Infrastructure
                     </p>
-                    <p class="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                    <p class="text-xs font-medium text-slate-500">
                       No hardware nodes detected in the current matrix.
                     </p>
                   </div>
@@ -120,27 +120,22 @@
               v-for="device in items"
               v-else 
               :key="device.id" 
-              class="group/row hover:bg-zinc-50/50 dark:hover:bg-zinc-800/50 transition-colors duration-300"
+              class="group/row hover:bg-slate-50/80 transition-colors duration-200"
             >
               <td class="px-4 py-3">
                 <div class="flex items-center gap-3">
-                  <div class="h-8 w-8 shrink-0 rounded-md overflow-hidden bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center border border-zinc-200 dark:border-zinc-700">
+                  <div class="h-8 w-8 shrink-0 rounded-lg overflow-hidden bg-slate-100 flex items-center justify-center border border-slate-200">
                     <img
                       v-if="device.controllerImage?.url"
                       :src="device.controllerImage.url"
                       class="h-full w-full object-cover"
                     >
-                    <Video
-                      v-else-if="device.controllerType === 'frigate_nvr'"
-                      class="h-4 w-4 text-emerald-500"
-                    />
                     <Cpu
-                      v-else
-                      class="h-4 w-4 text-zinc-400"
+                      class="h-4 w-4 text-slate-400"
                     />
                   </div>
                   <div class="flex flex-col">
-                    <span class="text-[13px] font-semibold text-foreground group-hover/row:text-primary transition-colors">
+                    <span class="text-[13px] font-semibold text-slate-900 group-hover/row:text-blue-600 transition-colors">
                       {{ device.controllerName || 'Unnamed Node' }}
                     </span>
                     <span class="text-[11px] text-muted-foreground">
@@ -150,17 +145,8 @@
                 </div>
               </td>
               <td class="px-4 py-3">
-                <span
-                  v-if="device.controllerType === 'frigate_nvr'"
-                  class="text-[13px] text-muted-foreground font-medium"
-                >
-                  Frigate AI NVR
-                </span>
-                <span
-                  v-else
-                  class="text-[13px] text-muted-foreground"
-                >
-                  Type {{ device.controllerType || '?' }}
+                <span class="text-[13px] text-muted-foreground">
+                  {{ device.controllerType ? `${device.controllerType}-Door Controller` : 'Controller' }}
                 </span>
               </td>
               <td class="px-4 py-3">
@@ -189,25 +175,25 @@
                   </span>
                 </div>
               </td>
-              <td class="px-5 py-3 text-xs text-slate-500 dark:text-slate-400 font-semibold mt-0.5">
+              <td class="px-5 py-3 text-xs text-slate-600 font-semibold mt-0.5">
                 {{ device.serverIp || 'OFFLINE' }}
               </td>
               <td class="px-5 py-3 whitespace-nowrap">
                 <span
                   :class="[
-                    'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest border',
+                    'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border',
                     device.status === 'approved' 
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20' 
-                      : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20'
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                      : 'bg-amber-50 text-amber-700 border-amber-200'
                   ]"
                 >
                   <CheckCircle2
                     v-if="device.status === 'approved'"
-                    class="w-3 h-3"
+                    class="w-3.5 h-3.5"
                   />
                   <Clock
                     v-else
-                    class="w-3 h-3"
+                    class="w-3.5 h-3.5"
                   />
                   {{ device.status }}
                 </span>
@@ -217,29 +203,21 @@
                   <button 
                     v-if="device.status !== 'approved'"
                     title="Approve Node"
-                    class="flex items-center justify-center p-0 h-7 w-7 rounded-md bg-transparent text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 transition-colors shadow-sm border border-emerald-200 dark:border-emerald-500/20 dark:hover:bg-emerald-500/10"
+                    class="flex items-center justify-center p-0 h-7 w-7 rounded-lg bg-emerald-50 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-100 transition-colors shadow-xs border border-emerald-200 cursor-pointer"
                     @click="approveDevice(device)"
                   >
                     <ShieldCheck class="w-3.5 h-3.5" />
                   </button>
                   <button 
-                    v-if="device.controllerType === 'frigate_nvr'"
-                    title="View AI Events"
-                    class="h-7 w-7 rounded-md flex items-center justify-center border border-slate-200 dark:border-zinc-700 text-blue-600 dark:text-blue-400 bg-transparent hover:bg-blue-50 dark:hover:bg-blue-900/20 shadow-sm transition-colors mr-1"
-                    @click="viewEvents(device)"
-                  >
-                    <Activity class="w-3.5 h-3.5" />
-                  </button>
-                  <button 
                     title="Configuration Setup"
-                    class="h-7 w-7 rounded-md flex items-center justify-center border border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300 bg-transparent hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 shadow-sm transition-colors"
+                    class="h-7 w-7 rounded-lg flex items-center justify-center border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 shadow-xs transition-colors cursor-pointer"
                     @click="editItem(device)"
                   >
                     <Settings2 class="w-3.5 h-3.5" />
                   </button>
                   <button 
                     title="Decommission Node"
-                    class="flex items-center justify-center p-0 h-7 w-7 rounded-md bg-transparent text-rose-600 hover:text-rose-700 hover:bg-rose-50 transition-colors border border-rose-200 dark:border-rose-900/50 dark:hover:bg-rose-900/20 shadow-sm"
+                    class="flex items-center justify-center p-0 h-7 w-7 rounded-lg bg-rose-50 text-rose-600 hover:text-rose-700 hover:bg-rose-100 transition-colors border border-rose-200 shadow-xs cursor-pointer"
                     @click="deleteDevice(device)"
                   >
                     <Trash2 class="w-3.5 h-3.5" />
@@ -252,19 +230,19 @@
       </div>
 
       <!-- Pagination -->
-      <div class="flex items-center justify-between p-4 border-t border-slate-100 dark:border-zinc-800 bg-slate-50 dark:hover:bg-zinc-800 mt-auto shrink-0">
+      <div class="flex items-center justify-between p-4 border-t border-slate-200 bg-slate-50 mt-auto shrink-0">
         <button
-          class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-zinc-800 hover:bg-white dark:bg-slate-900 dark:hover:bg-zinc-950 disabled:opacity-50 transition-colors shadow-sm text-slate-700 dark:text-slate-300"
+          class="h-8 px-3 text-[10px] font-bold uppercase tracking-wider rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 transition-colors shadow-xs text-slate-700 cursor-pointer"
           :disabled="page <= 1 || loading"
           @click="page--"
         >
           Previous
         </button>
-        <div class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
+        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500">
           Page {{ page }} of {{ totalPages || 1 }} (Total: {{ totalItems }})
         </div>
         <button
-          class="h-8 px-3 text-[10px] font-black uppercase tracking-widest rounded-lg border border-slate-200 dark:border-zinc-800 hover:bg-white dark:bg-slate-900 dark:hover:bg-zinc-950 disabled:opacity-50 transition-colors shadow-sm text-slate-700 dark:text-slate-300"
+          class="h-8 px-3 text-[10px] font-bold uppercase tracking-wider rounded-lg border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-40 transition-colors shadow-xs text-slate-700 cursor-pointer"
           :disabled="page >= totalPages || loading"
           @click="page++"
         >
@@ -277,14 +255,6 @@
         :device="selectedDevice"
         :start-with-scanner="startWithScanner"
         @success="fetchDeviceData"
-      />
-
-      <!-- Frigate Events Viewer Placeholder -->
-      <!-- We will build this dialog next to view AI events -->
-      <FrigateEventsDialog
-        v-if="showFrigateEvents"
-        v-model="showFrigateEvents"
-        :device="selectedDevice"
       />
 
       <!-- Delete Confirmation Dialog -->
@@ -314,11 +284,10 @@
 
 <script setup>
 import { ref, computed, watch, onMounted } from "vue";
-import { Zap, Network, Plus, Search, Loader2, Cpu, CheckCircle2, Clock, ShieldCheck, Settings2, DoorOpen, Trash2, Video, Activity, SlidersHorizontal } from "lucide-vue-next";
+import { Zap, Network, Plus, Search, Loader2, Cpu, CheckCircle2, Clock, ShieldCheck, Settings2, DoorOpen, Trash2, SlidersHorizontal } from "lucide-vue-next";
 import { authService } from "@/services/authService";
 import { currentUserTenant } from "@/utils/currentUserTenant";
 import DeviceRegistrationDialog from "./deviceRegistrationDialog.vue";
-import FrigateEventsDialog from "./frigateEventsDialog.vue";
 import ConfirmDeleteModal from "@/components/common/modals/ConfirmDeleteModal.vue";
 import DoorConfigModal from "./doors/doorConfigModal.vue";
 
@@ -334,7 +303,6 @@ const itemsPerPage = 10;
 const totalItems = ref(0);
 const activeStatusTab = ref("all");
 const showDialog = ref(false);
-const showFrigateEvents = ref(false);
 const showHardwareConfigModal = ref(false);
 const selectedDevice = ref(null);
 
@@ -453,11 +421,6 @@ const editItem = (item) => {
   selectedDevice.value = item;
   startWithScanner.value = false;
   showDialog.value = true;
-};
-
-const viewEvents = (item) => {
-  selectedDevice.value = item;
-  showFrigateEvents.value = true;
 };
 
 const approveDevice = async (device) => {

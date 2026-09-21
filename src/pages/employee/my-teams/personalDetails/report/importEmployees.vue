@@ -1757,7 +1757,7 @@ async function getCachedLeaveSettings() {
       const resolvedTenantId = currentUserTenant.getTenantId();
       const currentYear = new Date().getFullYear();
       try {
-        const leaveSettingsUrl = `${import.meta.env.VITE_API_URL}/items/leaveSetting?filter[_and][0][_and][0][tenant][tenantId][_eq]=${resolvedTenantId}&filter[_and][0][_and][1][year(yearOfPolicy)][_eq]=${currentYear}`;
+        const leaveSettingsUrl = `${import.meta.env.VITE_API_URL}/items/leaveSetting?filter[_and][0][_and][0][tenant][tenantId][_eq]=${resolvedTenantId}&filter[_and][0][_and][1][yearOfPolicy][_eq]=${currentYear}`;
         const response = await fetch(leaveSettingsUrl, {
           headers: { Authorization: `Bearer ${token}` },
         });

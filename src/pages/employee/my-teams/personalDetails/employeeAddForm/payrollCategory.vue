@@ -457,10 +457,10 @@ const fetchSalarySettings = async () => {
   try {
     const tenantId = currentUserTenant.getTenantId();
     const response = await fetch(
-      `${apiUrl}/items/salarySetting?fields=basicPay&fields=earnings&fields=deductions&fields=employerContribution&fields=allowances&fields=deduction&fields=professionalTax&fields=LWF&fields=employersContributions&fields=employeeDeductions&fields=configName&fields=adminCharges&fields=payrollBranch&fields=stateTaxes&fields=deductions&fields=id&fields=professionalTax.id&fields=professionalTax.state&fields=professionalTax.stateTaxRules&fields=LWF.id&fields=LWF.state&fields=LWF.stateTaxRules&filter[tenant][tenantId][_eq]=${tenantId}`,
+      `${apiUrl}/items/salarySetting?fields=id,configName,basicPay,earnings,deductions,employerContribution,allowances,deduction,professionalTax,LWF,employersContributions,employeeDeductions,adminCharges,stateTaxes&filter[tenant][_eq]=${tenantId}`,
       {
         headers: {
-          Authorization: `Bearer ${token.value}`,
+          Authorization: `Bearer ${token.value || import.meta.env.VITE_API_TOKEN}`,
         },
       },
     );

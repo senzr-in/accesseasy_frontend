@@ -237,16 +237,15 @@ export const workforceService = {
         .map(g => ({ id: g.id, name: g.accessLevelName }));
 
       // 4. Shifts / Attendance Cycle
-      let shiftRes = await fetch(`${API_URL}/items/attendanceCycle?${tenantParam}&limit=-1&fields=id,name`, {
+      let shiftRes = await fetch(`${API_URL}/items/attendanceCycle?${tenantParam}&limit=-1&fields=id,fixedCycle,startDate,endDate`, {
         headers: getHeaders()
       });
       if (!shiftRes.ok && activeTenantId) {
-        shiftRes = await fetch(`${API_URL}/items/attendanceCycle?limit=-1&fields=id,name`, { headers: getHeaders() });
+        shiftRes = await fetch(`${API_URL}/items/attendanceCycle?limit=-1&fields=id,fixedCycle,startDate,endDate`, { headers: getHeaders() });
       }
       const shiftData = shiftRes.ok ? await shiftRes.json() : { data: [] };
       const shifts = (shiftData.data || [])
-        .filter(s => s.name)
-        .map(s => ({ id: s.id, name: s.name }));
+        .map(s => ({ id: s.id, name: s.fixedCycle || `Cycle ${s.startDate || s.id}` }));
 
       return {
         organizations: activeTenantId ? [{ id: activeTenantId, name: 'Current Organization' }] : [],

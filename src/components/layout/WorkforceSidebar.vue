@@ -198,8 +198,7 @@ const rawUser = authService.getUserData();
 const userName = computed(() => {
   if (!rawUser) return 'Workforce Admin';
   const name = `${rawUser.first_name || ''} ${rawUser.last_name || ''}`.trim();
-  if (!name || name.toLowerCase().includes('patrol')) return 'Workforce Admin';
-  return name;
+  return name || 'Workforce Admin';
 });
 const userRole = computed(() => authService.getUserRole() || 'Admin');
 const userInitials = computed(() => (userName.value.charAt(0) || 'W').toUpperCase());
@@ -224,7 +223,7 @@ const navSections = [
   {
     title: 'HARDWARE & LOGS',
     items: [
-      { name: 'Devices & Controllers', href: '/dashboard/settings/devices', icon: Server, badge: 'MQTT', badgeClass: 'bg-emerald-50 text-emerald-600 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800/40' },
+      { name: 'Devices & Controllers', href: '/dashboard/settings/devices', icon: Server },
       { name: 'Event Logs', href: '/dashboard/settings/logs', icon: ShieldCheck, badge: 'Live', badgeClass: 'bg-blue-50 text-blue-600 border border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-800/40' }
     ]
   }

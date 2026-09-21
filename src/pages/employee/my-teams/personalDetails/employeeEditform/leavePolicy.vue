@@ -316,7 +316,7 @@ const fetchLeavePolicies = async () => {
     const tenantId = currentUserTenant.getTenantId();
     const currentYear = new Date().getFullYear();
     const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/items/leaveSetting?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][_and][1][year(yearOfPolicy)][_eq]=${currentYear}&fields=id,leaveName,leaveConfig`,
+      `${import.meta.env.VITE_API_URL}/items/leaveSetting?filter[_and][0][_and][0][tenant][tenantId][_eq]=${tenantId}&filter[_and][0][_and][1][yearOfPolicy][_eq]=${currentYear}&fields=id,leaveName,leaveConfig`,
       {
         headers: {
           Authorization: `Bearer ${authService.getToken()}`,

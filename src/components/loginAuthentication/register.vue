@@ -147,106 +147,127 @@
             <!-- Personal Info Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="space-y-1.5">
-                <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Full Name</label>
+                <label class="text-[10px] font-black tracking-[0.15em] text-slate-600 ml-1 uppercase">Full Name</label>
                 <div class="relative group">
+                  <User class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7d93b2] group-focus-within:text-blue-600 transition-colors pointer-events-none" />
                   <input
                     v-model="fullName"
                     type="text"
                     required
                     placeholder="John Doe"
-                    class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
+                    class="w-full h-11 pl-11 pr-4 bg-white/85 hover:bg-white/95 focus:bg-white border border-[#d8e2ee] focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none rounded-2xl text-[13px] font-semibold text-slate-800 placeholder:text-[#7d93b2] shadow-sm"
                   >
-                  <User class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
                 </div>
               </div>
 
               <div class="space-y-1.5">
-                <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Phone Number</label>
-                <div class="relative group">
-                  <input
-                    v-model="mobileNumber"
-                    type="text"
-                    inputmode="numeric"
-                    required
-                    placeholder="10-digit number"
-                    maxlength="10"
-                    class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
-                    @input="mobileNumber = $event.target.value.replace(/\D/g, '')"
-                  >
-                  <Phone class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
+                <label class="text-[10px] font-black tracking-[0.15em] text-slate-600 ml-1 uppercase">Phone Number</label>
+                <div class="relative flex items-center bg-white/85 hover:bg-white/95 focus-within:bg-white border border-[#d8e2ee] focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all rounded-2xl shadow-sm overflow-hidden h-11">
+                  <!-- Country Code Selector Dropdown -->
+                  <div class="relative shrink-0 flex items-center pl-3 pr-2 border-r border-[#d8e2ee] bg-slate-50/50 hover:bg-slate-100/60 transition-colors">
+                    <select
+                      v-model="selectedCountryCode"
+                      class="appearance-none bg-transparent text-[12px] font-bold text-slate-800 pr-5 outline-none cursor-pointer py-1.5"
+                    >
+                      <option
+                        v-for="c in countryCodes"
+                        :key="c.code"
+                        :value="c.code"
+                        class="text-slate-900 bg-white font-medium py-1"
+                      >
+                        {{ c.flag }} {{ c.code }} ({{ c.name }})
+                      </option>
+                    </select>
+                    <ChevronDown class="absolute right-1.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
+                  </div>
+
+                  <!-- Phone Number Input with Phone Icon -->
+                  <div class="relative flex-1 flex items-center">
+                    <Phone class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7d93b2] group-focus-within:text-blue-600 transition-colors pointer-events-none" />
+                    <input
+                      v-model="mobileNumber"
+                      type="text"
+                      inputmode="numeric"
+                      required
+                      placeholder="10-digit number"
+                      maxlength="12"
+                      class="w-full h-full pl-9 pr-4 bg-transparent outline-none text-[13px] font-semibold text-slate-800 placeholder:text-[#7d93b2]"
+                      @input="mobileNumber = $event.target.value.replace(/\D/g, '')"
+                    >
+                  </div>
                 </div>
               </div>
             
               <div class="space-y-1.5">
-                <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Work Email</label>
+                <label class="text-[10px] font-black tracking-[0.15em] text-slate-600 ml-1 uppercase">Work Email</label>
                 <div class="relative group">
+                  <Mail class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7d93b2] group-focus-within:text-blue-600 transition-colors pointer-events-none" />
                   <input
                     v-model="email"
                     type="email"
                     required
                     placeholder="name@company.com"
-                    class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
+                    class="w-full h-11 pl-11 pr-4 bg-white/85 hover:bg-white/95 focus:bg-white border border-[#d8e2ee] focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none rounded-2xl text-[13px] font-semibold text-slate-800 placeholder:text-[#7d93b2] shadow-sm"
                     @input="email = email.toLowerCase()"
                   >
-                  <Mail class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
                 </div>
               </div>
 
               <div class="space-y-1.5">
-                <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Employee ID</label>
+                <label class="text-[10px] font-black tracking-[0.15em] text-slate-600 ml-1 uppercase">Employee ID</label>
                 <div class="relative group">
+                  <IdCard class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7d93b2] group-focus-within:text-blue-600 transition-colors pointer-events-none" />
                   <input
                     v-model="employeeId"
                     type="text"
                     required
                     placeholder="EMP-001"
-                    class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
+                    class="w-full h-11 pl-11 pr-4 bg-white/85 hover:bg-white/95 focus:bg-white border border-[#d8e2ee] focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none rounded-2xl text-[13px] font-semibold text-slate-800 placeholder:text-[#7d93b2] shadow-sm"
                   >
-                  <IdCard class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
                 </div>
               </div>
             </div>
 
             <!-- Company info -->
             <div class="space-y-1.5">
-              <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Company Name</label>
+              <label class="text-[10px] font-black tracking-[0.15em] text-slate-600 ml-1 uppercase">Company Name</label>
               <div class="relative group">
+                <Building2 class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7d93b2] group-focus-within:text-blue-600 transition-colors pointer-events-none" />
                 <input
                   v-model="companyName"
                   type="text"
                   required
                   placeholder="Acme Corporation"
-                  class="w-full h-11 px-4 bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none rounded-xl text-[12px] font-bold text-slate-900 dark:text-white"
+                  class="w-full h-11 pl-11 pr-4 bg-white/85 hover:bg-white/95 focus:bg-white border border-[#d8e2ee] focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none rounded-2xl text-[13px] font-semibold text-slate-800 placeholder:text-[#7d93b2] shadow-sm"
                 >
-                <Building2 class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-blue-600 transition-colors" />
               </div>
             </div>
 
             <button
               type="submit"
               :disabled="isLoading || !isFormValid"
-              class="w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 transition-all disabled:opacity-70 disabled:cursor-not-allowed group mt-2"
+              class="w-full h-12 rounded-2xl text-[12px] font-black uppercase tracking-[0.15em] flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-[0_6px_25px_rgba(59,130,246,0.4)] transition-all active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed group mt-3"
             >
               <span v-if="isLoading">Processing...</span>
               <template v-else>
-                Launch my account
+                LAUNCH MY ACCOUNT
                 <ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </template>
             </button>
 
-            <div class="flex items-center justify-between gap-4 py-2 opacity-50">
-              <div class="h-[1px] flex-1 bg-slate-300 dark:bg-slate-700" />
-              <span class="text-[9px] font-black tracking-[0.3em] text-slate-500 dark:text-slate-400 uppercase">OR</span>
-              <div class="h-[1px] flex-1 bg-slate-300 dark:bg-slate-700" />
+            <div class="flex items-center justify-between gap-4 py-1.5 opacity-60">
+              <div class="h-[1px] flex-1 bg-slate-300" />
+              <span class="text-[9px] font-black tracking-[0.3em] text-slate-400 uppercase">OR</span>
+              <div class="h-[1px] flex-1 bg-slate-300" />
             </div>
 
             <button
               type="button"
-              class="w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.1em] flex items-center justify-center gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 hover:border-blue-500/50 hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-slate-800 text-slate-700 dark:text-white shadow-sm transition-all group"
+              class="w-full h-12 rounded-2xl text-[11px] font-black uppercase tracking-[0.12em] flex items-center justify-center gap-3 bg-white/90 hover:bg-white border border-[#d8e2ee] hover:border-slate-300 text-slate-800 shadow-sm transition-all active:scale-[0.99] group"
               @click="signupWithGoogle"
             >
               <svg
-                class="w-4 h-4"
+                class="w-4 h-4 shrink-0"
                 viewBox="0 0 24 24"
                 xmlns="http://www.w3.org/2000/svg"
               >
@@ -267,7 +288,7 @@
                   fill="#EA4335"
                 />
               </svg>
-              Sign up with Google
+              SIGN UP WITH GOOGLE
             </button>
 
             <p class="text-center text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider pt-2">
@@ -341,9 +362,10 @@
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
+import { authService } from "@/services/authService";
 import { 
   UserPlus, User, Mail, Phone, Building2, MapPin, 
-  ArrowRight, CheckCircle, AlertCircle, Info, X,
+  ArrowRight, CheckCircle, AlertCircle, Info, X, ChevronDown,
   IdCard, Zap, Shield, ShieldCheck, BarChart3, Layers, Globe,
   ScanFace, Fingerprint, Radio, Nfc, Bluetooth
 } from "lucide-vue-next";
@@ -354,21 +376,6 @@ import marbleBg from "@/assets/images/marble_bg.png";
 
 const router = useRouter();
 
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-api.interceptors.request.use((config) => {
-  const token = import.meta.env.VITE_API_TOKEN;
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-});
-
 const isLoading = ref(false);
 const companyName = ref("");
 const fullName = ref("");
@@ -378,6 +385,24 @@ const employeeId = ref("");
 const emailError = ref("");
 const phoneError = ref("");
 const year = ref(new Date().getFullYear());
+
+const countryCodes = [
+  { code: "+91", flag: "🇮🇳", name: "India" },
+  { code: "+1", flag: "🇺🇸", name: "USA/Canada" },
+  { code: "+44", flag: "🇬🇧", name: "UK" },
+  { code: "+971", flag: "🇦🇪", name: "UAE" },
+  { code: "+65", flag: "🇸🇬", name: "Singapore" },
+  { code: "+966", flag: "🇸🇦", name: "Saudi Arabia" },
+  { code: "+61", flag: "🇦🇺", name: "Australia" },
+  { code: "+49", flag: "🇩🇪", name: "Germany" },
+  { code: "+33", flag: "🇫🇷", name: "France" },
+  { code: "+974", flag: "🇶🇦", name: "Qatar" },
+  { code: "+965", flag: "🇰🇼", name: "Kuwait" },
+  { code: "+60", flag: "🇲🇾", name: "Malaysia" },
+  { code: "+63", flag: "🇵🇭", name: "Philippines" },
+  { code: "+81", flag: "🇯🇵", name: "Japan" }
+];
+const selectedCountryCode = ref("+91");
 
 const isEmailValid = ref(false);
 const isPhoneValid = ref(false);
@@ -439,20 +464,17 @@ async function validateRegistration() {
     return false;
   }
   
-  // Quick availability checks
+  // Quick availability checks using unauthenticated Knative auth-service
   try {
-    const emailRes = await api.get(`/users`, {
-      params: { "filter[email][_eq]": email.value.toLowerCase(), "fields[]": "email" },
-    });
-    if (emailRes.data.data.length > 0) {
+    const emailExists = await authService.checkEmailExists(email.value.toLowerCase());
+    if (emailExists) {
       showError("This email is already registered");
       return false;
     }
 
-    const phoneRes = await api.get(`/users`, {
-      params: { "filter[phone][_eq]": `+91${mobileNumber.value}`, "fields[]": "phone" },
-    });
-    if (phoneRes.data.data.length > 0) {
+    const fullPhoneNumber = `${selectedCountryCode.value}${mobileNumber.value}`;
+    const phoneExists = await authService.checkPhoneExists(fullPhoneNumber);
+    if (phoneExists) {
       showError("This phone number is already registered");
       return false;
     }
@@ -460,82 +482,8 @@ async function validateRegistration() {
     return true;
   } catch (err) {
     console.error("Validation error:", err);
-    return true; // Proceed and let the main handler catch API errors
+    return true; // Proceed and let the backend catch API errors
   }
-}
-
-function buildTrialPlan(opts = {}) {
-  const today = new Date();
-  const end = new Date(today);
-  end.setDate(today.getDate() + 14);
-
-  const toISO = (d) => d.toISOString().split("T")[0];
-
-  return {
-    users: 120,
-    features: [
-      {
-        key: "trial",
-        name: "trial",
-        features: ["all features"],
-      },
-      {
-        key: "lite",
-        name: "Lite",
-        features: [
-          "Selfie & QR check-in",
-          "Geofence check-in",
-          "Leave management",
-          "Expense management",
-          "Daily & monthly reports",
-        ],
-        value: 120,
-      },
-      {
-        key: "fieldpro",
-        name: "FieldPro",
-        features: [
-          "All Lite features",
-          "Work order management",
-          "Client management",
-          "Field job tracking",
-          "Work order scheduling",
-        ],
-        value: 120,
-      },
-      {
-        key: "pro",
-        name: "PRO",
-        features: [
-          "All Lite features",
-          "Face check-in with liveness",
-          "Regularisation",
-          "Scheduled reports",
-          "Payroll integration (API)",
-        ],
-        value: 120,
-      },
-      {
-        key: "crm",
-        name: "GrowthSuite CRMENTERPRISE",
-        features: [
-          "All Lite features",
-          "Smart Forms (custom)",
-          "CRM Dashboard",
-          "Role configurator",
-          "WhatsApp reports",
-          "Employee KPI Dashboard",
-          "CRM integrations (Zoho, ERPNext)",
-        ],
-        value: 120,
-      },
-    ],
-    billing_cycle: opts.billing_cycle || "trial",
-    start_date: toISO(today),
-    end_date: toISO(end),
-    currency: opts.currency || "INR",
-    total_value: opts.total_value ?? 0,
-  };
 }
 
 async function handleRegistration() {
@@ -546,48 +494,41 @@ async function handleRegistration() {
     return;
   }
 
+  const fullPhoneNumber = `${selectedCountryCode.value}${mobileNumber.value}`;
+
   try {
-    const accountSettings = {
-      currency: "INR",
-      currency_name: "Indian Rupee",
-      currency_symbol: "₹",
-      country: "India",
-      country_code: "IN",
-    };
-
-    const tenantPayload = {
+    const regResult = await authService.register({
       tenantName: companyName.value,
-      panOrGst: null,
-      companyAddress: null,
-      accountSettings: JSON.stringify(accountSettings),
-      plan: JSON.stringify(buildTrialPlan()),
-    };
-    const tenantResponse = await api.post("/items/tenant", tenantPayload);
-    const tenantId = tenantResponse.data.data.tenantId;
-
-    const adminRoleId = "ea2303aa-1662-43ca-a7f7-ab84924a7e0a";
-    const personalModulePayload = {
-      status: "active",
-      accessOn: true,
-      cycleType: 1,
-      uniqueId: `${tenantId}-${employeeId.value}`,
+      fullName: fullName.value,
+      email: email.value.toLowerCase(),
+      phone: fullPhoneNumber,
       employeeId: employeeId.value,
-      assignedUser: {
-        first_name: fullName.value,
-        email: email.value.toLowerCase(),
-        phone: `+91${mobileNumber.value}`,
-        role: adminRoleId,
-        tenant: tenantId,
-        appAccess: true,
-        userApp: "accesseasy",
-      },
-    };
-    await api.post("/items/personalModule", personalModulePayload);
+      userApp: "accesseasy"
+    });
 
-    showSuccess("Registration successful! Initiating login...", 3000);
+    if (regResult && regResult.success === false) {
+      showError(regResult.message || "Registration failed. Please check your details.");
+      isLoading.value = false;
+      return;
+    }
 
-    const registeredPhoneNumber = `+91${mobileNumber.value}`;
-    localStorage.setItem("justRegisteredPhone", registeredPhoneNumber);
+    // Trigger default initial settings and welcome/admin notification emails
+    const tenantId = regResult?.tenant_id || regResult?.tenantId || regResult?.tenant || "";
+    authService.setupInitialSettings({
+      tenantId: tenantId,
+      companyName: companyName.value,
+      name: fullName.value,
+      email: email.value.toLowerCase(),
+      phone: fullPhoneNumber,
+      userApp: "accesseasy",
+      setupDefaults: true,
+    }).catch((err) => {
+      console.warn("[Register] Default initial settings notification error:", err);
+    });
+
+    showSuccess("Registration successful! Setting up initial configuration...", 3000);
+
+    localStorage.setItem("justRegisteredPhone", fullPhoneNumber);
     localStorage.setItem("fromRegistration", "true");
 
     setTimeout(() => {
@@ -598,7 +539,7 @@ async function handleRegistration() {
     }, 2000);
   } catch (e) {
     console.error("Registration error:", e);
-    showError(e.response?.data?.message || "Registration failed. Please contact support.");
+    showError(e.response?.data?.message || e.message || "Registration failed. Please contact support.");
     isLoading.value = false;
   }
 }

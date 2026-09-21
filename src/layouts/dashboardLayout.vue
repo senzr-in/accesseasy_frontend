@@ -3,7 +3,7 @@
     <AlarmBanner />
     <div class="flex w-full h-full overflow-hidden">
       <!-- Sidebar -->
-      <component :is="activeSidebar" />
+      <WorkforceSidebar />
 
       <!-- Main Content Area -->
       <div class="flex flex-1 flex-col overflow-hidden min-w-0">
@@ -18,6 +18,16 @@
 
           <!-- Right Header: Search, Notifications, & Admin Profile -->
           <div class="flex items-center gap-3">
+            <!-- Hardware Gateway Connectivity Indicator -->
+            <div
+              class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all"
+              :class="mqttStatus === 'connected' ? 'bg-[#ECFDF5] text-[#059669] border-[#A7F3D0]' : mqttStatus === 'connecting' ? 'bg-[#FFFBEB] text-[#D97706] border-[#FDE68A]' : 'bg-[#F8FAFC] text-[#64748B] border-[#E2E8F0]'"
+              :title="mqttStatus === 'connected' ? 'Gateway MQTT connected for real-time access streaming' : 'Connecting to gateway MQTT broker'"
+            >
+              <span class="w-1.5 h-1.5 rounded-full" :class="mqttStatus === 'connected' ? 'bg-[#10B981] animate-pulse' : mqttStatus === 'connecting' ? 'bg-[#F59E0B] animate-pulse' : 'bg-[#94A3B8]'" />
+              <span>{{ mqttStatus === 'connected' ? 'Gateway Live' : mqttStatus === 'connecting' ? 'Connecting...' : 'Cloud Direct' }}</span>
+            </div>
+
             <!-- Search Trigger / Input -->
             <button
               class="flex items-center gap-2.5 h-9 px-3.5 rounded-lg bg-[#F1F5F9] hover:bg-[#E2E8F0] border border-[#E2E8F0] text-xs text-[#64748B] hover:text-[#0F172A] transition-all cursor-pointer shadow-2xs"
@@ -130,16 +140,17 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { onClickOutside } from '@vueuse/core';
 import { Search, Bell, AlertCircle } from 'lucide-vue-next';
-import SecuritySidebar from '@/components/layout/SecuritySidebar.vue';
 import WorkforceSidebar from '@/components/layout/WorkforceSidebar.vue';
 import AlarmBanner from '@/components/AlarmBanner.vue';
 import GlobalSearchModal from '@/components/workforce/dashboard/GlobalSearchModal.vue';
 
 import { authService } from '@/services/authService';
-import { patrolService } from '@/services/patrolService';
+import { useWorkforceMQTT } from '@/composables/workforce/useWorkforceMQTT';
 
 const route = useRoute();
 const router = useRouter();
+
+const { mqttStatus } = useWorkforceMQTT();
 
 const isSearchModalOpen = ref(false);
 const isNotificationsOpen = ref(false);
@@ -154,33 +165,41 @@ const userName = computed(() => {
   const ud = authService.getUserData();
   if (!ud) return 'Workforce Admin';
   const name = `${ud.first_name || ''} ${ud.last_name || ''}`.trim();
-  if (!name || name.toLowerCase().includes('patrol')) return 'Workforce Admin';
-  return name;
+  return name || 'Workforce Admin';
 });
 const userInitials = computed(() => userName.value.charAt(0).toUpperCase());
 
-const appMode = import.meta.env.VITE_APP_MODE || 'workforce';
-const activeSidebar = computed(() => (appMode === 'security' || appMode === 'patrol') ? SecuritySidebar : WorkforceSidebar);
+let hasDeviceLogsPermission = true;
 
 const fetchAlerts = async () => {
+  if (!hasDeviceLogsPermission) return;
   try {
-    const alerts = await patrolService.getActiveAlerts();
-    if (alerts && Array.isArray(alerts)) {
-      activeAlertsList.value = alerts;
+    const tenantId = authService.getTenantId();
+    if (!tenantId) return;
+    const res = await authService.protectedApi.get('/items/device_logs', {
+      params: {
+        'filter[tenant][_eq]': tenantId,
+        'sort': '-date_created',
+        'limit': 10
+      },
+      validateStatus: (status) => status < 500
+    }).catch(() => null);
+
+    if (res?.status === 403 || res?.status === 401 || res?.status === 404) {
+      hasDeviceLogsPermission = false;
+      return;
+    }
+
+    if (res?.data?.data && Array.isArray(res.data.data)) {
+      activeAlertsList.value = res.data.data;
     }
   } catch (e) {
-    // Non-blocking
+    hasDeviceLogsPermission = false;
   }
 };
 
 const resolveAllAlerts = async () => {
-  try {
-    const promises = activeAlertsList.value.map(a => patrolService.updateAlertStatus(a.id, 'resolved'));
-    await Promise.all(promises);
-    activeAlertsList.value = [];
-  } catch (err) {
-    console.error('Error clearing alerts:', err);
-  }
+  activeAlertsList.value = [];
 };
 
 const openAlertDetails = () => {

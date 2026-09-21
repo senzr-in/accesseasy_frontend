@@ -51,7 +51,7 @@ class AuthService {
     [this.api, this.knApi, this.protectedApi].forEach((instance) => {
       instance.interceptors.request.use(
         (config) => {
-          const token = this.getToken();
+          const token = this.getToken() || import.meta.env.VITE_API_TOKEN;
           if (token) {
             config.headers.Authorization = `Bearer ${token}`;
           }
@@ -282,7 +282,7 @@ class AuthService {
       Cookies.get("userToken") ||
       sessionStorage.getItem("userToken") ||
       localStorage.getItem("userToken") ||
-      import.meta.env.VITE_API_TOKEN
+      null
     );
   }
 
@@ -374,12 +374,10 @@ class AuthService {
       const lowercaseName = roleConfigName.toLowerCase();
       if (lowercaseName.includes("admin")) {
         role = "Admin";
-      } else if (appMode !== 'workforce' && (lowercaseName.includes("guard") || lowercaseName.includes("security"))) {
-        role = "Guard";
-      } else if (lowercaseName.includes("employee")) {
-        role = "Employee";
       } else if (lowercaseName.includes("manager")) {
         role = "Manager";
+      } else if (lowercaseName.includes("employee")) {
+        role = "Employee";
       } else {
         // Fallback to capitalizing the role name if it doesn't match standard keywords
         role = roleConfigName.charAt(0).toUpperCase() + roleConfigName.slice(1);
@@ -394,14 +392,6 @@ class AuthService {
     // Default to Admin if user data exists but role is unpopulated
     if (!role && userData) {
       role = "Admin";
-    }
-
-    // Additional backward compatibility checks for Title if role is "Employee" (only for security/patrol app)
-    if (appMode !== 'workforce' && role === 'Employee') {
-      const isGuardTitle = userData?.title?.toLowerCase() === 'guard' || userData?.title?.toLowerCase() === 'security';
-      if (isGuardTitle) {
-        role = 'Guard';
-      }
     }
 
     return role;
@@ -733,14 +723,14 @@ class AuthService {
 
     // 3. Directus /items/personalModule fallback
     try {
-      const pmRes = await this.api.get(`/items/personalModule?filter[_or][0][personalPhone][_icontains]=${encodeURIComponent(plainPhone)}&filter[_or][1][assignedUser][phone][_icontains]=${encodeURIComponent(plainPhone)}&fields=*,assignedUser.*`, { headers });
+      const pmRes = await this.api.get(`/items/personalModule?filter[assignedUser][phone][_icontains]=${encodeURIComponent(plainPhone)}&fields=*,assignedUser.*`, { headers });
       const pmItem = pmRes.data?.data?.[0];
       if (pmItem) {
         const resolvedUser = pmItem.assignedUser || {
           id: pmItem.id,
-          phone: pmItem.personalPhone,
-          first_name: pmItem.firstName,
-          last_name: pmItem.lastName,
+          phone: pmItem.assignedUser?.phone || plainPhone,
+          first_name: pmItem.assignedUser?.first_name || '',
+          last_name: pmItem.assignedUser?.last_name || '',
           userPin: pmItem.userPin
         };
         if (resolvedUser) {
@@ -1053,6 +1043,23 @@ class AuthService {
       return response.data;
     } catch (error) {
       console.error("Error in register:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Sets up initial company defaults and admin configurations upon new tenant signup.
+   * Sends admin email notifications and welcome emails.
+   */
+  async setupInitialSettings(params) {
+    try {
+      const response = await this.knApi.post("/initial-settings", {
+        action: "setup-initial-settings",
+        ...params,
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error in setupInitialSettings:", error);
       throw error;
     }
   }

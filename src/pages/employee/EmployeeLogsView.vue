@@ -177,7 +177,7 @@ const statusFilter = ref('all');
 const doorFilter = ref('all');
 const loading = ref(false);
 
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8055';
+const apiUrl = import.meta.env.VITE_API_URL || 'https://appv1.fieldseasy.com/directus';
 
 const logs = ref([]);
 
@@ -187,36 +187,36 @@ const fetchLogs = async () => {
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
   try {
-    const res = await fetch(`${apiUrl}/items/door_logs?sort=-timestamp&limit=50`, { headers });
+    const res = await fetch(`${apiUrl}/items/logs?sort=-id&limit=50&fields=id,name,action,door,rfid,timeStamp,date,date_created,status`, { headers });
     if (res.ok) {
       const data = await res.json();
-      const list = data.data || data;
+      const list = data.data || [];
       if (Array.isArray(list) && list.length > 0) {
-        logs.value = list.map((l, i) => ({
-          id: String(l.id || i),
-          initials: (l.employee_name || l.name || 'Emp').slice(0, 2).toUpperCase(),
-          employeeName: l.employee_name || l.name || 'Cardholder',
-          department: l.department || 'Operations',
-          cardId: l.card_id || l.cardId || `CARD-${10400 + i}`,
-          doorName: l.door_name || l.doorName || 'Main Entrance',
-          timestamp: l.timestamp ? new Date(l.timestamp).toLocaleTimeString() : 'Just now',
-          status: (l.status || 'GRANTED').toUpperCase()
-        }));
+        logs.value = list.map((l, i) => {
+          const empName = l.name || 'Cardholder';
+          const timeVal = l.timeStamp || l.date_created;
+          return {
+            id: String(l.id || i),
+            initials: empName.slice(0, 2).toUpperCase(),
+            employeeName: empName,
+            department: 'Operations',
+            cardId: l.rfid ? `CARD-${l.rfid}` : `ID-${l.id}`,
+            doorName: l.door || 'Access Door',
+            timestamp: timeVal ? new Date(timeVal).toLocaleTimeString() : 'Just now',
+            status: String(l.action || l.status || 'GRANTED').toUpperCase().includes('DENIED') ? 'DENIED' : 'GRANTED'
+          };
+        });
         loading.value = false;
         return;
       }
     }
   } catch (e) {
-    console.warn('[EmployeeLogs] Directus API fetch failed, utilizing cached logs:', e);
+    console.warn('[EmployeeLogs] Directus logs API fetch error:', e);
+  } finally {
+    loading.value = false;
   }
 
-  // Fallback initial dataset
-  logs.value = [
-    { id: '1', initials: 'JD', employeeName: 'John Doe', department: 'Engineering', cardId: 'CARD-10492', doorName: 'Door 1 - Main Entrance', timestamp: '10:14:12 AM', status: 'GRANTED' },
-    { id: '2', initials: 'SP', employeeName: 'Sarah Priya', department: 'IT Ops', cardId: 'CARD-10884', doorName: 'Server Room Door', timestamp: '10:12:30 AM', status: 'GRANTED' },
-    { id: '3', initials: 'UN', employeeName: 'Unassigned Card #9921', department: 'Visitor Pass', cardId: 'CARD-9921', doorName: 'Executive Suite', timestamp: '10:08:19 AM', status: 'DENIED' }
-  ];
-  loading.value = false;
+  logs.value = [];
 };
 
 const filteredLogs = computed(() => {

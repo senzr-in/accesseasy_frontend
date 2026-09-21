@@ -4,10 +4,10 @@
     <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shrink-0">
       <div>
         <h2 class="text-sm font-black uppercase tracking-widest text-slate-800 dark:text-slate-200">
-          Security Zones
+          Facility Zones
         </h2>
         <p class="text-[10px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">
-          Physical areas that group Access Points (visitor scanning) and Checkpoints (guard patrol).
+          Physical areas that group doors, access points, and reader terminals across facilities.
         </p>
       </div>
 
@@ -27,10 +27,10 @@
         </div>
         <div>
           <p class="text-xs font-bold text-emerald-800 dark:text-emerald-300">
-            Access Points <span class="ml-1 text-[9px] font-semibold bg-emerald-200 dark:bg-emerald-500/30 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.5 rounded-full uppercase tracking-wide">Visitors</span>
+            Access Points <span class="ml-1 text-[9px] font-semibold bg-emerald-200 dark:bg-emerald-500/30 text-emerald-700 dark:text-emerald-300 px-1.5 py-0.5 rounded-full uppercase tracking-wide">Doors</span>
           </p>
           <p class="text-[10px] text-emerald-700 dark:text-emerald-400 mt-0.5 leading-relaxed">
-            Entry/exit gates where visitors or employees scan a QR code to check in or check out.
+            Entry and exit doors assigned to this zone for employee access control.
           </p>
         </div>
       </div>
@@ -40,10 +40,10 @@
         </div>
         <div>
           <p class="text-xs font-bold text-indigo-800 dark:text-indigo-300">
-            Checkpoints <span class="ml-1 text-[9px] font-semibold bg-indigo-200 dark:bg-indigo-500/30 text-indigo-700 dark:text-indigo-300 px-1.5 py-0.5 rounded-full uppercase tracking-wide">Patrol</span>
+            Spatial Perimeter <span class="ml-1 text-[9px] font-semibold bg-indigo-200 dark:bg-indigo-500/30 text-indigo-700 dark:text-indigo-300 px-1.5 py-0.5 rounded-full uppercase tracking-wide">Security</span>
           </p>
           <p class="text-[10px] text-indigo-700 dark:text-indigo-400 mt-0.5 leading-relaxed">
-            Guard patrol stops where security scans a QR code to confirm they completed that route stop.
+            Logical area grouping controllers, turnstiles, and door perimeters.
           </p>
         </div>
       </div>
@@ -134,21 +134,21 @@
                   {{ (zone.entry_doors?.length || 0) + (zone.exit_doors?.length || 0) }}
                 </p>
                 <p class="text-[9px] text-slate-400 leading-tight">
-                  Visitor scan gates
+                  Assigned doors
                 </p>
               </div>
               <div class="space-y-1 border-x border-slate-100 dark:border-slate-700 px-4">
                 <div class="flex items-center gap-1 mb-1">
                   <MapPin class="w-3 h-3 text-indigo-500" />
                   <p class="text-[10px] font-black uppercase text-indigo-600 tracking-widest">
-                    Checkpoints
+                    Access Level
                   </p>
                 </div>
                 <p class="text-lg font-bold text-slate-900 dark:text-slate-100">
-                  0
+                  Standard
                 </p>
                 <p class="text-[9px] text-slate-400 leading-tight">
-                  Guard patrol stops
+                  Zone policy
                 </p>
               </div>
               <div class="space-y-1 text-right">
@@ -168,7 +168,10 @@
               {{ zone.description }}
             </p>
           
-            <button class="w-full mt-5 h-10 flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 dark:hover:text-white dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-800 transition-colors shadow-sm">
+            <button 
+              class="w-full mt-5 h-10 flex items-center justify-center text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-800 transition-colors shadow-sm"
+              @click="handleEdit(zone)"
+            >
               VIEW ZONE MAP <ArrowRight class="w-3.5 h-3.5 ml-2" />
             </button>
           </div>

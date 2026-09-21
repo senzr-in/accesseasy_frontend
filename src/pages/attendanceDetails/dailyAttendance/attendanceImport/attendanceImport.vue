@@ -408,9 +408,9 @@ const getToken = () => {
 
 const getManagerBranchId = async (tenantId, userId) => {
   try {
-    const token = getToken();
+    const token = getToken() || import.meta.env.VITE_API_TOKEN;
     const response = await axios.get(
-      `${import.meta.env.VITE_API_URL}/items/personalModule?filter[_and][0][assignedUser][id][_eq]=${userId}&filter[_and][1][assignedUser][tenant][tenantId][_eq]=${tenantId}&fields[]=assignedBranch.branch_id.id`,
+      `${import.meta.env.VITE_API_URL}/items/personalModule?filter[_and][0][assignedUser][id][_eq]=${userId}&filter[_and][1][tenant][_eq]=${tenantId}&fields[]=branch.id`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -418,11 +418,9 @@ const getManagerBranchId = async (tenantId, userId) => {
       },
     );
 
-    if (
-      response.data?.data?.length > 0 &&
-      response.data.data[0].assignedBranch?.length > 0
-    ) {
-      return response.data.data[0].assignedBranch[0].branch_id.id;
+    if (response.data?.data?.length > 0) {
+      const b = response.data.data[0].branch;
+      return typeof b === 'object' ? b?.id : b;
     }
     return null;
   } catch (error) {

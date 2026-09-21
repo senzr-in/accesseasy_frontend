@@ -438,10 +438,10 @@ const fetchUserData = async () => {
     }
 
     const userResponse = await axios.get(
-      `${import.meta.env.VITE_API_URL}/items/personalModule?filter[_and][0][id][_eq]=${props.employeeId}&fields[]=assignedUser.first_name&fields[]=assignedUser.last_name&fields[]=id&fields[]=employeeId&fields[]=assignedDepartment.department_id.departmentName`,
+      `${import.meta.env.VITE_API_URL}/items/personalModule?filter[_and][0][id][_eq]=${props.employeeId}&fields[]=assignedUser.first_name&fields[]=assignedUser.last_name&fields[]=id&fields[]=employeeId&fields[]=department.departmentName`,
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token || import.meta.env.VITE_API_TOKEN}`,
           "Content-Type": "application/json",
         },
       },
@@ -451,10 +451,10 @@ const fetchUserData = async () => {
       const user = userResponse.data.data[0];
       userData.value = {
         id: user.id,
-        name: `${user.assignedUser.first_name} ${user.assignedUser.last_name || ""}`,
+        name: `${user.assignedUser?.first_name || ''} ${user.assignedUser?.last_name || ""}`.trim() || user.employeeId || 'Employee',
         employeeId: user.employeeId,
         department:
-          user.assignedDepartment?.[0]?.department_id?.departmentName || "N/A",
+          user.department?.departmentName || user.assignedDepartment?.[0]?.department_id?.departmentName || "General",
       };
 
       let attendanceUrl = `${import.meta.env.VITE_API_URL}/attendance/monthly-dashboard?tenantId=${tenantId}&employeeId=${user.id}&year=${selectedYear.value}`;

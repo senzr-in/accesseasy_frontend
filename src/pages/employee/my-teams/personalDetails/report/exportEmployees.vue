@@ -133,6 +133,7 @@
 <script setup>
 import { ref, reactive, onMounted, watch } from "vue";
 import { ChevronDown } from "lucide-vue-next";
+import { authService } from "@/services/authService";
 import { currentUserTenant } from "@/utils/currentUserTenant";
 import ExcelJS from "exceljs";
 import jsPDF from "jspdf";
@@ -312,7 +313,6 @@ const roleOptions = ref([]);
 const genderOptions = ["Male", "Female", "Other", "null"];
 
 const loadingBranches = ref(false);
-const tenantId = currentUserTenant.getTenantId();
 const loadingDepartments = ref(false);
 const isExporting = ref(false);
 const selectAll = ref(false);
@@ -323,24 +323,35 @@ const selectedExportFormat = ref(props.exportFormat || "excel");
 const exportFormats = ["excel", "csv", "pdf"];
 
 const getToken = () => {
-  return localStorage.getItem("userToken");
+  return authService.getToken() || import.meta.env.VITE_API_TOKEN;
+};
+
+const getTenantId = async () => {
+  try {
+    return (await currentUserTenant.getTenantIdAsync()) || authService.getTenantId() || authService.getUserData()?.tenant?.id || null;
+  } catch (e) {
+    return authService.getTenantId() || authService.getUserData()?.tenant?.id || null;
+  }
 };
 
 const fetchBranches = async () => {
   loadingBranches.value = true;
   const token = getToken();
+  const currentTenantId = await getTenantId();
   try {
-    const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/items/branch?filter[tenant][tenantId][_eq]=${tenantId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    if (!response.ok) throw new Error("Failed to fetch branches");
-    const data = await response.json();
-    branches.value = data.data || [];
+    let url = `${import.meta.env.VITE_API_URL}/items/branch`;
+    if (currentTenantId) {
+      url += `?filter[tenant][tenantId][_eq]=${encodeURIComponent(currentTenantId)}`;
+    }
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (response.ok) {
+      const data = await response.json();
+      branches.value = data.data || [];
+    }
   } catch (error) {
     console.error("Error fetching branches:", error);
   } finally {
@@ -351,18 +362,21 @@ const fetchBranches = async () => {
 const fetchDepartments = async () => {
   loadingDepartments.value = true;
   const token = getToken();
+  const currentTenantId = await getTenantId();
   try {
-    const response = await fetch(
-      ` ${import.meta.env.VITE_API_URL}/items/department?filter[tenant][tenantId][_eq]=${tenantId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    if (!response.ok) throw new Error("Failed to fetch departments");
-    const data = await response.json();
-    departments.value = data.data || [];
+    let url = `${import.meta.env.VITE_API_URL}/items/department`;
+    if (currentTenantId) {
+      url += `?filter[tenant][tenantId][_eq]=${encodeURIComponent(currentTenantId)}`;
+    }
+    const response = await fetch(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (response.ok) {
+      const data = await response.json();
+      departments.value = data.data || [];
+    }
   } catch (error) {
     console.error("Error fetching departments:", error);
   } finally {
@@ -377,9 +391,10 @@ const fetchRoles = async () => {
       `${import.meta.env.VITE_API_URL}/roles?filter[_and][0][name][_neq]=Administrator&filter[_and][1][name][_neq]=esslAdmin&filter[_and][2][name][_neq]=Dealer`,
       { headers: { Authorization: `Bearer ${token}` } }
     );
-    if (!response.ok) throw new Error("Failed to fetch roles");
-    const data = await response.json();
-    roleOptions.value = data.data.map((r) => r.name) || [];
+    if (response.ok) {
+      const data = await response.json();
+      roleOptions.value = (data.data || []).map((r) => r.name).filter(Boolean);
+    }
   } catch (error) {
     console.error("Error fetching roles:", error);
   }

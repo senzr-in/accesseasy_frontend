@@ -11,7 +11,7 @@
             Scheduled Reports
           </h1>
           <p class="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
-            Automate attendance, access &amp; visitor summaries to your inbox.
+            Automate workforce attendance, access logs &amp; shift summaries to your inbox.
           </p>
         </div>
       </div>
@@ -582,8 +582,7 @@ function mkReport(internalId, name, description, icon, color) {
 }
 
 const reports = ref([
- mkReport('access-log-report', 'Employee Entry Logs', 'Summarizes total entries, granted vs denied events, and doors accessed by employees.', DoorOpen, '#0891b2'),
- mkReport('visitor-activity', 'Visitor Entry Logs', 'Summarizes daily visitor registrations, guard approvals, and check-in/out activities.', UserCheck, '#10b981'),
+  mkReport('access-log-report', 'Employee Entry Logs', 'Summarizes total entries, granted vs denied events, and doors accessed by employees.', DoorOpen, '#0891b2'),
 ]);
 
 // ── HELPERS ────────────────────────────────────────────────────────────────────

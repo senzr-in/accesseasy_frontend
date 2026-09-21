@@ -3,11 +3,8 @@
  *
  * Broker: mqtt.fieldseasy.com  (tries WSS → WS fallbacks)
  * Topics:
- *   frigate/events                           – person & plate detection events
- *   frigate/+/person                         – live person count per camera
- *   frigate/+/person/snapshot                – JPEG bytes (person snapshot)
- *   frigate/+/license_plate/snapshot         – LP snapshot filename
- *   frigate/+/license_plate/snapshot/bytes/+ – base64 annotated LP JPEG
+ *   access_device/v1/event/#   – access swipe & alarm events
+ *   access_device/v1/event/heartbeat – gateway heartbeats
  */
 
 import mqtt from 'mqtt';
@@ -43,25 +40,16 @@ export function verifyMD5Signature(payload, secretKey = GATEWAY_SECRET) {
   return payload.sign.toUpperCase() === expected;
 }
 
-// ── Broker endpoints (tried in order) ─────────────────────────────────────────
 const BROKER_URLS = [
-  'wss://mqtt.fieldseasy.com/mqtt',     // secure WS (port 443)
-  'wss://mqtt.fieldseasy.com:8084/mqtt', // secure WS (port 8084)
-  'wss://mqtt.fieldseasy.com:8083/mqtt', // secure WS (port 8083)
-  'ws://mqtt.fieldseasy.com:9001/mqtt', // Mosquitto default WS
-  'ws://mqtt.fieldseasy.com:8083/mqtt', // alternative WS
+  'wss://mqtt.fieldseasy.com:8084/mqtt', // secure WS (EMQX port 8084)
+  'wss://mqtt.fieldseasy.com:8083/mqtt', // secure WS (EMQX port 8083)
+  'ws://mqtt.fieldseasy.com:9001/mqtt',  // Mosquitto default WS
 ];
 
 const TOPICS = [
   'access_device/v1/event/#',
   'access_device/v1/cmd/#',
   'access_device/v1/status/#',
-  'accesseasy/tenant/+/guards/#',
-  'frigate/events',
-  'frigate/+/person',
-  'frigate/+/person/snapshot',
-  'frigate/+/license_plate/snapshot',
-  'frigate/+/license_plate/snapshot/bytes/+',
 ];
 
 const CLIENT_ID = `accesseasy-${Math.random().toString(36).slice(2, 8)}`;
@@ -152,7 +140,7 @@ class MQTTService {
     }
 
     const knativeEndpoint = `${import.meta.env.VITE_KN_API_URL || 'https://appv1.fieldseasy.com/kn'}/device-mqtt`;
-    const token = authService.getToken() || import.meta.env.VITE_API_TOKEN;
+    const token = authService.getToken();
 
     const payload = {
       action: cmd,
@@ -530,28 +518,30 @@ class MQTTService {
     });
 
     this._client.on('error', (err) => {
-      console.error('[MQTT] Error:', err.message);
+      console.warn('[MQTT] Connection notice:', err.message || err);
       this._setStatus('error');
-      // Kill this client and try next URL after 4 s
       if (this._client) {
-        this._client.end(true);
+        try { this._client.end(true); } catch (_) {}
         this._client = null;
       }
-      this._urlIdx = (this._urlIdx + 1) % BROKER_URLS.length;
-      console.log(`[MQTT] Will retry ${BROKER_URLS[this._urlIdx]} in 4 s`);
-      this._retryTimer = setTimeout(() => this._attemptConnect(), 4000);
+      if (!this._retryTimer) {
+        this._urlIdx = (this._urlIdx + 1) % BROKER_URLS.length;
+        const delay = this._urlIdx === 0 ? 10000 : 4000;
+        this._retryTimer = setTimeout(() => {
+          this._retryTimer = null;
+          this._attemptConnect();
+        }, delay);
+      }
     });
 
     this._client.on('close', () => {
-      console.warn('[MQTT] Connection closed');
       if (this._status !== 'disconnected') {
         this._setStatus('disconnected');
-        // Auto-retry on unexpected close
         if (!this._retryTimer) {
           this._retryTimer = setTimeout(() => {
             this._retryTimer = null;
             if (!this._client) this._attemptConnect();
-          }, 5000);
+          }, 8000);
         }
       }
     });

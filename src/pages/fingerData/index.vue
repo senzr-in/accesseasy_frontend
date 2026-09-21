@@ -2,7 +2,10 @@
   <div class="space-y-6 p-8 pb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
       <div class="flex items-center gap-4">
-        <button class="h-9 w-9 rounded-full flex items-center justify-center hover:bg-emerald-50 dark:hover:bg-emerald-500/10 text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-500 transition-colors">
+        <button 
+          class="h-9 w-9 rounded-full flex items-center justify-center hover:bg-emerald-50 dark:hover:bg-emerald-500/10 text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-500 transition-colors"
+          @click="$router.push('/dashboard/easy-access/biometrics')"
+        >
           <ArrowLeft class="w-5 h-5" />
         </button>
         <div>
@@ -16,23 +19,31 @@
         </div>
       </div>
       <div class="flex items-center gap-2 flex-wrap">
-        <button class="h-9 px-4 rounded-md border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 flex items-center gap-2 text-sm font-medium transition-colors">
+        <button 
+          class="h-9 px-4 rounded-md border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 flex items-center gap-2 text-sm font-medium transition-colors"
+          @click="exportData"
+        >
           <Share2 class="w-4 h-4" />
           Export
         </button>
-        <button class="h-9 px-4 rounded-md border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 flex items-center gap-2 text-sm font-medium transition-colors">
-          <Download class="w-4 h-4" />
-          Import
-        </button>
-        <button class="h-9 px-4 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-2 text-sm font-medium shadow-lg shadow-emerald-600/20 transition-all active:scale-95">
+        <button 
+          class="h-9 px-4 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-2 text-sm font-medium shadow-lg shadow-emerald-600/20 transition-all active:scale-95"
+          @click="$router.push('/dashboard/easy-access/employees')"
+        >
           <Plus class="w-4 h-4" />
           Add Finger
         </button>
-        <button class="h-9 px-4 rounded-full border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 flex items-center gap-2 text-sm font-medium transition-colors">
+        <button 
+          class="h-9 px-4 rounded-full border border-emerald-200 dark:border-emerald-500/20 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 flex items-center gap-2 text-sm font-medium transition-colors"
+          @click="fetchFingerData"
+        >
           <Database class="w-4 h-4" />
           Batch Sync
         </button>
-        <button class="h-9 w-9 rounded-full flex items-center justify-center text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-500 transition-colors">
+        <button 
+          class="h-9 w-9 rounded-full flex items-center justify-center text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-500 transition-colors"
+          @click="fetchFingerData"
+        >
           <RefreshCw class="w-4 h-4" />
         </button>
       </div>
@@ -188,6 +199,7 @@ import {
   UserCheck, HardDrive, Share2, Download, RefreshCw, Database, Loader2
 } from 'lucide-vue-next';
 import { authService } from "@/services/authService";
+import { currentUserTenant } from '@/utils/currentUserTenant';
 
 const templates = ref([]);
 const loading = ref(true);
@@ -196,23 +208,23 @@ const searchQuery = ref("");
 const fetchFingerData = async () => {
   loading.value = true;
   try {
-    const tenantId = authService.getTenantId();
-    const token = authService.getToken();
+    const tenantId = await currentUserTenant?.getTenantIdAsync?.().catch(() => null) || authService.getTenantId();
+    const token = authService.getToken() || import.meta.env.VITE_API_TOKEN;
     
-    const params = new URLSearchParams({
-      fields: [
-        "id", "assignedTo.id", "assignedTo.employeeId", 
-        "assignedTo.assignedUser.first_name", "assignedTo.assignedUser.last_name",
-        "date_created"
-      ].join(","),
-      "filter[tenant][tenantId][_eq]": tenantId,
-      limit: "-1",
-      sort: "-date_created"
-    });
+    let url = `${import.meta.env.VITE_API_URL}/items/userFingers?limit=-1&sort=-date_created&fields=id,assignedTo.id,assignedTo.employeeId,assignedTo.assignedUser.first_name,assignedTo.assignedUser.last_name,date_created`;
+    if (tenantId) {
+      url += `&filter[tenant][_eq]=${encodeURIComponent(tenantId)}`;
+    }
 
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/items/userFingers?${params.toString()}`, {
+    let response = await fetch(url, {
       headers: { Authorization: `Bearer ${token}` }
     });
+
+    if (!response.ok && tenantId) {
+      response = await fetch(`${import.meta.env.VITE_API_URL}/items/userFingers?limit=-1&sort=-date_created&fields=id,assignedTo.id,assignedTo.employeeId,assignedTo.assignedUser.first_name,assignedTo.assignedUser.last_name,date_created`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    }
 
     if (response.ok) {
       const data = await response.json();
@@ -261,6 +273,21 @@ const handleDelete = async (temp) => {
           console.error("Error deleting finger template:", error);
         }
     }
+};
+
+const exportData = () => {
+  if (templates.value.length === 0) return;
+  const csvContent = "data:text/csv;charset=utf-8," + 
+    ["ID,Employee Name,Employee ID,Date Created"]
+      .concat(templates.value.map(t => `${t.id},"${t.employee.firstName} ${t.employee.lastName}",${t.employee.employeeId},${t.createdAt}`))
+      .join("\n");
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", `fingerprint_credentials_${new Date().toISOString().slice(0, 10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 };
 
 onMounted(() => {

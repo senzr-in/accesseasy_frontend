@@ -80,7 +80,7 @@ const isOnStepPage = computed(() => {
 });
 
 onMounted(() => {
-  // Only show onboarding banner for Admin users — Guards and Employees should not see it
+  // Only show onboarding banner for Admin users — Employees should not see it
   const role = authService.getUserRole();
   if (role !== 'Admin') return;
   if (!onboardingService.isCompleted()) {

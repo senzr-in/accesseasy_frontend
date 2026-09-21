@@ -40,7 +40,7 @@ export class CorrelationEngine {
   }
 
   /**
-   * Add a new Camera Event (Frigate Detection)
+   * Add a new Camera Event
    * @param {Object} event { id, timestamp, doorId, snapshotUrl, clipUrl }
    */
   addCameraEvent(event) {

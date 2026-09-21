@@ -462,16 +462,13 @@ const transformRowData = (rowData, collectionName, userTenant) => {
 };
 
 const transformDoorData = (rowData, userTenant) => {
-  const { "door name": doorName } = rowData;
-  if (!doorNumber || !doorName) return null;
+  const doorName = rowData["door name"] || rowData["doorname"] || rowData["name"];
+  if (!doorName) return null;
 
   return {
-   
     doorName,
-   
     tenant: userTenant,
     status: "assigned",
-   
   };
 };
 

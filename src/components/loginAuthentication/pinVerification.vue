@@ -190,7 +190,7 @@
                     v-model="pinDigits[index]"
                     maxlength="1"
                     :type="showPin ? 'text' : 'password'"
-                    class="w-14 h-16 text-center rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none text-2xl font-black text-slate-900 dark:text-white shadow-sm"
+                    class="w-14 h-16 text-center rounded-2xl bg-white/85 hover:bg-white/95 focus:bg-white border border-[#d8e2ee] focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none text-2xl font-black text-slate-800 shadow-sm"
                     @input="handlePinDigitInput(index)"
                     @keydown="handlePinKeydown($event, index)"
                     @paste="handlePinPaste($event, index)"
@@ -214,13 +214,13 @@
               <!-- Max Attempts -->
               <div
                 v-else
-                class="text-center p-6 rounded-2xl bg-rose-50 dark:bg-rose-900/10 border border-rose-100 dark:border-rose-900/20"
+                class="text-center p-6 rounded-2xl bg-rose-50 border border-rose-100"
               >
                 <Lock class="w-8 h-8 text-rose-600 mx-auto mb-3" />
                 <h3 class="text-xs font-black text-rose-600 uppercase tracking-widest mb-1">
                   Max Attempts Reached
                 </h3>
-                <p class="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider mb-4">
+                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-4">
                   Please reset your PIN to continue
                 </p>
                 <button 
@@ -234,7 +234,7 @@
               <button
                 v-if="!maxAttemptsReached"
                 :disabled="loading || !isValidPin"
-                class="w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 transition-all disabled:opacity-70 disabled:cursor-not-allowed group"
+                class="w-full h-12 rounded-2xl text-[12px] font-black uppercase tracking-[0.15em] flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-[0_6px_25px_rgba(59,130,246,0.4)] transition-all active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed group"
                 @click="handlePinAction"
               >
                 <span v-if="loading">Verifying...</span>
@@ -255,7 +255,7 @@
                   Forgot your PIN?
                 </button>
                 <button
-                  class="text-[10px] font-bold text-slate-400 hover:text-slate-600 dark:text-slate-300 uppercase tracking-widest transition-colors"
+                  class="text-[10px] font-bold text-slate-400 hover:text-slate-600 uppercase tracking-widest transition-colors"
                   @click="goToAlternateLogin"
                 >
                   Switch Account
@@ -269,7 +269,7 @@
               class="space-y-6"
             >
               <div class="space-y-2">
-                <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">Enter 6-Digit OTP</label>
+                <label class="text-[10px] font-black tracking-[0.15em] text-slate-600 ml-1 uppercase">Enter 6-Digit OTP</label>
                 <div class="flex justify-between gap-2">
                   <input
                     v-for="(digit, index) in 6"
@@ -278,18 +278,18 @@
                     v-model="otpDigits[index]"
                     maxlength="1"
                     type="text"
-                    class="w-12 h-14 text-center rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none text-xl font-black text-slate-900 dark:text-white shadow-sm"
+                    class="w-12 h-14 text-center rounded-2xl bg-white/85 hover:bg-white/95 focus:bg-white border border-[#d8e2ee] focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none text-xl font-black text-slate-800 shadow-sm"
                     @input="handleOtpInput(index)"
                     @keydown="handleOtpKeydown($event, index)"
                     @paste="handleOtpPaste($event, index)"
                   >
                 </div>
                 <div class="flex items-center justify-between px-1">
-                  <p class="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
                     Didn't receive code?
                   </p>
                   <button
-                    class="text-[9px] font-black text-blue-600 uppercase tracking-widest"
+                    class="text-[10px] font-black text-blue-600 uppercase tracking-widest"
                     @click="resendOtp"
                   >
                     Resend
@@ -299,7 +299,7 @@
 
               <button
                 :disabled="loading || !isValidOtp"
-                class="w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 transition-all disabled:opacity-70 disabled:cursor-not-allowed group"
+                class="w-full h-12 rounded-2xl text-[12px] font-black uppercase tracking-[0.15em] flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-[0_6px_25px_rgba(59,130,246,0.4)] transition-all active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed group"
                 @click="verifyForgotPinOtp"
               >
                 <span v-if="loading">Processing...</span>
@@ -316,7 +316,7 @@
               class="space-y-6"
             >
               <div class="space-y-2">
-                <label class="text-[9px] font-black tracking-[0.2em] text-slate-500 dark:text-slate-400 ml-1 uppercase">
+                <label class="text-[10px] font-black tracking-[0.15em] text-slate-600 ml-1 uppercase">
                   {{ isConfirmingPin ? "Confirm Your PIN" : "Setup New PIN" }}
                 </label>
                 <div class="flex justify-center gap-3 relative">
@@ -327,7 +327,7 @@
                     v-model="newPinDigits[index]"
                     maxlength="1"
                     :type="showPin ? 'text' : 'password'"
-                    class="w-14 h-16 text-center rounded-xl bg-slate-100 dark:bg-slate-900 border border-transparent dark:border-white/5 focus:border-blue-600 focus:bg-white dark:bg-slate-900 dark:focus:bg-slate-800 focus:ring-4 focus:ring-blue-600/10 transition-all outline-none text-2xl font-black text-slate-900 dark:text-white shadow-sm"
+                    class="w-14 h-16 text-center rounded-2xl bg-white/85 hover:bg-white/95 focus:bg-white border border-[#d8e2ee] focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none text-2xl font-black text-slate-800 shadow-sm"
                     @input="handleNewPinDigitInput(index)"
                     @keydown="handleNewPinKeydown($event, index)"
                     @paste="handleNewPinPaste($event, index)"
@@ -350,7 +350,7 @@
 
               <button
                 :disabled="loading || !isValidNewPin"
-                class="w-full h-12 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/30 transition-all disabled:opacity-70 disabled:cursor-not-allowed group"
+                class="w-full h-12 rounded-2xl text-[12px] font-black uppercase tracking-[0.15em] flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-[0_6px_25px_rgba(59,130,246,0.4)] transition-all active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed group"
                 @click="handleNewPinAction"
               >
                 <span v-if="loading">Processing...</span>
@@ -851,7 +851,7 @@ async function handleNewPinAction() {
     authService.setUserData(userData);
     authService.setPinVerified(true);
     setSuccessMessage(`PIN created successfully! Redirecting...`);
-    setTimeout(() => router.push("/taskManagement/taskcomponents"), 2000);
+    setTimeout(() => router.push("/dashboard"), 1500);
   } catch (e) {
     setErrorMessage(e.message || "Failed to create PIN");
   } finally {
@@ -919,7 +919,7 @@ async function verifyPin() {
     if (currentPin.value === dbPin) {
       setSuccessMessage("PIN verified successfully");
       authService.setPinVerified(true);
-      setTimeout(() => router.push("/taskManagement/taskcomponents"), 1500);
+      setTimeout(() => router.push("/dashboard"), 1200);
       return;
     }
 
@@ -977,7 +977,7 @@ onMounted(async () => {
   if (fromReset) {
     authService.setPinVerified(true);
     await nextTick();
-    router.push("/taskManagement/taskcomponents");
+    router.push("/dashboard");
     return;
   }
 

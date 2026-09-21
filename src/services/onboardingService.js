@@ -118,5 +118,27 @@ export const onboardingService = {
 
   reset() {
     localStorage.removeItem(STORAGE_KEY);
+  },
+
+  /**
+   * Initializes default settings for a newly created or existing tenant
+   */
+  async initializeDefaults(tenantInfo = {}) {
+    try {
+      const { knativeService } = await import('./knativeService.js');
+      const result = await knativeService.setupInitialSettings({
+        tenantId: tenantInfo.tenantId || localStorage.getItem('tenant_id') || '',
+        companyName: tenantInfo.companyName || tenantInfo.tenantName || 'My Organization',
+        email: tenantInfo.email || '',
+        name: tenantInfo.name || tenantInfo.fullName || 'Admin',
+        userApp: 'accesseasy',
+        setupDefaults: true,
+      });
+      return result;
+    } catch (err) {
+      console.warn('[onboardingService] Initial defaults initialization warning:', err);
+      return null;
+    }
   }
 };
+

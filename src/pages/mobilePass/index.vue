@@ -143,11 +143,17 @@
 
     <!-- Footer Actions -->
     <div class="mt-8 grid grid-cols-2 gap-4 max-w-lg mx-auto w-full">
-      <button class="h-16 rounded-xl border border-slate-200 dark:border-zinc-800 flex flex-col gap-1 items-center justify-center bg-white dark:bg-zinc-950 shadow-sm hover:shadow-lg transition-all duration-200 hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 active:scale-[0.98]">
+      <button 
+        class="h-16 rounded-xl border border-slate-200 dark:border-zinc-800 flex flex-col gap-1 items-center justify-center bg-white dark:bg-zinc-950 shadow-sm hover:shadow-lg transition-all duration-200 hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 active:scale-[0.98]"
+        @click="router.push('/dashboard/my-logs')"
+      >
         <History class="w-4 h-4 text-slate-400 dark:text-zinc-500" />
         <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">My Logs</span>
       </button>
-      <button class="h-16 rounded-xl border border-slate-200 dark:border-zinc-800 flex flex-col gap-1 items-center justify-center bg-white dark:bg-zinc-950 shadow-sm hover:shadow-lg transition-all duration-200 hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 active:scale-[0.98]">
+      <button 
+        class="h-16 rounded-xl border border-slate-200 dark:border-zinc-800 flex flex-col gap-1 items-center justify-center bg-white dark:bg-zinc-950 shadow-sm hover:shadow-lg transition-all duration-200 hover:bg-slate-50 dark:hover:bg-slate-800/50 dark:hover:bg-zinc-800 active:scale-[0.98]"
+        @click="router.push('/dashboard/my-access')"
+      >
         <DoorOpen class="w-4 h-4 text-slate-400 dark:text-zinc-500" />
         <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-zinc-400">My Passes</span>
       </button>

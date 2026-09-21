@@ -123,19 +123,32 @@
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <!-- Department -->
               <div>
-                <label class="block text-xs font-semibold text-[#334155] mb-1">Department</label>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="block text-xs font-semibold text-[#334155]">Department</label>
+                  <button
+                    type="button"
+                    class="text-[11px] font-bold text-[#2563EB] hover:underline cursor-pointer flex items-center gap-0.5"
+                    @click="showAddDepartmentModal = true"
+                  >
+                    + New
+                  </button>
+                </div>
                 <select
                   v-model="formData.departmentId"
                   class="w-full h-9 px-2.5 rounded-xl border border-[#E2E8F0] bg-[#FFFFFF] text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
+                  @change="if ($event.target.value === '__create_new__') { formData.departmentId = ''; showAddDepartmentModal = true; }"
                 >
-                  <option value="">-- Select Department --</option>
+                  <option value="">{{ departments.length === 0 ? '-- No Departments (Click to Add) --' : '-- Select Department --' }}</option>
                   <option v-for="d in departments" :key="d.id" :value="d.id">
                     {{ d.departmentName }}
+                  </option>
+                  <option value="__create_new__" class="font-bold text-[#2563EB]">
+                    + Create New Department...
                   </option>
                 </select>
               </div>
 
-              <!-- Role (Employee, Admin, Guard, etc.) -->
+              <!-- Role (Employee, Admin, Manager, etc.) -->
               <div>
                 <label class="block text-xs font-semibold text-[#334155] mb-1">Role <span class="text-[#DC2626]">*</span></label>
                 <select
@@ -690,6 +703,64 @@
       </div>
     </Teleport>
 
+    <!-- SUB-POPUP 5: Add Department Modal -->
+    <Teleport to="body">
+      <div
+        v-if="showAddDepartmentModal"
+        class="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-150"
+        @click.self="showAddDepartmentModal = false"
+      >
+        <div class="w-full max-w-sm bg-[#FFFFFF] border border-[#E2E8F0] rounded-2xl p-5 shadow-2xl space-y-4">
+          <div class="flex items-center justify-between border-b border-[#E2E8F0] pb-3">
+            <div class="flex items-center gap-2.5">
+              <div class="p-2 rounded-lg bg-[#EFF6FF] text-[#2563EB] border border-[#BFDBFE]">
+                <Building class="w-4 h-4" />
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-[#0F172A]">Add Department</h3>
+                <p class="text-[11px] text-[#64748B]">Create new organizational unit</p>
+              </div>
+            </div>
+            <button class="w-7 h-7 rounded-lg border border-[#E2E8F0] flex items-center justify-center text-[#64748B] hover:text-[#0F172A] transition-colors" @click="showAddDepartmentModal = false">
+              <X class="w-4 h-4" />
+            </button>
+          </div>
+
+          <div class="space-y-3">
+            <div>
+              <label class="block text-xs font-semibold text-[#334155] mb-1">Department Name <span class="text-[#DC2626]">*</span></label>
+              <input
+                v-model="newDepartmentName"
+                type="text"
+                placeholder="e.g. Operations, IT, Sales"
+                class="w-full h-9 px-3 rounded-xl border border-[#E2E8F0] bg-[#FFFFFF] text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
+                @keyup.enter="handleCreateDepartment"
+              />
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-2 pt-2 border-t border-[#E2E8F0]">
+            <button
+              type="button"
+              class="px-3 py-1.5 text-xs text-[#64748B] hover:text-[#0F172A] font-medium cursor-pointer"
+              @click="showAddDepartmentModal = false"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              :disabled="savingDept || !newDepartmentName.trim()"
+              class="px-4 py-1.5 bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-bold rounded-xl shadow-2xs disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
+              @click="handleCreateDepartment"
+            >
+              <Loader2 v-if="savingDept" class="w-3.5 h-3.5 animate-spin" />
+              <span>Create Department</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
     <!-- Original Access Group Clearance Dialog -->
     <AddAccessLevelDialog
       v-model="showAccessLevelModal"
@@ -747,7 +818,7 @@ let tenantId = currentUserTenant.getTenantId();
 const roles = ref([
   { id: 'f667b169-c66c-4ec1-bef9-1831c1647c0d', name: 'Employee' },
   { id: 'admin_role', name: 'Admin' },
-  { id: 'guard_role', name: 'Guard' }
+  { id: 'manager_role', name: 'Manager' }
 ]);
 const departments = ref([]);
 const branches = ref([]);
@@ -968,13 +1039,54 @@ watch(() => props.modelValue, async (isOpen) => {
   }
 });
 
+const showAddDepartmentModal = ref(false);
+const newDepartmentName = ref('');
+const savingDept = ref(false);
+
+const handleCreateDepartment = async () => {
+  if (!newDepartmentName.value.trim()) return;
+  savingDept.value = true;
+  try {
+    const t = authService.getToken() || import.meta.env.VITE_API_TOKEN;
+    const tid = currentUserTenant.getTenantId();
+    const payload = {
+      departmentName: newDepartmentName.value.trim(),
+      status: 'published'
+    };
+    if (tid) payload.tenant = tid;
+
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/department`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${t}`
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (res.ok) {
+      const resData = await res.json();
+      const createdId = resData.data?.id;
+      await fetchDepartments();
+      if (createdId) {
+        formData.value.departmentId = createdId;
+      }
+      newDepartmentName.value = '';
+      showAddDepartmentModal.value = false;
+    } else {
+      alert("Failed to create department");
+    }
+  } catch (err) {
+    console.error("Create department error:", err);
+  } finally {
+    savingDept.value = false;
+  }
+};
+
 onMounted(async () => {
   await currentUserTenant.initialize();
   token = authService.getToken();
   tenantId = currentUserTenant.getTenantId();
-  fetchRoles();
-  fetchDepartments();
-  fetchGroups();
 });
 
 const close = () => {
@@ -1118,7 +1230,7 @@ const syncKnativeFromDialog = async (personalRecordId = null) => {
   }
 };
 
-const allowedRoleNames = ['employee', 'admin', 'guard'];
+const allowedRoleNames = ['employee', 'admin', 'manager'];
 
 const fetchRoles = async () => {
   try {
@@ -1153,7 +1265,7 @@ const fetchRoles = async () => {
   roles.value = [
     { id: 'employee_role', name: 'Employee' },
     { id: 'admin_role', name: 'Admin' },
-    { id: 'guard_role', name: 'Guard' }
+    { id: 'manager_role', name: 'Manager' }
   ];
   if (!formData.value.roleId && roles.value.length > 0) {
     formData.value.roleId = roles.value[0].id;
@@ -1163,13 +1275,26 @@ const fetchRoles = async () => {
 const fetchDepartments = async () => {
   try {
     const activeTenantId = await currentUserTenant.getTenantIdAsync();
-    const tkn = authService.getToken();
-    if (!activeTenantId || !tkn) return;
+    const tkn = authService.getToken() || import.meta.env.VITE_API_TOKEN;
+    if (!tkn) return;
 
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/department?filter[tenant][tenantId][_eq]=${activeTenantId}&fields=id,departmentName`, {
-      headers: { Authorization: `Bearer ${tkn}` }
-    });
-    if (res.ok) {
+    let res = null;
+    if (activeTenantId) {
+      res = await fetch(`${import.meta.env.VITE_API_URL}/items/department?filter[tenant][_eq]=${encodeURIComponent(activeTenantId)}&fields=id,departmentName&sort=departmentName&limit=-1`, {
+        headers: { Authorization: `Bearer ${tkn}` }
+      });
+      if (!res.ok) {
+        res = await fetch(`${import.meta.env.VITE_API_URL}/items/department?filter[tenant][tenantId][_eq]=${encodeURIComponent(activeTenantId)}&fields=id,departmentName&sort=departmentName&limit=-1`, {
+          headers: { Authorization: `Bearer ${tkn}` }
+        });
+      }
+    }
+    if (!res || !res.ok) {
+      res = await fetch(`${import.meta.env.VITE_API_URL}/items/department?limit=-1&fields=id,departmentName&sort=departmentName`, {
+        headers: { Authorization: `Bearer ${tkn}` }
+      });
+    }
+    if (res && res.ok) {
       const data = await res.json();
       departments.value = (data.data || []).filter(d => d.departmentName);
     }
@@ -1181,27 +1306,57 @@ const fetchDepartments = async () => {
 const fetchBranches = async () => {
   try {
     const activeTenantId = await currentUserTenant.getTenantIdAsync();
-    const tkn = authService.getToken();
-    if (!activeTenantId || !tkn) return;
+    const tkn = authService.getToken() || import.meta.env.VITE_API_TOKEN;
+    if (!tkn) return;
 
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/locationManagement?filter[_and][0][_and][0][tenant][tenantId][_eq]=${activeTenantId}&filter[_and][0][_and][1][locType][_eq]=branch`, {
-      headers: { Authorization: `Bearer ${tkn}` }
-    });
-    const data = await res.json();
-    branches.value = data.data || [];
-  } catch (err) {}
+    let res = null;
+    if (activeTenantId) {
+      res = await fetch(`${import.meta.env.VITE_API_URL}/items/locationManagement?filter[_and][0][_and][0][tenant][tenantId][_eq]=${encodeURIComponent(activeTenantId)}&filter[_and][0][_and][1][locType][_eq]=branch&limit=-1`, {
+        headers: { Authorization: `Bearer ${tkn}` }
+      });
+      if (!res.ok) {
+        res = await fetch(`${import.meta.env.VITE_API_URL}/items/locationManagement?filter[_and][0][_and][0][tenant][_eq]=${encodeURIComponent(activeTenantId)}&filter[_and][0][_and][1][locType][_eq]=branch&limit=-1`, {
+          headers: { Authorization: `Bearer ${tkn}` }
+        });
+      }
+    }
+    if (!res || !res.ok) {
+      res = await fetch(`${import.meta.env.VITE_API_URL}/items/locationManagement?filter[locType][_eq]=branch&limit=-1`, {
+        headers: { Authorization: `Bearer ${tkn}` }
+      });
+    }
+    if (res && res.ok) {
+      const data = await res.json();
+      branches.value = data.data || [];
+    }
+  } catch (err) {
+    console.warn("fetchBranches error:", err);
+  }
 };
 
 const fetchGroups = async () => {
   try {
     const activeTenantId = await currentUserTenant.getTenantIdAsync();
-    const tkn = authService.getToken();
-    if (!activeTenantId || !tkn) return;
+    const tkn = authService.getToken() || import.meta.env.VITE_API_TOKEN;
+    if (!tkn) return;
 
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/accesslevels?filter[tenant][tenantId][_eq]=${activeTenantId}&fields=id,accessLevelName,accessLevelNumber&sort[]=accessLevelNumber`, {
-      headers: { Authorization: `Bearer ${tkn}` }
-    });
-    if (res.ok) {
+    let res = null;
+    if (activeTenantId) {
+      res = await fetch(`${import.meta.env.VITE_API_URL}/items/accesslevels?filter[tenant][_eq]=${encodeURIComponent(activeTenantId)}&fields=id,accessLevelName,accessLevelNumber&sort[]=accessLevelNumber&limit=-1`, {
+        headers: { Authorization: `Bearer ${tkn}` }
+      });
+      if (!res.ok) {
+        res = await fetch(`${import.meta.env.VITE_API_URL}/items/accesslevels?filter[tenant][tenantId][_eq]=${encodeURIComponent(activeTenantId)}&fields=id,accessLevelName,accessLevelNumber&sort[]=accessLevelNumber&limit=-1`, {
+          headers: { Authorization: `Bearer ${tkn}` }
+        });
+      }
+    }
+    if (!res || !res.ok) {
+      res = await fetch(`${import.meta.env.VITE_API_URL}/items/accesslevels?fields=id,accessLevelName,accessLevelNumber&sort[]=accessLevelNumber&limit=-1`, {
+        headers: { Authorization: `Bearer ${tkn}` }
+      });
+    }
+    if (res && res.ok) {
       const data = await res.json();
       groups.value = (data.data || []).filter(g => g.accessLevelName);
     }

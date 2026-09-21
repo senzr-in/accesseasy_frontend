@@ -199,10 +199,10 @@ const fetchAttendanceData = async () => {
 
     // Fetch users
     const usersResponse = await axios.get(
-      `${import.meta.env.VITE_API_URL}/items/personalModule?filter[_and][1][status][_neq]=archived&filter[_and][0][assignedUser][tenant][tenantId][_eq]=${tenantId}&fields[]=assignedUser.first_name&fields[]=assignedUser.last_name&fields[]=id&fields[]=employeeId&fields[]=assignedDepartment.department_id.departmentName`,
+      `${import.meta.env.VITE_API_URL}/items/personalModule?filter[_and][1][status][_neq]=archived&filter[_and][0][tenant][_eq]=${tenantId}&fields[]=assignedUser.first_name&fields[]=assignedUser.last_name&fields[]=id&fields[]=employeeId&fields[]=department.departmentName`,
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token || import.meta.env.VITE_API_TOKEN}`,
           "Content-Type": "application/json",
         },
       },
@@ -213,10 +213,10 @@ const fetchAttendanceData = async () => {
 
     // Fetch attendance data
     const attendanceResponse = await axios.get(
-      `${import.meta.env.VITE_API_URL}/items/attendance?filter[_and][0][tenant][tenantId][_eq]=${tenantId}&fields[]=date&fields[]=employeeId.id&fields[]=status&fields[]=attendance&fields[]=inTime&fields[]=outTime&fields[]=id&fields[]=workHours&fields[]=mode&fields[]=overTime&fields[]=lateBy&fields[]=earlyDeparture&fields[]=leaveType&fields[]=onTime&fields[]=breakTime`,
+      `${import.meta.env.VITE_API_URL}/items/attendance?filter[_and][0][tenant][_eq]=${tenantId}&fields[]=date&fields[]=employeeId.id&fields[]=status&fields[]=attendance&fields[]=inTime&fields[]=outTime&fields[]=id&fields[]=workHours&fields[]=mode&fields[]=overTime&fields[]=lateBy&fields[]=earlyDeparture&fields[]=leaveType&fields[]=onTime&fields[]=breakTime`,
       {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token || import.meta.env.VITE_API_TOKEN}`,
           "Content-Type": "application/json",
         },
       },
@@ -227,11 +227,11 @@ const fetchAttendanceData = async () => {
     // Initialize map with users
     users.forEach((user) => {
       attendanceMap.set(user.id, {
-        name: `${user.assignedUser.first_name} ${user.assignedUser.last_name || ""}`,
+        name: `${user.assignedUser?.first_name || ''} ${user.assignedUser?.last_name || ""}`.trim() || user.employeeId || 'Employee',
         id: user.id,
         employeeId: user.employeeId,
         department:
-          user.assignedDepartment?.[0]?.department_id?.departmentName || "N/A",
+          user.department?.departmentName || user.assignedDepartment?.[0]?.department_id?.departmentName || "General",
         presentDays: 0,
         absentDays: 0,
         halfDays: 0,

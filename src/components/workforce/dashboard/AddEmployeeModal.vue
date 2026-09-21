@@ -85,7 +85,7 @@
                 <option value="General Staff">General Staff (08:00 - 19:00)</option>
                 <option value="Executive 24/7">Executive 24/7 (All Zones)</option>
                 <option value="Security & Facility">Security & Facilities</option>
-                <option value="Visitor Temporary">Visitor Temporary</option>
+                <option value="Contractor / Temporary">Contractor / Temporary</option>
               </select>
             </div>
           </div>

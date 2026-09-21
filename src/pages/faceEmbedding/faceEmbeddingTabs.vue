@@ -57,12 +57,10 @@ watch(
 
 // Watch for tab changes to navigate
 watch(activeTab, (newTab) => {
-  if (newTab === "mobile") {
-    router.push("/face-embedding/mobile-face-embedding");
-  } else if (newTab === "ai") {
-    router.push("/face-embedding/ai-face-embedding");
+  if (newTab === "mobile" || newTab === "ai") {
+    router.push("/dashboard/easy-access/biometrics/face");
   } else if (newTab === "finger") {
-    router.push("/face-embedding/finger-data");
+    router.push("/dashboard/easy-access/biometrics/fingerprint");
   }
 });
 </script>

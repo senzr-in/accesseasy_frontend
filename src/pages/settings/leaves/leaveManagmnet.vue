@@ -1543,7 +1543,7 @@ const fetchData = async () => {
     queryParams.append("limit", itemsPerPage.value);
     queryParams.append("page", currentPage.value);
     queryParams.append("filter[tenant][tenantId][_eq]", tenant.value);
-    queryParams.append("filter[year(yearOfPolicy)][_eq]", selectedYear.value);
+    queryParams.append("filter[yearOfPolicy][_eq]", selectedYear.value);
     queryParams.append("meta", "total_count,filter_count");
 
     console.log("📌 Query Params:", queryParams.toString());

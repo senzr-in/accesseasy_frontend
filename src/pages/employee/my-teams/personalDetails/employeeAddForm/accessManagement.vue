@@ -758,12 +758,12 @@ const handleAccessToggle = async (value) => {
 const fetchAccessLevelDetails = async (accessLevelName) => {
   try {
     const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/items/accesslevels?filter[accessLevelName][_eq]=${accessLevelName}&fields=accessLevelName,_24hrs,holidays,maxWorkHours,accessType,workingHours,assignedDoors.doors_id.doorNumber,assignedDoors.doors_id.doorName`,
+      `${import.meta.env.VITE_API_URL}/items/accesslevels?filter[accessLevelName][_eq]=${encodeURIComponent(accessLevelName)}&fields=id,accessLevelName,_24hrs,holidays,maxWorkHours,accessType,workingHours,assignDoorsGroup,doorBitmap`,
       {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${authService.getToken()}`,
+          Authorization: `Bearer ${authService.getToken() || import.meta.env.VITE_API_TOKEN}`,
         },
       }
     );

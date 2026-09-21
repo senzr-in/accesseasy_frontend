@@ -3,8 +3,6 @@
     <!-- 0. Hero Section with Quick Actions -->
     <QuickActions
       @open-add-employee="isAddModalOpen = true"
-      @open-import="isImportModalOpen = true"
-      @open-register-device="isRegisterDeviceModalOpen = true"
     />
 
     <!-- Loading Skeleton State -->

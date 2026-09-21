@@ -82,7 +82,7 @@ import { useRoute, useRouter } from "vue-router";
 import PersonalDetails from "@/pages/employee/my-teams/personalDetails/employeeAddForm/personalDetails.vue";
 import CompanyDetails from "@/pages/employee/my-teams/personalDetails/employeeAddForm/companyDetails.vue";
 import GovernmentIds from "@/pages/employee/my-teams/personalDetails/employeeAddForm/governmentIDs.vue";
-import AttendanceCategory from "@/pages/employee/my-teams/personalDetails/employeeAddForm/attendanceCategory.vue";
+import AttendanceCategory from "@/pages/employee/my-teams/personalDetails/employeeAddForm/attendance/attendanceManagement.vue";
 import PayrollCategory from "@/pages/employee/my-teams/personalDetails/employeeAddForm/payrollCategory.vue";
 import AccessManagement from "@/pages/employee/my-teams/personalDetails/employeeAddForm/accessManagement.vue";
 import PastExperience from "@/pages/employee/my-teams/personalDetails/employeeAddForm/pastExperience.vue";

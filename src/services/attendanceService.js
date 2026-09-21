@@ -4,7 +4,7 @@ import { currentUserTenant } from '@/utils/currentUserTenant';
 const API_URL = import.meta.env.VITE_API_URL || 'https://appv1.fieldseasy.com/directus';
 
 const getHeaders = () => {
-  const token = authService.getToken();
+  const token = authService.getToken() || import.meta.env.VITE_API_TOKEN;
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
@@ -173,19 +173,28 @@ export const attendanceService = {
       const token = authService.getToken();
       if (!token) return [];
 
-      const tenantParam = activeTenantId ? `filter[tenant][tenantId][_eq]=${activeTenantId}&` : '';
-      const res = await fetch(`${API_URL}/items/attendance?${tenantParam}filter[status][_eq]=pending&limit=10&fields=id,date,reason,employeeId.firstName,employeeId.lastName`, {
+      const tenantParam = activeTenantId ? `filter[tenant][_eq]=${activeTenantId}&` : '';
+      let res = await fetch(`${API_URL}/items/regularizationRequest?${tenantParam}limit=10&fields=id,Date,reason,status,employeeId.assignedUser.first_name,employeeId.assignedUser.last_name,employeeId.employeeId`, {
         headers: getHeaders()
       });
+      if (!res.ok) {
+        res = await fetch(`${API_URL}/items/attendance?${tenantParam}filter[status][_eq]=pending&limit=10&fields=id,date,attendanceContext,employeeId.assignedUser.first_name,employeeId.assignedUser.last_name,employeeId.employeeId`, {
+          headers: getHeaders()
+        });
+      }
       if (res.ok) {
         const data = await res.json();
-        return (data.data || []).map(r => ({
-          id: `REG-${r.id}`,
-          employee: `${r.employeeId?.firstName || ''} ${r.employeeId?.lastName || ''}`.trim() || 'Employee',
-          date: r.date || '—',
-          reason: r.reason || 'Pending verification',
-          status: 'Pending'
-        }));
+        return (data.data || []).map(r => {
+          const emp = r.employeeId?.assignedUser;
+          const empName = emp ? `${emp.first_name || ''} ${emp.last_name || ''}`.trim() : (r.employeeId?.employeeId ? `Employee ${r.employeeId.employeeId}` : 'Employee');
+          return {
+            id: `REG-${r.id}`,
+            employee: empName,
+            date: r.Date || r.date || '—',
+            reason: r.reason || 'Pending verification',
+            status: r.status || 'Pending'
+          };
+        });
       }
     } catch (err) {
       console.warn('[attendanceService] getRegularisationRequests error:', err);

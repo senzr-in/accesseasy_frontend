@@ -111,20 +111,21 @@ const fetchDeviceTypes = async () => {
   loading.value = true;
   try {
     const tenantId = authService.getTenantId();
-    const token = authService.getToken();
+    const token = authService.getToken() || import.meta.env.VITE_API_TOKEN;
     
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/items/prodCategory?fields=id,categoryName,description&filter[tenant][tenantId][_eq]=${tenantId}`, {
+    const tenantParam = tenantId ? `filter[tenant][_eq]=${tenantId}&` : '';
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/items/prodCategory?${tenantParam}fields=id,categoryName,type,terms`, {
       headers: { Authorization: `Bearer ${token}` }
     });
 
     if (response.ok) {
       const data = await response.json();
-      deviceTypes.value = data.data.map(cat => ({
+      deviceTypes.value = (data.data || []).map(cat => ({
         id: cat.id,
-        displayName: cat.categoryName,
-        name: cat.categoryName.toLowerCase().replace(/\s+/g, '_'),
-        description: cat.description || "Hardware category specification.",
-        _count: { parameters: 0, alertRules: 0, devices: 0 } // Counts might need separate join
+        displayName: cat.categoryName || 'General',
+        name: (cat.categoryName || 'hardware').toLowerCase().replace(/\s+/g, '_'),
+        description: cat.terms || "Hardware category specification.",
+        _count: { parameters: 0, alertRules: 0, devices: 0 }
       }));
     }
   } catch (error) {

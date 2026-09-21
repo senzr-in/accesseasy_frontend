@@ -1532,10 +1532,10 @@ async function fetchExistingControllers() {
   try {
     const resolvedTenantId = await resolveTenantId();
     const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/items/controllers?filter[tenant][tenantId][_eq]=${resolvedTenantId}&fields=id,assignedDoor.doors_id.id`,
+      `${import.meta.env.VITE_API_URL}/items/controllers?filter[tenant][_eq]=${resolvedTenantId}&fields=id,selectedDoors`,
       {
         headers: {
-          Authorization: `Bearer ${authService.getToken()}`,
+          Authorization: `Bearer ${authService.getToken() || import.meta.env.VITE_API_TOKEN}`,
         },
       },
     );

@@ -32,7 +32,6 @@ const personSnapshots  = ref({});
 const lpSnapshots      = ref({});
 const deviceOnlineMap  = ref({});    // { [uuid]: { status: 'online'|'offline', lastSeen: timestamp, ip: string, version: string } }
 const doorSensorStates = ref({});    // { [`${uuid}_${doorIndex}`]: { state: 'open'|'closed'|'forced'|'timeout', lastUpdated: timestamp } }
-const guardMessages    = ref([]);    // Array of real-time guard messages
 
 let _refCount       = 0;
 let _statusUnsub    = null;
@@ -44,15 +43,9 @@ let _snapUnsub      = null;
 let _lpSnapUnsub    = null;
 let _lpBase64Unsub  = null;
 let _heartbeatUnsub = null;
-let _guardUnsub     = null;
 let _offlineCheckTimer = null;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-
-/** Extract camera name from topic like "frigate/<camera>/…" */
-function cameraFrom(topic) {
-  return topic.split('/')[1] ?? 'unknown';
-}
 
 /** Prepend an item to a ref-array and trim to max length (immutably). */
 function prepend(refArr, item) {
@@ -179,143 +172,6 @@ function handleAlarmEvent(topic, payload) {
   if (severity === 'critical' || severity === 'warning') {
     activeAlarms.value = [alarmObj, ...activeAlarms.value.filter(a => a.id !== alarmObj.id)];
   }
-
-  console.warn(`[useMQTT] 🚨 Gateway Alarm Received: ${alarmTitle} [UUID: ${alarmObj.uuid}]`);
-}
-
-function handleFrigateEvent(_topic, payload) {
-  let msg;
-  try { msg = JSON.parse(payload.toString()); }
-  catch { console.warn('[useMQTT] Could not parse frigate/events payload'); return; }
-
-  const { type, after } = msg;
-  if (!after) return;
-
-  // Only allow registered cameras
-  if (!deviceRegistry.isCameraRegistered(after.camera)) {
-    return;
-  }
-
-  const label = after.label;
-  console.debug(`[useMQTT] ▶ frigate/events  type=${type}  label=${label}  camera=${after.camera}`);
-
-  // ── Person detection ───────────────────────────────────────────────────────
-  if (label === 'person') {
-    const ev = {
-      id:        after.id,
-      camera:    after.camera,
-      type,                         // 'new' | 'update' | 'end'
-      score:     after.score   ?? 0,
-      topScore:  after.top_score ?? 0,
-      active:    after.active  ?? (type !== 'end'),
-      startTime: after.start_time,
-      endTime:   after.end_time ?? null,
-      snapshot:  after.snapshot ?? null,
-      timestamp: Date.now(),
-    };
-
-    const idx = personEvents.value.findIndex(e => e.id === ev.id);
-    if (idx !== -1) {
-      if (type === 'end') {
-        // Move to bottom of list (ended)
-        const rest = personEvents.value.filter((_, i) => i !== idx);
-        personEvents.value = [...rest, ev].slice(0, MAX_EVENTS);
-      } else {
-        // Replace immutably so Vue 3 detects the change
-        const next = [...personEvents.value];
-        next[idx] = ev;
-        personEvents.value = next;
-      }
-    } else {
-      prepend(personEvents, ev);
-    }
-
-    if (type === 'new' || type === 'update') {
-      // Feed to correlation engine
-      correlationEngine.addCameraEvent({
-        id: ev.id,
-        timestamp: ev.timestamp,
-        doorId: ev.camera,
-        snapshotUrl: personSnapshots.value[ev.camera] || `http://frigate-mqtt.knative-fn.65.109.41.139.sslip.io/api/events/${ev.id}/snapshot.jpg`
-      });
-    }
-  }
-
-  // ── License-plate detection ────────────────────────────────────────────────
-  if (label === 'license_plate') {
-    const ev = {
-      id:          after.id,
-      camera:      after.camera,
-      score:       after.score ?? 0,
-      startTime:   after.start_time,
-      hasSnapshot: after.has_snapshot ?? false,
-      type,
-      timestamp:   Date.now(),
-    };
-
-    const idx = lpEvents.value.findIndex(e => e.id === ev.id);
-    if (idx !== -1) {
-      const next = [...lpEvents.value];
-      next[idx] = { ...next[idx], ...ev };
-      lpEvents.value = next;
-    } else {
-      prepend(lpEvents, ev);
-    }
-  }
-}
-
-function handlePersonCount(topic, payload) {
-  const camera = cameraFrom(topic);
-  if (!deviceRegistry.isCameraRegistered(camera)) {
-    return;
-  }
-  const count  = parseInt(payload.toString(), 10);
-  console.debug(`[useMQTT] person count  camera=${camera}  count=${count}`);
-  personCounts.value = { ...personCounts.value, [camera]: isNaN(count) ? 0 : count };
-}
-
-function handlePersonSnapshot(topic, payload) {
-  const camera = cameraFrom(topic);
-  if (!deviceRegistry.isCameraRegistered(camera)) {
-    return;
-  }
-  console.debug(`[useMQTT] person snapshot received  camera=${camera}  bytes=${payload.byteLength}`);
-  const blob = new Blob([payload], { type: 'image/jpeg' });
-  // Revoke the old URL to avoid memory leaks
-  if (personSnapshots.value[camera]) URL.revokeObjectURL(personSnapshots.value[camera]);
-  personSnapshots.value = { ...personSnapshots.value, [camera]: URL.createObjectURL(blob) };
-}
-
-function handleLPSnapshotFile(topic, payload) {
-  const camera   = cameraFrom(topic);
-  if (!deviceRegistry.isCameraRegistered(camera)) {
-    return;
-  }
-  const filename = payload.toString();
-  console.debug(`[useMQTT] LP snapshot file  camera=${camera}  file=${filename}`);
-  const idx = lpEvents.value.findIndex(e => e.camera === camera);
-  if (idx !== -1) {
-    const next = [...lpEvents.value];
-    next[idx] = { ...next[idx], snapshotFile: filename };
-    lpEvents.value = next;
-  }
-}
-
-function handleLPBase64(topic, payload) {
-  const parts   = topic.split('/');
-  const eventId = parts[parts.length - 1];
-  const b64     = payload.toString();
-  const dataUrl = `data:image/jpeg;base64,${b64}`;
-  console.debug(`[useMQTT] LP base64 snapshot  eventId=${eventId}  len=${b64.length}`);
-
-  lpSnapshots.value = { ...lpSnapshots.value, [eventId]: dataUrl };
-
-  const idx = lpEvents.value.findIndex(e => e.id === eventId);
-  if (idx !== -1) {
-    const next = [...lpEvents.value];
-    next[idx] = { ...next[idx], imageUrl: dataUrl };
-    lpEvents.value = next;
-  }
 }
 
 function handleSwipeEvent(topic, payload) {
@@ -394,28 +250,6 @@ function handleHeartbeatEvent(topic, payload) {
   console.debug(`[useMQTT] 💓 Device Heartbeat received from ${uuid}`);
 }
 
-function handleGuardMessage(topic, payload) {
-  let msg;
-  try { msg = JSON.parse(payload.toString()); }
-  catch { return; }
-
-  const parts = topic.split('/');
-  const guardId = parts[parts.indexOf('guards') + 1] || 'unknown';
-
-  const guardMsg = {
-    id: msg.id || `msg-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-    guardId,
-    type: msg.type || 'text',
-    text: msg.text || msg.message || '',
-    fileId: msg.fileId || null,
-    timestamp: msg.timestamp || Date.now(),
-    sender: msg.sender || 'guard'
-  };
-
-  prepend(guardMessages, guardMsg);
-  console.debug(`[useMQTT] 📩 Guard message on topic ${topic}:`, guardMsg);
-}
-
 // Periodic check: mark controllers offline if no heartbeat/swipe in 90 seconds
 function checkDeviceTimeouts() {
   const now = Date.now();
@@ -441,14 +275,8 @@ function _subscribe() {
   console.log('[useMQTT] Subscribing handlers + connecting MQTT service');
   deviceRegistry.loadDevices();
   _statusUnsub    = mqttService.onStatus(s => { mqttStatus.value = s; });
-  _eventUnsub     = mqttService.on('frigate/events',                           handleFrigateEvent);
   _swipeUnsub     = mqttService.on('access_device/v1/event/#',                 handleSwipeEvent);
   _heartbeatUnsub = mqttService.on('access_device/v1/event/heartbeat',         handleHeartbeatEvent);
-  _guardUnsub     = mqttService.on('accesseasy/tenant/+/guards/#',             handleGuardMessage);
-  _countUnsub     = mqttService.on('frigate/+/person',                         handlePersonCount);
-  _snapUnsub      = mqttService.on('frigate/+/person/snapshot',                handlePersonSnapshot);
-  _lpSnapUnsub    = mqttService.on('frigate/+/license_plate/snapshot',         handleLPSnapshotFile);
-  _lpBase64Unsub  = mqttService.on('frigate/+/license_plate/snapshot/bytes/+', handleLPBase64);
 
   if (!_offlineCheckTimer) {
     _offlineCheckTimer = setInterval(checkDeviceTimeouts, 15000);
@@ -460,15 +288,9 @@ function _subscribe() {
 function _unsubscribe() {
   console.log('[useMQTT] Unsubscribing handlers + disconnecting MQTT service');
   _statusUnsub?.();
-  _eventUnsub?.();
   _swipeUnsub?.();
   _alarmUnsub?.();
   _heartbeatUnsub?.();
-  _guardUnsub?.();
-  _countUnsub?.();
-  _snapUnsub?.();
-  _lpSnapUnsub?.();
-  _lpBase64Unsub?.();
 
   if (_offlineCheckTimer) {
     clearInterval(_offlineCheckTimer);
@@ -510,7 +332,6 @@ export function useMQTT() {
     lpSnapshots,
     deviceOnlineMap,
     doorSensorStates,
-    guardMessages,
     dismissAlarm,
     // Access Control Gateway RPC Actions
     sendRemoteDoorOpen:            (uuid, doorIndex, timing) => mqttService.sendRemoteDoorOpen(uuid, doorIndex, timing),

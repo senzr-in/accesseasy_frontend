@@ -11,4 +11,8 @@ dist/
 *.txt
 backup_sidebar.vue
 *.timestamp-*.mjs
+audit_*.json
+directus_all_fields.json
+schema_summary.json
+before-remediation/
 

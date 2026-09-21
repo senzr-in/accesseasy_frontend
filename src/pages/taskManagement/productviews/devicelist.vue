@@ -1101,16 +1101,7 @@ export default {
       if (props.initialDevices && props.initialDevices.length > 0) {
         devices.value = [...props.initialDevices];
       } else {
-        const mockDevices = [];
-        for (let i = 1; i <= 10; i++) {
-          mockDevices.push({
-            serialNumber: `SN${props.productId || 'MODEL'}${i.toString().padStart(4, '0')}`,
-            status: getRandomStatus(),
-            name: null,
-            assignedto: null
-          });
-        }
-        devices.value = mockDevices;
+        devices.value = [];
       }
       filteredDevices.value = [...devices.value];
       isLoading.value = false;

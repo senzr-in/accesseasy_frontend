@@ -1553,10 +1553,10 @@ const loadAccessManagementTabData = async () => {
     const resolvedTenantId = await resolveTenantId();
 
     const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/items/accesslevels?filter[tenant][tenantId][_eq]=${resolvedTenantId}&fields=accessLevelName,accessType,_24hrs,maxWorkHours,workingHours,holidays,assignedDoors.doors_id.doorNumber,assignedDoors.doors_id.doorName`,
+      `${import.meta.env.VITE_API_URL}/items/accesslevels?filter[tenant][_eq]=${resolvedTenantId}&fields=id,accessLevelName,accessType,_24hrs,maxWorkHours,workingHours,holidays,assignDoorsGroup,doorBitmap`,
       {
         headers: {
-          Authorization: `Bearer ${authService.getToken()}`,
+          Authorization: `Bearer ${authService.getToken() || import.meta.env.VITE_API_TOKEN}`,
         },
       }
     );
@@ -1699,7 +1699,7 @@ async function fetchLeavePolicies() {
     const currentYear = new Date().getFullYear();
 
     const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/items/leaveSetting?filter[_and][0][_and][0][tenant][tenantId][_eq]=${resolvedTenantId}&filter[_and][0][_and][1][year(yearOfPolicy)][_eq]=${currentYear}`,
+      `${import.meta.env.VITE_API_URL}/items/leaveSetting?filter[_and][0][_and][0][tenant][tenantId][_eq]=${resolvedTenantId}&filter[_and][0][_and][1][yearOfPolicy][_eq]=${currentYear}`,
       {
         headers: {
           Authorization: `Bearer ${authService.getToken()}`,

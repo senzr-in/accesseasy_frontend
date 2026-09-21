@@ -522,7 +522,7 @@ const commitEnrollment = () => {
 };
 
 const promoteUnknown = (unk) => {
-  form.name = 'Promoted Visitor';
+  form.name = 'New Employee';
   form.type = 'employee';
   openEnrollWizard();
 };

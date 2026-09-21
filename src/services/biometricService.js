@@ -8,17 +8,31 @@ const getHeaders = () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
+let inFlightHealthPromise = null;
+let cachedHealth = null;
+let lastHealthFetchTime = 0;
+const CACHE_TTL_MS = 15000;
+
 export const biometricService = {
   /**
    * Get biometric health metrics and device synchronization statistics from live database
    */
-  async getBiometricHealth() {
-    try {
-      const activeTenantId = await currentUserTenant.getTenantIdAsync();
-      const token = authService.getToken();
-      if (!token) {
-        return this.getEmptyHealth();
-      }
+  async getBiometricHealth(forceRefresh = false) {
+    const now = Date.now();
+    if (!forceRefresh && cachedHealth && (now - lastHealthFetchTime < CACHE_TTL_MS)) {
+      return cachedHealth;
+    }
+    if (inFlightHealthPromise) {
+      return inFlightHealthPromise;
+    }
+
+    inFlightHealthPromise = (async () => {
+      try {
+        const activeTenantId = await currentUserTenant.getTenantIdAsync();
+        const token = authService.getToken();
+        if (!token) {
+          return this.getEmptyHealth();
+        }
 
       const tenantParam = activeTenantId ? `filter[tenant][tenantId][_eq]=${activeTenantId}` : '';
 
@@ -80,36 +94,45 @@ export const biometricService = {
       const fingerScore = totalEligible > 0 ? Math.round((fingerEnrolledCount / totalEligible) * 100) : 0;
       const devicesOffline = Math.max(0, totalDevices - devicesOnline);
 
-      return {
-        faceRecognition: {
-          score: faceScore,
-          status: faceScore > 80 ? 'Optimal' : (totalEligible > 0 ? 'Active' : 'No Data'),
-          enrolledCount: faceEnrolledCount,
-          totalEligible
-        },
-        fingerprintDevices: {
-          score: fingerScore,
-          status: fingerScore > 80 ? 'Operational' : (totalEligible > 0 ? 'Active' : 'No Data'),
-          enrolledCount: fingerEnrolledCount,
-          totalEligible
-        },
-        credentialSync: {
-          score: totalDevices > 0 ? Math.round((devicesOnline / totalDevices) * 100) : 100,
-          status: devicesOffline > 0 ? 'Sync Pending' : 'Fully Synced',
-          pendingSync: devicesOffline,
-          syncedCount: devicesOnline,
-          totalDevices
-        },
-        summary: {
-          devicesOnline,
-          devicesOffline,
-          requiresSync: devicesOffline
-        }
-      };
-    } catch (err) {
-      console.error('[biometricService] Error getting biometric health:', err);
-      return this.getEmptyHealth();
-    }
+        const result = {
+          faceRecognition: {
+            score: faceScore,
+            status: faceScore > 80 ? 'Optimal' : (totalEligible > 0 ? 'Active' : 'No Data'),
+            enrolledCount: faceEnrolledCount,
+            totalEligible
+          },
+          fingerprintDevices: {
+            score: fingerScore,
+            status: fingerScore > 80 ? 'Operational' : (totalEligible > 0 ? 'Active' : 'No Data'),
+            enrolledCount: fingerEnrolledCount,
+            totalEligible
+          },
+          credentialSync: {
+            score: totalDevices > 0 ? Math.round((devicesOnline / totalDevices) * 100) : 100,
+            status: devicesOffline > 0 ? 'Sync Pending' : 'Fully Synced',
+            pendingSync: devicesOffline,
+            syncedCount: devicesOnline,
+            totalDevices
+          },
+          summary: {
+            devicesOnline,
+            devicesOffline,
+            requiresSync: devicesOffline
+          }
+        };
+
+        cachedHealth = result;
+        lastHealthFetchTime = Date.now();
+        return result;
+      } catch (err) {
+        console.error('[biometricService] Error getting biometric health:', err);
+        return this.getEmptyHealth();
+      } finally {
+        inFlightHealthPromise = null;
+      }
+    })();
+
+    return inFlightHealthPromise;
   },
 
   getEmptyHealth() {

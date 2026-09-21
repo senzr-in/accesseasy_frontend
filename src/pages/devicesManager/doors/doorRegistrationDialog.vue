@@ -1,22 +1,24 @@
 <template>
-  <div
-    v-if="modelValue"
-    class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-300"
-  >
-    <div class="relative w-full max-w-3xl max-h-[90vh] flex flex-col bg-white dark:bg-zinc-950 rounded-[24px] shadow-2xl shadow-indigo-500/10 border border-white/20 dark:border-zinc-800/80 overflow-hidden transform transition-all animate-in zoom-in-95 duration-300">
+  <Teleport to="body">
+    <div
+      v-if="modelValue"
+      class="fixed inset-0 z-[999] flex items-center justify-center p-4 sm:p-6 bg-slate-900/60 backdrop-blur-md animate-in fade-in duration-300 overflow-y-auto"
+      @click.self="close"
+    >
+      <div class="relative w-full max-w-3xl max-h-[90vh] flex flex-col my-auto bg-white dark:bg-zinc-950 rounded-[24px] shadow-2xl border border-zinc-200 dark:border-zinc-800 overflow-hidden transform transition-all animate-in zoom-in-95 duration-300">
       <!-- Premium Glass Header -->
-      <div class="relative px-8 py-6 flex justify-between items-start bg-gradient-to-b from-slate-50 to-white dark:from-zinc-900 dark:to-zinc-950 border-b border-zinc-100 dark:border-zinc-800/80 z-10">
+      <div class="relative px-6 py-5 sm:px-8 sm:py-6 flex justify-between items-start bg-gradient-to-b from-slate-50 to-white dark:from-zinc-900 dark:to-zinc-950 border-b border-zinc-100 dark:border-zinc-800/80 z-10 shrink-0">
         <div class="absolute inset-0 bg-white/40 dark:bg-zinc-950/40 backdrop-blur-xl" />
         <div class="relative z-10">
           <div class="flex items-center gap-3 mb-1">
             <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center border border-blue-100 dark:border-blue-500/20 shadow-inner">
               <DoorOpen class="w-5 h-5 text-blue-600 dark:text-blue-400" />
             </div>
-            <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
               {{ door ? 'Configure Door' : 'Register Access Point' }}
             </h2>
           </div>
-          <p class="text-[13px] font-medium text-slate-500 dark:text-zinc-400 ml-[52px]">
+          <p class="text-[12px] sm:text-[13px] font-medium text-slate-500 dark:text-zinc-400 ml-[52px]">
             {{ door ? 'Update hardware parameters and access rules' : 'Define a new physical barrier in your security topology' }}
           </p>
         </div>
@@ -29,7 +31,7 @@
       </div>
 
       <!-- Content with custom scrollbar -->
-      <div class="px-8 py-6 overflow-y-auto flex-1 bg-zinc-50/50 dark:bg-zinc-950/80 custom-scrollbar">
+      <div class="px-6 py-5 sm:px-8 sm:py-6 overflow-y-auto flex-1 bg-zinc-50/50 dark:bg-zinc-950/80 custom-scrollbar">
         <form
           id="door-form"
           class="space-y-8"
@@ -62,7 +64,7 @@
                 >
               </div>
               
-              <div class="space-y-1.5">
+              <div class="space-y-1.5 col-span-2">
                 <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Location</label>
                 <input
                   v-model="formData.location"
@@ -70,28 +72,6 @@
                   placeholder="Floor 1, Building A"
                   class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground placeholder:text-zinc-500"
                 >
-              </div>
-              
-              <!-- Controller Dropdown -->
-              <div class="space-y-1.5">
-                <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">
-                  Linked Hardware Controller
-                </label>
-                <select
-                  v-model="formData.deviceUuid"
-                  class="w-full h-9 px-3 rounded-md border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all text-foreground"
-                >
-                  <option value="">
-                    No hardware linked
-                  </option>
-                  <option
-                    v-for="c in controllers"
-                    :key="c.id"
-                    :value="c.sn"
-                  >
-                    {{ c.controllerName }} ({{ c.sn }})
-                  </option>
-                </select>
               </div>
             </div>
           </div>
@@ -181,7 +161,7 @@
             </h4>
             <div class="space-y-1.5 max-w-sm">
               <label class="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Authorized Departments</label>
-              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-60 overflow-y-auto p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-inner">
+              <div v-if="departments.length > 0" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-60 overflow-y-auto p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-inner">
                 <label
                   v-for="dept in departments"
                   :key="dept.id"
@@ -191,16 +171,13 @@
                     v-model="formData.assignedDepts"
                     type="checkbox"
                     :value="dept.id"
-                    class="w-4 h-4 rounded text-blue-600 focus:ring-blue-600 border-zinc-300 dark:border-zinc-700 dark:bg-zinc-900"
+                    class="w-4 h-4 rounded text-blue-600 focus:ring-blue-600 border-zinc-300 dark:border-zinc-700 dark:bg-zinc-900 cursor-pointer"
                   >
                   <span class="text-xs font-semibold text-slate-700 dark:text-zinc-300 truncate">{{ dept.departmentName || dept.name }}</span>
                 </label>
-                <div
-                  v-if="departments.length === 0"
-                  class="col-span-full text-xs text-zinc-400 italic text-center py-4"
-                >
-                  No departments found.
-                </div>
+              </div>
+              <div v-else class="p-3 rounded-xl border border-dashed border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/40 text-xs text-zinc-500 flex items-center justify-between">
+                <span>No specific departments configured (All verified users have access).</span>
               </div>
             </div>
           </div>
@@ -223,7 +200,7 @@
       </div>
 
       <!-- Footer Action Bar -->
-      <div class="relative px-8 py-5 border-t border-zinc-100 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 flex justify-end gap-3 z-10">
+      <div class="relative px-6 py-4 sm:px-8 sm:py-5 border-t border-zinc-100 dark:border-zinc-800/80 bg-white dark:bg-zinc-950 flex justify-end gap-3 z-10 shrink-0">
         <button
           type="button"
           class="px-6 h-10 rounded-xl border border-zinc-200 dark:border-zinc-800 text-[13px] font-bold text-slate-600 dark:text-zinc-300 hover:bg-slate-50 dark:hover:bg-zinc-900 hover:text-slate-900 dark:hover:text-white transition-all duration-200 cursor-pointer"
@@ -246,6 +223,7 @@
       </div>
     </div>
   </div>
+  </Teleport>
 </template>
 
 <script setup>
@@ -257,7 +235,9 @@ import { mqttService } from '@/services/mqttService';
 
 const props = defineProps({
   modelValue: Boolean, // controls v-if
-  door: { type: Object, default: null }
+  door: { type: Object, default: null },
+  defaultDoorNumber: { type: Number, default: 1 },
+  defaultDoorName: { type: String, default: '' }
 });
 
 const emit = defineEmits(['update:modelValue', 'success']);
@@ -323,8 +303,8 @@ watch(() => props.modelValue, (isOpen) => {
     } else {
       // Reset
       formData.value = {
-        doorNumber: 1,
-        doorName: '',
+        doorNumber: props.defaultDoorNumber || 1,
+        doorName: props.defaultDoorName || '',
         location: '',
         deviceUuid: '',
         assignedDepts: [],
@@ -333,12 +313,42 @@ watch(() => props.modelValue, (isOpen) => {
         doorTiming: 5,
         sensorMode: 1
       };
+      fetchNextDoorNumber();
     }
   }
 });
 
 const close = () => {
   emit('update:modelValue', false);
+};
+
+const fetchNextDoorNumber = async () => {
+  try {
+    const token = authService.getToken() || import.meta.env.VITE_API_TOKEN;
+    const tenantId = await currentUserTenant.getTenantIdAsync();
+    const tenantParam = tenantId ? `filter[tenant][_eq]=${tenantId}&` : '';
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/doors?${tenantParam}limit=100&fields[]=doorNumber`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const existing = new Set((data.data || []).map(d => Number(d.doorNumber)).filter(n => !isNaN(n) && n > 0));
+      
+      let candidate = props.defaultDoorNumber && !existing.has(Number(props.defaultDoorNumber))
+        ? Number(props.defaultDoorNumber)
+        : 1;
+
+      while (existing.has(candidate)) {
+        candidate++;
+      }
+      formData.value.doorNumber = candidate;
+      if (!formData.value.doorName || formData.value.doorName.startsWith('Door ')) {
+        formData.value.doorName = `Door ${candidate}`;
+      }
+    }
+  } catch (err) {
+    console.warn("Failed to calculate next door number:", err);
+  }
 };
 
 const fetchDepartments = async () => {

@@ -360,19 +360,19 @@ class ApiService {
     }
 
     // Add fields to fetch, including the nested user details
-    url += `&fields[]=id&fields[]=employeeId&fields[]=assignedUser.first_name&fields[]=assignedDepartment.department_id.id&fields[]=assignedBranch.branch_id.id`;
+    url += `&fields[]=id&fields[]=employeeId&fields[]=assignedUser.first_name&fields[]=department.id&fields[]=branch.id`;
 
     // Add tenant filter
-    url += `&filter[_and][0][_and][0][assignedUser][tenant][tenantId][_eq]=${TENANT_ID}`;
+    url += `&filter[_and][0][_and][0][tenant][_eq]=${TENANT_ID}`;
 
     // Add branch filter if provided
     if (filters && filters.branchId) {
-      url += `&filter[_and][1][branchId][_eq]=${filters.branchId}`;
+      url += `&filter[_and][1][branch][_eq]=${filters.branchId}`;
     }
 
     // Add department filter if provided
     if (filters && filters.departmentId) {
-      url += `&filter[_and][2][departmentId][_eq]=${filters.departmentId}`;
+      url += `&filter[_and][2][department][_eq]=${filters.departmentId}`;
     }
 
     // Debug Log
@@ -385,12 +385,12 @@ class ApiService {
       console.log("✅ [fetchEmployees] Response:", response);
 
       // Transform the data to match the expected format
-      return response.data.map((item) => ({
+      return (response.data || []).map((item) => ({
         id: item.id,
         employeeId: item.employeeId,
         firstName: item.assignedUser?.first_name || "Unknown",
-        departmentId: item.assignedDepartment?.department_id?.id,
-        branchId: item.assignedBranch?.branch_id?.id,
+        departmentId: typeof item.department === 'object' ? item.department?.id : item.department,
+        branchId: typeof item.branch === 'object' ? item.branch?.id : item.branch,
       }));
     } catch (error) {
       console.error("❌ [fetchEmployees] Error fetching employees:", error);
@@ -399,7 +399,7 @@ class ApiService {
   }
 
   static async fetchEmployeeById(employeeId) {
-    const url = `/items/personalModule/${employeeId}?fields[]=id&fields[]=employeeId&fields[]=assignedUser.first_name&fields[]=assignedDepartment.department_id.id&fields[]=assignedBranch.branch_id.id&filter[_and][0][_and][0][assignedUser][tenant][tenantId][_eq]=${TENANT_ID}`;
+    const url = `/items/personalModule/${employeeId}?fields[]=id&fields[]=employeeId&fields[]=assignedUser.first_name&fields[]=department.id&fields[]=branch.id&filter[_and][0][_and][0][tenant][_eq]=${TENANT_ID}`;
 
     // Debug Log
     console.log(`📤 [fetchEmployeeById] URL:`, url);

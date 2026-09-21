@@ -126,7 +126,17 @@ onMounted(async () => {
       if (!isNewUser) {
         statusMessage.value = "Account found! Logging you in...";
       } else {
-        statusMessage.value = "Account created! Finalizing login...";
+        statusMessage.value = "Account created! Setting up initial configurations...";
+        // Call Knative /initial-settings to configure company defaults & send admin notification
+        authService.setupInitialSettings({
+          tenantId: tenantId,
+          email: userEmail,
+          name: currentUserData?.name || currentUserData?.first_name || "",
+          companyName: tenantName,
+          tenantName: tenantName,
+        }).catch((initErr) => {
+          console.warn("[AuthCallback] Failed to initialize tenant defaults:", initErr);
+        });
       }
 
       if (userEmail) {

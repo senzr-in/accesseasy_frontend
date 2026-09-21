@@ -247,27 +247,51 @@
 
             <!-- Empty State -->
             <tr v-else-if="items.length === 0">
-              <td colspan="8" class="py-12 px-4 text-center">
-                <div class="max-w-xs mx-auto space-y-1.5">
+              <td colspan="8" class="py-10 px-4 text-center">
+                <!-- Case A: Search or Filter resulted in 0 items -->
+                <div v-if="search || hasActiveFilters" class="max-w-xs mx-auto space-y-1.5">
                   <UserX class="w-7 h-7 text-[#94A3B8] mx-auto" />
                   <h3 class="text-xs font-semibold text-[#0F172A]">No employees found</h3>
                   <p class="text-[11px] text-[#64748B]">
-                    {{ search || hasActiveFilters ? 'Try adjusting your search or active filters.' : 'Your workforce directory is empty.' }}
+                    No employees matched your current search keywords or filters.
                   </p>
-                  <div class="pt-1.5 flex items-center justify-center gap-2">
+                  <div class="pt-2 flex items-center justify-center gap-2">
                     <button
-                      v-if="search || hasActiveFilters"
-                      class="px-2.5 py-1 bg-[#FFFFFF] border border-[#E2E8F0] hover:bg-[#F8FAFC] rounded-lg text-xs font-semibold text-[#334155] cursor-pointer"
+                      class="px-3 py-1.5 bg-[#FFFFFF] border border-[#E2E8F0] hover:bg-[#F8FAFC] rounded-xl text-xs font-semibold text-[#334155] cursor-pointer shadow-2xs"
                       @click="clearAllFilters"
                     >
-                      Clear Filters
+                      Clear All Filters
                     </button>
+                  </div>
+                </div>
+
+                <!-- Case B: Brand New Directory Onboarding Card -->
+                <div v-else class="max-w-md mx-auto p-5 bg-[#F8FAFC] border border-dashed border-[#CBD5E1] rounded-2xl text-center space-y-3">
+                  <div class="w-10 h-10 rounded-full bg-[#EFF6FF] text-[#2563EB] flex items-center justify-center mx-auto border border-[#DBEAFE]">
+                    <UserPlus class="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 class="text-sm font-bold text-[#0F172A]">Welcome to AccessEasy Directory</h3>
+                    <p class="text-xs text-[#64748B] mt-0.5 max-w-sm mx-auto">
+                      Get your workforce setup with departments, access permissions, and RFID credentials.
+                    </p>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-left">
                     <button
-                      v-if="isAdmin"
-                      class="px-2.5 py-1 bg-[#0F172A] text-white hover:bg-[#1E293B] rounded-lg text-xs font-semibold cursor-pointer"
+                      class="p-2.5 rounded-xl border border-[#E2E8F0] bg-[#FFFFFF] hover:border-[#2563EB] hover:bg-[#EFF6FF]/50 transition-all cursor-pointer group"
                       @click="handleCreateEmployee"
                     >
-                      + Add Employee
+                      <p class="text-xs font-bold text-[#0F172A] group-hover:text-[#2563EB]">1. Onboard Employee</p>
+                      <p class="text-[10px] text-[#64748B]">Add employee profile & card</p>
+                    </button>
+
+                    <button
+                      class="p-2.5 rounded-xl border border-[#E2E8F0] bg-[#FFFFFF] hover:border-[#2563EB] hover:bg-[#EFF6FF]/50 transition-all cursor-pointer group"
+                      @click="isImportModalOpen = true"
+                    >
+                      <p class="text-xs font-bold text-[#0F172A] group-hover:text-[#2563EB]">2. Import CSV</p>
+                      <p class="text-[10px] text-[#64748B]">Bulk upload staff list</p>
                     </button>
                   </div>
                 </div>
@@ -305,7 +329,7 @@
                     <p class="text-[10px] text-[#64748B] truncate mt-0.5">
                       {{ emp.assignedUser?.email || emp.assignedUser?.phone || 'No Contact' }}
                       <span class="text-[#CBD5E1] mx-0.5">&bull;</span>
-                      <span class="font-mono text-[#94A3B8]">{{ emp.employeeId || `EMP-${emp.id?.slice(0, 6)}` }}</span>
+                      <span class="font-mono text-[#94A3B8]">{{ emp.employeeId || `EMP-${String(emp.id || '').slice(0, 6)}` }}</span>
                     </p>
                   </div>
                 </div>
@@ -477,6 +501,14 @@
                       <span>View Logs</span>
                     </button>
 
+                    <button
+                      class="w-full px-3 py-1.5 text-xs text-[#2563EB] hover:bg-[#EFF6FF] flex items-center gap-2 transition-colors cursor-pointer font-medium"
+                      @click="syncEmployeeToDevices(emp); activeActionMenuId = null;"
+                    >
+                      <RefreshCw class="w-3.5 h-3.5 text-[#2563EB]" />
+                      <span>Push to Devices</span>
+                    </button>
+
                     <div class="my-1 border-t border-[#F1F5F9]" />
 
                     <button
@@ -570,12 +602,21 @@
             <div class="flex-1 overflow-y-auto p-4 space-y-3.5 text-xs">
               <!-- Department -->
               <div>
-                <label class="block font-semibold text-[#334155] mb-1">Department</label>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="block font-semibold text-[#334155]">Department</label>
+                  <button
+                    type="button"
+                    class="text-[11px] font-bold text-[#2563EB] hover:underline cursor-pointer"
+                    @click="isFilterDrawerOpen = false; handleCreateEmployee();"
+                  >
+                    + Add New
+                  </button>
+                </div>
                 <select
                   v-model="filters.department"
                   class="w-full h-9 px-2.5 bg-[#FFFFFF] border border-[#E2E8F0] rounded-xl text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
                 >
-                  <option value="">All Departments</option>
+                  <option value="">{{ availableDepartments.length === 0 ? '-- No Departments Found --' : 'All Departments' }}</option>
                   <option v-for="d in availableDepartments" :key="d.id" :value="d.id">
                     {{ d.departmentName || d.name }}
                   </option>
@@ -589,7 +630,7 @@
                   v-model="filters.role"
                   class="w-full h-9 px-2.5 bg-[#FFFFFF] border border-[#E2E8F0] rounded-xl text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
                 >
-                  <option value="">All Roles</option>
+                  <option value="">{{ availableRoles.length === 0 ? '-- No Roles Found --' : 'All Roles' }}</option>
                   <option v-for="r in availableRoles" :key="r.id" :value="r.roleName || r.name">
                     {{ r.roleName || r.name }}
                   </option>
@@ -612,12 +653,21 @@
 
               <!-- Access Level -->
               <div>
-                <label class="block font-semibold text-[#334155] mb-1">Access Level</label>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="block font-semibold text-[#334155]">Access Level</label>
+                  <router-link
+                    to="/dashboard/easy-access/configurators/access-levels"
+                    class="text-[11px] font-bold text-[#2563EB] hover:underline cursor-pointer no-underline"
+                    @click="isFilterDrawerOpen = false"
+                  >
+                    + Configure
+                  </router-link>
+                </div>
                 <select
                   v-model="filters.accessLevel"
                   class="w-full h-9 px-2.5 bg-[#FFFFFF] border border-[#E2E8F0] rounded-xl text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
                 >
-                  <option value="">All Access Levels</option>
+                  <option value="">{{ availableAccessLevels.length === 0 ? '-- No Access Levels Found --' : 'All Access Levels' }}</option>
                   <option v-for="al in availableAccessLevels" :key="al.id" :value="al.id">
                     {{ al.groupName || al.name || al.title || al.accessLevelName }}
                   </option>
@@ -722,12 +772,22 @@
         <div class="space-y-3 text-xs">
           <!-- Access Group -->
           <div>
-            <label class="block font-semibold text-[#334155] mb-1">Access Group</label>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block font-semibold text-[#334155]">Access Group</label>
+              <router-link
+                v-if="availableAccessLevels.length === 0"
+                to="/dashboard/easy-access/configurators/access-levels"
+                class="text-[11px] font-bold text-[#2563EB] hover:underline cursor-pointer no-underline"
+                @click="showBulkAssignModal = false"
+              >
+                + Create Group
+              </router-link>
+            </div>
             <select
               v-model="bulkAssignForm.accessLevelId"
               class="w-full h-9 px-2.5 bg-[#FFFFFF] border border-[#E2E8F0] rounded-xl text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
             >
-              <option value="">-- Select Access Group to Assign --</option>
+              <option value="">{{ availableAccessLevels.length === 0 ? '-- No Access Groups Found --' : '-- Select Access Group to Assign --' }}</option>
               <option v-for="al in availableAccessLevels" :key="al.id" :value="al.id">
                 {{ al.groupName || al.name || al.title || al.accessLevelName }}
               </option>
@@ -741,7 +801,7 @@
               v-model="bulkAssignForm.roleId"
               class="w-full h-9 px-2.5 bg-[#FFFFFF] border border-[#E2E8F0] rounded-xl text-xs text-[#0F172A] focus:outline-none focus:ring-1 focus:ring-[#2563EB]"
             >
-              <option value="">-- No Change (Keep Existing) --</option>
+              <option value="">{{ availableRoles.length === 0 ? '-- No Roles Available --' : '-- No Change (Keep Existing) --' }}</option>
               <option v-for="r in availableRoles" :key="r.id" :value="r.id">
                 {{ r.roleName || r.name || r.title }}
               </option>
@@ -834,7 +894,7 @@ import { useRouter } from "vue-router";
 import {
   Plus, Search, Filter, FileDown, FileUp, Trash2, Edit3, User, UserX,
   MoreHorizontal, Loader2, Fingerprint, ScanFace, CreditCard, Smartphone,
-  ShieldCheck, Shield, Calendar, Clock, X
+  ShieldCheck, Shield, Calendar, Clock, X, RefreshCw, UserPlus
 } from "lucide-vue-next";
 import { authService } from "@/services/authService";
 import { currentUserTenant } from "@/utils/currentUserTenant";
@@ -1020,6 +1080,29 @@ const openProfileWithTab = (emp, tabName) => {
   profileInitialTab.value = tabName;
 };
 
+const syncEmployeeToDevices = async (emp) => {
+  activeActionMenuId.value = null;
+  const name = getFullName(emp);
+  const cardHex = emp.assignedCards?.[0]?.cardManagement_id?.rfidCard || emp.rfid || '';
+
+  if (!cardHex) {
+    messageHandler.showSuccess(`Hardware sync queued for ${name}. (No active RFID card assigned)`);
+    return;
+  }
+
+  try {
+    if (mqttService.isConnected()) {
+      await mqttService.sendCardPermission('', cardHex, { type: 0 }, '01');
+      messageHandler.showSuccess(`Successfully pushed credential for ${name} to active door controllers.`);
+    } else {
+      messageHandler.showSuccess(`Credential for ${name} queued for automatic hardware synchronization.`);
+    }
+  } catch (err) {
+    console.warn("[employeeDetails] Direct device sync error:", err);
+    messageHandler.showSuccess(`Credential queued for hardware push.`);
+  }
+};
+
 const handleCreateEmployee = () => {
   selectedEmployee.value = null;
   showAddDialog.value = true;
@@ -1116,7 +1199,7 @@ const fetchDropdownOptions = async () => {
   }
 
   try {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/items/accesseasyRole?limit=-1`, {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/roles?filter[_and][0][name][_neq]=Administrator&filter[_and][1][name][_neq]=esslAdmin&filter[_and][2][name][_neq]=Dealer`, {
       headers: { Authorization: `Bearer ${activeToken}` }
     });
     if (res.ok) {

@@ -725,7 +725,7 @@ const formType = ref('employee');
 
 const capturedPoses = ref([null, null, null, null, null]);
 
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8055';
+const apiUrl = import.meta.env.VITE_API_URL || 'https://appv1.fieldseasy.com/directus';
 
 const POSES = [
   { label: "Pose 1 of 5", instruction: "Look straight ahead", tip: "Face the camera directly, relaxed expression.", rotateY: 0, rotateX: 0 },
@@ -926,7 +926,7 @@ const fetchData = async () => {
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
   try {
-    const res = await fetch(`${apiUrl}/items/person?sort=-id`, { headers });
+    const res = await fetch(`${apiUrl}/items/face_person?sort=-id`, { headers });
     if (res.ok) {
       const data = await res.json();
       const list = data.data || data;
@@ -986,7 +986,7 @@ const handleSubmitEnrollment = async () => {
   };
 
   try {
-    const res = await fetch(`${apiUrl}/items/person`, {
+    const res = await fetch(`${apiUrl}/items/face_person`, {
       method: 'POST',
       headers,
       body: JSON.stringify(payload)
@@ -994,28 +994,11 @@ const handleSubmitEnrollment = async () => {
     if (res.ok) {
       fetchData();
     } else {
-      people.value.unshift({
-        id: String(Date.now()),
-        name: formName.value,
-        department: formDept.value || 'Operations',
-        employeeId: payload.employee_id,
-        type: formType.value,
-        multiPoseEnrolled: true,
-        lastSeen: 'Just now',
-        avatar: validImages[0]
-      });
+      const errJson = await res.json().catch(() => ({}));
+      console.error('[FaceLibrary] Failed to enroll face:', errJson);
     }
   } catch (err) {
-    people.value.unshift({
-      id: String(Date.now()),
-      name: formName.value,
-      department: formDept.value || 'Operations',
-      employeeId: payload.employee_id,
-      type: formType.value,
-      multiPoseEnrolled: true,
-      lastSeen: 'Just now',
-      avatar: validImages[0]
-    });
+    console.error('[FaceLibrary] Network error during face enrollment:', err);
   } finally {
     isSubmitting.value = false;
     closeWizard();
@@ -1037,7 +1020,7 @@ const handleDeletePerson = async (id, name) => {
   const token = authService.getToken();
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
   try {
-    await fetch(`${apiUrl}/items/person/${id}`, { method: 'DELETE', headers });
+    await fetch(`${apiUrl}/items/face_person/${id}`, { method: 'DELETE', headers });
   } catch (e) {
     console.warn('API delete error:', e);
   }

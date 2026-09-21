@@ -8,26 +8,40 @@ const getHeaders = () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
+let inFlightOverviewPromise = null;
+let cachedOverview = null;
+let lastOverviewFetchTime = 0;
+const CACHE_TTL_MS = 15000;
+
 export const accessService = {
   /**
    * Get overall access control counts from live database
    */
-  async getAccessOverview() {
-    try {
-      const activeTenantId = await currentUserTenant.getTenantIdAsync();
-      const token = authService.getToken();
-      if (!token) {
-        return {
-          granted: 0,
-          denied: 0,
-          suspicious: 0,
-          equipment: {
-            doors: { online: 0, offline: 0, total: 0 },
-            turnstiles: { online: 0, offline: 0, total: 0 },
-            controllers: { online: 0, offline: 0, total: 0 }
-          }
-        };
-      }
+  async getAccessOverview(forceRefresh = false) {
+    const now = Date.now();
+    if (!forceRefresh && cachedOverview && (now - lastOverviewFetchTime < CACHE_TTL_MS)) {
+      return cachedOverview;
+    }
+    if (inFlightOverviewPromise) {
+      return inFlightOverviewPromise;
+    }
+
+    inFlightOverviewPromise = (async () => {
+      try {
+        const activeTenantId = await currentUserTenant.getTenantIdAsync();
+        const token = authService.getToken();
+        if (!token) {
+          return {
+            granted: 0,
+            denied: 0,
+            suspicious: 0,
+            equipment: {
+              doors: { online: 0, offline: 0, total: 0 },
+              turnstiles: { online: 0, offline: 0, total: 0 },
+              controllers: { online: 0, offline: 0, total: 0 }
+            }
+          };
+        }
 
       const tenantParam = activeTenantId ? `filter[tenant][tenantId][_eq]=${activeTenantId}` : '';
 
@@ -99,29 +113,38 @@ export const accessService = {
         console.warn('[accessService] error loading access events:', e);
       }
 
-      return {
-        granted: grantedCount,
-        denied: deniedCount,
-        suspicious: 0,
-        equipment: {
-          doors: { online: totalDoors, offline: 0, total: totalDoors },
-          turnstiles: { online: 0, offline: 0, total: 0 },
-          controllers: { online: onlineControllers, offline: Math.max(0, totalControllers - onlineControllers), total: totalControllers }
-        }
-      };
-    } catch (err) {
-      console.error('[accessService] Error getting access overview:', err);
-      return {
-        granted: 0,
-        denied: 0,
-        suspicious: 0,
-        equipment: {
-          doors: { online: 0, offline: 0, total: 0 },
-          turnstiles: { online: 0, offline: 0, total: 0 },
-          controllers: { online: 0, offline: 0, total: 0 }
-        }
-      };
-    }
+        const result = {
+          granted: grantedCount,
+          denied: deniedCount,
+          suspicious: 0,
+          equipment: {
+            doors: { online: totalDoors, offline: 0, total: totalDoors },
+            turnstiles: { online: 0, offline: 0, total: 0 },
+            controllers: { online: onlineControllers, offline: Math.max(0, totalControllers - onlineControllers), total: totalControllers }
+          }
+        };
+
+        cachedOverview = result;
+        lastOverviewFetchTime = Date.now();
+        return result;
+      } catch (err) {
+        console.error('[accessService] Error getting access overview:', err);
+        return {
+          granted: 0,
+          denied: 0,
+          suspicious: 0,
+          equipment: {
+            doors: { online: 0, offline: 0, total: 0 },
+            turnstiles: { online: 0, offline: 0, total: 0 },
+            controllers: { online: 0, offline: 0, total: 0 }
+          }
+        };
+      } finally {
+        inFlightOverviewPromise = null;
+      }
+    })();
+
+    return inFlightOverviewPromise;
   },
 
   /**

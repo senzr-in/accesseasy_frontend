@@ -539,7 +539,7 @@ const buildPersonalModuleUrl = () => {
     console.error("buildPersonalModuleUrl: tenantId is null or undefined");
     return null;
   }
-  let url = `${import.meta.env.VITE_API_URL}/items/personalModule?filter[_and][0][assignedUser][tenant][tenantId][_eq]=${tenantId.value}&filter[_and][1][status][_neq]=archived&limit=-1`;
+  let url = `${import.meta.env.VITE_API_URL}/items/personalModule?filter[_and][0][tenant][_eq]=${tenantId.value}&filter[_and][1][status][_neq]=archived&limit=-1`;
   let filterIndex = 2;
 
   // Add approver filter for Manager role

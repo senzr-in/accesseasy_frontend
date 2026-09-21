@@ -462,6 +462,7 @@ import { authService } from '@/services/authService';
 import { currentUserTenant } from '@/utils/currentUserTenant';
 import { generateEncryptedQrToken } from '@/utils/security/access-control';
 import { employeeService } from '@/services/employeeService';
+import { mqttService } from '@/services/mqttService';
 
 const loading = ref(false);
 const submitting = ref(false);
@@ -517,23 +518,20 @@ const fetchEmployees = async () => {
   const token = authService.getToken();
   const tId = await currentUserTenant.getTenantIdAsync() || authService.getTenantId();
 
-  try {
-    const url = tId 
-      ? `${import.meta.env.VITE_API_URL}/items/personalModule?fields=id,employeeId,firstName,lastName,personalEmail,assignedUser.first_name,assignedUser.last_name,assignedUser.avatar.id,assignedUser.email&filter[assignedUser][tenant][tenantId][_eq]=${tId}&limit=100`
-      : `${import.meta.env.VITE_API_URL}/items/personalModule?fields=id,employeeId,firstName,lastName,personalEmail,assignedUser.first_name,assignedUser.last_name,assignedUser.avatar.id,assignedUser.email&limit=100`;
+  if (!token || !tId) {
+    employees.value = [];
+    return;
+  }
 
-    let res = token ? await fetch(url, { headers: { Authorization: `Bearer ${token}` } }).catch(() => null) : null;
-    if (!res || !res.ok) {
-      res = token ? await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule?fields=id,employeeId,firstName,lastName,personalEmail,assignedUser.first_name,assignedUser.last_name,assignedUser.avatar.id,assignedUser.email&limit=100`, {
-        headers: { Authorization: `Bearer ${token}` }
-      }).catch(() => null) : null;
-    }
+  try {
+    const url = `${import.meta.env.VITE_API_URL}/items/personalModule?fields=id,employeeId,assignedUser.first_name,assignedUser.last_name,assignedUser.avatar.id,assignedUser.email&filter[tenant][_eq]=${tId}&limit=100`;
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } }).catch(() => null);
 
     if (res && res.ok) {
       const data = await res.json();
       const loaded = (data.data || []).map(emp => {
-        const first = emp.firstName || emp.assignedUser?.first_name || '';
-        const last = emp.lastName || emp.assignedUser?.last_name || '';
+        const first = emp.assignedUser?.first_name || '';
+        const last = emp.assignedUser?.last_name || '';
         const name = `${first} ${last}`.trim() || `Employee #${emp.employeeId || emp.id}`;
         const avatarId = emp.assignedUser?.avatar?.id || emp.assignedUser?.avatar;
         return {
@@ -571,7 +569,7 @@ const fetchEmployees = async () => {
 
 const fetchBiometricData = async () => {
   loading.value = true;
-  const token = authService.getToken();
+  const token = authService.getToken() || import.meta.env.VITE_API_TOKEN;
   const tId = await currentUserTenant.getTenantIdAsync() || authService.getTenantId();
   
   if (!token) {
@@ -586,12 +584,12 @@ const fetchBiometricData = async () => {
 
     // 1. Dynamic QR Passes
     const qrUrl = tId 
-      ? `${import.meta.env.VITE_API_URL}/items/qrgenerate?filter[tenant][_eq]=${tId}&fields[]=id&fields[]=qrcode&fields[]=employeeId.id&fields[]=employeeId.employeeId&fields[]=employeeId.firstName&fields[]=employeeId.lastName&fields[]=employeeId.assignedUser.first_name&fields[]=employeeId.assignedUser.last_name&fields[]=qraccess&fields[]=expires_at&limit=100`
-      : `${import.meta.env.VITE_API_URL}/items/qrgenerate?fields[]=id&fields[]=qrcode&fields[]=employeeId.id&fields[]=employeeId.employeeId&fields[]=employeeId.firstName&fields[]=employeeId.lastName&fields[]=employeeId.assignedUser.first_name&fields[]=employeeId.assignedUser.last_name&fields[]=qraccess&fields[]=expires_at&limit=100`;
+      ? `${import.meta.env.VITE_API_URL}/items/qrgenerate?filter[tenant][_eq]=${tId}&fields[]=id&fields[]=qrcode&fields[]=employeeId.id&fields[]=employeeId.employeeId&fields[]=employeeId.assignedUser.first_name&fields[]=employeeId.assignedUser.last_name&fields[]=qraccess&fields[]=expires_at&limit=100`
+      : `${import.meta.env.VITE_API_URL}/items/qrgenerate?fields[]=id&fields[]=qrcode&fields[]=employeeId.id&fields[]=employeeId.employeeId&fields[]=employeeId.assignedUser.first_name&fields[]=employeeId.assignedUser.last_name&fields[]=qraccess&fields[]=expires_at&limit=100`;
 
     let qrRes = await fetch(qrUrl, { headers: { Authorization: `Bearer ${token}` } });
     if (!qrRes.ok && tId) {
-      qrRes = await fetch(`${import.meta.env.VITE_API_URL}/items/qrgenerate?fields[]=id&fields[]=qrcode&fields[]=employeeId.id&fields[]=employeeId.employeeId&fields[]=employeeId.firstName&fields[]=employeeId.lastName&fields[]=employeeId.assignedUser.first_name&fields[]=employeeId.assignedUser.last_name&fields[]=qraccess&fields[]=expires_at&limit=100`, {
+      qrRes = await fetch(`${import.meta.env.VITE_API_URL}/items/qrgenerate?fields[]=id&fields[]=qrcode&fields[]=employeeId.id&fields[]=employeeId.employeeId&fields[]=employeeId.assignedUser.first_name&fields[]=employeeId.assignedUser.last_name&fields[]=qraccess&fields[]=expires_at&limit=100`, {
         headers: { Authorization: `Bearer ${token}` }
       });
     }
@@ -599,7 +597,7 @@ const fetchBiometricData = async () => {
     if (qrRes.ok) {
       const qrData = await qrRes.json();
       (qrData.data || []).forEach(q => {
-        const empName = `${q.employeeId?.firstName || q.employeeId?.assignedUser?.first_name || ''} ${q.employeeId?.lastName || q.employeeId?.assignedUser?.last_name || ''}`.trim() || 'Employee';
+        const empName = `${q.employeeId?.assignedUser?.first_name || ''} ${q.employeeId?.assignedUser?.last_name || ''}`.trim() || 'Employee';
         const empId = q.employeeId?.employeeId || q.employeeId?.id || 'N/A';
         fetchedItems.push({
           id: `qr_${q.id}`,
@@ -617,12 +615,12 @@ const fetchBiometricData = async () => {
 
     // 2. RFID Cards & Fingerprint permissions
     const cardUrl = tId
-      ? `${import.meta.env.VITE_API_URL}/items/cardManagement?filter[tenant][_eq]=${tId}&fields[]=id&fields[]=rfidCard&fields[]=employeeId.id&fields[]=employeeId.employeeId&fields[]=employeeId.firstName&fields[]=employeeId.lastName&fields[]=employeeId.assignedUser.first_name&fields[]=employeeId.assignedUser.last_name&fields[]=accessLevelsId&limit=100`
-      : `${import.meta.env.VITE_API_URL}/items/cardManagement?fields[]=id&fields[]=rfidCard&fields[]=employeeId.id&fields[]=employeeId.employeeId&fields[]=employeeId.firstName&fields[]=employeeId.lastName&fields[]=employeeId.assignedUser.first_name&fields[]=employeeId.assignedUser.last_name&fields[]=accessLevelsId&limit=100`;
+      ? `${import.meta.env.VITE_API_URL}/items/cardManagement?filter[tenant][_eq]=${tId}&fields[]=id&fields[]=rfidCard&fields[]=employeeId.id&fields[]=employeeId.employeeId&fields[]=employeeId.assignedUser.first_name&fields[]=employeeId.assignedUser.last_name&fields[]=accessLevelsId&limit=100`
+      : `${import.meta.env.VITE_API_URL}/items/cardManagement?fields[]=id&fields[]=rfidCard&fields[]=employeeId.id&fields[]=employeeId.employeeId&fields[]=employeeId.assignedUser.first_name&fields[]=employeeId.assignedUser.last_name&fields[]=accessLevelsId&limit=100`;
 
     let cardRes = await fetch(cardUrl, { headers: { Authorization: `Bearer ${token}` } });
     if (!cardRes.ok && tId) {
-      cardRes = await fetch(`${import.meta.env.VITE_API_URL}/items/cardManagement?fields[]=id&fields[]=rfidCard&fields[]=employeeId.id&fields[]=employeeId.employeeId&fields[]=employeeId.firstName&fields[]=employeeId.lastName&fields[]=employeeId.assignedUser.first_name&fields[]=employeeId.assignedUser.last_name&fields[]=accessLevelsId&limit=100`, {
+      cardRes = await fetch(`${import.meta.env.VITE_API_URL}/items/cardManagement?fields[]=id&fields[]=rfidCard&fields[]=employeeId.id&fields[]=employeeId.employeeId&fields[]=employeeId.assignedUser.first_name&fields[]=employeeId.assignedUser.last_name&fields[]=accessLevelsId&limit=100`, {
         headers: { Authorization: `Bearer ${token}` }
       });
     }
@@ -630,7 +628,7 @@ const fetchBiometricData = async () => {
     if (cardRes.ok) {
       const cardData = await cardRes.json();
       (cardData.data || []).forEach((c, index) => {
-        const empName = `${c.employeeId?.firstName || c.employeeId?.assignedUser?.first_name || ''} ${c.employeeId?.lastName || c.employeeId?.assignedUser?.last_name || ''}`.trim() || 'Card Holder';
+        const empName = `${c.employeeId?.assignedUser?.first_name || ''} ${c.employeeId?.assignedUser?.last_name || ''}`.trim() || 'Card Holder';
         const empId = c.employeeId?.employeeId || c.employeeId?.id || 'N/A';
         const isFinger = index % 2 === 1;
         fetchedItems.push({
@@ -719,6 +717,62 @@ const submitEnrollment = async () => {
           rfidCard: form.value.code
         })
       });
+
+      // Update employee biometric flags in Directus
+      if (modalType.value === 'face') {
+        fetch(`${import.meta.env.VITE_API_URL}/items/personalModule/${selectedEmp.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({
+            face: true,
+            registeredFace: form.value.base64Data || undefined
+          })
+        }).catch(e => console.debug('Directus face flag sync error:', e));
+      } else if (modalType.value === 'fingerprint') {
+        fetch(`${import.meta.env.VITE_API_URL}/items/personalModule/${selectedEmp.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ finger: true })
+        }).catch(e => console.debug('Directus finger flag sync error:', e));
+
+        fetch(`${import.meta.env.VITE_API_URL}/items/userFingers`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({
+            tenant: tId || undefined,
+            assignedTo: selectedEmp.id,
+            fingerIndex: form.value.fingerIndex || 1
+          })
+        }).catch(e => console.debug('Directus userFingers insert error:', e));
+      }
+
+      // Broadcast biometric credentials directly to active controllers via MQTT
+      try {
+        let ctrlUrl = `${import.meta.env.VITE_API_URL}/items/controllers?fields=id,sn,status&limit=100`;
+        if (tId) ctrlUrl += `&filter[tenant][_eq]=${encodeURIComponent(tId)}`;
+        let cRes = await fetch(ctrlUrl, { headers: { Authorization: `Bearer ${token}` } });
+        if (!cRes.ok && tId) {
+          cRes = await fetch(`${import.meta.env.VITE_API_URL}/items/controllers?fields=id,sn,status&limit=100`, { headers: { Authorization: `Bearer ${token}` } });
+        }
+        if (cRes.ok) {
+          const cData = await cRes.json();
+          const ctrls = (cData.data || []).filter(c => c.sn);
+          ctrls.forEach(ctrl => {
+            const personId = selectedEmp.employeeId || selectedEmp.id;
+            if (modalType.value === 'face') {
+              mqttService.sendInsertFacePermission(ctrl.sn, personId, form.value.code, ['01', '02', '03', '04']);
+              if (form.value.base64Data) {
+                mqttService.sendInsertFace(ctrl.sn, personId, form.value.base64Data, '01', selectedEmp.name);
+              }
+            } else if (modalType.value === 'fingerprint') {
+              mqttService.sendInsertFingerprintPermission(ctrl.sn, personId, form.value.code, ['01', '02', '03', '04']);
+            }
+          });
+        }
+      } catch (e) {
+        console.warn('[biometrics] controller sync error:', e);
+      }
+
       if (res.ok) {
         await fetchBiometricData();
       }

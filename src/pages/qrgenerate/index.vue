@@ -150,7 +150,10 @@
               <QrCode class="w-32 h-32 text-slate-900 dark:text-slate-100" />
             </div>
             <div class="flex gap-2 w-full">
-              <button class="flex-1 h-8 inline-flex items-center justify-center rounded-md border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800/80 dark:bg-slate-950 dark:hover:bg-slate-800 transition-colors">
+              <button 
+                class="flex-1 h-8 inline-flex items-center justify-center rounded-md border border-slate-200 dark:border-slate-800 text-xs font-medium text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors"
+                @click="shareToken"
+              >
                 <Share2 class="w-3 h-3 mr-1" /> Share
               </button>
               <button
@@ -263,27 +266,40 @@ const selectedAccessLevelId = ref("");
 const validity = ref("60");
 const currentQR = ref(null);
 
+const shareToken = async () => {
+  if (!currentQR.value) return;
+  const text = `Access QR Token: ${currentQR.value.token || currentQR.value.id || 'Active Pass'}`;
+  try {
+    if (navigator.share) {
+      await navigator.share({ title: 'Access Token', text });
+      return;
+    }
+  } catch (_) {}
+  await navigator.clipboard.writeText(text);
+  alert('Access token copied to clipboard!');
+};
+
 const fetchData = async () => {
   loading.value = true;
   try {
     const tenantId = authService.getTenantId();
-    const token = authService.getToken();
+    const token = authService.getToken() || import.meta.env.VITE_API_TOKEN;
     
     // Fetch Employees
-    const empRes = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule?fields=id,employeeId,firstName,lastName,personalEmail,assignedUser.first_name,assignedUser.last_name,assignedUser.email&filter[assignedUser][tenant][tenantId][_eq]=${tenantId}&limit=-1`, {
+    const empRes = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule?fields=id,employeeId,assignedUser.first_name,assignedUser.last_name,assignedUser.email&filter[tenant][_eq]=${tenantId}&limit=-1`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     if (empRes.ok) {
       const data = await empRes.json();
       employees.value = data.data.map(e => ({
         id: e.id,
-        name: `${e.firstName || e.assignedUser?.first_name || "Unknown"} ${e.lastName || e.assignedUser?.last_name || ""}`,
-        email: e.personalEmail || e.assignedUser?.email || "N/A"
+        name: `${e.assignedUser?.first_name || "Unknown"} ${e.assignedUser?.last_name || ""}`.trim(),
+        email: e.assignedUser?.email || "N/A"
       }));
     }
 
     // Fetch Access Levels
-    const alRes = await fetch(`${import.meta.env.VITE_API_URL}/items/accesslevels?fields=id,accessLevelName&filter[tenant][tenantId][_eq]=${tenantId}&limit=-1`, {
+    const alRes = await fetch(`${import.meta.env.VITE_API_URL}/items/accesslevels?fields=id,accessLevelName&filter[tenant][_eq]=${tenantId}&limit=-1`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     if (alRes.ok) {
@@ -295,14 +311,14 @@ const fetchData = async () => {
     }
 
     // Fetch QR History
-    const qrRes = await fetch(`${import.meta.env.VITE_API_URL}/items/qrgenerate?fields=id,qrcode,qraccess,date_created,employeeId.firstName,employeeId.lastName,employeeId.assignedUser.first_name,employeeId.assignedUser.last_name&filter[tenant][_eq]=${tenantId}&limit=20&sort=-date_created`, {
+    const qrRes = await fetch(`${import.meta.env.VITE_API_URL}/items/qrgenerate?fields=id,qrcode,qraccess,date_created,employeeId.assignedUser.first_name,employeeId.assignedUser.last_name&filter[tenant][_eq]=${tenantId}&limit=20&sort=-date_created`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     if (qrRes.ok) {
       const data = await qrRes.json();
       history.value = data.data.map(q => ({
         id: q.id,
-        employee: { name: `${q.employeeId?.firstName || q.employeeId?.assignedUser?.first_name || "Unknown"} ${q.employeeId?.lastName || q.employeeId?.assignedUser?.last_name || ""}` },
+        employee: { name: `${q.employeeId?.assignedUser?.first_name || "Unknown"} ${q.employeeId?.assignedUser?.last_name || ""}`.trim() },
         timestamp: q.date_created,
         // Using a mock expiry of 24h as API field might vary
         expiresAt: new Date(new Date(q.date_created).getTime() + 86400000).toISOString()

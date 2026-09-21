@@ -27,22 +27,6 @@
 
       <!-- Action Buttons -->
       <button
-        class="btn-secondary"
-        @click="$emit('open-register-device')"
-      >
-        <HardDrive class="w-3.5 h-3.5 text-[#64748B]" />
-        Register Device
-      </button>
-
-      <button
-        class="btn-secondary"
-        @click="$emit('open-import')"
-      >
-        <Upload class="w-3.5 h-3.5 text-[#64748B]" />
-        Import
-      </button>
-
-      <button
         class="btn-primary"
         @click="$emit('open-add-employee')"
       >
@@ -55,10 +39,10 @@
 
 <script setup>
 import { computed } from 'vue';
-import { Calendar, Plus, Upload, HardDrive } from 'lucide-vue-next';
+import { Calendar, Plus } from 'lucide-vue-next';
 import { authService } from '@/services/authService';
 
-defineEmits(['open-add-employee', 'open-import', 'open-register-device']);
+defineEmits(['open-add-employee']);
 
 const userData = authService.getUserData();
 const userName = computed(() => {

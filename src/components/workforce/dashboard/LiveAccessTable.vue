@@ -83,12 +83,21 @@
 
             <!-- Result -->
             <td class="py-3.5 px-3 text-right">
-              <span
-                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border"
-                :class="ev.result === 'Granted' ? 'bg-[#ECFDF5] text-[#059669] border-[#A7F3D0]' : 'bg-[#FEF2F2] text-[#DC2626] border-[#FECACA]'"
-              >
-                {{ ev.result }}
-              </span>
+              <div class="inline-flex flex-col items-end gap-1">
+                <span
+                  class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border"
+                  :class="ev.result === 'Granted' ? 'bg-[#ECFDF5] text-[#059669] border-[#A7F3D0]' : 'bg-[#FEF2F2] text-[#DC2626] border-[#FECACA]'"
+                >
+                  {{ ev.result }}
+                </span>
+                <span
+                  v-if="ev.result === 'Denied' && ev.reason"
+                  class="text-[9px] font-medium text-[#DC2626] max-w-[130px] truncate leading-tight"
+                  :title="ev.reason"
+                >
+                  {{ ev.reason }}
+                </span>
+              </div>
             </td>
           </tr>
 

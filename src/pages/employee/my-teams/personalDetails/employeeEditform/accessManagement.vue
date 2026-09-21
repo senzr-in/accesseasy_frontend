@@ -524,7 +524,7 @@
                   </div>
                   <div class="header-text">
                     <h3>Mobile QR</h3>
-                    <p>Temporary visitor access</p>
+                    <p>Dynamic QR access pass</p>
                   </div>
                 </div>
                 <v-switch

@@ -4,7 +4,7 @@
     <div class="flex items-center justify-between mb-4">
       <button 
         class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-slate-200 dark:border-zinc-800 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:text-slate-200 bg-white dark:bg-zinc-950 font-black text-[10px] uppercase tracking-widest active:scale-95 shadow-sm cursor-pointer"
-        @click="$router.push('/dashboard/visitors')"
+        @click="$router.push('/dashboard')"
       >
         <ArrowLeft class="w-3.5 h-3.5" /> Back to Console
       </button>
@@ -240,8 +240,6 @@ const handleCodeDecoded = async (qrString) => {
     if (parsedQr.type === 'EMPLOYEE' && parsedQr.token) {
         queryToken = parsedQr.token;
         embeddedName = parsedQr.name || '';
-    } else if (parsedQr.type === 'VISITOR') {
-        embeddedName = parsedQr.name || 'Visitor';
     }
   } catch(e) {}
 
@@ -359,76 +357,10 @@ const handleCodeDecoded = async (qrString) => {
            await postVerificationLog('authorized', empIdFallback, actionType);
          }
       } else {
-         // ── VISITOR QR FALLBACK ──
-         // The scanned QR may be a Visitor QR issued by visitor-portal-flow.
-         // Those QRs encode a JSON payload: { type: 'VISITOR', visitorId, name, expiresAt, ... }
-         // The employee qrgenerate lookup failed, so try parsing the scanned string as visitor JSON.
-         console.log('VIS-01: No employee QR match — attempting visitor QR parse...');
-         let visitorQrData = null;
-         try {
-           visitorQrData = JSON.parse(qrString);
-         } catch (_) {
-           // Not a JSON payload — definitely not a visitor QR
-         }
-
-         if (visitorQrData && visitorQrData.type === 'VISITOR' && visitorQrData.visitorId) {
-           try {
-             // Check QR expiry embedded in the token itself (fast client-side check)
-             if (visitorQrData.expiresAt && new Date(visitorQrData.expiresAt) < new Date()) {
-               console.warn('VIS-01: Visitor QR has expired.');
-               authResult.value = 'failed';
-               await postVerificationLog('unAuthorized', null);
-             } else {
-               // Route through visitor-portal-flow backend (/guardians/scan)
-               // This uses the admin Directus token (avoids 403) and handles Entry/Exit toggle
-               const scanRes = await authService.knApi.post(
-                 '/visitor-portal-flow/guardians/scan',
-                 { qrToken: qrString, tenant: tenantId },
-                 { signal: abortController.signal }
-               );
-               const scanData = scanRes.data;
-               console.log('VIS-01: Backend scan response:', scanData);
-
-               if (scanRes.status === 200 && (scanData.status === 'ACCESS_GRANTED' || scanData.status === 'EXIT_RECORDED')) {
-                 const isEntry = scanData.status === 'ACCESS_GRANTED';
-                 const finalName = scanData.visitor?.name || visitorQrData?.name || 'Visitor';
-                 console.log(`VIS-01: Visitor ${isEntry ? 'Entry' : 'Exit'} recorded:`, finalName);
-                 scannedEmployee.value = {
-                   first_name: `${finalName} (Visitor)`,
-                   last_name: isEntry ? '(Entry)' : '(Exit)'
-                 };
-                 accessData.value = scanData;
-                 authResult.value = 'success';
-                 
-                 // Update visitor status directly in database so the Dashboard sees the Check-in
-                 try {
-                   await authService.protectedApi.patch(`/items/visitor/${visitorQrData.visitorId}`, { 
-                     status: isEntry ? 'active' : 'inactive',
-                     ...(isEntry && { startTime: new Date().toLocaleTimeString('en-GB') })
-                   });
-                 } catch (patchErr) {
-                   console.error('VIS-01: Failed to update visitor status:', patchErr);
-                 }
-
-                 await postVerificationLog('authorized', null, isEntry ? 'in' : 'out', `${finalName} (Visitor)`);
-               } else {
-                 // DENIED or error from backend
-                 const reason = scanData.reason || scanData.message || 'Access Denied';
-                 console.warn('VIS-01: Visitor scan denied by backend:', reason);
-                 authResult.value = 'failed';
-                 await postVerificationLog('unAuthorized', null);
-               }
-             }
-           } catch(visErr) {
-             console.warn('VIS-01: Visitor QR validation error:', visErr);
-             authResult.value = 'failed';
-             await postVerificationLog('unAuthorized', null);
-           }
-         } else {
-           // Not a visitor QR either — deny
-           authResult.value = 'failed';
-           await postVerificationLog('unAuthorized', match?.employeeId?.id || null);
-         }
+        // No employee QR match — deny
+        console.warn('AUTH: No valid employee QR match found.');
+        authResult.value = 'failed';
+        await postVerificationLog('unAuthorized', null);
       }
     } else {
       authResult.value = 'failed';

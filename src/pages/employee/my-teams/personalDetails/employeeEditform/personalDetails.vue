@@ -1452,7 +1452,7 @@ const fetchVerifiedGovernmentData = async () => {
     const queryString = `fields[]=${fields.join("&fields[]=")}&filter[employee][_eq]=${props.id}`;
 
     const response = await fetch(
-      `${import.meta.env.VITE_API_URL}/items/verifiedGovernmentData?${queryString}`,
+      `${import.meta.env.VITE_API_URL}/items/bgVerification?${queryString}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,

@@ -128,33 +128,34 @@ const performSearch = async () => {
 
   const q = query.value.trim();
   const activeTenantId = await currentUserTenant.getTenantIdAsync();
-  const token = authService.getToken();
+  const token = authService.getToken() || import.meta.env.VITE_API_TOKEN;
   if (!token) return;
 
-  const tenantParam = activeTenantId ? `filter[tenant][tenantId][_eq]=${activeTenantId}&` : '';
+  const tenantParam = activeTenantId ? `filter[tenant][_eq]=${activeTenantId}&` : '';
   const results = [];
 
   try {
     // 1. Search employees
-    const empRes = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule?${tenantParam}filter[_or][0][firstName][_icontains]=${q}&filter[_or][1][lastName][_icontains]=${q}&filter[_or][2][employeeId][_icontains]=${q}&limit=5&fields=id,employeeId,firstName,lastName,department.departmentName`, {
+    const empRes = await fetch(`${import.meta.env.VITE_API_URL}/items/personalModule?${tenantParam}filter[_or][0][assignedUser][first_name][_icontains]=${encodeURIComponent(q)}&filter[_or][1][assignedUser][last_name][_icontains]=${encodeURIComponent(q)}&filter[_or][2][employeeId][_icontains]=${encodeURIComponent(q)}&limit=5&fields=id,employeeId,assignedUser.first_name,assignedUser.last_name,department.departmentName`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     if (empRes.ok) {
       const empData = await empRes.json();
       (empData.data || []).forEach(e => {
+        const fullName = `${e.assignedUser?.first_name || ''} ${e.assignedUser?.last_name || ''}`.trim();
         results.push({
           id: `emp-${e.id}`,
-          title: `${e.firstName || ''} ${e.lastName || ''}`.trim() || e.employeeId || 'Employee',
-          subtitle: `${e.employeeId || ''} • ${e.department?.departmentName || 'Operations'}`,
+          title: fullName || e.employeeId || 'Employee',
+          subtitle: `${e.employeeId || ''} • ${e.department?.departmentName || 'General'}`,
           category: 'Employees',
           icon: Users,
-          path: `/dashboard/easy-access/employees?search=${encodeURIComponent(e.firstName || e.employeeId || '')}`
+          path: `/employee/my-teams?search=${encodeURIComponent(fullName || e.employeeId || '')}`
         });
       });
     }
 
     // 2. Search doors
-    const doorRes = await fetch(`${import.meta.env.VITE_API_URL}/items/doors?${tenantParam}filter[doorName][_icontains]=${q}&limit=5&fields=id,doorName,doorNumber`, {
+    const doorRes = await fetch(`${import.meta.env.VITE_API_URL}/items/doors?${tenantParam}filter[doorName][_icontains]=${encodeURIComponent(q)}&limit=5&fields=id,doorName,doorNumber`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     if (doorRes.ok) {
@@ -166,13 +167,13 @@ const performSearch = async () => {
           subtitle: `Door #${d.doorNumber || '—'}`,
           category: 'Doors',
           icon: DoorClosed,
-          path: '/dashboard/access-control/doors'
+          path: '/devicesManager/doors'
         });
       });
     }
 
     // 3. Search controllers
-    const ctrlRes = await fetch(`${import.meta.env.VITE_API_URL}/items/controllers?${tenantParam}filter[name][_icontains]=${q}&limit=5&fields=id,name,sn,ip`, {
+    const ctrlRes = await fetch(`${import.meta.env.VITE_API_URL}/items/controllers?${tenantParam}filter[_or][0][controllerName][_icontains]=${encodeURIComponent(q)}&filter[_or][1][sn][_icontains]=${encodeURIComponent(q)}&limit=5&fields=id,controllerName,sn,controllerIP,ip_address`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     if (ctrlRes.ok) {
@@ -180,11 +181,11 @@ const performSearch = async () => {
       (ctrlData.data || []).forEach(c => {
         results.push({
           id: `ctrl-${c.id}`,
-          title: c.name || `Controller ${c.sn}`,
-          subtitle: `${c.ip || '—'} • SN: ${c.sn || '—'}`,
+          title: c.controllerName || `Controller ${c.sn}`,
+          subtitle: `${c.controllerIP || c.ip_address || '—'} • SN: ${c.sn || '—'}`,
           category: 'Devices',
           icon: Server,
-          path: '/dashboard/settings/devices'
+          path: '/devicesManager'
         });
       });
     }
