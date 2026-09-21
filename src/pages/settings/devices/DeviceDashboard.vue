@@ -306,8 +306,7 @@
           <div class="p-3 bg-white rounded-2xl border border-slate-200 inline-block shadow-inner mb-4">
             <qrcode-vue
               :value="pairingQrPayload"
-              :size="190"
-              level="H"
+              :size="220" level="M"
               class="rounded-lg"
             />
           </div>
@@ -416,12 +415,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { Smartphone, Plus, RefreshCw, X, QrCode, Copy, Check, Lock, Unlock, ArrowLeft } from 'lucide-vue-next';
 import QrcodeVue from 'qrcode.vue';
 import { deviceService } from '@/services/deviceService';
 import { siteService } from '@/services/siteService';
+import { attendanceService } from '@/services/attendanceService';
 import { authService } from '@/services/authService';
 import FeatureGate from '@/components/common/FeatureGate.vue';
 
@@ -475,30 +475,18 @@ const pairingQrPayload = computed(() => {
 
   return JSON.stringify({
     type: 'device_pairing',
-    version: '1.0',
-    tenant: tenantId,
-    tenant_id: tenantId,
-    tenantId: tenantId,
-    device_id: deviceId,
-    deviceId: deviceId,
-    device_name: deviceName,
-    deviceName: deviceName,
+    tenant_id: String(tenantId),
+    device_id: String(deviceId),
+    device_name: String(deviceName),
     site_id: String(siteId),
-    siteId: String(siteId),
-    site_name: siteName,
-    siteName: siteName,
-    zone_id: activePairingDevice.value.zone_id || activePairingDevice.value.zoneId || '',
-    zoneId: activePairingDevice.value.zone_id || activePairingDevice.value.zoneId || '',
-    token: activePairingDevice.value.pairing_token || activePairingDevice.value.id || '',
-    pairing_code: activePairingDevice.value.pairing_code || '',
-    pairingCode: activePairingDevice.value.pairing_code || '',
-    api_url: import.meta.env.VITE_API_URL || 'https://appv1.fieldseasy.com/directus',
-    mqtt_broker: 'mqtt.fieldseasy.com',
-    timestamp: new Date().toISOString()
+    site_name: String(siteName),
+    token: String(activePairingDevice.value.pairing_token || activePairingDevice.value.id || ''),
+    pairing_code: String(activePairingDevice.value.pairing_code || ''),
+    api_url: import.meta.env.VITE_API_URL || 'https://appv1.fieldseasy.com/directus'
   });
 });
 
-const getBatteryBarClass = (level) => {
+  const getBatteryBarClass = (level) => {
   if (level > 50) return 'bg-emerald-500';
   if (level > 20) return 'bg-amber-500';
   return 'bg-rose-500';
@@ -615,19 +603,71 @@ const submitReplace = async () => {
   await loadData();
 };
 
-const loadData = async () => {
-  isLoading.value = true;
+let pollInterval = null;
+
+const loadData = async (silent = false) => {
+  if (!silent) isLoading.value = true;
   try {
-    devices.value = await deviceService.fetchDevices();
-    availableSites.value = await siteService.fetchSites();
+    const [devList, sitesList, todayAttendance] = await Promise.all([
+      deviceService.fetchDevices(),
+      siteService.fetchSites(),
+      attendanceService.getTodayAttendance().catch(() => [])
+    ]);
+
+    availableSites.value = sitesList || [];
+
+    // Cross-reference devices with today's active guard check-ins
+    const activeAttendanceList = Array.isArray(todayAttendance)
+      ? todayAttendance.filter(a => a.status === 'on_duty' || a.status === 'active' || (a.clock_in_time && !a.clock_out_time))
+      : [];
+
+    devices.value = (devList || []).map(dev => {
+      // Find matching active guard by device ID, controller ID, or assigned property site
+      let matchedGuard = activeAttendanceList.find(a => 
+        (a.device_id && String(a.device_id) === String(dev.device_id || dev.sn)) ||
+        (a.controller_id && String(a.controller_id) === String(dev.id))
+      );
+
+      if (!matchedGuard && dev.site_id) {
+        matchedGuard = activeAttendanceList.find(a => 
+          String(a.site_id || a.site?.id || a.location) === String(dev.site_id)
+        );
+      }
+
+      if (matchedGuard) {
+        const guardDisplayName = matchedGuard.guard_name || matchedGuard.guard?.name || matchedGuard.guard?.first_name || 'Active Guard';
+        return {
+          ...dev,
+          current_guard_name: guardDisplayName,
+          guard_status: matchedGuard.status || 'on_duty',
+          active_guard: {
+            id: matchedGuard.guard?.id || matchedGuard.guard_id,
+            name: guardDisplayName,
+            status: matchedGuard.status || 'on_duty',
+            clock_in_time: matchedGuard.clock_in_time
+          },
+          status: dev.status === 'locked' ? 'locked' : 'active',
+          last_seen: matchedGuard.clock_in_time ? new Date(matchedGuard.clock_in_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : dev.last_seen
+        };
+      }
+      return dev;
+    });
   } catch (e) {
     console.error('Failed to load device dashboard data:', e);
   } finally {
-    isLoading.value = false;
+    if (!silent) isLoading.value = false;
   }
 };
 
 onMounted(async () => {
   await loadData();
+  // Auto-refresh every 40 seconds for live telemetry & guard shift sync
+  pollInterval = setInterval(() => {
+    loadData(true);
+  }, 40000);
+});
+
+onUnmounted(() => {
+  if (pollInterval) clearInterval(pollInterval);
 });
 </script>
