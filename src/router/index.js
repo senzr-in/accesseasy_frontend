@@ -260,6 +260,18 @@ const routes = [
     name: "VisitorPortalView",
     component: VisitorPortalView
   },
+  // Public Blog Routes
+  {
+    path: "/blog",
+    name: "Blog",
+    component: () => import("@/pages/blog/BlogPage.vue"),
+  },
+  {
+    path: "/blog/:slug",
+    name: "BlogPost",
+    component: () => import("@/pages/blog/BlogPostPage.vue"),
+    props: true,
+  },
   // Catch-all — send to role-appropriate home
   {
     path: "/:pathMatch(.*)*",
