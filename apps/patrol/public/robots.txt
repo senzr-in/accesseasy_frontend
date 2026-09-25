@@ -38,4 +38,4 @@ Allow: /
 User-agent: Amazonbot
 Allow: /
 
-Sitemap: https://patrol.accesseasy.com/sitemap.xml
+Sitemap: https://patrol.accesseasy.in/sitemap.xml

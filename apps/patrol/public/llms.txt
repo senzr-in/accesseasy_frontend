@@ -33,11 +33,11 @@
 
 ## Pages & Reference Links
 
-- [Platform Overview & Features](https://patrol.accesseasy.com/#features)
-- [Command Center Demo](https://patrol.accesseasy.com/#product)
-- [Comparison: Patrol vs Legacy Systems](https://patrol.accesseasy.com/#compare)
-- [Pricing Plans](https://patrol.accesseasy.com/#pricing)
-- [Frequently Asked Questions](https://patrol.accesseasy.com/#faq)
+- [Platform Overview & Features](https://patrol.accesseasy.in/#features)
+- [Command Center Demo](https://patrol.accesseasy.in/#product)
+- [Comparison: Patrol vs Legacy Systems](https://patrol.accesseasy.in/#compare)
+- [Pricing Plans](https://patrol.accesseasy.in/#pricing)
+- [Frequently Asked Questions](https://patrol.accesseasy.in/#faq)
 
 ## Target Users
 
