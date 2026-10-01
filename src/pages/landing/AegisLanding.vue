@@ -2,30 +2,38 @@
   <div class="ag" ref="rootRef">
 
     <!-- ══════════════════════════════════════════════════════════
+         0. SCROLL PROGRESS BAR (TOP FIXED)
+    ══════════════════════════════════════════════════════════ -->
+    <div class="ag-scroll-progress-track">
+      <div class="ag-scroll-progress-bar" :style="{ width: `${scrollProgress}%` }">
+        <div class="ag-scroll-progress-glow"></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════
          1. NAVIGATION
     ══════════════════════════════════════════════════════════ -->
     <header class="ag-nav" :class="{ 'ag-nav--scrolled': scrolled }">
       <div class="ag-wrap ag-nav__inner">
         <!-- Brand -->
-        <a href="#" class="ag-brand" @click.prevent>
+        <a href="#" class="ag-brand" @click.prevent="scrollToTop">
           <img :src="logoPatrol" class="w-8 h-8 object-contain" alt="AccessEasy Patrol Logo" />
           <span class="ag-brand__name">AccessEasy <span style="color:#1B4FD8; font-weight:900;">PATROL</span></span>
         </a>
 
         <!-- Desktop nav links -->
         <nav class="ag-nav__links" aria-label="Main navigation">
-          <a href="#" class="ag-nav__link">Product</a>
+          <a href="#product" class="ag-nav__link" @click.prevent="scrollTo('product')">Product</a>
           <a href="#features" class="ag-nav__link" @click.prevent="scrollTo('features')">Features</a>
-          <a href="#solutions" class="ag-nav__link">Solutions</a>
+          <a href="#how" class="ag-nav__link" @click.prevent="scrollTo('how')">How It Works</a>
           <a href="#pricing" class="ag-nav__link" @click.prevent="scrollTo('pricing')">Pricing</a>
-          <a href="#" class="ag-nav__link">Resources</a>
-          <a href="#" class="ag-nav__link">Contact</a>
+          <a href="#faq" class="ag-nav__link" @click.prevent="scrollTo('faq')">FAQ</a>
         </nav>
 
         <!-- Desktop CTA -->
         <div class="ag-nav__cta">
           <button class="ag-btn ag-btn--ghost" @click="goToLogin" id="nav-login">Login</button>
-          <button class="ag-btn ag-btn--primary" @click="goToLogin" id="nav-demo">Book a Demo</button>
+          <button class="ag-btn ag-btn--primary" @click="goToLogin" id="nav-demo">Start 7-Day Free Trial</button>
         </div>
 
         <!-- Hamburger -->
@@ -37,15 +45,14 @@
       <!-- Mobile menu -->
       <Transition name="ag-mobile">
         <div v-if="mobileOpen" class="ag-mobile-menu">
-          <a href="#" class="ag-mobile-menu__link" @click="mobileOpen = false">Product</a>
+          <a href="#product" class="ag-mobile-menu__link" @click="mobileOpen = false; scrollTo('product')">Product</a>
           <a href="#features" class="ag-mobile-menu__link" @click="mobileOpen = false; scrollTo('features')">Features</a>
-          <a href="#" class="ag-mobile-menu__link" @click="mobileOpen = false">Solutions</a>
+          <a href="#how" class="ag-mobile-menu__link" @click="mobileOpen = false; scrollTo('how')">How It Works</a>
           <a href="#pricing" class="ag-mobile-menu__link" @click="mobileOpen = false; scrollTo('pricing')">Pricing</a>
-          <a href="#" class="ag-mobile-menu__link" @click="mobileOpen = false">Resources</a>
-          <a href="#" class="ag-mobile-menu__link" @click="mobileOpen = false">Contact</a>
+          <a href="#faq" class="ag-mobile-menu__link" @click="mobileOpen = false; scrollTo('faq')">FAQ</a>
           <div class="ag-mobile-menu__cta">
             <button class="ag-btn ag-btn--ghost ag-btn--full" @click="goToLogin">Login</button>
-            <button class="ag-btn ag-btn--primary ag-btn--full" @click="goToLogin">Book a Demo</button>
+            <button class="ag-btn ag-btn--primary ag-btn--full" @click="goToLogin">Start 7-Day Free Trial</button>
           </div>
         </div>
       </Transition>
@@ -56,17 +63,20 @@
          2. HERO
     ══════════════════════════════════════════════════════════ -->
     <section class="ag-hero">
-      <!-- Ambient Smooth Dynamic Background Glows & Tech Grid -->
-      <div class="ag-hero__ambient ag-hero__ambient--1" />
-      <div class="ag-hero__ambient ag-hero__ambient--2" />
-      <div class="ag-hero__ambient ag-hero__ambient--3" />
-      <div class="ag-hero__grid-pattern" />
+      <!-- Ambient Smooth Dynamic Background Glows with Parallax & Tech Grid -->
+      <div class="ag-hero__ambient ag-hero__ambient--1" :style="{ transform: `translateY(${parallaxY * 0.25}px)` }" />
+      <div class="ag-hero__ambient ag-hero__ambient--2" :style="{ transform: `translateY(${parallaxY * -0.18}px)` }" />
+      <div class="ag-hero__ambient ag-hero__ambient--3" :style="{ transform: `translateY(${parallaxY * 0.12}px)` }" />
+      <div class="ag-hero__grid-pattern" :style="{ transform: `translateY(${parallaxY * 0.08}px)` }" />
 
       <div class="ag-wrap ag-hero__inner">
 
         <!-- LEFT: content -->
         <div class="ag-hero__content">
-          <div class="ag-eyebrow">Patrol Management Made Simple</div>
+          <div class="ag-eyebrow-pill">
+            <span class="ag-eyebrow-pill__badge">7-DAY FREE TRIAL</span>
+            <span>Zero Risk · No Credit Card Required</span>
+          </div>
           <h1 class="ag-hero__h1">
             Smart Patrol.<br>
             <span class="ag-hero__h1--blue">Stronger Security.</span><br>
@@ -83,8 +93,14 @@
             even in areas without cellular coverage, using an offline-first sync queue.
           </p>
           <div class="ag-hero__btns">
-            <button class="ag-btn ag-btn--primary ag-btn--lg" @click="goToLogin" id="hero-trial">Start Free Trial</button>
+            <button class="ag-btn ag-btn--primary ag-btn--lg" @click="goToLogin" id="hero-trial">
+              Start 7-Day Free Trial
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 12l4-4-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
             <button class="ag-btn ag-btn--outline ag-btn--lg" @click="goToLogin" id="hero-demo">Book a Demo</button>
+          </div>
+          <div class="ag-hero__trial-note">
+            ⚡ Full feature access · Instant setup in 5 mins · Cancel anytime
           </div>
           <div class="ag-hero__trust">
             <span v-for="t in heroTrust" :key="t" class="ag-hero__trust-item">
@@ -94,11 +110,16 @@
           </div>
         </div>
 
-        <!-- RIGHT: visual mockups -->
-        <div class="ag-hero__visual">
+        <!-- RIGHT: visual mockups with 3D Parallax Tilt -->
+        <div 
+          class="ag-hero__visual ag-parallax-container" 
+          ref="heroVisualRef"
+          @mousemove="handleHeroMouseMove"
+          @mouseleave="handleHeroMouseLeave"
+        >
 
           <!-- Dashboard (browser frame) -->
-          <div class="ag-hero__dash ag-float">
+          <div class="ag-hero__dash" :style="{ transform: dashTransform }">
             <!-- Browser chrome -->
             <div class="ag-chrome">
               <div class="ag-chrome__dots"><span></span><span></span><span></span></div>
@@ -130,27 +151,27 @@
               <!-- Main area -->
               <main class="ag-db__main">
                 <div class="ag-db__topbar">
-                  <span class="ag-db__title">Dashboard</span>
+                  <span class="ag-db__title">Live Operations Dashboard</span>
                   <div class="ag-db__topbar-right">
                     <span class="ag-db__bell">🔔</span>
                     <div class="ag-db__avatar">JA</div>
                   </div>
                 </div>
 
-                <!-- KPIs -->
+                <!-- KPIs with Dynamic Animated Counters -->
                 <div class="ag-db__kpis">
                   <div class="ag-db__kpi">
-                    <div class="ag-db__kpi-num">24</div>
+                    <div class="ag-db__kpi-num">{{ countSites }}</div>
                     <div class="ag-db__kpi-lbl">Total Sites</div>
                     <div class="ag-db__kpi-tag ag-db__kpi-tag--neutral">↑ 2 this week</div>
                   </div>
                   <div class="ag-db__kpi ag-db__kpi--blue">
-                    <div class="ag-db__kpi-num">156</div>
+                    <div class="ag-db__kpi-num">{{ countGuards }}</div>
                     <div class="ag-db__kpi-lbl">Active Guards</div>
                     <div class="ag-db__kpi-tag ag-db__kpi-tag--blue">Online now</div>
                   </div>
                   <div class="ag-db__kpi ag-db__kpi--green">
-                    <div class="ag-db__kpi-num">32</div>
+                    <div class="ag-db__kpi-num">{{ countPatrols }}</div>
                     <div class="ag-db__kpi-lbl">Active Patrols</div>
                     <div class="ag-db__kpi-tag ag-db__kpi-tag--green">In progress</div>
                   </div>
@@ -161,18 +182,62 @@
                   </div>
                 </div>
 
-                <!-- Map -->
+                <!-- Map with Animated Vector Patrol Route & Sonar Radar -->
                 <div class="ag-db__map">
-                  <div class="ag-db__map-header">Live Guard Tracking <span class="ag-db__live-pill"><span></span>LIVE</span></div>
-                  <div class="ag-db__map-area">
+                  <div class="ag-db__map-header">
+                    <span>Live GPS & Checkpoint Telemetry</span>
+                    <span class="ag-db__live-pill"><span></span>LIVE</span>
+                  </div>
+                  <div class="ag-db__map-area relative overflow-hidden">
                     <!-- Subtle grid lines -->
                     <div class="ag-db__map-grid"></div>
-                    <!-- Guard dots -->
-                    <div class="ag-db__guard-dot ag-db__guard-dot--blue" style="top:38%;left:22%"></div>
-                    <div class="ag-db__guard-dot ag-db__guard-dot--blue" style="top:62%;left:48%"></div>
-                    <div class="ag-db__guard-dot ag-db__guard-dot--orange" style="top:28%;left:67%"></div>
-                    <div class="ag-db__guard-dot ag-db__guard-dot--blue" style="top:72%;left:30%"></div>
-                    <div class="ag-db__guard-dot ag-db__guard-dot--blue" style="top:50%;left:80%"></div>
+
+                    <!-- Sonar Radar Ping Background -->
+                    <div class="ag-radar-sweep"></div>
+
+                    <!-- Animated SVG Patrol Route -->
+                    <svg class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 400 180">
+                      <!-- Base Route Path -->
+                      <path 
+                        d="M 50 120 L 120 70 L 220 110 L 320 60 L 350 140 L 240 150 Z" 
+                        fill="none" 
+                        stroke="#1B4FD8" 
+                        stroke-width="2" 
+                        stroke-dasharray="6,6"
+                        opacity="0.3"
+                      />
+                      <!-- Animated Glowing Active Route -->
+                      <path 
+                        d="M 50 120 L 120 70 L 220 110 L 320 60" 
+                        fill="none" 
+                        stroke="url(#agRouteGrad)" 
+                        stroke-width="3.5" 
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="ag-route-glow-path"
+                      />
+                      <defs>
+                        <linearGradient id="agRouteGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stop-color="#38BDF8" />
+                          <stop offset="50%" stop-color="#1B4FD8" />
+                          <stop offset="100%" stop-color="#22C55E" />
+                        </linearGradient>
+                      </defs>
+
+                      <!-- Checkpoint Nodes with Sonar Rings -->
+                      <circle cx="50" cy="120" r="5" fill="#22C55E" />
+                      <circle cx="120" cy="70" r="5" fill="#22C55E" />
+                      <circle cx="220" cy="110" r="5" fill="#22C55E" />
+                      <circle cx="320" cy="60" r="7" fill="#1B4FD8" class="animate-pulse" />
+                      <circle cx="320" cy="60" r="3" fill="#ffffff" />
+                      <circle cx="350" cy="140" r="4" fill="#94A3B8" />
+                      <circle cx="240" cy="150" r="4" fill="#94A3B8" />
+                    </svg>
+
+                    <!-- Guard Active Beacon with Live Sonar Pulse -->
+                    <div class="ag-db__guard-dot ag-db__guard-dot--blue" style="top:32%;left:78%;transform:scale(1.25);">
+                      <div class="ag-sonar-pulse"></div>
+                    </div>
                   </div>
                 </div>
 
@@ -181,8 +246,8 @@
                   <div class="ag-db__compliance">
                     <div class="ag-db__compliance-hdr">Patrol Compliance</div>
                     <div class="ag-db__compliance-row">
-                      <div class="ag-db__bar-wrap"><div class="ag-db__bar-fill" style="width:98%"></div></div>
-                      <span class="ag-db__compliance-pct">98%</span>
+                      <div class="ag-db__bar-wrap"><div class="ag-db__bar-fill" :style="{ width: countCompliance + '%' }"></div></div>
+                      <span class="ag-db__compliance-pct">{{ countCompliance }}%</span>
                     </div>
                   </div>
                   <div class="ag-db__top-guard">
@@ -191,7 +256,7 @@
                       <div class="ag-db__guard-av">JD</div>
                       <div>
                         <div class="ag-db__guard-name">John Doe</div>
-                        <div class="ag-db__guard-score">Score: 98%</div>
+                        <div class="ag-db__guard-score">Score: 99.4%</div>
                       </div>
                     </div>
                   </div>
@@ -211,9 +276,12 @@
             </div>
           </div><!-- /ag-hero__dash -->
 
-          <!-- Phone mockup -->
-          <div class="ag-hero__phone ag-float-delayed">
-            <div class="ag-phone">
+          <!-- Phone mockup with Live Interactive QR Scan -->
+          <div class="ag-hero__phone" :style="{ transform: phoneTransform }">
+            <div class="ag-phone relative overflow-hidden">
+              <!-- Scan Laser Animation Beam -->
+              <div v-if="isScanning" class="ag-phone__laser"></div>
+
               <div class="ag-phone__statusbar">
                 <span class="ag-phone__time">9:41</span>
                 <span class="ag-phone__signal">●●●</span>
@@ -229,15 +297,31 @@
                 <div class="ag-phone__patrol-card">
                   <div class="ag-phone__patrol-badge">ACTIVE PATROL</div>
                   <div class="ag-phone__patrol-name">Night Route — Sector B</div>
-                  <div class="ag-phone__bar-wrap"><div class="ag-phone__bar-fill" style="width:43%"></div></div>
-                  <div class="ag-phone__bar-lbl">3 / 7 Checkpoints</div>
+                  <div class="ag-phone__bar-wrap">
+                    <div class="ag-phone__bar-fill transition-all duration-500" :style="{ width: `${Math.round((phoneCheckpointsDone / 7) * 100)}%` }"></div>
+                  </div>
+                  <div class="ag-phone__bar-lbl">{{ phoneCheckpointsDone }} / 7 Checkpoints</div>
                 </div>
-                <div class="ag-phone__checkpoint">
+
+                <!-- Active Checkpoint with Clickable Scan -->
+                <div class="ag-phone__checkpoint relative">
                   <div class="ag-phone__checkpoint-lbl">NEXT CHECKPOINT</div>
-                  <div class="ag-phone__checkpoint-name">CP-04 · East Gate</div>
-                  <button class="ag-phone__scan-btn">📷 Scan QR Code</button>
+                  <div class="ag-phone__checkpoint-name">{{ currentTargetCheckpoint }}</div>
+                  
+                  <button class="ag-phone__scan-btn active:scale-95 transition-transform" @click="simulateScan">
+                    <span v-if="isScanning">⚡ Verifying NFC/QR...</span>
+                    <span v-else>📷 Tap to Scan Checkpoint</span>
+                  </button>
+
+                  <!-- Success Toast Pill -->
+                  <div v-if="scanToastVisible" class="ag-phone__toast animate-bounce">
+                    ✓ Verified in 0.22s
+                  </div>
                 </div>
-                <button class="ag-phone__report-btn">⚠ Report Incident</button>
+
+                <button class="ag-phone__report-btn" @click="triggerPanicSimulation">
+                  ⚠ Report Incident / SOS
+                </button>
               </div>
             </div>
           </div><!-- /ag-hero__phone -->
@@ -248,13 +332,34 @@
 
 
     <!-- ══════════════════════════════════════════════════════════
-         3. TRUST LOGOS
+         3. TRUST LOGOS (INFINITE MARQUEE)
     ══════════════════════════════════════════════════════════ -->
-    <section class="ag-trust">
+    <section class="ag-trust ag-reveal">
       <div class="ag-wrap">
-        <p class="ag-trust__label">Trusted by security teams across the world</p>
-        <div class="ag-trust__logos">
-          <div v-for="logo in trustLogos" :key="logo" class="ag-trust__logo">{{ logo }}</div>
+        <p class="ag-trust__label">Trusted by enterprise security agencies & operations worldwide</p>
+      </div>
+      <div class="ag-trust__marquee">
+        <div class="ag-trust__fade ag-trust__fade--left"></div>
+        <div class="ag-trust__fade ag-trust__fade--right"></div>
+        <div class="ag-trust__track">
+          <div class="ag-trust__group">
+            <div v-for="(logo, idx) in trustLogos" :key="'grp1-' + idx" class="ag-trust__logo-item">
+              <span class="ag-trust__icon">🛡️</span>
+              <span class="ag-trust__name">{{ logo }}</span>
+            </div>
+          </div>
+          <div class="ag-trust__group" aria-hidden="true">
+            <div v-for="(logo, idx) in trustLogos" :key="'grp2-' + idx" class="ag-trust__logo-item">
+              <span class="ag-trust__icon">🛡️</span>
+              <span class="ag-trust__name">{{ logo }}</span>
+            </div>
+          </div>
+          <div class="ag-trust__group" aria-hidden="true">
+            <div v-for="(logo, idx) in trustLogos" :key="'grp3-' + idx" class="ag-trust__logo-item">
+              <span class="ag-trust__icon">🛡️</span>
+              <span class="ag-trust__name">{{ logo }}</span>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -270,7 +375,14 @@
           <h2 class="ag-section__h2">Everything you need to manage<br class="ag-break"> your security operations</h2>
         </div>
         <div class="ag-features__grid">
-          <div v-for="(feat, i) in features" :key="i" class="ag-feature-card ag-reveal" :style="{ '--delay': i * 60 + 'ms' }">
+          <div 
+            v-for="(feat, i) in features" 
+            :key="i" 
+            class="ag-feature-card ag-reveal ag-spotlight-card" 
+            :style="{ '--delay': i * 60 + 'ms' }"
+            @mousemove="handleCardMouseMove"
+          >
+            <div class="ag-spotlight-glow"></div>
             <div class="ag-feature-card__icon" v-html="feat.icon"></div>
             <h3 class="ag-feature-card__title">{{ feat.title }}</h3>
             <p class="ag-feature-card__desc">{{ feat.desc }}</p>
@@ -497,16 +609,21 @@
                     </div>
                   </div>
 
-                  <!-- Activity feed -->
+                  <!-- Live Dynamic Activity feed -->
                   <div class="ag-cmd-activity">
-                    <div class="ag-cmd-activity__hdr">Recent Activity</div>
-                    <div v-for="act in activityFeed" :key="act.time" class="ag-cmd-activity__item">
-                      <div class="ag-cmd-activity__dot" :class="`ag-cmd-activity__dot--${act.type}`"></div>
-                      <div class="ag-cmd-activity__info">
-                        <div class="ag-cmd-activity__text">{{ act.text }}</div>
-                        <div class="ag-cmd-activity__time">{{ act.time }}</div>
-                      </div>
+                    <div class="ag-cmd-activity__hdr">
+                      <span>Recent Activity</span>
+                      <span class="ag-live-indicator"><span class="ag-live-indicator__dot"></span>LIVE</span>
                     </div>
+                    <TransitionGroup name="ag-feed-list" tag="div" class="ag-cmd-activity__list">
+                      <div v-for="act in dynamicFeed" :key="act.text" class="ag-cmd-activity__item">
+                        <div class="ag-cmd-activity__dot" :class="`ag-cmd-activity__dot--${act.type}`"></div>
+                        <div class="ag-cmd-activity__info">
+                          <div class="ag-cmd-activity__text">{{ act.text }}</div>
+                          <div class="ag-cmd-activity__time">{{ act.time }}</div>
+                        </div>
+                      </div>
+                    </TransitionGroup>
                   </div>
                 </div>
 
@@ -551,21 +668,36 @@
     <!-- ══════════════════════════════════════════════════════════
          6. HOW IT WORKS
     ══════════════════════════════════════════════════════════ -->
-    <section class="ag-section ag-how">
+    <section class="ag-section ag-how" id="how">
       <div class="ag-wrap">
-        <div class="ag-section__header ag-reveal">
+        <div class="ag-section__header ag-reveal ag-reveal--up">
+          <div class="ag-eyebrow">Seamless Deployment</div>
           <h2 class="ag-section__h2">From assignment to completion,<br class="ag-break"> everything stays connected.</h2>
         </div>
         <div class="ag-how__steps">
-          <div v-for="(step, i) in howSteps" :key="i" class="ag-how__step ag-reveal" :style="{ '--delay': i * 100 + 'ms' }">
-            <div class="ag-how__step-num">0{{ i + 1 }}</div>
+          <div 
+            v-for="(step, i) in howSteps" 
+            :key="i" 
+            class="ag-how__step ag-reveal ag-reveal--scale ag-spotlight-card" 
+            :style="{ '--delay': i * 140 + 'ms' }"
+            @mousemove="handleCardMouseMove"
+          >
+            <div class="ag-spotlight-glow"></div>
+            <div class="ag-how__step-num-wrap">
+              <span class="ag-how__step-num">0{{ i + 1 }}</span>
+            </div>
             <div class="ag-how__step-icon" v-html="step.icon"></div>
             <div class="ag-how__step-label">{{ step.label }}</div>
             <h3 class="ag-how__step-title">{{ step.title }}</h3>
             <p class="ag-how__step-desc">{{ step.desc }}</p>
           </div>
-          <div class="ag-how__connector ag-how__connector--1"></div>
-          <div class="ag-how__connector ag-how__connector--2"></div>
+          <!-- Animated Laser Beam Connectors -->
+          <div class="ag-how__connector ag-how__connector--1">
+            <div class="ag-how__connector-beam"></div>
+          </div>
+          <div class="ag-how__connector ag-how__connector--2">
+            <div class="ag-how__connector-beam"></div>
+          </div>
         </div>
       </div>
     </section>
@@ -578,7 +710,7 @@
       <div class="ag-wrap ag-app__inner">
 
         <!-- Left phones -->
-        <div class="ag-app__visual ag-reveal">
+        <div class="ag-app__visual ag-reveal ag-reveal--left">
           <div class="ag-app__phone-wrap">
             <!-- Primary phone -->
             <div class="ag-app__phone ag-float" style="z-index:2">
@@ -661,7 +793,7 @@
         </div>
 
         <!-- Right text -->
-        <div class="ag-app__content ag-reveal" style="--delay:100ms">
+        <div class="ag-app__content ag-reveal ag-reveal--right" style="--delay:100ms">
           <div class="ag-eyebrow">Guard Mobile App</div>
           <h2 class="ag-app__h2">Give every guard a smarter<br>way to patrol.</h2>
           <p class="ag-app__desc">
@@ -686,10 +818,10 @@
     <!-- ══════════════════════════════════════════════════════════
          8. ANALYTICS
     ══════════════════════════════════════════════════════════ -->
-    <section class="ag-section ag-analytics">
+    <section class="ag-section ag-analytics" id="analytics">
       <div class="ag-wrap">
         <div class="ag-analytics__inner">
-          <div class="ag-analytics__content ag-reveal">
+          <div class="ag-analytics__content ag-reveal ag-reveal--left">
             <div class="ag-eyebrow">Operational Intelligence</div>
             <h2 class="ag-analytics__h2">Turn patrol activity into<br>actionable intelligence.</h2>
             <p class="ag-analytics__desc">
@@ -705,14 +837,17 @@
             <button class="ag-btn ag-btn--outline" style="margin-top:1.5rem" @click="goToLogin">View Full Analytics</button>
           </div>
 
-          <div class="ag-analytics__charts ag-reveal" style="--delay:100ms">
+          <div class="ag-analytics__charts ag-reveal ag-reveal--right" style="--delay:100ms">
             <div v-for="(metric, i) in analyticsMetrics" :key="i" class="ag-analytics__metric">
               <div class="ag-analytics__metric-top">
                 <span class="ag-analytics__metric-label">{{ metric.label }}</span>
-                <span class="ag-analytics__metric-value">{{ metric.value }}</span>
+                <span class="ag-analytics__metric-value">{{ metricFills[i] }}%</span>
               </div>
               <div class="ag-analytics__metric-bar">
-                <div class="ag-analytics__metric-fill" :style="{ width: metric.pct + '%', background: metric.color }"></div>
+                <div 
+                  class="ag-analytics__metric-fill" 
+                  :style="{ width: metricFills[i] + '%', background: metric.color }"
+                ></div>
               </div>
             </div>
             <!-- Area chart mockup -->
@@ -741,12 +876,19 @@
     ══════════════════════════════════════════════════════════ -->
     <section class="ag-section ag-reliability">
       <div class="ag-wrap">
-        <div class="ag-section__header ag-reveal">
+        <div class="ag-section__header ag-reveal ag-reveal--up">
           <div class="ag-eyebrow">Enterprise Grade</div>
           <h2 class="ag-section__h2">Built for security operations<br class="ag-break"> you can depend on.</h2>
         </div>
         <div class="ag-reliability__grid">
-          <div v-for="(item, i) in reliabilityItems" :key="i" class="ag-reliability__item ag-reveal" :style="{ '--delay': i * 80 + 'ms' }">
+          <div 
+            v-for="(item, i) in reliabilityItems" 
+            :key="i" 
+            class="ag-reliability__item ag-reveal ag-reveal--scale ag-spotlight-card" 
+            :style="{ '--delay': i * 70 + 'ms' }"
+            @mousemove="handleCardMouseMove"
+          >
+            <div class="ag-spotlight-glow"></div>
             <div class="ag-reliability__icon" v-html="item.icon"></div>
             <h3 class="ag-reliability__title">{{ item.title }}</h3>
             <p class="ag-reliability__desc">{{ item.desc }}</p>
@@ -761,13 +903,43 @@
     ══════════════════════════════════════════════════════════ -->
     <section class="ag-section ag-pricing" id="pricing">
       <div class="ag-wrap">
-        <div class="ag-section__header ag-reveal">
+        <div class="ag-section__header ag-reveal ag-reveal--up">
           <div class="ag-eyebrow">Simple &amp; Transparent Pricing</div>
           <h2 class="ag-section__h2">Plans that grow with your business</h2>
+          <p class="ag-pricing__sub-note">Start your 7-day free trial today — no credit card required to get started.</p>
         </div>
+
+        <!-- 7-Day Free Trial Banner -->
+        <div class="ag-trial-banner ag-reveal ag-reveal--scale">
+          <div class="ag-trial-banner__glow"></div>
+          <div class="ag-trial-banner__left">
+            <div class="ag-trial-banner__tag">✨ 100% RISK-FREE</div>
+            <h3 class="ag-trial-banner__title">Try AccessEasy Patrol Free for 7 Days</h3>
+            <p class="ag-trial-banner__desc">
+              Experience live GPS tracking, QR &amp; NFC checkpoint tours, and automated incident logs with zero commitment.
+            </p>
+            <div class="ag-trial-banner__perks">
+              <span>✓ All Features Unlocked</span>
+              <span>✓ No Credit Card Needed</span>
+              <span>✓ Instant 5-Min Setup</span>
+              <span>✓ Cancel Anytime</span>
+            </div>
+          </div>
+          <div class="ag-trial-banner__right">
+            <button class="ag-btn ag-btn--primary ag-btn--lg" @click="goToLogin">
+              Start 7-Day Free Trial →
+            </button>
+          </div>
+        </div>
+
         <div class="ag-pricing__grid">
           <!-- Per site -->
-          <div class="ag-price-card ag-reveal">
+          <div 
+            class="ag-price-card ag-reveal ag-reveal--left ag-spotlight-card"
+            @mousemove="handleCardMouseMove"
+          >
+            <div class="ag-spotlight-glow"></div>
+            <div class="ag-price-card__trial-badge">7-DAY FREE TRIAL INCLUDED</div>
             <div class="ag-price-card__label">Per Site</div>
             <div class="ag-price-card__price">
               <span class="ag-price-card__currency">₹</span>
@@ -781,11 +953,17 @@
                 {{ f }}
               </li>
             </ul>
-            <button class="ag-btn ag-btn--outline ag-btn--full ag-btn--lg" @click="goToLogin">Get Started</button>
+            <button class="ag-btn ag-btn--primary ag-btn--full ag-btn--lg" @click="goToLogin">Start 7-Day Free Trial</button>
+            <div class="ag-price-card__subtext">No credit card required</div>
           </div>
 
           <!-- Custom plan -->
-          <div class="ag-price-card ag-price-card--popular ag-reveal" style="--delay:80ms">
+          <div 
+            class="ag-price-card ag-price-card--popular ag-reveal ag-reveal--right ag-spotlight-card" 
+            style="--delay:80ms"
+            @mousemove="handleCardMouseMove"
+          >
+            <div class="ag-spotlight-glow"></div>
             <div class="ag-price-card__badge">ENTERPRISE</div>
             <div class="ag-price-card__label">Custom</div>
             <div class="ag-price-card__price">
@@ -800,11 +978,12 @@
               </li>
             </ul>
             <button class="ag-btn ag-btn--white ag-btn--full ag-btn--lg" @click="goToLogin">Contact Sales</button>
+            <div class="ag-price-card__subtext" style="color:rgba(255,255,255,0.7)">Custom SLAs &amp; Onboarding</div>
           </div>
         </div>
 
         <!-- Pricing assurances -->
-        <div class="ag-pricing__assurances ag-reveal" style="--delay:160ms">
+        <div class="ag-pricing__assurances ag-reveal ag-reveal--up" style="--delay:160ms">
           <div v-for="a in pricingAssurances" :key="a.text" class="ag-pricing__assurance">
             <div v-html="a.icon" class="ag-pricing__assurance-icon"></div>
             <div>
@@ -822,12 +1001,12 @@
     ══════════════════════════════════════════════════════════ -->
     <section class="ag-section ag-faq" id="faq">
       <div class="ag-wrap">
-        <div class="ag-section__header ag-reveal">
+        <div class="ag-section__header ag-reveal ag-reveal--up">
           <div class="ag-eyebrow">Common Questions</div>
           <h2 class="ag-section__h2">Frequently Asked Questions</h2>
         </div>
         <div class="ag-faq__list">
-          <details v-for="(item, i) in faqs" :key="i" class="ag-faq__item ag-reveal" :style="{ '--delay': i * 50 + 'ms' }">
+          <details v-for="(item, i) in faqs" :key="i" class="ag-faq__item ag-reveal ag-reveal--up" :style="{ '--delay': i * 50 + 'ms' }">
             <summary class="ag-faq__question">{{ item.q }}</summary>
             <p class="ag-faq__answer">{{ item.a }}</p>
           </details>
@@ -839,13 +1018,17 @@
     <!-- ══════════════════════════════════════════════════════════
          11. FINAL CTA
     ══════════════════════════════════════════════════════════ -->
-    <section class="ag-cta ag-reveal">
+    <section class="ag-cta ag-reveal ag-reveal--scale">
       <div class="ag-wrap ag-cta__inner">
         <div class="ag-cta__content">
+          <div class="ag-cta__badge">START YOUR RISK-FREE TRIAL</div>
           <h2 class="ag-cta__h2">Ready to transform your<br>security operations?</h2>
-          <p class="ag-cta__sub">Join security teams using AccessEasy Patrol to stay ahead.</p>
+          <p class="ag-cta__sub">Get full access for 7 days. No credit card required. Setup in minutes.</p>
           <div class="ag-cta__btns">
-            <button class="ag-btn ag-btn--white ag-btn--lg" @click="goToLogin" id="cta-trial">Start Free Trial</button>
+            <button class="ag-btn ag-btn--white ag-btn--lg" @click="goToLogin" id="cta-trial">
+              Start 7-Day Free Trial
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 12l4-4-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
             <button class="ag-btn ag-btn--outline-white ag-btn--lg" @click="goToLogin" id="cta-demo">Book a Demo</button>
           </div>
         </div>
@@ -865,7 +1048,7 @@
       <div class="ag-wrap ag-footer__inner">
         <!-- Brand col -->
         <div class="ag-footer__brand">
-          <a href="#" class="ag-brand" @click.prevent>
+          <a href="#" class="ag-brand" @click.prevent="scrollToTop">
             <img :src="logoPatrol" class="w-7 h-7 object-contain" alt="AccessEasy Patrol Logo" />
             <span class="ag-brand__name">AccessEasy <span style="color:#1B4FD8; font-weight:900;">PATROL</span></span>
           </a>
@@ -877,10 +1060,10 @@
         <!-- Link columns -->
         <div class="ag-footer__col">
           <div class="ag-footer__col-title">Product</div>
-          <a href="#" class="ag-footer__link">Features</a>
+          <a href="#features" class="ag-footer__link" @click.prevent="scrollTo('features')">Features</a>
           <a href="#pricing" class="ag-footer__link" @click.prevent="scrollTo('pricing')">Pricing</a>
-          <a href="#" class="ag-footer__link">Guard App</a>
-          <a href="#" class="ag-footer__link">Integrations</a>
+          <a href="#product" class="ag-footer__link" @click.prevent="scrollTo('product')">Command Center</a>
+          <a href="#how" class="ag-footer__link" @click.prevent="scrollTo('how')">How It Works</a>
         </div>
         <div class="ag-footer__col">
           <div class="ag-footer__col-title">Company</div>
@@ -916,6 +1099,32 @@
       </div>
     </footer>
 
+    <!-- ══════════════════════════════════════════════════════════
+         13. BACK TO TOP FLOATING BUTTON WITH PROGRESS RING
+    ══════════════════════════════════════════════════════════ -->
+    <button 
+      class="ag-back-to-top" 
+      :class="{ 'ag-back-to-top--visible': showBackToTop }" 
+      @click="scrollToTop"
+      aria-label="Scroll back to top"
+      title="Back to top"
+    >
+      <svg class="ag-back-to-top__ring" viewBox="0 0 36 36">
+        <path 
+          class="ag-back-to-top__ring-bg" 
+          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
+        />
+        <path 
+          class="ag-back-to-top__ring-fill" 
+          :stroke-dasharray="`${scrollProgress}, 100`"
+          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
+        />
+      </svg>
+      <svg class="ag-back-to-top__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="18 15 12 9 6 15"></polyline>
+      </svg>
+    </button>
+
   </div>
 </template>
 
@@ -928,43 +1137,241 @@ const router = useRouter();
 const rootRef = ref(null);
 const scrolled = ref(false);
 const mobileOpen = ref(false);
+const scrollProgress = ref(0);
+const showBackToTop = ref(false);
+const parallaxY = ref(0);
+
+// ── Interactive Analytics Metric Fills ─────────────────────────
+const metricFills = ref([0, 0, 0, 0]);
+let analyticsAnimated = false;
+
+function animateAnalytics() {
+  if (analyticsAnimated) return;
+  analyticsAnimated = true;
+  const targets = [94, 98, 87, 91];
+  targets.forEach((target, idx) => {
+    let current = 0;
+    const stepTime = 1200 / target;
+    const timer = setInterval(() => {
+      current += 2;
+      if (current >= target) {
+        metricFills.value[idx] = target;
+        clearInterval(timer);
+      } else {
+        metricFills.value[idx] = current;
+      }
+    }, stepTime);
+  });
+}
+
+// ── Interactive Phone Mockup Simulation ─────────────────────────
+const isScanning = ref(false);
+const scanToastVisible = ref(false);
+const phoneCheckpointsDone = ref(3);
+const checkpointNames = ['CP-01 · Main Gate', 'CP-02 · Lobby', 'CP-03 · Vault', 'CP-04 · East Gate', 'CP-05 · Roof Access', 'CP-06 · Loading Dock', 'CP-07 · Exit Gate'];
+const currentTargetCheckpoint = ref('CP-04 · East Gate');
+
+const simulateScan = () => {
+  if (isScanning.value) return;
+  isScanning.value = true;
+  setTimeout(() => {
+    isScanning.value = false;
+    scanToastVisible.value = true;
+    phoneCheckpointsDone.value = Math.min(7, phoneCheckpointsDone.value + 1);
+    currentTargetCheckpoint.value = checkpointNames[Math.min(checkpointNames.length - 1, phoneCheckpointsDone.value)];
+    setTimeout(() => {
+      scanToastVisible.value = false;
+    }, 2400);
+  }, 900);
+};
+
+const triggerPanicSimulation = () => {
+  alert('🚨 Emergency Incident / SOS logged! Command Center dispatcher notified in 0.08s.');
+};
+
+// ── Interactive 3D Mouse Parallax / Tilt ───────────────────────
+const heroVisualRef = ref(null);
+const dashTransform = ref('perspective(1000px) rotateX(0deg) rotateY(0deg)');
+const phoneTransform = ref('perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)');
+
+function handleHeroMouseMove(e) {
+  if (!heroVisualRef.value) return;
+  const rect = heroVisualRef.value.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  const centerX = rect.width / 2;
+  const centerY = rect.height / 2;
+  
+  // Subtle angles
+  const rotX = -((y - centerY) / centerY) * 6;
+  const rotY = ((x - centerX) / centerX) * 8;
+  
+  dashTransform.value = `perspective(1000px) rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) translateZ(10px)`;
+  phoneTransform.value = `perspective(1000px) rotateX(${(rotX * 1.3).toFixed(2)}deg) rotateY(${(rotY * 1.3).toFixed(2)}deg) translateZ(30px) translateY(-6px)`;
+}
+
+function handleHeroMouseLeave() {
+  dashTransform.value = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0px)';
+  phoneTransform.value = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0px) translateY(0px)';
+}
+
+// ── Spotlight Hover Glow on Cards ──────────────────────────────
+function handleCardMouseMove(e) {
+  const card = e.currentTarget;
+  const rect = card.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  card.style.setProperty('--mouse-x', `${x}px`);
+  card.style.setProperty('--mouse-y', `${y}px`);
+}
+
+// ── Real-time Feed Simulation ──────────────────────────────────
+const dynamicFeed = ref([
+  { type: 'ok',   text: 'Patrol completed — Site A East Wing',   time: 'Just now' },
+  { type: 'ok',   text: 'Checkpoint scanned — CP-07 Main Gate',  time: '1m ago' },
+  { type: 'warn', text: 'Incident reported — North Parking',      time: '3m ago' },
+  { type: 'ok',   text: 'Guard clocked in — James Wilson',        time: '5m ago' },
+  { type: 'ok',   text: 'Route assigned — Perimeter North',       time: '12m ago' },
+]);
+
+let feedInterval = null;
+const simulatedEvents = [
+  { type: 'ok', text: 'CP-04 scanned — East Corridor verified' },
+  { type: 'ok', text: 'Guard Sarah Connor checked in at Zone B' },
+  { type: 'ok', text: 'NFC tag verified — Roof Access Gate' },
+  { type: 'warn', text: 'Patrol delayed 2m — Perimeter West' },
+  { type: 'ok', text: 'QR code verified — Loading Dock B' },
+];
+
+function startFeedSimulation() {
+  let eventIdx = 0;
+  feedInterval = setInterval(() => {
+    const nextEvent = simulatedEvents[eventIdx % simulatedEvents.length];
+    dynamicFeed.value.unshift({
+      type: nextEvent.type,
+      text: nextEvent.text,
+      time: 'Just now',
+    });
+    if (dynamicFeed.value.length > 5) {
+      dynamicFeed.value.pop();
+    }
+    eventIdx++;
+  }, 4500);
+}
+
+// ── Animated Number Counters ───────────────────────────────────
+const countGuards = ref(0);
+const countSites = ref(0);
+const countPatrols = ref(0);
+const countCompliance = ref(0);
+let countsAnimated = false;
+
+function animateCounters() {
+  if (countsAnimated) return;
+  countsAnimated = true;
+  
+  const animateValue = (target, refVar, duration = 1400) => {
+    const start = 0;
+    const startTime = performance.now();
+    const step = (currentTime) => {
+      const progress = Math.min((currentTime - startTime) / duration, 1);
+      // ease-out cubic
+      const ease = 1 - Math.pow(1 - progress, 3);
+      refVar.value = Math.floor(ease * (target - start) + start);
+      if (progress < 1) {
+        requestAnimationFrame(step);
+      } else {
+        refVar.value = target;
+      }
+    };
+    requestAnimationFrame(step);
+  };
+
+  animateValue(156, countGuards, 1600);
+  animateValue(24, countSites, 1200);
+  animateValue(32, countPatrols, 1400);
+  animateValue(98, countCompliance, 1500);
+}
 
 function goToLogin() {
   router.push({ name: 'Login' });
 }
+
 function scrollTo(id) {
   const el = document.getElementById(id);
-  if (el) el.scrollIntoView({ behavior: 'smooth' });
-}
-function onScroll() {
-  scrolled.value = window.scrollY > 50;
+  if (el) {
+    const offset = 80;
+    const bodyRect = document.body.getBoundingClientRect().top;
+    const elementRect = el.getBoundingClientRect().top;
+    const elementPosition = elementRect - bodyRect;
+    const offsetPosition = elementPosition - offset;
+
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: 'smooth'
+    });
+  }
 }
 
-// ── Scroll reveal ──────────────────────────────────────────────
+function scrollToTop() {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+}
+
+function onScroll() {
+  const scrollY = window.scrollY || window.pageYOffset;
+  scrolled.value = scrollY > 50;
+  showBackToTop.value = scrollY > 350;
+  parallaxY.value = scrollY;
+
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  if (docHeight > 0) {
+    scrollProgress.value = Math.min(100, Math.max(0, Math.round((scrollY / docHeight) * 100)));
+  }
+}
+
+// ── Scroll reveal & Observer ──────────────────────────────────
 let observer;
 onMounted(() => {
   window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+  startFeedSimulation();
 
-  // Intersection observer for reveal animations
+  // Intersection observer for reveal animations & counter trigger
   observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         entry.target.classList.add('ag-reveal--in');
+        if (entry.target.classList.contains('ag-hero') || entry.target.classList.contains('ag-hero__visual')) {
+          animateCounters();
+        }
+        if (entry.target.classList.contains('ag-analytics') || entry.target.id === 'analytics') {
+          animateAnalytics();
+        }
         observer.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
 
   document.querySelectorAll('.ag-reveal').forEach(el => observer.observe(el));
+  const analyticsEl = document.getElementById('analytics') || document.querySelector('.ag-analytics');
+  if (analyticsEl) observer.observe(analyticsEl);
+  
+  // Trigger counters initially
+  setTimeout(animateCounters, 300);
 });
+
 onUnmounted(() => {
   window.removeEventListener('scroll', onScroll);
   observer?.disconnect();
+  if (feedInterval) clearInterval(feedInterval);
 });
 
 // ── Static data ────────────────────────────────────────────────
 
-const heroTrust = ['Real-time Tracking', 'Cloud Based', 'Easy to Use', 'Secure & Reliable'];
+const heroTrust = ['7-Day Free Trial', 'Real-time GPS', 'No Credit Card Needed', 'SOC-2 Ready'];
 
 const trustLogos = ['SecurePlus', 'Guardian Protection', 'SafeWatch Security', 'DefendX', 'ShieldForce', 'Fortress Solutions'];
 
@@ -1138,6 +1545,10 @@ const pricingAssurances = [
 // ── FAQ data (AEO + GEO) ────────────────────────────────────────
 const faqs = [
   {
+    q: 'How does the 7-day free trial work?',
+    a: 'You get instant, unrestricted access to all AccessEasy Patrol features for 7 days — including live GPS guard tracking, unlimited QR & NFC checkpoint creation, guard mobile apps, and automated incident logs. No credit card is required to start your trial.',
+  },
+  {
     q: 'How does AccessEasy Patrol verify checkpoints without an internet connection?',
     a: 'AccessEasy Patrol uses an offline-first local event queue on the mobile device. When a guard scans an NFC tag or QR code in a cellular dead zone, the scan is saved locally with an immutable device timestamp. When connectivity is restored, all queued events sync automatically to the cloud in chronological order — ensuring zero data loss.',
   },
@@ -1188,16 +1599,58 @@ const faqs = [
 
 .ag-break { display: block; }
 
-/* ── Reveal animation ── */
+/* ── Top Scroll Progress Bar ── */
+.ag-scroll-progress-track {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3.5px;
+  background: rgba(226, 232, 240, 0.3);
+  z-index: 1000;
+  pointer-events: none;
+}
+.ag-scroll-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #1B4FD8 0%, #38BDF8 50%, #22C55E 100%);
+  position: relative;
+  transition: width 0.1s linear;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.8);
+}
+.ag-scroll-progress-glow {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 20px;
+  background: #FFFFFF;
+  filter: blur(2px);
+  opacity: 0.8;
+}
+
+/* ── Multi-directional Scroll Reveal Animations ── */
 .ag-reveal {
   opacity: 0;
-  transform: translateY(18px);
-  transition: opacity 0.55s cubic-bezier(0.16,1,0.3,1), transform 0.55s cubic-bezier(0.16,1,0.3,1);
+  transform: translateY(22px);
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
   transition-delay: var(--delay, 0ms);
+  will-change: opacity, transform;
+}
+.ag-reveal--up {
+  transform: translateY(28px);
+}
+.ag-reveal--left {
+  transform: translateX(-32px);
+}
+.ag-reveal--right {
+  transform: translateX(32px);
+}
+.ag-reveal--scale {
+  transform: scale(0.92) translateY(16px);
 }
 .ag-reveal--in {
-  opacity: 1;
-  transform: translateY(0);
+  opacity: 1 !important;
+  transform: translate(0, 0) scale(1) !important;
 }
 
 /* ── Float animations ── */
@@ -1966,13 +2419,14 @@ const faqs = [
 .ag-phone__incident-status { font-size: 0.45rem; color: #D97706; margin-top: 3px; font-weight: 600; }
 
 /* ══════════════════════════════════════════════════════════════
-   TRUST LOGOS
+   TRUST LOGOS (INFINITE MARQUEE)
 ══════════════════════════════════════════════════════════════ */
 .ag-trust {
-  padding: 2.75rem 0;
+  padding: 2.25rem 0;
   border-top: 1px solid #E2E8F0;
   border-bottom: 1px solid #E2E8F0;
   background: #F8FAFC;
+  overflow: hidden;
 }
 .ag-trust__label {
   text-align: center;
@@ -1981,25 +2435,71 @@ const faqs = [
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: #94A3B8;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
-.ag-trust__logos {
+.ag-trust__marquee {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
   display: flex;
-  flex-wrap: wrap;
+}
+.ag-trust__fade {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 120px;
+  z-index: 2;
+  pointer-events: none;
+}
+.ag-trust__fade--left {
+  left: 0;
+  background: linear-gradient(90deg, #F8FAFC 0%, transparent 100%);
+}
+.ag-trust__fade--right {
+  right: 0;
+  background: linear-gradient(270deg, #F8FAFC 0%, transparent 100%);
+}
+.ag-trust__track {
+  display: flex;
+  width: max-content;
+  animation: agMarqueeScroll 28s linear infinite;
+  will-change: transform;
+}
+.ag-trust__track:hover {
+  animation-play-state: paused;
+}
+.ag-trust__group {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 2.5rem;
+  gap: 3rem;
+  padding-right: 3rem;
 }
-.ag-trust__logo {
-  font-size: 0.875rem;
+.ag-trust__logo-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9375rem;
   font-weight: 700;
-  color: #CBD5E1;
-  letter-spacing: 0.05em;
+  color: #64748B;
+  letter-spacing: 0.04em;
   text-transform: uppercase;
-  transition: color 0.2s;
-  cursor: default;
+  transition: color 0.2s, transform 0.2s;
+  cursor: pointer;
+  white-space: nowrap;
 }
-.ag-trust__logo:hover { color: #94A3B8; }
+.ag-trust__logo-item:hover {
+  color: #1B4FD8;
+  transform: translateY(-1px);
+}
+.ag-trust__icon {
+  font-size: 1rem;
+  opacity: 0.75;
+}
+
+@keyframes agMarqueeScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-33.333333%); }
+}
 
 /* ══════════════════════════════════════════════════════════════
    SECTION BASE
@@ -2241,12 +2741,19 @@ const faqs = [
   position: relative;
   z-index: 1;
 }
+.ag-how__step-num-wrap {
+  margin-bottom: 0.75rem;
+}
 .ag-how__step-num {
-  font-size: 0.6875rem;
+  display: inline-block;
+  font-size: 0.75rem;
   font-weight: 900;
-  color: #CBD5E1;
+  color: #1B4FD8;
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  padding: 2px 10px;
+  border-radius: 999px;
   letter-spacing: 0.08em;
-  margin-bottom: 1rem;
 }
 .ag-how__step-icon {
   width: 64px;
@@ -2258,9 +2765,15 @@ const faqs = [
   justify-content: center;
   color: #1B4FD8;
   margin-bottom: 1.25rem;
-  transition: background 0.2s, transform 0.2s;
+  transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
+  box-shadow: 0 4px 12px rgba(27, 79, 216, 0.08);
 }
-.ag-how__step:hover .ag-how__step-icon { background: #DBEAFE; transform: scale(1.05); }
+.ag-how__step:hover .ag-how__step-icon {
+  background: #1B4FD8;
+  color: white;
+  transform: translateY(-4px) scale(1.08);
+  box-shadow: 0 8px 24px rgba(27, 79, 216, 0.25);
+}
 .ag-how__step-label {
   font-size: 0.6875rem;
   font-weight: 800;
@@ -2271,18 +2784,37 @@ const faqs = [
 .ag-how__step-title { font-size: 1.0625rem; font-weight: 700; color: #0A1628; margin-bottom: 0.5rem; }
 .ag-how__step-desc { font-size: 0.875rem; color: #64748B; line-height: 1.65; max-width: 260px; }
 
-/* connectors */
+/* connectors with glowing laser energy pulse */
 .ag-how__connector {
   display: none;
   position: absolute;
   top: calc(2.5rem + 32px); /* center of icon */
-  height: 1px;
+  height: 2px;
   background: #E2E8F0;
   z-index: 0;
+  overflow: hidden;
 }
 @media (min-width: 768px) { .ag-how__connector { display: block; } }
 .ag-how__connector--1 { left: 33.33%; width: 33.33%; }
 .ag-how__connector--2 { left: 66.66%; width: 33.33%; }
+
+.ag-how__connector-beam {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 60px;
+  background: linear-gradient(90deg, transparent, #1B4FD8, #38BDF8, transparent);
+  box-shadow: 0 0 8px #38BDF8;
+  animation: agBeamTravel 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+.ag-how__connector--2 .ag-how__connector-beam {
+  animation-delay: 1.25s;
+}
+
+@keyframes agBeamTravel {
+  0% { left: -60px; }
+  100% { left: 100%; }
+}
 
 /* ══════════════════════════════════════════════════════════════
    GUARD APP
@@ -2687,5 +3219,379 @@ const faqs = [
   font-size: 0.9375rem;
   color: #475569;
   line-height: 1.7;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PREMIUM ROUTE GLOW & MICRO-ANIMATIONS
+══════════════════════════════════════════════════════════════ */
+.ag-route-glow-path {
+  stroke-dasharray: 400;
+  stroke-dashoffset: 400;
+  animation: agDrawRoute 4s ease-in-out infinite alternate;
+}
+
+@keyframes agDrawRoute {
+  0% { stroke-dashoffset: 400; }
+  100% { stroke-dashoffset: 0; }
+}
+
+.ag-btn--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(27, 79, 216, 0.35);
+}
+
+.ag-feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(27, 79, 216, 0.08);
+  border-color: rgba(27, 79, 216, 0.3);
+}
+
+.ag-phone__laser {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(to right, transparent, #22C55E, #38BDF8, transparent);
+  box-shadow: 0 0 12px #22C55E;
+  animation: agLaserScan 0.9s ease-in-out infinite;
+  z-index: 20;
+}
+
+@keyframes agLaserScan {
+  0% { top: 10%; opacity: 0; }
+  50% { opacity: 1; }
+  100% { top: 90%; opacity: 0; }
+}
+
+.ag-phone__toast {
+  position: absolute;
+  bottom: -32px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #22C55E;
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 4px 12px;
+  border-radius: 999px;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
+  white-space: nowrap;
+}
+
+/* ── 3D Parallax Tilt Smoothing ── */
+.ag-parallax-container {
+  perspective: 1200px;
+  transform-style: preserve-3d;
+}
+
+.ag-hero__dash, .ag-hero__phone {
+  transition: transform 0.18s cubic-bezier(0.2, 0, 0.2, 1);
+  will-change: transform;
+}
+
+/* ── Radar Sweep & Sonar Pulse ── */
+.ag-radar-sweep {
+  position: absolute;
+  inset: -50%;
+  background: conic-gradient(from 0deg at 50% 50%, rgba(27, 79, 216, 0.12) 0deg, transparent 60deg, transparent 360deg);
+  animation: agRadarRotate 6s linear infinite;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes agRadarRotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.ag-sonar-pulse {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 2px solid rgba(27, 79, 216, 0.6);
+  animation: agSonarWave 2s cubic-bezier(0.1, 0.8, 0.3, 1) infinite;
+}
+
+@keyframes agSonarWave {
+  0% { transform: scale(0.6); opacity: 1; }
+  100% { transform: scale(2.6); opacity: 0; }
+}
+
+/* ── Spotlight Hover Glow ── */
+.ag-spotlight-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.ag-spotlight-glow {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  background: radial-gradient(400px circle at var(--mouse-x, 0px) var(--mouse-y, 0px), rgba(27, 79, 216, 0.08), transparent 80%);
+  transition: opacity 0.3s ease;
+  z-index: 0;
+}
+
+.ag-spotlight-card:hover .ag-spotlight-glow {
+  opacity: 1;
+}
+
+/* ── Live Dynamic Feed Transitions ── */
+.ag-live-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #059669;
+  background: #ECFDF5;
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.ag-live-indicator__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #059669;
+  box-shadow: 0 0 6px #059669;
+  animation: livePulse 1.4s ease-in-out infinite;
+}
+
+.ag-feed-list-enter-active,
+.ag-feed-list-leave-active {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ag-feed-list-enter-from {
+  opacity: 0;
+  transform: translateY(-16px) scale(0.95);
+  background: #EFF6FF;
+}
+
+.ag-feed-list-leave-to {
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   7-DAY FREE TRIAL STYLING
+══════════════════════════════════════════════════════════════ */
+.ag-eyebrow-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  padding: 4px 12px 4px 4px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #1B4FD8;
+  margin-bottom: 1rem;
+  width: fit-content;
+}
+
+.ag-eyebrow-pill__badge {
+  background: #1B4FD8;
+  color: white;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
+
+.ag-hero__trial-note {
+  font-size: 0.8rem;
+  color: #64748B;
+  font-weight: 600;
+  margin-top: -8px;
+  margin-bottom: 1.25rem;
+}
+
+.ag-pricing__sub-note {
+  font-size: 0.95rem;
+  color: #64748B;
+  margin-top: 0.5rem;
+}
+
+.ag-trial-banner {
+  position: relative;
+  background: linear-gradient(135deg, #0F172A 0%, #1E293B 60%, #1B4FD8 100%);
+  border-radius: 16px;
+  padding: clamp(24px, 3.5vw, 36px);
+  color: white;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+  box-shadow: 0 16px 36px -10px rgba(15, 23, 42, 0.25);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ag-trial-banner__glow {
+  position: absolute;
+  top: -50%;
+  right: 10%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.25) 0%, transparent 70%);
+  filter: blur(50px);
+  pointer-events: none;
+}
+
+.ag-trial-banner__left {
+  max-width: 680px;
+  position: relative;
+  z-index: 1;
+}
+
+.ag-trial-banner__tag {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #38BDF8;
+  background: rgba(56, 189, 248, 0.12);
+  padding: 3px 9px;
+  border-radius: 6px;
+  margin-bottom: 0.6rem;
+}
+
+.ag-trial-banner__title {
+  font-size: clamp(1.25rem, 2vw, 1.75rem);
+  font-weight: 800;
+  line-height: 1.25;
+  margin-bottom: 0.5rem;
+}
+
+.ag-trial-banner__desc {
+  font-size: 0.92rem;
+  color: #CBD5E1;
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+
+.ag-trial-banner__perks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #93C5FD;
+}
+
+.ag-trial-banner__right {
+  position: relative;
+  z-index: 1;
+}
+
+.ag-price-card__trial-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #059669;
+  background: #ECFDF5;
+  border: 1px solid #A7F3D0;
+  padding: 3px 8px;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+}
+
+.ag-price-card__subtext {
+  text-align: center;
+  font-size: 0.75rem;
+  color: #64748B;
+  font-weight: 500;
+  margin-top: 0.5rem;
+}
+
+.ag-cta__badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #93C5FD;
+  background: rgba(147, 197, 253, 0.15);
+  padding: 4px 12px;
+  border-radius: 999px;
+  margin-bottom: 1rem;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   13. BACK TO TOP FLOATING BUTTON WITH CIRCULAR PROGRESS RING
+══════════════════════════════════════════════════════════════ */
+.ag-back-to-top {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 8px 24px rgba(10, 22, 40, 0.14), 0 2px 6px rgba(10, 22, 40, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 990;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(16px) scale(0.85);
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s, background 0.2s, box-shadow 0.2s;
+}
+
+.ag-back-to-top--visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+.ag-back-to-top:hover {
+  background: #EFF6FF;
+  box-shadow: 0 12px 32px rgba(27, 79, 216, 0.22);
+  transform: translateY(-3px) scale(1.05);
+}
+
+.ag-back-to-top__ring {
+  position: absolute;
+  inset: -2px;
+  width: calc(100% + 4px);
+  height: calc(100% + 4px);
+  transform: rotate(-90deg);
+  pointer-events: none;
+}
+
+.ag-back-to-top__ring-bg {
+  fill: none;
+  stroke: rgba(226, 232, 240, 0.6);
+  stroke-width: 2.8;
+}
+
+.ag-back-to-top__ring-fill {
+  fill: none;
+  stroke: #1B4FD8;
+  stroke-width: 2.8;
+  stroke-linecap: round;
+  transition: stroke-dasharray 0.15s ease;
+}
+
+.ag-back-to-top__icon {
+  color: #1B4FD8;
+  position: relative;
+  z-index: 1;
+  transition: transform 0.2s ease;
+}
+
+.ag-back-to-top:hover .ag-back-to-top__icon {
+  transform: translateY(-2px);
 }
 </style>

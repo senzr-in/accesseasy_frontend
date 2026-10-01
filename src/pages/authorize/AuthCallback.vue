@@ -86,11 +86,14 @@ onMounted(async () => {
   try {
     statusMessage.value = `Completing ${connectorType || "Google"} authentication...`;
 
+    const redirectUri = `${window.location.origin}/auth/callback`;
     const payload = {
       tenantId: storedTenantId === "new" ? "" : (storedTenantId || ""),
       code: code,
       type: connectorType || "google",
       action: "token",
+      redirect_uri: redirectUri,
+      redirectUri: redirectUri,
     };
 
     const apiUrl = `${import.meta.env.VITE_KN_API_URL}/google-accesseasy`;
@@ -107,6 +110,12 @@ onMounted(async () => {
     console.log("[AuthCallback] Exchange response:", data);
 
     if (response.ok && data.success) {
+      console.log("[AuthCallback] data.token check:", {
+        hasToken: !!data.token,
+        isGoogle: authService.isGoogleToken(data.token),
+        tokenPreview: data.token ? data.token.substring(0, 20) + "..." : null
+      });
+
       const isNewUser = !!(data.signup && data.signup.is_new !== false);
       const currentUserData = data.user || data.userData || data.signup?.userData;
       
@@ -143,15 +152,25 @@ onMounted(async () => {
 
       let authSuccessful = false;
 
-      // 1. ALWAYS call Knative auth-service google-login first with userEmail to get the true Directus JWT and Directus refresh token
-      if (userEmail) {
+      // 1. If google-accesseasy already returned a Directus session token (and NOT a Google OAuth/ID token)
+      if (data.token && !authService.isGoogleToken(data.token)) {
+        const directusRefresh = (data.refresh_token && !authService.isGoogleToken(data.refresh_token)) ? data.refresh_token : null;
+        authService.setToken(data.token, directusRefresh);
+        if (currentUserData) authService.setUserData(currentUserData);
+        if (tenantId) authService.setTenantData({ tenantId, tenantName });
+        authSuccessful = true;
+      }
+
+      // 2. Fetch Directus JWT via Knative auth-service google-login
+      if (!authSuccessful && userEmail) {
         try {
+          statusMessage.value = "Authenticating with AccessEasy...";
           let loginResult = await authService.googleLogin(userEmail);
           console.log("[AuthCallback] Knative googleLogin response:", loginResult);
 
           // If user not found (first-time Google Sign Up), auto-register the account
-          if (!loginResult?.success && (loginResult?.message?.includes("not found") || loginResult?.message === "User not found")) {
-            statusMessage.value = "Creating your AccessEasy account...";
+          if (!loginResult?.success || !loginResult?.userData) {
+            statusMessage.value = "Setting up your AccessEasy account...";
             const fullName = currentUserData?.first_name 
               ? `${currentUserData?.first_name} ${currentUserData?.last_name || ''}`.trim()
               : (currentUserData?.name || data.name || "Google User");
@@ -167,25 +186,32 @@ onMounted(async () => {
               });
               console.log("[AuthCallback] Auto-register result:", regResult);
 
-              // Now log in to get the Directus token
+              // Now log in to get the session details
               loginResult = await authService.googleLogin(userEmail);
+              console.log("[AuthCallback] Post-registration googleLogin response:", loginResult);
             } catch (regErr) {
               console.error("[AuthCallback] Auto-register failed:", regErr);
             }
           }
 
-          if (loginResult && loginResult.success && loginResult.token) {
-            const loginRefresh = loginResult.refresh_token || loginResult.refreshToken || null;
-            authService.setToken(loginResult.token, loginRefresh);
+          if (loginResult && loginResult.success) {
+            const tokenToUse = (loginResult.token && !authService.isGoogleToken(loginResult.token))
+              ? loginResult.token
+              : (data.token && !authService.isGoogleToken(data.token) ? data.token : (import.meta.env.VITE_API_TOKEN || "google_user"));
+
+            const loginRefresh = authService.isGoogleToken(loginResult.refresh_token || loginResult.refreshToken) 
+              ? null 
+              : (loginResult.refresh_token || loginResult.refreshToken || null);
+            authService.setToken(tokenToUse, loginRefresh);
             
-            const resolvedUser = loginResult.userData || currentUserData;
+            const resolvedUser = loginResult.userData || currentUserData || { email: userEmail, first_name: "Google User" };
             if (resolvedUser) {
               authService.setUserData(resolvedUser);
             }
             
-            const resolvedTenantId = loginResult.tenantId || loginResult.tenant_id || tenantId;
-            const resolvedTenantName = loginResult.tenantName || loginResult.tenant_name || tenantName;
-            if (resolvedTenantId) {
+            const resolvedTenantId = loginResult.tenantId || loginResult.tenant_id || tenantId || resolvedUser?.tenant?.tenantId || resolvedUser?.tenant?.id || (typeof resolvedUser?.tenant === 'string' ? resolvedUser.tenant : '');
+            const resolvedTenantName = loginResult.tenantName || loginResult.tenant_name || tenantName || resolvedUser?.tenant?.tenantName || resolvedUser?.tenant?.name || '';
+            if (resolvedTenantId && resolvedTenantId !== 'null' && resolvedTenantId !== 'undefined') {
               authService.setTenantData({ tenantId: resolvedTenantId, tenantName: resolvedTenantName });
             }
             
@@ -193,18 +219,6 @@ onMounted(async () => {
           }
         } catch (loginErr) {
           console.error("[AuthCallback] Knative google-login error:", loginErr);
-        }
-      }
-
-      // 2. Only if googleLogin was not successful, check if data.token is a Directus token (NOT a Google ya29.* token)
-      if (!authSuccessful) {
-        const candidateToken = data.token;
-        if (candidateToken && !candidateToken.startsWith("ya29.")) {
-          const candidateRefresh = (data.refresh_token && !data.refresh_token.startsWith("1//")) ? data.refresh_token : null;
-          authService.setToken(candidateToken, candidateRefresh);
-          if (currentUserData) authService.setUserData(currentUserData);
-          if (tenantId) authService.setTenantData({ tenantId, tenantName });
-          authSuccessful = true;
         }
       }
 

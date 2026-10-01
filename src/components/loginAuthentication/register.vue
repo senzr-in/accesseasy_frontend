@@ -673,15 +673,21 @@ async function handleRegistration() {
 async function signupWithGoogle() {
   try {
     sessionStorage.setItem("connector_type", "google");
+    sessionStorage.setItem("tenant_id", "new");
     googleLoading.value = true;
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 45000);
 
+    const redirectUri = `${window.location.origin}/auth/callback`;
     const response = await fetch(`${import.meta.env.VITE_KN_API_URL}/google-accesseasy`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ type: "google" }),
+      body: JSON.stringify({ 
+        type: "google",
+        redirect_uri: redirectUri,
+        redirectUri: redirectUri 
+      }),
       signal: controller.signal,
     });
     clearTimeout(timeoutId);

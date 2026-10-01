@@ -74,17 +74,8 @@
     <header class="navbar" :class="{ 'navbar-scrolled': isScrolled }">
       <div class="nav-container">
         <a href="#" class="brand-logo" @click.prevent="scrollToSection('hero')">
-          <div class="logo-shield">
-            <svg width="22" height="24" viewBox="0 0 26 30" fill="none">
-              <path d="M13 0L0.5 5V15C0.5 22.5 6.1 29.4 13 30C19.9 29.4 25.5 22.5 25.5 15V5L13 0Z" fill="url(#shieldGrad)"/>
-              <path d="M9 15.5L11.8 18.3L17.5 11.5" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-              <defs>
-                <linearGradient id="shieldGrad" x1="0" y1="0" x2="26" y2="30">
-                  <stop offset="0%" stop-color="#38BDF8"/>
-                  <stop offset="100%" stop-color="#1B4FD8"/>
-                </linearGradient>
-              </defs>
-            </svg>
+          <div class="logo-shield p-1">
+            <img src="/images/logoPatrol.png" alt="AccessEasy Patrol" class="w-full h-full object-contain" />
           </div>
           <div class="brand-titles">
             <span class="brand-text">AccessEasy <span class="brand-highlight">PATROL</span></span>

@@ -2796,7 +2796,9 @@ onMounted(async () => {
     const tenantIdPk = tenantData?.id;
 
     const validTenantSet = new Set(
-      [tenantId, tenantIdStr, tenantIdPk].filter(Boolean).map(String)
+      [tenantId, tenantIdStr, tenantIdPk]
+        .filter(t => t && t !== 'null' && t !== 'undefined' && String(t).trim() !== '')
+        .map(String)
     );
 
     const userFieldList = [

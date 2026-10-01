@@ -1263,7 +1263,9 @@ const fetchStaticMetadata = async () => {
     const apiUrl = import.meta.env.VITE_API_URL;
 
     const validTenantSet = new Set(
-      [tenantId, tenantIdStr, tenantIdPk].filter(Boolean).map(String)
+      [tenantId, tenantIdStr, tenantIdPk]
+        .filter(t => t && t !== 'null' && t !== 'undefined' && String(t).trim() !== '')
+        .map(String)
     );
 
     if (token && validTenantSet.size > 0) {

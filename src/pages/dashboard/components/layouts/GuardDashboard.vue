@@ -396,7 +396,7 @@
         </p>
         <button
           class="shrink-0 px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white text-xs font-bold transition-all cursor-pointer shadow-sm shadow-indigo-600/30"
-          @click="$router.push({ name: 'Guards' })"
+          @click="$router.push({ name: 'Patrols' })"
         >
           Get Started →
         </button>
@@ -1737,13 +1737,11 @@ const loadDashboardData = async () => {
 
     // 2. Guards
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_URL}/users?filter[tenant][_eq]=${tenantId}&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=status&fields[]=phone&fields[]=title&fields[]=role.name&fields[]=avatar&limit=500`,
-        { headers: { Authorization: `Bearer ${token}` } }
+      const res = await authService.protectedApi.get(
+        `/users?filter[tenant][_eq]=${tenantId}&fields[]=id&fields[]=first_name&fields[]=last_name&fields[]=status&fields[]=phone&fields[]=title&fields[]=role.name&fields[]=avatar&limit=500`
       );
-      if (res.ok) {
-        const udata = await res.json();
-        allGuards.value = (udata.data || []).filter(u => {
+      if (res.data?.data) {
+        allGuards.value = (res.data.data || []).filter(u => {
           const r = (u.role?.name || '').toLowerCase();
           return !r.includes('admin') && !r.includes('administrator');
         });

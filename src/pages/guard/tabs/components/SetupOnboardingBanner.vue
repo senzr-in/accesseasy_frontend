@@ -278,7 +278,7 @@
                   v-model="zoneForm.siteId"
                   class="w-full h-9 px-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 font-medium outline-none focus:border-indigo-500 shadow-sm"
                 >
-                  <option value="">Primary Site</option>
+                  <option value="">Select Site (Optional)</option>
                   <option v-for="site in availableSites" :key="site.id" :value="site.id">
                     {{ site.name || site.branchName }}
                   </option>
@@ -787,7 +787,9 @@ const fetchMetadata = async () => {
     const apiUrl = import.meta.env.VITE_API_URL;
 
     const validTenantSet = new Set(
-      [tenantId, tenantIdStr, tenantIdPk].filter(Boolean).map(String)
+      [tenantId, tenantIdStr, tenantIdPk]
+        .filter(t => t && t !== 'null' && t !== 'undefined' && String(t).trim() !== '')
+        .map(String)
     );
 
     if (token && validTenantSet.size > 0) {

@@ -158,6 +158,11 @@ const routes = [
     component: LandingPage2,
   },
   {
+    path: "/pro-landing",
+    name: "ProLandingShowcase",
+    component: () => import("@/pages/landing/ProLandingShowcase.vue"),
+  },
+  {
     path: "/dealer-dashboard",
     name: "DealerDashboard",
     component: EsslDashboard,

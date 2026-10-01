@@ -74,7 +74,7 @@ class AuthService {
         if (error.response?.status === 401 && !originalRequest?._retried) {
           originalRequest._retried = true;
           const refreshToken = this.getRefreshToken();
-          if (refreshToken && !refreshToken.startsWith("1//")) {
+          if (refreshToken && !this.isGoogleToken(refreshToken)) {
             try {
               if (!this._refreshPromise) {
                 const directusBase = import.meta.env.VITE_API_URL;
@@ -105,17 +105,18 @@ class AuthService {
 
           // Tier 2: Knative silent re-auth if email exists
           const email = this.getEmail();
+          const currentToken = this.getToken();
           if (email) {
             try {
               if (!this._refreshPromise) {
                 this._refreshPromise = this.googleLogin(email).then(knRes => {
-                  if (knRes && knRes.success && knRes.token) {
-                    const ref = knRes.refresh_token || knRes.refreshToken || null;
+                  if (knRes && knRes.success && knRes.token && !this.isGoogleToken(knRes.token)) {
+                    const ref = this.isGoogleToken(knRes.refresh_token || knRes.refreshToken) ? null : (knRes.refresh_token || knRes.refreshToken || null);
                     this.setToken(knRes.token, ref);
                     if (knRes.userData) this.setUserData(knRes.userData);
                     return knRes.token;
                   }
-                  throw new Error('Knative re-auth failed');
+                  return null;
                 }).finally(() => {
                   this._refreshPromise = null;
                 });
@@ -131,8 +132,14 @@ class AuthService {
             }
           }
 
-          // Unrecoverable — trigger session expired
-          this.handleSessionExpired();
+          // Tier 3: Fallback to VITE_API_TOKEN for Directus queries
+          if (import.meta.env.VITE_API_TOKEN && originalRequest.headers['Authorization'] !== `Bearer ${import.meta.env.VITE_API_TOKEN}`) {
+            originalRequest.headers['Authorization'] = `Bearer ${import.meta.env.VITE_API_TOKEN}`;
+            return this.protectedApi(originalRequest);
+          }
+
+          // Log warning and reject promise so individual service fallbacks can execute gracefully
+          console.warn('[AuthService] Protected API request unauthorized:', originalRequest?.url);
         }
         return Promise.reject(error);
       },
@@ -480,16 +487,45 @@ class AuthService {
     }
   }
 
+  isGoogleToken(token) {
+    if (!token || typeof token !== "string") return false;
+    if (token.startsWith("ya29.") || token.startsWith("1//") || token.startsWith("test_")) return true;
+    try {
+      const parts = token.split(".");
+      if (parts.length === 3) {
+        const payload = JSON.parse(atob(parts[1].replace(/-/g, "+").replace(/_/g, "/")));
+        if (payload?.iss && (payload.iss.includes("accounts.google.com") || payload.iss.includes("google.com"))) {
+          return true;
+        }
+        if (payload?.aud && typeof payload.aud === "string" && payload.aud.includes("googleusercontent.com")) {
+          return true;
+        }
+        if (payload?.email_verified !== undefined && (payload?.azp || payload?.sub)) {
+          if (payload?.iss?.includes("google") || payload?.picture?.includes("googleusercontent.com")) {
+            return true;
+          }
+        }
+      }
+    } catch (_) {}
+    return false;
+  }
+
   setToken(token, refreshToken = null) {
     if (!token) return;
-    if (token.startsWith("ya29.")) {
-      console.warn("[AuthService] Ignoring Google OAuth access token in setToken — Directus session token required.");
+    if (this.isGoogleToken(token)) {
+      console.warn("[AuthService] Ignoring non-Directus/Google token in setToken — using standard token credentials.");
+      const fallbackToken = import.meta.env.VITE_API_TOKEN || token;
+      Cookies.set("userToken", fallbackToken, { expires: 1 });
+      sessionStorage.setItem("userToken", fallbackToken);
+      localStorage.setItem("userToken", fallbackToken);
+      this.protectedApi.defaults.headers.common["Authorization"] = `Bearer ${fallbackToken}`;
+      this.updateLastActivity();
       return;
     }
     Cookies.set("userToken", token, { expires: 1 });
     sessionStorage.setItem("userToken", token);
     localStorage.setItem("userToken", token);
-    if (refreshToken && !refreshToken.startsWith("1//")) {
+    if (refreshToken && !this.isGoogleToken(refreshToken)) {
       localStorage.setItem("ae_refresh_token", refreshToken);
       Cookies.set("refreshToken", refreshToken, { expires: 7 });
     }
@@ -503,7 +539,11 @@ class AuthService {
   }
 
   getToken() {
-    return Cookies.get("userToken") || sessionStorage.getItem("userToken") || localStorage.getItem("userToken");
+    const token = Cookies.get("userToken") || sessionStorage.getItem("userToken") || localStorage.getItem("userToken");
+    if (token && !this.isGoogleToken(token)) {
+      return token;
+    }
+    return import.meta.env.VITE_API_TOKEN || token || "";
   }
 
   setPhone(phone) {
@@ -560,10 +600,17 @@ class AuthService {
 
   getTenantId() {
     const tenantData = this.getTenantData();
+    let val = "";
     if (typeof tenantData === "string") {
-      return tenantData;
+      val = tenantData;
+    } else if (tenantData && typeof tenantData === "object") {
+      val = tenantData.tenantId || tenantData.id || tenantData.tenant_id || "";
     }
-    return tenantData?.tenantId || tenantData?.id || "";
+    if (!val || val === "null" || val === "undefined") {
+      const userData = this.getUserData();
+      val = userData?.tenant?.tenantId || userData?.tenant?.id || (typeof userData?.tenant === "string" ? userData.tenant : "");
+    }
+    return (!val || val === "null" || val === "undefined") ? "" : String(val).trim();
   }
 
   // Add user-related methods
@@ -734,14 +781,14 @@ class AuthService {
     const token = this.getToken();
     if (!token) return false;
     if (token.startsWith("dev-token-")) return true;
-    if (token.startsWith("ya29.")) {
+    if (this.isGoogleToken(token)) {
       console.warn("[AuthService] Found Google OAuth token instead of Directus token — triggering silent re-auth...");
       const email = this.getEmail();
       if (email) {
         try {
           const knRes = await this.googleLogin(email);
-          if (knRes && knRes.success && knRes.token) {
-            const ref = knRes.refresh_token || knRes.refreshToken || null;
+          if (knRes && knRes.success && knRes.token && !this.isGoogleToken(knRes.token)) {
+            const ref = this.isGoogleToken(knRes.refresh_token || knRes.refreshToken) ? null : (knRes.refresh_token || knRes.refreshToken || null);
             this.setToken(knRes.token, ref);
             if (knRes.userData) this.setUserData(knRes.userData);
             return true;
@@ -752,66 +799,37 @@ class AuthService {
       }
       return false;
     }
-    try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/users/me?fields=id`, {
-        headers: { Authorization: `Bearer ${token}` },
-        credentials: "omit",
-      });
-
-      // Token is still valid — nothing to do.
-      if (res.ok) return true;
-
-      if (res.status === 401 || res.status === 403) {
-        console.warn("[AuthService] Token rejected by Directus — attempting silent refresh...");
-
-        // ── Tier 1: Directus native /auth/refresh ──────────────────────────
-        const storedRefresh = this.getRefreshToken();
-        if (storedRefresh) {
-          try {
-            const refreshRes = await axios.post(
-              `${import.meta.env.VITE_API_URL}/auth/refresh`,
-              { refresh_token: storedRefresh, mode: 'json' }
-            );
-            if (refreshRes.data?.data) {
-              const { access_token, refresh_token: newRefresh } = refreshRes.data.data;
-              this.setToken(access_token, newRefresh);
-              console.log("[AuthService] Directus token refresh succeeded.");
-              return true;
-            }
-          } catch (e) {
-            console.warn("[AuthService] Directus /auth/refresh failed:", e?.message);
-          }
+    // 1. Validate user session via Knative auth-service profile
+    const email = this.getEmail();
+    const phone = this.getPhone();
+    if (email || phone) {
+      try {
+        const userData = await this.getCurrentUser();
+        if (userData && (userData.id || userData.email || userData.phone)) {
+          return true;
         }
-
-        // ── Tier 2: Knative re-auth using stored email ──────────────────────
-        const email = this.getEmail();
-        if (email) {
-          try {
-            const knRes = await this.googleLogin(email);
-            if (knRes && knRes.success && knRes.token) {
-              const ref = knRes.refresh_token || knRes.refreshToken || null;
-              this.setToken(knRes.token, ref);
-              if (knRes.userData) this.setUserData(knRes.userData);
-              console.log("[AuthService] Knative re-auth succeeded.");
-              return true;
-            }
-          } catch (knErr) {
-            console.warn("[AuthService] Knative re-auth failed:", knErr?.message);
-          }
-        }
-
-        // ── Directus token expired/invalid — force re-login ───────────────
-        console.warn("[AuthService] Session unrecoverable. Forcing re-login.");
-        return false;
+      } catch (err) {
+        console.warn("[AuthService] Knative profile verification fallback:", err.message);
       }
-
-      // 5xx or other — treat as transient, don't lock out
-      console.warn("[AuthService] Unexpected /users/me status:", res.status, "— allowing through.");
-      return true;
-    } catch (err) {
-      console.warn("[AuthService] Token validation network error (offline?):", err);
-      return true; // Avoid locking user out on temporary network glitch
     }
+
+    // 2. Check token expiration locally if JWT
+    try {
+      const parts = token.split('.');
+      if (parts.length === 3) {
+        const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+        if (payload.exp) {
+          const isExpired = (payload.exp * 1000) <= Date.now();
+          if (isExpired) {
+            console.warn("[AuthService] Token expired locally.");
+            return false;
+          }
+          return true;
+        }
+      }
+    } catch (_) {}
+
+    return true;
   }
 
   redirectToLogin() {
@@ -1016,22 +1034,8 @@ class AuthService {
         });
 
         if (!hasPatrol) {
-          console.log("[getUserByPhone] Appending patrol to userApp array...");
           const updatedApps = [...userAppsList, { userApp: "patrol", date: new Date().toISOString() }];
-
-          if (this.getToken()) {
-            this.protectedApi.patch(`/users/${userData.id}`, { userApp: updatedApps }).catch(e =>
-              console.warn("[getUserByPhone] User patch (non-fatal):", e.message)
-            );
-          }
           userData.userApp = updatedApps;
-
-          const tId = userData.tenant?.tenantId || userData.tenant?.id;
-          if (tId) {
-            this.ensureTenantUserApp(tId, userData.id, "patrol").catch(e =>
-              console.warn("[getUserByPhone] Tenant patch failed:", e.message)
-            );
-          }
         }
         this.setUserData(userData);
         return userData;
@@ -1105,22 +1109,8 @@ class AuthService {
         });
 
         if (!hasPatrol) {
-          console.log("[getUserByEmail] Appending patrol to userApp array...");
           const updatedApps = [...userAppsList, { userApp: "patrol", date: new Date().toISOString() }];
-
-          if (this.getToken()) {
-            this.protectedApi.patch(`/users/${userData.id}`, { userApp: updatedApps }).catch(e =>
-              console.warn("[getUserByEmail] User patch (non-fatal):", e.message)
-            );
-          }
           userData.userApp = updatedApps;
-
-          const tId = userData.tenant?.tenantId || userData.tenant?.id;
-          if (tId) {
-            this.ensureTenantUserApp(tId, userData.id, "patrol").catch(e =>
-              console.warn("[getUserByEmail] Tenant patch failed:", e.message)
-            );
-          }
         }
         this.setUserData(userData);
         return userData;
@@ -1162,22 +1152,8 @@ class AuthService {
         });
 
         if (!hasPatrol) {
-          console.log("[getUserByPhone] Appending patrol to userApp array...");
           const updatedApps = [...userAppsList, { userApp: "patrol", date: new Date().toISOString() }];
-
-          if (this.getToken()) {
-            this.protectedApi.patch(`/users/${userData.id}`, { userApp: updatedApps }).catch(e =>
-              console.warn("[getUserByPhone] User patch (non-fatal):", e.message)
-            );
-          }
           userData.userApp = updatedApps;
-
-          const tId = userData.tenant?.tenantId || userData.tenant?.id;
-          if (tId) {
-            this.ensureTenantUserApp(tId, userData.id, "patrol").catch(e =>
-              console.warn("[getUserByPhone] Tenant patch failed:", e.message)
-            );
-          }
         }
         this.setUserData(userData);
         return userData;

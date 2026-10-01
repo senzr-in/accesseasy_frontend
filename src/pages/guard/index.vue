@@ -183,15 +183,6 @@
             <UserPlus class="w-4 h-4" />
             <span>+ Register Security Officer</span>
           </button>
-
-          <button
-            type="button"
-            class="px-5 py-2.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold border border-slate-200 dark:border-slate-700 transition-all flex items-center gap-2 cursor-pointer shadow-xs"
-            @click="loadDemoGuards"
-          >
-            <Sparkles class="w-4 h-4 text-amber-500" />
-            <span>Load Sample Guards (Demo)</span>
-          </button>
         </div>
       </div>
 
@@ -1707,7 +1698,9 @@ const fetchGuards = async () => {
 
     // Collect all valid representations of the current tenant
     const validTenantSet = new Set(
-      [tenantId, tenantIdStr, tenantIdPk].filter(Boolean).map(String)
+      [tenantId, tenantIdStr, tenantIdPk]
+        .filter(t => t && t !== 'null' && t !== 'undefined' && String(t).trim() !== '')
+        .map(String)
     );
 
     if (validTenantSet.size === 0) {
