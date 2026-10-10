@@ -55,6 +55,9 @@ class AuthService {
           if (token) {
             config.headers.Authorization = `Bearer ${token}`;
           }
+          if (config.data && typeof config.data === "object" && !config.data.userApp) {
+            config.data.userApp = "accesseasy";
+          }
           return config;
         },
         (error) => Promise.reject(error),
@@ -496,27 +499,12 @@ class AuthService {
       const response = await this.knApi.post("/auth-service", {
         action: "check-user",
         phone,
+        userApp: "accesseasy",
       });
       return response.data.success === true;
     } catch (error) {
       console.error("Error checking phone:", error);
       return false;
-    }
-  }
-
-  async getUserByPhone(phone) {
-    try {
-      const response = await this.knApi.post("/auth-service", {
-        action: "check-user",
-        phone,
-      });
-      if (response.data?.success && response.data?.userData) {
-        return response.data.userData;
-      }
-      return null;
-    } catch (error) {
-      console.error("Error getting user by phone:", error);
-      return null;
     }
   }
 
@@ -538,6 +526,7 @@ class AuthService {
       const response = await this.knApi.post("/auth-service", {
         action: "check-user",
         phone,
+        userApp: "accesseasy",
       });
       return response.data.success === false && response.data.message === "RESIGNED_USER";
     } catch (error) {
@@ -634,6 +623,7 @@ class AuthService {
         phone: cleanPhone,
         otp,
         sessionUuid,
+        userApp: "accesseasy",
       });
 
       if (!response.data.success) {
@@ -686,6 +676,7 @@ class AuthService {
       const response = await this.knApi.post("/auth-service", {
         action: "get-user-profile",
         phone: formattedPhone,
+        userApp: "accesseasy",
       });
 
       if (response?.data?.success && response.data.userData) {
@@ -830,6 +821,7 @@ class AuthService {
       const response = await this.knApi.post("/auth-service", {
         action: "check-user",
         email,
+        userApp: "accesseasy",
       });
       return response.data.success === true;
     } catch (error) {
@@ -843,6 +835,7 @@ class AuthService {
       const response = await this.knApi.post("/auth-service", {
         action: "check-user",
         email,
+        userApp: "accesseasy",
       });
       return response.data.success === false && response.data.message === "RESIGNED_USER";
     } catch (error) {
@@ -856,6 +849,7 @@ class AuthService {
       const response = await this.knApi.post("/auth-service", {
         action: "get-user-profile",
         email,
+        userApp: "accesseasy",
       });
 
       if (response?.data?.success && response.data.userData) {
@@ -952,6 +946,7 @@ class AuthService {
         email,
         otp,
         sessionUuid,
+        userApp: "accesseasy",
       });
 
       if (!response.data.success) {
@@ -1002,7 +997,8 @@ class AuthService {
     try {
       const payload = {
         action: "verify-forgotpin-otp",
-        otp
+        otp,
+        userApp: "accesseasy"
       };
 
       if (phone) {
@@ -1026,6 +1022,7 @@ class AuthService {
         action: "set-pin",
         userId,
         pin,
+        userApp: "accesseasy",
       });
       return response.data;
     } catch (error) {
@@ -1038,6 +1035,7 @@ class AuthService {
     try {
       const response = await this.knApi.post("/auth-service", {
         action: "register",
+        userApp: "accesseasy",
         ...params,
       });
       return response.data;
@@ -1055,6 +1053,7 @@ class AuthService {
     try {
       const response = await this.knApi.post("/initial-settings", {
         action: "setup-initial-settings",
+        userApp: "accesseasy",
         ...params,
       });
       return response.data;
@@ -1069,6 +1068,7 @@ class AuthService {
       const response = await this.knApi.post("/auth-service", {
         action: "google-login",
         email,
+        userApp: "accesseasy",
       });
       return response.data;
     } catch (error) {
