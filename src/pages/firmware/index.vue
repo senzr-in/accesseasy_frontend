@@ -11,8 +11,18 @@
         </p>
       </div>
 
-      <div class="flex items-center gap-4">
-        <button class="h-10 sm:h-12 px-6 sm:px-8 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-xs tracking-widest uppercase bg-slate-900 border border-slate-800 text-white hover:bg-slate-800 dark:bg-slate-100 dark:bg-slate-950 dark:text-slate-900 dark:text-slate-100 dark:hover:bg-slate-200 gap-2 shadow-xl shadow-slate-900/10 dark:shadow-white/5 active:scale-95 transition-all flex items-center justify-center">
+      <div class="flex items-center gap-3">
+        <button
+          class="h-10 sm:h-12 px-5 sm:px-6 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-xs tracking-widest uppercase bg-sky-600 hover:bg-sky-700 text-white gap-2 shadow-xl shadow-sky-600/20 active:scale-95 transition-all flex items-center justify-center cursor-pointer"
+          @click="showFotaModal = true"
+        >
+          <CloudUpload class="w-4 h-4 sm:w-5 sm:h-5 mr-1" />
+          FOTA Hub
+        </button>
+        <button
+          class="h-10 sm:h-12 px-6 sm:px-8 rounded-xl sm:rounded-2xl font-black text-[10px] sm:text-xs tracking-widest uppercase bg-slate-900 border border-slate-800 text-white hover:bg-slate-800 dark:bg-slate-100 dark:bg-slate-950 dark:text-slate-900 dark:text-slate-100 dark:hover:bg-slate-200 gap-2 shadow-xl shadow-slate-900/10 dark:shadow-white/5 active:scale-95 transition-all flex items-center justify-center cursor-pointer"
+          @click="showFotaModal = true"
+        >
           <Upload class="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
           New Release
         </button>
@@ -236,14 +246,24 @@
         </div>
       </div>
     </div>
+
+    <!-- FOTA Management Modal Popup -->
+    <FotaManagementModal
+      v-model="showFotaModal"
+      device-uuid="all"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import { Upload, Activity, Package, Download, Trash2, ChevronDown, CheckCircle2 } from "lucide-vue-next";
+import { Upload, Activity, Package, Download, Trash2, ChevronDown, CheckCircle2, CloudUpload } from "lucide-vue-next";
+import { fotaService } from "@/services/fotaService";
+import FotaManagementModal from "@/pages/devicesManager/doors/FotaManagementModal.vue";
 
-// Mock data to replicate Next.js initial state
+const showFotaModal = ref(false);
+
+// Releases list
 const firmwareList = ref([
     { version: "1.4.2", hardwareProfileCode: "NVR-8CH-PRO", size: 14502100, lastModified: new Date().toISOString() },
     { version: "1.4.1", hardwareProfileCode: "CAM-BULLET-4K", size: 8402100, lastModified: new Date(Date.now() - 86400000 * 5).toISOString() },
@@ -274,6 +294,36 @@ const latest = ref(null);
 const loading = ref(false);
 const search = ref("");
 
+const fetchFotaData = async () => {
+    loading.value = true;
+    try {
+        const [latestRes, releasesRes] = await Promise.allSettled([
+            fotaService.getLatestRelease(),
+            fotaService.getReleases()
+        ]);
+        if (latestRes.status === "fulfilled" && latestRes.value) {
+            latest.value = latestRes.value;
+        }
+        if (releasesRes.status === "fulfilled" && releasesRes.value?.releases?.length > 0) {
+            const liveList = releasesRes.value.releases.map(r => ({
+                version: r.fileName.replace('.zip', ''),
+                hardwareProfileCode: "CTRL-DOOR-1",
+                size: r.sizeBytes,
+                lastModified: r.lastModified || new Date().toISOString()
+            }));
+            firmwareList.value = [...liveList, ...firmwareList.value];
+        }
+    } catch (e) {
+        console.warn("Could not load Knative FOTA releases:", e);
+    } finally {
+        loading.value = false;
+    }
+};
+
+onMounted(() => {
+    fetchFotaData();
+});
+
 const filteredFirmware = computed(() => {
     return firmwareList.value.filter(fw =>
         fw.version.toLowerCase().includes(search.value.toLowerCase()) ||
@@ -295,3 +345,4 @@ const handleDelete = (fw) => {
     }
 }
 </script>
+

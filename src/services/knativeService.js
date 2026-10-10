@@ -10,6 +10,7 @@
 
 import axios from 'axios';
 import { authService } from './authService.js';
+import { fotaService } from './fotaService.js';
 
 const KNATIVE_BASE_URL = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_KN_API_URL) || 'https://appv1.fieldseasy.com/kn';
 
@@ -181,6 +182,15 @@ class KnativeService {
       isFallback: true,
     };
   }
+
+  /**
+   * Firmware Over-The-Air (FOTA) API methods via Knative fota-service
+   */
+  get fota() {
+    return fotaService;
+  }
 }
 
+export { fotaService } from './fotaService.js';
 export const knativeService = new KnativeService();
+

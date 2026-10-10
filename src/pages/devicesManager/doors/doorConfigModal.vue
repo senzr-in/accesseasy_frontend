@@ -67,7 +67,8 @@
           v-for="tab in [
             { key: 'childInfo', label: channelTabLabel, icon: DoorOpen },
             { key: 'mqttInfo', label: 'MQTT Broker', icon: Radio },
-            { key: 'netInfo', label: 'Network Settings', icon: Network }
+            { key: 'netInfo', label: 'Network Settings', icon: Network },
+            { key: 'fotaInfo', label: 'FOTA Firmware', icon: CloudUpload }
           ]"
           :key="tab.key"
           class="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold border-b-2 transition-all cursor-pointer"
@@ -306,7 +307,121 @@
             >
           </div>
         </div>
+
+        <!-- 4. FOTA Firmware Settings -->
+        <div
+          v-if="activeTab === 'fotaInfo'"
+          class="flex flex-col gap-4 animate-in fade-in duration-200"
+        >
+          <!-- S3 Info Card -->
+          <div class="p-5 rounded-2xl border border-sky-200/70 dark:border-sky-900/40 bg-gradient-to-br from-sky-50/60 via-white to-indigo-50/30 dark:from-sky-950/20 dark:via-zinc-900 dark:to-zinc-900 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
+            <div class="space-y-1">
+              <div class="flex items-center gap-2">
+                <span class="h-2 w-2 rounded-full bg-sky-500 animate-pulse"></span>
+                <span class="text-[10px] font-black text-sky-800 dark:text-sky-300 uppercase tracking-widest">Knative FOTA Service</span>
+                <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-white/80 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700">AWS S3</span>
+              </div>
+              <h4 class="text-sm font-black text-slate-900 dark:text-white">
+                FOTA Over-The-Air Firmware Upgrade
+              </h4>
+              <p class="text-xs text-slate-600 dark:text-zinc-400">
+                Upload firmware bundle (.zip) to S3 bucket and proceed with instant OTA deployment to device <code class="font-mono font-bold text-sky-600 dark:text-sky-400">{{ targetUuid }}</code>.
+              </p>
+            </div>
+            <button
+              type="button"
+              class="px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md shadow-sky-500/20 active:scale-95 transition-all cursor-pointer shrink-0"
+              @click="showFotaManagerModal = true"
+            >
+              <CloudUpload class="w-4 h-4" />
+              <span>Open FOTA Window</span>
+            </button>
+          </div>
+
+          <!-- 3-Step FOTA Proceed Form -->
+          <div class="p-5 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/60 space-y-4 shadow-2xs">
+            <!-- Step 1: Device -->
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                <span class="w-4 h-4 rounded-full bg-sky-500 text-white flex items-center justify-center text-[9px] font-bold">1</span>
+                <span>Target Hardware Device</span>
+              </label>
+              <input
+                :value="targetUuid"
+                readonly
+                class="w-full h-9 px-3 rounded-lg border border-slate-200 dark:border-zinc-700 bg-slate-100 dark:bg-zinc-800 font-mono text-xs font-bold text-slate-700 dark:text-zinc-300 cursor-not-allowed"
+              />
+            </div>
+
+            <!-- Step 2: Firmware Package -->
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <label class="text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                  <span class="w-4 h-4 rounded-full bg-sky-500 text-white flex items-center justify-center text-[9px] font-bold">2</span>
+                  <span>Upload Firmware Package (.zip, .bin)</span>
+                </label>
+                <span v-if="fotaFile" class="text-[10px] font-mono text-emerald-600 font-bold">
+                  {{ fotaFile.name }}
+                </span>
+              </div>
+              
+              <div
+                class="border border-dashed rounded-xl p-4 text-center cursor-pointer transition-colors"
+                :class="fotaFile ? 'border-emerald-400 bg-emerald-50/20 dark:bg-emerald-950/20' : 'border-slate-300 dark:border-zinc-700 hover:border-sky-500 bg-slate-50/50 dark:bg-zinc-800/40'"
+                @click="triggerDoorFotaFileInput"
+              >
+                <input
+                  ref="doorFotaInputRef"
+                  type="file"
+                  accept=".zip,.bin,.tar.gz"
+                  class="hidden"
+                  @change="handleDoorFotaFile"
+                />
+                <div v-if="fotaFile" class="flex items-center justify-center gap-2 text-xs font-bold text-emerald-600">
+                  <CheckCircle2 class="w-4 h-4" />
+                  <span>{{ fotaFile.name }} (Ready)</span>
+                </div>
+                <div v-else class="text-xs text-slate-500 flex items-center justify-center gap-2">
+                  <UploadCloud class="w-4 h-4 text-sky-500" />
+                  <span>Click to choose firmware file from computer</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 3: Firmware Version -->
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                <span class="w-4 h-4 rounded-full bg-sky-500 text-white flex items-center justify-center text-[9px] font-bold">3</span>
+                <span>Firmware Version</span>
+              </label>
+              <input
+                v-model="fotaVersion"
+                type="text"
+                placeholder="e.g. v1.4.2"
+                class="w-full h-9 px-3 rounded-lg border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800 font-mono text-xs focus:outline-none focus:ring-1 focus:ring-sky-500 text-slate-900 dark:text-white"
+              />
+            </div>
+
+            <!-- Action Button -->
+            <div class="pt-3 border-t border-slate-100 dark:border-zinc-800 flex items-center justify-between">
+              <span class="text-[11px] text-slate-400">
+                Connected to AWS S3 & Knative MQTT
+              </span>
+              <button
+                type="button"
+                class="px-5 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-md shadow-sky-500/20 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                :disabled="deployingFota || !targetUuid || !fotaFile || !fotaVersion"
+                @click="triggerDoorFotaProceed"
+              >
+                <Loader2 v-if="deployingFota" class="w-3.5 h-3.5 animate-spin" />
+                <CloudUpload v-else class="w-3.5 h-3.5" />
+                <span>{{ deployingFota ? 'Uploading to S3 & Deploying...' : 'Proceed FOTA Update' }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
+
 
       <!-- Footer Actions -->
       <div class="px-6 py-3.5 bg-slate-50 dark:bg-zinc-900 border-t border-slate-100 dark:border-zinc-800 flex items-center justify-end gap-2">
@@ -333,17 +448,27 @@
         </button>
       </div>
     </div>
+
+    <!-- FOTA Management Modal Popup -->
+    <FotaManagementModal
+      v-model="showFotaManagerModal"
+      :device-uuid="targetUuid"
+      :registered-devices="registeredControllers"
+    />
   </div>
   </Teleport>
 </template>
 
 <script setup>
+
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
-import { SlidersHorizontal, RefreshCw, X, Clock, Volume2, ShieldCheck, Info, Save, Loader2, DoorOpen, Radio, Network } from 'lucide-vue-next';
+import { SlidersHorizontal, RefreshCw, X, Clock, Volume2, ShieldCheck, Info, Save, Loader2, DoorOpen, Radio, Network, CloudUpload, Zap, UploadCloud, CheckCircle2 } from 'lucide-vue-next';
 import { useMQTT } from '@/composables/useMQTT';
 import { mqttService } from '@/services/mqttService';
 import { authService } from '@/services/authService';
 import { currentUserTenant } from '@/utils/currentUserTenant';
+import { fotaService } from '@/services/fotaService';
+import FotaManagementModal from './FotaManagementModal.vue';
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -352,6 +477,63 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['update:modelValue', 'toast']);
+
+// FOTA State
+const showFotaManagerModal = ref(false);
+const deployingFota = ref(false);
+const fotaFile = ref(null);
+const fotaVersion = ref('');
+const doorFotaInputRef = ref(null);
+
+const triggerDoorFotaFileInput = () => {
+  if (doorFotaInputRef.value) {
+    doorFotaInputRef.value.click();
+  }
+};
+
+const handleDoorFotaFile = (e) => {
+  const file = e.target.files?.[0];
+  if (file) {
+    fotaFile.value = file;
+    if (!fotaVersion.value) {
+      const rawName = file.name.replace(/\.[^/.]+$/, '');
+      const match = rawName.match(/v?\d+(\.\d+)+(-\w+)?/i);
+      fotaVersion.value = match ? (match[0].startsWith('v') ? match[0] : `v${match[0]}`) : (rawName.startsWith('v') ? rawName : `v${rawName}`);
+    }
+  }
+};
+
+const triggerDoorFotaProceed = async () => {
+  if (!targetUuid.value || !fotaFile.value || !fotaVersion.value) return;
+  deployingFota.value = true;
+  try {
+    const res = await fotaService.uploadRelease({
+      file: fotaFile.value,
+      version: fotaVersion.value,
+      changelog: `OTA update for ${targetUuid.value}`,
+      autoDeploy: true,
+      deviceId: targetUuid.value,
+    });
+
+    emit('toast', {
+      type: 'success',
+      title: 'FOTA Update Succeeded',
+      message: `Firmware ${fotaVersion.value} uploaded to S3 and OTA command sent to node ${targetUuid.value}!`,
+    });
+
+    fotaFile.value = null;
+    fotaVersion.value = '';
+  } catch (err) {
+    console.error('FOTA Proceed error:', err);
+    emit('toast', {
+      type: 'error',
+      title: 'FOTA Failed',
+      message: err.response?.data?.error || err.message || 'Failed to upload firmware to AWS S3',
+    });
+  } finally {
+    deployingFota.value = false;
+  }
+};
 
 const { sendGetConfig, sendSetConfig } = useMQTT();
 

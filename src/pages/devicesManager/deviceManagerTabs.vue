@@ -7,6 +7,13 @@
       </div>
       <div class="flex gap-3">
         <button
+          class="flex items-center gap-2 rounded-xl bg-sky-600 px-4 py-2 text-[10px] font-black text-white hover:bg-sky-700 transition-colors shadow-sm uppercase tracking-widest cursor-pointer"
+          @click="openFotaModal(null)"
+        >
+          <CloudUpload class="h-3.5 w-3.5" />
+          FOTA Hub
+        </button>
+        <button
           class="flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-[10px] font-black text-white hover:bg-indigo-700 transition-colors shadow-sm uppercase tracking-widest cursor-pointer"
           @click="showHardwareConfigModal = true"
         >
@@ -209,6 +216,13 @@
                     <ShieldCheck class="w-3.5 h-3.5" />
                   </button>
                   <button 
+                    title="FOTA Firmware Over-The-Air"
+                    class="h-7 w-7 rounded-lg flex items-center justify-center border border-sky-200 dark:border-sky-800/80 text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/50 hover:bg-sky-100 shadow-xs transition-colors cursor-pointer"
+                    @click="openFotaModal(device)"
+                  >
+                    <CloudUpload class="w-3.5 h-3.5" />
+                  </button>
+                  <button 
                     title="Configuration Setup"
                     class="h-7 w-7 rounded-lg flex items-center justify-center border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 shadow-xs transition-colors cursor-pointer"
                     @click="editItem(device)"
@@ -278,18 +292,26 @@
         v-model="showHardwareConfigModal"
         :device-uuid="selectedDevice?.sn || items[0]?.sn || ''"
       />
+
+      <!-- FOTA Management Modal -->
+      <FotaManagementModal
+        v-model="showFotaModal"
+        :device-uuid="selectedFotaDeviceUuid"
+        :registered-devices="items"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, watch, onMounted } from "vue";
-import { Zap, Network, Plus, Search, Loader2, Cpu, CheckCircle2, Clock, ShieldCheck, Settings2, DoorOpen, Trash2, SlidersHorizontal } from "lucide-vue-next";
+import { Zap, Network, Plus, Search, Loader2, Cpu, CheckCircle2, Clock, ShieldCheck, Settings2, DoorOpen, Trash2, SlidersHorizontal, CloudUpload } from "lucide-vue-next";
 import { authService } from "@/services/authService";
 import { currentUserTenant } from "@/utils/currentUserTenant";
 import DeviceRegistrationDialog from "./deviceRegistrationDialog.vue";
 import ConfirmDeleteModal from "@/components/common/modals/ConfirmDeleteModal.vue";
 import DoorConfigModal from "./doors/doorConfigModal.vue";
+import FotaManagementModal from "./doors/FotaManagementModal.vue";
 
 // Accessors
 const token = authService.getToken();
@@ -304,7 +326,14 @@ const totalItems = ref(0);
 const activeStatusTab = ref("all");
 const showDialog = ref(false);
 const showHardwareConfigModal = ref(false);
+const showFotaModal = ref(false);
+const selectedFotaDeviceUuid = ref("all");
 const selectedDevice = ref(null);
+
+const openFotaModal = (device = null) => {
+  selectedFotaDeviceUuid.value = device?.sn || "all";
+  showFotaModal.value = true;
+};
 
 const totalPages = computed(() => Math.ceil(totalItems.value / itemsPerPage));
 
