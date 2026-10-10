@@ -1,58 +1,51 @@
 <template>
-  <div class="grid grid-cols-1 lg:grid-cols-2 min-h-screen w-full bg-[#030614] text-slate-100 relative overflow-x-hidden font-sans selection:bg-blue-500 selection:text-white">
-    <!-- Left Side: Marketing & Skyscraper Hero Section -->
-    <div class="w-full h-full flex flex-col justify-between px-6 py-8 lg:px-12 lg:py-10 relative z-20 overflow-hidden border-r border-slate-800/60 shadow-[10px_0_35px_rgba(0,0,0,0.35)] min-h-[500px]">
-      <!-- Photorealistic Skyscraper Office Background Image with Network Overlay -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 min-h-screen w-full bg-[#1C1E1E] text-slate-100 relative overflow-x-hidden font-sans selection:bg-[#1E4FD8] selection:text-white">
+    <!-- Left Side: Marketing Hero Section -->
+    <div class="w-full h-full flex flex-col justify-between px-6 py-8 lg:px-12 lg:py-10 relative z-20 overflow-hidden border-r border-[#E4E1D8]/15 shadow-[10px_0_35px_rgba(0,0,0,0.2)] min-h-[500px]">
+      <!-- Background Image with Overlay -->
       <div 
-        class="absolute inset-0 bg-cover bg-center transition-transform duration-10000 hover:scale-105 pointer-events-none z-0"
+        class="absolute inset-0 bg-cover bg-center transition-transform duration-10000 hover:scale-105 pointer-events-none z-0 opacity-20"
         :style="{ backgroundImage: `url(${loginHeroBg})` }"
       />
-      <!-- Subtle Dark Blue Overlay Gradient for Text Contrast (Low Opacity) -->
-      <div class="absolute inset-0 bg-gradient-to-br from-[#04081c]/50 via-[#071133]/30 to-[#030614]/60 pointer-events-none z-0" />
+      <!-- Rich Charcoal Overlay Gradient -->
+      <div class="absolute inset-0 bg-gradient-to-br from-[#1C1E1E]/95 via-[#151717]/90 to-[#1C1E1E]/95 pointer-events-none z-0" />
 
       <!-- Tech Grid Pattern -->
       <div 
-        class="absolute inset-0 opacity-[0.08] pointer-events-none z-0"
-        style="background-image: radial-gradient(circle at 2px 2px, rgba(59, 130, 246, 0.9) 1px, transparent 0); background-size: 30px 30px;"
+        class="absolute inset-0 opacity-[0.04] pointer-events-none z-0"
+        style="background-image: radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.8) 1px, transparent 0); background-size: 28px 28px;"
       />
-
-      <!-- Floating Tech Mesh Nodes Animation -->
-      <div class="absolute inset-0 pointer-events-none overflow-hidden z-0">
-        <div class="node-particle node-1" />
-        <div class="node-particle node-2" />
-        <div class="node-particle node-3" />
-      </div>
 
       <!-- Top Header / Logo -->
       <div class="relative z-10 animate-fade-in-down">
         <div class="flex items-center gap-3.5 mb-2">
           <!-- Hex Shield Icon -->
-          <div class="h-11 w-11 rounded-xl bg-gradient-to-br from-blue-500/30 to-blue-700/20 flex items-center justify-center border border-blue-400/40 shadow-[0_0_20px_rgba(59,130,246,0.3)] backdrop-blur-md group cursor-pointer hover:border-blue-300 transition-all duration-300">
-            <Shield class="w-6 h-6 text-blue-400 group-hover:scale-110 transition-transform duration-300" />
+          <div class="h-11 w-11 rounded-xl bg-[#1E4FD8]/20 flex items-center justify-center border border-[#1E4FD8]/40 shadow-[0_0_20px_rgba(30,79,216,0.25)] backdrop-blur-md group cursor-pointer hover:border-[#1E4FD8] transition-all duration-300">
+            <Shield class="w-6 h-6 text-[#1E4FD8] group-hover:scale-110 transition-transform duration-300" />
           </div>
           <div class="flex flex-col">
-            <span class="text-2xl font-bold tracking-tight text-white drop-shadow-md">AccessEasy</span>
-            <span class="text-[11px] font-medium text-slate-300 tracking-wider">Secure. Manage. Empower.</span>
+            <span class="text-2xl font-bold tracking-tight text-white">AccessEasy</span>
+            <span class="text-[11px] font-medium text-[#EFECE2]/70 tracking-wider">Secure. Manage. Empower.</span>
           </div>
         </div>
       </div>
 
       <!-- Hero Body Content -->
       <div class="max-w-xl relative z-10 my-auto py-6">
-        <!-- Animated Pill Badge -->
-        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-600/30 border border-blue-400/40 text-blue-200 text-xs font-semibold tracking-wide mb-6 backdrop-blur-md shadow-[0_0_15px_rgba(59,130,246,0.3)]">
-          <span class="h-2 w-2 rounded-full bg-blue-400 animate-ping" />
+        <!-- Pill Badge -->
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#1E4FD8]/15 border border-[#1E4FD8]/30 text-[#EEF2FE] text-xs font-semibold tracking-wide mb-6 backdrop-blur-md">
+          <span class="h-2 w-2 rounded-full bg-[#1E4FD8] animate-ping" />
           <span>Welcome to AccessEasy</span>
         </div>
 
         <!-- Headline -->
-        <h1 class="text-3xl lg:text-4xl xl:text-5xl font-bold tracking-tight leading-[1.15] mb-4 text-white drop-shadow-xl">
+        <h1 class="text-3xl lg:text-4xl xl:text-5xl font-bold tracking-tight leading-[1.15] mb-4 text-white">
           Smart Access.<br>
           Stronger Security.<br>
           Empowered Workforce.
         </h1>
 
-        <p class="text-xs lg:text-sm text-slate-100 font-normal leading-relaxed mb-6 max-w-lg drop-shadow-md">
+        <p class="text-xs lg:text-sm text-[#EFECE2]/80 font-normal leading-relaxed mb-6 max-w-lg">
           The all-in-one platform for access control, workforce management, and real-time intelligence.
         </p>
 
@@ -61,19 +54,19 @@
           <div
             v-for="(feature, idx) in features"
             :key="idx"
-            class="flex items-start gap-3 p-3 rounded-2xl bg-slate-900/60 border border-blue-500/30 backdrop-blur-md hover:bg-slate-900/80 hover:border-blue-400/60 shadow-md hover:shadow-blue-500/25 transition-all duration-300 group hover:-translate-y-0.5"
+            class="flex items-start gap-3 p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 backdrop-blur-md hover:bg-white/[0.07] hover:border-[#1E4FD8]/50 shadow-sm transition-all duration-300 group hover:-translate-y-0.5"
           >
-            <div class="h-9 w-9 shrink-0 flex items-center justify-center rounded-xl bg-gradient-to-br from-blue-900/60 to-slate-900/80 border border-blue-400/30 text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.3)] group-hover:scale-105 transition-all duration-300">
+            <div class="h-9 w-9 shrink-0 flex items-center justify-center rounded-xl bg-[#1E4FD8]/15 border border-[#1E4FD8]/30 text-[#EEF2FE] group-hover:scale-105 transition-all duration-300">
               <component
                 :is="feature.icon"
-                class="h-4.5 w-4.5"
+                class="h-4.5 w-4.5 text-[#1E4FD8]"
               />
             </div>
             <div>
-              <h3 class="font-bold text-xs text-white tracking-wide mb-0.5 group-hover:text-blue-300 transition-colors">
+              <h3 class="font-bold text-xs text-white tracking-wide mb-0.5 group-hover:text-[#EEF2FE] transition-colors">
                 {{ feature.title }}
               </h3>
-              <p class="text-[10px] lg:text-[11px] text-slate-200 leading-snug opacity-90">
+              <p class="text-[10px] lg:text-[11px] text-[#EFECE2]/70 leading-snug">
                 {{ feature.desc }}
               </p>
             </div>
@@ -82,9 +75,9 @@
       </div>
 
       <!-- Bottom Hardware Authentication Methods Badges Bar -->
-      <div class="relative z-10 pt-4 border-t border-slate-700/60">
-        <p class="text-[11px] font-bold tracking-wider text-slate-300 uppercase mb-3 drop-shadow flex items-center gap-2">
-          <ShieldCheck class="w-4 h-4 text-cyan-400" />
+      <div class="relative z-10 pt-4 border-t border-white/10">
+        <p class="text-[11px] font-bold tracking-wider text-[#EFECE2]/70 uppercase mb-3 flex items-center gap-2">
+          <ShieldCheck class="w-4 h-4 text-[#1E4FD8]" />
           <span>Supported Access & Authentication Modalities</span>
         </p>
 
@@ -92,18 +85,18 @@
           <div
             v-for="(auth, i) in authMethods"
             :key="i"
-            class="p-2.5 rounded-xl bg-slate-900/70 border border-blue-500/30 backdrop-blur-md shadow-md hover:border-cyan-400/70 hover:bg-slate-900/90 shadow-[0_0_15px_rgba(6,182,212,0.15)] transition-all duration-300 flex flex-col items-center justify-center text-center group cursor-default"
+            class="p-2.5 rounded-xl bg-white/[0.04] border border-white/10 backdrop-blur-md hover:border-[#1E4FD8]/60 hover:bg-white/[0.08] transition-all duration-300 flex flex-col items-center justify-center text-center group cursor-default"
           >
-            <div class="h-9 w-9 rounded-lg bg-cyan-950/60 border border-cyan-500/30 flex items-center justify-center mb-1.5 group-hover:scale-110 group-hover:border-cyan-400/80 transition-all duration-300">
+            <div class="h-9 w-9 rounded-lg bg-[#1E4FD8]/15 border border-[#1E4FD8]/30 flex items-center justify-center mb-1.5 group-hover:scale-110 transition-all duration-300">
               <component
                 :is="auth.icon"
-                class="w-5 h-5 text-cyan-400"
+                class="w-4.5 h-4.5 text-[#EEF2FE]"
               />
             </div>
-            <span class="text-xs font-bold text-white tracking-wide leading-tight group-hover:text-cyan-300 transition-colors">
+            <span class="text-xs font-bold text-white tracking-wide leading-tight group-hover:text-[#EEF2FE] transition-colors">
               {{ auth.name }}
             </span>
-            <span class="text-[9px] text-slate-300 font-medium tracking-tight mt-0.5 opacity-90">
+            <span class="text-[9px] text-[#EFECE2]/60 font-medium tracking-tight mt-0.5">
               {{ auth.sub }}
             </span>
           </div>
@@ -111,53 +104,43 @@
       </div>
     </div>
 
-    <!-- Right Side: Real White Marble Luxury Login Card Section -->
-    <div class="w-full h-full flex items-center justify-center p-4 sm:p-6 lg:p-8 relative overflow-hidden bg-[#e5e9f0] min-h-screen z-10">
-      <!-- Background Ambient Glow & Sparks -->
-      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-blue-400/15 rounded-full blur-[140px] pointer-events-none" />
-      <div class="spark spark-1" />
-      <div class="spark spark-2" />
-      <div class="spark spark-3" />
+    <!-- Right Side: Clean Modern Login Form Section -->
+    <div class="w-full h-full flex items-center justify-center p-4 sm:p-6 lg:p-8 relative overflow-hidden bg-[#FAFAF8] min-h-screen z-10">
+      <!-- Background Ambient Glow -->
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#1E4FD8]/5 rounded-full blur-[120px] pointer-events-none" />
 
-      <!-- Main Marble Card Container -->
-      <div 
-        class="w-full max-w-[450px] rounded-[2.5rem] p-8 lg:p-10 shadow-[0_30px_70px_-10px_rgba(0,0,0,0.25),0_0_35px_rgba(255,255,255,0.8)] border border-white/90 relative z-10 animate-fade-in-up text-slate-900 overflow-hidden bg-cover bg-center"
-        :style="{ backgroundImage: `url(${marbleBg})` }"
-      >
-        <!-- Light Translucent White Wash for Polished Marble Texture Visibility -->
-        <div class="absolute inset-0 bg-white/40 pointer-events-none z-0" />
-
+      <!-- Main Card Container -->
+      <div class="w-full max-w-[440px] rounded-3xl p-8 lg:p-10 shadow-[0_20px_50px_-12px_rgba(28,30,30,0.08),0_1px_3px_rgba(28,30,30,0.05)] border border-[#E4E1D8] bg-white relative z-10 animate-fade-in-up text-[#1C1E1E]">
         <div class="relative z-10">
-          <!-- Top Shield Crest Icon with Golden/Blue Glowing Aura Ring -->
+          <!-- Top Shield Crest Icon -->
           <div class="text-center mb-6">
             <div class="relative inline-flex items-center justify-center mb-3">
-              <div class="absolute inset-0 rounded-full bg-blue-500/20 animate-ping opacity-60 duration-1000 scale-125" />
-              <div class="relative h-16 w-16 rounded-full bg-gradient-to-br from-blue-50 via-white to-blue-100 border border-blue-300 flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.3)]">
-                <ShieldCheck class="w-8 h-8 text-blue-600" />
+              <div class="h-14 w-14 rounded-2xl bg-[#EEF2FE] border border-[#1E4FD8]/20 flex items-center justify-center shadow-sm">
+                <ShieldCheck class="w-7 h-7 text-[#1E4FD8]" />
               </div>
             </div>
 
-            <h2 class="text-2xl lg:text-3xl font-black tracking-tight text-slate-900 mb-1">
+            <h2 class="text-2xl font-bold tracking-tight text-[#1C1E1E] mb-1">
               Welcome Back
             </h2>
-            <p class="text-xs text-slate-600 font-semibold">
+            <p class="text-xs text-[#5B615F] font-medium">
               Sign in to your AccessEasy account
             </p>
           </div>
 
           <!-- Mode Selector Switcher (Email / Phone Pill Tabs) -->
-          <div class="p-1 bg-[#e2e8f0]/80 rounded-2xl mb-6 border border-slate-300/80 flex items-center shadow-inner">
+          <div class="p-1 bg-[#F1EEE6] rounded-2xl mb-6 border border-[#E4E1D8] flex items-center">
             <button
               type="button"
               :class="[
                 'flex-1 py-2.5 px-3 flex items-center justify-center gap-2 text-xs font-bold rounded-xl transition-all duration-300 cursor-pointer',
                 authMode === 'email'
-                  ? 'bg-white text-slate-900 shadow-sm border border-slate-200/80'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-white text-[#1C1E1E] shadow-xs'
+                  : 'text-[#5B615F] hover:text-[#1C1E1E]'
               ]"
               @click="setAuthMode('email')"
             >
-              <Mail class="w-4 h-4 text-blue-600" />
+              <Mail class="w-4 h-4 text-[#1E4FD8]" />
               <span>Email</span>
             </button>
             <button
@@ -165,12 +148,12 @@
               :class="[
                 'flex-1 py-2.5 px-3 flex items-center justify-center gap-2 text-xs font-bold rounded-xl transition-all duration-300 cursor-pointer',
                 authMode === 'phone'
-                  ? 'bg-white text-slate-900 shadow-sm border border-slate-200/80'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-white text-[#1C1E1E] shadow-xs'
+                  : 'text-[#5B615F] hover:text-[#1C1E1E]'
               ]"
               @click="setAuthMode('phone')"
             >
-              <Phone class="w-4 h-4 text-emerald-600" />
+              <Phone class="w-4 h-4 text-[#1E4FD8]" />
               <span>Phone</span>
             </button>
           </div>
@@ -184,32 +167,44 @@
               v-if="authMode === 'phone'"
               class="space-y-1.5"
             >
-              <label class="block text-xs font-bold text-slate-800">
+              <label class="block text-xs font-bold text-[#1C1E1E]">
                 Phone number
               </label>
-              <div class="flex items-center rounded-xl bg-slate-50/90 border-2 border-slate-300 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/20 overflow-hidden transition-all shadow-inner">
-                <div class="relative flex items-center border-r-2 border-slate-300 bg-slate-100/80">
+              <div class="flex items-center rounded-2xl bg-[#FAFAF8] hover:bg-white focus-within:bg-white border border-[#E4E1D8] focus-within:border-[#1E4FD8] focus-within:ring-4 focus-within:ring-[#1E4FD8]/10 overflow-hidden transition-all shadow-2xs h-12">
+                <div class="relative shrink-0 flex items-center justify-between pl-3 pr-2.5 border-r border-[#E4E1D8] bg-[#FAFAF8] hover:bg-[#F1EEE6] transition-colors w-[94px] h-full cursor-pointer">
+                  <!-- Crisp visible label (no ellipsis) -->
+                  <span class="text-xs font-bold text-[#1C1E1E] select-none tracking-tight whitespace-nowrap">
+                    {{ selectedCountryDisplay }}
+                  </span>
+                  <ChevronDown class="w-3.5 h-3.5 text-[#8B908D] shrink-0 pointer-events-none" />
+
+                  <!-- Invisible native select overlay for clean picker interaction -->
                   <select
                     v-model="countryCode"
-                    class="appearance-none bg-transparent pl-3 pr-6 py-3 text-xs font-extrabold text-slate-700 outline-none cursor-pointer"
+                    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer text-slate-900"
                   >
-                    <option value="+91">IN +91</option>
-                    <option value="+1">US +1</option>
-                    <option value="+44">UK +44</option>
-                    <option value="+971">AE +971</option>
-                    <option value="+65">SG +65</option>
+                    <option
+                      v-for="c in countryCodes"
+                      :key="c.code"
+                      :value="c.code"
+                      class="text-slate-900 bg-white font-medium py-1"
+                    >
+                      {{ c.flag }} {{ c.code }} ({{ c.name }})
+                    </option>
                   </select>
-                  <ChevronDown class="w-3.5 h-3.5 text-slate-500 absolute right-1.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 </div>
-                <input
-                  v-model="phoneDigits"
-                  type="tel"
-                  maxlength="10"
-                  required
-                  class="w-full h-12 px-3.5 text-sm font-semibold text-slate-900 placeholder:text-slate-400 bg-transparent outline-none"
-                  placeholder="10-digit number"
-                  @input="phoneDigits = phoneDigits.replace(/\D/g, '')"
-                >
+                <div class="relative flex-1 min-w-0 flex items-center h-full">
+                  <Phone class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8B908D] focus-within:text-[#1E4FD8] transition-colors pointer-events-none shrink-0" />
+                  <input
+                    v-model="phoneDigits"
+                    type="tel"
+                    maxlength="10"
+                    required
+                    class="w-full h-full pl-10 pr-4 text-sm font-semibold text-[#1C1E1E] placeholder:text-[#8B908D] bg-transparent outline-none"
+                    placeholder="10-digit number"
+                    @input="phoneDigits = phoneDigits.replace(/\D/g, '')"
+                  >
+                </div>
               </div>
             </div>
 
@@ -218,64 +213,61 @@
               v-else
               class="space-y-1.5"
             >
-              <label class="block text-xs font-bold text-slate-800">
+              <label class="block text-xs font-bold text-[#1C1E1E]">
                 Email address
               </label>
-              <div class="flex items-center rounded-xl bg-slate-50/90 border-2 border-slate-300 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/20 overflow-hidden transition-all shadow-inner">
-                <div class="pl-3.5 text-slate-400 flex items-center">
-                  <Mail class="w-4 h-4 text-blue-500" />
+              <div class="flex items-center rounded-2xl bg-[#FAFAF8] hover:bg-white focus-within:bg-white border border-[#E4E1D8] focus-within:border-[#1E4FD8] focus-within:ring-4 focus-within:ring-[#1E4FD8]/10 overflow-hidden transition-all shadow-2xs h-12">
+                <div class="pl-3.5 text-[#8B908D] flex items-center">
+                  <Mail class="w-4 h-4 text-[#1E4FD8]" />
                 </div>
                 <input
                   v-model="emailAddress"
                   type="email"
                   required
-                  class="w-full h-12 px-3.5 text-sm font-semibold text-slate-900 placeholder:text-slate-400 bg-transparent outline-none"
+                  class="w-full h-full px-3.5 text-sm font-semibold text-[#1C1E1E] placeholder:text-[#8B908D] bg-transparent outline-none"
                   placeholder="Enter email address"
                 >
               </div>
             </div>
 
             <!-- Helper Text -->
-            <p class="text-xs text-slate-500 font-medium">
+            <p class="text-xs text-[#5B615F] font-normal">
               We'll send you a one-time password (OTP) to sign in.
             </p>
 
             <!-- Error Feedback Banner -->
             <div
               v-if="errorMessage"
-              class="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 text-xs font-medium flex items-center gap-2"
+              class="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-2"
             >
-              <AlertCircle class="w-4 h-4 shrink-0" />
+              <AlertCircle class="w-4 h-4 shrink-0 text-rose-600" />
               <span>{{ errorMessage }}</span>
             </div>
 
-            <!-- SEND OTP CTA Button with glowing drop shadow -->
+            <!-- SEND OTP CTA Button -->
             <button
               type="submit"
               :disabled="loading"
-              class="w-full h-12 rounded-xl text-xs font-black tracking-wider uppercase flex items-center justify-center gap-2 bg-gradient-to-r from-[#3b82f6] via-[#2563eb] to-[#1d4ed8] hover:from-[#2563eb] hover:to-[#1e40af] text-white shadow-[0_10px_25px_rgba(37,99,235,0.45)] hover:shadow-[0_12px_30px_rgba(37,99,235,0.6)] active:scale-[0.99] transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed group relative overflow-hidden"
+              class="w-full h-12 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 bg-[#1E4FD8] hover:bg-[#153AA0] text-white shadow-[0_4px_14px_rgba(30,79,216,0.25)] hover:shadow-[0_6px_20px_rgba(30,79,216,0.35)] active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed group cursor-pointer"
             >
-              <!-- Button Gloss Sweep Effect -->
-              <div class="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12 -translate-x-full group-hover:translate-x-[300%] transition-transform duration-1000" />
-              
               <span v-if="loading">Processing...</span>
               <template v-else>
-                <span>SEND OTP</span>
-                <ArrowRight class="w-4 h-4 transition-transform group-hover:translate-x-1.5 duration-300" />
+                <span>Send OTP</span>
+                <ArrowRight class="w-4 h-4 transition-transform group-hover:translate-x-1 duration-300" />
               </template>
             </button>
 
             <!-- OR Divider -->
             <div class="flex items-center justify-center gap-3 py-1">
-              <div class="h-[1px] flex-1 bg-slate-300" />
-              <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">OR</span>
-              <div class="h-[1px] flex-1 bg-slate-300" />
+              <div class="h-[1px] flex-1 bg-[#E4E1D8]" />
+              <span class="text-[10px] font-bold text-[#8B908D] uppercase tracking-widest">OR</span>
+              <div class="h-[1px] flex-1 bg-[#E4E1D8]" />
             </div>
 
             <!-- Google OAuth Button -->
             <button
               type="button"
-              class="w-full h-12 rounded-xl text-xs font-bold flex items-center justify-center gap-3 bg-gradient-to-b from-white to-slate-100 border border-slate-300/80 hover:bg-slate-50 text-slate-800 shadow-sm hover:scale-[1.01] active:scale-[0.99] transition-all duration-300"
+              class="w-full h-12 rounded-xl text-xs font-bold flex items-center justify-center gap-3 bg-white hover:bg-[#FAFAF8] border border-[#E4E1D8] text-[#1C1E1E] shadow-2xs hover:scale-[1.005] active:scale-[0.99] transition-all cursor-pointer"
               @click="loginWithGoogle"
             >
               <svg
@@ -305,11 +297,11 @@
           </form>
 
           <!-- Footer Sign Up Link -->
-          <p class="text-center text-xs font-semibold text-slate-600 mt-6">
+          <p class="text-center text-xs font-medium text-[#5B615F] mt-6">
             Don't have an account? 
             <a
               href="#"
-              class="text-blue-600 hover:text-blue-700 font-bold underline underline-offset-4 ml-1 cursor-pointer transition-colors"
+              class="text-[#1E4FD8] hover:text-[#153AA0] font-bold underline underline-offset-4 ml-1 cursor-pointer transition-colors"
               @click.prevent="goToRegister"
             >
               Sign Up
@@ -322,7 +314,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { authService } from "@/services/authService";
 import { 
@@ -339,7 +331,27 @@ const router = useRouter();
 const route = useRoute();
 
 const authMode = ref("phone"); // 'phone' | 'email'
+const countryCodes = [
+  { code: "+91", flag: "🇮🇳", name: "India" },
+  { code: "+1", flag: "🇺🇸", name: "USA/Canada" },
+  { code: "+44", flag: "🇬🇧", name: "UK" },
+  { code: "+971", flag: "🇦🇪", name: "UAE" },
+  { code: "+65", flag: "🇸🇬", name: "Singapore" },
+  { code: "+966", flag: "🇸🇦", name: "Saudi Arabia" },
+  { code: "+61", flag: "🇦🇺", name: "Australia" },
+  { code: "+49", flag: "🇩🇪", name: "Germany" },
+  { code: "+33", flag: "🇫🇷", name: "France" },
+  { code: "+974", flag: "🇶🇦", name: "Qatar" },
+  { code: "+965", flag: "🇰🇼", name: "Kuwait" },
+  { code: "+60", flag: "🇲🇾", name: "Malaysia" },
+  { code: "+63", flag: "🇵🇭", name: "Philippines" },
+  { code: "+81", flag: "🇯🇵", name: "Japan" }
+];
 const countryCode = ref("+91");
+const selectedCountryDisplay = computed(() => {
+  const match = countryCodes.find((c) => c.code === countryCode.value);
+  return match ? `${match.flag} ${match.code}` : countryCode.value;
+});
 const phoneDigits = ref("");
 const emailAddress = ref("");
 const loading = ref(false);
@@ -533,9 +545,10 @@ async function loginWithGoogle() {
 
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "456615098701-cihaj0btvoe011ba92r7hpbemkse5vm3.apps.googleusercontent.com";
     const redirectUri = `${window.location.origin}/auth/callback`;
+    const knBase = import.meta.env.VITE_KN_API_URL || "https://appv1.fieldseasy.com/kn";
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_KN_API_URL}/google-accesseasy`, {
+      const response = await fetch(`${knBase}/google-accesseasy`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -544,6 +557,7 @@ async function loginWithGoogle() {
           redirectUri: redirectUri,
           client_id: clientId,
           clientId: clientId,
+          userApp: "accesseasy",
         }),
       });
 

@@ -1,58 +1,51 @@
 <template>
-  <div class="grid grid-cols-1 lg:grid-cols-2 min-h-screen w-full bg-[#030614] text-slate-100 relative overflow-x-hidden font-sans selection:bg-blue-500 selection:text-white">
-    <!-- Left Side: Marketing & Skyscraper Hero Section -->
-    <div class="w-full h-full flex flex-col justify-between px-6 py-8 lg:px-12 lg:py-10 relative z-20 overflow-hidden border-r border-slate-800/60 shadow-[10px_0_35px_rgba(0,0,0,0.35)] min-h-[500px]">
-      <!-- Photorealistic Skyscraper Office Background Image with Network Overlay -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 min-h-screen w-full bg-[#1C1E1E] text-slate-100 relative overflow-x-hidden font-sans selection:bg-[#1E4FD8] selection:text-white">
+    <!-- Left Side: Marketing Hero Section -->
+    <div class="w-full h-full flex flex-col justify-between px-6 py-8 lg:px-12 lg:py-10 relative z-20 overflow-hidden border-r border-[#E4E1D8]/15 shadow-[10px_0_35px_rgba(0,0,0,0.2)] min-h-[500px]">
+      <!-- Background Image with Overlay -->
       <div 
-        class="absolute inset-0 bg-cover bg-center transition-transform duration-10000 hover:scale-105 pointer-events-none z-0"
+        class="absolute inset-0 bg-cover bg-center transition-transform duration-10000 hover:scale-105 pointer-events-none z-0 opacity-20"
         :style="{ backgroundImage: `url(${loginHeroBg})` }"
       />
-      <!-- Subtle Dark Blue Overlay Gradient for Text Contrast (Low Opacity) -->
-      <div class="absolute inset-0 bg-gradient-to-br from-[#04081c]/50 via-[#071133]/30 to-[#030614]/60 pointer-events-none z-0" />
+      <!-- Rich Charcoal Overlay Gradient -->
+      <div class="absolute inset-0 bg-gradient-to-br from-[#1C1E1E]/95 via-[#151717]/90 to-[#1C1E1E]/95 pointer-events-none z-0" />
 
       <!-- Tech Grid Pattern -->
       <div 
-        class="absolute inset-0 opacity-[0.08] pointer-events-none z-0"
-        style="background-image: radial-gradient(circle at 2px 2px, rgba(59, 130, 246, 0.9) 1px, transparent 0); background-size: 30px 30px;"
+        class="absolute inset-0 opacity-[0.04] pointer-events-none z-0"
+        style="background-image: radial-gradient(circle at 2px 2px, rgba(255, 255, 255, 0.8) 1px, transparent 0); background-size: 28px 28px;"
       />
-
-      <!-- Floating Tech Mesh Nodes Animation -->
-      <div class="absolute inset-0 pointer-events-none overflow-hidden z-0">
-        <div class="node-particle node-1" />
-        <div class="node-particle node-2" />
-        <div class="node-particle node-3" />
-      </div>
 
       <!-- Top Header / Logo -->
       <div class="relative z-10 animate-fade-in-down">
         <div class="flex items-center gap-3.5 mb-2">
           <!-- Hex Shield Icon -->
-          <div class="h-11 w-11 rounded-xl bg-gradient-to-br from-blue-500/30 to-blue-700/20 flex items-center justify-center border border-blue-400/40 shadow-[0_0_20px_rgba(59,130,246,0.3)] backdrop-blur-md group cursor-pointer hover:border-blue-300 transition-all duration-300">
-            <Shield class="w-6 h-6 text-blue-400 group-hover:scale-110 transition-transform duration-300" />
+          <div class="h-11 w-11 rounded-xl bg-[#1E4FD8]/20 flex items-center justify-center border border-[#1E4FD8]/40 shadow-[0_0_20px_rgba(30,79,216,0.25)] backdrop-blur-md group cursor-pointer hover:border-[#1E4FD8] transition-all duration-300">
+            <Shield class="w-6 h-6 text-[#1E4FD8] group-hover:scale-110 transition-transform duration-300" />
           </div>
           <div class="flex flex-col">
-            <span class="text-2xl font-bold tracking-tight text-white drop-shadow-md">AccessEasy</span>
-            <span class="text-[11px] font-medium text-slate-300 tracking-wider">Secure. Manage. Empower.</span>
+            <span class="text-2xl font-bold tracking-tight text-white">AccessEasy</span>
+            <span class="text-[11px] font-medium text-[#EFECE2]/70 tracking-wider">Secure. Manage. Empower.</span>
           </div>
         </div>
       </div>
 
       <!-- Hero Body Content -->
       <div class="max-w-xl relative z-10 my-auto py-6">
-        <!-- Animated Pill Badge -->
-        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-600/30 border border-blue-400/40 text-blue-200 text-xs font-semibold tracking-wide mb-6 backdrop-blur-md shadow-[0_0_15px_rgba(59,130,246,0.3)]">
-          <span class="h-2 w-2 rounded-full bg-blue-400 animate-ping" />
+        <!-- Pill Badge -->
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#1E4FD8]/15 border border-[#1E4FD8]/30 text-[#EEF2FE] text-xs font-semibold tracking-wide mb-6 backdrop-blur-md">
+          <span class="h-2 w-2 rounded-full bg-[#1E4FD8] animate-ping" />
           <span>Scale Globally</span>
         </div>
 
         <!-- Headline -->
-        <h1 class="text-3xl lg:text-4xl xl:text-5xl font-bold tracking-tight leading-[1.15] mb-4 text-white drop-shadow-xl">
+        <h1 class="text-3xl lg:text-4xl xl:text-5xl font-bold tracking-tight leading-[1.15] mb-4 text-white">
           Build your secure<br>
           Enterprise Network.<br>
           Empowered Workforce.
         </h1>
 
-        <p class="text-xs lg:text-sm text-slate-100 font-normal leading-relaxed mb-6 max-w-lg drop-shadow-md">
+        <p class="text-xs lg:text-sm text-[#EFECE2]/80 font-normal leading-relaxed mb-6 max-w-lg">
           The all-in-one platform for access control, workforce management, and real-time intelligence.
         </p>
 
@@ -61,19 +54,19 @@
           <div
             v-for="(feature, idx) in features"
             :key="idx"
-            class="flex items-start gap-3 p-3 rounded-2xl bg-slate-900/60 border border-blue-500/30 backdrop-blur-md hover:bg-slate-900/80 hover:border-blue-400/60 shadow-md hover:shadow-blue-500/25 transition-all duration-300 group hover:-translate-y-0.5"
+            class="flex items-start gap-3 p-3.5 rounded-2xl bg-white/[0.04] border border-white/10 backdrop-blur-md hover:bg-white/[0.07] hover:border-[#1E4FD8]/50 shadow-sm transition-all duration-300 group hover:-translate-y-0.5"
           >
-            <div class="h-9 w-9 shrink-0 flex items-center justify-center rounded-xl bg-gradient-to-br from-blue-900/60 to-slate-900/80 border border-blue-400/30 text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.3)] group-hover:scale-105 transition-all duration-300">
+            <div class="h-9 w-9 shrink-0 flex items-center justify-center rounded-xl bg-[#1E4FD8]/15 border border-[#1E4FD8]/30 text-[#EEF2FE] group-hover:scale-105 transition-all duration-300">
               <component
                 :is="feature.icon"
-                class="h-4.5 w-4.5"
+                class="h-4.5 w-4.5 text-[#1E4FD8]"
               />
             </div>
             <div>
-              <h3 class="font-bold text-xs text-white tracking-wide mb-0.5 group-hover:text-blue-300 transition-colors">
+              <h3 class="font-bold text-xs text-white tracking-wide mb-0.5 group-hover:text-[#EEF2FE] transition-colors">
                 {{ feature.title }}
               </h3>
-              <p class="text-[10px] lg:text-[11px] text-slate-200 leading-snug opacity-90">
+              <p class="text-[10px] lg:text-[11px] text-[#EFECE2]/70 leading-snug">
                 {{ feature.desc }}
               </p>
             </div>
@@ -82,9 +75,9 @@
       </div>
 
       <!-- Bottom Hardware Authentication Methods Badges Bar -->
-      <div class="relative z-10 pt-4 border-t border-slate-700/60">
-        <p class="text-[11px] font-bold tracking-wider text-slate-300 uppercase mb-3 drop-shadow flex items-center gap-2">
-          <ShieldCheck class="w-4 h-4 text-cyan-400" />
+      <div class="relative z-10 pt-4 border-t border-white/10">
+        <p class="text-[11px] font-bold tracking-wider text-[#EFECE2]/70 uppercase mb-3 flex items-center gap-2">
+          <ShieldCheck class="w-4 h-4 text-[#1E4FD8]" />
           <span>Supported Access & Authentication Modalities</span>
         </p>
 
@@ -92,18 +85,18 @@
           <div
             v-for="(auth, i) in authMethods"
             :key="i"
-            class="p-2.5 rounded-xl bg-slate-900/70 border border-blue-500/30 backdrop-blur-md shadow-md hover:border-cyan-400/70 hover:bg-slate-900/90 shadow-[0_0_15px_rgba(6,182,212,0.15)] transition-all duration-300 flex flex-col items-center justify-center text-center group cursor-default"
+            class="p-2.5 rounded-xl bg-white/[0.04] border border-white/10 backdrop-blur-md hover:border-[#1E4FD8]/60 hover:bg-white/[0.08] transition-all duration-300 flex flex-col items-center justify-center text-center group cursor-default"
           >
-            <div class="h-9 w-9 rounded-lg bg-cyan-950/60 border border-cyan-500/30 flex items-center justify-center mb-1.5 group-hover:scale-110 group-hover:border-cyan-400/80 transition-all duration-300">
+            <div class="h-9 w-9 rounded-lg bg-[#1E4FD8]/15 border border-[#1E4FD8]/30 flex items-center justify-center mb-1.5 group-hover:scale-110 transition-all duration-300">
               <component
                 :is="auth.icon"
-                class="w-5 h-5 text-cyan-400"
+                class="w-4.5 h-4.5 text-[#EEF2FE]"
               />
             </div>
-            <span class="text-xs font-bold text-white tracking-wide leading-tight group-hover:text-cyan-300 transition-colors">
+            <span class="text-xs font-bold text-white tracking-wide leading-tight group-hover:text-[#EEF2FE] transition-colors">
               {{ auth.name }}
             </span>
-            <span class="text-[9px] text-slate-300 font-medium tracking-tight mt-0.5 opacity-90">
+            <span class="text-[9px] text-[#EFECE2]/60 font-medium tracking-tight mt-0.5">
               {{ auth.sub }}
             </span>
           </div>
@@ -111,63 +104,61 @@
       </div>
     </div>
 
-    <!-- Right Side: Real White Marble Luxury Registration Form Section -->
-    <div class="w-full h-full flex items-center justify-center p-4 sm:p-6 lg:p-8 relative overflow-hidden bg-[#e5e9f0] min-h-screen z-10">
-      <!-- Background Ambient Glow & Sparks -->
-      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[550px] bg-blue-400/15 rounded-full blur-[140px] pointer-events-none" />
+    <!-- Right Side: Clean Modern Registration Form Section -->
+    <div class="w-full h-full flex items-center justify-center p-4 sm:p-6 lg:p-8 relative overflow-hidden bg-[#FAFAF8] min-h-screen z-10">
+      <!-- Background Ambient Glow -->
+      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#1E4FD8]/5 rounded-full blur-[120px] pointer-events-none" />
 
-      <!-- Main Marble Card Container -->
-      <div 
-        class="w-full max-w-[480px] rounded-[2.5rem] p-8 lg:p-10 shadow-[0_30px_70px_-10px_rgba(0,0,0,0.25),0_0_35px_rgba(255,255,255,0.8)] border border-white/90 relative z-10 animate-fade-in-up text-slate-900 overflow-hidden bg-cover bg-center"
-        :style="{ backgroundImage: `url(${marbleBg})` }"
-      >
-        <!-- Light Translucent White Wash for Polished Marble Texture Visibility -->
-        <div class="absolute inset-0 bg-white/40 pointer-events-none z-0" />
-
+      <!-- Main Card Container -->
+      <div class="w-full max-w-[480px] rounded-3xl p-8 lg:p-10 shadow-[0_20px_50px_-12px_rgba(28,30,30,0.08),0_1px_3px_rgba(28,30,30,0.05)] border border-[#E4E1D8] bg-white relative z-10 animate-fade-in-up text-[#1C1E1E]">
         <div class="relative z-10">
           <div class="text-center mb-6">
             <div class="relative inline-flex items-center justify-center mb-3">
-              <div class="absolute inset-0 rounded-full bg-blue-500/20 animate-ping opacity-60 duration-1000 scale-125" />
-              <div class="relative h-16 w-16 rounded-full bg-gradient-to-br from-blue-50 via-white to-blue-100 border border-blue-300 flex items-center justify-center shadow-[0_0_20px_rgba(59,130,246,0.3)]">
-                <UserPlus class="w-8 h-8 text-blue-600" />
+              <div class="h-14 w-14 rounded-2xl bg-[#EEF2FE] border border-[#1E4FD8]/20 flex items-center justify-center shadow-sm">
+                <UserPlus class="w-7 h-7 text-[#1E4FD8]" />
               </div>
             </div>
-            <h2 class="text-2xl font-black text-slate-900 tracking-tight mb-1">
+            <h2 class="text-2xl font-bold text-[#1C1E1E] tracking-tight mb-1">
               Create Account
             </h2>
-            <p class="text-xs text-slate-600 font-semibold">
+            <p class="text-xs text-[#5B615F] font-medium">
               Join the next-gen security platform
             </p>
           </div>
 
           <form
-            class="space-y-5"
+            class="space-y-4"
             @submit.prevent="handleRegistration"
           >
             <!-- Personal Info Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
               <div class="space-y-1.5">
-                <label class="text-[10px] font-black tracking-[0.15em] text-slate-600 ml-1 uppercase">Full Name</label>
-                <div class="relative group">
-                  <User class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7d93b2] group-focus-within:text-blue-600 transition-colors pointer-events-none" />
+                <label class="text-[11px] font-bold tracking-wider text-[#5B615F] uppercase">Full Name</label>
+                <div class="relative flex items-center">
+                  <User class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8B908D] focus-within:text-[#1E4FD8] transition-colors pointer-events-none" />
                   <input
                     v-model="fullName"
                     type="text"
                     required
                     placeholder="John Doe"
-                    class="w-full h-11 pl-11 pr-4 bg-white/85 hover:bg-white/95 focus:bg-white border border-[#d8e2ee] focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none rounded-2xl text-[13px] font-semibold text-slate-800 placeholder:text-[#7d93b2] shadow-sm"
+                    class="w-full h-11 pl-10 pr-3.5 bg-[#FAFAF8] hover:bg-white focus:bg-white border border-[#E4E1D8] focus:border-[#1E4FD8] focus:ring-4 focus:ring-[#1E4FD8]/10 transition-all outline-none rounded-xl text-xs font-semibold text-[#1C1E1E] placeholder:text-[#8B908D] shadow-2xs"
                   >
                 </div>
               </div>
 
               <div class="space-y-1.5">
-                <label class="text-[10px] font-black tracking-[0.15em] text-slate-600 ml-1 uppercase">Phone Number</label>
-                <div class="relative flex items-center bg-white/85 hover:bg-white/95 focus-within:bg-white border border-[#d8e2ee] focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all rounded-2xl shadow-sm overflow-hidden h-11">
+                <label class="text-[11px] font-bold tracking-wider text-[#5B615F] uppercase">Phone Number</label>
+                <div class="relative flex items-center bg-[#FAFAF8] hover:bg-white focus-within:bg-white border border-[#E4E1D8] focus-within:border-[#1E4FD8] focus-within:ring-4 focus-within:ring-[#1E4FD8]/10 transition-all rounded-xl shadow-2xs overflow-hidden h-11">
                   <!-- Country Code Selector Dropdown -->
-                  <div class="relative shrink-0 flex items-center pl-3 pr-2 border-r border-[#d8e2ee] bg-slate-50/50 hover:bg-slate-100/60 transition-colors">
+                  <div class="relative shrink-0 flex items-center justify-between px-2.5 border-r border-[#E4E1D8] bg-[#FAFAF8] hover:bg-[#F1EEE6] transition-colors w-[78px] h-full cursor-pointer">
+                    <span class="text-xs font-bold text-[#1C1E1E] select-none tracking-tight whitespace-nowrap">
+                      {{ selectedCountryDisplay }}
+                    </span>
+                    <ChevronDown class="w-3 h-3 text-[#8B908D] shrink-0 pointer-events-none" />
+
                     <select
                       v-model="selectedCountryCode"
-                      class="appearance-none bg-transparent text-[12px] font-bold text-slate-800 pr-5 outline-none cursor-pointer py-1.5"
+                      class="absolute inset-0 w-full h-full opacity-0 cursor-pointer text-slate-900"
                     >
                       <option
                         v-for="c in countryCodes"
@@ -178,51 +169,47 @@
                         {{ c.flag }} {{ c.code }} ({{ c.name }})
                       </option>
                     </select>
-                    <ChevronDown class="absolute right-1.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400 pointer-events-none" />
                   </div>
 
-                  <!-- Phone Number Input with Phone Icon -->
-                  <div class="relative flex-1 flex items-center">
-                    <Phone class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7d93b2] group-focus-within:text-blue-600 transition-colors pointer-events-none" />
-                    <input
-                      v-model="mobileNumber"
-                      type="text"
-                      inputmode="numeric"
-                      required
-                      placeholder="10-digit number"
-                      maxlength="12"
-                      class="w-full h-full pl-9 pr-4 bg-transparent outline-none text-[13px] font-semibold text-slate-800 placeholder:text-[#7d93b2]"
-                      @input="mobileNumber = $event.target.value.replace(/\D/g, '')"
-                    >
-                  </div>
+                  <!-- Phone Number Input -->
+                  <input
+                    v-model="mobileNumber"
+                    type="tel"
+                    inputmode="numeric"
+                    required
+                    placeholder="Mobile number"
+                    maxlength="10"
+                    class="flex-1 min-w-0 h-full px-3 bg-transparent outline-none text-xs font-semibold text-[#1C1E1E] placeholder:text-[#8B908D]"
+                    @input="mobileNumber = $event.target.value.replace(/\D/g, '')"
+                  >
                 </div>
               </div>
             
               <div class="space-y-1.5">
-                <label class="text-[10px] font-black tracking-[0.15em] text-slate-600 ml-1 uppercase">Work Email</label>
-                <div class="relative group">
-                  <Mail class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7d93b2] group-focus-within:text-blue-600 transition-colors pointer-events-none" />
+                <label class="text-[11px] font-bold tracking-wider text-[#5B615F] uppercase">Work Email</label>
+                <div class="relative flex items-center">
+                  <Mail class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8B908D] focus-within:text-[#1E4FD8] transition-colors pointer-events-none" />
                   <input
                     v-model="email"
                     type="email"
                     required
                     placeholder="name@company.com"
-                    class="w-full h-11 pl-11 pr-4 bg-white/85 hover:bg-white/95 focus:bg-white border border-[#d8e2ee] focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none rounded-2xl text-[13px] font-semibold text-slate-800 placeholder:text-[#7d93b2] shadow-sm"
+                    class="w-full h-11 pl-10 pr-3.5 bg-[#FAFAF8] hover:bg-white focus:bg-white border border-[#E4E1D8] focus:border-[#1E4FD8] focus:ring-4 focus:ring-[#1E4FD8]/10 transition-all outline-none rounded-xl text-xs font-semibold text-[#1C1E1E] placeholder:text-[#8B908D] shadow-2xs"
                     @input="email = email.toLowerCase()"
                   >
                 </div>
               </div>
 
               <div class="space-y-1.5">
-                <label class="text-[10px] font-black tracking-[0.15em] text-slate-600 ml-1 uppercase">Employee ID</label>
-                <div class="relative group">
-                  <IdCard class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7d93b2] group-focus-within:text-blue-600 transition-colors pointer-events-none" />
+                <label class="text-[11px] font-bold tracking-wider text-[#5B615F] uppercase">Employee ID</label>
+                <div class="relative flex items-center">
+                  <IdCard class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8B908D] focus-within:text-[#1E4FD8] transition-colors pointer-events-none" />
                   <input
                     v-model="employeeId"
                     type="text"
                     required
                     placeholder="EMP-001"
-                    class="w-full h-11 pl-11 pr-4 bg-white/85 hover:bg-white/95 focus:bg-white border border-[#d8e2ee] focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none rounded-2xl text-[13px] font-semibold text-slate-800 placeholder:text-[#7d93b2] shadow-sm"
+                    class="w-full h-11 pl-10 pr-3.5 bg-[#FAFAF8] hover:bg-white focus:bg-white border border-[#E4E1D8] focus:border-[#1E4FD8] focus:ring-4 focus:ring-[#1E4FD8]/10 transition-all outline-none rounded-xl text-xs font-semibold text-[#1C1E1E] placeholder:text-[#8B908D] shadow-2xs"
                   >
                 </div>
               </div>
@@ -230,15 +217,15 @@
 
             <!-- Company info -->
             <div class="space-y-1.5">
-              <label class="text-[10px] font-black tracking-[0.15em] text-slate-600 ml-1 uppercase">Company Name</label>
-              <div class="relative group">
-                <Building2 class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#7d93b2] group-focus-within:text-blue-600 transition-colors pointer-events-none" />
+              <label class="text-[11px] font-bold tracking-wider text-[#5B615F] uppercase">Company Name</label>
+              <div class="relative flex items-center">
+                <Building2 class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8B908D] focus-within:text-[#1E4FD8] transition-colors pointer-events-none" />
                 <input
                   v-model="companyName"
                   type="text"
                   required
                   placeholder="Acme Corporation"
-                  class="w-full h-11 pl-11 pr-4 bg-white/85 hover:bg-white/95 focus:bg-white border border-[#d8e2ee] focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all outline-none rounded-2xl text-[13px] font-semibold text-slate-800 placeholder:text-[#7d93b2] shadow-sm"
+                  class="w-full h-11 pl-10 pr-3.5 bg-[#FAFAF8] hover:bg-white focus:bg-white border border-[#E4E1D8] focus:border-[#1E4FD8] focus:ring-4 focus:ring-[#1E4FD8]/10 transition-all outline-none rounded-xl text-xs font-semibold text-[#1C1E1E] placeholder:text-[#8B908D] shadow-2xs"
                 >
               </div>
             </div>
@@ -246,24 +233,24 @@
             <button
               type="submit"
               :disabled="isLoading || !isFormValid"
-              class="w-full h-12 rounded-2xl text-[12px] font-black uppercase tracking-[0.15em] flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-[0_6px_25px_rgba(59,130,246,0.4)] transition-all active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed group mt-3"
+              class="w-full h-12 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 bg-[#1E4FD8] hover:bg-[#153AA0] text-white shadow-[0_4px_14px_rgba(30,79,216,0.25)] hover:shadow-[0_6px_20px_rgba(30,79,216,0.35)] transition-all active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed group cursor-pointer mt-2"
             >
               <span v-if="isLoading">Processing...</span>
               <template v-else>
-                LAUNCH MY ACCOUNT
+                <span>Launch My Account</span>
                 <ArrowRight class="h-4 w-4 transition-transform group-hover:translate-x-1" />
               </template>
             </button>
 
-            <div class="flex items-center justify-between gap-4 py-1.5 opacity-60">
-              <div class="h-[1px] flex-1 bg-slate-300" />
-              <span class="text-[9px] font-black tracking-[0.3em] text-slate-400 uppercase">OR</span>
-              <div class="h-[1px] flex-1 bg-slate-300" />
+            <div class="flex items-center justify-between gap-3 py-1">
+              <div class="h-[1px] flex-1 bg-[#E4E1D8]" />
+              <span class="text-[10px] font-bold text-[#8B908D] uppercase tracking-widest">OR</span>
+              <div class="h-[1px] flex-1 bg-[#E4E1D8]" />
             </div>
 
             <button
               type="button"
-              class="w-full h-12 rounded-2xl text-[11px] font-black uppercase tracking-[0.12em] flex items-center justify-center gap-3 bg-white/90 hover:bg-white border border-[#d8e2ee] hover:border-slate-300 text-slate-800 shadow-sm transition-all active:scale-[0.99] group"
+              class="w-full h-12 rounded-xl text-xs font-bold flex items-center justify-center gap-3 bg-white hover:bg-[#FAFAF8] border border-[#E4E1D8] text-[#1C1E1E] shadow-2xs hover:scale-[1.005] active:scale-[0.99] transition-all cursor-pointer"
               @click="signupWithGoogle"
             >
               <svg
@@ -288,22 +275,22 @@
                   fill="#EA4335"
                 />
               </svg>
-              SIGN UP WITH GOOGLE
+              <span>Sign Up with Google</span>
             </button>
 
-            <p class="text-center text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider pt-2">
+            <p class="text-center text-xs font-medium text-[#5B615F] pt-2">
               Already have an account? 
               <router-link
                 to="/login"
-                class="text-blue-600 hover:text-blue-700 underline underline-offset-4 cursor-pointer"
+                class="text-[#1E4FD8] hover:text-[#153AA0] font-bold underline underline-offset-4 cursor-pointer"
               >
                 Sign In
               </router-link>
             </p>
           </form>
 
-          <div class="mt-6 text-center text-[9px] font-black tracking-[0.3em] text-slate-400 uppercase flex items-center justify-center gap-2">
-            <div class="h-1.5 w-1.5 rounded-full bg-blue-500" />
+          <div class="mt-6 text-center text-[10px] font-medium tracking-wider text-[#8B908D] uppercase flex items-center justify-center gap-2">
+            <div class="h-1.5 w-1.5 rounded-full bg-[#2F8F5B]" />
             Join 500+ Enterprises
           </div>
         </div>
@@ -316,13 +303,13 @@
         <div 
           v-for="toast in toasts" 
           :key="toast.id"
-          class="pointer-events-auto min-w-[320px] p-4 rounded-2xl bg-white dark:bg-slate-900/90 dark:bg-slate-900/90 backdrop-blur-xl border border-slate-200 dark:border-white/10 shadow-2xl flex items-start gap-3 animate-fade-in-up"
+          class="pointer-events-auto min-w-[320px] p-4 rounded-2xl bg-white border border-[#E4E1D8] shadow-xl flex items-start gap-3 animate-fade-in-up text-[#1C1E1E]"
         >
           <div
             :class="[
-              'mt-0.5 p-1 rounded-lg',
-              toast.type === 'success' ? 'bg-emerald-100 text-emerald-600' : 
-              toast.type === 'error' ? 'bg-rose-100 text-rose-600' : 'bg-blue-100 text-blue-600'
+              'mt-0.5 p-1.5 rounded-xl',
+              toast.type === 'success' ? 'bg-[#E9F5EE] text-[#2F8F5B]' : 
+              toast.type === 'error' ? 'bg-rose-50 text-rose-600' : 'bg-[#EEF2FE] text-[#1E4FD8]'
             ]"
           >
             <CheckCircle
@@ -339,15 +326,15 @@
             />
           </div>
           <div class="flex-1">
-            <p class="text-[11px] font-black uppercase tracking-wider text-slate-900 dark:text-white leading-tight">
+            <p class="text-xs font-bold text-[#1C1E1E] leading-tight">
               {{ toast.type === 'success' ? 'Success' : toast.type === 'error' ? 'Notice' : 'Information' }}
             </p>
-            <p class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-1">
+            <p class="text-[11px] font-medium text-[#5B615F] mt-0.5">
               {{ toast.message }}
             </p>
           </div>
           <button
-            class="text-slate-400 hover:text-slate-600 dark:text-slate-300"
+            class="text-[#8B908D] hover:text-[#1C1E1E] cursor-pointer"
             @click="removeToast(toast.id)"
           >
             <X class="w-4 h-4" />
@@ -403,6 +390,10 @@ const countryCodes = [
   { code: "+81", flag: "🇯🇵", name: "Japan" }
 ];
 const selectedCountryCode = ref("+91");
+const selectedCountryDisplay = computed(() => {
+  const match = countryCodes.find((c) => c.code === selectedCountryCode.value);
+  return match ? `${match.flag} ${match.code}` : selectedCountryCode.value;
+});
 
 const isEmailValid = ref(false);
 const isPhoneValid = ref(false);
@@ -552,9 +543,10 @@ async function signupWithGoogle() {
 
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "456615098701-cihaj0btvoe011ba92r7hpbemkse5vm3.apps.googleusercontent.com";
     const redirectUri = `${window.location.origin}/auth/callback`;
+    const knBase = import.meta.env.VITE_KN_API_URL || "https://appv1.fieldseasy.com/kn";
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_KN_API_URL}/google-accesseasy`, {
+      const response = await fetch(`${knBase}/google-accesseasy`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -564,6 +556,7 @@ async function signupWithGoogle() {
           client_id: clientId,
           clientId: clientId,
           action: "signup",
+          userApp: "accesseasy",
         }),
       });
 

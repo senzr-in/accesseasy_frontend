@@ -61,7 +61,12 @@ onMounted(async () => {
     return;
   }
 
-  const state = route.query.state;
+  const oauthError = route.query.error;
+  if (oauthError) {
+    statusMessage.value = `Google authentication error: ${oauthError}`;
+    setTimeout(() => router.push(`/login?error=${encodeURIComponent(oauthError)}`), 2500);
+    return;
+  }
 
   if (!code) {
     statusMessage.value = "Error: No authorization code";
@@ -69,7 +74,7 @@ onMounted(async () => {
     return;
   }
 
-  const connectorType = sessionStorage.getItem("connector_type");
+  const connectorType = sessionStorage.getItem("connector_type") || "google";
   const storedTenantId = sessionStorage.getItem("tenant_id");
 
   if (!storedTenantId && connectorType !== "google") {
@@ -89,7 +94,7 @@ onMounted(async () => {
     const redirectUri = `${window.location.origin}/auth/callback`;
 
     const payload = {
-      tenantId: storedTenantId === "new" ? "" : storedTenantId,
+      tenantId: storedTenantId === "new" ? "" : (storedTenantId || ""),
       code: code,
       type: connectorType || "google",
       action: "token",
@@ -97,12 +102,11 @@ onMounted(async () => {
       redirectUri: redirectUri,
       client_id: clientId,
       clientId: clientId,
+      userApp: "accesseasy",
     };
 
-
-
-
-    const apiUrl = `${import.meta.env.VITE_KN_API_URL}/google-accesseasy`;
+    const knBase = import.meta.env.VITE_KN_API_URL || "https://appv1.fieldseasy.com/kn";
+    const apiUrl = `${knBase}/google-accesseasy`;
 
     const response = await fetch(apiUrl, {
       method: "POST",
@@ -120,12 +124,10 @@ onMounted(async () => {
       
       // Extract user data
       const tenantId = data.tenant_id || data.signup?.tenant_id || "";
-      const userEmail = currentUserData?.email || "";
+      const userEmail = currentUserData?.email || data.email || "";
       const tenantName = data.tenant_name || "";
 
-      if (!isNewUser) {
-        statusMessage.value = "Account found! Logging you in...";
-      } else {
+      if (isNewUser) {
         statusMessage.value = "Account created! Setting up initial configurations...";
         // Call Knative /initial-settings to configure company defaults & send admin notification
         authService.setupInitialSettings({
@@ -134,15 +136,21 @@ onMounted(async () => {
           name: currentUserData?.name || currentUserData?.first_name || "",
           companyName: tenantName,
           tenantName: tenantName,
+          userApp: "accesseasy",
         }).catch((initErr) => {
           console.warn("[AuthCallback] Failed to initialize tenant defaults:", initErr);
         });
+      } else {
+        statusMessage.value = "Account found! Logging you in...";
       }
 
       if (userEmail) {
-        // Set email in authService immediately
         authService.setEmail(userEmail);
+      }
 
+      let loginDone = false;
+
+      if (userEmail) {
         try {
           const loginResult = await authService.googleLogin(userEmail);
 
@@ -162,20 +170,15 @@ onMounted(async () => {
               authService.onSuccessfulLogin(loginResult.userData.id);
             }
 
-            statusMessage.value = "Login successful! Redirecting...";
-            clearSessionAndRedirect();
-            return;
-          } else {
-            throw new Error(loginResult.message || "Google login failed");
+            loginDone = true;
           }
         } catch (genError) {
-          console.warn("Knative google-login failed, trying fallback...", genError);
+          console.warn("Knative google-login failed, trying direct token...", genError);
         }
       }
 
-      // Fallback
-      const fallbackToken = data.token || data.tokens?.access_token;
-      if (fallbackToken) {
+      const fallbackToken = data.token || data.tokens?.access_token || data.signup?.token;
+      if (!loginDone && fallbackToken) {
         authService.setToken(fallbackToken);
         if (userEmail) authService.setEmail(userEmail);
         if (currentUserData) authService.setUserData(currentUserData);
@@ -184,19 +187,15 @@ onMounted(async () => {
         localStorage.setItem("fromEmailOtp", "true");
         authService.setPinVerified(true);
 
-        if (currentUserData) {
+        if (currentUserData?.id) {
           authService.onSuccessfulLogin(currentUserData.id);
         }
 
-        statusMessage.value = "Login successful! Redirecting...";
-        clearSessionAndRedirect();
-        return;
+        loginDone = true;
       }
 
-      // If we got here, we have no token but maybe we are already authenticated?
-      if (authService.isAuthenticated()) {
-        localStorage.setItem("fromEmailOtp", "true");
-        authService.setPinVerified(true);
+      if (loginDone || authService.isAuthenticated()) {
+        statusMessage.value = "Login successful! Redirecting...";
         clearSessionAndRedirect();
         return;
       }
@@ -205,7 +204,6 @@ onMounted(async () => {
     } else {
       statusMessage.value = data.message || "Authentication failed";
       
-      // Recovery: if we're actually logged in, just go home
       if (authService.isAuthenticated()) {
         setTimeout(() => clearSessionAndRedirect(), 1000);
         return;
@@ -220,7 +218,6 @@ onMounted(async () => {
     clearTimeout(timeoutId);
     console.error("Auth Callback Exception:", error);
     
-    // Recovery: if we're actually logged in, just go home
     if (authService.isAuthenticated()) {
       statusMessage.value = "Authentication taking longer than expected. Redirecting to dashboard...";
       setTimeout(() => clearSessionAndRedirect(), 1500);
