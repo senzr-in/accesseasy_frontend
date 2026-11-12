@@ -11,18 +11,12 @@ async function fetchDirectusPatrolPosts() {
     const res = await fetch(DIRECTUS_PATROL_URL);
     if (!res.ok) return [];
     const json = await res.json();
-    return (json?.data || [])
-      .filter(exec => {
-        const title = (exec.title || exec.blog_json?.website_title || '').toLowerCase();
-        const body = (exec.blog_json?.website_body || exec.caption || '').toLowerCase();
-        const img = (exec.image_url || exec.blog_json?.featured_image || '').toLowerCase();
-        if (!title || title === 'manual post' || title === 'new blog article') return false;
-        if (DISALLOWED_WORDS.some(bad => title.includes(bad) || body.includes(bad) || img.includes(bad))) return false;
-        return true;
-      })
-      .map(exec => {
+    return (json?.data || []).map(exec => {
       const bj = exec.blog_json || {};
-      const title = bj.website_title || bj.title || exec.title || 'AccessEasy Patrol Article';
+      let title = bj.website_title || bj.title || exec.title || 'AccessEasy Patrol Article';
+      if (title.toLowerCase() === 'manual post') title = 'AccessEasy Patrol Guard Operations Insights';
+      if (title.toLowerCase() === 'new blog article') title = 'Security Patrol Management & Inspection Guide';
+      
       const rawSlug = bj.slug || (exec.meta_post_id && !exec.meta_post_id.startsWith('http') ? exec.meta_post_id : null) || title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').slice(0, 45);
       const slug = rawSlug || `post-${exec.id}`;
       const body = bj.website_body || bj.body || bj.content || exec.caption || '';
