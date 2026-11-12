@@ -3,18 +3,34 @@ export const S3_CENTRAL_URL = 'https://fieldseaymarketingwebsite-production-asse
 export const S3_HOSTING_URL = 'https://accesseasy-patrol-assets.s3.ap-south-1.amazonaws.com';
 export const DIRECTUS_PATROL_URL = 'https://appv1.fieldseasy.com/directus/items/marketing_executions?filter[tenantId][_eq]=3e67e01c-96b3-415c-a7f6-97ffcab1cfee&filter[channel][_in]=website,blog,wordpress&filter[status][_eq]=published&sort=-id&limit=100&access_token=p2pJHhZAjca6jQea0RbPVwNWRyrJG29X';
 
+const DISALLOWED_WORDS = ['gbb', 'ad17', 'commute', 'commuting', 'scooter', 'rider', 'snowboard', 'manual post'];
+const DEFAULT_PATROL_IMAGE = 'https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&w=1200&q=80';
+
 async function fetchDirectusPatrolPosts() {
   try {
     const res = await fetch(DIRECTUS_PATROL_URL);
     if (!res.ok) return [];
     const json = await res.json();
-    return (json?.data || []).map(exec => {
+    return (json?.data || [])
+      .filter(exec => {
+        const title = (exec.title || exec.blog_json?.website_title || '').toLowerCase();
+        const body = (exec.blog_json?.website_body || exec.caption || '').toLowerCase();
+        const img = (exec.image_url || exec.blog_json?.featured_image || '').toLowerCase();
+        if (!title || title === 'manual post' || title === 'new blog article') return false;
+        if (DISALLOWED_WORDS.some(bad => title.includes(bad) || body.includes(bad) || img.includes(bad))) return false;
+        return true;
+      })
+      .map(exec => {
       const bj = exec.blog_json || {};
       const title = bj.website_title || bj.title || exec.title || 'AccessEasy Patrol Article';
       const rawSlug = bj.slug || (exec.meta_post_id && !exec.meta_post_id.startsWith('http') ? exec.meta_post_id : null) || title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').slice(0, 45);
       const slug = rawSlug || `post-${exec.id}`;
       const body = bj.website_body || bj.body || bj.content || exec.caption || '';
       const summary = bj.meta_description || exec.caption || bj.excerpt || body.replace(/<[^>]+>/g, '').substring(0, 160);
+      let img = exec.image_url || bj.featured_image;
+      if (!img || img.includes('pollinations.ai')) {
+        img = DEFAULT_PATROL_IMAGE;
+      }
       return {
         id: slug,
         slug: slug,
@@ -26,7 +42,7 @@ async function fetchDirectusPatrolPosts() {
         category: 'Security Patrol & Operations',
         author: bj.author_name || 'AccessEasy Patrol Team',
         date: exec.published_date ? exec.published_date.substring(0, 10) : new Date().toISOString().substring(0, 10),
-        image: exec.image_url || bj.featured_image || 'https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&w=1200&q=80',
+        image: img,
         read_time: '4 min read'
       };
     });
