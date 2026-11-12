@@ -329,6 +329,17 @@ const routes = [
     component: () => import("@/pages/blog/BlogPostPage.vue"),
     props: true,
   },
+  // Public Comparison / Alternative Routes
+  {
+    path: "/vs/tracktik",
+    name: "TrackTikAlternativeVs",
+    component: () => import("@/pages/compare/TrackTikAlternative.vue"),
+  },
+  {
+    path: "/solutions/tracktik-alternative",
+    name: "TrackTikAlternative",
+    component: () => import("@/pages/compare/TrackTikAlternative.vue"),
+  },
   // Catch-all — send to patrol home
   {
     path: "/:pathMatch(.*)*",
