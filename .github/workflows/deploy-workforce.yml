@@ -87,10 +87,23 @@ jobs:
       - name: Deploy to S3
         run: |
           echo "🚀 Deploying Workforce App to S3..."
-          if aws s3 sync dist/workforce/ s3://accesseasy-workforce-assets/ \
+          # Performance (2026-11-23): files in dist/workforce/assets/ have a content hash in their name, so
+          # they are cached for a year (browser + CloudFront) and uploaded FIRST; index.html and the
+          # rest keep no-cache so a new deploy shows at once. Before: every file was no-store.
+          # if aws s3 sync dist/workforce/ s3://accesseasy-workforce-assets/ \
+          #    --delete \
+          #    --cache-control "no-cache,no-store,must-revalidate" \
+          #    --metadata-directive REPLACE \
+          #    --exclude "source-backups/*"; then
+          if { [ ! -d dist/workforce/assets ] || aws s3 sync dist/workforce/assets/ s3://accesseasy-workforce-assets/assets/ \
+             --delete \
+             --cache-control "public,max-age=31536000,immutable" \
+             --metadata-directive REPLACE; } \
+             && aws s3 sync dist/workforce/ s3://accesseasy-workforce-assets/ \
              --delete \
              --cache-control "no-cache,no-store,must-revalidate" \
              --metadata-directive REPLACE \
+             --exclude "assets/*" \
              --exclude "source-backups/*"; then
             echo "✅ S3 deployment successful!"
           else
