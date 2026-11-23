@@ -1,40 +1,64 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { authService } from "@/services/authService";
 
+// Performance (2026-11-23): every screen except Login loads when its route opens,
+// so the login page no longer downloads the whole app.
 // Auth
 import Login from "@/components/loginAuthentication/login.vue";
-import Register from "@/components/loginAuthentication/register.vue";
-import Verification from "@/components/loginAuthentication/verification.vue";
-import PinVerification from "@/components/loginAuthentication/pinVerification.vue";
-import EmailVerification from "@/components/loginAuthentication/emailVerification.vue";
-import AlternateLogin from "@/components/loginAuthentication/alternateLogin.vue";
-import AuthCallback from "@/pages/authorize/AuthCallback.vue";
+// import Register from "@/components/loginAuthentication/register.vue";
+const Register = () => import("@/components/loginAuthentication/register.vue");
+// import Verification from "@/components/loginAuthentication/verification.vue";
+const Verification = () => import("@/components/loginAuthentication/verification.vue");
+// import PinVerification from "@/components/loginAuthentication/pinVerification.vue";
+const PinVerification = () => import("@/components/loginAuthentication/pinVerification.vue");
+// import EmailVerification from "@/components/loginAuthentication/emailVerification.vue";
+const EmailVerification = () => import("@/components/loginAuthentication/emailVerification.vue");
+// import AlternateLogin from "@/components/loginAuthentication/alternateLogin.vue";
+const AlternateLogin = () => import("@/components/loginAuthentication/alternateLogin.vue");
+// import AuthCallback from "@/pages/authorize/AuthCallback.vue";
+const AuthCallback = () => import("@/pages/authorize/AuthCallback.vue");
 
 // Layout
-import DashboardLayout from "@/layouts/dashboardLayout.vue";
+// import DashboardLayout from "@/layouts/dashboardLayout.vue";
+const DashboardLayout = () => import("@/layouts/dashboardLayout.vue");
 
 // Superadmin (esslAdmin) Dashboard
-import EsslDashboard from "@/pages/dealers/dashboard/esslDashboard.vue";
+// import EsslDashboard from "@/pages/dealers/dashboard/esslDashboard.vue";
+const EsslDashboard = () => import("@/pages/dealers/dashboard/esslDashboard.vue");
 
 // Visitor Portal
-import VisitorPortalView from "@/pages/visitorPortals/VisitorPortalView.vue";
+// import VisitorPortalView from "@/pages/visitorPortals/VisitorPortalView.vue";
+const VisitorPortalView = () => import("@/pages/visitorPortals/VisitorPortalView.vue");
 
 // DEV ONLY: Dev quick login bypass
-import DevLogin from "@/components/loginAuthentication/devLogin.vue";
+// import DevLogin from "@/components/loginAuthentication/devLogin.vue";
+const DevLogin = () => import("@/components/loginAuthentication/devLogin.vue");
 
 // Placeholders / Ports
-import DashboardHome from "@/pages/dashboard/index.vue";
-import Employees from "@/pages/employee/my-teams/personalDetails/employeeDetails.vue";
-import Devices from "@/pages/devicesManager/deviceManagerTabs.vue";
-import Doors from "@/pages/devicesManager/doors/doorsVue.vue";
-import Zones from "@/pages/zones/index.vue";
-import Logs from "@/pages/logs/logTab.vue";
-import OnboardingPage from "@/pages/onboarding/index.vue";
-import Timerzones from "@/pages/accesslevel/timerzone.vue";
-import BranchConfiguration from "@/pages/settings/configuration/branch/branchConfiguration.vue";
-import BranchAddForm from "@/pages/settings/configuration/branch/branchAddForm.vue";
-import BranchEditForm from "@/pages/settings/configuration/branch/branchEditForm.vue";
-import AppearanceSettings from "@/pages/settings/appearance.vue";
+// import DashboardHome from "@/pages/dashboard/index.vue";
+const DashboardHome = () => import("@/pages/dashboard/index.vue");
+// import Employees from "@/pages/employee/my-teams/personalDetails/employeeDetails.vue";
+const Employees = () => import("@/pages/employee/my-teams/personalDetails/employeeDetails.vue");
+// import Devices from "@/pages/devicesManager/deviceManagerTabs.vue";
+const Devices = () => import("@/pages/devicesManager/deviceManagerTabs.vue");
+// import Doors from "@/pages/devicesManager/doors/doorsVue.vue";
+const Doors = () => import("@/pages/devicesManager/doors/doorsVue.vue");
+// import Zones from "@/pages/zones/index.vue";
+const Zones = () => import("@/pages/zones/index.vue");
+// import Logs from "@/pages/logs/logTab.vue";
+const Logs = () => import("@/pages/logs/logTab.vue");
+// import OnboardingPage from "@/pages/onboarding/index.vue";
+const OnboardingPage = () => import("@/pages/onboarding/index.vue");
+// import Timerzones from "@/pages/accesslevel/timerzone.vue";
+const Timerzones = () => import("@/pages/accesslevel/timerzone.vue");
+// import BranchConfiguration from "@/pages/settings/configuration/branch/branchConfiguration.vue";
+const BranchConfiguration = () => import("@/pages/settings/configuration/branch/branchConfiguration.vue");
+// import BranchAddForm from "@/pages/settings/configuration/branch/branchAddForm.vue";
+const BranchAddForm = () => import("@/pages/settings/configuration/branch/branchAddForm.vue");
+// import BranchEditForm from "@/pages/settings/configuration/branch/branchEditForm.vue";
+const BranchEditForm = () => import("@/pages/settings/configuration/branch/branchEditForm.vue");
+// import AppearanceSettings from "@/pages/settings/appearance.vue";
+const AppearanceSettings = () => import("@/pages/settings/appearance.vue");
 
 // ─── Role → Home Route map ───────────────────────────────────────────────────
 const getRoleHome = () => {
