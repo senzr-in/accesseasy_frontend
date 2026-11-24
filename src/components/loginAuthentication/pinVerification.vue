@@ -959,12 +959,22 @@ async function handlePinAction() {
 
 async function verifyPin() {
   try {
-    let dbPin = userPin.value || "";
-    dbPin = checkIfEncrypted(dbPin)
-      ? decryptData(dbPin).trim()
-      : dbPin.toString().trim();
+    // PIN is checked on the server (auth-service verify-pin); the stored PIN is no longer
+    // compared in the browser.
+    const pinRes = await authService.verifyPinOnServer({
+      userId: userId.value,
+      phone: userPhone.value,
+      email: userEmail.value,
+      pin: currentPin.value,
+    });
+    if (pinRes?.locked) {
+      maxAttemptsReached.value = true;
+      setErrorMessage("Too many wrong attempts. Please reset your PIN.");
+      pinDigits.value = Array(4).fill("");
+      return;
+    }
 
-    if (currentPin.value === dbPin || currentPin.value === "1234") {
+    if (pinRes?.success) {
       setSuccessMessage("PIN verified successfully");
       authService.setPinVerified(true);
       if (!authService.getToken()) {

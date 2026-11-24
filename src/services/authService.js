@@ -132,11 +132,7 @@ class AuthService {
             }
           }
 
-          // Tier 3: Fallback to VITE_API_TOKEN for Directus queries
-          if (import.meta.env.VITE_API_TOKEN && originalRequest.headers['Authorization'] !== `Bearer ${import.meta.env.VITE_API_TOKEN}`) {
-            originalRequest.headers['Authorization'] = `Bearer ${import.meta.env.VITE_API_TOKEN}`;
-            return this.protectedApi(originalRequest);
-          }
+          // (Tier 3 removed 2026-11-24: never retry with the shared admin key.)
 
           // Log warning and reject promise so individual service fallbacks can execute gracefully
           console.warn('[AuthService] Protected API request unauthorized:', originalRequest?.url);
@@ -514,7 +510,7 @@ class AuthService {
     if (!token) return;
     if (this.isGoogleToken(token)) {
       console.warn("[AuthService] Ignoring non-Directus/Google token in setToken — using standard token credentials.");
-      const fallbackToken = import.meta.env.VITE_API_TOKEN || token;
+      const fallbackToken = token; // no shared admin key as a user's login (2026-11-24)
       Cookies.set("userToken", fallbackToken, { expires: 1 });
       sessionStorage.setItem("userToken", fallbackToken);
       localStorage.setItem("userToken", fallbackToken);
@@ -543,7 +539,7 @@ class AuthService {
     if (token && !this.isGoogleToken(token)) {
       return token;
     }
-    return import.meta.env.VITE_API_TOKEN || token || "";
+    return token || "";
   }
 
   setPhone(phone) {
@@ -1299,13 +1295,24 @@ class AuthService {
     }
   }
 
+
+  // Server-side PIN check (auth-service verify-pin). Returns { success, locked, attemptsLeft }.
+  async verifyPinOnServer({ userId, phone, email, pin }) {
+    const payload = { action: "verify-pin", pin: String(pin || "") };
+    if (userId) payload.userId = userId;
+    else if (phone) payload.phone = String(phone).replace(/\s/g, "");
+    else if (email) payload.email = email;
+    const response = await this.knApi.post("/auth-service", payload);
+    return response.data;
+  }
+
   async setPin(userId, pin) {
     try {
       const response = await this.knApi.post("/auth-service", {
         action: "set-pin",
         userId,
         pin,
-      });
+      }, { headers: { Authorization: `Bearer ${this.getToken() || ""}` } });
       return response.data;
     } catch (error) {
       console.error("Error in setPin:", error);
@@ -1360,11 +1367,12 @@ class AuthService {
     }
   }
 
-  async googleLogin(email) {
+  async googleLogin(email, loginProof = null) {
     try {
       const response = await this.knApi.post("/auth-service", {
         action: "google-login",
         email,
+        ...(loginProof ? { login_proof: loginProof } : {}),
         userApp: "patrol",
       });
       return response.data;

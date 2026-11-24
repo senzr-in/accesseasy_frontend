@@ -33,7 +33,6 @@ jobs:
           tags: senzr/accesseasy-frontend:hetzner,senzr/accesseasy-frontend:latest-hetzner
           build-args: |
             VITE_API_URL=https://privateapp.senzr.in/directus
-            VITE_API_TOKEN=${{ secrets.HETZNER_VITE_API_TOKEN }}
             VITE_KN_API_URL=https://accesseasy-privateapp.senzr.in/kn
             VITE_UI_URL=https://accesseasy-privateapp.senzr.in
             VITE_GOOGLE_MAPS_API_KEY=AIzaSyAwpDlggo6hmUnaxPqzzS7ydmUhjKug11Y

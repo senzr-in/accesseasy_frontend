@@ -165,7 +165,7 @@ onMounted(async () => {
       if (!authSuccessful && userEmail) {
         try {
           statusMessage.value = "Authenticating with AccessEasy...";
-          let loginResult = await authService.googleLogin(userEmail);
+          let loginResult = await authService.googleLogin(userEmail, data?.login_proof || null);
           console.log("[AuthCallback] Knative googleLogin response:", loginResult);
 
           // If user not found (first-time Google Sign Up), auto-register the account
@@ -187,7 +187,7 @@ onMounted(async () => {
               console.log("[AuthCallback] Auto-register result:", regResult);
 
               // Now log in to get the session details
-              loginResult = await authService.googleLogin(userEmail);
+              loginResult = await authService.googleLogin(userEmail, data?.login_proof || null);
               console.log("[AuthCallback] Post-registration googleLogin response:", loginResult);
             } catch (regErr) {
               console.error("[AuthCallback] Auto-register failed:", regErr);
@@ -197,7 +197,7 @@ onMounted(async () => {
           if (loginResult && loginResult.success) {
             const tokenToUse = (loginResult.token && !authService.isGoogleToken(loginResult.token))
               ? loginResult.token
-              : (data.token && !authService.isGoogleToken(data.token) ? data.token : (import.meta.env.VITE_API_TOKEN || "google_user"));
+              : (data.token && !authService.isGoogleToken(data.token) ? data.token : "google_user");
 
             const loginRefresh = authService.isGoogleToken(loginResult.refresh_token || loginResult.refreshToken) 
               ? null 
