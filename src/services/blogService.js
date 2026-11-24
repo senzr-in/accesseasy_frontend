@@ -1,7 +1,7 @@
 export const BASE_URL = 'https://patrol.accesseasy.in';
 export const S3_CENTRAL_URL = 'https://fieldseaymarketingwebsite-production-assets.s3.ap-south-1.amazonaws.com';
 export const S3_HOSTING_URL = 'https://accesseasy-patrol-assets.s3.ap-south-1.amazonaws.com';
-export const DIRECTUS_PATROL_URL = 'https://appv1.fieldseasy.com/directus/items/marketing_executions?filter[tenantId][_eq]=3e67e01c-96b3-415c-a7f6-97ffcab1cfee&filter[channel][_in]=website,blog,wordpress&filter[status][_eq]=published&sort=-id&limit=100&access_token=p2pJHhZAjca6jQea0RbPVwNWRyrJG29X';
+export const DIRECTUS_PATROL_URL = 'https://appv1.fieldseasy.com/directus/items/marketing_executions?filter[tenantId][_eq]=3e67e01c-96b3-415c-a7f6-97ffcab1cfee&filter[channel][_in]=website,blog,wordpress&filter[status][_eq]=published&sort=-id&limit=100';
 
 const DISALLOWED_WORDS = ['gbb', 'ad17', 'commute', 'commuting', 'scooter', 'rider', 'snowboard', 'manual post'];
 const DEFAULT_PATROL_IMAGE = 'https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&w=1200&q=80';
